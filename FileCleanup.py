@@ -36,30 +36,11 @@ def main(argv):
 
     # Get dataset paths for all completed dataset analyses in experiment folder
     datasets = os.listdir(experiment_path)
-    datasets.remove('metadata.csv')
-    datasets.remove('metadata.pickle')
-    datasets.remove('algInfo.pickle')
-    try:
-        datasets.remove('jobsCompleted')
-    except:
-        pass
-    try:
-        datasets.remove('logs')
-        datasets.remove('jobs')
-    except:
-        pass
-    try:
-        datasets.remove('DatasetComparisons') #If it has been run previously (overwrite)
-    except:
-        pass
-    try:
-        datasets.remove('KeyFileCopy') #If it has been run previously (overwrite)
-    except:
-        pass
-    try:
-        datasets.remove(experiment_name+'_ML_Pipeline_Report.pdf') #If it has been run previously (overwrite)
-    except:
-        pass
+    experiment_name = experiment_path.split('/')[-1] #Name of experiment folder
+    removeList = removeList = ['metadata.pickle','metadata.csv','algInfo.pickle','jobsCompleted','logs','jobs','DatasetComparisons','UsefulNotebooks',experiment_name+'_ML_Pipeline_Report.pdf']
+    for text in removeList:
+        if text in datasets:
+            datasets.remove(text)
 
     #Delete log folder/files
     try:

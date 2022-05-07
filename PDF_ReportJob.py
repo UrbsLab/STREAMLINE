@@ -101,6 +101,7 @@ def job(experiment_path,training,rep_data_path,data_path):
     analy_report.x += 90
     analy_report.multi_cell(w = 90,h = 4,txt=' '+listToString(ls4), border=1, align='L')
     analy_report.y = bottomOfList + 2
+    analy_report.image('Pictures/STREAMLINE_LOGO.png', 102, 164, 90)
     if eval(training):
         #Get names of datasets run in analysis
         listDatasets = ''
@@ -429,25 +430,25 @@ def job(experiment_path,training,rep_data_path,data_path):
             analy_report.output(experiment_path+'/'+fileName)
             # Print phase completion
             print("Phase 8 complete")
-            job_file = open(experiment_path + '/jobsCompleted/job_data_pdf_training.txt', 'w')
-            job_file.write('complete')
-            job_file.close()
+            try:
+                job_file = open(experiment_path + '/jobsCompleted/job_data_pdf_training.txt', 'w')
+                job_file.write('complete')
+                job_file.close()
+            except:
+                pass
         else:
             fileName = str(experiment_name)+'_ML_Pipeline_Apply_Report.pdf'
             analy_report.output(experiment_path+'/'+train_name+'/applymodel/'+ds[n]+'/'+fileName)
             # Print phase completion
             print("Phase 10 complete")
-            job_file = open(experiment_path + '/jobsCompleted/job_data_pdf_apply_'+str(train_name) +'.txt', 'w')
-            job_file.write('complete')
-            job_file.close()
+            try:
+                job_file = open(experiment_path + '/jobsCompleted/job_data_pdf_apply_'+str(train_name) +'.txt', 'w')
+                job_file.write('complete')
+                job_file.close()
+            except:
+                pass
     except:
         print('Pdf Output Failed')
-
-    # Print phase completion
-    print("Phase 7 complete")
-    job_file = open(experiment_path + '/jobsCompleted/job_data_compare' + '.txt', 'w')
-    job_file.write('complete')
-    job_file.close()
 
 def pubUnivariate(analy_report,experiment_path,ds,page,resultLimit,pageCount):
     """ Generates single page of univariate analysis results. Automatically moves to another page when runs out of space. Maximum of 4 dataset results to a page. """
