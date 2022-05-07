@@ -68,10 +68,11 @@ def main(argv):
     if not options.do_check: #Run job file
         #Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(options.output_path+"/"+options.experiment_name)
-        dataset_paths.remove('logs')
-        dataset_paths.remove('jobs')
-        dataset_paths.remove('jobsCompleted')
-        dataset_paths.remove('metadata.pickle')
+        removeList = removeList = ['metadata.pickle','metadata.csv','algInfo.pickle','jobsCompleted','logs','jobs','DatasetComparisons','UsefulNotebooks']
+        for text in removeList:
+            if text in dataset_paths:
+                dataset_paths.remove(text)
+
         for dataset_directory_path in dataset_paths:
             full_path = options.output_path+"/"+options.experiment_name+"/"+dataset_directory_path
             for cv_train_path in glob.glob(full_path+"/CVDatasets/*Train.csv"):
