@@ -101,7 +101,19 @@ def job(experiment_path,training,rep_data_path,data_path):
     analy_report.x += 90
     analy_report.multi_cell(w = 90,h = 4,txt=' '+listToString(ls4), border=1, align='L')
     analy_report.y = bottomOfList + 2
-    analy_report.image('Pictures/STREAMLINE_LOGO.png', 102, 164, 90)
+
+    tryAgain = True
+    try:
+        analy_report.image('Pictures/STREAMLINE_LOGO.png', 102, 164, 90)
+        tryAgain = False
+    except:
+        pass
+    if tryAgain:
+        try: #Running on Google Colab
+            analy_report.image('/content/drive/MyDrive/STREAMLINE/Pictures/STREAMLINE_LOGO.png', 102, 164, 90)
+        except:
+            pass
+
     if eval(training):
         #Get names of datasets run in analysis
         listDatasets = ''
