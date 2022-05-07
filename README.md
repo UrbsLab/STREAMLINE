@@ -574,6 +574,8 @@ Have ideas on how to improve this pipeline? We welcome suggestions, contribution
 
 ## Planned Extensions
 * Support multiclass and quantitative endpoints
+* Addition of other ML modeling algorithm options
+* Refinement of pre-configured ML algorithm hyperparameter options considered using Optuna
 * Shapley value calculation and visualizations
 * Improved modularization of code for adding new ML modeling algorithms
 * Create ensemble model from all trained models which can then be evaluated on hold out replication data
