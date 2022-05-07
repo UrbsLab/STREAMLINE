@@ -1,17 +1,17 @@
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/STREAMLINE_LOGO.jpg?raw=true)
 # Summary
-STREAMLINE is an automated, rigorous, and largely scikit-learn based machine learning (ML) analysis pipeline for binary classification. Adopts current best practices to avoid bias, optimize performance, ensure replicatability, capture complex associations (e.g. interactions and heterogeneity), and enhance interpretability. Includes (1) exploratory analysis, (2) data cleaning, (3) partitioning, (4) scaling, (5) imputation, (6) filter-based feature selection, (7) collective feature selection, (8) modeling with 'Optuna' hyperparameter optimization across 15 implemented ML algorithms (including three rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS), (9) testing evaluations with 16 classification metrics, model feature importance estimation, (10) automatically saves all results, models, and publication-ready plots (including proposed composite feature importance plots), (11) non-parametric statistical comparisons across ML algorithms and analyzed datasets, and (12) automatically generated PDF summary reports.
+STREAMLINE is an end-to-end automated machine learning and data science pipeline currently limited to supervised learning on tabular, binary classification data. It lays out a transparent, and adaptable framework within users can easily carry out rigorous exploration, modeling, and application of their data with little to no programming experience. In contrast to other AutoML tools, this tool adopts a fixed series of purposefully selected steps/phases in line with data science best practices. It seeks to automate all domain generalizable elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges. This tool can be run or utilized in a number of ways to suite a variety experience levels and levels of problem/data complexity. STREAMLINE can be used as a tool to quickly run a comprehensive ML data analysis, a framework to compare scikit-learn compatible ML modeling algorithm performance, a baseline standard of comparison for AutoML tools that seek to optimize ML pipeline assembly, and an educational example of how to integrate the wealth of amazing python-based data science tools currently available (in particular pandas, scipy, optuna, and scikit-learn). This pipeline was designed, in particular, to avoid or detect sources of bias, optimize modeling performance, ensure reproducibility, capture complex associations in data (e.g. feature interactions), and enhance interpretability. More specifically, STREAMLINE includes (1) exploratory analysis, (2) basic data cleaning, (3) CV partitioning, (4) scaling, (5) imputation, (6) filter-based feature importance estimation, (7) collective feature selection, (8) modeling with 'Optuna' hyperparameter optimization across 15 implemented ML algorithms (including three rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS, implemented by our research group), (9) testing evaluations with 16 classification metrics, model feature importance estimation, (10) automatic saving all results, models, and publication-ready plots (including proposed composite feature importance plots), (11) non-parametric statistical comparisons across ML algorithms and analyzed datasets, and (12) automatically generated PDF summary reports.
 
-We have recently submitted a publication introducting and applying this pipeline. We will have a preprint posted for citation soon.
+We have recently submitted a publication introducing and applying this pipeline. See below for citation information prior to publication.
 
 # Overview
 This AutoML tool empowers anyone with a basic understanding of python to easily run a comprehensive and customizable machine learning analysis. Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigorously apply and compare a variety of ML modeling algorithms and collectively learn from them as opposed to simply identifying a best performing model and/or attempting to evolutionarily optimize the analysis pipeline itself. Instead, its design focused on automating (1) application of best practices in data science and ML for binary classification, (2) avoiding potential sources of bias (e.g. by conducting data transformations, imputation, and feature selection within distinct CV partitions), (3) providing transparency in the modeling and evaluation of models, (4) the detection and characterization of complex patterns of association (e.g. interactions and heterogeneity), (5) generation of publication-ready plots/figures, and (6) generation of a PDF summary report for quick interpretation. Overall, the goal of this pipeline is to provide an interpretable framework to learn from the data as well as the strengths and weaknesses of the ML algorithms or as a baseline to compare other AutoML strategies.
 
-The following 15 ML modeling algorithms are currently included as options: 1. Naive Bayes (NB), 2. Logistic Regression (LR), 3. Decision Tree (DT), 4. Random Forest (RF), 5. Gradient Boosting (GB), 6. XGBoost (XGB), 7. LGBoost (LGB), 8. CatBoost (CGB), 9. Support Vector Machine (SVM), 10. Artificial Neural Network (ANN), 11. K-Nearest Neighbors (k-NN), 12. Genetic Programming, 13. Eductional Learning Classifier System (eLCS), 14. 'X' Classifier System (XCS), and 15. Extended Supervised Tracking and Classifying System (ExSTraCS). Classification-relevant hyperparameter values and ranges have been included for the (Optuna-driven) automated hyperparameter sweep.
+The following 15 ML modeling algorithms are currently included as options: 1. Naive Bayes (NB), 2. Logistic Regression (LR), 3. Decision Tree (DT), 4. Random Forest (RF), 5. Gradient Boosting (GB), 6. XGBoost (XGB), 7. LGBoost (LGB), 8. CatBoost (CGB), 9. Support Vector Machine (SVM), 10. Artificial Neural Network (ANN), 11. K-Nearest Neighbors (k-NN), 12. Genetic Programming, 13. Eductional Learning Classifier System (eLCS), 14. 'X' Classifier System (XCS), and 15. Extended Supervised Tracking and Classifying System (ExSTraCS). Classification-relevant hyperparameter values and ranges have carefully selected and included for the (Optuna-driven) automated hyperparameter sweep.
 
-This pipeline does NOT: (1) conduct feature engineering, or feature construction, (2) conduct feature encoding (e.g. apply one-hot-encoding to categorical features, or numerically encode text-based feature values), (3) account for bias in data collection, or (4) conduct anything beyond simple data cleaning (i.e. it only removes instances with no class label, or where all features are missing). These elements should be conducted externally at the discretion of the user.
+This pipeline does NOT do the following problem/data-specific elements: (1) conduct feature engineering, or feature construction, (2) conduct feature encoding (e.g. apply one-hot-encoding to categorical features, or numerically encode text-based feature values), (3) account for bias in data collection, or (4) conduct anything beyond simple data cleaning (i.e. it only removes instances with no class label, or where all features are missing). These elements should be conducted externally at the discretion of the user.
 
-We do not claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms are necessarily the best options for inclusion. Certainly, this pipeline could be expanded much further and adapted to different problems or goals. We welcome feedback and suggestions for improvement.
+We do not claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms are necessarily the best options for inclusion. We intend many expansions/improvements to this pipeline in the future. We welcome feedback and suggestions for improvement.
 
 ***
 ## Schematic of STREAMLINE
@@ -203,7 +203,7 @@ The base code for STREAMLINE is organized into a series of script phases designe
   * \[Runtime]: Moderately fast
 
 * Phase 9: [Optional] Apply Models to Replication Data
-  * Applies all previously trained models for a single 'target' dataset to one or more new 'replication' dataset that has all features found in the original 'target' datasets
+  * Applies all previously trained models for a single 'target' dataset to one or more new 'replication' dataset(s) that has the same features from an original 'target' dataset
   * Conducts exploratory analysis on new 'replication' dataset(s)
   * Applies scaling, imputation, and feature selection (unique to each CV partition from model training) to new 'replication' dataset(s) in preparation for model application
   * Evaluates performance of all models the prepared 'replication' dataset(s)
@@ -585,3 +585,17 @@ In particular we welcome suggestions on improving this pipeline with respect to:
 * Other key data/results visualizations
 * Support to easily run this pipeline on cloud computing platforms such as AWS, Azure, or Google Cloud.
 * Support to utilize this pipeline within Docker
+
+# Citation
+
+If you wish to cite this work prior to our first journal publication, please use:
+```
+@misc{streamline2022,
+  author = {Urbanowicz, Ryan and Zhang, Robert},
+  title = {STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline},
+  year = {2022},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/UrbsLab/STREAMLINE/} }
+}
+```
