@@ -1,46 +1,93 @@
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/STREAMLINE_LOGO.jpg?raw=true)
-# Summary
-STREAMLINE is an end-to-end automated machine learning and data science pipeline currently limited to supervised learning on tabular, binary classification data. It lays out a transparent, and adaptable framework within users can easily carry out rigorous exploration, modeling, and application of their data with little to no programming experience. In contrast to other AutoML tools, this tool adopts a fixed series of purposefully selected steps/phases in line with data science best practices. It seeks to automate all domain generalizable elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges. This tool can be run or utilized in a number of ways to suite a variety experience levels and levels of problem/data complexity.
-
-STREAMLINE can be used as a tool to quickly run a comprehensive ML data analysis, a framework to compare scikit-learn compatible ML modeling algorithm performance, a baseline standard of comparison for AutoML tools that seek to optimize ML pipeline assembly, and an educational example of how to integrate the wealth of amazing python-based data science tools currently available (in particular pandas, scipy, optuna, and scikit-learn). This pipeline was designed, in particular, to avoid or detect sources of bias, optimize modeling performance, ensure reproducibility, capture complex associations in data (e.g. feature interactions), and enhance interpretability.
-
-Specifically, STREAMLINE includes (1) exploratory analysis, (2) basic data cleaning, (3) CV partitioning, (4) scaling, (5) imputation, (6) filter-based feature importance estimation, (7) collective feature selection, (8) modeling with 'Optuna' hyperparameter optimization across 15 implemented ML algorithms (including three rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS, implemented by our research group), (9) testing evaluations with 16 classification metrics, model feature importance estimation, (10) automatic saving all results, models, and publication-ready plots (including proposed composite feature importance plots), (11) non-parametric statistical comparisons across ML algorithms and analyzed datasets, and (12) automatically generated PDF summary reports.
-
-We have recently submitted a publication introducing and applying this pipeline. See below for citation information prior to publication.
-
 # Overview
-This AutoML tool empowers anyone with a basic understanding of python to easily run a comprehensive and customizable machine learning analysis. Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigorously apply and compare a variety of ML modeling algorithms and collectively learn from them as opposed to simply identifying a best performing model and/or attempting to evolutionarily optimize the analysis pipeline itself. Instead, its design focused on automating (1) application of best practices in data science and ML for binary classification, (2) avoiding potential sources of bias (e.g. by conducting data transformations, imputation, and feature selection within distinct CV partitions), (3) providing transparency in the modeling and evaluation of models, (4) the detection and characterization of complex patterns of association (e.g. interactions and heterogeneity), (5) generation of publication-ready plots/figures, and (6) generation of a PDF summary report for quick interpretation. Overall, the goal of this pipeline is to provide an interpretable framework to learn from the data as well as the strengths and weaknesses of the ML algorithms or as a baseline to compare other AutoML strategies.
+STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that empowers anyone to easily run, interpret, and apply a rigorous and customizable analysis for data mining or predictive modeling. Notably, this tool is currently limited to supervised learning on tabular, binary classification data but will be expanded as our development continues. The development of this pipeline focused on (1) overall automation, (2) avoiding and detecting sources of bias, (3) optimizing modeling performance, (4) ensuring reproducibility, (5) capturing complex associations in data (e.g. feature interactions), and (6) enhancing interpretability of output. Overall, the goal of this pipeline is to provide a transparent framework to learn from data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
 
-The following 15 ML modeling algorithms are currently included as options: 1. Naive Bayes (NB), 2. Logistic Regression (LR), 3. Decision Tree (DT), 4. Random Forest (RF), 5. Gradient Boosting (GB), 6. XGBoost (XGB), 7. LGBoost (LGB), 8. CatBoost (CGB), 9. Support Vector Machine (SVM), 10. Artificial Neural Network (ANN), 11. K-Nearest Neighbors (k-NN), 12. Genetic Programming, 13. Eductional Learning Classifier System (eLCS), 14. 'X' Classifier System (XCS), and 15. Extended Supervised Tracking and Classifying System (ExSTraCS). Classification-relevant hyperparameter values and ranges have carefully selected and included for the (Optuna-driven) automated hyperparameter sweep.
+We have recently submitted a publication introducing and applying STREAMLINE. See below for code citation information prior to publication.
 
-This pipeline does NOT do the following problem/data-specific elements: (1) conduct feature engineering, or feature construction, (2) conduct feature encoding (e.g. apply one-hot-encoding to categorical features, or numerically encode text-based feature values), (3) account for bias in data collection, or (4) conduct anything beyond simple data cleaning (i.e. it only removes instances with no class label, or where all features are missing). These elements should be conducted externally at the discretion of the user.
-
-We do not claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms are necessarily the best options for inclusion. We intend many expansions/improvements to this pipeline in the future. We welcome feedback and suggestions for improvement.
-
-***
-## Schematic of STREAMLINE
-This schematic breaks the overall pipeline down into 4 generalized stages: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
+## Pipeline Schematic
+This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
 
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/ML_pipe_schematic.png?raw=true)
 
-***
+## What level of computing skill is required for use?
+STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naïve user need only know how to navigate their PC file system, specify folder/file paths, un-zip a folder, and have or set up a google drive account. Those with a very basic knowledge of python and computer environments can apply STEAMLINE within the included jupyter notebook, and those with a bit more experience can run it locally or in parallel on a computing cluster.  Notably, the easier routes for using STEAMLINE are more computationally limited. Analyses using larger datasets, or a larger number of ML modeling algorithms turned on are best completed via command line (in parallel).
+
+## What can it be used for?
+STREAMLINE can be used as:
+1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the well-known modeling algorithms included
+2. A framework to compare established scikit-learn compatible ML modeling algorithms to each other or to new algorithms
+3. A baseline standard of comparison (i.e. negative control) with which to evaluate other AutoML tools that seek to optimize ML pipeline assembly as part of their methodology
+4. A framework to quickly run an exploratory analysis and/or feature importance estimation/feature selection prior to using some other methodology for ML modeling
+5. An educational example of how to integrate some of the many amazing python-based data science tools currently available (in particular pandas, scipy, optuna, and scikit-learn).
+6. A framework from which to create a new, expanded, adapted, or modified ML analysis pipeline
+
+## What does STREAMLINE include?
+The automated elements of STREAMLINE includes (1) exploratory analysis, (2) basic data cleaning, (3) CV partitioning, (4) scaling, (5) imputation, (6) filter-based feature importance estimation, (7) collective feature selection, (8) modeling with 'Optuna' hyperparameter optimization across 15 implemented ML algorithms (including three rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS, implemented by our research group), (9) testing evaluations with 16 classification metrics, model feature importance estimation, (10) automatic saving all results, models, and publication-ready plots (including proposed composite feature importance plots), (11) non-parametric statistical comparisons across ML algorithms and analyzed datasets, and (12) automatically generated PDF summary reports.
+
+The following 15 scikit-learn compatible ML modeling algorithms are currently included as options: Naive Bayes (NB), Logistic Regression (LR), Decision Tree (DT), Random Forest (RF), Gradient Boosting (GB), XGBoost (XGB), LGBoost (LGB), CatBoost (CGB), Support Vector Machine (SVM), Artificial Neural Network (ANN), K-Nearest Neighbors (k-NN), 12. Genetic Programming, 13. Eductional Learning Classifier System (eLCS), 'X' Classifier System (XCS), and Extended Supervised Tracking and Classifying System (ExSTraCS). Classification-relevant hyperparameter values and ranges have carefully selected for each and are pre-specified for the automated (Optuna-driven) automated hyperparameter sweep.
+
+The automatically formatted PDF reports generated by STREAMLINE are intended to give a brief summary of pipeline settings and key results. A folder containing all results, statistical analyses publication-ready plots/figures, models, and other outputs is saved allowing users to carefully examine all aspects of analysis performance.  We have also included a variety of useful Jupyter Notebooks designed to operate on this output folder giving users quick paths to do even more with the pipeline output. Examples include: (1) Accessing prediction probabilities, (2) regenerating figures with custom tweaks, (3) trying out the effect of different prediction thresholds on selected models with an interactive slider, (4) re-evaluating models using a new prediction threshold, and (5) generating an interactive model feature importance ranking visualization across all ML algorithms.
+
+This pipeline does NOT automate the following elements, as they are still best determined by human experts: (1) feature engineering, or feature construction, (2) feature encoding (e.g. apply one-hot-encoding to categorical features, or numerically encode text-based feature values), (3) account for bias in data collection, or (4) anything beyond simple data cleaning (i.e. the pipeline only removes instances with no class label, or where all feature values are missing). We recommend users consider conducting these items, as needed, prior to applying STREAMLINE.
+
+## How is it Different from other AutoML tools?
+Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigorously apply and compare a variety of ML modeling algorithms and collectively learn from them as opposed to identifying a best performing model and/or attempting to optimize the analysis pipeline configuration itself. STREAMLINE adopts a fixed series of purposefully selected steps/phases in line with data science best practices. It seeks to automate all domain generalizable elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges. This tool can be run or utilized in a number of ways to suite a variety experience levels and levels of problem/data complexity.
+
+## STREAMLINE Run Modes
+This multi-phase pipeline has been set up to run in one of four ways:
+
+1. [Almost Anyone] - As a 'notebook' within Google Collaboratory:
+  * Advantages: (1) No coding or PC environment experience needed, (2) computing can be performed directly on Google Cloud, (3) one-click run of whole pipeline
+  * Notes: Requires a Google and Google Drive account (free)
+  * Disadvantages: (1) Can only run pipeline serially, (2) slowest of the run options, (3) limited by google cloud computing allowances
+
+2. [Basic Experience] - As a Jupyter Notebook (included):
+  * Advantages: (1) Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience, (2) offers in-notebook viewing of results, (3) offers in-notebook documentation of the run phases, (4) one-click run of whole pipeline
+  * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
+  * Disadvantages: (1) Can only run pipeline serially, (2) slower runtime than from command-line
+
+3. [Command-line Users] - Locally from the command line:
+* Advantages: (1) Typically runs faster than within Jupyter Notebook, (2) an easier more versatile option for those with command-line experience
+* Notes: Requires Anaconda3, Python3, and several other minor Python package installations
+* Disadvantages: (1) Can only run pipeline serially, (2) command-line experience recommended
+
+4. [Computing Cluster Users] - Run in parallel from the command line using a computing cluster (only Linux-based cluster currently tested):
+* Advantages: (1) By far the fastest, most efficient way to run STREAMLINE, (2) offers parallelization in running pipeline phases over separate datasets, cross-validation partitions, and ML algorithms.
+* Notes: Requires Anaconda3, Python3, and several other minor Python package installations
+* Disadvantages: (1) Experience with command-line recommended (2) access to a computing cluster required
+
+Parallelized runs of STREAMLINE were set up to run on a Linux-based computing cluster. See https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was designed). We have not yet tested parallelized STREAMLINE on other compute clusters or within cloud computing resources such as Microsoft Azure, Amazon Web Services, or Google Cloud. We aim to provide support for doing so in the future. In the meantime we welcome help in testing and extending this pipeline for other computing resources.  We expect only minor tweaks to the 'Main' scripts to be required to do so.
+
 ## Implementation
 STREAMLINE is coded in Python 3 relying heavily on pandas and scikit-learn as well as a variety of other python packages.
 
-***
-## Run Modes
-This multi-phase pipeline has been set up in a way that it can be easily run in one of three ways:
-* A series of scripts (not parallelized) running on a local PC from the command line.
-* A series of scripts that are run as parallelized jobs within a Linux-based computing cluster (see https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was designed).
-* As an editable Jupyter Notebook that can be run all at once utilizing the associated code from the aforementioned scripts.
+## Disclaimer
+We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms will yield the best performance. We intend many expansions/improvements to this pipeline in the future. We welcome feedback and suggestions for improvement.
 
 ***
-## Suggested Uses
-* To easily conduct a rigorous, customizable ML analysis of one or more datasets using one or more of the included ML algorithms.
-* As an analysis framework to evaluate and compare existing or other new ML modeling approaches.
-* As a standard (or negative control) with which to compare other AutoML tools and determine if the added computational effort of searching pipeline configurations is paying off.
-* As the basis to create a new expanded, adapted, or modified AutoML tool.
-* As an educational example of how to program many of the most commonly used ML analysis procedures, and generate a variety of standard and novel plots.
+# Installation and Use
+In this section we first provide use instructions for users with little to no coding experience (i.e. on Google Collaboratory), followed by more typical instructions for all other users. All users would still benefit from reviewing this entire section to understand how STREAMLINE is assembled into different phases and the pipeline run parameters available for each.
+
+To quickly pre-view the pipeline (pre-run on [included demonstration datasets](#Included Demonstration Data) without any installation whatsoever, open the following link:
+
+https://colab.research.google.com/github/UrbsLab/STREAMLINE/blob/main/STREAMLINE-Notebook.ipynb  
+
+Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Notebook and will not be able to run or permanently edit the code. This is an easy way to get a feel for what the pipeline is and does.
+
+## STREAMLINE Use Mode 1: Google Collaboratory [Almost Anyone]
+This is the easiest but most limited way to run STREAMLINE. Follow the steps below to get the pipeline running on the demonstration datasets.
+
+1. 
+
+
+
+Here we give an overview of the codebase and how to run STREAMLINE in different contexts. We begin with a brief overview of STREAMLINE with respect to the 11 possible phases that can be run in sequence. Next we cover three ways in which a user can run STREAMLINE.  The simplest way to use STREAMLINE is within a Notebook in Google Colab. This is intended for those with little to no coding experience, however this is the slowest, most limited option. The second way to use STREAMLINE is within Jupyter Notebook.  This requires a basic familiarity of coding environments, jupyter notebooks, and python. The third and most powerful way to use STREAMLINE is from the command line, either locally in a serial manner or in parallel on a computing cluster (currently only set up to run on a linux based compute cluster).
+
+
+
+
+
+
 
 ***
 ## Assumptions For Use (data and run preparation)
@@ -151,7 +198,7 @@ pip install kaleido==0.0.3.post1
 pip install fpdf
 ```
 # Usage
-Here we give an overview of the codebase and how to run STREAMLINE in different contexts.
+Here we give an overview of the codebase and how to run STREAMLINE in different contexts. We begin with a brief overview of STREAMLINE with respect to the 11 possible phases that can be run in sequence. Next we cover three ways in which a user can run STREAMLINE.  The simplest way to use STREAMLINE is within a Notebook in Google Colab. This is intended for those with little to no coding experience, however this is the slowest, most limited option. The second way to use STREAMLINE is within Jupyter Notebook.  This requires a basic familiarity of coding environments, jupyter notebooks, and python. The third and most powerful way to use STREAMLINE is from the command line, either locally in a serial manner or in parallel on a computing cluster (currently only set up to run on a linux based compute cluster).
 ***
 ## Code Orientation
 The base code for STREAMLINE is organized into a series of script phases designed to best optimize the parallelization of a given analysis. These loosely correspond with the pipeline schematic above. These phases are designed to be run in order. Phases 1-7 make up the core automated pipeline, with Phase 7 and beyond being run optionally based on user needs. In general this pipeline will run more slowly when a larger number of 'target' dataset are being analyzed and when a larger number of CV 'folds' are requested.
