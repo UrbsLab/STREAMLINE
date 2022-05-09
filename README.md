@@ -69,7 +69,7 @@ We make no claim that this is the best or only viable way to assemble an ML anal
 In this section we first provide use instructions for users with little to no coding experience (i.e. on Google Colaboratory), followed by more typical instructions for all other users. All users would still benefit from reviewing this entire section to understand how STREAMLINE is assembled into different phases and the pipeline run parameters available for each.
 
 ## View Pipeline and Output Before Running [Optional]
-* To quickly pre-view the pipeline (pre-run on [included demonstration datasets](# Included Demonstration Data) without any installation whatsoever, open the following link:
+* To quickly pre-view the pipeline (pre-run on [included demonstration datasets](#included-demonstration-data) without any installation whatsoever, open the following link:
 
 https://colab.research.google.com/github/UrbsLab/STREAMLINE/blob/main/STREAMLINE-Notebook.ipynb  
 
