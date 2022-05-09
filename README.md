@@ -36,7 +36,7 @@ Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigoro
 ## STREAMLINE Run Modes
 This multi-phase pipeline has been set up to run in one of four ways:
 
-1. As a 'notebook' within Google Collaboratory [Almost Anyone]:
+1. As a 'notebook' within Google Colaboratory [Almost Anyone]:
     * Advantages: (1) No coding or PC environment experience needed, (2) computing can be performed directly on Google Cloud, (3) one-click run of whole pipeline
     * Notes: Requires a Google and Google Drive account (free)
     * Disadvantages: (1) Can only run pipeline serially, (2) slowest of the run options, (3) limited by google cloud computing allowances
@@ -56,28 +56,74 @@ This multi-phase pipeline has been set up to run in one of four ways:
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
     * Disadvantages: (1) Experience with command-line recommended (2) access to a computing cluster required
 
-Parallelized runs of STREAMLINE were set up to run on a Linux-based computing cluster. See https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was designed). We have not yet tested parallelized STREAMLINE on other compute clusters or within cloud computing resources such as Microsoft Azure, Amazon Web Services, or Google Cloud. We aim to provide support for doing so in the future. In the meantime we welcome help in testing and extending this pipeline for other computing resources.  We expect only minor tweaks to the 'Main' scripts to be required to do so.
+Parallelized runs of STREAMLINE were set up to run on a Linux-based computing cluster. See https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was designed). We have not yet tested parallelized STREAMLINE on other compute clusters or within cloud computing resources such as Microsoft Azure, Amazon Web Services, or Google Cloud. We aim to provide support for doing so in the future. In the meantime we welcome help in testing and extending this pipeline for computing resources such as these.  We expect only minor tweaks to the 'Main' scripts to be required to do so.
 
 ## Implementation
 STREAMLINE is coded in Python 3 relying heavily on pandas and scikit-learn as well as a variety of other python packages.
 
 ## Disclaimer
-We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms will yield the best performance. We intend many expansions/improvements to this pipeline in the future. We welcome feedback and suggestions for improvement.
+We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms will yield the best performance. We intend many expansions/improvements to this pipeline in the future.  We welcome feedback and suggestions for improvement.
 
 ***
 # Installation and Use
-In this section we first provide use instructions for users with little to no coding experience (i.e. on Google Collaboratory), followed by more typical instructions for all other users. All users would still benefit from reviewing this entire section to understand how STREAMLINE is assembled into different phases and the pipeline run parameters available for each.
+In this section we first provide use instructions for users with little to no coding experience (i.e. on Google Colaboratory), followed by more typical instructions for all other users. All users would still benefit from reviewing this entire section to understand how STREAMLINE is assembled into different phases and the pipeline run parameters available for each.
 
-To quickly pre-view the pipeline (pre-run on [included demonstration datasets](#Included Demonstration Data) without any installation whatsoever, open the following link:
+## View Pipeline and Output Before Running [Optional]
+* To quickly pre-view the pipeline (pre-run on [included demonstration datasets](#Included Demonstration Data) without any installation whatsoever, open the following link:
 
 https://colab.research.google.com/github/UrbsLab/STREAMLINE/blob/main/STREAMLINE-Notebook.ipynb  
 
-Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Notebook and will not be able to run or permanently edit the code. This is an easy way to get a feel for what the pipeline is and does.
+    * Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Notebook and will not be able to run or permanently edit the code. This is an easy way to get a feel for what the pipeline is and does.
 
-## STREAMLINE Use Mode 1: Google Collaboratory [Almost Anyone]
-This is the easiest but most limited way to run STREAMLINE. Follow the steps below to get the pipeline running on the demonstration datasets.
+* To quickly pre-view the folder of output files generated when running STREAMLINE on the demonstration data, open the following link:
 
-1.
+https://drive.google.com/drive/folders/1obAwo9NgkwnVdfIE1PPXNu9LYsTxiH37?usp=sharing
+
+## STREAMLINE Use Mode 1: Google Colaboratory [Almost Anyone]
+This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users skip to the next [section](#STREAMLINE Use Mode 2: Jupyter Notebook [Basic Experience]).
+    *To learn more about Google Colaboratory prior to setup please visit the following link: https://research.google.com/colaboratory/
+
+### Set Up Your First Run
+Follow the steps below to get the pipeline running on the demonstration datasets:
+
+1. Set up a Google account (if for some reason you don't already have one).
+    * Click here for help: https://support.google.com/accounts/answer/27441?hl=en
+2. Make sure you can access your Google Drive.
+    * Click here to open Google Drive with your google account: https://drive.google.com
+3. Navigate to this GitHub Repository: https://github.com/UrbsLab/STREAMLINE
+4. Click the green button labeled 'Code' and select 'Download ZIP'.
+5. Unzip this file:
+    * Navigate to the folder where this file was downloaded.
+    * Find the file named 'STREAMLINE-main.zip'.
+    * Right click on the zipped file and choose 'Extract all'.
+6. Rename the folder to 'STREAMLINE'. (This is to make sure that the file-paths that have set up for Google Colaboratory work correctly).
+7. Navigate to 'My Drive' in your Google Drive.  This is the base folder in your google drive account.
+8. Copy the entire extracted folder named 'STREAMLINE' to 'My Drive' on your Google Drive account.
+9. Open the newly copied 'STREAMLINE' folder on Google Drive.
+10. Open the 'Colab_Output' folder and delete the entire subfolder 'hcc_demo' by right clicking on it and selecting 'Remove'.
+    * Note: You will need to do this anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the 'experiment_name' parameter within the Notebook.
+11. Navigate back to the base STREAMLINE folder.
+12. Ensure you have installed the Google Colaboratory App.
+    * Right click on 'STREAMLINE-Notebook.ipynb' (this is the notebook used to run the pipeline on Google Colaboratory only)
+    * Choose 'Open with' and select:
+        1. 'Google Colaboratory' if it's already installed, or
+        2. 'Connect more apps', then search for and install 'Google Colaboratory'
+    * Note: Once Google Colaboratory has been installed you need only double click on the notebook file to open it in the future.
+    * The STREAMLINE notebook will now open in Google Colaboratory as a webpage.
+13. At the top of the notebook open the 'Runtime' menu and select 'Run all'.  This directs the notebook to run all code cells of the notebook, i.e. all phases of STREAMLINE.  Here we have preconfigured STREAMLINE to run on a folder including two demonstration datasets automatically.
+14. In order to communicate with your Google Drive, Google will ask permission for the notebook to connect to it.
+    * First pop up window: Click 'Connect to Google Drive'
+    * Second pop up window: Choose the Google account within which you copied the STREAMLINE folder from the available list.
+    * Third pop up window: Scroll down and select 'Allow'.
+    * Note: At this point the notebook will do the following automatically:
+        1. Reserve a limited amount of free memory (RAM) and disk space on Google Cloud.
+            * Note: it is also possible to set up this Notebook to run using the resources of your local PC (not covered here).
+        2. Mount your google drive (so it can access the STREAMLINE run files and export output files to it).
+        3. Load the individual STREAMLINE run files into memory.
+        4. Install all other necessary python packages not already available in Anaconda3 (which is preloaded in the Google Colaboratory Environment).
+        5. Run the entirety of STREAMLINE on the demonstration datasets folder (i.e. 'DemoData').
+            * Note: all 5 steps should take approximately 3-5 minutes to run.
+
 
 
 
@@ -85,7 +131,7 @@ Here we give an overview of the codebase and how to run STREAMLINE in different 
 
 
 
-
+## STREAMLINE Use Mode 2: Jupyter Notebook [Basic Experience]
 
 
 
@@ -643,6 +689,9 @@ In particular we welcome suggestions on improving this pipeline with respect to:
 * Other key data/results visualizations
 * Support to easily run this pipeline on cloud computing platforms such as AWS, Azure, or Google Cloud.
 * Support to utilize this pipeline within Docker
+
+# Acknowledgements
+STREAMLINE is the result of 3 years of on and off development gaining feedback from multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center. The bulk of the coding was completed by Ryan Urbanowicz and Robert Zhang. Special thanks to Sy Hwang, Richard Zhang, and Wilson Zhang for their code contributions.  We also thank the following collaborators for their feedback on application of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon, Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, and Diego Mazzotti.
 
 # Citation
 
