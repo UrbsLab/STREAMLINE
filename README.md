@@ -204,7 +204,7 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 
 ***
 ## Standard Installation (Use Modes 2-4)
-This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2,3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run)
+This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2, 3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run)
 
 ### Prerequisites
 To be able to run STREAMLINE you will need Anaconda (recommended rather than individually installing all individual packages) which also includes Python3, and a handful of other Python packages that are not included within Anaconda. Anaconda is a distribution of Python and R programming languages for scientific computing, that aims to simplify package management and deployment. The distribution includes data-science packages suitable for Windows, Linux, and macOS. We recommend installing the most recent stable version of Anaconda (https://docs.anaconda.com/anaconda/install/) within your computing environment (make sure to install a version appropriate for your operating system). Anaconda also includes Jupyter Notebook. We tested STREAMLINE in Jupyter Notebook and on a local PC command-line run with Microsoft Windows 10 using 'Anaconda3-2021.05-Windows-x86_64', which used Python 3.8.8.
