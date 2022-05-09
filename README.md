@@ -14,7 +14,7 @@ STREAMLINE offers a variety of use options making it accessible to those with li
 
 ## What can it be used for?
 STREAMLINE can be used as:
-1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the well-known modeling algorithms included
+1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the well-known or in-development modeling algorithms included
 2. A framework to compare established scikit-learn compatible ML modeling algorithms to each other or to new algorithms
 3. A baseline standard of comparison (i.e. negative control) with which to evaluate other AutoML tools that seek to optimize ML pipeline assembly as part of their methodology
 4. A framework to quickly run an exploratory analysis and/or feature importance estimation/feature selection prior to using some other methodology for ML modeling
@@ -36,12 +36,12 @@ Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigoro
 ## STREAMLINE Run Modes
 This multi-phase pipeline has been set up to run in one of four ways:
 
-1. As a 'notebook' within Google Colaboratory [Almost Anyone]:
+1. A 'Notebook' within Google Colaboratory [Almost Anyone]:
     * Advantages: (1) No coding or PC environment experience needed, (2) computing can be performed directly on Google Cloud, (3) one-click run of whole pipeline
     * Notes: Requires a Google and Google Drive account (free)
     * Disadvantages: (1) Can only run pipeline serially, (2) slowest of the run options, (3) limited by google cloud computing allowances
 
-2. As a Jupyter Notebook (included) [Basic Experience]:
+2. A Jupyter Notebook (included) [Basic Experience]:
     * Advantages: (1) Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience, (2) offers in-notebook viewing of results, (3) offers in-notebook documentation of the run phases, (4) one-click run of whole pipeline
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
     * Disadvantages: (1) Can only run pipeline serially, (2) slower runtime than from command-line
@@ -56,31 +56,31 @@ This multi-phase pipeline has been set up to run in one of four ways:
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
     * Disadvantages: (1) Experience with command-line recommended (2) access to a computing cluster required
 
-Parallelized runs of STREAMLINE were set up to run on a Linux-based computing cluster. See https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was designed). We have not yet tested parallelized STREAMLINE on other compute clusters or within cloud computing resources such as Microsoft Azure, Amazon Web Services, or Google Cloud. We aim to provide support for doing so in the future. In the meantime we welcome help in testing and extending this pipeline for computing resources such as these.  We expect only minor tweaks to the 'Main' scripts to be required to do so.
+Parallelized runs of STREAMLINE were set up to run on a Linux-based computing cluster. See https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was originally designed). We have not yet tested parallelized STREAMLINE on other compute clusters or within cloud computing resources such as Microsoft Azure, Amazon Web Services, or Google Cloud. We aim to provide support for doing so in the future. In the meantime we welcome help in testing and extending this pipeline for computing resources such as these.  We expect only minor tweaks to the 'Main' scripts to be required to do so.
 
 ## Implementation
 STREAMLINE is coded in Python 3 relying heavily on pandas and scikit-learn as well as a variety of other python packages.
 
 ## Disclaimer
-We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms will yield the best performance. We intend many expansions/improvements to this pipeline in the future.  We welcome feedback and suggestions for improvement.
+We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms will yield the best performance. We intend many expansions/improvements to this pipeline in the future.  We welcome feedback, suggestions, and contributions for improvement.
 
 ***
 # Installation and Use
 In this section we first provide use instructions for users with little to no coding experience (i.e. on Google Colaboratory), followed by more typical instructions for all other users. All users would still benefit from reviewing this entire section to understand how STREAMLINE is assembled into different phases and the pipeline run parameters available for each.
 
 ## View Pipeline and Output Before Running [Optional]
-* To quickly pre-view the pipeline (pre-run on [included demonstration datasets](#Included Demonstration Data) without any installation whatsoever, open the following link:
+* To quickly pre-view the pipeline (pre-run on [included demonstration datasets](# Included Demonstration Data) without any installation whatsoever, open the following link:
 
 https://colab.research.google.com/github/UrbsLab/STREAMLINE/blob/main/STREAMLINE-Notebook.ipynb  
 
-    * Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Notebook and will not be able to run or permanently edit the code. This is an easy way to get a feel for what the pipeline is and does.
+Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Notebook and will not be able to run or permanently edit the code. This is an easy way to get a feel for what the pipeline is and does.
 
 * To quickly pre-view the folder of output files generated when running STREAMLINE on the demonstration data, open the following link:
 
 https://drive.google.com/drive/folders/1obAwo9NgkwnVdfIE1PPXNu9LYsTxiH37?usp=sharing
 
 ## STREAMLINE Use Mode 1: Google Colaboratory [Almost Anyone]
-This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users skip to the next [section](#STREAMLINE Use Mode 2: Jupyter Notebook [Basic Experience]).
+This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users skip to the next [section](# STREAMLINE Use Mode 2: Jupyter Notebook [Basic Experience]).
     *To learn more about Google Colaboratory prior to setup please visit the following link: https://research.google.com/colaboratory/
 
 ### Set Up Your First Run
