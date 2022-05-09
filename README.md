@@ -79,8 +79,8 @@ Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Note
 
 https://drive.google.com/drive/folders/1obAwo9NgkwnVdfIE1PPXNu9LYsTxiH37?usp=sharing
 
-## STREAMLINE Use Mode 1: Google Colaboratory [Almost Anyone]
-This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users skip to the next [section](#streamline-use-mode-2:-jupyter-notebook-[basic-experience]).
+## Use Mode 1: Google Colaboratory
+This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users skip to the next [section](#use-mode-2:-jupyter-notebook).
     *To learn more about Google Colaboratory prior to setup please visit the following link: https://research.google.com/colaboratory/
 
 ### Set Up Your First Run
@@ -131,7 +131,7 @@ Here we give an overview of the codebase and how to run STREAMLINE in different 
 
 
 
-## STREAMLINE Use Mode 2: Jupyter Notebook [Basic Experience]
+## Use Mode 2: Jupyter Notebook
 
 
 
