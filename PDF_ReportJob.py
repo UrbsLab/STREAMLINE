@@ -104,13 +104,13 @@ def job(experiment_path,training,rep_data_path,data_path):
 
     tryAgain = True
     try:
-        analy_report.image('Pictures/STREAMLINE_LOGO.png', 102, 160, 90)
+        analy_report.image('Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
         tryAgain = False
     except:
         pass
     if tryAgain:
         try: #Running on Google Colab
-            analy_report.image('/content/drive/MyDrive/STREAMLINE/Pictures/STREAMLINE_LOGO.png', 102, 160, 90)
+            analy_report.image('/content/drive/MyDrive/STREAMLINE/Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
         except:
             pass
 
