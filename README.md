@@ -36,25 +36,25 @@ Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigoro
 ## STREAMLINE Run Modes
 This multi-phase pipeline has been set up to run in one of four ways:
 
-1. [Almost Anyone] - As a 'notebook' within Google Collaboratory:
-* Advantages: (1) No coding or PC environment experience needed, (2) computing can be performed directly on Google Cloud, (3) one-click run of whole pipeline
+1. As a 'notebook' within Google Collaboratory [Almost Anyone]:
+    * Advantages: (1) No coding or PC environment experience needed, (2) computing can be performed directly on Google Cloud, (3) one-click run of whole pipeline
     * Notes: Requires a Google and Google Drive account (free)
     * Disadvantages: (1) Can only run pipeline serially, (2) slowest of the run options, (3) limited by google cloud computing allowances
 
-2. [Basic Experience] - As a Jupyter Notebook (included):
+2. As a Jupyter Notebook (included) [Basic Experience]:
     * Advantages: (1) Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience, (2) offers in-notebook viewing of results, (3) offers in-notebook documentation of the run phases, (4) one-click run of whole pipeline
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
     * Disadvantages: (1) Can only run pipeline serially, (2) slower runtime than from command-line
 
-3. [Command-line Users] - Locally from the command line:
-* Advantages: (1) Typically runs faster than within Jupyter Notebook, (2) an easier more versatile option for those with command-line experience
-* Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-* Disadvantages: (1) Can only run pipeline serially, (2) command-line experience recommended
+3. Locally from the command line [Command-line Users]:
+    * Advantages: (1) Typically runs faster than within Jupyter Notebook, (2) an easier more versatile option for those with command-line experience
+    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
+    * Disadvantages: (1) Can only run pipeline serially, (2) command-line experience recommended
 
-4. [Computing Cluster Users] - Run in parallel from the command line using a computing cluster (only Linux-based cluster currently tested):
-* Advantages: (1) By far the fastest, most efficient way to run STREAMLINE, (2) offers parallelization in running pipeline phases over separate datasets, cross-validation partitions, and ML algorithms.
-* Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-* Disadvantages: (1) Experience with command-line recommended (2) access to a computing cluster required
+4. Run in parallel from the command line using a computing cluster (only Linux-based cluster currently tested) [Computing Cluster Users]:
+    * Advantages: (1) By far the fastest, most efficient way to run STREAMLINE, (2) offers parallelization in running pipeline phases over separate datasets, cross-validation partitions, and ML algorithms.
+    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
+    * Disadvantages: (1) Experience with command-line recommended (2) access to a computing cluster required
 
 Parallelized runs of STREAMLINE were set up to run on a Linux-based computing cluster. See https://github.com/UrbsLab/I2C2-Documentation for a description of the computing cluster for which this functionality was designed). We have not yet tested parallelized STREAMLINE on other compute clusters or within cloud computing resources such as Microsoft Azure, Amazon Web Services, or Google Cloud. We aim to provide support for doing so in the future. In the meantime we welcome help in testing and extending this pipeline for other computing resources.  We expect only minor tweaks to the 'Main' scripts to be required to do so.
 
