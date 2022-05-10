@@ -4,6 +4,10 @@ STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that em
 
 We have recently submitted a publication introducing and applying STREAMLINE. See [below](#citation) for code citation information prior to publication.
 
+## Quick Start
+The easiest way for anyone to run a quick analysis using STREAMLINE on Google Colaboratory:
+[Setting Up Your First Run](#setting-up-your-first-run)
+
 ## STREAMLINE Schematic
 This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
 
