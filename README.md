@@ -2,7 +2,7 @@
 # Overview
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that empowers anyone to easily run, interpret, and apply a rigorous and customizable analysis for data mining or predictive modeling. Notably, this tool is currently limited to supervised learning on tabular, binary classification data but will be expanded as our development continues. The development of this pipeline focused on (1) overall automation, (2) avoiding and detecting sources of bias, (3) optimizing modeling performance, (4) ensuring reproducibility, (5) capturing complex associations in data (e.g. feature interactions), and (6) enhancing interpretability of output. Overall, the goal of this pipeline is to provide a transparent framework to learn from data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
 
-We have recently submitted a publication introducing and applying STREAMLINE. See below for code citation information prior to publication.
+We have recently submitted a publication introducing and applying STREAMLINE. See [below](#citation) for code citation information prior to publication.
 
 ## STREAMLINE Schematic
 This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
