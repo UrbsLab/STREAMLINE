@@ -62,6 +62,7 @@ def main(argv):
     categorical_cutoff = metadata['Categorical Cutoff']
     sig_cutoff = metadata['Statistical Significance Cutoff']
     cv_partitions = metadata['CV Partitions']
+    random_state = metadata['Random Seed']
     scale_data = metadata['Use Data Scaling']
     impute_data = metadata['Use Data Imputation']
     multi_impute = metadata['Use Multivariate Imputation']
@@ -111,9 +112,9 @@ def main(argv):
                     unique_datanames.append(apply_name)
                     if eval(options.run_parallel):
                         job_counter += 1
-                        submitClusterJob(options.reserved_memory,options.maximum_memory,options.queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.data_path,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute)
+                        submitClusterJob(options.reserved_memory,options.maximum_memory,options.queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.data_path,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute,random_state)
                     else:
-                        submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.data_path,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute)
+                        submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.data_path,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute,random_state)
                     file_count += 1
 
         if file_count == 0: #Check that there was at least 1 dataset
@@ -137,11 +138,11 @@ def main(argv):
     if not options.do_check:
         print(str(job_counter)+ " jobs submitted in Phase 9")
 
-def submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
+def submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
     """ Runs ApplyModelJob.py on each dataset in dataset_path locally. These runs will be completed serially rather than in parallel. """
-    ApplyModelJob.job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute)
+    ApplyModelJob.job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state)
 
-def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
+def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
     """ Runs ApplyModelJob.py on each dataset in rep_data_path. Runs in parallel on a linux-based computing cluster that uses an IBM Spectrum LSF for job scheduling."""
     train_name = full_path.split('/')[-1] #original training data name
     apply_name = datasetFilename.split('/')[-1].split('.')[0]
@@ -159,7 +160,7 @@ def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datase
 
     this_file_path = os.path.dirname(os.path.realpath(__file__))
     sh_file.write('python '+this_file_path+'/ApplyModelJob.py '+datasetFilename+" "+full_path+" "+class_label+" "+instance_label+" "+str(categorical_cutoff)+" "+str(sig_cutoff)+" "+str(cv_partitions)+" "+scale_data+" "+impute_data+" "+
-                  primary_metric+" "+data_path+" "+match_label+" "+plot_ROC+" "+plot_PRC+" "+plot_metric_boxplots+" "+export_feature_correlations+" "+jupyterRun+" "+multi_impute+'\n')
+                  primary_metric+" "+data_path+" "+match_label+" "+plot_ROC+" "+plot_PRC+" "+plot_metric_boxplots+" "+export_feature_correlations+" "+jupyterRun+" "+multi_impute+" "+str(random_state)+'\n')
     sh_file.close()
     os.system('bsub < ' + job_name)
     pass
