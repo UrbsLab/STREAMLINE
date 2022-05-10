@@ -160,7 +160,7 @@ def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datase
 
     this_file_path = os.path.dirname(os.path.realpath(__file__))
     sh_file.write('python '+this_file_path+'/ApplyModelJob.py '+datasetFilename+" "+full_path+" "+class_label+" "+instance_label+" "+str(categorical_cutoff)+" "+str(sig_cutoff)+" "+str(cv_partitions)+" "+scale_data+" "+impute_data+" "+
-                  primary_metric+" "+data_path+" "+match_label+" "+plot_ROC+" "+plot_PRC+" "+plot_metric_boxplots+" "+export_feature_correlations+" "+jupyterRun+" "+multi_impute+" "+str(random_state)+'\n')
+                  primary_metric+" "+data_path+" "+match_label+" "+plot_ROC+" "+plot_PRC+" "+plot_metric_boxplots+" "+export_feature_correlations+" "+jupyterRun+" "+multi_impute+'\n')
     sh_file.close()
     os.system('bsub < ' + job_name)
     pass
