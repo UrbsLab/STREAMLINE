@@ -34,7 +34,7 @@ def main(argv):
     #Defaults available
     parser.add_argument('--do-mi', dest='do_mutual_info', type=str, help='do mutual information analysis',default="True")
     parser.add_argument('--do-ms', dest='do_multisurf', type=str, help='do multiSURF analysis',default="True")
-    parser.add_argument('--use-turf', dest='use_TURF', type=str, help='use TURF wrapper around MultiSURF', default="False")
+    parser.add_argument('--use-turf', dest='use_TURF', type=str, help='use TURF wrapper around MultiSURF to improve feature interaction detection in large feature spaces (only recommended if you have reason to believe at least half of your features are non-informative)', default="False")
     parser.add_argument('--turf-pct', dest='TURF_pct', type=float, help='proportion of instances removed in an iteration (also dictates number of iterations)',default=0.5)
     parser.add_argument('--n-jobs', dest='n_jobs', type=int, help='number of cores dedicated to running algorithm; setting to -1 will use all available cores', default=1)
     parser.add_argument('--inst-sub', dest='instance_subset', type=int, help='sample subset size to use with multiSURF',default=2000)
