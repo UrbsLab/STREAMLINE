@@ -32,7 +32,7 @@ from sklearn import metrics
 from scipy import interp,stats
 from statistics import mean,stdev
 
-def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
+def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
     train_name = full_path.split('/')[-1] #original training data name
     experiment_path = '/'.join(full_path.split('/')[:-1])
     apply_name = datasetFilename.split('/')[-1].split('.')[0]
@@ -133,7 +133,7 @@ def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,
         evalDict = {}
         for algorithm in algorithms:
             algAbrev = abbrev[algorithm]
-            ret = evalModel(full_path,algAbrev,cvRepDataX,cvRepDataY,cvCount)
+            ret = evalModel(full_path,algAbrev,cvRepDataX,cvRepDataY,cvCount,int(random_state))
             evalDict[algorithm] = ret
             pickle.dump(ret, open(full_path +"/applymodel/"+apply_name+'/model_evaluation/pickled_metrics/' + algAbrev + '_CV_' + str(cvCount) + "_metrics.pickle", 'wb')) #includes everything from training except feature importance values
         masterList.append(evalDict) #update master list with evalDict for this CV model
@@ -216,11 +216,13 @@ def imputeRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_tra
                 cvRepData[c].fillna(median_dict[c], inplace=True)
     return impute_rep_df
 
-def evalModel(full_path,algAbrev,cvRepDataX,cvRepDataY,cvCount):
+def evalModel(full_path,algAbrev,cvRepDataX,cvRepDataY,cvCount, random_state):
     modelInfo = full_path+'/models/pickledModels/'+algAbrev+'_'+str(cvCount)+'.pickle' #Corresponding pickle file name with scalingInfo
     infile = open(modelInfo,'rb')
     model = pickle.load(infile)
     infile.close()
+    model.
+    setattr(model, 'random_state', random_state)
     # Prediction evaluation
     y_pred = model.predict(cvRepDataX)
     metricList = ModelJob.classEval(cvRepDataY, y_pred)
@@ -407,4 +409,4 @@ def doPlotPRC(result_table,colors,full_path,apply_name,instance_label,class_labe
         plt.close('all')
 
 if __name__ == '__main__':
-    job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],int(sys.argv[5]),float(sys.argv[6]),int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],sys.argv[11],sys.argv[12],sys.argv[13],sys.argv[14],sys.argv[15],sys.argv[16],sys.argv[17],sys.argv[18])
+    job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],int(sys.argv[5]),float(sys.argv[6]),int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],sys.argv[11],sys.argv[12],sys.argv[13],sys.argv[14],sys.argv[15],sys.argv[16],sys.argv[17],sys.argv[18],sys.argv[19])
