@@ -4,7 +4,7 @@ STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that em
 
 We have recently submitted a publication introducing and applying STREAMLINE. See below for code citation information prior to publication.
 
-## Pipeline Schematic
+## STREAMLINE Schematic
 This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
 
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/ML_pipe_schematic.png?raw=true)
