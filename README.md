@@ -6,6 +6,7 @@ We have recently submitted a publication introducing and applying STREAMLINE. Se
 
 ## Quick Start
 The easiest way for anyone to run a quick analysis using STREAMLINE on Google Colaboratory:
+
 [Setting Up Your First Run](#setting-up-your-first-run)
 
 ## STREAMLINE Schematic
