@@ -160,7 +160,7 @@ This section explains how to update the Google Colaboratory Notebook to run on o
         * However both instance_label and match_label values may be either numeric or text.
     * Place all datasets to be analyzed simultaneously into the new folder created above (e.g. my_data).
         * If multiple datasets are being analyzed they must each have the same class_label (e.g. 'Class'), and (if present) the same instance_label (e.g. 'ID') and match_label (e.g. 'Match_ID').
-3. Open 'STREAMLINE-Notebook.ipynb' in Google Colaboratory.
+3. Open 'STREAMLINE-GoogleColabNotebook.ipynb' in Google Colaboratory.
 4. Scroll down to the 5th code block with the text 'Mandatory Run Parameters for Pipeline' above it.
 5. Update the first 6 pipeline run parameters as such.
     * demo_run: Change from True to False (without '').
