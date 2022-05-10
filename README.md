@@ -105,7 +105,7 @@ Follow the steps below to get the pipeline running on the demonstration datasets
     * Note: You will need to do this anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the 'experiment_name' parameter within the Notebook.
 11. Navigate back to the base STREAMLINE folder.
 12. Ensure you have installed the Google Colaboratory App.
-    * Right click on 'STREAMLINE-Notebook.ipynb' (this is the notebook used to run the pipeline on Google Colaboratory only)
+    * Right click on 'STREAMLINE-GoogleColabNotebook.ipynb' (this is the notebook used to run the pipeline on Google Colaboratory only)
     * Choose 'Open with' and select:
         1. 'Google Colaboratory' if it's already installed, or
         2. 'Connect more apps', then search for and install 'Google Colaboratory'
