@@ -5,7 +5,7 @@ STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that em
 We have recently submitted a publication introducing and applying STREAMLINE. See [below](#citation) for code citation information prior to publication.
 
 ## Quick Start
-The easiest way for anyone to run a quick analysis using STREAMLINE on Google Colaboratory:
+Click below for the easiest way for anyone to run an analysis using STREAMLINE (on Google Colaboratory):
 
 [Setting Up Your First Run](#setting-up-your-first-run)
 
