@@ -29,7 +29,8 @@ from sklearn.impute import IterativeImputer
 #Evalutation metrics
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 from sklearn import metrics
-from scipy import interp,stats
+from scipy import stats
+#from scipy import interp,stats
 from statistics import mean,stdev
 
 def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
@@ -291,11 +292,13 @@ def primaryStats(algorithms,cv_partitions,full_path,apply_name,instance_label,cl
             s_lrm.append(metricList[12])
             alg_result_table.append([fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec])
             # Update ROC plot variable lists
-            tprs.append(interp(mean_fpr, fpr, tpr))
+            tprs.append(np.interp(mean_fpr, fpr, tpr))
+            #tprs.append(interp(mean_fpr, fpr, tpr))
             tprs[-1][0] = 0.0
             aucs.append(roc_auc)
             # Update PRC plot variable lists
-            precs.append(interp(mean_recall, recall, prec))
+            precs.append(np.interp(mean_recall, recall, prec))
+            #precs.append(interp(mean_recall, recall, prec))
             praucs.append(prec_rec_auc)
             aveprecs.append(ave_prec)
 
