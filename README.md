@@ -94,22 +94,33 @@ Follow the steps below to get the pipeline running on the demonstration datasets
 
 1. Set up a Google account (if for some reason you don't already have one).
     * Click here for help: https://support.google.com/accounts/answer/27441?hl=en
+
 2. Make sure you can access your Google Drive.
     * Click here to open Google Drive with your google account: https://drive.google.com
+
 3. Navigate to this GitHub Repository: https://github.com/UrbsLab/STREAMLINE
+
 4. Click the green button labeled 'Code' and select 'Download ZIP'.
+
 5. Unzip this file:
     * Navigate to the folder where this file was downloaded.
     * Find the file named 'STREAMLINE-main.zip'.
     * Right click on the zipped file and choose 'Extract all', then select 'Extract'.
     * Note: This will typically create an unzipped folder in your 'Downloads' folder with the name STREAMLINE-main, with another folder inside it also called STREAMLINE-main. This inner folder is the one you will be copying in the next steps, so that when you open it, you immediately see all the STREAMLINE files.
+
 6. Ensure that you have located your extracted folder named 'STREAMLINE-main', and that when you open it, you immediately see the various STREAMLINE files and folders.
+
 7. Navigate to 'My Drive' in your Google Drive.  This is the base folder in your google drive account.
+
 8. Copy the inner extracted folder named 'STREAMLINE-main' to 'My Drive' on your Google Drive account.
+
 9. Open the newly copied 'STREAMLINE-main' folder on Google Drive.
+
 10. Open the 'Colab_Output' folder and delete the entire subfolder 'hcc_demo' by right clicking on it and selecting 'Remove'.
     * Note: You will need to do this anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the 'experiment_name' parameter within the Notebook.
+
 11. Navigate back to the base STREAMLINE-main folder on Google Drive.
+
 12. Ensure you have installed the Google Colaboratory App.
     * Right click on 'STREAMLINE-GoogleColabNotebook.ipynb' (this is the notebook used to run the pipeline on Google Colaboratory only)
     * Choose 'Open with' and select:
@@ -117,25 +128,30 @@ Follow the steps below to get the pipeline running on the demonstration datasets
         2. 'Connect more apps', then search for and install 'Google Colaboratory'
     * Note: Once Google Colaboratory has been installed you need only double click on the notebook file to open it in the future.
     * The STREAMLINE notebook will now open in Google Colaboratory as a webpage.
+
 13. [Optional] At the top of the notebook open the 'Runtime' menu and select 'Disconnect and delete runtime'. This clears the memory of the previous notebook run. This is only necessary when the underlying base code is modified, but it may be useful to troubleshoot if modifications to the notebook do not seem to have an effect.
+
 14. At the top of the notebook open the 'Runtime' menu and select 'Run all'.  This directs the notebook to run all code cells of the notebook, i.e. all phases of STREAMLINE.  Here we have preconfigured STREAMLINE to run on a folder including two demonstration datasets automatically.
+
 15. In order to communicate with your Google Drive, Google will ask permission for the notebook to connect to it.
     * First pop up window: Click 'Connect to Google Drive'
     * Second pop up window: Choose the Google account within which you copied the STREAMLINE-main folder from the available list.
     * Third pop up window: Scroll down and select 'Allow'.
-    * Note: At this point the notebook will do the following automatically:
-        1. Reserve a limited amount of free memory (RAM) and disk space on Google Cloud.
-            * Note: it is also possible to set up this Notebook to run using the resources of your local PC (not covered here).
-        2. Mount your google drive (so it can access the STREAMLINE run files and export output files to it).
-        3. Load the individual STREAMLINE run files into memory.
-        4. Install all other necessary python packages not already available in Anaconda3 (which is preloaded in the Google Colaboratory Environment).
-        5. Run the entirety of STREAMLINE on the demonstration datasets folder (i.e. 'DemoData').
-            * Note: all 5 steps should take approximately 3-5 minutes to run.
+
+16. Note: At this point the notebook will do the following automatically:
+    1. Reserve a limited amount of free memory (RAM) and disk space on Google Cloud.
+        * Note: it is also possible to set up this Notebook to run using the resources of your local PC (not covered here).
+    2. Mount your google drive (so it can access the STREAMLINE run files and export output files to it).
+    3. Load the individual STREAMLINE run files into memory.
+    4. Install all other necessary python packages not already available in Anaconda3 (which is preloaded in the Google Colaboratory Environment).
+    5. Run the entirety of STREAMLINE on the demonstration datasets folder (i.e. 'DemoData').
+        * Note: all 5 steps should take approximately 3-5 minutes to run.
 
 ### Inspecting Your First Run
 During or after the notebook runs, users can inspect the individual code and text (i.e. markdown) cells of the notebook. Individual cells can be collapsed or expanded by clicking on the small arrowhead on the left side of each cell. The first set of cells set up the coding environment automatically. Later cells are used to set the pipeline run parameters and then run the 11 phases of the pipeline in sequence. Some cells will display output figures generated by STREAMLINE. For example, scroll down to 'Phase 6: Statistics' and open the cell below the text 'Run Statistics Summary and Figure Generation'. Scrolling down this cell will first reveal the run commands calling relevant STREAMLINE code, then the figures generated by this phase. Note that to save runtime, this demonstration run is only applying three ML modeling algorithms: Naive Bayes, Logistic Regression, and Decision Trees.  These are typically the three fastest algorithms available in STREAMLINE.
 
 Outside of the notebook, navigate back to your Google Drive and reopen the folder: 'STREAMLINE-main/Colab_Output'. You should find the saved experiment folder that was output by the run, called 'hcc_demo'. Within this folder you should find the following:
+
 * 'hcc_demo_ML_Pipeline_Report.pdf' [File]: This is an automatically formatted PDF summarizing key findings during the model training and evaluation. A great place to start!
 * 'metadata.csv' [File]: Another way to view the pipeline run parameters used by the pipeline.  These are also organized on the first page of the PDF report.
 * 'metadata.pickle' [File]: A binary 'pickle' file of the metadata for easy loading by the different run phases. (For experienced users only)
@@ -216,63 +232,75 @@ Generally speaking, the more computational time you are willing to spend on ML, 
 This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2, 3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run)
 
 ### Prerequisites
-To be able to run STREAMLINE you will need Anaconda (recommended rather than individually installing all individual packages) which also includes Python3, and a handful of other Python packages that are not included within Anaconda. Anaconda is a distribution of Python and R programming languages for scientific computing, that aims to simplify package management and deployment. The distribution includes data-science packages suitable for Windows, Linux, and macOS. We recommend installing the most recent stable version of Anaconda (https://docs.anaconda.com/anaconda/install/) within your computing environment (make sure to install a version appropriate for your operating system). Anaconda also includes Jupyter Notebook. We tested STREAMLINE in Jupyter Notebook and on a local PC command-line run with Microsoft Windows 10 using 'Anaconda3-2021.05-Windows-x86_64', which used Python 3.8.8.
+To be able to run STREAMLINE you will need Anaconda (recommended rather than individually installing all individual packages) which also includes Python3, and a handful of other Python packages that are not included within Anaconda. Anaconda is a distribution of Python and R programming languages for scientific computing, that aims to simplify package management and deployment. The distribution includes data-science packages suitable for Windows, Linux, and macOS. We recommend installing the most recent stable version of Anaconda (https://docs.anaconda.com/anaconda/install/) within your computing environment (make sure to install a version appropriate for your operating system). Anaconda also includes Jupyter Notebook.
 
-For testing on our Linux-based computing cluster we installed 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.8.3. We followed the installation instructions given in the section 'Installing Anaconda' at https://github.com/UrbsLab/I2C2-Documentation.
+We tested STREAMLINE in Jupyter Notebook and on a local PC command-line run with Microsoft Windows 10 using:
+https://repo.anaconda.com/archive/Anaconda3-2021.05-Windows-x86_64.exe 'Anaconda3-2021.05-Windows-x86_64', which used Python 3.8.8.
 
-In addition to the above you will also need to install the following packages in your computing environment: skrebate, xgboost, lightgbm, catboost, gplearn, scikit-eLCS, scikit-XCS, scikit-ExSTraCS, optuna, plotly, and kaleido.  Installation commands are given below (along with the version used at time of posting):
+We tested STREAMLINE on our Linux-based computing cluster using the following:
+https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.8.3
+https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.9.12
+ We followed the installation instructions given in the section 'Installing Anaconda' at https://github.com/UrbsLab/I2C2-Documentation.
+
+IMPORTANT: In addition to the above you will also need to install the following packages in your computing environment: skrebate, xgboost, lightgbm, catboost, gplearn, scikit-eLCS, scikit-XCS, scikit-ExSTraCS, optuna, plotly, and kaleido.  You may also need to upgrade scipy to v_1.8.0 or greater. Installation commands are given below (along with the version used at time of posting):
 
 #### Feature Selection Packages
-* scikit-learn compatible version of ReBATE, a suite of Relief-based feature selection algorithms (0.7). There is currently a PyPi issue requiring that the newest version (i.e. 0.7) be explicitly installed.
+* scikit-learn compatible version of ReBATE, a suite of Relief-based feature selection algorithms (0.7). There is currently a PyPi issue requiring that the newest version (i.e. v_0.7) be explicitly installed.
 ```
 pip install skrebate==0.7
 ```
 #### ML Modeling Packages
-* XGboost (1.2.0)
+* XGboost (v_1.2.0)
 ```
 pip install xgboost
 ```
-* LightGBM (3.0.0)
+* LightGBM (v_3.0.0)
 ```
 pip install lightgbm
 ```
-* CatBoost (1.0.5)
+* CatBoost (v_1.0.5)
 ```
 pip install catboost
 ```
-* GPLearn (0.4.2)
+* GPLearn (v_0.4.2)
 ```
 pip install gplearn
 ```
-* scikit-learn compatible version of eLCS, an educational learning classifier system (1.2.4)
+* scikit-learn compatible version of eLCS, an educational learning classifier system (v_1.2.4)
 ```
 pip install scikit-eLCS
 ```
-* scikit-learn compatible version of the learning classifier system XCS designed exclusively for supervised learning (1.0.8)
+* scikit-learn compatible version of the learning classifier system XCS designed exclusively for supervised learning (v_1.0.8)
 ```
 pip install scikit-XCS
 ```
-* scikit-learn compatible version of the learning classifier system ExSTraCS (1.1.0)
+* scikit-learn compatible version of the learning classifier system ExSTraCS (v_1.1.0)
 ```
 pip install scikit-ExSTraCS
 ```
 
 #### Other Required Packages
-* Optuna, a hyperparameter optimization framework (2.9.1)
+* Optuna, a hyperparameter optimization framework (v_2.9.1)
 ```
 pip install optuna
 ```
-Plotly, an open-source, interactive data visualization library. Used by optuna to generate hyperparameter sweep visualizations (5.1.0)
+Plotly, an open-source, interactive data visualization library. Used by optuna to generate hyperparameter sweep visualizations (v_5.1.0)
 ```
 pip install plotly
 ```
-Kaleido a package for static image export for web-based visualization. This again is needed to generate hyperparameter sweep visualizations in optuna. We found that getting this package to work properly can be tricky and so far noted that it only works with version 0.03.post1. If the pipeline is getting hung up in modeling, try setting 'export_hyper_sweep_plots' to False to avoid the issue. These plots are nice to have but not necessary for the overall pipeline. (0.0.3.post1)
+Kaleido a package for static image export for web-based visualization. This again is needed to generate hyperparameter sweep visualizations in optuna. We found that getting this package to work properly can be tricky and so far noted that it only works with version 0.03.post1. If the pipeline is getting hung up in modeling, try setting 'export_hyper_sweep_plots' to False to avoid the issue. These plots are nice to have but not necessary for the overall pipeline. (v_0.0.3.post1)
 ```
 pip install kaleido==0.0.3.post1
 ```
-* FPDF, a simple PDF generation for Python (1.7.2)
+* FPDF, a simple PDF generation for Python (v_1.7.2)
 ```
 pip install fpdf
+```
+
+#### Likely Required Package Updates
+* Scipy, a general scientific computing package (included with Anaconda). Within, some versions of 'mannwhitneyu' require different arguments than expected by this pipeline. STREAMLINE has been tested function on both scipy v_1.5.0 and v_1.8.0. Avoid an error by updating scipy to (v_1.8.0)
+```
+pip install --upgrade scipy
 ```
 
 ### Download STREAMLINE
@@ -366,7 +394,6 @@ Here we detail how to run STREAMLINE within the provided Jupyter Notebook named 
 
 ### Running STREAMLINE Jupyter Notebook On Your Own Dataset(s)
 Follow the same steps as above, but update code blocks 2-11 in the Jupyter Notebook to reflect the correct dataset configurations and analysis needs as covered in [this section](#running-streamline-on-your-own-datasets) above.
-
 
 ***
 ## Run From Command Line (Local or Cluster Parallelization)
