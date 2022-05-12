@@ -241,15 +241,15 @@ pip install catboost
 ```
 pip install gplearn
 ```
-* scikit-learn compatible version of eLCS, an educational learning classifier system (1.2.2)
+* scikit-learn compatible version of eLCS, an educational learning classifier system (1.2.4)
 ```
 pip install scikit-eLCS
 ```
-* scikit-learn compatible version of the learning classifier system XCS designed exclusively for supervised learning (1.0.6)
+* scikit-learn compatible version of the learning classifier system XCS designed exclusively for supervised learning (1.0.8)
 ```
 pip install scikit-XCS
 ```
-* scikit-learn compatible version of the learning classifier system ExSTraCS (1.0.7)
+* scikit-learn compatible version of the learning classifier system ExSTraCS (1.1.0)
 ```
 pip install scikit-ExSTraCS
 ```
