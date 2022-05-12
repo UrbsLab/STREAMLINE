@@ -72,7 +72,7 @@ def main(argv):
     if not options.do_check: #Run job submission
         # Iterate through datasets
         dataset_paths = os.listdir(options.output_path + "/" + options.experiment_name)
-        removeList = ['metadata.pickle','metadata.csv','algInfo.pickle','jobsCompleted','logs','jobs','DatasetComparisons']
+        removeList = ['metadata.pickle','metadata.csv','algInfo.pickle','jobsCompleted','logs','jobs','DatasetComparisons',options.experiment_name+'_ML_Pipeline_Report.pdf']
         for text in removeList:
             if text in dataset_paths:
                 dataset_paths.remove(text)

@@ -17,7 +17,8 @@ import time
 import pandas as pd
 import glob
 import numpy as np
-from scipy import interp,stats
+from scipy import stats
+#from scipy import interp,stats
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import os
@@ -203,11 +204,13 @@ def primaryStats(algorithms,original_headers,cv_partitions,full_path,data_name,i
             #update list that stores values used in ROC and PRC plots
             alg_result_table.append([fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec]) # alg_result_table.append([fpr, tpr, roc_auc, recall, prec, prec_rec_auc, ave_prec])
             # Update ROC plot variable lists needed to plot all CVs in one ROC plot
-            tprs.append(interp(mean_fpr, fpr, tpr))
+            tprs.append(np.interp(mean_fpr, fpr, tpr))
+            #tprs.append(interp(mean_fpr, fpr, tpr))
             tprs[-1][0] = 0.0
             aucs.append(roc_auc)
             # Update PRC plot variable lists needed to plot all CVs in one PRC plot
-            precs.append(interp(mean_recall, recall, prec)) #old way
+            precs.append(np.interp(mean_recall, recall, prec))
+            #precs.append(interp(mean_recall, recall, prec))
             #precs.append(interp(mean_recall, prec, recall))
             praucs.append(prec_rec_auc)
             aveprecs.append(ave_prec)
