@@ -208,6 +208,9 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 11. Set n_trials and/or timeout to lower values (this limits the time spent on hyperparameter optimization).
 12. If using eLCS, XCS, or ExSTraCS, set do_lcs_sweep to 'False', iterations at or below 200000, and N at or below 2000.
 
+### Tips For Improving STREAMLINE Modeling performance
+Generally speaking, the more computational time you are willing to spend on ML, the better the results. Doing the opposite of the above tips for reducing runtime, will likely improve performance. Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These 'learning classifier system' (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).
+
 ***
 ## Standard Installation (Use Modes 2-4)
 This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2, 3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run)
