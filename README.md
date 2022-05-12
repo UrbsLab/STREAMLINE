@@ -235,11 +235,15 @@ This section covers the general installation instructions for all users with bas
 To be able to run STREAMLINE you will need Anaconda (recommended rather than individually installing all individual packages) which also includes Python3, and a handful of other Python packages that are not included within Anaconda. Anaconda is a distribution of Python and R programming languages for scientific computing, that aims to simplify package management and deployment. The distribution includes data-science packages suitable for Windows, Linux, and macOS. We recommend installing the most recent stable version of Anaconda (https://docs.anaconda.com/anaconda/install/) within your computing environment (make sure to install a version appropriate for your operating system). Anaconda also includes Jupyter Notebook.
 
 We tested STREAMLINE in Jupyter Notebook and on a local PC command-line run with Microsoft Windows 10 using:
+
 https://repo.anaconda.com/archive/Anaconda3-2021.05-Windows-x86_64.exe 'Anaconda3-2021.05-Windows-x86_64', which used Python 3.8.8.
 
 We tested STREAMLINE on our Linux-based computing cluster using the following:
+
 https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.8.3
+
 https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.9.12
+
  We followed the installation instructions given in the section 'Installing Anaconda' at https://github.com/UrbsLab/I2C2-Documentation.
 
 IMPORTANT: In addition to the above you will also need to install the following packages in your computing environment: skrebate, xgboost, lightgbm, catboost, gplearn, scikit-eLCS, scikit-XCS, scikit-ExSTraCS, optuna, plotly, and kaleido.  You may also need to upgrade scipy to v_1.8.0 or greater. Installation commands are given below (along with the version used at time of posting):
