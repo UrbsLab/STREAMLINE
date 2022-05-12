@@ -247,32 +247,39 @@ def reportHeaders(x_data,experiment_path,dataset_name):
 def univariateAnalysis(data,experiment_path,dataset_name,class_label,instance_label,match_label,categorical_variables,jupyterRun,topFeatures):
     """ Calculates univariate association significance between each individual feature and class outcome. Assumes categorical outcome using Chi-square test for
         categorical features and Mann-Whitney Test for quantitative features. """
-    #Create folder for univariate analysis results
-    if not os.path.exists(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses'):
-        os.mkdir(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses')
-    #Generate dictionary of p-values for each feature using appropriate test (via test_selector)
-    p_value_dict = {}
-    for column in data:
-        if column != class_label and column != instance_label:
-            p_value_dict[column] = test_selector(column,class_label,data,categorical_variables)
-    sorted_p_list = sorted(p_value_dict.items(),key = lambda item:item[1])
-    #Save p-values to file
-    pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
-    pval_df.to_csv(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses/Univariate_Significance.csv',index_label='Feature',header=['p-value'])
-    #Print results for top features across univariate analyses
-    if eval(jupyterRun):
-        fCount = data.shape[1]-1
-        if not instance_label == 'None':
-            fCount -= 1
-        if not match_label == 'None':
-            fCount -=1
-        min_num = min(topFeatures,fCount)
-        sorted_p_list_temp = sorted_p_list[: min_num]
-        print('Plotting top significant '+ str(min_num) + ' features.')
-        print('###################################################')
-        print('Significant Univariate Associations:')
-        for each in sorted_p_list_temp[:min_num]:
-            print(each[0]+": (p-val = "+str(each[1]) +")")
+    try: #Try loop added to deal with versions specific change to using mannwhitneyu in scipy and avoid STREAMLINE crash in those circumstances.
+        #Create folder for univariate analysis results
+        if not os.path.exists(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses'):
+            os.mkdir(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses')
+        #Generate dictionary of p-values for each feature using appropriate test (via test_selector)
+        p_value_dict = {}
+        for column in data:
+            if column != class_label and column != instance_label:
+                p_value_dict[column] = test_selector(column,class_label,data,categorical_variables)
+        sorted_p_list = sorted(p_value_dict.items(),key = lambda item:item[1])
+        #Save p-values to file
+        pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
+        pval_df.to_csv(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses/Univariate_Significance.csv',index_label='Feature',header=['p-value'])
+        #Print results for top features across univariate analyses
+        if eval(jupyterRun):
+            fCount = data.shape[1]-1
+            if not instance_label == 'None':
+                fCount -= 1
+            if not match_label == 'None':
+                fCount -=1
+            min_num = min(topFeatures,fCount)
+            sorted_p_list_temp = sorted_p_list[: min_num]
+            print('Plotting top significant '+ str(min_num) + ' features.')
+            print('###################################################')
+            print('Significant Univariate Associations:')
+            for each in sorted_p_list_temp[:min_num]:
+                print(each[0]+": (p-val = "+str(each[1]) +")")
+    except:
+        sorted_p_list = [] #won't actually be sorted
+        print('WARNING: Exploratory univariate analysis failed due to scipy package version error when running mannwhitneyu test. To fix, we recommend updating scipy to version 1.8.0 or greater using: pip install --upgrade scipy')
+        for column in data:
+            if column != class_label and column != instance_label:
+                sorted_p_list.append([column,'None'])
     return sorted_p_list
 
 def test_selector(featureName, class_label, data, categorical_variables):
@@ -298,9 +305,12 @@ def test_selector(featureName, class_label, data, categorical_variables):
 def univariatePlots(data,sorted_p_list,class_label,categorical_variables,experiment_path,dataset_name,sig_cutoff):
     """ Checks whether p-value of each feature is less than or equal to significance cutoff. If so, calls graph_selector to generate an appropriate plot."""
     for i in sorted_p_list: #each feature in sorted p-value dictionary
-        for j in data: #each feature
-            if j == i[0] and i[1] <= sig_cutoff: #ONLY EXPORTS SIGNIFICANT FEATURES
-                graph_selector(j,class_label,data,categorical_variables,experiment_path,dataset_name)
+        if i[1] == 'None':
+            pass
+        else:
+            for j in data: #each feature
+                if j == i[0] and i[1] <= sig_cutoff: #ONLY EXPORTS SIGNIFICANT FEATURES
+                    graph_selector(j,class_label,data,categorical_variables,experiment_path,dataset_name)
 
 def graph_selector(featureName, class_label, data, categorical_variables,experiment_path,dataset_name):
     """ Assuming a categorical class outcome, a barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature. """

@@ -473,24 +473,29 @@ def pubUnivariate(analy_report,experiment_path,ds,page,resultLimit,pageCount):
         analy_report.cell(w=180, h = 8, txt='Univariate Analysis of Each Dataset (Top 10 Features for Each): Page '+str(page+1), border=1, align='L', ln=2)
     else:
         analy_report.cell(w=180, h = 8, txt='Univariate Analysis of Each Dataset (Top 10 Features for Each)', border=1, align='L', ln=2)
-    for n in range(dataStart,datasetCount):
-        if n >= countLimit: #Stops generating page when dataset count limit reached
-            break
-        analy_report.y += 2
-        sig_df = pd.read_csv(experiment_path+'/'+ds[n]+'/exploratory/univariate_analyses/Univariate_Significance.csv')
-        sig_ls = []
-        sig_df = sig_df.nsmallest(10, ['p-value'])
-        for i in range(len(sig_df)):
-            sig_ls.append(sig_df.iloc[i,0]+': ')
-            sig_ls.append(str(sig_df.iloc[i,1]))
-            sig_ls.append('\n')
-        analy_report.set_font('Times', 'B', 10)
-        analy_report.multi_cell(w=180, h=4, txt='D'+str(n+1)+' = '+ds[n], border=1, align='L')
-        analy_report.y += 1 #Space below section header
-        analy_report.set_font('Times','B', 8)
-        analy_report.multi_cell(w=180, h=4, txt='Feature:  P-Value', border=1, align='L')
-        analy_report.set_font('Times','', 8)
-        analy_report.multi_cell(w=180, h=4, txt=' '+listToString(sig_ls), border=1, align='L')
+    try: #Try loop added to deal with versions specific change to using mannwhitneyu in scipy and avoid STREAMLINE crash in those circumstances.
+        for n in range(dataStart,datasetCount):
+            if n >= countLimit: #Stops generating page when dataset count limit reached
+                break
+            analy_report.y += 2
+            sig_df = pd.read_csv(experiment_path+'/'+ds[n]+'/exploratory/univariate_analyses/Univariate_Significance.csv')
+            sig_ls = []
+            sig_df = sig_df.nsmallest(10, ['p-value'])
+            for i in range(len(sig_df)):
+                sig_ls.append(sig_df.iloc[i,0]+': ')
+                sig_ls.append(str(sig_df.iloc[i,1]))
+                sig_ls.append('\n')
+            analy_report.set_font('Times', 'B', 10)
+            analy_report.multi_cell(w=180, h=4, txt='D'+str(n+1)+' = '+ds[n], border=1, align='L')
+            analy_report.y += 1 #Space below section header
+            analy_report.set_font('Times','B', 8)
+            analy_report.multi_cell(w=180, h=4, txt='Feature:  P-Value', border=1, align='L')
+            analy_report.set_font('Times','', 8)
+            analy_report.multi_cell(w=180, h=4, txt=' '+listToString(sig_ls), border=1, align='L')
+    except:
+        analy_report.x = 5
+        analy_report.y = 40
+        analy_report.cell(180, 4, 'WARNING: Univariate analysis failed from scipy package error. To fix: pip install --upgrade scipy', 1, align="L")
     footer(analy_report)
 
 
