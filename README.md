@@ -116,8 +116,8 @@ Follow the steps below to get the pipeline running on the demonstration datasets
 
 9. Open the newly copied 'STREAMLINE-main' folder on Google Drive.
 
-10. Open the 'Colab_Output' folder and delete the entire subfolder 'hcc_demo' by right clicking on it and selecting 'Remove'.
-    * Note: You will need to do this anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the 'experiment_name' parameter within the Notebook.
+10. Open the 'Colab_Output' folder and confirm there is no subfolder named 'hcc_demo'. If there is, right clicking on it and select 'Remove'.
+    * Note: You will need to remove this folder anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the 'experiment_name' parameter within the Notebook.
 
 11. Navigate back to the base STREAMLINE-main folder on Google Drive.
 
