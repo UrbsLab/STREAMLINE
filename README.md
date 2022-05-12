@@ -589,7 +589,7 @@ Run parameters for ModelMain.py:
 | --do-ExSTraCS | run ExSTraCS modeling (a learning classifier system designed for biomedical data mining) | None |
 | --metric |primary scikit-learn specified scoring metric used for hyperparameter optimization and permutation-based model feature importance evaluation | balanced_accuracy |
 | --subsample | for long running algos (XGB,SVM,ANN,KN), option to subsample training set (0 for no subsample) | 0 |
-| --use-uniformFI | overrides use of any available feature importance estimate methods from models, instead using permutation_importance uniformly | False |
+| --use-uniformFI | overrides use of any available feature importance estimate methods from models, instead using permutation_importance uniformly | True |
 | --n-trials | # of bayesian hyperparameter optimization trials using optuna | 100 |
 | --timeout | seconds until hyperparameter sweep stops running new trials (Note: it may run longer to finish last trial started) | 300 |
 | --export-hyper-sweep | export optuna-generated hyperparameter sweep plots | False |

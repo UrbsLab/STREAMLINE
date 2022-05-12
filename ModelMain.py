@@ -63,7 +63,7 @@ def main(argv):
     #Other Analysis Parameters - Defaults available
     parser.add_argument('--metric', dest='primary_metric', type=str,help='primary scikit-learn specified scoring metric used for hyperparameter optimization and permutation-based model feature importance evaluation', default='balanced_accuracy')
     parser.add_argument('--subsample', dest='training_subsample', type=int, help='for long running algos (XGB,SVM,ANN,KN), option to subsample training set (0 for no subsample)', default=0)
-    parser.add_argument('--use-uniformFI', dest='use_uniform_FI', type=str, help='overrides use of any available feature importance estimate methods from models, instead using permutation_importance uniformly',default='False')
+    parser.add_argument('--use-uniformFI', dest='use_uniform_FI', type=str, help='overrides use of any available feature importance estimate methods from models, instead using permutation_importance uniformly',default='True')
     #Hyperparameter sweep options - Defaults available
     parser.add_argument('--n-trials', dest='n_trials', type=int,help='# of bayesian hyperparameter optimization trials using optuna', default=100)
     parser.add_argument('--timeout', dest='timeout', type=int,help='seconds until hyperparameter sweep stops running new trials (Note: it may run longer to finish last trial started)', default=900) #900 sec = 15 minutes default
