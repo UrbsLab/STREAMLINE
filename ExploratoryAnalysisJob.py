@@ -288,7 +288,10 @@ def test_selector(featureName, class_label, data, categorical_variables):
     # Feature is continuous and Outcome is discrete/categorical/binary
     else:
         # Univariate association test (Mann-Whitney Test - Non-parametric)
-        c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0], y=data[featureName].loc[data[class_label] == 1])
+        try: #works in scipy 1.5.0
+            c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0], y=data[featureName].loc[data[class_label] == 1])
+        except: #for scipy 1.8.0
+            c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0], y=data[featureName].loc[data[class_label] == 1],nan_policy='omit')
         p_val = p
     return p_val
 
