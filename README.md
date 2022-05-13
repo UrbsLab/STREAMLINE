@@ -801,24 +801,25 @@ Have ideas on how to improve this pipeline? We welcome suggestions, contribution
 ## History
 STREAMLINE is based on our initial development repository https://github.com/UrbsLab/AutoMLPipe-BC. STREAMLINE's codebase and functionalities have been reorganized and extended, along with the name rebranding. This STREAMLINE repository will be developed further in the future while AutoMLPipe-BC will remain as is.
 
-## Planned Extensions
+## Planned Extensions/Improvements
+
+### Logistic
+* Improved modularization of code for adding new ML modeling algorithms
+* Set up code to be run easily on cloud computing options such as AWS, Azure, or Google Cloud
+* Set up option to use STREAMLINE within Docker
+
+### Capabilities
 * Support multiclass and quantitative endpoints
+    * Will require significant extensions to most phases of the pipeline including exploratory analysis, CV partitioning, feature importance/selection, modeling, statistics analysis, and
+* Shapley value calculation and visualizations
+* Create ensemble model from all trained models which can then be evaluated on hold out replication data
+* Expand available model visualization opportunities for model interpretation
+
+### Algorithmic
 * Addition of other ML modeling algorithm options
 * Refinement of pre-configured ML algorithm hyperparameter options considered using Optuna
-* Shapley value calculation and visualizations
-* Improved modularization of code for adding new ML modeling algorithms
-* Create ensemble model from all trained models which can then be evaluated on hold out replication data
 * Expanded feature importance estimation algorithm options and improved, more flexible feature selection strategy improving high-order feature interaction detection
-* Expand available model visualization opportunities for model interpretation
 * New rule-based machine learning algorithm (in development)
-
-## Solicited Feedback  
-In particular we welcome suggestions on improving this pipeline with respect to:
-* Other key ML modeling algorithms (for classification) that should be included
-* The range of hyperparmeters and associated values used for each ML modeling algorithms
-* Other key data/results visualizations
-* Support to easily run this pipeline on cloud computing platforms such as AWS, Azure, or Google Cloud.
-* Support to utilize this pipeline within Docker
 
 ***
 # Acknowledgements
