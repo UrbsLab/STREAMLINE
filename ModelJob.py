@@ -1199,11 +1199,11 @@ def classEval(y_true, y_pred):
     ac = accuracy_score(y_true, y_pred)
     bac = balanced_accuracy_score(y_true, y_pred)
     #Calculate Precision and Recall
-    re = recall_score(y_true, y_pred)
+    re = recall_score(y_true, y_pred) #a.k.a. sensitivity or TPR
     pr = precision_score(y_true, y_pred)
     #Calculate F1 score
     f1 = f1_score(y_true, y_pred)
-    # Calculate specificity
+    # Calculate specificity, a.k.a. TNR
     if tn == 0 and fp == 0:
         sp = 0
     else:
@@ -1217,12 +1217,12 @@ def classEval(y_true, y_pred):
     if sp == 1:
         lrp = 0
     else:
-        lrp = re/float(1-sp)
+        lrp = re/float(1-sp)  #sensitivity / (1-specificity).... a.k.a. TPR/FPR... or TPR/(1-TNR)
     # Calculate likeliehood ratio negative
     if sp == 0:
         lrm = 0
     else:
-        lrm = (1-re)/float(sp)
+        lrm = (1-re)/float(sp) #(1-sensitivity) / specificity... a.k.a. FNR/TNR ... or (1-TPR)/TNR
     return [bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm]
 
 def hyperparameters(random_state,do_lcs_sweep,nu,iterations,N,feature_names): #### Add new algorithm hyperparameters here using same formatting...
