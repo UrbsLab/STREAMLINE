@@ -227,7 +227,7 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 ### Tips For Improving STREAMLINE Modeling performance
 * Generally speaking, the more computational time you are willing to spend on ML, the better the results. Doing the opposite of the above tips for reducing runtime, will likely improve performance.
 
-* In certain situations, turning off feature selection, and relying on the ML algorithms alone to identify relevant features will yield better performance.  However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000). 
+* In certain situations, turning off feature selection, and relying on the ML algorithms alone to identify relevant features will yield better performance.  However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).
 * Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These 'learning classifier system' (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).
 
 ***
@@ -808,7 +808,9 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
 * Shapley value calculation and visualizations
 * Improved modularization of code for adding new ML modeling algorithms
 * Create ensemble model from all trained models which can then be evaluated on hold out replication data
-* Expanded feature importance estimation algorithm options and extended feature selection strategy
+* Expanded feature importance estimation algorithm options and improved, more flexible feature selection strategy improving high-order feature interaction detection
+* Expand available model visualization opportunities for model interpretation
+* New rule-based machine learning algorithm (in development)
 
 ## Solicited Feedback  
 In particular we welcome suggestions on improving this pipeline with respect to:
