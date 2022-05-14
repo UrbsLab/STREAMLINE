@@ -823,6 +823,7 @@ Run parameters for `FileCleanup.py`:
 # Other Guidelines for STREAMLINE Use
 * SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
 * Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise `use_uniform_FI` should be True.
+* While the STREAMLINE includes `impute_data` as an option that can be turned off in `DataPreprocessing`, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
 
 ***
 # Unique Characteristics of STREAMLINE
@@ -915,6 +916,7 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
     * Allow it to use internal feature importance estimates as an option
     * Give it the list of features to be treated as categorical
 * New `UsefulNotebooks` providing even more post-run data visualizations and customizations
+* Clearly identify which algorithms can be run with missing values present, when user does not wish to apply `impute_data` (not yet fully tested)
 
 ### Algorithmic extensions
 * Addition of other ML modeling algorithm options
