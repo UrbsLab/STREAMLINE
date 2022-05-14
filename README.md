@@ -174,7 +174,7 @@ In this section we first provide [instructions for users with little to no codin
 
 ***
 ## Use Mode 1: Google Colaboratory
-This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users can skip to the next [section](#standard-installation-use-modes-2-4) but may wish to revisit later parts of this section for helpful details.   Standard Installation (Use Modes 2-4)
+This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users can skip to the next [section](#use-modes-2-4-standard-installation-and-use) but may wish to revisit later parts of this section for helpful details.   Standard Installation (Use Modes 2-4)
     *To learn more about Google Colaboratory prior to setup please visit the following link: https://research.google.com/colaboratory/
 
 ### Setting up your first run
