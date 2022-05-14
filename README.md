@@ -10,6 +10,10 @@ Click below for the easiest way for anyone to run an analysis using STREAMLINE (
 
 [Setting Up Your First Run](#setting-up-your-first-run)
 
+Click below for a quick look at an example pre-run notebook (with no installation steps), and/or example output files.
+
+[View pipeline and output before running](#view-pipeline-and-output-before-running)
+
 ***
 ## STREAMLINE schematic
 This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
