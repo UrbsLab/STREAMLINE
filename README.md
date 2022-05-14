@@ -442,7 +442,7 @@ The base code for STREAMLINE is organized into a series of script phases designe
   * \[Runtime]: Fast
 
 * Phase 8: [Optional] Generate PDF Training Summary Report
-  * Generates a pre-formatted PDF including all pipeline run parameters, basic dataset information, and key exploratory analyses, ML modeling results, statistical comparisons, and runtime. Will properly format on analyses that include up to 20 datasets (aim to expand this in the future).
+  * Generates a pre-formatted PDF including all pipeline run parameters, basic dataset information, and key exploratory analyses, ML modeling results, statistical comparisons, and runtime.
   * \[Code]: `PDF_ReportMain.py` and `PDF_ReportJob.py`
   * \[Runtime]: Moderately fast
 
