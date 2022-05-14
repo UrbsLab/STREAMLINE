@@ -315,6 +315,7 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2, 3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run)
 
 ### Prerequisites
+#### Anaconda3
 To be able to run STREAMLINE you will need Anaconda (recommended rather than individually installing all individual packages) including Python3, and additionally it requires a handful of other Python packages not included within Anaconda. Anaconda is a distribution of Python and R programming languages for scientific computing, that aims to simplify package management and deployment. The distribution includes data-science packages suitable for Windows, Linux, and macOS. We recommend installing the most recent stable version of Anaconda (https://docs.anaconda.com/anaconda/install/) within your computing environment. Make sure to install a version appropriate for your operating system. Anaconda also includes Jupyter Notebook.
 
 We confirmed STREAMLINE functionality in Jupyter Notebook and on a local PC command-line run with Microsoft Windows 10 using:
@@ -331,7 +332,8 @@ We also confirmed STREAMLINE functionality on our Linux-based computing cluster 
 2. https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh which has Python 3.9.12
     * Note: This version of anaconda instead required kaleido (v_0.2.1) and scipy (v_1.8.0), see below.
 
-In addition to the above you will also need to install the following packages in your computing environment. This can be done at once with one of the following commands:
+#### Additional Python Packages
+In addition to the above you will also need to install the following packages (not included in Anaconda3) in your computing environment. This can be done at once with one of the following commands:
 
 * For 'Anaconda3-2021.05-Windows-x86_64' or Anaconda3-2020.07-Linux-x86_64, or other older Anaconda versions (not tested) use:
 ```
@@ -343,8 +345,8 @@ pip install skrebate==0.7 xgboost lightgbm catboost gplearn scikit-eLCS scikit-X
 pip install skrebate==0.7 xgboost lightgbm catboost gplearn scikit-eLCS scikit-XCS scikit-ExSTraCS optuna plotly kaleido fpdf scipy  
 ```
 
-#### Summary of additional required packages
-Below we list all additional packages required by STREAMLINE (outside of Anaconda3), each given with their respective versions at the time of confirming STREAMLINE functionality):
+Below we detail these packages, each given with the respective versions used at the time of confirming STREAMLINE functionality):
+
 * skrebate (v_0.7) scikit-learn compatible version of ReBATE, a suite of Relief-based feature selection algorithms (0.7). There is currently a PyPi issue requiring that the newest version (i.e. v_0.7) be explicitly installed.
 
 * xgboost (v_1.2.0) Extreme Gradient Boosting ML classification algorithm
