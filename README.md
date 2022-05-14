@@ -153,7 +153,7 @@ We make no claim that this is the best or only viable way to assemble an ML anal
 
 ***
 # Installation and Use
-In this section we first provide [instructions for users with little to no coding experience](#use-mode-1-google-colaboratory). Users with some coding experience can jump to the [standard instructions](#standard-installation-use-modes-2-4). However, all users would benefit from reviewing the following sections:
+In this section we first provide [instructions for users with little to no coding experience](#use-mode-1-google-colaboratory). Users with some coding experience can jump to the [standard instructions](#use-modes-2-4-standard-installation-and-use). However, all users would benefit from reviewing the following sections:
 
 * [Inspecting your first run](#inspecting-your-first-run)
 * [Running STREAMLINE on your own dataset(s)](#running-streamline-on-your-own-datasets)
