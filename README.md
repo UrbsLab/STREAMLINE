@@ -325,11 +325,11 @@ https://repo.anaconda.com/archive/Anaconda3-2021.05-Windows-x86_64.exe 'Anaconda
 We also confirmed STREAMLINE functionality on our Linux-based computing cluster using the following:
     * Note: We followed the cluster anaconda installation instructions given in the section 'Installing Anaconda' at https://github.com/UrbsLab/I2C2-Documentation.
 
-    1. https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.8.3
-        * Note: This version of anaconda worked with kaleido (v_0.0.3.post1) and scipy (v_1.5.0), see below.
+1. https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.8.3
+    * Note: This version of anaconda worked with kaleido (v_0.0.3.post1) and scipy (v_1.5.0), see below.
 
-    2. https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.9.12
-        * Note: This version of anaconda instead required kaleido (v_0.2.1) and scipy (v_1.8.0), see below.
+2. https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh 'Anaconda3-2020.07-Linux-x86_64.sh' which used Python 3.9.12
+    * Note: This version of anaconda instead required kaleido (v_0.2.1) and scipy (v_1.8.0), see below.
 
 In addition to the above you will also need to install the following packages in your computing environment. This can be done at once with one of the following commands:
 
