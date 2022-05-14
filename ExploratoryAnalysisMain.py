@@ -143,7 +143,7 @@ def makeDirTree(data_path,output_path,experiment_name,jupyterRun):
     if not os.path.exists(data_path):
         raise Exception("Provided data_path does not exist")
     if os.path.exists(output_path+'/'+experiment_name):
-        raise Exception("Error: A folder with the specified experiment name already exists at "+output_path+'/'+experiment_name'. This path/folder name must be unique.)
+        raise Exception("Error: A folder with the specified experiment name already exists at "+output_path+'/'+experiment_name+'. This path/folder name must be unique.')
     for char in experiment_name:
         if not char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_':
             raise Exception('Experiment Name must be alphanumeric')
