@@ -74,7 +74,7 @@ This schematic breaks the overall pipeline down into 4 basic components: (1) pre
 * [Demonstration data](#demonstration-data)  
 * [Troubleshooting](#troubleshooting)
     * [Rerunning a failed modeling job](#rerunning-a-failed-modeling-job)
-    * [Unending modeling jobs](#unending modeling jobs)
+    * [Unending modeling jobs](#unending-modeling-jobs)
 * [Development notes](#development-notes)
     * [History](#history)
     * [Planned extensions/improvements](#planned-extensionsimprovements)
