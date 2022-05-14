@@ -90,7 +90,7 @@ This schematic breaks the overall pipeline down into 4 basic components: (1) pre
 
 ***
 ## What level of computing skill is required for use?
-STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naïve user need only know how to navigate their PC file system, specify folder/file paths, un-zip a folder, and have or set up a google drive account. Those with a very basic knowledge of python and computer environments can apply STEAMLINE within the included jupyter notebook, and those with a bit more experience can run it serially by command line or in parallel on a computing cluster.  Notably, the easier routes for using STEAMLINE are more computationally limited. Analyses using larger datasets, or a larger number of ML modeling algorithms turned on are best completed via command line (in parallel).
+STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naïve user need only know how to navigate their PC file system, specify folder/file paths, un-zip a folder, and have or set up a google drive account. Those with a very basic knowledge of python and computer environments can apply STEAMLINE within the included jupyter notebook, and those with a bit more experience can run it serially by command line or in parallel on an LSF compatible computing cluster.  Notably, the easier routes for using STEAMLINE are more computationally limited. Analyses using larger datasets, or a larger number of ML modeling algorithms turned on are best completed via command line (in parallel).
 
 ***
 ## What can it be used for?
@@ -492,7 +492,7 @@ The primary way to run STREAMLINE is via the command line. In this section we pr
 
 Note, each phase must be run to completion before starting the next. They should not all be run at once!
 
-As indicated above, each phase can run locally (not parallelized) or parallelized using a Linux based computing cluster. Parallelization occurs within each phase distributing the workload of running multiple datasets, across multiple CV partitions, and across multiple algorithms. It does nothing to speed up individual algorithms. For example, when running `ModelMain.py` using all 15 algorithms, 10-fold CV, applied to 4 datasets, (15 x 10 x 4) parallelization submits 600 individual jobs to the compute cluster to run simultaneously (if available compute resources allows). 
+As indicated above, each phase can run locally (not parallelized) or parallelized using a Linux based computing cluster. Parallelization occurs within each phase distributing the workload of running multiple datasets, across multiple CV partitions, and across multiple algorithms. It does nothing to speed up individual algorithms. For example, when running `ModelMain.py` using all 15 algorithms, 10-fold CV, applied to 4 datasets, (15 x 10 x 4) parallelization submits 600 individual jobs to the compute cluster to run simultaneously (if available compute resources allows).
 
 With a little tweaking of the respective 'Main' scripts, this code should be adaptable to be parallelized on other cluster frameworks (i.e. non LSF) or with cloud computing.
 
