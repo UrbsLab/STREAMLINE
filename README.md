@@ -492,7 +492,7 @@ The primary way to run STREAMLINE is via the command line. In this section we pr
 
 Note, each phase must be run to completion before starting the next. They should not all be run at once!
 
-As indicated above, each phase can run locally (not parallelized) or parallelized using a Linux based computing cluster. Parallelization occurs within each phase distributing the workload of running multiple datasets, across multiple CV partitions, and across multiple algorithms. It does nothing to speed up individual algorithms.
+As indicated above, each phase can run locally (not parallelized) or parallelized using a Linux based computing cluster. Parallelization occurs within each phase distributing the workload of running multiple datasets, across multiple CV partitions, and across multiple algorithms. It does nothing to speed up individual algorithms. For example, when running `ModelMain.py` using all 15 algorithms, 10-fold CV, applied to 4 datasets, (15 x 10 x 4) parallelization submits 600 individual jobs to the compute cluster to run simultaneously (if available compute resources allows). 
 
 With a little tweaking of the respective 'Main' scripts, this code should be adaptable to be parallelized on other cluster frameworks (i.e. non LSF) or with cloud computing.
 
