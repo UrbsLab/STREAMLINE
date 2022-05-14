@@ -70,12 +70,12 @@ def main(argv):
     parser.add_argument('--export-hyper-sweep', dest='export_hyper_sweep_plots', type=str, help='export optuna-generated hyperparameter sweep plots', default='False')
     #LCS specific parameters - Defaults available
     parser.add_argument('--do-LCS-sweep', dest='do_lcs_sweep', type=str, help='do LCS hyperparam tuning or use below params',default='False')
-    parser.add_argument('--nu', dest='nu', type=int, help='fixed LCS nu param', default=1)
+    parser.add_argument('--nu', dest='nu', type=int, help='fixed LCS nu param (recommended range 1-10), set to larger value for data with less or no noise', default=1)
     parser.add_argument('--iter', dest='iterations', type=int, help='fixed LCS # learning iterations param', default=200000)
     parser.add_argument('--N', dest='N', type=int, help='fixed LCS rule population maximum size param', default=2000)
     parser.add_argument('--lcs-timeout', dest='lcs_timeout', type=int, help='seconds until hyperparameter sweep stops for LCS algorithms', default=1200)
     #Lostistical arguments - Defaults available
-    parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel',default="True")
+    parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel on LSF compatible computing cluster',default="True")
     parser.add_argument('--queue',dest='queue',type=str,help='specify name of parallel computing queue (uses our research groups queue by default)',default="i2c2_normal")
     parser.add_argument('--res-mem', dest='reserved_memory', type=int, help='reserved memory for the job (in Gigabytes)',default=4)
     parser.add_argument('--max-mem', dest='maximum_memory', type=int, help='maximum memory before the job is automatically terminated',default=15)

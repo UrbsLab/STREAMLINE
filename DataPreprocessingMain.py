@@ -38,7 +38,7 @@ def main(argv):
     parser.add_argument('--multi-impute', dest='multi_impute',type=str,help='applies multivariate imputation to quantitative features, otherwise uses median imputation',default="True")
     parser.add_argument('--over-cv', dest='overwrite_cv',type=str,help='overwrites earlier cv datasets with new scaled/imputed ones',default="True")
     #Lostistical arguments
-    parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel',default="True")
+    parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel on LSF compatible computing cluster',default="True")
     parser.add_argument('--queue',dest='queue',type=str,help='specify name of parallel computing queue (uses our research groups queue by default)',default="i2c2_normal")
     parser.add_argument('--res-mem', dest='reserved_memory', type=int, help='reserved memory for the job (in Gigabytes)',default=4)
     parser.add_argument('--max-mem', dest='maximum_memory', type=int, help='maximum memory before the job is automatically terminated',default=15)
