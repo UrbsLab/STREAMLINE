@@ -59,7 +59,7 @@ This schematic breaks the overall pipeline down into 4 basic components: (1) pre
             * [Phase 4: Feature Selection](#phase-4-feature-selection)
             * [Phase 5: Machine Learning Modeling](#phase-5-machine-learning-modeling)
                 * [Example: Run only one ML modeling algorithm](#example-run-only-one-ml-modeling-algorithm)
-                * [Example: Utilize the same model feature importance estimation for all algorithms](#example-utilize-the-same-model-feature-importance-estimation-for-all-algorithms)
+                * [Example: Utilize built-in algorithm feature importance estimates when available](#example-utilize-built-in-algorithm-feature-importance-estimates-when-available)
                 * [Example: Specify an alternative primary evaluation metric](#example-specify-an-alternative-primary-evaluation-metric)
                 * [Example: Reduce computational burden of algorithms that run slow in large instance spaces](#example-reduce-computational-burden-of-algorithms-that-run-slow-in-large-instance-spaces)
             * [Phase 6: Statistics Summary](#phase-6-statistics-summary)
@@ -168,7 +168,7 @@ This is the easiest but most limited way to run STREAMLINE. These instructions a
     *To learn more about Google Colaboratory prior to setup please visit the following link: https://research.google.com/colaboratory/
 
 ### Setting up your first run
-Follow the steps below to get the pipeline running on the demonstration datasets. In summary, they detail the process of copying the STREAMLINE GitHub repository to your Google Drive, and running the notebook called 'STREAMLINE-GoogleColabNotebook.ipynb' with Google Colaboratory.
+Follow the steps below to get the pipeline running on the demonstration datasets. In summary, they detail the process of copying the STREAMLINE GitHub repository to your Google Drive, and running the notebook called `STREAMLINE-GoogleColabNotebook.ipynb` with Google Colaboratory.
 
 1. Set up a Google account (if for some reason you don't already have one).
     * Click here for help: https://support.google.com/accounts/answer/27441?hl=en
@@ -178,43 +178,43 @@ Follow the steps below to get the pipeline running on the demonstration datasets
 
 3. Navigate to this GitHub Repository: https://github.com/UrbsLab/STREAMLINE
 
-4. Click the green button labeled 'Code' and select 'Download ZIP'.
+4. Click the green button labeled `Code` and select `Download ZIP`.
 
 5. Unzip this file:
     * Navigate to the folder where this file was downloaded.
-    * Find the file named 'STREAMLINE-main.zip'.
-    * Right click on the zipped file and choose 'Extract all', then select 'Extract'.
-    * Note: This will typically create an unzipped folder in your 'Downloads' folder with the name STREAMLINE-main, with another folder inside it also called STREAMLINE-main. This inner folder is the one you will be copying in the next steps, so that when you open it, you immediately see all the STREAMLINE files.
+    * Find the file named `STREAMLINE-main.zip`.
+    * Right click on the zipped file and choose `Extract all`, then select `Extract`.
+    * Note: This will typically create an unzipped folder in your `Downloads` folder with the name `STREAMLINE-main`, with another folder inside it also called `STREAMLINE-main`. This inner folder is the one you will be copying in the next steps, so that when you open it, you immediately see all the STREAMLINE files.
 
-6. Ensure that you have located your extracted folder named 'STREAMLINE-main', and that when you open it, you immediately see the various STREAMLINE files and folders.
+6. Ensure that you have located your extracted folder named `STREAMLINE-main`, and that when you open it, you immediately see the various STREAMLINE files and folders.
 
-7. Navigate to 'My Drive' in your Google Drive.  This is the base folder in your google drive account.
+7. Navigate to `My Drive` in your Google Drive.  This is the base folder in your google drive account.
 
-8. Copy the inner extracted folder named 'STREAMLINE-main' to 'My Drive' on your Google Drive account.
+8. Copy the inner extracted folder named `STREAMLINE-main` to `My Drive` on your Google Drive account.
 
-9. Open the newly copied 'STREAMLINE-main' folder on Google Drive.
+9. Open the newly copied `STREAMLINE-main` folder on Google Drive.
 
-10. Open the 'Colab_Output' folder and confirm there is no subfolder named 'hcc_demo'. If there is, right clicking on it and select 'Remove'.
-    * Note: STREAMLINE creates a folder here using the name set by the 'experiment_name' parameter. You will need to remove this folder anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the 'experiment_name' parameter within the Notebook.
+10. Open the `Colab_Output` folder and confirm there is no subfolder named `hcc_demo`. If there is, right clicking on it and select `Remove`.
+    * Note: STREAMLINE creates a folder here using the name set by the `experiment_name` parameter. You will need to remove this folder anytime you want to re-run the demo of STREAMLINE without changing the experiment folder name. This prevents users from accidentally overwriting a previous run of the pipeline unintentionally. As an alternative, users can simply change the name of the `experiment_name` parameter within the Notebook.
 
-11. Navigate back to the base STREAMLINE-main folder on Google Drive.
+11. Navigate back to the base `STREAMLINE-main` folder on Google Drive.
 
 12. Ensure you have installed the Google Colaboratory App.
-    * Right click on 'STREAMLINE-GoogleColabNotebook.ipynb' (this is the notebook used to run the pipeline on Google Colaboratory only)
-    * Choose 'Open with' and select:
-        1. 'Google Colaboratory' if it's already installed, or
-        2. 'Connect more apps', then search for and install 'Google Colaboratory'
+    * Right click on `STREAMLINE-GoogleColabNotebook.ipynb` (this is the notebook used to run the pipeline on Google Colaboratory only)
+    * Choose `Open with` and select:
+        1. `Google Colaboratory` if it's already installed, or
+        2. `Connect more apps`, then search for and install `Google Colaboratory`
     * Note: Once Google Colaboratory has been installed you need only double click on the notebook file to open it in the future.
     * The STREAMLINE notebook will now open in Google Colaboratory as a webpage.
 
-13. [Optional] At the top of the notebook open the 'Runtime' menu and select 'Disconnect and delete runtime'. This clears the memory of the previous notebook run. This is only necessary when the underlying base code is modified, but it may be useful to troubleshoot if modifications to the notebook do not seem to have an effect.
+13. [Optional] At the top of the notebook open the `Runtime` menu and select `Disconnect and delete runtime`. This clears the memory of the previous notebook run. This is only necessary when the underlying base code is modified, but it may be useful to troubleshoot if modifications to the notebook do not seem to have an effect.
 
-14. At the top of the notebook open the 'Runtime' menu and select 'Run all'.  This directs the notebook to run all code cells of the notebook, i.e. all phases of STREAMLINE.  Here we have preconfigured STREAMLINE to automatically run on two [demonstration datasets](#demonstration-data) found in the 'DemoData' folder.
+14. At the top of the notebook open the `Runtime` menu and select `Run all`.  This directs the notebook to run all code cells of the notebook, i.e. all phases of STREAMLINE.  Here we have preconfigured STREAMLINE to automatically run on two [demonstration datasets](#demonstration-data) found in the `DemoData` folder.
 
 15. In order to communicate with your Google Drive, Google will ask permission for the notebook to connect to it.
-    * First pop up window: Click 'Connect to Google Drive'
-    * Second pop up window: Choose the Google account within which you copied the STREAMLINE-main folder from the available list.
-    * Third pop up window: Scroll down and select 'Allow'.
+    * First pop up window: Click `Connect to Google Drive`
+    * Second pop up window: Choose the Google account within which you copied the `STREAMLINE-main` folder from the available list.
+    * Third pop up window: Scroll down and select `Allow`.
 
 16. Note: At this point the notebook will do the following automatically:
     1. Reserve a limited amount of free memory (RAM) and disk space on Google Cloud.
@@ -222,35 +222,36 @@ Follow the steps below to get the pipeline running on the demonstration datasets
     2. Mount your google drive (so it can access the STREAMLINE run files and export output files to it).
     3. Load the individual STREAMLINE run files into memory.
     4. Install all other necessary python packages not already available in Anaconda3 (which is preloaded in the Google Colaboratory Environment).
-    5. Run the entirety of STREAMLINE on the [demonstration datasets](#demonstration-data) folder (i.e. 'DemoData').
+    5. Run the entirety of STREAMLINE on the [demonstration datasets](#demonstration-data) folder (i.e. `DemoData`).
         * Note: all 5 steps should take approximately 3-5 minutes to run.
+    6. Save all output files to `My Drive/STREAMLINE-main/Colab_Output/hcc_demo`
 
 ### Inspecting your first run
 During or after the notebook runs, users can inspect the individual code and text (i.e. markdown) cells of the notebook. Individual cells can be collapsed or expanded by clicking on the small arrowhead on the left side of each cell. The first set of cells set up the coding environment automatically. Later cells are used to set the pipeline run parameters and then run the 11 phases of the pipeline in sequence. Some cells will display output figures generated by STREAMLINE. For example, scroll down to 'Phase 6: Statistics' and open the cell below the text 'Run Statistics Summary and Figure Generation'. Scrolling down this cell will first reveal the run commands calling relevant STREAMLINE code, then the figures generated by this phase. Note that to save runtime, this demonstration run is only applying three ML modeling algorithms: Naive Bayes, Logistic Regression, and Decision Trees.  These are typically the three fastest algorithms available in STREAMLINE.
 
-Outside of the notebook, navigate back to your Google Drive and reopen the folder: 'STREAMLINE-main/Colab_Output'. You should find the saved experiment folder that was output by the run, called 'hcc_demo'. Within this folder you should find the following:
+Outside of the notebook, navigate back to your Google Drive and reopen the folder: `My Drive/STREAMLINE-main/Colab_Output`. You should find the saved experiment folder that was output by the run, called `hcc_demo`. Within this folder you should find the following:
 
-* 'hcc_demo_ML_Pipeline_Report.pdf' [File]: This is an automatically formatted PDF summarizing key findings during the model training and evaluation. A great place to start!
-* 'metadata.csv' [File]: Another way to view the STREAMLINE parameters used by the pipeline.  These are also organized on the first page of the PDF report.
-* 'metadata.pickle' [File]: A binary 'pickle' file of the metadata for easy loading by the 11 pipeline phases detailed in [Code Orientation](#code-orientation). (For more experienced users)
-* 'algInfo.pickle' [File]: A binary 'pickle' file including a dictionary indicating which ML algorithms were used, along with abbreviations of names for figures/filenames, and colors to use for each algorithm in figures. (For more experienced users)
-* 'DatasetComparisons' [Folder]: Containing figures and statistical significance comparisons between the two datasets that were analyzed with STREAMLINE. (This folder only appears if more than one dataset was included in the user specified data folder, i.e. 'data_path' and phase 7 of STREAMLINE was run). Within the PDF summary, each dataset is assigned an abbreviated designation of 'D#' (e.g. D1, D2, etc) based on the alphabetical order of each dataset name. These designations are used in some of the files included within this folder.
-* [Folders] - A folder for each of the two datasets analyzed (in this demo there were two: hcc-data_example and hcc-data_example_no_covariates). These folders include all results and models respective to each dataset. We summarize the contents of each folder below (feel free to skip this for now and revisit it as needed)...
-    * 'exploratory' [Folder]: Includes all exploratory analysis summaries and figures.
-    * 'CVDatasets' [Folder]: Includes all individual training and testing datasets (as .csv files) generated.
+* `hcc_demo_ML_Pipeline_Report.pdf` [File]: This is an automatically formatted PDF summarizing key findings during the model training and evaluation. A great place to start!
+* `metadata.csv` [File]: Another way to view the STREAMLINE parameters used by the pipeline.  These are also organized on the first page of the PDF report.
+* `metadata.pickle` [File]: A binary 'pickle' file of the metadata for easy loading by the 11 pipeline phases detailed in [Code Orientation](#code-orientation). (For more experienced users)
+* `algInfo.pickle` [File]: A binary 'pickle' file including a dictionary indicating which ML algorithms were used, along with abbreviations of names for figures/filenames, and colors to use for each algorithm in figures. (For more experienced users)
+* `DatasetComparisons` [Folder]: Containing figures and statistical significance comparisons between the two datasets that were analyzed with STREAMLINE. (This folder only appears if more than one dataset was included in the user specified data folder, i.e. `data_path`, and phase 7 of STREAMLINE was run). Within the PDF summary, each dataset is assigned an abbreviated designation of 'D#' (e.g. D1, D2, etc) based on the alphabetical order of each dataset name. These designations are used in some of the files included within this folder.
+* [Folders] - A folder for each of the two datasets analyzed (in this demo there were two: `hcc-data_example` and `hcc-data_example_no_covariates`). These folders include all results and models respective to each dataset. We summarize the contents of each folder below (feel free to skip this for now and revisit it as needed)...
+    * `exploratory` [Folder]: Includes all exploratory analysis summaries and figures.
+    * `CVDatasets` [Folder]: Includes all individual training and testing datasets (as .csv files) generated.
         * Note: These are the datasets passed to modeling so if imputation and scaling was conducted, these datasets will have been partitioned, imputed, and scaled.
-    * 'scale_impute' [Folder]: Includes all pickled files preserving how scaling and/or imputation was conducted based on respective training datasets.
-    * 'feature_selection' [Folder]: Includes feature importance and selection summaries and figures.
-    * 'models' [Folder]: Includes the ML algorithm hyperparameters selected by Optuna for each CV partition and modeling algorithm, as well as pickled files storing all models for future use.
-    * 'model_evaluation' [Folder]: Includes all model evaluation results, summaries, figures, and statistical comparisons.
-    * 'applymodel' [Folder]: Includes all model evaluation results when applied to a hold out replication datasets. This includes a new PDF summary of models when applied to this further hold-out dataset.
-        * Note: In the demonstration analysis we only created and 'applied' a replication dataset for 'hcc-data_example'. Therefore this folder only appears in output folder for 'hcc-data_example'.
-    * 'runtimes.csv' [File]: Summary file giving the total runtimes spent on each phase or ML modeling algorithm in STREAMLINE.
+    * `scale_impute` [Folder]: Includes all pickled files preserving how scaling and/or imputation was conducted based on respective training datasets.
+    * `feature_selection` [Folder]: Includes feature importance and selection summaries and figures.
+    * `models` [Folder]: Includes the ML algorithm hyperparameters selected by Optuna for each CV partition and modeling algorithm, as well as pickled files storing all models for future use.
+    * `model_evaluation` [Folder]: Includes all model evaluation results, summaries, figures, and statistical comparisons.
+    * `applymodel` [Folder]: Includes all model evaluation results when applied to a hold out replication datasets. This includes a new PDF summary of models when applied to this further hold-out dataset.
+        * Note: In the demonstration analysis we only created and applied a replication dataset for `hcc-data_example`. Therefore this folder only appears in output folder for `hcc-data_example`.
+    * `runtimes.csv` [File]: Summary file giving the total runtimes spent on each phase or ML modeling algorithm in STREAMLINE.
 
 ### Running STREAMLINE on your own dataset(s)
 This section explains how to update the Google Colaboratory Notebook to run on one or more user specified datasets rather than the [demonstration datasets](#demonstration-data). This instructions are effectively the same for running STREAMLINE from Jupyter Notebook. Note that, for brevity, the parameter names given below are slightly different from the argument identifiers when using STREAMLINE from the command-line (see [here](#phase-details-run-parameters-and-additional-examples)).
 
-1. Within your STREAMLINE-main folder on Google Drive, add, or copy in a new folder, that has no spaces in it's name (e.g. my_data)
+1. Within your `STREAMLINE-main` folder on Google Drive, add, or copy in a new folder, that has no spaces in it's name (e.g. `my_data`)
 2. Place 1 or more 'target' datasets in this folder following these requirements:
     * Files are in comma-separated format with extension '.txt' or '.csv' format.
     * Missing data values should be empty or indicated with an 'NA'.
@@ -258,34 +259,34 @@ This section explains how to update the Google Colaboratory Notebook to run on o
     * Data columns should only include features (i.e. independant variables), a class label, and [optionally] instance (i.e. row) labels, and/or match labels (if matched cross validation will be used).
     * Binary class values are encoded as 0 (e.g. negative), and 1 (positive) with respect to true positive, true negative, false positive, false negative metrics. PRC plots focus on classification of 'positives'.
     * All feature values (both categorical and quantitative) are numerically encoded (i.e. no letters or words). Scikit-learn does not accept text-based values.
-        * However both instance_label and match_label values may be either numeric or text.
-    * Place all datasets to be analyzed simultaneously into the new folder created above (e.g. my_data).
-        * If multiple datasets are being analyzed they must each have the same class_label (e.g. 'Class'), and (if present) the same instance_label (e.g. 'ID') and match_label (e.g. 'Match_ID').
-3. Open 'STREAMLINE-GoogleColabNotebook.ipynb' in Google Colaboratory.
+        * However both `instance_label` and `match_label` values may be either numeric or text.
+    * Place all datasets to be analyzed simultaneously into the new folder created above (e.g. `my_data`).
+        * If multiple datasets are being analyzed they must each have the same `class_label` (e.g. 'Class'), and (if present), the same `instance_label` (e.g. 'ID') and `match_label` (e.g. 'Match_ID').
+3. Open `STREAMLINE-GoogleColabNotebook.ipynb` in Google Colaboratory.
 4. Scroll down to the 5th code block with the text 'Mandatory Run Parameters for Pipeline' above it.
 5. Update the first 6 pipeline run parameters as such:
-    * demo_run: Change from True to False (Note, this parameter is only used by the notebooks for the demonstration analysis, and is one of the few parameters that use a Boolean rather than string value).
-    * data_path: Change the end of the path from DemoData to the name of your new dataset folder (e.g. "/content/drive/MyDrive/STREAMLINE-main/my_data").
-    * output_path: This can be left 'as-is' or modified to some other folder on your google drive within which to store all STREAMLINE experiments.
-    * experiment_name: Change this to some new unique experiment name (do this each time you want to run a new experiment, either on the same or different dataset(s)), e.g. 'my_first_experiment'.
-    * class_label: Change to the column header indicating the class label in each dataset, e.g. 'Class'.
-    * instance_label: Change to the column header indicating unique instance ID's for each row in the dataset(s), or change to the string 'None' if your dataset does not include instance IDs.
+    * `demo_run`: Change from True to False (Note, this parameter is only used by the notebooks for the demonstration analysis, and is one of the few parameters that use a Boolean rather than string value).
+    * `data_path`: Change the end of the path from DemoData to the name of your new dataset folder (e.g. "/content/drive/MyDrive/STREAMLINE-main/my_data").
+    * `output_path`: This can be left 'as-is' or modified to some other folder on your google drive within which to store all STREAMLINE experiments.
+    * `experiment_name`: Change this to some new unique experiment name (do this each time you want to run a new experiment, either on the same or different dataset(s)), e.g. 'my_first_experiment'.
+    * `class_label`: Change to the column header indicating the class label in each dataset, e.g. 'Class'.
+    * `instance_label`: Change to the column header indicating unique instance ID's for each row in the dataset(s), or change to the string 'None' if your dataset does not include instance IDs.
 6. Specifying replication data run parameters:
     * Scroll down to the 13th code block with the text 'Run Parameters for Phase 10'.
     * If you have a hold out replication dataset (with the same set of columns as one of the original 'target' datasets), you can apply the trained models to this new data for evaluation. If so, update the following run parameters.
-        * rep_data_path: Change the path to point to a different folder on Google Drive that contains one or more replication datasets intended to be applied to one of your original 'target' datasets.
-        * data_path_for_rep: Change to the path+filename of the 'target' dataset used to train the models we wish to apply the replication data to. This will be a specific file from the first dataset folder you created (e.g. my_data)
+        * `rep_data_path`: Change the path to point to a different folder on Google Drive that contains one or more replication datasets intended to be applied to one of your original 'target' datasets.
+        * `data_path_for_rep`: Change to the path+filename of the 'target' dataset used to train the models we wish to apply the replication data to. This will be a specific file from the first dataset folder you created (e.g. `my_data`)
         * Note: The run parameters described so far are the only essential ones to consider when setting up the pipeline to run on new data(sets).
-    * If you don't have a replication dataset simply change 'applyToReplication' to False (boolean value) and ignore the other two run parameters in this code block.
+    * If you don't have a replication dataset simply change `applyToReplication` to False (boolean value) and ignore the other two run parameters in this code block.
 9. [Optional] Update other STREAMLINE run parameters to suit your analysis needs within code blocks 6-14. We will cover some common run parameters to consider here:
-    * cv_partitions: The number of CV training/testing partitions created, and consequently the number of models trained for each ML algorithm. We recommend setting this between 3-10. A larger value will take longer to run but produce more accurate results.
-    * categorical_cutoff: STREAMLINE uses this parameter to automatically determine which features to treat as categorical vs. numeric. If a feature has more than this many unique values, it is considered to be numeric.
+    * `cv_partitions`: The number of CV training/testing partitions created, and consequently the number of models trained for each ML algorithm. We recommend setting this between 3-10. A larger value will take longer to run but produce more accurate results.
+    * `categorical_cutoff`: STREAMLINE uses this parameter to automatically determine which features to treat as categorical vs. numeric. If a feature has more than this many unique values, it is considered to be numeric.
         * Note: Currently, STREAMLINE does NOT automatically apply one-hot-encoding to categorical features meaning that all features will still be treated as numerical during ML modeling. Its currently up to the users decide whether to pre-encode features.  However STREAMLINE does take feature type into account during both the exploratory analysis, data preprocessing, and feature importance phases.
-        * Note: Users can also manually specify which features to treat as categorical or even to point to features in the dataset that should be ignored in the analysis with the parameters ignore_features_path and categorical_feature_path, respectively. For either, instead of the default 'None' setting the user specifies the path to a .csv file including a row of feature names from the dataset that should either be treated as categorical or ignored, respectively.
-    * do_all: Setting this to 'True' will run all ML algorithms available by default, unless a specific do_ALGORITHM parameter is set to 'False' Setting this to 'False' will run no algorithms unless a specific do_ALGORITHM parameter is set to 'True'
-    * do_ALGORITHM: There are 15 possible algorithms use parameters (e.g. do_NB, do_XGB, etc).  Setting any of these to 'True' or 'False' will override the default setting and run or not run that specific algorithm. Any set to 'None' (default setting from command-line) will have its 'True' or 'False' value specified by do_all.
-    * n_trials: Set to a higher value to give Optuna more attempts to optimize hyperparameter settings.
-    * timeout: Set higher to increase the maximum time allowed for Optuna to run the specified N_trials (useful for algorithms that take more time to run)
+        * Note: Users can also manually specify which features to treat as categorical or even to point to features in the dataset that should be ignored in the analysis with the parameters `ignore_features_path` and `categorical_feature_path`, respectively. For either, instead of the default string 'None' setting the user specifies the path to a .csv file including a row of feature names from the dataset that should either be treated as categorical or ignored, respectively.
+    * `do_all`: Setting this to 'True' will run all ML algorithms available by default, unless a specific do_ALGORITHM parameter is set to 'False' Setting this to 'False' will run no algorithms unless a specific do_ALGORITHM parameter is set to 'True'
+    * do_ALGORITHM: There are 15 possible algorithms use parameters (e.g. `do_NB`, `do_XGB`, etc).  Setting any of these to 'True' or 'False' will override the default setting and run or not run that specific algorithm. Any set to 'None' (default setting from command-line) will have its 'True' or 'False' value specified by `do_all`.
+    * `n_trials`: Set to a higher value to give Optuna more attempts to optimize hyperparameter settings.
+    * `timeout`: Set higher to increase the maximum time allowed for Optuna to run the specified `n_trials` (useful for algorithms that take more time to run)
 * Note: There are a number of other run parameter options and we encourage users to read descriptions of each to see what other options are available.
 * Note: Code block 11 (i.e. Hyperparameter Sweep Options for ML Algorithms) includes carefully selected relevant hyperparameter options for each ML algorithm. We advise users to modify these with caution. Further information regarding the hyperparameters for each algorithm are included as commented links within code block 11.
 
@@ -295,25 +296,26 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 2. Run using fewer ML algorithms at once:
     * Naive Bayes, Logistic Regression, and Decision Trees are typically fastest.
     * Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).
-3. Run using a smaller number of CV_partitions.
-4. Run without generating plots (i.e. export_feature_correlations, export_univariate_plots, plot_PRC, plot_ROC, plot_FI_box, plot_metric_boxplots).
-5. In large datasets with missing values set multi_impute to 'False'. This will apply simple 'mean imputation; to numerical features instead.
-6. Set use_TURF as 'False'. However we strongly recommend setting this to 'True' in feature spaces > 10,000 in order to avoid missing feature interactions during feature selection.
-7. Set TURF_pct no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.
-8. Set instance_subset at or below 2000 (speeds up multiSURF feature importance evaluation at potential expense of performance).
-9. Set max_features_to_keep at or below 2000 and filter_poor_features = 'True' (this limits the maximum number of features that can be passed on to ML modeling).
-10. Set training_subsample at or below 2000 (this limits the number of sample used to train particularly expensive ML modeling algorithms). However avoid setting this too low, or ML algorithms may not have enough training instances to effectively learn.
-11. Set n_trials and/or timeout to lower values (this limits the time spent on hyperparameter optimization).
-12. If using eLCS, XCS, or ExSTraCS, set do_lcs_sweep to 'False', iterations at or below 200000, and N at or below 2000.
+3. Run using a smaller number of `cv_partitions`.
+4. Run without generating plots (i.e. `export_feature_correlations`, `export_univariate_plots`, `plot_PRC`, `plot_ROC`, `plot_FI_box`, `plot_metric_boxplots`).
+5. In large datasets with missing values, set `multi_impute` to 'False'. This will apply simple mean imputation to numerical features instead.
+6. Set `use_TURF` as 'False'. However we strongly recommend setting this to 'True' in feature spaces > 10,000 in order to avoid missing feature interactions during feature selection.
+7. Set `TURF_pct` no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.
+8. Set `instance_subset` at or below 2000 (speeds up multiSURF feature importance evaluation at potential expense of performance).
+9. Set `max_features_to_keep` at or below 2000 and `filter_poor_features` = 'True' (this limits the maximum number of features that can be passed on to ML modeling).
+10. Set `training_subsample` at or below 2000 (this limits the number of sample used to train particularly expensive ML modeling algorithms). However avoid setting this too low, or ML algorithms may not have enough training instances to effectively learn.
+11. Set `n_trials` and/or timeout to lower values (this limits the time spent on hyperparameter optimization).
+12. If using eLCS, XCS, or ExSTraCS, set `do_lcs_sweep` to 'False', `iterations` at or below 200000, and `N` at or below 2000.
 
 ### Tips for improving STREAMLINE modeling performance
 * Generally speaking, the more computational time you are willing to spend on ML, the better the results. Doing the opposite of the above tips for reducing runtime, will likely improve performance.
-* In certain situations, turning off feature selection, and relying on the ML algorithms alone to identify relevant features will yield better performance.  However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).
-* Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These 'learning classifier system' (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).
+* In certain situations, `feature_selection` to 'False', and relying on the ML algorithms alone to identify relevant features will yield better performance.  However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).
+* Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These learning classifier system (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).
+* In problems with no noise (i.e. datasets where it is possible to achieve 100% testing accuracy), LCS algorithms (i.e. eLCS, XCS, and ExSTraCS) perform better when `nu` is set larger than 1 (i.e. 5 or 10 recommended).  This applies significantly more pressure for individual rules to achieve perfect accuracy.  In noisy problems this may lead to significant overfitting.
 
 ***
 ## Use Modes 2-4: Standard Installation and Use
-This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2, 3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run)
+This section covers the general installation instructions for all users with basic Python/Environment experience. These instructions are relevant to use modes 2, 3, and 4 (i.e. within Jupyter Notebook, local command-line run, and parallelized linux-based computing cluster run).
 
 ### Prerequisites
 #### Anaconda3
@@ -388,50 +390,50 @@ The base code for STREAMLINE is organized into a series of script phases designe
   * Conducts an initial exploratory analysis of all target datasets to be analyzed and compared
   * Conducts basic data cleaning
   * Conducts k-fold cross validation (CV) partitioning to generate k training and k testing datasets
-  * \[Code]: ExploratoryAnalysisMain.py and ExploratoryAnalysisJob.py
+  * \[Code]: `ExploratoryAnalysisMain.py` and `ExploratoryAnalysisJob.py`
   * \[Runtime]: Typically fast, with the exception of generating feature correlation heatmaps in datasets with a large number of features
 
 * Phase 2: Data Preprocessing
   * Conducts feature transformations (i.e. data scaling) on all CV training datasets individually
   * Conducts imputation of missing data values (missing data is not allowed by most scikit-learn modeling packages) on all CV training datasets individually
   * Generates updated training and testing CV datasets
-  * \[Code]: DataPreprocessingMain.py and DataPreprocessingJob.py
+  * \[Code]: `DataPreprocessingMain.py` and `DataPreprocessingJob.py`
   * \[Runtime]: Typically fast, with the exception of imputing larger datasets with many missing values
 
 * Phase 3: Feature Importance Evaluation
   * Conducts feature importance estimations on all CV training datasets individually
   * Generates updated training and testing CV datasets
-  * \[Code]: FeatureImportanceMain.py and FeatureImportanceJob.py
+  * \[Code]: `FeatureImportanceMain.py` and `FeatureImportanceJob.py`
   * \[Runtime]: Typically reasonably fast, takes more time to run MultiSURF as the number of training instances approaches the default for 'instance_subset', or this parameter set higher in larger datasets
 
 * Phase 4: Feature Selection
   * Applies 'collective' feature selection within all CV training datasets individually
   * Features removed from a given training dataset are also removed from corresponding testing dataset
   * Generates updated training and testing CV datasets
-  * [Code]: FeatureSelectionMain.py and FeatureSelectionJob.py
+  * [Code]: `FeatureSelectionMain.py` and `FeatureSelectionJob.py`
   * [Runtime]: Fast
 
 * Phase 5: Machine Learning Modeling
   * Conducts hyperparameter sweep for all ML modeling algorithms individually on all CV training datasets
   * Conducts 'final' modeling for all ML algorithms individually on all CV training datasets using 'optimal' hyperparameters found in previous step
   * Calculates and saves all evaluation metrics for all 'final' models
-  * \[Code]: ModelMain.py and ModelJob.py
+  * \[Code]: `ModelMain.py` and `ModelJob.py`
   * \[Runtime]: Slowest phase, can be sped up by reducing the set of ML methods selected to run, or deactivating ML methods that run slowly on large datasets
 
 * Phase 6: Statistics Summary
   * Combines all results to generate summary statistics files, generate results plots, and conduct non-parametric statistical significance analyses comparing ML model performance across CV runs
-  * \[Code]: StatsMain.py and StatsJob.py
+  * \[Code]: `StatsMain.py` and `StatsJob.py`
   * \[Runtime]: Moderately fast
 
 * Phase 7: [Optional] Compare Datasets
   * NOTE: Only can be run if the STREAMLINE was run on more than dataset
   * Conducts non-parametric statistical significance analyses comparing separate original 'target' datasets analyzed by pipeline
-  * \[Code]: DataCompareMain.py and DataCompareJob.py
+  * \[Code]: `DataCompareMain.py` and `DataCompareJob.py`
   * \[Runtime]: Fast
 
 * Phase 8: [Optional] Generate PDF Training Summary Report
   * Generates a pre-formatted PDF including all pipeline run parameters, basic dataset information, and key exploratory analyses, ML modeling results, statistical comparisons, and runtime. Will properly format on analyses that include up to 20 datasets (aim to expand this in the future).
-  * \[Code]: PDF_ReportMain.py and PDF_ReportJob.py
+  * \[Code]: `PDF_ReportMain.py` and `PDF_ReportJob.py`
   * \[Runtime]: Moderately fast
 
 * Phase 9: [Optional] Apply Models to Replication Data
@@ -441,28 +443,33 @@ The base code for STREAMLINE is organized into a series of script phases designe
   * Evaluates performance of all models the prepared 'replication' dataset(s)
   * Generates summary statistics files, results plots, and conducts non-parametric statistical significance analyses comparing ML model performance across replications CV data transformations
   * NOTE: feature importance evaluation and 'target' dataset statistical comparisons are irrelevant to this phase
-  * \[Code]: ApplyModelMain.py and ApplyModelJob.py
+  * \[Code]: `ApplyModelMain.py` and `ApplyModelJob.py`
   * \[Runtime]: Moderately fast
 
 * Phase 10: [Optional] Generate PDF 'Apply Replication' Summary Report
   * Generates a pre-formatted PDF including all pipeline run parameters, basic dataset information, and key exploratory analyses, ML modeling results, and statistics.
-  * \[Code]: PDF_ReportMain.py and PDF_ReportJob.py
+  * \[Code]: `PDF_ReportMain.py` and `PDF_ReportJob.py`
   * \[Runtime]: Moderately fast
 
 * Phase 11: [Optional] File Cleanup
   * Deletes files that do not need to be kept following pipeline run.
-  * \[Code]: FileCleanup.py
+  * \[Code]: `FileCleanup.py`
   * \[Runtime]: Fast
 
 ***
 ### Run From Jupyter Notebook
-Here we detail how to run STREAMLINE within the provided Jupyter Notebook named 'STREAMLINE-Notebook.ipypnb'. This included notebook is set up to run on the included [demonstration datasets](#demonstration-data). However users will still need to modify the local folder/file paths in this notebook for it to be able for it to correctly run the demonstration within Jupyter Notebook.
-1. First, ensure all prerequisite packages are installed in your environment and dataset assumptions (above) are satisfied.
-2. Open Jupyter Notebook (info about Jupyter Notebooks here, https://jupyter.readthedocs.io/en/latest/running.html). We recommend opening the 'anaconda prompt' which comes with your anaconda installation.  Once opened, type the command 'jupyter notebook' which will open as a webpage. Navigate to your working directory and open the included jupyter notebook file: 'STREAMLINE-Notebook.ipynb'.
+Here we detail how to run STREAMLINE within the provided Jupyter Notebook named `STREAMLINE-Notebook.ipypnb`. This included notebook is set up to run on the included [demonstration datasets](#demonstration-data). However users will still need to modify the local folder/file paths in this notebook for it to be able for it to correctly run the demonstration within Jupyter Notebook.
+
+1. First, ensure all prerequisite packages are [installed](#prerequisites) in your environment and dataset assumptions ([above](#running-streamline-on-your-own-datasets)) are satisfied.
+
+2. Open Jupyter Notebook (info about Jupyter Notebooks here, https://jupyter.readthedocs.io/en/latest/running.html). We recommend opening the 'anaconda prompt' which comes with your anaconda installation.  Once opened, type the command `jupyter notebook` which will open as a webpage. Navigate to your working directory and open the included jupyter notebook file: `STREAMLINE-Notebook.ipynb`.
+
 3. Scroll down to the second code block of the notebook below the header 'Mandatory Parameters to Update' and update the following run parameters to reflect paths on your PC.
-    * data_path: Change the path so it reflects the location of the 'DemoData' folder (within the STREAMLINE folder) on your PC, e.g. "C:/Users/ryanu/Documents/GitHub/STREAMLINE/DemoData".
-    * output_path: Change the path to specify the desired location for the STREAMLINE output experiment folder.
-4. Click 'Kernel' on the Jupyter notebook GUI, and select 'Restart & Run All' to run the script.  
+    * `data_path`: Change the path so it reflects the location of the `DemoData` folder (within the STREAMLINE folder) on your PC, e.g. `C:/Users/ryanu/Documents/GitHub/STREAMLINE/DemoData`.
+    * `output_path`: Change the path to specify the desired location for the STREAMLINE output experiment folder.
+
+4. Click `Kernel` on the Jupyter notebook GUI, and select `Restart & Run All` to run the script.  
+
 5. Running the included [demonstration datasets](#demonstration-data) with the pre-specified notebook run parameters, should only take a 3-5 minutes depending on your PC hardware.
     * Note: It may take several hours or more to run this notebook in other contexts. Parameters that impact runtimes are discussed in [this section](#tips-for-reducing-streamline-runtime) above. We recommend users with larger analyses to use a computing cluster if possible.
 
@@ -508,7 +515,7 @@ python FileCleanup.py --out-path /myoutputpath --exp-name hcc_demo
 ```
 
 #### Computing Cluster Run (Parallelized) Example
-Below we give the same set of STREAMLINE run commands, however in each, the run parameter --run-parallel is left to its default value of 'True'. This will submit jobs to an LSF job scheduler. Note that the last phase, 'FileCleanup' will run on the head node, and is not submitted as a job.
+Below we give the same set of STREAMLINE run commands, however in each, the run parameter `--run-parallel` is left to its default value of 'True'. This will submit jobs to an LSF job scheduler. Note that the last phase, `FileCleanup.py` will run on the head node, and is not submitted as a job.
 ```
 python ExploratoryAnalysisMain.py --data-path /mydatapath/STREAMLINE/DemoData --out-path /myoutputpath --exp-name hcc_demo --inst-label InstanceID --class-label Class
 
@@ -534,18 +541,18 @@ python FileCleanup.py --out-path /myoutputpath --exp-name hcc_demo
 ```
 
 ### Checking Phase Completion
-After running any of Phases 1-10 a 'phase-complete' file is automatically generated for each job run locally or in parallel.  Users can confirm that all jobs for that phase have been completed by running the phase command again, this time with the argument '-c'. Any incomplete jobs will be listed, or an indication of successful completion will be returned.
+After running any of Phases 1-10 a 'phase-complete' file is automatically generated for each job run locally or in parallel.  Users can confirm that all jobs for that phase have been completed by running the phase command again, this time with the argument `-c`. Any incomplete jobs will be listed, or an indication of successful completion will be returned.
 
-For example, after running ModelMain.py, the following command can be given to check whether all jobs have been completed.
+For example, after running `ModelMain.py`, the following command can be given to check whether all jobs have been completed.
 ```
-python ModelMain.py --out-path /myoutputpath/output --exp-name hcc_test -c
+python ModelMain.py --out-path /myoutputpath --exp-name hcc_test -c
 ```
 
 ### Phase Details (Run Parameters and Additional Examples)
-Here we review the run parameters available for each of the 11 phases and provide some additional run examples. The additional examples illustrate how to flexibly adapt STREAMLINE to user needs. All examples below assume that class and instance labels set to default values for simplicity. Run parameters that are necessary to set are marked as 'MANDATORY' under 'default'.
+Here we review the run parameters available for each of the 11 phases and provide some additional run examples. We remind users that the parameter names described for the above notebooks sometimes different than the argument names when using STREAMLINE from the command-line (for brevity). The additional examples illustrate how to flexibly adapt STREAMLINE to user needs. All examples below assume that class and instance labels set to default values for simplicity. Run parameters that are necessary to set are marked as 'MANDATORY' under 'Default Value'.
 
 #### Phase 1: Exploratory Analysis
-Run parameters for ExploratoryAnalysisMain.py:
+Run parameters for `ExploratoryAnalysisMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -573,23 +580,23 @@ Run parameters for ExploratoryAnalysisMain.py:
 ##### Example: Data with instances matched by one or more covariates
 Run on dataset with a match label (i.e. a column that identifies groups of instances matched by one or more covariates to remove their effect). Here we specify the use of matched CV partitioning and indicate the column label including the matched instance group identifiers. All instances with the same unique identifier in this column are assumed to be a part of a matched group, and are kept together within a given data partition.
 ```
-python ExploratoryAnalysisMain.py --data-path /mydatapath/MatchData --out-path /myoutputpath/output --exp-name match_test --part M --match-label MatchGroups
+python ExploratoryAnalysisMain.py --data-path /mydatapath/STREAMLINE/MyMatchedData --out-path /myoutputpath --exp-name my_match_test --part M --match-label MyMatchGroups
 ```
 
 ##### Example: Ignore specified feature columns in data
 A convenience for running the analysis, but ignoring one or more feature columns that were originally included in the dataset.  
 ```
-python ExploratoryAnalysisMain.py --data-path /mydatapath/TestData --out-path /myoutputpath/output --exp-name hcc_test --fi /mydatapath/ignoreFeatureList.csv
+python ExploratoryAnalysisMain.py --data-path /mydatapath/STREAMLINE/MyDataFolder --out-path /myoutputpath --exp-name hcc_test --fi /someOtherPath/ignoreFeatureList.csv
 ```
 
 ##### Example: Specify features to treat as categorical
-By default STREAMLINE uses the --cat-cutoff parameter to try and automatically decide what features to treat as categorical (i.e. are there < 10 unique values in the feature column) vs. continuous valued. With this option the user can specify the list of feature names to explicitly treat as categorical. Currently this only impacts the exploratory analysis as well as the imputation in data preprocessing. The identification of categorical variables within STREAMLINE has no impact on ML modeling.
+By default STREAMLINE uses the `--cat-cutoff` parameter to try and automatically decide what features to treat as categorical (i.e. are there < 10 unique values in the feature column) vs. continuous valued. With this option the user can specify the list of feature names to explicitly treat as categorical. Currently this only impacts the exploratory analysis as well as the imputation in data preprocessing. The identification of categorical variables within STREAMLINE has no impact on ML modeling.
 ```
-python ExploratoryAnalysisMain.py --data-path /mydatapath/TestData --out-path /myoutputpath/output --exp-name hcc_test --cf /mydatapath/categoricalFeatureList.csv
+python ExploratoryAnalysisMain.py --data-path /mydatapath/STREAMLINE/MyDataFolder --out-path /myoutputpath --exp-name hcc_test --cf /someOtherPath/categoricalFeatureList.csv
 ```
 
 #### Phase 2: Data Preprocessing
-Run parameters for DataPreprocessingMain.py:
+Run parameters for `DataPreprocessingMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -606,7 +613,7 @@ Run parameters for DataPreprocessingMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 3: Feature Importance Evaluation
-Run parameters for FeatureImportanceMain.py:
+Run parameters for `FeatureImportanceMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -625,7 +632,7 @@ Run parameters for FeatureImportanceMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 4: Feature Selection
-Run parameters for FeatureSelectionMain.py:
+Run parameters for `FeatureSelectionMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -643,7 +650,7 @@ Run parameters for FeatureSelectionMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 5: Machine Learning Modeling
-Run parameters for ModelMain.py:
+Run parameters for `ModelMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -686,29 +693,29 @@ Run parameters for ModelMain.py:
 ##### Example: Run only one ML modeling algorithm
 By default STREAMLINE runs all ML modeling algorithms. If the user only wants to run one (or a small number) of these algorithms, they can run the following command first turning all algorithms off, then specifying the ones to activate. In this example we only run random forest. Other algorithms could be specified as True here to run them as well.
 ```
-python ModelMain.py --out-path /myoutputpath/output --exp-name hcc_test --do-all False --do-RF True
+python ModelMain.py --out-path /myoutputpath --exp-name hcc_test --do-all False --do-RF True
 ```
 
-##### Example: Utilize the same model feature importance estimation for all algorithms
-By default STREAMLINE uses any feature importance estimation that may already be available for a given algorithm.  However, Naive Bayes, Support Vector Machines (for non-linear kernels), ANN, and k-NN do not have such built in estimates. By default, these instead estimate model feature importances using a permutation-based estimator. However, to more consistently compare feature importance scores across algorithms, the user may wish to apply the permutation-based estimator uniformly across all algorithms. This is illustrated in the following example:
+##### Example: Utilize built-in algorithm feature importance estimates when available
+By default STREAMLINE uniformly applies scikit-learn's permutation feature importance estimator to all ML modeling algorithms. However a number of algorithms offer built in strategies for feature importance estimation (that can differ for each algorithm). Naive Bayes, Support Vector Machines (for non-linear kernels), ANN, and k-NN do not have such built in estimates. By setting `--use-uniformFI` to 'False', any algorithm that can return internally determined feature importance estimates will be used instead of the default permutation feature importance estimate. Generally, to more consistently compare feature importance scores across algorithms, we recommend users apply the default permutation-based estimator uniformly across all algorithms. However the example below shows how to turn this off:
 ```
-python ModelMain.py --out-path /myoutputpath/output --exp-name hcc_test --use-uniformFI True
+python ModelMain.py --out-path /myoutputpath --exp-name hcc_test --use-uniformFI True
 ```
 
 ##### Example: Specify an alternative primary evaluation metric
-By default STREAMLINE uses balanced accuracy as it's primary evaluation metric for both hyperparameter optimization and permutation-based model feature importance evaluation. However any classification metrics defined by scikit-learn (see https://scikit-learn.org/stable/modules/model_evaluation.html) could be used instead.  We chose balanced accuracy because it equally values accurate prediction of both 'positive' and 'negative' classes, and accounts for class imbalance. In this example we change this metric to the F1 score.
+By default STREAMLINE uses balanced accuracy as it's primary evaluation metric for both hyperparameter optimization and permutation-based model feature importance evaluation. However any classification metrics defined by scikit-learn (see https://scikit-learn.org/stable/modules/model_evaluation.html) could be used instead.  We chose balanced accuracy as the default because it equally values accurate prediction of both 'positive' and 'negative' classes, accounting for class imbalance. In this example illustrate how a user could change this primary metric to the F1 score.
 ```
-python ModelMain.py --out-path /myoutputpath/output --exp-name hcc_test --metric f1
+python ModelMain.py --out-path /myoutputpath --exp-name hcc_test --metric f1
 ```
 
 ##### Example: Reduce computational burden of algorithms that run slow in large instance spaces
-By default STREAMLINE uses all available training instances to train each specified ML algorithm. However XGB, SVM, ANN, and k-NN can run very slowly when the number of training instances is very large. To be able to run these algorithms in a reasonable amount of time this pipeline includes the option to specify a random (class-balance-preserved) subset of the training instances upon which to train. In this example we set this training sample to 2000. This will only be applied to the 4 aformentioned algorithms.  All others will still train on the entire training set.
+By default STREAMLINE uses all available training instances to train each specified ML algorithm. However XGB, SVM, ANN, k-NN and GP, can run very slowly when the number of training instances is very large. To be able to run these algorithms in a reasonable amount of time this pipeline includes the option to specify a random (class-balance-preserved) subset of the training instances upon which to train. In this example we set this training sample to 2000. This will only be applied to the 5 aforementioned algorithms.  All others will still train on the entire training set.
 ```
-python ModelMain.py --out-path /myoutputpath/output --exp-name hcc_test --subsample 2000
+python ModelMain.py --out-path /myoutputpath --exp-name hcc_test --subsample 2000
 ```
 
 #### Phase 6: Statistics Summary
-Run parameters for StatsMain.py:
+Run parameters for `StatsMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -727,7 +734,7 @@ Run parameters for StatsMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 7: [Optional] Compare Datasets
-Run parameters for DataCompareMain.py:
+Run parameters for `DataCompareMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -740,7 +747,7 @@ Run parameters for DataCompareMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 8: [Optional] Generate PDF Training Summary Report
-Run parameters for PDF_ReportTrainMain.py:
+Run parameters for `PDF_ReportMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -754,7 +761,7 @@ Run parameters for PDF_ReportTrainMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 9: [Optional] Apply Models to Replication Data
-Run parameters for ApplyModelMain.py:
+Run parameters for `ApplyModelMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -774,7 +781,8 @@ Run parameters for ApplyModelMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 10: [Optional] Generate PDF 'Apply Replication' Summary Report
-Run parameters for PDF_ReportApplyMain.py:
+Note that this phase uses the same script as phase 8 but requires specifying three additional parameters `--training`, `--rep-path`, and `--dataset` so that a report geared towards applying new data to pre-trained models is generated instead.
+Run parameters for `PDF_ReportMain.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -790,7 +798,7 @@ Run parameters for PDF_ReportApplyMain.py:
 | -c | Boolean: Specify whether to check for existence of all output files | Stores False |
 
 #### Phase 11: [Optional] File Cleanup
-Run parameters for FileCleanup.py:
+Run parameters for `FileCleanup.py`:
 
 | Argument | Description | Default Value |
 |:-------- |:---------------------  | ----------- |
@@ -802,7 +810,7 @@ Run parameters for FileCleanup.py:
 ***
 # Other Guidelines for STREAMLINE Use
 * SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
-* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise 'use_uniform_FI' should be True.
+* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise `use_uniform_FI` should be True.
 
 ***
 # Unique Characteristics of STREAMLINE
@@ -821,9 +829,8 @@ Run parameters for FileCleanup.py:
 * Includes 3 rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS (to run optionally). These 'learning classifier systems' have been demonstrated to be able to detect complex associations while providing human interpretable models in the form of IF:THEN rule-sets. The ExSTraCS algorithm was developed by our research group to specifically handle the challenges of scalability, noise, and detection of epistasis and genetic heterogeneity in biomedical data mining.  
 * Utilizes the 'optuna' package to conduct automated Bayesian hyperparameter optimization during modeling (and optionally outputs plots summarizing the sweep).
 * We have sought to specify a comprehensive range of relevant hyperparameter options for all included ML algorithms.
-* Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS) These can be used in place of permutation feature importance estimates using the parameter 'use_uniform_FI'.
-* All other algorithms (NB,SVM,ANN,k-NN) estimate feature importance using permutation feature importance.
-* The pipeline includes the option to apply permutation feature importance estimation uniformly (i.e. for all algorithms) by setting the 'use_uniform_FI' parameter to 'True'.
+* Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS) These can be used in place of permutation feature importance estimates by setting the parameter `use_uniform_FI` to 'False'.
+* All other algorithms rely on estimating feature importance using permutation feature importance.
 * All models are evaluated, reporting 16 classification metrics: Accuracy, Balanced Accuracy, F1 Score, Sensitivity(Recall), Specificity, Precision (PPV), True Positives (TP), True Negatives (TN), False Positives (FP), False Negatives (FN), Negative Predictive Value (NPV), Likeliehood Ratio + (LR+), Likeliehood Ratio - (LR-), ROC AUC, PRC AUC, and PRC APS.
 * All models are saved as 'pickle' files so that they can be loaded and reapplied in the future.
 * Outputs ROC and PRC plots for each ML modeling algorithm displaying individual n-fold CV runs and average the average curve.
@@ -834,40 +841,42 @@ Run parameters for FileCleanup.py:
 * Collects run-time information on each phase of the pipeline and for the training of each ML algorithm model.
 * For each dataset, Kruskall-Wallis and subsequent pairwise Mann-Whitney U-Tests evaluates statistical significance of ML algorithm modeling performance differences for all metrics.
 * The same statistical tests (Kruskall-Wallis and Mann-Whitney U-Test) are conducted comparing datasets using the best performing modeling algorithm (for a given metric and dataset).
+* Outputs boxplots comparing performance of multiple datasets analyzed either across CV runs of a single algorithm and metric, or across average for each algorithm for a single metric.
 * A formatted PDF report is automatically generated giving a snapshot of all key pipeline results.
 * A script is included to apply all trained (and 'pickled') models to an external replication dataset to further evaluate model generalizability. This script (1) conducts an exploratory analysis of the new dataset, (2) uses the same scaling, imputation, and feature subsets determined from n-fold cv training, yielding 'n' versions of the replication dataset to be applied to the respective models, (3) applies and evaluates all models with these respective versions of the replication data, (4) outputs the same set of aforementioned boxplots, ROC, and PRC plots, and (5) automatically generates a new, formatted PDF report summarizing these applied results.
+* A collection of `UsefulNotebooks` described in the next section offers even more functionality following the initial pipeline run.
 
 ***
 # Do Even More with STREAMLINE
-The STREAMLINE repository includes a folder called 'UsefulNotebooks'.  This set of notebooks are designed to operate on a previously run STREAMLINE experiment output folder. They open this folder and generate additional materials outside of the main analysis pipeline.  We review these notebooks below:
-1. AccessingPickledMetricsAndPredictionProbabilities.ipynb: Gives a demonstration of how users can easily access all pickled metrics from the analysis, and also generates new files within respective 'model_evaluation' folders including case (i.e. class 1) probabilities for all testing data instances for each model.
-2. CompositeFeatureImportancePlots.ipynb: Offers users the ability to regenerate composite feature importance plots to their own specifications for publication.
-3. GenerateModelFeatureImportanceHeatmap.ipynb: Allows users to generate a web-based interactive heatmap illustrating model feature importance ranks across all ML algorithms.
-4. ModelDecisionThresholdTestEval.ipynb: Allows users to recalculate all testing evaluation metrics for models using an alternative decision threshold.
-5. ModelDecisionThresholdTrainEval.ipynb: Allows users to view and/or recalculate all training evaluation metrics for models using an alternative decision threshold.
-6. ModelDecisionThresholdView.ipynb: Allows users to generate an interactive slider within Jupyter Notebook to examine the impact of different decision thresholds on a given model trained by the pipeline.
-7. ModelViz_DT_GP.ipynb: Allows users to generate directly interpretable visualizations of any decision tree or genetic programming models trained by the pipeline.
-8. ReportingAppliedPredictionProbabilities.ipynb: Allows users to recalculate all testing evaluation metrics for models using an alternative decision threshold (on the applied, rather than original 'target' datasets).
-9. ROC_PRC_Plots.ipynb: Offers users the ability to regenerate ROC and PRC Plots to their own specifications for publication.
+The STREAMLINE repository includes a folder called `UsefulNotebooks`.  This set of notebooks are designed to operate on a previously run STREAMLINE experiment output folder. They open this folder and generate additional materials outside of the main analysis pipeline.  We review these notebooks below:
+1. `AccessingPickledMetricsAndPredictionProbabilities.ipynb`: Gives a demonstration of how users can easily access all pickled metrics from the analysis, and also generates new files within respective `model_evaluation` folders including case (i.e. class 1) probabilities for all testing data instances for each model.
+2. `CompositeFeatureImportancePlots.ipynb`: Offers users the ability to regenerate composite feature importance plots to their own specifications for publication.
+3. `GenerateModelFeatureImportanceHeatmap.ipynb`: Allows users to generate a web-based interactive heatmap illustrating model feature importance ranks across all ML algorithms.
+4. `ModelDecisionThresholdTestEval.ipynb`: Allows users to recalculate all testing evaluation metrics for models using an alternative decision threshold.
+5. `ModelDecisionThresholdTrainEval.ipynb`: Allows users to view and/or recalculate all training evaluation metrics for models using an alternative decision threshold.
+6. `ModelDecisionThresholdView.ipynb`: Allows users to generate an interactive slider within Jupyter Notebook to examine the impact of different decision thresholds on a given model trained by the pipeline.
+7. `ModelViz_DT_GP.ipynb`: Allows users to generate directly interpretable visualizations of any decision tree or genetic programming models trained by the pipeline.
+8. `ReportingAppliedPredictionProbabilities.ipynb`: Allows users to recalculate all testing evaluation metrics for models using an alternative decision threshold (on the applied, rather than original 'target' datasets).
+9. `ROC_PRC_Plots.ipynb`: Offers users the ability to regenerate ROC and PRC Plots to their own specifications for publication.
 
 ***
 # Demonstration data
-Included with this pipeline is a folder named 'DemoData' including two small datasets used as a demonstration of pipeline efficacy. New users can easily run the included jupyter notebook 'as-is', and it will be run automatically on these datasets. The first dataset 'hcc-data_example.csv' is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. It includes 165 instances, 49 fetaures, and a binary class label. It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).  To illustrate how STREAMLINE can be applied to more than one dataset at once, we created a second dataset from this HCC dataset called 'hcc-data_example_no_covariates.csv', which is the same as the first but we have removed two covariates, i.e. Age at Diagnosis, and Gender.
+Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of pipeline efficacy. New users can easily run the included jupyter notebook 'as-is', and it will be run automatically on these datasets. The first dataset `hcc-data_example.csv` is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. It includes 165 instances, 49 fetaures, and a binary class label. It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).  To illustrate how STREAMLINE can be applied to more than one dataset at once, we created a second dataset from this HCC dataset called `hcc-data_example_no_covariates.csv`, which is the same as the first but we have removed two covariates, i.e. `Age at Diagnosis`, and `Gender`.
 
-Furthermore, to demonstrate how STREAMLINE-trained models may be applied to new data in the future through the phase 9 'ApplyModel' we have simply added a copy of 'hcc-data_example.csv', renamed as 'hcc-data_example_rep.csv' to the folder 'DemoRepData'. While this is not a true replication dataset (as none was available for this example) it does illustrate the functionality of 'ApplyModel'. Since the cross validation (CV)-trained models are being applied to all of the original target data, the 'ApplyModel' results in this demonstration are predictably overfit.  When applying trained models to a true replication dataset model prediction performance is generally expected to be as good or less well performing than the individual testing evaluations completed for each CV model.
+Furthermore, to demonstrate how STREAMLINE-trained models may be applied to new data in the future through the phase 9 `ApplyModel.py` we have simply added a copy of `hcc-data_example.csv`, renamed as `hcc-data_example_rep.csv` to the folder `DemoRepData`. While this is not a true replication dataset (as none was available for this example) it does illustrate the functionality of `ApplyModel`. Since the cross validation (CV)-trained models are being applied to all of the original target data, the `ApplyModel.py` results in this demonstration are predictably overfit.  When applying trained models to a true replication dataset model prediction performance is generally expected to be as good or less well performing than the individual testing evaluations completed for each CV model.
 
 ***
 # Troubleshooting
 
 ## Rerunning a failed modeling job
-If for some reason a ModelJob.py job fails, or must be stopped because it's taking much longer than expected, we have implemented a run parameter (-r) in ModelMain.py allowing the user to only rerun those failed/stopped jobs rather than the entire modeling phase. After using -c to confirm that some jobs have not completed, the user can instead use the -r command to search for missing jobs and rerun them. Note that a new random seed or a more limited hyperparameter range may be needed for a specific modeling algorithm to resolve job failures or overly long runs (see below).
+If for some reason a `ModelJob.py` job fails, or must be stopped because it's taking much longer than expected, we have implemented a run parameter `-r` in `ModelMain.py` allowing the user to only rerun those failed/stopped jobs rather than the entire modeling phase. After using `-c` to confirm that some jobs have not completed, the user can instead use the `-r` command to search for missing jobs and rerun them. Note that a new random seed or a more limited hyperparameter range may be needed for a specific modeling algorithm to resolve job failures or overly long runs (see below).
 
 ## Unending modeling jobs
-One known issue is that the Optuna hyperparameter optimization does not have a way to kill a specific hyperparameter trial during optimization.  The 'timeout' option does not set a global time limit for hyperparameter optimization, i.e. it won't stop a trial in progress once it's started. The result is that if a specific hyperparameter combination takes a very long time to run, that job will run indefinitely despite going past the 'timeout' setting. There are currently two recommended ways to address this.
+One known issue is that the Optuna hyperparameter optimization does not have a way to kill a specific hyperparameter trial during optimization.  The `timeout` option does not set a global time limit for hyperparameter optimization, i.e. it won't stop a trial in progress once it's started. The result is that if a specific hyperparameter combination takes a very long time to run, that job will run indefinitely despite going past the `timeout` setting. There are currently two recommended ways to address this.
 
-First, try to kill the given job(s) and use the -r command for ModelMain.py.  When using this command, a different random seed will automatically which can resolve the run completion, but will impact perfect reproducibility of the results.
+1. Try to kill the given job(s) and use the `-r` command for `ModelMain.py`.  When using this command, a different random seed will automatically which can resolve the run completion, but will impact perfect reproducibility of the results.
 
-Second, go into the code in ModelJob.py and limit the hyperparameter ranges specified (or do this directly in the jupyter notebook if running from there).  Specifically eliminate possible hyperparameter combinations that might lead the hyperparameter sweep to run for a very long time (i.e. way beyond the 'timeout' parameter).
+2. Go into the code in `ModelJob.py` and limit the hyperparameter ranges specified (or do this directly in the jupyter notebook if running from there).  Specifically eliminate possible hyperparameter combinations that might lead the hyperparameter sweep to run for a very long time (i.e. way beyond the `timeout` parameter).
 
 ***
 # Development notes
@@ -890,6 +899,10 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
 * Shapley value calculation and visualizations
 * Create ensemble model from all trained models which can then be evaluated on hold out replication data
 * Expand available model visualization opportunities for model interpretation
+* Improve Catboost implementation:
+    * Allow it to use internal feature importance estimates as an option
+    * Give it the list of features to be treated as categorical
+* New `UsefulNotebooks` providing even more post-run data visualizations and customizations
 
 ### Algorithmic extensions
 * Addition of other ML modeling algorithm options
