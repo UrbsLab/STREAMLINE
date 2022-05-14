@@ -37,7 +37,7 @@ This schematic breaks the overall pipeline down into 4 basic components: (1) pre
         * [Running STREAMLINE on your own dataset(s)](#running-streamline-on-your-own-datasets)
         * [Tips for reducing STREAMLINE runtime](#tips-for-reducing-streamline-runtime)
         * [Tips for improving STREAMLINE modeling performance](#tips-for-improving-streamline-modeling-performance)
-    * [Use Modes 2-4: Standard Installation and Use](#use-modes-24-standard-installation-and-use)
+    * [Use Modes 2-4: Standard Installation and Use](#use-modes-2-4-standard-installation-and-use)
         * [Prerequisites](#prerequisites)
             * [Summary of additional required packages](#summary-of-additional-required-packages)
         * [Download STREAMLINE](#download-streamline)
