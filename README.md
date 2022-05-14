@@ -178,7 +178,7 @@ This is the easiest but most limited way to run STREAMLINE. These instructions a
 * To learn more about Google Colaboratory prior to setup please visit the following link: https://research.google.com/colaboratory/
 
 ### Setting up your first run
-Follow the steps below to get the pipeline running on the [demonstration datasets](#demonstration-data). In summary, they detail the process of copying the STREAMLINE GitHub repository to your Google Drive, and running the notebook called `STREAMLINE-GoogleColabNotebook.ipynb` with Google Colaboratory.
+Follow the steps below to get STREAMLINE running on the [demonstration datasets](#demonstration-data). In summary, they detail the process of copying the STREAMLINE GitHub repository to your Google Drive, and running the notebook called `STREAMLINE-GoogleColabNotebook.ipynb` with Google Colaboratory.
 
 1. Set up a Google account (if for some reason you don't already have one).
     * Click here for help: https://support.google.com/accounts/answer/27441?hl=en
