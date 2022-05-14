@@ -64,7 +64,7 @@ This schematic breaks the overall pipeline down into 4 basic components: (1) pre
                 * [Example: Reduce computational burden of algorithms that run slow in large instance spaces](#example-reduce-computational-burden-of-algorithms-that-run-slow-in-large-instance-spaces)
             * [Phase 6: Statistics Summary](#phase-6-statistics-summary)
             * [Phase 7: Compare Datasets](#phase-7-optional-compare-datasets)
-            * [Phase 8: Generate PDF Training Summary Report](#phase-8-generate-pdf-training-summary-report)
+            * [Phase 8: Generate PDF Training Summary Report](#phase-8-optional-generate-pdf-training-summary-report)
             * [Phase 9: Apply Models to Replication Data](#phase-9-optional-apply-models-to-replication-data)
             * [Phase 10: Generate PDF 'Apply Replication' Summary Report](#phase-10-optional-generate-pdf-apply-replication-summary-report)
             * [Phase 11: File Cleanup](#phase-11-optional-file-cleanup)
