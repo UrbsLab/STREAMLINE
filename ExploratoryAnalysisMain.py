@@ -57,7 +57,7 @@ def main(argv):
     parser.add_argument('--export-up', dest='export_univariate_plots', type=str, help='export univariate analysis plots (note: univariate analysis still output by default)',default="False")
     parser.add_argument('--rand-state', dest='random_state', type=int, help='"Dont Panic" - sets a specific random seed for reproducible results',default=42)
     #Lostistical arguments
-    parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel',default="True")
+    parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel on LSF compatible computing cluster',default="True")
     parser.add_argument('--queue',dest='queue',type=str,help='specify name of parallel computing queue (uses our research groups queue by default)',default="i2c2_normal")
     parser.add_argument('--res-mem', dest='reserved_memory', type=int, help='reserved memory for the job (in Gigabytes)',default=4)
     parser.add_argument('--max-mem', dest='maximum_memory', type=int, help='maximum memory before the job is automatically terminated',default=15)
@@ -143,7 +143,7 @@ def makeDirTree(data_path,output_path,experiment_name,jupyterRun):
     if not os.path.exists(data_path):
         raise Exception("Provided data_path does not exist")
     if os.path.exists(output_path+'/'+experiment_name):
-        raise Exception("Experiment Name must be unique")
+        raise Exception("Error: A folder with the specified experiment name already exists at "+output_path+'/'+experiment_name'. This path/folder name must be unique.)
     for char in experiment_name:
         if not char in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_':
             raise Exception('Experiment Name must be alphanumeric')
