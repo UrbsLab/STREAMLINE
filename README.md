@@ -87,6 +87,7 @@ This schematic breaks the overall pipeline down into 4 basic components: (1) pre
 * [Development notes](#development-notes)
     * [History](#history)
     * [Planned extensions/improvements](#planned-extensionsimprovements)
+        * [Known issue fixes](#known-issue-fixes)
         * [Logistical extensions](#logistical-extensions)
         * [Capabilities extensions](#capabilities-extensions)
         * [Algorithmic extensions](#algorithmic-extensions)
@@ -914,12 +915,15 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
 
 ## Planned extensions/improvements
 
+### Known issue fixes
+* Repair probable bugs in eLCS and XCS ML modeling algorithms (currently we have intentionally set both to 'False' by default, so they will not run unless user explicitly turns them on)
+* Set up STREAMLINE to be able to run to through all phases even if some CV runs fail (as an option)
+
 ### Logistical extensions
 * Improved modularization of code for adding new ML modeling algorithms
 * Set up code to be run easily on cloud computing options such as AWS, Azure, or Google Cloud
 * Set up option to use STREAMLINE within Docker
 * Set up STREAMLINE parallelization to be able to automatically run with one command rather than require phases to be run in sequence (subsequent phases only being run when the prior one completes)
-* Set up STREAMLINE to be able to run to through all phases even if some CV runs fail (as an option)
 
 ### Capabilities extensions
 * Support multiclass and quantitative endpoints

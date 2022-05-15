@@ -69,11 +69,11 @@ def job(experiment_path,training,rep_data_path,data_path):
     #PDF page dimension reference - page width = 210 and page height down to start of footer = 285 (these are estimates)
     #FRONT PAGE - Summary of Pipeline settings-------------------------------------------------------------------------------------------------------
     print("Starting Report")
-    ls1 = ars_dic[0:87] # Class - filter poor [0:87]
+    ls1 = ars_dic[0:87] # DataPath to OverwriteCVDatasets - filter poor [0:87]
     ls2 = ars_dic[87:132]   # ML modeling algorithms (NaiveB - ExSTraCS) [87:132]
-    ls3 = ars_dic[132:147]  # primary metric - hypersweep timeout [132:147]
-    ls4 = ars_dic[147:162]  # LCS parameters (do LCS sweep - LCS hypersweep timeout) [147:162]
-    ls5 = ars_dic[162:180]  # [162:180]
+    ls3 = ars_dic[132:150]  # primary metric - ExportHyperparemterSweepPLot  [132:150]
+    ls4 = ars_dic[150:165]  # DoLCSHyperparemeterSweep LCS hypersweep timeout) [150:165]
+    ls5 = ars_dic[165:180]  # ExportROCPlot to Top Model Features to Display [165:180]
     analy_report.set_font('Times', 'B', 12)
     analy_report.cell(w=180, h=8, txt='STREAMLINE Training Summary Report: '+time, ln=2, border=1, align='L')
     analy_report.y += 2 #Margin below page header
@@ -427,7 +427,7 @@ def job(experiment_path,training,rep_data_path,data_path):
     #LAST PAGE - Create Runtime Summary Page---------------------------------------
     if eval(training):
         print("Publishing Runtime Summary")
-        resultLimit = 8 #Limits to this many dataset results per page
+        resultLimit = 6 #Limits to this many dataset results per page
         datasetCount = len(ds)
         #Determine number of pages needed for univariate results
         pageCount = datasetCount / float (resultLimit)
@@ -586,7 +586,7 @@ def pubModelStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,tra
 
 
 def pubRuntime(analy_report,experiment_path,ds,page,resultLimit,pageCount):
-    """ Generates single page of univariate analysis results. Automatically moves to another page when runs out of space. Maximum of 4 dataset results to a page. """
+    """ Generates single page of runtime analysis results. Automatically moves to another page when runs out of space. Maximum of 4 dataset results to a page. """
     col_width = 40 #maximum column width
     datasetCount = len(ds)
     dataStart = page*resultLimit
@@ -629,7 +629,7 @@ def pubRuntime(analy_report,experiment_path,ds,page,resultLimit,pageCount):
             left = False
         else:
             analy_report.x = 1
-            analy_report.y = lastY+63
+            analy_report.y = lastY+75
             left = True
     footer(analy_report)
 
