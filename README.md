@@ -921,7 +921,8 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
 * Set up STREAMLINE to be able to run to through all phases even if some CV runs fail (as an option)
 
 ### Logistical extensions
-* Improved modularization of code for adding new ML modeling algorithms
+* Simplify documentation using gitub.io 
+Improved modularization of code for adding new ML modeling algorithms
 * Set up code to be run easily on cloud computing options such as AWS, Azure, or Google Cloud
 * Set up option to use STREAMLINE within Docker
 * Set up STREAMLINE parallelization to be able to automatically run with one command rather than require phases to be run in sequence (subsequent phases only being run when the prior one completes)
