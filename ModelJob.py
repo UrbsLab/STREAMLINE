@@ -1311,8 +1311,8 @@ def hyperparameters(random_state,do_lcs_sweep,nu,iterations,N,feature_names): ##
         # XCS
         param_grid_XCS = {'learning_iterations': [iterations], 'N': [N], 'nu': [nu], 'random_state': [random_state]}
         # ExSTraCS
-        param_grid_ExSTraCS = {'learning_iterations': [iterations], 'N': [N], 'nu': [nu], 'random_state': [random_state], 'rule_compaction': ['QRF']} #'QRF'
-        
+        param_grid_ExSTraCS = {'learning_iterations': [iterations], 'N': [N], 'nu': [nu], 'random_state': [random_state], 'rule_compaction': ['QRF']} #'QRF', 'None'
+
     param_grid['Naive Bayes'] = {}
     param_grid['Logistic Regression'] = param_grid_LR
     param_grid['Decision Tree'] = param_grid_DT

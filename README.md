@@ -112,6 +112,7 @@ STREAMLINE can be used as:
 4. A framework to quickly run an exploratory analysis and/or feature importance estimation/feature selection prior to using some other methodology for ML modeling
 5. An educational example of how to integrate some of the many amazing python-based data science tools currently available (in particular pandas, scipy, optuna, and scikit-learn).
 6. A framework from which to create a new, expanded, adapted, or modified ML analysis pipeline
+7. A framework to test new algorithms and identify less obvious bugs (i.e. those that don't prevent the algorithm from running to completion)
 
 ***
 ## What does STREAMLINE include?
@@ -692,8 +693,8 @@ Run parameters for `ModelMain.py`:
 | --do-ANN | run artificial neural network modeling | None |
 | --do-KNN | run k-nearest neighbors classifier modeling | None |
 | --do-GP | run genetic programming symbolic classifier modeling | None |
-| --do-eLCS | run eLCS modeling (a basic supervised-learning learning classifier system) | None |
-| --do-XCS | run XCS modeling (a supervised-learning-only implementation of the best studied learning classifier system) | None |
+| --do-eLCS | run eLCS modeling (a basic supervised-learning learning classifier system) | False |
+| --do-XCS | run XCS modeling (a supervised-learning-only implementation of the best studied learning classifier system) | False |
 | --do-ExSTraCS | run ExSTraCS modeling (a learning classifier system designed for biomedical data mining) | None |
 | --metric |primary scikit-learn specified scoring metric used for hyperparameter optimization and permutation-based model feature importance evaluation | balanced_accuracy |
 | --subsample | for long running algos (XGB,SVM,ANN,KN), option to subsample training set (0 for no subsample) | 0 |
