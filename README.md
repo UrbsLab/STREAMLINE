@@ -116,7 +116,7 @@ STREAMLINE can be used as:
 
 ***
 ## What does STREAMLINE include?
-The automated elements of STREAMLINE includes (1) exploratory analysis, (2) basic data cleaning, (3) cross validation (CV) partitioning, (4) scaling, (5) imputation, (6) filter-based feature importance estimation, (7) collective feature selection, (8) modeling with 'Optuna' hyperparameter optimization across 15 implemented ML algorithms (including three rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS, implemented by our research group), (9) testing evaluations with 16 classification metrics, model feature importance estimation, (10) automatic saving all results, models, and publication-ready plots (including proposed composite feature importance plots), (11) non-parametric statistical comparisons across ML algorithms and analyzed datasets, and (12) automatically generated PDF summary reports.
+The automated elements of STREAMLINE includes (1) exploratory analysis, (2) basic data cleaning, (3) cross validation (CV) partitioning, (4) scaling, (5) imputation, (6) filter-based feature importance estimation, (7) collective feature selection, (8) modeling with 'Optuna' hyperparameter optimization across 15 implemented ML algorithms (including three rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS, implemented by our research group), (9) testing evaluations with 16 classification metrics, and model feature importance estimation, (10) automatic saving of all results, models, and publication-ready plots (including proposed composite feature importance plots), (11) non-parametric statistical comparisons across ML algorithms and analyzed datasets, and (12) automatically generated PDF summary reports.
 
 The following 15 scikit-learn compatible ML modeling algorithms are currently included as options: Naive Bayes (NB), Logistic Regression (LR), Decision Tree (DT), Random Forest (RF), Gradient Boosting (GB), XGBoost (XGB), LGBoost (LGB), CatBoost (CGB), Support Vector Machine (SVM), Artificial Neural Network (ANN), K-Nearest Neighbors (k-NN), Genetic Programming (GP), Eductional Learning Classifier System (eLCS), 'X' Classifier System (XCS), and Extended Supervised Tracking and Classifying System (ExSTraCS). Classification-relevant hyperparameter values and ranges have carefully selected for each and are pre-specified for the automated (Optuna-driven) automated hyperparameter sweep.
 
@@ -918,8 +918,8 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
 
 ### Known issues
 * Repair probable bugs in eLCS and XCS ML modeling algorithms (currently we have intentionally set both to 'False' by default, so they will not run unless user explicitly turns them on)
-* Set up STREAMLINE to be able to run (as an option) to through all phases even if some CV runs fail (as an option)
-* Optuna currently prevents a guarantee of replicability of STREAMLINE when run in parallel. This is explained in the Optuna documentation as an inherent result of running Optuna in parallel. We will consider alternative strategies for running STREAMLINE in parallel aiming to provide an alternative for those for wish to run STREAMLINE in parallel as well as guarantee replicability of the pipeline when using the same configuration and datasets.
+* Set up STREAMLINE to be able to run (as an option) through all phases even if some CV model training runs have failed (as an option)
+* Optuna currently prevents a guarantee of replicability of STREAMLINE when run in parallel. This is explained in the Optuna documentation as an inherent result of running Optuna in parallel. We will consider alternative strategies for running STREAMLINE in parallel aiming to provide an alternative for those for wish to run STREAMLINE in parallel as well as guarantee replicability of the pipeline when using the same configuration and datasets
 
 ### Logistical extensions
 * Simplify documentation using gitub.io
@@ -930,15 +930,17 @@ Improved modularization of code for adding new ML modeling algorithms
 
 ### Capabilities extensions
 * Support multiclass and quantitative endpoints
-    * Will require significant extensions to most phases of the pipeline including exploratory analysis, CV partitioning, feature importance/selection, modeling, statistics analysis, and
+    * Will require significant extensions to most phases of the pipeline including exploratory analysis, CV partitioning, feature importance/selection, modeling, statistics analysis, and visualizations
 * Shapley value calculation and visualizations
 * Create ensemble model from all trained models which can then be evaluated on hold out replication data
-* Expand available model visualization opportunities for model interpretation
-* Improve Catboost implementation:
+* Expand available model visualization opportunities for model interpretation (i.e. Logistic Regression)
+* Improve Catboost integration:
     * Allow it to use internal feature importance estimates as an option
     * Give it the list of features to be treated as categorical
 * New `UsefulNotebooks` providing even more post-run data visualizations and customizations
 * Clearly identify which algorithms can be run with missing values present, when user does not wish to apply `impute_data` (not yet fully tested)
+* Add option for user to apply grid search rather than 'Oputna' Bayesian optimization.  This will ensure complete STREAMLINE reproducibility, but will take much longer to run when using computationally expensive ML algorithms.
+* Create a smarter approach to hyperparameter optimization: (1) avoid hyperparameter combinations that are invalid (i.e. as seen when using Logistic Regression), (2) intelligently exclude key hyperparameters known to improve overall performance as they get larger, and apply a user defined value for these in the final model training after all other hyperparameters have been optimized (i.e. evolutionary algorithms such as genetic programming and ExSTraCS almost always benefit from larger population sizes and learning cycles. Given that we know these parameters improve performance, including them in hyperparameter optimization only slows down the process with little informational gain)
 
 ### Algorithmic extensions
 * Addition of other ML modeling algorithm options
