@@ -530,10 +530,16 @@ def pubModelStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,tra
             ds2 = pd.read_csv(experiment_path+'/'+ds[n]+"/model_evaluation/Summary_performance_mean.csv")
         else:
             ds2 = pd.read_csv(experiment_path+'/'+train_name+'/applymodel/'+ds[n]+'/model_evaluation/Summary_performance_mean.csv')
+        lowValBetter = ['FP','FN']
         for metric in metricNameList:
-            ds2[metric] = ds2[metric].astype(float).round(3)
-            metricMax = ds2[metric].max()
-            bestMetricList.append(metricMax)
+            metricBest = None
+            if metric in lowValBetter:
+                ds2[metric] = ds2[metric].astype(float).round(3)
+                metricBest = ds2[metric].min()
+            else:
+                ds2[metric] = ds2[metric].astype(float).round(3)
+                metricBest = ds2[metric].max()
+            bestMetricList.append(metricBest)
 
         stats_ds = stats_ds.round(3)
 

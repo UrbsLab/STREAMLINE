@@ -161,12 +161,15 @@ def dataScaling(x_train,x_test,experiment_path,dataset_name,cvCount):
         both the training and testing datasets. The fit scaling is pickled so that it can be applied identically to data in the future for model application."""
     scale_train_df = None
     scale_test_df = None
+    decimal_places = 7 # number of decimal places to round scaled values to (Important to avoid float round errors, and thus pipeline reproducibility)
     # Scale features (x) using training data
     scaler = StandardScaler()
     scaler.fit(x_train)
-    x_train = pd.DataFrame(scaler.transform(x_train), columns=x_train.columns)
+    x_train = pd.DataFrame(scaler.transform(x_train).round(decimal_places), columns=x_train.columns)
+    #x_train = xtrain.round(decimal_places) # Avoid float value rounding errors with large numbers of decimal places. Important for pipeline replicability
     # Scale features (x) using fit scalar in corresponding testing dataset
-    x_test = pd.DataFrame(scaler.transform(x_test), columns=x_test.columns)
+    x_test = pd.DataFrame(scaler.transform(x_test).round(decimal_places), columns=x_test.columns)
+    #x_test = xtest.round(decimal_places) # Avoid float value rounding errors with large numbers of decimal places. Important for pipeline replicability
     #Save scalar for future use
     outfile = open(experiment_path + '/' + dataset_name + '/scale_impute/scaler_cv'+str(cvCount)+'.pickle', 'wb')
     pickle.dump(scaler, outfile)

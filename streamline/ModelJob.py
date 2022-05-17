@@ -216,7 +216,7 @@ def run_LR_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_LR(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -281,7 +281,7 @@ def run_DT_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_DT(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -348,7 +348,7 @@ def run_RF_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_RF(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -412,7 +412,7 @@ def run_GB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_GB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -496,7 +496,7 @@ def run_XGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_XGB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -572,7 +572,7 @@ def run_LGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_LGB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -636,7 +636,7 @@ def run_CGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_CGB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -706,7 +706,7 @@ def run_SVM_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.DEBUG)  #.CRITICAL
+        optuna.logging.set_verbosity(optuna.logging.INFO)  #.CRITICAL
         study.optimize(lambda trial: objective_SVM(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -780,7 +780,7 @@ def run_ANN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_ANN(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -856,7 +856,7 @@ def run_KNN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_KNN(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -897,12 +897,13 @@ def objective_GP(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, sc
     params = {'population_size': trial.suggest_int('population_size', param_grid['population_size'][0], param_grid['population_size'][1]),
               'generations': trial.suggest_int('generations', param_grid['generations'][0], param_grid['generations'][1]),
               'tournament_size': trial.suggest_int('tournament_size', param_grid['tournament_size'][0], param_grid['tournament_size'][1]),
-              'init_method': trial.suggest_categorical('init_method', param_grid['init_method']),
               'function_set': trial.suggest_categorical('function_set', param_grid['function_set']),
+              'init_method': trial.suggest_categorical('init_method', param_grid['init_method']),
               'parsimony_coefficient': trial.suggest_float('parsimony_coefficient', param_grid['parsimony_coefficient'][0], param_grid['parsimony_coefficient'][1]),
               'feature_names': trial.suggest_categorical('feature_names', param_grid['feature_names']),
               'low_memory': trial.suggest_categorical('low_memory', param_grid['low_memory']),
               'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
+
     return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
 
 def run_GP_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
@@ -925,7 +926,7 @@ def run_GP_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_GP(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user #Currently because some hyperparameters are lists, this breaks the visualization
         #if eval(do_plot):
@@ -983,7 +984,7 @@ def run_eLCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trial
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_eLCS(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -1042,7 +1043,7 @@ def run_XCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_XCS(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -1140,7 +1141,7 @@ def run_ExSTraCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_t
         #Apply Optuna-----------------------------------------
         sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
-        optuna.logging.set_verbosity(optuna.logging.CRITICAL)
+        optuna.logging.set_verbosity(optuna.logging.INFO)
         study.optimize(lambda trial: objective_ExSTraCS(trial, est, x_train, y_train, randSeed, 3, param_grid,primary_metric), n_trials=n_trials, timeout=timeout,catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
@@ -1237,7 +1238,7 @@ def hyperparameters(random_state,do_lcs_sweep,nu,iterations,N,feature_names): ##
     learning classifier system algorithms. """
     param_grid = {}
     # Naive Bayes - Has no hyperparameters
-    # Logistic Regression (Note: can take longer to run in data with larger instance spaces)
+    # Logistic Regression (Note: can take longer to run in data with larger instance spaces) Note some hyperparameter combinations are known to be invalid, hyperparameter sweep will lose a trial attempt whenever this occurs.
     # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
     param_grid_LR = {'penalty': ['l2', 'l1'],'C': [1e-5, 1e5],'dual': [True, False],
                      'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],

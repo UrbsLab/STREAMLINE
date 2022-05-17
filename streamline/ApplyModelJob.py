@@ -162,6 +162,7 @@ def scaleRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_trai
     scaleInfo = full_path+'/scale_impute/scaler_cv'+str(cvCount)+'.pickle' #Corresponding pickle file name with scalingInfo
     infile = open(scaleInfo,'rb')
     scaler = pickle.load(infile)
+    decimal_places = 7
     infile.close()
     #Scale target replication data
     if instance_label == None or instance_label == 'None':
@@ -171,7 +172,7 @@ def scaleRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_trai
         inst_rep = cvRepData[instance_label]  # pull out instance labels in case they include text
     y_rep = cvRepData[class_label]
     # Scale features (x)
-    x_rep_scaled = pd.DataFrame(scaler.transform(x_rep), columns=x_rep.columns)
+    x_rep_scaled = pd.DataFrame(scaler.transform(x_rep).round(decimal_places), columns=x_rep.columns)
     # Recombine x and y
     if instance_label == None or instance_label == 'None':
         scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[class_label]), pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)],axis=1, sort=False)
