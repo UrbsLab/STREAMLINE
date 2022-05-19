@@ -12,7 +12,6 @@ __pycache__/ModelJob.cpython-38.pyc
 __pycache__/PDF_ReportJob.cpython-38.pyc
 __pycache__/StatsJob.cpython-38.pyc
 *.pyc
-.ipynb_checkpoints/STREAMLINE-GoogleColabNotebook_old-checkpoint.ipynb
 streamline/__pycache__/ApplyModelJob.cpython-38.pyc
 streamline/__pycache__/ApplyModelJob.cpython-38.pyc
 streamline/__pycache__/ApplyModelJob.cpython-38.pyc
@@ -20,6 +19,5 @@ streamline/__pycache__/FeatureSelectionJob.cpython-38.pyc
 streamline/__pycache__/FeatureSelectionJob.cpython-38.pyc
 UsefulNotebooks/fprtpr.csv
 streamline/__pycache__/StatsJob.cpython-38.pyc
-*.pyc
 *.ipynb
-*.pyc
+
