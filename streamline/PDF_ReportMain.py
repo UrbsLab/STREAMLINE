@@ -77,7 +77,7 @@ def main(argv):
         else:
             print(str(job_counter)+ " job submitted in Phase 10")
 
-def submitLocalJob(experiment_path):
+def submitLocalJob(experiment_path,training,rep_data_path,dataset_for_rep):
     """ Runs PDF_ReportJob.py locally, once. """
     PDF_ReportJob.job(experiment_path,training,rep_data_path,dataset_for_rep)
 
