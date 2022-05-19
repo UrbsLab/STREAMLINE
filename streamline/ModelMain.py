@@ -65,8 +65,8 @@ def main(argv):
     parser.add_argument('--subsample', dest='training_subsample', type=int, help='for long running algos (XGB,SVM,ANN,KN), option to subsample training set (0 for no subsample)', default=0)
     parser.add_argument('--use-uniformFI', dest='use_uniform_FI', type=str, help='overrides use of any available feature importance estimate methods from models, instead using permutation_importance uniformly',default='True')
     #Hyperparameter sweep options - Defaults available
-    parser.add_argument('--n-trials', dest='n_trials', type=int,help='# of bayesian hyperparameter optimization trials using optuna', default=200)
-    parser.add_argument('--timeout', dest='timeout', type=int,help='seconds until hyperparameter sweep stops running new trials (Note: it may run longer to finish last trial started)', default=900) #900 sec = 15 minutes default
+    parser.add_argument('--n-trials', dest='n_trials', type=str,help='# of bayesian hyperparameter optimization trials using optuna (specify an integer or None)', default=200)
+    parser.add_argument('--timeout', dest='timeout', type=str,help='seconds until hyperparameter sweep stops running new trials (Note: it may run longer to finish last trial started) If set to None, STREAMLINE is completely replicable, but will take longer to run', default=900) #900 sec = 15 minutes default
     parser.add_argument('--export-hyper-sweep', dest='export_hyper_sweep_plots', type=str, help='export optuna-generated hyperparameter sweep plots', default='False')
     #LCS specific parameters - Defaults available
     parser.add_argument('--do-LCS-sweep', dest='do_lcs_sweep', type=str, help='do LCS hyperparam tuning or use below params',default='False')

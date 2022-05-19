@@ -29,7 +29,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description='')
     #No defaults
     parser.add_argument('--rep-path',dest='rep_data_path',type=str,help='path to directory containing replication or hold-out testing datasets (must have at least all features with same labels as in original training dataset)')
-    parser.add_argument('--dataset',dest='data_path',type=str,help='path to target original training dataset')
+    parser.add_argument('--dataset',dest='dataset_for_rep',type=str,help='path to target original training dataset')
     parser.add_argument('--out-path', dest='output_path', type=str, help='path to output directory')
     parser.add_argument('--exp-name', dest='experiment_name', type=str, help='name of experiment (no spaces)')
     #Defaults available
@@ -50,7 +50,7 @@ def main(argv):
     job_counter = 0
 
     experiment_path = options.output_path+'/'+options.experiment_name
-    data_name = options.data_path.split('/')[-1].split('.')[0] #Save unique dataset names so that analysis is run only once if there is both a .txt and .csv version of dataset with same name.
+    data_name = options.dataset_for_rep.split('/')[-1].split('.')[0] #Save unique dataset names so that analysis is run only once if there is both a .txt and .csv version of dataset with same name.
 
     #Unpickle metadata from previous phase
     file = open(options.output_path+'/'+options.experiment_name+'/'+"metadata.pickle", 'rb')
@@ -112,9 +112,9 @@ def main(argv):
                     unique_datanames.append(apply_name)
                     if eval(options.run_parallel):
                         job_counter += 1
-                        submitClusterJob(options.reserved_memory,options.maximum_memory,options.queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.data_path,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute,random_state)
+                        submitClusterJob(options.reserved_memory,options.maximum_memory,options.queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.dataset_for_rep,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute,random_state)
                     else:
-                        submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.data_path,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute,random_state)
+                        submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,options.dataset_for_rep,options.match_label,options.plot_ROC,options.plot_PRC,options.plot_metric_boxplots,options.export_feature_correlations,jupyterRun,multi_impute,random_state)
                     file_count += 1
 
         if file_count == 0: #Check that there was at least 1 dataset
@@ -138,11 +138,11 @@ def main(argv):
     if not options.do_check:
         print(str(job_counter)+ " jobs submitted in Phase 9")
 
-def submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
+def submitLocalJob(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,dataset_for_rep,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
     """ Runs ApplyModelJob.py on each dataset in dataset_path locally. These runs will be completed serially rather than in parallel. """
-    ApplyModelJob.job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state)
+    ApplyModelJob.job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,dataset_for_rep,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state)
 
-def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
+def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,dataset_for_rep,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute,random_state):
     """ Runs ApplyModelJob.py on each dataset in rep_data_path. Runs in parallel on a linux-based computing cluster that uses an IBM Spectrum LSF for job scheduling."""
     train_name = full_path.split('/')[-1] #original training data name
     apply_name = datasetFilename.split('/')[-1].split('.')[0]
@@ -160,7 +160,7 @@ def submitClusterJob(reserved_memory,maximum_memory,queue,experiment_path,datase
 
     this_file_path = os.path.dirname(os.path.realpath(__file__))
     sh_file.write('python '+this_file_path+'/ApplyModelJob.py '+datasetFilename+" "+full_path+" "+class_label+" "+instance_label+" "+str(categorical_cutoff)+" "+str(sig_cutoff)+" "+str(cv_partitions)+" "+scale_data+" "+impute_data+" "+
-                  primary_metric+" "+data_path+" "+match_label+" "+plot_ROC+" "+plot_PRC+" "+plot_metric_boxplots+" "+export_feature_correlations+" "+jupyterRun+" "+multi_impute+'\n')
+                  primary_metric+" "+dataset_for_rep+" "+match_label+" "+plot_ROC+" "+plot_PRC+" "+plot_metric_boxplots+" "+export_feature_correlations+" "+jupyterRun+" "+multi_impute+'\n')
     sh_file.close()
     os.system('bsub < ' + job_name)
     pass

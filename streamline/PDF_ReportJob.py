@@ -230,11 +230,37 @@ def job(experiment_path,training,rep_data_path,data_path):
         analy_report.set_font('Times', 'B', 8)
         analy_report.multi_cell(w=80, h=4, txt='Top ML Algorithm Results (Averaged Over CV Runs):', border=1, align='L')
         analy_report.set_font('Times','', 8)
-        analy_report.multi_cell(w=80, h=4, txt="Best (ROC_AUC): "+ str(best_alg_ROC.values)+' = '+ str("{:.3f}".format(highest_ROC))+
-                    '\n'+"Best (Balanced Acc.): "+ str(best_alg_BA.values)+' = '+ str("{:.3f}".format(highest_BA))+
-                    '\n'+"Best (F1 Score): "+ str(best_alg_F1.values)+' = '+ str("{:.3f}".format(highest_F1))+
-                    '\n'+"Best (PRC AUC): "+ str(best_alg_PRC.values)+' = '+ str("{:.3f}".format(highest_PRC))+
-                    '\n'+"Best (PRC APS): "+ str(best_alg_APS.values)+' = '+ str("{:.3f}".format(highest_APS)), border=1, align='L')
+
+        if len(best_alg_ROC.values) > 1:
+            analy_report.multi_cell(w=80, h=4, txt="Best (ROC_AUC): "+ str(best_alg_ROC.values[0])+' (TIE) = '+ str("{:.3f}".format(highest_ROC)), border=1, align='L')
+        else:
+            analy_report.multi_cell(w=80, h=4, txt="Best (ROC_AUC): "+ str(best_alg_ROC.values[0])+' = '+ str("{:.3f}".format(highest_ROC)), border=1, align='L')
+
+        if len(best_alg_BA.values) > 1:
+            analy_report.multi_cell(w=80, h=4, txt="Best (Balanced Acc.): "+ str(best_alg_BA.values[0])+' (TIE) = '+ str("{:.3f}".format(highest_BA)), border=1, align='L')
+        else:
+            analy_report.multi_cell(w=80, h=4, txt="Best (Balanced Acc.): "+ str(best_alg_BA.values[0])+' = '+ str("{:.3f}".format(highest_BA)), border=1, align='L')
+
+        if len(best_alg_F1.values) > 1:
+            analy_report.multi_cell(w=80, h=4, txt="Best (F1 Score): "+ str(best_alg_F1.values[0])+' (TIE) = '+ str("{:.3f}".format(highest_F1)), border=1, align='L')
+        else:
+            analy_report.multi_cell(w=80, h=4, txt="Best (F1 Score): "+ str(best_alg_F1.values[0])+' = '+ str("{:.3f}".format(highest_F1)), border=1, align='L')
+
+        if len(best_alg_PRC.values) > 1:
+            analy_report.multi_cell(w=80, h=4, txt="Best (PRC AUC): "+ str(best_alg_PRC.values[0])+' (TIE) = '+ str("{:.3f}".format(highest_PRC)), border=1, align='L')
+        else:
+            analy_report.multi_cell(w=80, h=4, txt="Best (PRC AUC): "+ str(best_alg_PRC.values[0])+' = '+ str("{:.3f}".format(highest_PRC)), border=1, align='L')
+
+        if len(best_alg_APS.values) > 1:
+            analy_report.multi_cell(w=80, h=4, txt="Best (PRC APS): "+ str(best_alg_APS.values[0])+' (TIE) = '+ str("{:.3f}".format(highest_APS)), border=1, align='L')
+        else:
+            analy_report.multi_cell(w=80, h=4, txt="Best (PRC APS): "+ str(best_alg_APS.values[0])+' = '+ str("{:.3f}".format(highest_APS)), border=1, align='L')
+
+        #analy_report.multi_cell(w=80, h=4, txt="Best (ROC_AUC): "+ str(best_alg_ROC.values)+' = '+ str("{:.3f}".format(highest_ROC))+
+        #            '\n'+"Best (Balanced Acc.): "+ str(best_alg_BA.values)+' = '+ str("{:.3f}".format(highest_BA))+
+        #            '\n'+"Best (F1 Score): "+ str(best_alg_F1.values)+' = '+ str("{:.3f}".format(highest_F1))+
+        #            '\n'+"Best (PRC AUC): "+ str(best_alg_PRC.values)+' = '+ str("{:.3f}".format(highest_PRC))+
+        #            '\n'+"Best (PRC APS): "+ str(best_alg_APS.values)+' = '+ str("{:.3f}".format(highest_APS)), border=1, align='L')
 
         analy_report.set_font('Times', 'B', 10)
         #ROC-------------------------------
