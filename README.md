@@ -749,6 +749,7 @@ Run parameters for `StatsMain.py`:
 | --plot-PRC | Plot PRC curves individually for each algorithm including all CV results and averages | True |
 | --plot-box | Plot box plot summaries comparing algorithms for each metric | True |
 | --plot-FI_box | Plot feature importance boxplots and histograms for each algorithm | True |
+| --metric-weight | ML model metric used as weight in composite FI plots (only supports balanced_accuracy or roc_auc as options) Recommend setting the same as primary_metric if possible. | balanced_accuracy |
 | --top-features| Number of top features to illustrate in figures | 20 |
 | --model-viz| Directly visualize either DT or GP models if trained | True |
 | --run-parallel | if run parallel on LSF compatible computing cluster | True |
@@ -917,7 +918,7 @@ STREAMLINE is based on our initial development repository https://github.com/Urb
 ## Planned extensions/improvements
 
 ### Known issues
-* Repair probable bugs in eLCS and XCS ML modeling algorithms (currently we have intentionally set both to 'False' by default, so they will not run unless user explicitly turns them on)
+* Repair probable bugs in eLCS and XCS ML modeling algorithms (outside of STREAMLINE). Currently we have intentionally set both to 'False' by default, so they will not run unless user explicitly turns them on)
 * Set up STREAMLINE to be able to run (as an option) through all phases even if some CV model training runs have failed (as an option)
 * Optuna currently prevents a guarantee of replicability of STREAMLINE when run in parallel. This is explained in the Optuna documentation as an inherent result of running Optuna in parallel. We will consider alternative strategies for running STREAMLINE in parallel aiming to provide an alternative for those for wish to run STREAMLINE in parallel as well as guarantee replicability of the pipeline when using the same configuration and datasets
 
