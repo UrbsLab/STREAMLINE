@@ -34,7 +34,7 @@ def main(argv):
     parser.add_argument('--out-path', dest='output_path', type=str, help='path to output directory')
     parser.add_argument('--exp-name', dest='experiment_name', type=str, help='name of experiment (no spaces)')
     #Defaults available
-    parser.add_argument('--max-feat', dest='max_features_to_keep', type=int,help='max features to keep. None if no max', default=2000)
+    parser.add_argument('--max-feat', dest='max_features_to_keep', type=int,help='max features to keep (only applies if filter_poor_features is True)', default=2000)
     parser.add_argument('--filter-feat', dest='filter_poor_features', type=str, help='filter out the worst performing features prior to modeling',default='True')
     parser.add_argument('--top-features', dest='top_features', type=int,help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--export-scores', dest='export_scores', type=str,help='export figure summarizing average feature importance scores over cv partitions', default='True')

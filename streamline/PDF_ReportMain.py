@@ -32,7 +32,7 @@ def main(argv):
     #Defaults available (Note default settings will generate pdf summary for Training analysis, but arguments must be specified for summary of models applied to new/replication data)
     parser.add_argument('--training',dest='training',type=str,help='Indicate True or False for whether to generate pdf summary for pipeline training or followup application analysis to new dataset',default='True')
     parser.add_argument('--rep-path',dest='rep_data_path',type=str,help='path to directory containing replication or hold-out testing datasets (must have at least all features with same labels as in original training dataset)',default="None")
-    parser.add_argument('--dataset',dest='data_path',type=str,help='path to target original training dataset',default="None")
+    parser.add_argument('--dataset',dest='dataset_for_rep',type=str,help='path to target original training dataset',default="None")
     #Lostistical arguments
     parser.add_argument('--run-parallel',dest='run_parallel',type=str,help='if run parallel on LSF compatible computing cluster',default="True")
     parser.add_argument('--queue',dest='queue',type=str,help='specify name of parallel computing queue (uses our research groups queue by default)',default="i2c2_normal")
@@ -46,15 +46,15 @@ def main(argv):
 
     #Check that user has specified additional run parameters if intending to generate a replication analysis summary (when applying previously trained models)
     if not options.training == 'True':
-        if options.rep_data_path == 'None' or options.data_path == 'None':
+        if options.rep_data_path == 'None' or options.dataset_for_rep == 'None':
             raise Exception('Replication and Dataset paths must be specified as arguments to generate PDF summary on new data analysis!')
 
     if not options.do_check: #Run job submission
         if eval(options.run_parallel):
             job_counter += 1
-            submitClusterJob(experiment_path,options.training,options.rep_data_path,options.data_path,options.reserved_memory,options.maximum_memory,options.queue)
+            submitClusterJob(experiment_path,options.training,options.rep_data_path,options.dataset_for_rep,options.reserved_memory,options.maximum_memory,options.queue)
         else:
-            submitLocalJob(experiment_path,options.training,options.rep_data_path,options.data_path)
+            submitLocalJob(experiment_path,options.training,options.rep_data_path,options.dataset_for_rep)
 
     else: #run job completion checks
         if options.training == 'True': # Make pdf summary for training analysis
@@ -64,7 +64,7 @@ def main(argv):
                 else:
                     print("Phase 8 Job Not Completed")
         else: #Make pdf summary for application analysis
-            train_name = options.data_path.split('/')[-1].split('.')[0]
+            train_name = options.dataset_for_rep.split('/')[-1].split('.')[0]
             for filename in glob.glob(options.output_path + "/" + options.experiment_name+'/jobsCompleted/job_data_pdf_apply_'+str(train_name)+'*'):
                 if filename.split('/')[-1] == 'job_data_pdf_apply_'+str(train_name)+'.txt':
                     print("Phase 10 Job Completed")
@@ -79,9 +79,9 @@ def main(argv):
 
 def submitLocalJob(experiment_path):
     """ Runs PDF_ReportJob.py locally, once. """
-    PDF_ReportJob.job(experiment_path,training,rep_data_path,data_path)
+    PDF_ReportJob.job(experiment_path,training,rep_data_path,dataset_for_rep)
 
-def submitClusterJob(experiment_path,training,rep_data_path,data_path,reserved_memory,maximum_memory,queue):
+def submitClusterJob(experiment_path,training,rep_data_path,dataset_for_rep,reserved_memory,maximum_memory,queue):
     """ Runs PDF_ReportJob.py once. Runs on a linux-based computing cluster that uses an IBM Spectrum LSF for job scheduling."""
     job_ref = str(time.time())
     job_name = experiment_path + '/jobs/PDF_' + job_ref + '_run.sh'
@@ -95,7 +95,7 @@ def submitClusterJob(experiment_path,training,rep_data_path,data_path,reserved_m
     sh_file.write('#BSUB -e ' + experiment_path+'/logs/PDF_'+job_ref+'.e\n')
 
     this_file_path = os.path.dirname(os.path.realpath(__file__))
-    sh_file.write('python ' + this_file_path + '/PDF_ReportJob.py ' + experiment_path+' '+training+' '+rep_data_path+' '+data_path + '\n')
+    sh_file.write('python ' + this_file_path + '/PDF_ReportJob.py ' + experiment_path+' '+training+' '+rep_data_path+' '+dataset_for_rep + '\n')
     sh_file.close()
     os.system('bsub < ' + job_name)
     pass

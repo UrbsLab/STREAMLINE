@@ -57,6 +57,14 @@ import optuna #hyperparameter optimization
 
 def job(algorithm,train_file_path,test_file_path,full_path,n_trials,timeout,lcs_timeout,export_hyper_sweep_plots,instance_label,class_label,random_state,cvCount,filter_poor_features,do_lcs_sweep,nu,iterations,N,training_subsample,use_uniform_FI,primary_metric,algAbrev,jupyterRun):
     """ Specifies hardcoded (below) range of hyperparameter options selected for each ML algorithm and then runs the modeling method. Set up this way so that users can easily modify ML hyperparameter settings when running from the Jupyter Notebook. """
+    if n_trials == 'None':
+        n_trials = None
+    else:
+        n_trials = int(n_trials)
+    if timeout == 'None':
+        timeout = None
+    else:
+        timeout = int(timeout)
     #Add spaces back to algorithm names
     algorithm = algorithm.replace("_", " ")
     if eval(jupyterRun):
@@ -148,14 +156,14 @@ def saveRuntime(full_path,job_start_time,algAbrev,algorithm,cvCount):
     runtime_file.write(str(time.time() - job_start_time))
     runtime_file.close()
 
-def hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric):
+def hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric):
     """ Run hyperparameter evaluation for a given ML algorithm using Optuna. Uses further k-fold cv within target training data for hyperparameter evaluation."""
-    cv = StratifiedKFold(n_splits=hype_cv, shuffle=True, random_state=randSeed)
+    cv = StratifiedKFold(n_splits=hype_cv, shuffle=True, random_state=random_state)
     model = clone(est).set_params(**params)
     #Flexibly handle whether random seed is given as 'random_seed' or 'seed' - scikit learn uses 'random_seed'
-    for a in ['random_state','seed']:
-        if hasattr(model,a):
-            setattr(model,a,randSeed)
+    #for a in ['random_state','seed']:
+    #    if hasattr(model,a):
+    #        setattr(model,a,random_state)
     performance = np.mean(cross_val_score(model,x_train,y_train,cv=cv,scoring=scoring_metric,verbose=0))
     return performance
 
@@ -177,7 +185,7 @@ def modelEvaluation(clf,model,x_test,y_test):
     return metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
 
 #Naive Bayes #############################################################################################################################
-def run_NB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_NB_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run Naive Bayes model training, evaluation, and model feature importance estimation. No hyperparameters to optimize."""
     #Train model using 'best' hyperparameters - Uses default 3-fold internal CV (training/validation splits)
     clf = GaussianNB()
@@ -187,23 +195,32 @@ def run_NB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     #Evaluate model
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     #Feature Importance Estimates
-    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
     fi = results.importances_mean
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Logistic Regression ###################################################################################################################
-def objective_LR(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_LR(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Logistic Regression hyperparameter variables for Optuna run hyperparameter optimization. """
-    params = {'penalty' : trial.suggest_categorical('penalty',param_grid['penalty']),
-			  'dual' : trial.suggest_categorical('dual', param_grid['dual']),
+    params = {'solver' : trial.suggest_categorical('solver',param_grid['solver']),
 			  'C' : trial.suggest_loguniform('C', param_grid['C'][0], param_grid['C'][1]),
-			  'solver' : trial.suggest_categorical('solver',param_grid['solver']),
 			  'class_weight' : trial.suggest_categorical('class_weight',param_grid['class_weight']),
 			  'max_iter' : trial.suggest_loguniform('max_iter',param_grid['max_iter'][0], param_grid['max_iter'][1]),
               'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    #Handle the special cases of valid hyperparameter combinations allowed by logistic regression.
+    #duel = True only for penalty = l2 and solver = liblinear
+    #solver = newton-cg only with l2
+    #solver = lbfgs only with l2
+    #solver = sag only with l2
+    if params['solver'] == 'liblinear':
+        params['penalty'] = trial.suggest_categorical('penalty',param_grid['penalty'])
+        if params['penalty'] == 'l2':
+            params['dual'] = trial.suggest_categorical('dual', param_grid['dual'])
 
-def run_LR_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
+
+
+def run_LR_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run Logistic Regression hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -214,14 +231,18 @@ def run_LR_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     est = LogisticRegression()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_LR(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_LR(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        #study.best_trial.user_attrs['params']
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/LR_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/LR_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for LR Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -248,14 +269,14 @@ def run_LR_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = pow(math.e,model.coef_[0])
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Decision Tree #####################################################################################################################################
-def objective_DT(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_DT(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Decision Tree hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'criterion' : trial.suggest_categorical('criterion',param_grid['criterion']),
                 'splitter' : trial.suggest_categorical('splitter', param_grid['splitter']),
@@ -265,9 +286,9 @@ def objective_DT(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, sc
                 'max_features' : trial.suggest_categorical('max_features',param_grid['max_features']),
                 'class_weight' : trial.suggest_categorical('class_weight',param_grid['class_weight']),
                 'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_DT_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_DT_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run Decision Tree hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -279,14 +300,17 @@ def run_DT_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
 
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_DT(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_DT(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/DT_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/DT_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for DT Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -313,14 +337,14 @@ def run_DT_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.feature_importances_
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Random Forest ######################################################################################################################################
-def objective_RF(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_RF(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Random Forest hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'n_estimators' : trial.suggest_int('n_estimators',param_grid['n_estimators'][0], param_grid['n_estimators'][1]),
                 'criterion' : trial.suggest_categorical('criterion',param_grid['criterion']),
@@ -332,9 +356,9 @@ def objective_RF(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, sc
                 'oob_score' : trial.suggest_categorical('oob_score',param_grid['oob_score']),
                 'class_weight' : trial.suggest_categorical('class_weight',param_grid['class_weight']),
                 'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_RF_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_RF_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run Random Forest hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -346,14 +370,17 @@ def run_RF_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
 
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_RF(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_RF(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/RF_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/RF_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for RF Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -380,14 +407,14 @@ def run_RF_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.feature_importances_
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Gradient Boosting Classifier #####################################################################################################################
-def objective_GB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_GB(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Gradient Boosting hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'n_estimators' : trial.suggest_int('n_estimators',param_grid['n_estimators'][0], param_grid['n_estimators'][1]),
                 'loss': trial.suggest_categorical('loss', param_grid['loss']),
@@ -396,9 +423,9 @@ def objective_GB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, sc
                 'min_samples_split': trial.suggest_int('min_samples_split', param_grid['min_samples_split'][0],param_grid['min_samples_split'][1]),
                 'max_depth': trial.suggest_int('max_depth', param_grid['max_depth'][0], param_grid['max_depth'][1]),
                 'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_GB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_GB_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run Gradient Boosting hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -410,14 +437,17 @@ def run_GB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
 
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_GB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_GB(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/GB_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/GB_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for GB Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -444,14 +474,14 @@ def run_GB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.feature_importances_
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #XGBoost ###################################################################################################################################################
-def objective_XGB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_XGB(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares XGBoost hyperparameter variables for Optuna run hyperparameter optimization. """
     posInst = sum(y_train)
     negInst = len(y_train) - posInst
@@ -473,10 +503,10 @@ def objective_XGB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, s
                 'colsample_bytree' : trial.suggest_uniform('colsample_bytree', param_grid['colsample_bytree'][0], param_grid['colsample_bytree'][1]),
                 'scale_pos_weight' : trial.suggest_categorical('scale_pos_weight', [1.0, classWeight]),
                 'nthread' : trial.suggest_categorical('nthread',param_grid['nthread']),
-                'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+                'random_state' : trial.suggest_categorical('seed',param_grid['seed'])}
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_XGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
+def run_XGB_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
     """ Run XGBoost hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -485,7 +515,7 @@ def run_XGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
             isSingle = False
     #Utilize a subset of training instances to reduce runtime on a very large dataset
     if training_subsample > 0 and training_subsample < x_train.shape[0]:
-        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=randSeed)
+        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=random_state)
         for train_index, _ in sss.split(x_train,y_train):
             x_train = x_train[train_index]
             y_train = y_train[train_index]
@@ -494,14 +524,17 @@ def run_XGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = xgb.XGBClassifier()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_XGB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_XGB(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/XGB_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/XGB_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for XGB Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -513,7 +546,7 @@ def run_XGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
         est = xgb.XGBClassifier()
         clf = clone(est).set_params(**best_trial.params)
         export_best_params(full_path + '/models/XGB_bestparams' + str(i) + '.csv', best_trial.params) #Export final model hyperparamters to csv file
-        setattr(clf, 'random_state', randSeed)
+        setattr(clf, 'random_state', random_state)
     else: #Specify hyperparameter values (no sweep)
         params = copy.deepcopy(param_grid)
         for key, value in param_grid.items():
@@ -529,14 +562,14 @@ def run_XGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.feature_importances_
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #LGBoost #########################################################################################################################################
-def objective_LGB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_LGB(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares LGBoost hyperparameter variables for Optuna run hyperparameter optimization. """
     posInst = sum(y_train)
     negInst = len(y_train) - posInst
@@ -556,10 +589,10 @@ def objective_LGB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, s
               'n_estimators': trial.suggest_int('n_estimators', param_grid['n_estimators'][0],param_grid['n_estimators'][1]),
               'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, classWeight]),
               'num_threads' : trial.suggest_categorical('num_threads',param_grid['num_threads']),
-              'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+              'random_state' : trial.suggest_categorical('seed',param_grid['seed'])}
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_LGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_LGB_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run LGBoost hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -570,14 +603,17 @@ def run_LGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = lgb.LGBMClassifier()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_LGB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_LGB(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/LGB_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/LGB_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for LGB Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -604,14 +640,14 @@ def run_LGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.feature_importances_
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #CatBoost #########################################################################################################################################
-def objective_CGB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_CGB(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Catboost hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'learning_rate': trial.suggest_loguniform('learning_rate',param_grid['learning_rate'][0],param_grid['learning_rate'][1]),
               'iterations': trial.suggest_int('iterations',param_grid['iterations'][0],param_grid['iterations'][1]),
@@ -620,10 +656,10 @@ def objective_CGB(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, s
               'loss_function': trial.suggest_categorical('loss_function',param_grid['loss_function']),
               'random_seed' : trial.suggest_categorical('random_seed',param_grid['random_seed'])}
 
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
 
-def run_CGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_CGB_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run CGBoost hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -634,14 +670,17 @@ def run_CGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = cgb.CatBoostClassifier(verbose=0)
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_CGB(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_CGB(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/CGB_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/CGB_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for CGB Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -668,14 +707,14 @@ def run_CGB_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.feature_importances_
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Support Vector Machines #####################################################################################################################################
-def objective_SVM(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_SVM(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Support Vector Machine hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'kernel': trial.suggest_categorical('kernel', param_grid['kernel']),
               'C': trial.suggest_loguniform('C', param_grid['C'][0], param_grid['C'][1]),
@@ -684,9 +723,9 @@ def objective_SVM(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, s
               'probability': trial.suggest_categorical('probability', param_grid['probability']),
               'class_weight': trial.suggest_categorical('class_weight', param_grid['class_weight']),
               'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_SVM_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
+def run_SVM_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
     """ Run Support Vector Machine hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -695,7 +734,7 @@ def run_SVM_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
             isSingle = False
     #Utilize a subset of training instances to reduce runtime on a very large dataset
     if training_subsample > 0 and training_subsample < x_train.shape[0]:
-        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=randSeed)
+        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=random_state)
         for train_index, _ in sss.split(x_train,y_train):
             x_train = x_train[train_index]
             y_train = y_train[train_index]
@@ -704,14 +743,17 @@ def run_SVM_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = SVC()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)  #.CRITICAL
-        study.optimize(lambda trial: objective_SVM(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_SVM(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/SVM_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/SVM_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for SVM Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -737,12 +779,12 @@ def run_SVM_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     #Evaluate model
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates (SVM can only automatically obtain feature importance estimates (coef_) for linear kernel)
-    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
     fi = results.importances_mean
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Artificial Neural Networks #######################################################################################################################
-def objective_ANN(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_ANN(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Artificial Neural Network hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'activation': trial.suggest_categorical('activation', param_grid['activation']),
               'learning_rate': trial.suggest_categorical('learning_rate', param_grid['learning_rate']),
@@ -758,9 +800,9 @@ def objective_ANN(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, s
         layers.append(
             trial.suggest_int('n_units_l{}'.format(i), param_grid['layer_size'][0], param_grid['layer_size'][1]))
         params['hidden_layer_sizes'] = tuple(layers)
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_ANN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
+def run_ANN_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
     """ Run Artificial Neural Network hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -769,7 +811,7 @@ def run_ANN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
             isSingle = False
     #Utilize a subset of training instances to reduce runtime on a very large dataset
     if training_subsample > 0 and training_subsample < x_train.shape[0]:
-        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=randSeed)
+        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=random_state)
         for train_index, _ in sss.split(x_train,y_train):
             x_train = x_train[train_index]
             y_train = y_train[train_index]
@@ -778,17 +820,17 @@ def run_ANN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = MLPClassifier()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_ANN(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_ANN(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
             try:
                 fig = optuna.visualization.plot_parallel_coordinate(study)
                 fig.write_image(full_path+'/models/ANN_ParamOptimization_'+str(i)+'.png')
             except:
-                pass
+                print('Warning: Optuna Optimization Visualization Generation Failed for ANN Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -822,21 +864,21 @@ def run_ANN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     #Evaluate model
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
-    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
     fi = results.importances_mean
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #K-Neighbors Classifier ####################################################################################################################################
-def objective_KNN(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_KNN(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares K Nearest Neighbor hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {
         'n_neighbors': trial.suggest_int('n_neighbors', param_grid['n_neighbors'][0], param_grid['n_neighbors'][1]),
         'weights': trial.suggest_categorical('weights', param_grid['weights']),
         'p': trial.suggest_int('p', param_grid['p'][0], param_grid['p'][1]),
         'metric': trial.suggest_categorical('metric', param_grid['metric'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_KNN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
+def run_KNN_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
     """ Run K Nearest Neighbors Classifier hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -845,7 +887,7 @@ def run_KNN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
             isSingle = False
     #Utilize a subset of training instances to reduce runtime on a very large dataset
     if training_subsample > 0 and training_subsample < x_train.shape[0]:
-        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=randSeed)
+        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=random_state)
         for train_index, _ in sss.split(x_train,y_train):
             x_train = x_train[train_index]
             y_train = y_train[train_index]
@@ -854,14 +896,17 @@ def run_KNN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = KNeighborsClassifier()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_KNN(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_KNN(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/KNN_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/KNN_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for KNN Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -887,12 +932,12 @@ def run_KNN_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     #Evaluate model
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
-    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
     fi = results.importances_mean
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Genetic Programming (Symbolic classification) ####################################################################################################################################
-def objective_GP(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_GP(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares genetic programming hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'population_size': trial.suggest_int('population_size', param_grid['population_size'][0], param_grid['population_size'][1]),
               'generations': trial.suggest_int('generations', param_grid['generations'][0], param_grid['generations'][1]),
@@ -904,9 +949,9 @@ def objective_GP(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, sc
               'low_memory': trial.suggest_categorical('low_memory', param_grid['low_memory']),
               'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
 
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_GP_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
+def run_GP_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,training_subsample,use_uniform_FI,primary_metric):
     """ Run Genetic Programming Symbolic Classifier hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -915,7 +960,7 @@ def run_GP_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
             isSingle = False
     #Utilize a subset of training instances to reduce runtime on a very large dataset
     if training_subsample > 0 and training_subsample < x_train.shape[0]:
-        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=randSeed)
+        sss = StratifiedShuffleSplit(n_splits=1, train_size=int(training_subsample), random_state=random_state)
         for train_index, _ in sss.split(x_train,y_train):
             x_train = x_train[train_index]
             y_train = y_train[train_index]
@@ -924,14 +969,18 @@ def run_GP_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     est = SymbolicClassifier()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_GP(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_GP(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user #Currently because some hyperparameters are lists, this breaks the visualization
-        #if eval(do_plot):
-        #    fig = optuna.visualization.plot_parallel_coordinate(study)
-        #    fig.write_image(full_path+'/models/GP_ParamOptimization_'+str(i)+'.png')
+        if eval(do_plot):
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/GP_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for GP Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue. However failure may persist for GP specifically.')
+
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -957,21 +1006,21 @@ def run_GP_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,
     #Evaluate model
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
-    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+    results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
     fi = results.importances_mean
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #Experimental ML modeling algorithms (developed by our research group)
 #eLCS (educational learning Classifier System) ##################################################################################################################################
-def objective_eLCS(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_eLCS(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares Eductional Learning Classifier System hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'learning_iterations': trial.suggest_categorical('learning_iterations', param_grid['learning_iterations']),
         'N': trial.suggest_categorical('N', param_grid['N']),
         'nu': trial.suggest_categorical('nu', param_grid['nu']),
         'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_eLCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_eLCS_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run Educational Learning Classifier System hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -982,14 +1031,17 @@ def run_eLCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trial
     est = eLCS()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_eLCS(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_eLCS(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/eLCS_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/eLCS_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for eLCS Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -1015,22 +1067,22 @@ def run_eLCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trial
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.get_final_attribute_specificity_list()
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #XCS ('X' Learning classifier system) ############################################################################################################################################
-def objective_XCS(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_XCS(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares X Learning Classifier System hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'learning_iterations': trial.suggest_categorical('learning_iterations', param_grid['learning_iterations']),
         'N': trial.suggest_categorical('N', param_grid['N']),
         'nu': trial.suggest_categorical('nu', param_grid['nu']),
         'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
-def run_XCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
+def run_XCS_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,use_uniform_FI,primary_metric):
     """ Run X Learning Classifier System (XCS) hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Check whether hyperparameters are fixed (i.e. no hyperparameter sweep required) or whether a set/range of values were specified for any hyperparameter (conduct hyperparameter sweep)
     isSingle = True
@@ -1041,14 +1093,17 @@ def run_XCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     est = XCS()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_XCS(trial, est, x_train, y_train, randSeed, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
+        study.optimize(lambda trial: objective_XCS(trial, est, x_train, y_train, random_state, 3, param_grid, primary_metric),n_trials=n_trials, timeout=timeout, catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/XCS_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/XCS_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for XCS Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -1074,21 +1129,21 @@ def run_XCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.get_final_attribute_specificity_list()
     return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
 #ExSTraCS (Extended supervised tracking and classifying system) #############################################################################
-def objective_ExSTraCS(trial, est, x_train, y_train, randSeed, hype_cv, param_grid, scoring_metric):
+def objective_ExSTraCS(trial, est, x_train, y_train, random_state, hype_cv, param_grid, scoring_metric):
     """ Prepares ExSTraCS hyperparameter variables for Optuna run hyperparameter optimization. """
     params = {'learning_iterations': trial.suggest_categorical('learning_iterations', param_grid['learning_iterations']),
               'N': trial.suggest_categorical('N', param_grid['N']), 'nu': trial.suggest_categorical('nu', param_grid['nu']),
               'random_state' : trial.suggest_categorical('random_state',param_grid['random_state']),
               'expert_knowledge':param_grid['expert_knowledge'],
               'rule_compaction':trial.suggest_categorical('rule_compaction', param_grid['rule_compaction'])}
-    return hyper_eval(est, x_train, y_train, randSeed, hype_cv, params, scoring_metric)
+    return hyper_eval(est, x_train, y_train, random_state, hype_cv, params, scoring_metric)
 
 def get_FI_subset_ExSTraCS(full_path,i,instance_label,class_label,filter_poor_features):
     """ For ExSTraCS, gets the MultiSURF (or MI if MS not availabile) FI scores for the feature subset being analyzed here in modeling"""
@@ -1125,7 +1180,7 @@ def get_FI_subset_ExSTraCS(full_path,i,instance_label,class_label,filter_poor_fe
         scores = rawData[0]
     return scores
 
-def run_ExSTraCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_trials,timeout,do_plot,full_path,filter_poor_features,instance_label,class_label,use_uniform_FI,primary_metric):
+def run_ExSTraCS_full(x_train, y_train, x_test, y_test,random_state,i,param_grid,n_trials,timeout,do_plot,full_path,filter_poor_features,instance_label,class_label,use_uniform_FI,primary_metric):
     """ Run Extended Supervised Tracking and Classifying System (ExSTraCS) hyperparameter optimization, model training, evaluation, and model feature importance estimation. """
     #Grab feature importance weights from multiSURF, used by ExSTraCS
     scores = get_FI_subset_ExSTraCS(full_path,i,instance_label,class_label,filter_poor_features)
@@ -1139,14 +1194,17 @@ def run_ExSTraCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_t
     est = ExSTraCS()
     if not isSingle: #Run hyperparameter sweep
         #Apply Optuna-----------------------------------------
-        sampler = optuna.samplers.TPESampler(seed=randSeed)  # Make the sampler behave in a deterministic way.
+        sampler = optuna.samplers.TPESampler(seed=random_state)  # Make the sampler behave in a deterministic way.
         study = optuna.create_study(direction='maximize', sampler=sampler)
         optuna.logging.set_verbosity(optuna.logging.INFO)
-        study.optimize(lambda trial: objective_ExSTraCS(trial, est, x_train, y_train, randSeed, 3, param_grid,primary_metric), n_trials=n_trials, timeout=timeout,catch=(ValueError,))
+        study.optimize(lambda trial: objective_ExSTraCS(trial, est, x_train, y_train, random_state, 3, param_grid,primary_metric), n_trials=n_trials, timeout=timeout,catch=(ValueError,))
         #Export hyperparameter optimization search visualization if specified by user
         if eval(do_plot):
-            fig = optuna.visualization.plot_parallel_coordinate(study)
-            fig.write_image(full_path+'/models/ExSTraCS_ParamOptimization_'+str(i)+'.png')
+            try:
+                fig = optuna.visualization.plot_parallel_coordinate(study)
+                fig.write_image(full_path+'/models/ExSTraCS_ParamOptimization_'+str(i)+'.png')
+            except:
+                print('Warning: Optuna Optimization Visualization Generation Failed for ExSTraCS Due to Known Release Issue.  Please install Optuna 2.0.0 to avoid this issue.')
         #Print results and hyperparamter values for best hyperparameter sweep trial
         print('Best trial:')
         best_trial = study.best_trial
@@ -1175,7 +1233,7 @@ def run_ExSTraCS_full(x_train, y_train, x_test, y_test,randSeed,i,param_grid,n_t
     metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = modelEvaluation(clf,model,x_test,y_test)
     # Feature Importance Estimates
     if eval(use_uniform_FI):
-        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=randSeed, scoring=primary_metric)
+        results = permutation_importance(model, x_train, y_train, n_repeats=10,random_state=random_state, scoring=primary_metric)
         fi = results.importances_mean
     else:
         fi = clf.get_final_attribute_specificity_list()
@@ -1260,20 +1318,20 @@ def hyperparameters(random_state,do_lcs_sweep,nu,iterations,N,feature_names): ##
     # https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingClassifier.html?highlight=gradient%20boosting#sklearn.ensemble.GradientBoostingClassifier
     param_grid_GB = {'n_estimators': [10, 1000],'loss': ['deviance', 'exponential'], 'learning_rate': [.0001, 0.3], 'min_samples_leaf': [1, 50],
                      'min_samples_split': [2, 50], 'max_depth': [1, 30],'random_state':[random_state]}
-    # XG Boost (Note: Not great for large instance spaces (limited completion) and class weight balance is included as option internally
+    # XG Boost (Note: Not great for large instance spaces (limited completion) and class weight balance is included as option internally (Note: uses 'seed' instead of 'random_state')
     # https://xgboost.readthedocs.io/en/latest/parameter.html
     param_grid_XGB = {'booster': ['gbtree'],'objective': ['binary:logistic'],'verbosity': [0],'reg_lambda': [1e-8, 1.0],
                       'alpha': [1e-8, 1.0],'eta': [1e-8, 1.0],'gamma': [1e-8, 1.0],'max_depth': [1, 30],
                       'grow_policy': ['depthwise', 'lossguide'],'n_estimators': [10, 1000],'min_samples_split': [2, 50],
                       'min_samples_leaf': [1, 50],'subsample': [0.5, 1.0],'min_child_weight': [0.1, 10],
-                      'colsample_bytree': [0.1, 1.0],'nthread':[1],'random_state':[random_state]}
-    # LG Boost (Note: class weight balance is included as option internally (still takes a while on large instance spaces))
+                      'colsample_bytree': [0.1, 1.0],'nthread':[1],'seed':[random_state]}
+    # LG Boost (Note: class weight balance is included as option internally (still takes a while on large instance spaces)) (Note: uses 'seed' instead of 'random_state')
     # https://lightgbm.readthedocs.io/en/latest/Parameters.html
     param_grid_LGB = {'objective': ['binary'],'metric': ['binary_logloss'],'verbosity': [-1],'boosting_type': ['gbdt'],
                       'num_leaves': [2, 256],'max_depth': [1, 30],'lambda_l1': [1e-8, 10.0],'lambda_l2': [1e-8, 10.0],
                       'feature_fraction': [0.4, 1.0],'bagging_fraction': [0.4, 1.0],'bagging_freq': [1, 7],
-                      'min_child_samples': [5, 100],'n_estimators': [10, 1000],'num_threads':[1],'random_state':[random_state]}
-    # CatBoost - (Note this is newly added, and further optimization to this configuration is possible)
+                      'min_child_samples': [5, 100],'n_estimators': [10, 1000],'num_threads':[1],'seed':[random_state]}
+    # CatBoost - (Note this is newly added, and further optimization to this configuration is possible) (Note: uses 'random_seed' instead of 'random_state')
     # https://catboost.ai/en/docs/references/training-parameters/
     param_grid_CGB = {'learning_rate':[.0001, 0.3],'iterations':[10,500],'depth':[1,10],'l2_leaf_reg': [1,9],
                       'loss_function': ['Logloss'], 'random_seed': [random_state]}
@@ -1333,4 +1391,4 @@ def hyperparameters(random_state,do_lcs_sweep,nu,iterations,N,feature_names): ##
     return param_grid
 
 if __name__ == '__main__':
-    job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],int(sys.argv[5]),int(sys.argv[6]),int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],int(sys.argv[11]),int(sys.argv[12]),sys.argv[13],sys.argv[14],int(sys.argv[15]),int(sys.argv[16]),int(sys.argv[17]),int(sys.argv[18]),sys.argv[19],sys.argv[20],sys.argv[21],sys.argv[22])
+    job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],int(sys.argv[11]),int(sys.argv[12]),sys.argv[13],sys.argv[14],int(sys.argv[15]),int(sys.argv[16]),int(sys.argv[17]),int(sys.argv[18]),sys.argv[19],sys.argv[20],sys.argv[21],sys.argv[22])

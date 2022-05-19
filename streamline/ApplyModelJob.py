@@ -33,7 +33,7 @@ from scipy import stats
 #from scipy import interp,stats
 from statistics import mean,stdev
 
-def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,data_path,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
+def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,dataset_for_rep,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
     train_name = full_path.split('/')[-1] #original training data name
     experiment_path = '/'.join(full_path.split('/')[:-1])
     apply_name = datasetFilename.split('/')[-1].split('.')[0]
@@ -46,7 +46,7 @@ def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,
     if instance_label != 'None':
         rep_feature_list.remove(instance_label)
     #Load original training dataset (could include 'match label')
-    trainData = pd.read_csv(data_path, na_values='NA', sep = ",")
+    trainData = pd.read_csv(dataset_for_rep, na_values='NA', sep = ",")
     all_train_feature_list = list(trainData.columns.values)
     all_train_feature_list.remove(class_label)
     if match_label != 'None':

@@ -125,10 +125,10 @@ def reportAveFS(algorithm,algorithmlabel,cv_partitions,top_features,full_path,se
             plt.close('all')
     return selected_feature_lists,meta_feature_ranks
 
-def selectFeatures(algorithms, cv_partitions, selectedFeatureLists, maxFeaturesToKeep, metaFeatureRanks):
+def selectFeatures(algorithms, cv_partitions, selectedFeatureLists, max_features_to_keep, metaFeatureRanks): 
     """ Identifies features to keep for each cv. If more than one feature importance algorithm was applied, collective feature selection
         is applied so that the union of informative features is preserved. Overall, only informative features (i.e. those with a score > 0
-        are preserved). If there are more informative features than the maxFeaturesToKeep, then only those top scoring features are preserved.
+        are preserved). If there are more informative features than the max_features_to_keep, then only those top scoring features are preserved.
         To reduce the feature list to some max limit, we alternate between algorithm ranked feature lists grabbing the top features from each
         until the max limit is reached."""
     cv_Selected_List = []  # final list of selected features for each cv (list of lists)
@@ -144,17 +144,17 @@ def selectFeatures(algorithms, cv_partitions, selectedFeatureLists, maxFeaturesT
                 unionList = list(set(unionList) | set(selectedFeatureLists[algorithms[j]][i]))
             informativeFeatureCounts.append(len(unionList))
             uninformativeFeatureCounts.append(totalFeatures-len(unionList))
-            #Further reduce selected feature set if it is larger than maxFeaturesToKeep
-            if len(unionList) > maxFeaturesToKeep:  # Apply further filtering if more than max features remains
+            #Further reduce selected feature set if it is larger than max_features_to_keep
+            if len(unionList) > max_features_to_keep:  # Apply further filtering if more than max features remains
                 # Create score list dictionary with indexes in union list
                 newFeatureList = []
                 k = 0
-                while len(newFeatureList) < maxFeaturesToKeep:
+                while len(newFeatureList) < max_features_to_keep:
                     for each in metaFeatureRanks:
                         targetFeature = metaFeatureRanks[each][i][k]
                         if not targetFeature in newFeatureList:
                             newFeatureList.append(targetFeature)
-                        if len(newFeatureList) < maxFeaturesToKeep:
+                        if len(newFeatureList) < max_features_to_keep:
                             break
                     k += 1
                 unionList = newFeatureList
@@ -165,11 +165,11 @@ def selectFeatures(algorithms, cv_partitions, selectedFeatureLists, maxFeaturesT
             featureList = selectedFeatureLists[algorithms[0]][i]  # grab first algorithm's lists
             informativeFeatureCounts.append(len(featureList))
             uninformativeFeatureCounts.append(totalFeatures-informativeFeatureCounts)
-            if len(featureList) > maxFeaturesToKeep:  # Apply further filtering if more than max features remains
+            if len(featureList) > max_features_to_keep:  # Apply further filtering if more than max features remains
                 # Create score list dictionary with indexes in union list
                 newFeatureList = []
                 k = 0
-                while len(newFeatureList) < maxFeaturesToKeep:
+                while len(newFeatureList) < max_features_to_keep:
                     targetFeature = metaFeatureRanks[algorithms[0]][i][k]
                     newFeatureList.append(targetFeature)
                     k += 1
