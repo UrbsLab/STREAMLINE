@@ -67,7 +67,7 @@ def main(argv):
 
 def submitLocalJob(experiment_path,sig_cutoff,jupyterRun):
     """ Runs DataCompareJob.py locally, once. """
-    WrapperComparisonJob.job(experiment_path,jupyterRun)
+    DataCompareJob.job(experiment_path,sig_cutoff,jupyterRun)
 
 def submitClusterJob(experiment_path,reserved_memory,maximum_memory,queue,sig_cutoff,jupyterRun):
     """ Runs DataCompareJob.py once. Runs on a linux-based computing cluster that uses an IBM Spectrum LSF for job scheduling."""

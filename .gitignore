@@ -11,3 +11,4 @@ __pycache__/FeatureSelectionJob.cpython-38.pyc
 __pycache__/ModelJob.cpython-38.pyc
 __pycache__/PDF_ReportJob.cpython-38.pyc
 __pycache__/StatsJob.cpython-38.pyc
+*.pyc

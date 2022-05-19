@@ -73,7 +73,7 @@ def job(experiment_path,training,rep_data_path,data_path):
     ls2 = ars_dic[87:132]   # ML modeling algorithms (NaiveB - ExSTraCS) [87:132]
     ls3 = ars_dic[132:150]  # primary metric - ExportHyperparemterSweepPLot  [132:150]
     ls4 = ars_dic[150:165]  # DoLCSHyperparemeterSweep LCS hypersweep timeout) [150:165]
-    ls5 = ars_dic[165:180]  # ExportROCPlot to Top Model Features to Display [165:180]
+    ls5 = ars_dic[165:183]  # ExportROCPlot to Top Model Features to Display [165:180]
     analy_report.set_font('Times', 'B', 12)
     analy_report.cell(w=180, h=8, txt='STREAMLINE Training Summary Report: '+time, ln=2, border=1, align='L')
     analy_report.y += 2 #Margin below page header

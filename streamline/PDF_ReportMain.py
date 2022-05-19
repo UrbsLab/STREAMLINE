@@ -79,7 +79,7 @@ def main(argv):
 
 def submitLocalJob(experiment_path):
     """ Runs PDF_ReportJob.py locally, once. """
-    KeyFileCopyJob.job(experiment_path,training,rep_data_path,data_path)
+    PDF_ReportJob.job(experiment_path,training,rep_data_path,data_path)
 
 def submitClusterJob(experiment_path,training,rep_data_path,data_path,reserved_memory,maximum_memory,queue):
     """ Runs PDF_ReportJob.py once. Runs on a linux-based computing cluster that uses an IBM Spectrum LSF for job scheduling."""

@@ -31,7 +31,7 @@ from sklearn import tree
 from subprocess import call
 from IPython.display import display_pdf
 
-def job(full_path,plot_ROC,plot_PRC,plot_FI_box,class_label,instance_label,cv_partitions,scale_data,plot_metric_boxplots,primary_metric,top_model_features,sig_cutoff,jupyterRun):
+def job(full_path,plot_ROC,plot_PRC,plot_FI_box,class_label,instance_label,cv_partitions,scale_data,plot_metric_boxplots,primary_metric,top_model_features,sig_cutoff,metric_weight,jupyterRun):
     """ Run all elements of stats summary and analysis for one one the original phase 1 datasets: summaries of average and standard deviations for all metrics and modeling algorithms,
     ROC and PRC plots (comparing CV performance in the same ML algorithm and comparing average performance between ML algorithms), model feature importance averages over CV runs,
     boxplots comparing ML algorithms for each metric, Kruskal Wallis and Mann Whitney statistical comparsions between ML algorithms, model feature importance boxplots for each
@@ -46,8 +46,11 @@ def job(full_path,plot_ROC,plot_PRC,plot_FI_box,class_label,instance_label,cv_pa
     algInfo = pickle.load(file)
     file.close()
     #Translate metric name from scikitlearn standard (currently balanced accuracy is hardcoded for use in generating FI plots due to no-skill normalization)
-    metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy','accuracy': 'Accuracy','f1': 'F1_Score','recall': 'Sensitivity (Recall)','precision': 'Precision (PPV)','roc_auc': 'ROC_AUC'}
-    primary_metric = metric_term_dict[primary_metric]
+    #metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy','accuracy': 'Accuracy','f1': 'F1_Score','recall': 'Sensitivity (Recall)','precision': 'Precision (PPV)','roc_auc': 'ROC_AUC'}
+    #primary_metric = metric_term_dict[primary_metric] #currently not used
+    metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy','accuracy': 'Accuracy','f1': 'F1_Score','recall': 'Sensitivity (Recall)','precision': 'Precision (PPV)','roc_auc': 'ROC AUC'}
+    metric_weight = metric_term_dict[metric_weight] #currently not used
+
     #Get algorithms run, specify algorithm abbreviations, colors to use for algorithms in plots, and original ordered feature name list
     algorithms,abbrev,colors,original_headers = preparation(full_path,algInfo)
     #Gather and summarize all evaluation metrics for each algorithm across all CVs. Returns result_table used to plot average ROC and PRC plots and metric_dict organizing all metrics over all algorithms and CVs.
@@ -79,7 +82,7 @@ def job(full_path,plot_ROC,plot_PRC,plot_FI_box,class_label,instance_label,cv_pa
     #Prepare for feature importance visualizations
     if eval(jupyterRun):
         print('Preparing for Model Feature Importance Plotting...')
-    fi_df_list,fi_ave_list,fi_ave_norm_list,ave_metric_list,all_feature_list,non_zero_union_features,non_zero_union_indexes = prepFI(algorithms,full_path,abbrev,metric_dict,'Balanced Accuracy')
+    fi_df_list,fi_ave_list,fi_ave_norm_list,ave_metric_list,all_feature_list,non_zero_union_features,non_zero_union_indexes = prepFI(algorithms,full_path,abbrev,metric_dict,metric_weight) #old - 'Balanced Accuracy'
     #Select 'top' features for composite vizualization
     featuresToViz = selectForCompositeViz(top_model_features,non_zero_union_features,non_zero_union_indexes,algorithms,ave_metric_list,fi_ave_norm_list)
     #Generate FI boxplots for each modeling algorithm if specified by user
@@ -531,7 +534,7 @@ def mannWhitneyU(full_path,metrics,algorithms,metric_dict,kruskal_summary,sig_cu
             mann_stats_df.to_csv(full_path + '/model_evaluation/statistical_comparisons/MannWhitneyU_'+metric+'.csv', index=False)
 
 
-def prepFI(algorithms,full_path,abbrev,metric_dict,primary_metric):
+def prepFI(algorithms,full_path,abbrev,metric_dict,metric_weight):
     """ Organizes and prepares model feature importance data for boxplot and composite feature importance figure generation."""
     #Initialize required lists
     fi_df_list = []         # algorithm feature importance dataframe list (used to generate FI boxplots for each algorithm)
@@ -547,7 +550,7 @@ def prepFI(algorithms,full_path,abbrev,metric_dict,primary_metric):
         fi_df_list.append(temp_df)
         fi_ave_list.append(temp_df.mean().tolist()) #Saves average FI scores over CV runs
         # Get relevant metric info
-        avgBA = mean(metric_dict[algorithm][primary_metric])
+        avgBA = mean(metric_dict[algorithm][metric_weight]) #   old-     avgBA = mean(metric_dict[algorithm][primary_metric])
         ave_metric_list.append(avgBA)
     #Normalize Average Feature importance scores so they fall between (0 - 1)
     fi_ave_norm_list = []
@@ -590,7 +593,7 @@ def selectForCompositeViz(top_model_features,non_zero_union_features,non_zero_un
             score = fi_ave_norm_list[j][non_zero_union_indexes[i]]
             # multiply score by algorithm performance weight
             weight = ave_metric_list[j]
-            if weight <= .5:
+            if weight <= .5: #This is why this method is limited to balanced_accuracy and roc_auc
                 weight = 0
             if not weight == 0:
                 weight = (weight - 0.5) / 0.5
@@ -703,12 +706,16 @@ def composite_FI_plot(fi_list, algorithms, algColors, all_feature_listToViz, fig
         bottoms.append(bottom)
     if not isinstance(bottoms, list):
         bottoms = bottoms.tolist()
-    #Plot subsequent feature bars for each subsequent algorithm
-    ps = [p1[0]]
-    for i in range(len(algorithms) - 1):
-        p = plt.bar(r, fi_list[i + 1], bottom=bottoms[i], color=algColors[i + 1], edgecolor='white', width=barWidth)
-        ps.append(p[0])
-    lines = tuple(ps)
+    if len(algorithms) > 1:
+        #Plot subsequent feature bars for each subsequent algorithm
+        ps = [p1[0]]
+        for i in range(len(algorithms) - 1):
+            p = plt.bar(r, fi_list[i + 1], bottom=bottoms[i], color=algColors[i + 1], edgecolor='white', width=barWidth)
+            ps.append(p[0])
+        lines = tuple(ps)
+    else:
+        ps = [p1[0]]
+        lines = tuple(ps)
     # Specify axes info and legend
     plt.xticks(np.arange(len(all_feature_listToViz)), all_feature_listToViz, rotation='vertical')
     plt.xlabel("Feature", fontsize=20)
@@ -806,4 +813,4 @@ def parseRuntime(full_path,algorithms,abbrev):
         writer.writerow(["Stats Summary",dict['Stats']])
 
 if __name__ == '__main__':
-    job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],int(sys.argv[11]),float(sys.argv[12]),sys.argv[13])
+    job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],int(sys.argv[11]),float(sys.argv[12]),sys.argv[13],sys.argv[14])
