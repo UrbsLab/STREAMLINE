@@ -20,6 +20,7 @@ import sys
 import argparse
 import time
 import glob
+import PDF_ReportJob
 
 def main(argv):
     #Parse arguments
@@ -50,8 +51,8 @@ def main(argv):
             raise Exception('Replication and Dataset paths must be specified as arguments to generate PDF summary on new data analysis!')
 
     if not options.do_check: #Run job submission
+        job_counter += 1
         if eval(options.run_parallel):
-            job_counter += 1
             submitClusterJob(experiment_path,options.training,options.rep_data_path,options.dataset_for_rep,options.reserved_memory,options.maximum_memory,options.queue)
         else:
             submitLocalJob(experiment_path,options.training,options.rep_data_path,options.dataset_for_rep)

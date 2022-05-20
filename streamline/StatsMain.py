@@ -86,9 +86,8 @@ def main(argv):
                 os.mkdir(full_path+'/model_evaluation/DT_Viz')
             if eval(do_GP) and not os.path.exists(full_path+'/model_evaluation/GP_Viz'):
                 os.mkdir(full_path+'/model_evaluation/GP_Viz')
-
+            job_counter += 1
             if eval(options.run_parallel):
-                job_counter += 1
                 submitClusterJob(full_path,options.plot_ROC,options.plot_PRC,options.plot_FI_box,class_label,instance_label,options.output_path+'/'+options.experiment_name,cv_partitions,scale_data,options.reserved_memory,options.maximum_memory,options.queue,options.plot_metric_boxplots,primary_metric,options.top_model_features,sig_cutoff,options.metric_weight,jupyterRun)
             else:
                 submitLocalJob(full_path,options.plot_ROC,options.plot_PRC,options.plot_FI_box,class_label,instance_label,cv_partitions,scale_data,options.plot_metric_boxplots,primary_metric,options.top_model_features,sig_cutoff,options.metric_weight,jupyterRun)

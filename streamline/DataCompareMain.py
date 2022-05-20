@@ -49,9 +49,8 @@ def main(argv):
         #Load variables specified earlier in the pipeline from metadata
         sig_cutoff = metadata['Statistical Significance Cutoff']
         jupyterRun = metadata['Run From Jupyter Notebook']
-
+        job_counter += 1
         if eval(options.run_parallel):
-            job_counter += 1
             submitClusterJob(options.output_path+'/'+options.experiment_name,options.reserved_memory,options.maximum_memory,options.queue,sig_cutoff,jupyterRun)
         else:
             submitLocalJob(options.output_path+'/'+options.experiment_name,sig_cutoff,jupyterRun)
