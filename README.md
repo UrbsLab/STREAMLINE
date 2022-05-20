@@ -185,6 +185,8 @@ In this section we first provide [instructions for users with little to no codin
 * [Tips for improving STREAMLINE modeling performance](#tips-for-improving-streamline-modeling-performance)
 * [Code orientation](#code-orientation)
 
+As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the most recent release of STREAMLINE before applying any of the run modes described below, as we are actively updating this software as feedback is received.
+
 ***
 ## Use Mode 1: Google Colaboratory
 This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little to no computing experience. All other users can skip to the next [section](#use-modes-2-4-standard-installation-and-use) but may wish to revisit later parts of this section for helpful details.
