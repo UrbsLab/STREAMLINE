@@ -76,8 +76,8 @@ def main(argv):
 
         for dataset_directory_path in dataset_paths:
             full_path = options.output_path + "/" + options.experiment_name + "/" + dataset_directory_path
+            job_counter += 1
             if eval(options.run_parallel):
-                job_counter += 1
                 submitClusterJob(full_path,options.output_path+'/'+options.experiment_name,do_mutual_info,do_multisurf,options.max_features_to_keep,options.filter_poor_features,options.top_features,options.export_scores,class_label,instance_label,cv_partitions,options.overwrite_cv,options.reserved_memory,options.maximum_memory,options.queue,jupyterRun)
             else:
                 submitLocalJob(full_path,do_mutual_info,do_multisurf,options.max_features_to_keep,options.filter_poor_features,options.top_features,options.export_scores,class_label,instance_label,cv_partitions,options.overwrite_cv,jupyterRun)

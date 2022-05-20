@@ -87,8 +87,8 @@ def main(argv):
                     os.mkdir(full_path+"/feature_selection/mutualinformation")
                 for cv_train_path in glob.glob(full_path+"/CVDatasets/*_CV_*Train.csv"):
                     command_text = '/FeatureImportanceJob.py ' + cv_train_path+" "+experiment_path+" "+str(random_state)+" "+class_label+" "+instance_label+" " +str(options.instance_subset)+" mi "+str(options.n_jobs)+' '+str(options.use_TURF)+' '+str(options.TURF_pct)
+                    job_counter += 1
                     if eval(options.run_parallel):
-                        job_counter += 1
                         submitClusterJob(command_text, experiment_path,options.reserved_memory,options.maximum_memory,options.queue,jupyterRun)
                     else:
                         submitLocalJob(cv_train_path,experiment_path,random_state,class_label,instance_label,options.instance_subset,'mi',options.n_jobs,options.use_TURF,options.TURF_pct,jupyterRun)

@@ -197,8 +197,8 @@ def main(argv):
                 for algorithm in algorithms:
                     algAbrev = algInfo[algorithm][1]
                     algNoSpace = algorithm.replace(" ", "_")
+                    job_counter += 1
                     if eval(options.run_parallel):
-                        job_counter += 1
                         submitClusterJob(algNoSpace,train_file_path,test_file_path,full_path,options.n_trials,options.timeout,options.lcs_timeout,options.export_hyper_sweep_plots,instance_label,class_label,random_state,options.output_path+'/'+options.experiment_name,cvCount,filter_poor_features,options.reserved_memory,options.maximum_memory,options.do_lcs_sweep,options.nu,options.iterations,options.N,options.training_subsample,options.queue,options.use_uniform_FI,options.primary_metric,algAbrev,jupyterRun)
                     else:
                         submitLocalJob(algNoSpace,train_file_path,test_file_path,full_path,options.n_trials,options.timeout,options.lcs_timeout,options.export_hyper_sweep_plots,instance_label,class_label,random_state,cvCount,filter_poor_features,options.do_lcs_sweep,options.nu,options.iterations,options.N,options.training_subsample,options.use_uniform_FI,options.primary_metric,algAbrev,jupyterRun)
