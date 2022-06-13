@@ -106,7 +106,10 @@ def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,
         cvRepData = repData.copy()
         #Impute dataframe based on training imputation
         if eval(impute_data):
-            cvRepData = imputeRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_train_feature_list,multi_impute)
+            try: #assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
+                cvRepData = imputeRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_train_feature_list,multi_impute)
+            except: #If there was no missing data in respective dataset, thus no imputation files were created, bypass loding of imputation data. Requires new replication data to have no missing values, as there is no established internal scheme to conduct imputation.
+                print("Notice: Imputation was not conducted for the following target dataset, so imputation was not conducted for replication data: "+str(apply_name))
         #Scale dataframe based on training scaling
         if eval(scale_data):
             cvRepData = scaleRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_train_feature_list)
@@ -158,28 +161,6 @@ def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,
     job_file.write('complete')
     job_file.close()
 
-def scaleRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_train_feature_list):
-    scaleInfo = full_path+'/scale_impute/scaler_cv'+str(cvCount)+'.pickle' #Corresponding pickle file name with scalingInfo
-    infile = open(scaleInfo,'rb')
-    scaler = pickle.load(infile)
-    decimal_places = 7
-    infile.close()
-    #Scale target replication data
-    if instance_label == None or instance_label == 'None':
-        x_rep = cvRepData.drop([class_label], axis=1)
-    else:
-        x_rep = cvRepData.drop([class_label, instance_label], axis=1)
-        inst_rep = cvRepData[instance_label]  # pull out instance labels in case they include text
-    y_rep = cvRepData[class_label]
-    # Scale features (x)
-    x_rep_scaled = pd.DataFrame(scaler.transform(x_rep).round(decimal_places), columns=x_rep.columns)
-    # Recombine x and y
-    if instance_label == None or instance_label == 'None':
-        scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[class_label]), pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)],axis=1, sort=False)
-    else:
-        scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[class_label]), pd.DataFrame(inst_rep, columns=[instance_label]),pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)], axis=1, sort=False)
-    return scale_rep_df
-
 def imputeRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_train_feature_list,multi_impute):
     cvRepData.shape
     #Impute categorical features (i.e. those included in the mode_dict)
@@ -217,6 +198,28 @@ def imputeRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_tra
             if c in median_dict: #was the given feature identified as and treated as categorical during training?
                 cvRepData[c].fillna(median_dict[c], inplace=True)
     return impute_rep_df
+
+def scaleRepData(full_path,cvCount,instance_label,class_label,cvRepData,all_train_feature_list):
+    scaleInfo = full_path+'/scale_impute/scaler_cv'+str(cvCount)+'.pickle' #Corresponding pickle file name with scalingInfo
+    infile = open(scaleInfo,'rb')
+    scaler = pickle.load(infile)
+    decimal_places = 7
+    infile.close()
+    #Scale target replication data
+    if instance_label == None or instance_label == 'None':
+        x_rep = cvRepData.drop([class_label], axis=1)
+    else:
+        x_rep = cvRepData.drop([class_label, instance_label], axis=1)
+        inst_rep = cvRepData[instance_label]  # pull out instance labels in case they include text
+    y_rep = cvRepData[class_label]
+    # Scale features (x)
+    x_rep_scaled = pd.DataFrame(scaler.transform(x_rep).round(decimal_places), columns=x_rep.columns)
+    # Recombine x and y
+    if instance_label == None or instance_label == 'None':
+        scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[class_label]), pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)],axis=1, sort=False)
+    else:
+        scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[class_label]), pd.DataFrame(inst_rep, columns=[instance_label]),pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)], axis=1, sort=False)
+    return scale_rep_df
 
 def evalModel(full_path,algAbrev,cvRepDataX,cvRepDataY,cvCount):
     modelInfo = full_path+'/models/pickledModels/'+algAbrev+'_'+str(cvCount)+'.pickle' #Corresponding pickle file name with scalingInfo

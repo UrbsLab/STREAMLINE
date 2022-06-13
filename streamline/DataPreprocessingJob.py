@@ -63,7 +63,7 @@ def job(cv_train_path,cv_test_path,experiment_path,scale_data,impute_data,overwr
             x_train,x_test = imputeCVData(categorical_variables,x_train,x_test,random_state,experiment_path,dataset_name,cvCount,multi_impute)
             x_train = pd.DataFrame(x_train, columns=header)
             x_test = pd.DataFrame(x_test, columns=header)
-        else:
+        else: # No missing data found in dataset 
             if eval(jupyterRun):
                 print('Notice: No missing values found. Imputation skipped.')
     #Scale training and testing datasets if specified by user
