@@ -74,6 +74,7 @@ def reportAveFS(algorithm,algorithmlabel,cv_partitions,top_features,full_path,se
     counter = 0
     cv_keep_list = []
     feature_name_ranks = [] #stores sorded feature importance dictionaries for all CVs
+    cv_score_dict = {}
     for i in range(0,cv_partitions):
         scoreInfo = full_path+"/feature_selection/"+algorithmlabel+"/pickledForPhase4/"+str(i)+'.pickle'
         file = open(scoreInfo, 'rb')
@@ -82,13 +83,24 @@ def reportAveFS(algorithm,algorithmlabel,cv_partitions,top_features,full_path,se
         scoreDict = rawData[1] #dictionary of feature importance scores (original feature order)
         score_sorted_features = rawData[2] #dictionary of feature importances scores (in decreasing order)
         feature_name_ranks.append(score_sorted_features)
+        #update cv_Score_dict so there is a list of scores (from CV runs) for each feature
+        if counter == 0:
+            cv_score_dict = copy.deepcopy(scoreDict)
+            for each in cv_score_dict:
+                cv_score_dict[each] = [cv_score_dict[each]]
+        else:
+            for each in rawData[1]:
+                cv_score_dict[each].append(scoreDict[each])
+        counter += 1
+        """
         #Update scoreDict so it includes feature importance sums across all cvs.
         if counter == 0:
             scoreSum = copy.deepcopy(scoreDict)
         else:
             for each in rawData[1]:
                 scoreSum[each] += scoreDict[each]
-        counter += 1
+
+        """
         keep_list = []
         for each in scoreDict:
             if scoreDict[each] > 0:
@@ -98,15 +110,23 @@ def reportAveFS(algorithm,algorithmlabel,cv_partitions,top_features,full_path,se
     meta_feature_ranks[algorithm] = feature_name_ranks #stores sorted feature importance dicitonaries for all algorithms and CVs
     #Generate barplot of average scores------------------------------------------------------------------------
     if eval(export_scores):
+        # Get median score for each features
+        for v in cv_score_dict:
+            cv_score_dict[v] = median(cv_score_dict[v])
+        print(cv_score_dict)
+        """
         # Make the sum of scores an average
         for v in scoreSum:
             scoreSum[v] = scoreSum[v] / float(cv_partitions)
+        """
         # Sort averages (decreasing order and print top 'n' and plot top 'n'
         f_names = []
         f_scores = []
-        for each in scoreSum:
+        #for each in scoreSum:
+        for each in cv_score_dict:
             f_names.append(each)
-            f_scores.append(scoreSum[each])
+            #f_scores.append(scoreSum[each])
+            f_scores.append(cv_score_dict[each])
         names_scores = {'Names': f_names, 'Scores': f_scores}
         ns = pd.DataFrame(names_scores)
         ns = ns.sort_values(by='Scores', ascending=False)
@@ -115,9 +135,9 @@ def reportAveFS(algorithm,algorithmlabel,cv_partitions,top_features,full_path,se
         # Visualize sorted feature scores
         ns['Scores'].plot(kind='barh', figsize=(6, 12))
         plt.ylabel('Features')
-        plt.xlabel(str(algorithm) + ' Score')
+        plt.xlabel(str(algorithm) + ' Median Score')
         plt.yticks(np.arange(len(ns['Names'])), ns['Names'])
-        plt.title('Sorted ' + str(algorithm) + ' Scores')
+        #plt.title('Sorted Median ' + str(algorithm) + ' Scores')
         plt.savefig((full_path+"/feature_selection/"+algorithmlabel+"/TopAverageScores.png"), bbox_inches="tight")
         if eval(jupyterRun):
             plt.show()
@@ -125,7 +145,7 @@ def reportAveFS(algorithm,algorithmlabel,cv_partitions,top_features,full_path,se
             plt.close('all')
     return selected_feature_lists,meta_feature_ranks
 
-def selectFeatures(algorithms, cv_partitions, selectedFeatureLists, max_features_to_keep, metaFeatureRanks): 
+def selectFeatures(algorithms, cv_partitions, selectedFeatureLists, max_features_to_keep, metaFeatureRanks):
     """ Identifies features to keep for each cv. If more than one feature importance algorithm was applied, collective feature selection
         is applied so that the union of informative features is preserved. Overall, only informative features (i.e. those with a score > 0
         are preserved). If there are more informative features than the max_features_to_keep, then only those top scoring features are preserved.
