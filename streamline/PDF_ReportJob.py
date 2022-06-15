@@ -295,7 +295,18 @@ def job(experiment_path,training,rep_data_path,data_path):
     pageCount = math.ceil(pageCount) #rounds up to next full integer
     analy_report.set_fill_color(200)
     for page in range(0, pageCount): #generate each page
-        pubModelStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,training,train_name)
+        pubModelMeanStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,training,train_name)
+
+    # NEXT PAGE(S) - Median Model Prediction Statistics--------------------------------------------------------------------------------------
+    print("Publishing Median Model Prediction Statistics")
+    resultLimit = 5 #Limits to this many dataset results per page
+    datasetCount = len(ds)
+    #Determine number of pages needed for univariate results
+    pageCount = datasetCount / float (resultLimit)
+    pageCount = math.ceil(pageCount) #rounds up to next full integer
+    analy_report.set_fill_color(200)
+    for page in range(0, pageCount): #generate each page
+        pubModelMedianStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,training,train_name)
 
     #NEXT PAGE(S) - ML Dataset Feature Importance Summary----------------------------------------------------------------
     if eval(training):
@@ -363,8 +374,8 @@ def job(experiment_path,training,rep_data_path,data_path):
 
         if success:
             #Process
-            for i in range(len(ds)):
-                kw_ds = kw_ds.drop('Std_D'+str(i+1),1)
+            #for i in range(len(ds)):
+            #    kw_ds = kw_ds.drop('Std_D'+str(i+1),1)
             kw_ds = kw_ds.drop('Statistic',1)
             kw_ds = kw_ds.drop('Sig(*)',1)
 
@@ -524,8 +535,7 @@ def pubUnivariate(analy_report,experiment_path,ds,page,resultLimit,pageCount):
         analy_report.cell(180, 4, 'WARNING: Univariate analysis failed from scipy package error. To fix: pip install --upgrade scipy', 1, align="L")
     footer(analy_report)
 
-
-def pubModelStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,training,train_name):
+def pubModelMeanStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,training,train_name):
     datasetCount = len(ds)
     dataStart = page*resultLimit
     countLimit = (page*resultLimit)+resultLimit
@@ -556,6 +566,98 @@ def pubModelStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,tra
             ds2 = pd.read_csv(experiment_path+'/'+ds[n]+"/model_evaluation/Summary_performance_mean.csv")
         else:
             ds2 = pd.read_csv(experiment_path+'/'+train_name+'/applymodel/'+ds[n]+'/model_evaluation/Summary_performance_mean.csv')
+        lowValBetter = ['FP','FN']
+        for metric in metricNameList:
+            metricBest = None
+            if metric in lowValBetter:
+                ds2[metric] = ds2[metric].astype(float).round(3)
+                metricBest = ds2[metric].min()
+            else:
+                ds2[metric] = ds2[metric].astype(float).round(3)
+                metricBest = ds2[metric].max()
+            bestMetricList.append(metricBest)
+
+        stats_ds = stats_ds.round(3)
+
+        #Format
+        stats_ds.reset_index(inplace=True)
+        stats_ds = stats_ds.columns.to_frame().T.append(stats_ds, ignore_index=True)
+        stats_ds.columns = range(len(stats_ds.columns))
+        epw = 208 #Amount of Space (width) Avaliable
+        th = analy_report.font_size
+        col_width_list = [32,11,11,8,12,12,10,15,15,15,15,8,9,9,8,8,8]
+        table1 = stats_ds.iloc[: , :18]
+        table1 = table1.to_numpy()
+
+        #Print table header first
+        row_count = 0
+        col_count = 0
+        for row in table1: # each row
+            if row_count == 0:
+                #Print first row
+                for datum in row:
+                    if col_count == 0:
+                        analy_report.cell(col_width_list[col_count], th, 'ML Algorithm', border=0, align="C")
+                    else:
+                        entryList = str(datum).split(' ')
+                        analy_report.cell(col_width_list[col_count], th, entryList[0], border=0, align="C")
+                    col_count +=1
+                analy_report.ln(th) #critical
+                col_count = 0
+                #Print second row
+                for datum in row:
+                    entryList = str(datum).split(' ')
+                    try:
+                        analy_report.cell(col_width_list[col_count], th, entryList[1], border=0, align="C")
+                    except:
+                        analy_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
+                    col_count +=1
+                analy_report.ln(th) #critical
+                col_count = 0
+            else: #Print table contents
+                for datum in row: #each column
+                    if col_count > 0 and float(datum) == float(bestMetricList[col_count-1]):
+                        analy_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L", fill=True)
+                    else:
+                        analy_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
+                    col_count +=1
+                analy_report.ln(th) #critical
+                col_count = 0
+            row_count += 1
+    footer(analy_report)
+
+
+def pubModelMedianStats(analy_report,experiment_path,ds,page,resultLimit,pageCount,training,train_name):
+    datasetCount = len(ds)
+    dataStart = page*resultLimit
+    countLimit = (page*resultLimit)+resultLimit
+    #Create PDF and Set Options
+    analy_report.set_margins(left=1, top=1, right=1, )
+    analy_report.add_page()
+    analy_report.set_font('Times', 'B', 12)
+    if pageCount > 1:
+        analy_report.cell(w=0, h = 8, txt='Median Model Prediction Statistics (Rounded to 3 Decimal Points): Page '+str(page+1), border=1, align='L', ln=2)
+    else:
+        analy_report.cell(w=0, h = 8, txt='Median Model Prediction Statistics (Rounded to 3 Decimal Points)', border=1, align='L', ln=2)
+    for n in range(dataStart,datasetCount):
+        if n >= countLimit: #Stops generating page when dataset count limit reached
+            break
+        analy_report.y += 4
+        analy_report.set_font('Times', 'B', 10)
+        analy_report.multi_cell(w=0, h=4, txt='D'+str(n+1)+' = '+ds[n], border=1, align='L')
+        analy_report.y += 1 #Space below section header
+        analy_report.set_font('Times','', 7)
+        if eval(training):
+            stats_ds = pd.read_csv(experiment_path+'/'+str(ds[n])+'/model_evaluation/Summary_performance_median.csv',sep=',',index_col=0)
+        else:
+            stats_ds = pd.read_csv(experiment_path+'/'+train_name+'/applymodel/'+ds[n]+'/model_evaluation/Summary_performance_median.csv',sep=',',index_col=0)
+        #Make list of top values for each metric
+        metricNameList = ['Balanced Accuracy','Accuracy','F1 Score','Sensitivity (Recall)','Specificity','Precision (PPV)','TP','TN','FP','FN','NPV','LR+','LR-','ROC AUC','PRC AUC','PRC APS']
+        bestMetricList = []
+        if eval(training):
+            ds2 = pd.read_csv(experiment_path+'/'+ds[n]+"/model_evaluation/Summary_performance_median.csv")
+        else:
+            ds2 = pd.read_csv(experiment_path+'/'+train_name+'/applymodel/'+ds[n]+'/model_evaluation/Summary_performance_median.csv')
         lowValBetter = ['FP','FN']
         for metric in metricNameList:
             metricBest = None

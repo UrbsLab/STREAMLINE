@@ -36,9 +36,10 @@ from statistics import mean,stdev
 def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,sig_cutoff,cv_partitions,scale_data,impute_data,primary_metric,dataset_for_rep,match_label,plot_ROC,plot_PRC,plot_metric_boxplots,export_feature_correlations,jupyterRun,multi_impute):
     train_name = full_path.split('/')[-1] #original training data name
     experiment_path = '/'.join(full_path.split('/')[:-1])
-    apply_name = datasetFilename.split('/')[-1].split('.')[0]
+    apply_name = datasetFilename.split('/')[-1].split('.')[0] #replication dataset being analyzed in this job
+    apply_ext = datasetFilename.split('/')[-1].split('.')[-1] #replication dataset file extension
+    repData = loadData(datasetFilename,apply_ext)
     #Load Replication Dataset
-    repData = pd.read_csv(datasetFilename, na_values='NA', sep = ",")
     rep_feature_list = list(repData.columns.values)
     rep_feature_list.remove(class_label)
     if match_label != 'None':
@@ -46,7 +47,9 @@ def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,
     if instance_label != 'None':
         rep_feature_list.remove(instance_label)
     #Load original training dataset (could include 'match label')
-    trainData = pd.read_csv(dataset_for_rep, na_values='NA', sep = ",")
+    data_ext = dataset_for_rep.split('/')[-1].split('.')[-1] #replication dataset file extension
+    trainData = loadData(dataset_for_rep,data_ext)
+    #trainData = pd.read_csv(dataset_for_rep, na_values='NA', sep = ",")
     all_train_feature_list = list(trainData.columns.values)
     all_train_feature_list.remove(class_label)
     if match_label != 'None':
@@ -145,6 +148,7 @@ def job(datasetFilename,full_path,class_label,instance_label,categorical_cutoff,
     StatsJob.doPlotROC(result_table,colors,full_path+'/applymodel/'+apply_name,jupyterRun)
     doPlotPRC(result_table,colors,full_path,apply_name,instance_label,class_label,jupyterRun,repData) #can't use existing method since we need to recalculate 'no skill' line
     metrics = list(metric_dict[algorithms[0]].keys())
+    StatsJob.saveMetricMedians(full_path+'/applymodel/'+apply_name,metrics,metric_dict)
     StatsJob.saveMetricMeans(full_path+'/applymodel/'+apply_name,metrics,metric_dict)
     StatsJob.saveMetricStd(full_path+'/applymodel/'+apply_name,metrics,metric_dict)
     if eval(plot_metric_boxplots):
@@ -412,6 +416,14 @@ def doPlotPRC(result_table,colors,full_path,apply_name,instance_label,class_labe
         plt.show()
     else:
         plt.close('all')
+
+def loadData(dataset_path,dataset_ext):
+    """ Load the target dataset given the dataset file path and respective file extension"""
+    if dataset_ext == 'csv':
+        data = pd.read_csv(dataset_path,na_values='NA',sep=',')
+    else: # txt file
+        data = pd.read_csv(dataset_path,na_values='NA',sep='\t')
+    return data
 
 if __name__ == '__main__':
     job(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],int(sys.argv[5]),float(sys.argv[6]),int(sys.argv[7]),sys.argv[8],sys.argv[9],sys.argv[10],sys.argv[11],sys.argv[12],sys.argv[13],sys.argv[14],sys.argv[15],sys.argv[16],sys.argv[17],sys.argv[18])

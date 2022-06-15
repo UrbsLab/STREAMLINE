@@ -87,21 +87,24 @@ def kruscallWallis(experiment_path,datasets,algorithms,metrics,dataset_directory
     label = ['Statistic', 'P-Value', 'Sig(*)']
     i = 1
     for dataset in datasets:
-        label.append('Mean_D' + str(i))
-        label.append('Std_D' + str(i))
+        label.append('Median_D' + str(i))
+        #label.append('Mean_D' + str(i))
+        #label.append('Std_D' + str(i))
         i += 1
     for algorithm in algorithms:
         kruskal_summary = pd.DataFrame(index=metrics, columns=label)
         for metric in metrics:
             tempArray = []
-            aveList = []
-            sdList = []
+            medList = []
+            #aveList = []
+            #sdList = []
             for dataset_path in dataset_directory_paths:
                 filename = dataset_path+'/model_evaluation/'+name_to_abbrev[algorithm]+'_performance.csv'
                 td = pd.read_csv(filename)
                 tempArray.append(td[metric])
-                aveList.append(td[metric].mean())
-                sdList.append(td[metric].std())
+                medList.append(td[metric].median())
+                #aveList.append(td[metric].mean())
+                #sdList.append(td[metric].std())
             try: #Run Kruscall Wallis
                 result = stats.kruskal(*tempArray)
             except:
@@ -112,9 +115,11 @@ def kruscallWallis(experiment_path,datasets,algorithms,metrics,dataset_directory
                 kruskal_summary.at[metric, 'Sig(*)'] = str('*')
             else:
                 kruskal_summary.at[metric, 'Sig(*)'] = str('')
-            for j in range(len(aveList)):
-                kruskal_summary.at[metric, 'Mean_D' + str(j+1)] = str(round(aveList[j], 6))
-                kruskal_summary.at[metric, 'Std_D' + str(j+1)] = str(round(sdList[j], 6))
+            #for j in range(len(aveList)):
+            for j in range(len(medList)):
+                kruskal_summary.at[metric, 'Median_D' + str(j+1)] = str(round(medList[j], 6))
+                #kruskal_summary.at[metric, 'Mean_D' + str(j+1)] = str(round(aveList[j], 6))
+                #kruskal_summary.at[metric, 'Std_D' + str(j+1)] = str(round(sdList[j], 6))
         #Export analysis summary to .csv file
         kruskal_summary.to_csv(experiment_path+'/DatasetComparisons/KruskalWallis_'+algorithm+'.csv')
 
@@ -124,8 +129,9 @@ def wilcoxonRank(experiment_path,datasets,algorithms,metrics,dataset_directory_p
     larger than the other."""
     label = ['Metric', 'Data1', 'Data2', 'Statistic', 'P-Value', 'Sig(*)']
     for i in range(1,3):
-        label.append('Mean_Data' + str(i))
-        label.append('Std_Data' + str(i))
+        label.append('Median_Data' + str(i))
+        #label.append('Mean_Data' + str(i))
+        #label.append('Std_Data' + str(i))
     for algorithm in algorithms:
         master_list = []
         for metric in metrics:
@@ -136,14 +142,16 @@ def wilcoxonRank(experiment_path,datasets,algorithms,metrics,dataset_directory_p
                     file1 = dataset_directory_paths[x]+'/model_evaluation/'+name_to_abbrev[algorithm]+'_performance.csv'
                     td1 = pd.read_csv(file1)
                     set1 = td1[metric]
-                    ave1 = td1[metric].mean()
-                    sd1 = td1[metric].std()
+                    med1 = td1[metric].median()
+                    #ave1 = td1[metric].mean()
+                    #sd1 = td1[metric].std()
                     #Grab info on second dataset
                     file2 = dataset_directory_paths[y] + '/model_evaluation/' + name_to_abbrev[algorithm] + '_performance.csv'
                     td2 = pd.read_csv(file2)
                     set2 = td2[metric]
-                    ave2 = td2[metric].mean()
-                    sd2 = td2[metric].std()
+                    med2 = td2[metric].median()
+                    #ave2 = td2[metric].mean()
+                    #sd2 = td2[metric].std()
                     #handle error when metric values are equal for both algorithms
                     if set1.equals(set2):  # Check if all nums are equal in sets
                         result = ['NA', 1]
@@ -162,10 +170,12 @@ def wilcoxonRank(experiment_path,datasets,algorithms,metrics,dataset_directory_p
                         tempList.append(str('*'))
                     else:
                         tempList.append(str(''))
-                    tempList.append(str(round(ave1, 6)))
-                    tempList.append(str(round(sd1, 6)))
-                    tempList.append(str(round(ave2, 6)))
-                    tempList.append(str(round(sd2, 6)))
+                    tempList.append(str(round(med1, 6)))
+                    tempList.append(str(round(med2, 6)))
+                    #tempList.append(str(round(ave1, 6)))
+                    #tempList.append(str(round(sd1, 6)))
+                    #tempList.append(str(round(ave2, 6)))
+                    #tempList.append(str(round(sd2, 6)))
                     master_list.append(tempList)
         #Export test results
         df = pd.DataFrame(master_list)
@@ -178,8 +188,9 @@ def mannWhitneyU(experiment_path,datasets,algorithms,metrics,dataset_directory_p
     larger than the other."""
     label = ['Metric', 'Data1', 'Data2', 'Statistic', 'P-Value', 'Sig(*)']
     for i in range(1,3):
-        label.append('Mean_Data' + str(i))
-        label.append('Std_Data' + str(i))
+        label.append('Median_Data' + str(i))
+        #label.append('Mean_Data' + str(i))
+        #label.append('Std_Data' + str(i))
     for algorithm in algorithms:
         master_list = []
         for metric in metrics:
@@ -190,14 +201,16 @@ def mannWhitneyU(experiment_path,datasets,algorithms,metrics,dataset_directory_p
                     file1 = dataset_directory_paths[x]+'/model_evaluation/'+name_to_abbrev[algorithm]+'_performance.csv'
                     td1 = pd.read_csv(file1)
                     set1 = td1[metric]
-                    ave1 = td1[metric].mean()
-                    sd1 = td1[metric].std()
+                    med1 = td1[metric].median()
+                    #ave1 = td1[metric].mean()
+                    #sd1 = td1[metric].std()
                     #Grab info on second dataset
                     file2 = dataset_directory_paths[y] + '/model_evaluation/' + name_to_abbrev[algorithm] + '_performance.csv'
                     td2 = pd.read_csv(file2)
                     set2 = td2[metric]
-                    ave2 = td2[metric].mean()
-                    sd2 = td2[metric].std()
+                    med2 = td2[metric].median()
+                    #ave2 = td2[metric].mean()
+                    #sd2 = td2[metric].std()
                     #handle error when metric values are equal for both algorithms
                     if set1.equals(set2):  # Check if all nums are equal in sets
                         result = ['NA', 1]
@@ -216,10 +229,12 @@ def mannWhitneyU(experiment_path,datasets,algorithms,metrics,dataset_directory_p
                         tempList.append(str('*'))
                     else:
                         tempList.append(str(''))
-                    tempList.append(str(round(ave1, 6)))
-                    tempList.append(str(round(sd1, 6)))
-                    tempList.append(str(round(ave2, 6)))
-                    tempList.append(str(round(sd2, 6)))
+                    tempList.append(str(round(med1, 6)))
+                    tempList.append(str(round(med2, 6)))
+                    #tempList.append(str(round(ave1, 6)))
+                    #tempList.append(str(round(sd1, 6)))
+                    #tempList.append(str(round(ave2, 6)))
+                    #tempList.append(str(round(sd2, 6)))
                     master_list.append(tempList)
         #Export test results
         df = pd.DataFrame(master_list)
@@ -234,8 +249,9 @@ def bestKruscallWallis(experiment_path,datasets,algorithms,metrics,dataset_direc
     i = 1
     for dataset in datasets:
         label.append('Best_Alg_D' + str(i))
-        label.append('Mean_D' + str(i))
-        label.append('Std_D' + str(i))
+        label.append('Median_D' + str(i))
+        #label.append('Mean_D' + str(i))
+        #label.append('Std_D' + str(i))
         i += 1
     kruskal_summary = pd.DataFrame(index=metrics, columns=label)
     global_data = []
@@ -243,22 +259,27 @@ def bestKruscallWallis(experiment_path,datasets,algorithms,metrics,dataset_direc
         best_list = []
         best_data = []
         for dataset_path in dataset_directory_paths:
-            alg_ave = []
-            alg_st = []
+            alg_med = []
+            #alg_ave = []
+            #alg_st = []
             alg_data = []
             for algorithm in algorithms:
                 filename = dataset_path+'/model_evaluation/'+name_to_abbrev[algorithm]+'_performance.csv'
                 td = pd.read_csv(filename)
-                alg_ave.append(td[metric].mean())
-                alg_st.append(td[metric].std())
+                alg_med.append(td[metric].median())
+                #alg_ave.append(td[metric].mean())
+                #alg_st.append(td[metric].std())
                 alg_data.append(td[metric])
             # Find best algorithm for given metric based on average
-            best_ave = max(alg_ave)
-            best_index = alg_ave.index(best_ave)
-            best_sd = alg_st[best_index]
+            #best_ave = max(alg_ave)
+            best_med = max(alg_med)
+            #best_index = alg_ave.index(best_ave)
+            best_index = alg_med.index(best_med)
+            #best_sd = alg_st[best_index]
             best_alg = algorithms[best_index]
             best_data.append(alg_data[best_index])
-            best_list.append([best_alg, best_ave, best_sd])
+            #best_list.append([best_alg, best_ave, best_sd])
+            best_list.append([best_alg, best_med])
         global_data.append([best_data, best_list])
         try:
             result = stats.kruskal(*best_data)
@@ -274,8 +295,9 @@ def bestKruscallWallis(experiment_path,datasets,algorithms,metrics,dataset_direc
             kruskal_summary.at[metric, 'Sig(*)'] = str('')
         for j in range(len(best_list)):
             kruskal_summary.at[metric, 'Best_Alg_D' + str(j+1)] = str(best_list[j][0])
-            kruskal_summary.at[metric, 'Mean_D' + str(j+1)] = str(round(best_list[j][1], 6))
-            kruskal_summary.at[metric, 'Std_D' + str(j+1)] = str(round(best_list[j][2], 6))
+            kruskal_summary.at[metric, 'Median_D' + str(j+1)] = str(round(best_list[j][1], 6))
+            #kruskal_summary.at[metric, 'Mean_D' + str(j+1)] = str(round(best_list[j][1], 6))
+            #kruskal_summary.at[metric, 'Std_D' + str(j+1)] = str(round(best_list[j][2], 6))
     #Export analysis summary to .csv file
     kruskal_summary.to_csv(experiment_path + '/DatasetComparisons/BestCompare_KruskalWallis.csv')
     return global_data
@@ -287,8 +309,9 @@ def bestMannWhitneyU(experiment_path,datasets,algorithms,metrics,dataset_directo
     label = ['Metric', 'Data1', 'Data2', 'Statistic', 'P-Value', 'Sig(*)']
     for i in range(1,3):
         label.append('Best_Alg_Data' + str(i))
-        label.append('Mean_Data' + str(i))
-        label.append('Std_Data' + str(i))
+        label.append('Median_Data' + str(i))
+        #label.append('Mean_Data' + str(i))
+        #label.append('Std_Data' + str(i))
     master_list = []
     j = 0
     for metric in metrics:
@@ -296,11 +319,13 @@ def bestMannWhitneyU(experiment_path,datasets,algorithms,metrics,dataset_directo
             for y in range(x + 1, len(datasets)):
                 tempList = []
                 set1 = global_data[j][0][x]
-                ave1 = global_data[j][1][x][1]
-                sd1 = global_data[j][1][x][2]
+                med1 = global_data[j][1][x][1]
+                #ave1 = global_data[j][1][x][1]
+                #sd1 = global_data[j][1][x][2]
                 set2 = global_data[j][0][y]
-                ave2 = global_data[j][1][y][1]
-                sd2 = global_data[j][1][y][2]
+                med2 = global_data[j][1][y][1]
+                #ave2 = global_data[j][1][y][1]
+                #sd2 = global_data[j][1][y][2]
                 #handle error when metric values are equal for both algorithms
                 if set1.equals(set2):  # Check if all nums are equal in sets
                     result = ['NA', 1]
@@ -320,11 +345,13 @@ def bestMannWhitneyU(experiment_path,datasets,algorithms,metrics,dataset_directo
                 else:
                     tempList.append(str(''))
                 tempList.append(global_data[j][1][x][0])
-                tempList.append(str(round(ave1, 6)))
-                tempList.append(str(round(sd1, 6)))
+                tempList.append(str(round(med1, 6)))
+                #tempList.append(str(round(ave1, 6)))
+                #tempList.append(str(round(sd1, 6)))
                 tempList.append(global_data[j][1][y][0])
-                tempList.append(str(round(ave2, 6)))
-                tempList.append(str(round(sd2, 6)))
+                tempList.append(str(round(med2, 6)))
+                #tempList.append(str(round(ave2, 6)))
+                #tempList.append(str(round(sd2, 6)))
                 master_list.append(tempList)
         j += 1
     #Export analysis summary to .csv file
@@ -340,8 +367,9 @@ def bestWilcoxonRank(experiment_path,datasets,algorithms,metrics,dataset_directo
     label = ['Metric', 'Data1', 'Data2', 'Statistic', 'P-Value', 'Sig(*)']
     for i in range(1,3):
         label.append('Best_Alg_Data' + str(i))
-        label.append('Mean_Data' + str(i))
-        label.append('Std_Data' + str(i))
+        label.append('Median_Data' + str(i))
+        #label.append('Mean_Data' + str(i))
+        #label.append('Std_Data' + str(i))
     master_list = []
     j = 0
     for metric in metrics:
@@ -349,11 +377,13 @@ def bestWilcoxonRank(experiment_path,datasets,algorithms,metrics,dataset_directo
             for y in range(x + 1, len(datasets)):
                 tempList = []
                 set1 = global_data[j][0][x]
-                ave1 = global_data[j][1][x][1]
-                sd1 = global_data[j][1][x][2]
+                med1 = global_data[j][1][x][1]
+                #ave1 = global_data[j][1][x][1]
+                #sd1 = global_data[j][1][x][2]
                 set2 = global_data[j][0][y]
-                ave2 = global_data[j][1][y][1]
-                sd2 = global_data[j][1][y][2]
+                med2 = global_data[j][1][y][1]
+                #ave2 = global_data[j][1][y][1]
+                #sd2 = global_data[j][1][y][2]
                 #handle error when metric values are equal for both algorithms
                 if set1.equals(set2):  # Check if all nums are equal in sets
                     result = ['NA', 1]
@@ -373,11 +403,13 @@ def bestWilcoxonRank(experiment_path,datasets,algorithms,metrics,dataset_directo
                 else:
                     tempList.append(str(''))
                 tempList.append(global_data[j][1][x][0])
-                tempList.append(str(round(ave1, 6)))
-                tempList.append(str(round(sd1, 6)))
+                tempList.append(str(round(med1, 6)))
+                #tempList.append(str(round(ave1, 6)))
+                #tempList.append(str(round(sd1, 6)))
                 tempList.append(global_data[j][1][y][0])
-                tempList.append(str(round(ave2, 6)))
-                tempList.append(str(round(sd2, 6)))
+                tempList.append(str(round(med2, 6)))
+                #tempList.append(str(round(ave2, 6)))
+                #tempList.append(str(round(sd2, 6)))
                 master_list.append(tempList)
         j += 1
     #Export analysis summary to .csv file
