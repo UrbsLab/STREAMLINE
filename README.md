@@ -971,7 +971,7 @@ To cite the STREAMLINE preprint on arXiv, please use:
   title={STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison},
   author={Urbanowicz, Ryan J and Zhang, Robert and Cui, Yuhan and Suri, Pranshu},
   journal={arXiv preprint arXiv:2206.12002v1},
-  year={2020}
+  year={2022}
 }
 ```
 If you wish to cite the STREAMLINE codebase, please use:
