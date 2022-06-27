@@ -2,7 +2,9 @@
 # Overview
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that empowers anyone to easily run, interpret, and apply a rigorous and customizable analysis for data mining or predictive modeling. Notably, this tool is currently limited to supervised learning on tabular, binary classification data but will be expanded as our development continues. The development of this pipeline focused on (1) overall automation, (2) avoiding and detecting sources of bias, (3) optimizing modeling performance, (4) ensuring complete reproducibility (under certain STREAMLINE parameter settings), (5) capturing complex associations in data (e.g. feature interactions), and (6) enhancing interpretability of output. Overall, the goal of this pipeline is to provide a transparent framework to learn from data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
 
-We have recently submitted a publication introducing and applying STREAMLINE. See [below](#citation) for code citation information prior to publication.
+A preprint introducing and applying STREAMLINE is now available https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw.
+
+See [below](#citation) for how to cite this preprint and/or the codebase prior to the availability of the final peer-reviewed publication.
 
 ***
 ## Quick Start
@@ -963,7 +965,16 @@ STREAMLINE is the result of 3 years of on-and-off development gaining feedback f
 
 ***
 # Citation
-If you wish to cite STREAMLINE prior to our first journal publication, please use:
+To cite the STREAMLINE preprint on arXiv, please use:
+```
+@article{urbanowicz2022streamline,
+  title={STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison},
+  author={Urbanowicz, Ryan J and Zhang, Robert and Cui, Yuhan and Suri, Pranshu},
+  journal={arXiv preprint arXiv:2206.12002v1},
+  year={2020}
+}
+```
+If you wish to cite the STREAMLINE codebase, please use:
 ```
 @misc{streamline2022,
   author = {Urbanowicz, Ryan and Zhang, Robert},
@@ -983,7 +994,7 @@ A preprint describing an early version of what would become STREAMLINE applied t
 @article{urbanowicz2020rigorous,
   title={A Rigorous Machine Learning Analysis Pipeline for Biomedical Binary Classification: Application in Pancreatic Cancer Nested Case-control Studies with Implications for Bias Assessments},
   author={Urbanowicz, Ryan J and Suri, Pranshu and Cui, Yuhan and Moore, Jason H and Ruth, Karen and Stolzenberg-Solomon, Rachael and Lynch, Shannon M},
-  journal={arXiv preprint arXiv:2008.12829},
+  journal={arXiv preprint arXiv:2008.12829v2},
   year={2020}
 }
 ```
