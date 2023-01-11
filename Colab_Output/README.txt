@@ -1,1 +1,0 @@
-This folder 'Collab_Output' is here only for running this pipeline using Google Colab.  It is necessary for output files to be saved directly to this folder on the users's google drive.
