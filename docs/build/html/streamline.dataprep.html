@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>streamline.dataprep package &mdash; STREAMLINE 2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="streamline.utils package" href="streamline.utils.html" />
+    <link rel="prev" title="STREAMLINE Package" href="streamline.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> STREAMLINE
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE Package Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">STREAMLINE Package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">STREAMLINE Package Documentation</a> &raquo;</li>
+        
+          <li><a href="streamline.html">STREAMLINE Package</a> &raquo;</li>
+        
+      <li>streamline.dataprep package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/streamline.dataprep.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="streamline-dataprep-package">
+<h1>streamline.dataprep package<a class="headerlink" href="#streamline-dataprep-package" title="Permalink to this heading">¶</a></h1>
+<section id="module-streamline.dataprep.exploratory_analysis">
+<span id="streamline-dataprep-exploratory-analysis-module"></span><h2>streamline.dataprep.exploratory_analysis module<a class="headerlink" href="#module-streamline.dataprep.exploratory_analysis" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.exploratory_analysis.</span></span><span class="sig-name descname"><span class="pre">ExploratortoryDataAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
+<p>Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE</p>
+<p>Initialization function for Exploratory Data Analysis Class. Parameters are defined below.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_path</strong> – path to dataset text file</p></li>
+<li><p><strong>experiment_path</strong> – path to experiment the logging directory folder</p></li>
+<li><p><strong>ignore_features</strong> – list of row names of features to ignore</p></li>
+<li><p><strong>categorical_features</strong> – list of row names of categorical features</p></li>
+<li><p><strong>explorations</strong> – list of names of analysis to do while doing EDA (must be in set X)</p></li>
+<li><p><strong>plots</strong> – list of analysis plots to save in experiment directory (must be in set Y)</p></li>
+<li><p><strong>categorical_cutoff</strong> – categorical cut off to consider a feature categorical by analysis</p></li>
+<li><p><strong>sig_cutoff</strong> – </p></li>
+<li><p><strong>random_state</strong> – random state to set seeds for reproducibility of algorithms</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.drop_ignored_rowcols">
+<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.drop_ignored_rowcols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic data cleaning: Drops any instances with a missing outcome
+value as well as any features (ignore_features) specified by user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.feature_only_data">
+<span class="sig-name descname"><span class="pre">feature_only_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.feature_only_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.feature_only_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create features-only version of dataset for some operations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>match_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>class_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>instance_label</strong> – <p>?</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: dataframe x_data with only features</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.identify_feature_types">
+<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.identify_feature_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically identify categorical vs. quantitative features/variables
+Takes a dataframe (of independent variables) with column labels and
+returns a list of column names identified as
+being categorical based on user defined cutoff (categorical_cutoff).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.load_dataset">
+<span class="sig-name descname"><span class="pre">load_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.load_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.load_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads given dataset of the class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.make_log_folders">
+<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.make_log_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes folders for logging exploratory data analysis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.run_explore">
+<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run Exploratory Data Analysis according to EDA object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>match_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>class_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>instance_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>top_features</strong> – no of top features to consider (default=20)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.save_runtime">
+<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.save_runtime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export runtime for this phase of the pipeline on current target dataset</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-streamline.dataprep"></span></section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="streamline.utils.html" class="btn btn-neutral float-right" title="streamline.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="streamline.html" class="btn btn-neutral float-left" title="STREAMLINE Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
