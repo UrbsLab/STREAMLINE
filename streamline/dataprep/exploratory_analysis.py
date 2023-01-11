@@ -10,10 +10,28 @@ from streamline.utils.dataset import Dataset
 
 
 class ExploratortoryDataAnalysis(Job):
-    def __init__(self, dataset_path, experiment_path,
-                 categorical_cutoff=None, significane_cutoff=None,
-                 ignore_features=None, categorical_features=None,
+    """
+    Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE
+    """
+    def __init__(self, dataset_path, experiment_path, ignore_features=None,
+                 categorical_features=None, explorations=None, plots=None,
+                 categorical_cutoff=None, sig_cutoff=None,
                  random_state=None):
+        """
+        Initialization function for Exploratory Data Analysis Class. Parameters are defined below.
+
+        Args:
+            dataset_path: path to dataset text file
+            experiment_path: path to experiment the logging directory folder
+            ignore_features: list of row names of features to ignore
+            categorical_features: list of row names of categorical features
+            explorations: list of names of analysis to do while doing EDA (must be in set X)
+            plots: list of analysis plots to save in experiment directory (must be in set Y)
+            categorical_cutoff: categorical cut off to consider a feature categorical by analysis
+            sig_cutoff:
+            random_state: random state to set seeds for reproducibility of algorithms
+        """
+        super().__init__()
         self.dataset = None
         self.dataset_path = dataset_path
         self.experiment_path = experiment_path
@@ -33,7 +51,7 @@ class ExploratortoryDataAnalysis(Job):
         # Allows user to specify features that should be treated as categorical whenever possible,
         # rather than relying on pipelines automated strategy for distinguishing categorical vs.
         # quantitative features using the categorical_cutoff parameter.
-        if type(categorical_features) is type(None):
+        if type(categorical_features) == type(None):
             self.categorical_features = []
         elif type(categorical_features) == str:
             categorical_features = pd.read_csv(categorical_features, sep=',')
@@ -50,15 +68,55 @@ class ExploratortoryDataAnalysis(Job):
         # self.match_label = None
 
     def load_dataset(self):
+        """
+        Loads given dataset of the class
+        """
         self.dataset = Dataset(self.dataset_path)
 
     def make_log_folders(self):
+        """
+        Makes folders for logging exploratory data analysis
+        """
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name):
             os.mkdir(self.experiment_path + '/' + self.dataset.name)
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.mkdir(self.experiment_path + '/' + self.dataset.name + '/exploratory')
 
+    def feature_only_data(self, match_label=None, class_label=None, instance_label=None):
+        """
+        Create features-only version of dataset for some operations
+
+        Args:
+            match_label: ?
+            class_label: ?
+            instance_label: ?
+
+        Returns: dataframe x_data with only features
+
+        """
+
+        if instance_label is None and match_label is None:
+            x_data = self.dataset.data.drop([class_label], axis=1)  # exclude class column
+        elif instance_label is not None and match_label is None:
+            x_data = self.dataset.data.drop([class_label, instance_label], axis=1)  # exclude class column
+        elif instance_label is None and match_label is not None:
+            x_data = self.dataset.data.drop([class_label, match_label], axis=1)  # exclude class column
+        else:
+            x_data = self.dataset.data.drop([class_label, instance_label, match_label],
+                                            axis=1)  # exclude class column
+        return x_data
+
     def run_explore(self, match_label=None, class_label=None, instance_label=None, top_features=20):
+        """
+        Run Exploratory Data Analysis according to EDA object
+
+        Args:
+            match_label: ?
+            class_label: ?
+            instance_label: ?
+            top_features: no of top features to consider (default=20)
+
+        """
         job_start_time = time.time()
         random.seed(self.random_state)
         np.random.seed(self.random_state)
@@ -75,54 +133,50 @@ class ExploratortoryDataAnalysis(Job):
         if not (match_label is None or match_label in self.dataset.data.columns):
             match_label = None
             partition_method = 'S'
-            logging.warn("Warning: Specified 'Match label' could not be found in dataset. "
-                         "Analysis moving forward assuming there is no 'match label' column using "
-                         "stratified (S) CV partitioning.")
+            logging.warning("Warning: Specified 'Match label' could not be found in dataset. "
+                            "Analysis moving forward assuming there is no 'match label' column using "
+                            "stratified (S) CV partitioning.")
 
         # Create features-only version of dataset for some operations
-        if instance_label is None and match_label is None:
-            x_data = self.dataset.data.drop([class_label], axis=1)  # exclude class column
-        elif not instance_label is None and match_label is None:
-            x_data = self.dataset.data.drop([class_label, instance_label], axis=1)  # exclude class column
-        elif instance_label is None and not match_label is None:
-            x_data = self.dataset.data.drop([class_label, match_label], axis=1)  # exclude class column
-        else:
-            x_data = self.dataset.data.drop([class_label, instance_label, match_label],
-                                            axis=1)  # exclude class column
+        x_data = self.feature_only_data(match_label, class_label, instance_label)
 
         if len(self.categorical_features) == 0:
             self.categorical_features = self.identify_feature_types(x_data)
 
-        logging.log("Running Basic Exploratory Analysis...")
+        logging.log(0, "Running Basic Exploratory Analysis...")
+
+
         # describeData(data, experiment_path, dataset_name)
         # totalMissing = missingnessCounts(data, experiment_path, dataset_name, jupyterRun)
         # countsSummary(data, class_label, experiment_path, dataset_name, instance_label, match_label,
         #               categorical_variables,
         #               totalMissing, jupyterRun)
-        #
-        # # Export feature correlation plot if user specified
-        # if eval(export_feature_correlations):
-        #     if eval(jupyterRun):
-        #         print("Generating Feature Correlation Heatmap...")
-        #     featureCorrelationPlot(x_data, experiment_path, dataset_name, jupyterRun)
-        # # Export feature labels from data header as a reference to be used later in the pipeline
+
+        # Export feature correlation plot if user specified
+        if "Feature Correlation" in self.explorations:
+            logging.log(0, "Generating Feature Correlation Heatmap...")
+            # featureCorrelationPlot(x_data, experiment_path, dataset_name, jupyterRun)
+
+        # Export feature labels from data header as a reference to be used later in the pipeline
         # reportHeaders(x_data, experiment_path, dataset_name)
-        # del x_data  # memory cleanup
-        # # Conduct univariate analyses of association between individual features and class
-        # if eval(jupyterRun):
-        #     print("Running Univariate Analyses...")
-        # sorted_p_list = univariateAnalysis(data, experiment_path, dataset_name, class_label, instance_label,
-        #                                    match_label,
-        #                                    categorical_variables, jupyterRun, topFeatures)
-        # # Export univariate association plots (for significant features) if user specifies
-        # if eval(export_univariate_plots):
-        #     if eval(jupyterRun):
-        #         print("Generating Univariate Analysis Plots...")
-        #     univariatePlots(data, sorted_p_list, class_label, categorical_variables, experiment_path, dataset_name,
-        #                     sig_cutoff)
-        # # Generate and export cross validation datasets (i.e. training and testing sets)
-        # if eval(jupyterRun):
-        #     print("Generating and Saving CV Datasets...")
+        del x_data  # memory cleanup
+
+        # Conduct univariate analyses of association between individual features and class
+        if "Univariate analysis" in self.explorations:
+            logging.log(0, "Running Univariate Analyses...")
+            # sorted_p_list = univariateAnalysis(data, experiment_path, dataset_name, class_label, instance_label,
+            #                                    match_label,
+            #                                    categorical_variables, jupyterRun, topFeatures)
+
+        # Export univariate association plots (for significant features) if user specifies
+        if "Univariate analysis" in self.plots:
+            logging.log(0, "Generating Univariate Analysis Plots...")
+            # univariatePlots(data, sorted_p_list, class_label, categorical_variables, experiment_path, dataset_name,
+            #                 sig_cutoff)
+
+        # Generate and export cross validation datasets (i.e. training and testing sets)
+
+        print("Generating and Saving CV Datasets...")
         # train_dfs, test_dfs = cv_partitioner(data, cv_partitions, partition_method, class_label, match_label,
         #                                      random_state)
         # saveCVDatasets(experiment_path, dataset_name, train_dfs, test_dfs)
@@ -154,8 +208,8 @@ class ExploratortoryDataAnalysis(Job):
         being categorical based on user defined cutoff (categorical_cutoff).
         """
         # Identify categorical variables in dataset
-        logging.log("Identifying Feature Types...")
-        # Runs unless user has specified a predifined list of variables to treat as categorical
+        logging.log(0, "Identifying Feature Types...")
+        # Runs unless user has specified a predefined list of variables to treat as categorical
         if len(self.categorical_features) == 0:
             categorical_variables = []
             for each in x_data:
@@ -501,11 +555,15 @@ class ExploratortoryDataAnalysis(Job):
 #         file.close()
 #         counter += 1
 #
-#
-# def saveRuntime(experiment_path, dataset_name, job_start_time):
-#     """ Export runtime for this phase of the pipeline on current target dataset"""
-#     if not os.path.exists(experiment_path + '/' + dataset_name + '/runtime'):
-#         os.mkdir(experiment_path + '/' + dataset_name + '/runtime')
-#     runtime_file = open(experiment_path + '/' + dataset_name + '/runtime/runtime_exploratory.txt', 'w')
-#     runtime_file.write(str(time.time() - job_start_time))
-#     runtime_file.close()
+# ----------------------------------------------------------------------------------------------------
+    def save_runtime(self):
+        """
+        Export runtime for this phase of the pipeline on current target dataset
+        """
+        runtime = str(time.time() - self.job_start_time)
+        logging.log(0, "PHASE 1 Completed: Runtime="+str(runtime))
+        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/runtime'):
+            os.mkdir(self.experiment_path + '/' + self.dataset.name + '/runtime')
+        runtime_file = open(self.experiment_path + '/' + self.dataset.name + '/runtime/runtime_exploratory.txt', 'w')
+        runtime_file.write(runtime)
+        runtime_file.close()
