@@ -20,8 +20,6 @@ class Dataset:
     def load_data(self):
         """
         Function to load data in dataset
-
-        Returns: None
         """
         logging.log("Loading Dataset: "+str(self.name))
         if self.format == 'csv':
@@ -33,5 +31,38 @@ class Dataset:
         else:
             raise Exception("Unknown file format")
 
-    def clean_data(self):
-        pass
+    def feature_only_data(self, match_label=None, class_label=None, instance_label=None):
+        """
+        Create features-only version of dataset for some operations
+
+        Args:
+            match_label: ?
+            class_label: ?
+            instance_label: ?
+
+        Returns: dataframe x_data with only features
+
+        """
+
+        if instance_label is None and match_label is None:
+            x_data = self.data.drop([class_label], axis=1)  # exclude class column
+        elif instance_label is not None and match_label is None:
+            x_data = self.data.drop([class_label, instance_label], axis=1)  # exclude class column
+        elif instance_label is None and match_label is not None:
+            x_data = self.data.drop([class_label, match_label], axis=1)  # exclude class column
+        else:
+            x_data = self.data.drop([class_label, instance_label, match_label],
+                                    axis=1)  # exclude class column
+        return x_data
+
+    def clean_data(self, class_label, ignore_features):
+        """
+        Basic data cleaning: Drops any instances with a missing outcome
+        value as well as any features (ignore_features) specified by user
+        """
+        # Remove instances with missing outcome values
+        self.data = self.data.dropna(axis=0, how='any', subset=[class_label])
+        self.data = self.data.reset_index(drop=True)
+        self.data[class_label] = self.data[class_label].astype(dtype='int8')
+        # Remove columns to be ignored in analysis
+        self.data = self.data.drop(ignore_features, axis=1)
