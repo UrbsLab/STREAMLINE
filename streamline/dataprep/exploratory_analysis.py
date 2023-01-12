@@ -9,6 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
+from scipy.stats import chi2_contingency, mannwhitneyu
 
 
 class ExploratoryDataAnalysis(Job):
@@ -44,10 +45,10 @@ class ExploratoryDataAnalysis(Job):
         self.experiment_path = experiment_path
         self.random_state = random_state
         explorations_list = ["Describe", "Differentiate", "Univariate Analysis"]
-        plot_list = ["Univariate Analysis", "Feature Correlation"]
+        plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
 
         # Allows user to specify features that should be ignored.
-        if type(ignore_features) == type(None):
+        if ignore_features is None:
             self.ignore_features = []
         elif type(ignore_features) == str:
             ignore_features = pd.read_csv(ignore_features, sep=',')
@@ -60,7 +61,7 @@ class ExploratoryDataAnalysis(Job):
         # Allows user to specify features that should be treated as categorical whenever possible,
         # rather than relying on pipelines automated strategy for distinguishing categorical vs.
         # quantitative features using the categorical_cutoff parameter.
-        if type(categorical_features) == type(None):
+        if categorical_features is None:
             self.categorical_features = []
         elif type(categorical_features) == str:
             categorical_features = pd.read_csv(categorical_features, sep=',')
@@ -71,13 +72,14 @@ class ExploratoryDataAnalysis(Job):
             raise Exception
 
         self.categorical_cutoff = categorical_cutoff
+        self.sig_cutoff = sig_cutoff
 
         self.explorations = explorations
         if self.explorations is None:
             self.explorations = explorations_list
-        self.plot = plots
-        if self.plot is None:
-            plots = plot_list
+        self.plots = plots
+        if self.plots is None:
+            self.plots = plot_list
 
         for x in self.explorations:
             if x not in explorations_list:
@@ -111,7 +113,7 @@ class ExploratoryDataAnalysis(Job):
             top_features: no of top features to consider (default=20)
 
         """
-        job_start_time = time.time()
+        self.job_start_time = time.time()
         random.seed(self.random_state)
         np.random.seed(self.random_state)
         # Load csv file as dataset object for exploratory analysis
@@ -126,7 +128,7 @@ class ExploratoryDataAnalysis(Job):
         # in the pipeline where not all of them have match labels if specified)
         if not (match_label is None or match_label in self.dataset.data.columns):
             match_label = None
-            partition_method = 'S'
+            self.dataset.partition_method = 'S'
             logging.warning("Warning: Specified 'Match label' could not be found in dataset. "
                             "Analysis moving forward assuming there is no 'match label' column using "
                             "stratified (S) CV partitioning.")
@@ -137,9 +139,9 @@ class ExploratoryDataAnalysis(Job):
         if len(self.categorical_features) == 0:
             self.categorical_features = self.identify_feature_types(x_data)
 
-        self.data.categorical_variables = self.categorical_features
+        self.dataset.categorical_variables = self.categorical_features
 
-        logging.log(0, "Running Basic Exploratory Analysis...")
+        logging.info("Running Basic Exploratory Analysis...")
 
         # Describe and save description if user specified
         if "Describe" in self.explorations:
@@ -148,25 +150,21 @@ class ExploratoryDataAnalysis(Job):
             plot = False
             if "Describe" in self.plots:
                 plot = True
-            self.counts_summary(match_label, class_label, instance_label, plot)
+            self.counts_summary(match_label, class_label, instance_label, total_missing, plot)
 
         # Export feature correlation plot if user specified
         if "Feature Correlation" in self.plots:
-            logging.log(0, "Generating Feature Correlation Heatmap...")
+            logging.info("Generating Feature Correlation Heatmap...")
             self.feature_correlation_plot(x_data)
 
         # Conduct univariate analyses of association between individual features and class
         if "Univariate analysis" in self.explorations:
-            logging.log(0, "Running Univariate Analyses...")
-            # sorted_p_list = univariateAnalysis(data, experiment_path, dataset_name, class_label, instance_label,
-            #                                    match_label,
-            #                                    categorical_variables, jupyterRun, topFeatures)
-
-        # Export univariate association plots (for significant features) if user specifies
-        if ("Univariate analysis" in self.explorations) and ("Univariate analysis" in self.plots):
-            logging.log(0, "Generating Univariate Analysis Plots...")
-            # univariatePlots(data, sorted_p_list, class_label, categorical_variables, experiment_path, dataset_name,
-            #                 sig_cutoff)
+            logging.info("Running Univariate Analyses...")
+            sorted_p_list = self.univariate_analysis(class_label, match_label, instance_label, top_features)
+            # Export univariate association plots (for significant features) if user specifies
+            if "Univariate analysis" in self.plots:
+                logging.info("Generating Univariate Analysis Plots...")
+                self.univariate_plots(class_label, match_label, instance_label, sorted_p_list)
 
     def drop_ignored_rowcols(self, class_label, ignore_features):
         """
@@ -217,7 +215,8 @@ class ExploratoryDataAnalysis(Job):
 
     def missingness_counts(self):
         """
-        Count and export missing values for all data columns. Also plots a histogram of missingness across all data columns.
+        Count and export missing values for all data columns. Also plots a histogram of m
+        issingness across all data columns.
         """
         # Assess Missingness in all data columns
         missing_count = self.dataset.data.isnull().sum()
@@ -241,7 +240,7 @@ class ExploratoryDataAnalysis(Job):
         if plot:
             plt.show()
 
-    def counts_summary(self, class_label, instance_label, match_label, plot=False, show=False):
+    def counts_summary(self, class_label, instance_label, match_label, total_missing=None, plot=False, show=False):
         """
         Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
         features, and class counts. Also saves a simple bar graph of class counts if user specified.
@@ -255,6 +254,7 @@ class ExploratoryDataAnalysis(Job):
             It keeps any set of instances with the same match label value in the same partition.
             instance_label: Instance label is mostly used by the rule based learner in modeling, \
             we use it to trace back heterogeneous subgroups to the instances in the original dataset \
+            total_missing: count of total missing values (optional)
             plot: flag to output bar graph in the experiment log folder
             show: flag to output the bar graph in interactive interface
 
@@ -262,17 +262,18 @@ class ExploratoryDataAnalysis(Job):
 
         """
         # Calculate, print, and export instance and feature counts
-        fCount = self.dataset.data.shape[1] - 1
-        if instance_label is not None:
-            fCount -= 1
-        if match_label is not None:
-            fCount -= 1
-        total_missing = self.missingness_counts()
-        percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * fCount)
+        f_count = self.dataset.data.shape[1] - 1
+        if not (instance_label is None):
+            f_count -= 1
+        if not (match_label is None):
+            f_count -= 1
+        if total_missing is None:
+            total_missing = self.missingness_counts()
+        percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
         summary = [['instances', self.dataset.data.shape[0]],
-                   ['features', fCount],
+                   ['features', f_count],
                    ['categorical_features', len(self.dataset.categorical_variables)],
-                   ['quantitative_features', fCount - len(self.dataset.categorical_variables)],
+                   ['quantitative_features', f_count - len(self.dataset.categorical_variables)],
                    ['missing_values', total_missing],
                    ['missing_percent', round(percent_missing, 5)]]
 
@@ -301,7 +302,7 @@ class ExploratoryDataAnalysis(Job):
             class_counts.plot(kind='bar')
             plt.ylabel('Count')
             plt.title('Class Counts')
-            plt.savefig(self.experiment_path + '/' + self.dataset_name + '/exploratory/' + 'ClassCountsBarPlot.png',
+            plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'ClassCountsBarPlot.png',
                         bbox_inches='tight')
             if show:
                 plt.show()
@@ -322,7 +323,7 @@ class ExploratoryDataAnalysis(Job):
         # Calculate correlation matrix
         correlation_mat = x_data.corr(method='pearson')
         # Generate and export correlation heatmap
-        f, ax = plt.subplots(figsize=(40, 20))
+        plt.subplots(figsize=(40, 20))
         sns.heatmap(correlation_mat, vmax=1, square=True)
         plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'FeatureCorrelations.png',
                     bbox_inches='tight')
@@ -331,93 +332,161 @@ class ExploratoryDataAnalysis(Job):
         else:
             plt.close('all')
 
-    # def univariateAnalysis(data, experiment_path, dataset_name, class_label, instance_label, match_label,
-    #                        categorical_variables, jupyterRun, topFeatures):
-    #     """ Calculates univariate association significance between each individual feature and class outcome. Assumes categorical outcome using Chi-square test for
-    #         categorical features and Mann-Whitney Test for quantitative features. """
-    #     try:  # Try loop added to deal with versions specific change to using mannwhitneyu in scipy and avoid STREAMLINE crash in those circumstances.
-    #         # Create folder for univariate analysis results
-    #         if not os.path.exists(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses'):
-    #             os.mkdir(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses')
-    #         # Generate dictionary of p-values for each feature using appropriate test (via test_selector)
-    #         p_value_dict = {}
-    #         for column in data:
-    #             if column != class_label and column != instance_label:
-    #                 p_value_dict[column] = test_selector(column, class_label, data, categorical_variables)
-    #         sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1])
-    #         # Save p-values to file
-    #         pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
-    #         pval_df.to_csv(
-    #             experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses/Univariate_Significance.csv',
-    #             index_label='Feature', header=['p-value'])
-    #         # Print results for top features across univariate analyses
-    #         if eval(jupyterRun):
-    #             fCount = data.shape[1] - 1
-    #             if not instance_label == 'None':
-    #                 fCount -= 1
-    #             if not match_label == 'None':
-    #                 fCount -= 1
-    #             min_num = min(topFeatures, fCount)
-    #             sorted_p_list_temp = sorted_p_list[: min_num]
-    #             print('Plotting top significant ' + str(min_num) + ' features.')
-    #             print('###################################################')
-    #             print('Significant Univariate Associations:')
-    #             for each in sorted_p_list_temp[:min_num]:
-    #                 print(each[0] + ": (p-val = " + str(each[1]) + ")")
-    #     except:
-    #         sorted_p_list = []  # won't actually be sorted
-    #         print(
-    #             'WARNING: Exploratory univariate analysis failed due to scipy package version error when running mannwhitneyu test. To fix, we recommend updating scipy to version 1.8.0 or greater using: pip install --upgrade scipy')
-    #         for column in data:
-    #             if column != class_label and column != instance_label:
-    #                 sorted_p_list.append([column, 'None'])
-    #     return sorted_p_list
-    #
-    #
-    # def univariatePlots(data, sorted_p_list, class_label, categorical_variables, experiment_path, dataset_name, sig_cutoff):
-    #     """ Checks whether p-value of each feature is less than or equal to significance cutoff. If so, calls graph_selector to generate an appropriate plot."""
-    #     for i in sorted_p_list:  # each feature in sorted p-value dictionary
-    #         if i[1] == 'None':
-    #             pass
-    #         else:
-    #             for j in data:  # each feature
-    #                 if j == i[0] and i[1] <= sig_cutoff:  # ONLY EXPORTS SIGNIFICANT FEATURES
-    #                     graph_selector(j, class_label, data, categorical_variables, experiment_path, dataset_name)
-    #
-    #
-    # def graph_selector(featureName, class_label, data, categorical_variables, experiment_path, dataset_name):
-    #     """ Assuming a categorical class outcome, a barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature. """
-    #     if featureName in categorical_variables:  # Feature and Outcome are discrete/categorical/binary
-    #         # Generate contingency table count bar plot. ------------------------------------------------------------------------
-    #         # Calculate Contingency Table - Counts
-    #         table = pd.crosstab(data[featureName], data[class_label])
-    #         geom_bar_data = pd.DataFrame(table)
-    #         mygraph = geom_bar_data.plot(kind='bar')
-    #         plt.ylabel('Count')
-    #         new_feature_name = featureName.replace(" ",
-    #                                                "")  # Deal with the dataset specific characters causing problems in this dataset.
-    #         new_feature_name = new_feature_name.replace("*",
-    #                                                     "")  # Deal with the dataset specific characters causing problems in this dataset.
-    #         new_feature_name = new_feature_name.replace("/",
-    #                                                     "")  # Deal with the dataset specific characters causing problems in this dataset.
-    #         plt.savefig(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses/' + 'Barplot_' + str(
-    #             new_feature_name) + ".png", bbox_inches="tight", format='png')
-    #         plt.close('all')
-    #     else:  # Feature is continuous and Outcome is discrete/categorical/binary
-    #         # Generate boxplot-----------------------------------------------------------------------------------------------------
-    #         mygraph = data.boxplot(column=featureName, by=class_label)
-    #         plt.ylabel(featureName)
-    #         plt.title('')
-    #         new_feature_name = featureName.replace(" ",
-    #                                                "")  # Deal with the dataset specific characters causing problems in this dataset.
-    #         new_feature_name = new_feature_name.replace("*",
-    #                                                     "")  # Deal with the dataset specific characters causing problems in this dataset.
-    #         new_feature_name = new_feature_name.replace("/",
-    #                                                     "")  # Deal with the dataset specific characters causing problems in this dataset.
-    #         plt.savefig(experiment_path + '/' + dataset_name + '/exploratory/univariate_analyses/' + 'Boxplot_' + str(
-    #             new_feature_name) + ".png", bbox_inches="tight", format='png')
-    #         plt.close('all')
-    #
+    def univariate_analysis(self, class_label, match_label=None, instance_label=None, top_features=20):
+        """
+        Calculates univariate association significance between each individual feature and class outcome.
+        Assumes categorical outcome using Chi-square test for
+        categorical features and Mann-Whitney Test for quantitative features.
+
+        Args:
+            class_label: column label for the outcome to be predicted in the dataset
+            match_label: column to identify unique groups of instances in the dataset \
+            that have been 'matched' as part of preparing the dataset with cases and controls \
+            that have been matched for some co-variates \
+            Match label is really only used in the cross validation partitioning \
+            It keeps any set of instances with the same match label value in the same partition.
+            instance_label: Instance label is mostly used by the rule based learner in modeling, \
+            we use it to trace back heterogeneous subgroups to the instances in the original dataset
+            top_features: no of top features to show/consider
+
+        """
+        try:
+            # Try loop added to deal with versions specific change to using
+            # mannwhitneyu in scipy and avoid STREAMLINE crash in those circumstances.
+            # Create folder for univariate analysis results
+            if not os.path.exists(self.experiment_path + '/' + self.dataset.name
+                                  + '/exploratory/univariate_analyses'):
+                os.mkdir(self.experiment_path + '/' + self.dataset.name
+                         + '/exploratory/univariate_analyses')
+            # Generate dictionary of p-values for each feature using appropriate test (via test_selector)
+            p_value_dict = {}
+            for column in self.dataset.data:
+                if column != class_label and column != instance_label:
+                    p_value_dict[column] = self.test_selector(column, class_label)
+
+            sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1])
+            # Save p-values to file
+            pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
+            pval_df.to_csv(
+                self.experiment_path + '/' + self.dataset.name
+                + '/exploratory/univariate_analyses/Univariate_Significance.csv',
+                index_label='Feature', header=['p-value'])
+
+            # Print results for top features across univariate analyses
+            f_count = self.dataset.data.shape[1] - 1
+            if not (instance_label is None):
+                f_count -= 1
+            if not (match_label is None):
+                f_count -= 1
+
+            assert (top_features is None or top_features is 20)
+            # TODO: Update with logging later.
+            #     min_num = min(top_features, f_count)
+            #     sorted_p_list_temp = sorted_p_list[: min_num]
+            #     print('Plotting top significant ' + str(min_num) + ' features.')
+            #     print('###################################################')
+            #     print('Significant Univariate Associations:')
+            #     for each in sorted_p_list_temp[:min_num]:
+            #         print(each[0] + ": (p-val = " + str(each[1]) + ")")
+
+        except Exception:
+            sorted_p_list = []  # won't actually be sorted
+            logging.warning('WARNING: Exploratory univariate analysis failed due to scipy package '
+                            'version error when running mannwhitneyu test. '
+                            'To fix, we recommend updating scipy to version 1.8.0 or greater '
+                            'using: pip install --upgrade scipy')
+            for column in self.dataset.data:
+                if column != class_label and column != instance_label:
+                    sorted_p_list.append([column, 'None'])
+
+        return sorted_p_list
+
+    def univariate_plots(self, class_label, match_label, instance_label, sorted_p_list):
+        """
+        Checks whether p-value of each feature is less than or equal to significance cutoff.
+        If so, calls graph_selector to generate an appropriate plot.
+
+        Args:
+            class_label: column label for the outcome to be predicted in the dataset
+            match_label: only required when sorted_p_list is None
+            instance_label: only required when sorted_p_list is None
+            sorted_p_list: sorted list of p-values
+
+        """
+
+        if sorted_p_list is None:
+            sorted_p_list = self.univariate_analysis(class_label, match_label, instance_label)
+
+        for i in sorted_p_list:  # each feature in sorted p-value dictionary
+            if i[1] == 'None':
+                pass
+            else:
+                for j in self.dataset.data:  # each feature
+                    if j == i[0] and i[1] <= self.sig_cutoff:  # ONLY EXPORTS SIGNIFICANT FEATURES
+                        self.graph_selector(j, class_label)
+
+    def graph_selector(self, feature_name, class_label):
+        """
+        Assuming a categorical class outcome, a
+        barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature.
+
+        Args:
+            feature_name: ?
+            class_label: column label for the outcome to be predicted in the dataset
+
+        """
+        # Feature and Outcome are discrete/categorical/binary
+        if feature_name in self.dataset.categorical_variables:
+            # Generate contingency table count bar plot.
+            # Calculate Contingency Table - Counts
+            table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[class_label])
+            geom_bar_data = pd.DataFrame(table)
+            geom_bar_data.plot(kind='bar')
+            plt.ylabel('Count')
+        else:
+            # Feature is continuous and Outcome is discrete/categorical/binary
+            # Generate boxplot
+            self.dataset.data.boxplot(column=feature_name, by=class_label)
+            plt.ylabel(feature_name)
+            plt.title('')
+
+        # Deal with the dataset specific characters causing problems in this dataset.
+        new_feature_name = feature_name.replace(" ", "")
+        new_feature_name = new_feature_name.replace("*", "")
+        new_feature_name = new_feature_name.replace("/", "")
+        plt.savefig(self.experiment_path + '/' + self.dataset.name
+                    + '/exploratory/univariate_analyses/' + 'Barplot_' +
+                    str(new_feature_name) + ".png", bbox_inches="tight", format='png')
+        plt.close('all')
+
+    def test_selector(self, feature_name, class_label):
+        """
+        Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value
+
+        Args:
+            feature_name: name of feature column operation is running on
+            class_label: cl
+        """
+        # Feature and Outcome are discrete/categorical/binary
+        if feature_name in self.dataset.categorical_variables:
+            # Calculate Contingency Table - Counts
+            table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[class_label])
+            # Univariate association test (Chi Square Test of Independence - Non-parametric)
+            c, p, dof, expected = chi2_contingency(table_temp)
+            p_val = p
+        # Feature is continuous and Outcome is discrete/categorical/binary
+        else:
+            # Univariate association test (Mann-Whitney Test - Non-parametric)
+            try:  # works in scipy 1.5.0
+                c, p = mannwhitneyu(
+                    x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
+                    y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1])
+            except Exception:  # for scipy 1.8.0
+                c, p = mannwhitneyu(
+                    x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
+                    y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1], nan_policy='omit')
+            p_val = p
+        return p_val
 
     def save_runtime(self):
         """

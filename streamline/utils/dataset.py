@@ -74,3 +74,11 @@ class Dataset:
         self.data[class_label] = self.data[class_label].astype(dtype='int8')
         # Remove columns to be ignored in analysis
         self.data = self.data.drop(ignore_features, axis=1)
+
+    def get_headers(self, class_label, ignore_features):
+        """
+        Exports dataset header labels for use as a reference later in the pipeline.
+        """
+        # Get Original Headers
+        headers = self.clean_data(class_label, ignore_features).columns.values.tolist()
+        return headers

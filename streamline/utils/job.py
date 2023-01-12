@@ -1,6 +1,7 @@
 class Job:
     def __init__(self):
-        pass
+        self.cluster = None
+        self.job_start_time = None
 
     def run_local(self):
         pass
