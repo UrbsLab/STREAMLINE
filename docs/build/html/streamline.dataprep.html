@@ -170,15 +170,15 @@
 <section id="module-streamline.dataprep.exploratory_analysis">
 <span id="streamline-dataprep-exploratory-analysis-module"></span><h2>streamline.dataprep.exploratory_analysis module<a class="headerlink" href="#module-streamline.dataprep.exploratory_analysis" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.exploratory_analysis.</span></span><span class="sig-name descname"><span class="pre">ExploratortoryDataAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.exploratory_analysis.</span></span><span class="sig-name descname"><span class="pre">ExploratoryDataAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
 <p>Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE</p>
 <p>Initialization function for Exploratory Data Analysis Class. Parameters are defined below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset_path</strong> – path to dataset text file</p></li>
+<li><p><strong>dataset</strong> – a streamline.utils.dataset.Dataset object or a path to dataset text file</p></li>
 <li><p><strong>experiment_path</strong> – path to experiment the logging directory folder</p></li>
 <li><p><strong>ignore_features</strong> – list of row names of features to ignore</p></li>
 <li><p><strong>categorical_features</strong> – list of row names of categorical features</p></li>
@@ -191,34 +191,58 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.drop_ignored_rowcols">
-<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.drop_ignored_rowcols" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">
+<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative features, and class counts.
+Also saves a simple bar graph of class counts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>class_label</strong> – </p></li>
+<li><p><strong>instance_label</strong> – </p></li>
+<li><p><strong>match_label</strong> – </p></li>
+<li><p><strong>plot</strong> – </p></li>
+<li><p><strong>show</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data">
+<span class="sig-name descname"><span class="pre">describe_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.describe_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conduct and export basic dataset descriptions including basic column statistics, column variable types
+(i.e. int64 vs. float64), and unique value counts for each column</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols">
+<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols" title="Permalink to this definition">¶</a></dt>
 <dd><p>Basic data cleaning: Drops any instances with a missing outcome
 value as well as any features (ignore_features) specified by user</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.feature_only_data">
-<span class="sig-name descname"><span class="pre">feature_only_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.feature_only_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.feature_only_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create features-only version of dataset for some operations</p>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot">
+<span class="sig-name descname"><span class="pre">feature_correlation_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.feature_correlation_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
+Due to computational expense this may not be recommended for datasets with a large number of instances
+and/or features unless needed. The generated heatmap will be difficult to read with a large number
+of features in the target dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>match_label</strong> – <p>?</p>
-</p></li>
-<li><p><strong>class_label</strong> – <p>?</p>
-</p></li>
-<li><p><strong>instance_label</strong> – <p>?</p>
-</p></li>
+<li><p><strong>x_data</strong> – data with only feature columns</p></li>
+<li><p><strong>show</strong> – flag to show plot or not</p></li>
 </ul>
 </dd>
 </dl>
-<p>Returns: dataframe x_data with only features</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.identify_feature_types">
-<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.identify_feature_types" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types">
+<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types" title="Permalink to this definition">¶</a></dt>
 <dd><p>Automatically identify categorical vs. quantitative features/variables
 Takes a dataframe (of independent variables) with column labels and
 returns a list of column names identified as
@@ -226,20 +250,26 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.load_dataset">
-<span class="sig-name descname"><span class="pre">load_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.load_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.load_dataset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads given dataset of the class</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.make_log_folders">
-<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.make_log_folders" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders">
+<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes folders for logging exploratory data analysis</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.run_explore">
-<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot">
+<span class="sig-name descname"><span class="pre">missing_count_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.missing_count_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a histogram of missingness across all data columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts">
+<span class="sig-name descname"><span class="pre">missingness_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.missingness_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count and export missing values for all data columns. Also plots a histogram of missingness across all data columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">
+<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Exploratory Data Analysis according to EDA object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -257,11 +287,30 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.save_runtime">
-<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratortoryDataAnalysis.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratortoryDataAnalysis.save_runtime" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime">
+<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export runtime for this phase of the pipeline on current target dataset</p>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-streamline.dataprep.kfold_partitioning">
+<span id="streamline-dataprep-kfold-partitioning-module"></span><h2>streamline.dataprep.kfold_partitioning module<a class="headerlink" href="#module-streamline.dataprep.kfold_partitioning" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="streamline.dataprep.kfold_partitioning.KFoldPartitioner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.kfold_partitioning.</span></span><span class="sig-name descname"><span class="pre">KFoldPartitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/kfold_partitioning.html#KFoldPartitioner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.kfold_partitioning.KFoldPartitioner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
+<p>Base class for KFold CrossValidation Operations on dataset</p>
+<p>Initialization for KFoldPartitioner base class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> – a streamline.utils.dataset.Dataset object or a path to dataset text file</p></li>
+<li><p><strong>experiment_path</strong> – path to experiment the logging directory folder</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <span class="target" id="module-streamline.dataprep"></span></section>

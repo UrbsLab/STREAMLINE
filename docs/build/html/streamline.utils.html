@@ -180,14 +180,34 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.clean_data">
-<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/utils/dataset.html#Dataset.clean_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.clean_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/utils/dataset.html#Dataset.clean_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.clean_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic data cleaning: Drops any instances with a missing outcome
+value as well as any features (ignore_features) specified by user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.feature_only_data">
+<span class="sig-name descname"><span class="pre">feature_only_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/utils/dataset.html#Dataset.feature_only_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.feature_only_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create features-only version of dataset for some operations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>match_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>class_label</strong> – <p>?</p>
+</p></li>
+<li><p><strong>instance_label</strong> – <p>?</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: dataframe x_data with only features</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.load_data">
 <span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/utils/dataset.html#Dataset.load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to load data in dataset</p>
-<p>Returns: None</p>
 </dd></dl>
 
 </dd></dl>

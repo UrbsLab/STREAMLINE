@@ -81,9 +81,9 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">streamline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">STREAMLINE Package Documentation</a></li>
 </ul>
 
             
@@ -169,8 +169,6 @@
 <div class="viewcode-block" id="Dataset.load_data"><a class="viewcode-back" href="../../../streamline.utils.html#streamline.utils.dataset.Dataset.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function to load data in dataset</span>
-
-<span class="sd">        Returns: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Loading Dataset: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
@@ -182,8 +180,41 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown file format&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Dataset.clean_data"><a class="viewcode-back" href="../../../streamline.utils.html#streamline.utils.dataset.Dataset.clean_data">[docs]</a>    <span class="k">def</span> <span class="nf">clean_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+<div class="viewcode-block" id="Dataset.feature_only_data"><a class="viewcode-back" href="../../../streamline.utils.html#streamline.utils.dataset.Dataset.feature_only_data">[docs]</a>    <span class="k">def</span> <span class="nf">feature_only_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create features-only version of dataset for some operations</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            match_label: ?</span>
+<span class="sd">            class_label: ?</span>
+<span class="sd">            instance_label: ?</span>
+
+<span class="sd">        Returns: dataframe x_data with only features</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">match_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">class_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># exclude class column</span>
+        <span class="k">elif</span> <span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">match_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># exclude class column</span>
+        <span class="k">elif</span> <span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">match_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">class_label</span><span class="p">,</span> <span class="n">match_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># exclude class column</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">,</span> <span class="n">match_label</span><span class="p">],</span>
+                                    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># exclude class column</span>
+        <span class="k">return</span> <span class="n">x_data</span></div>
+
+<div class="viewcode-block" id="Dataset.clean_data"><a class="viewcode-back" href="../../../streamline.utils.html#streamline.utils.dataset.Dataset.clean_data">[docs]</a>    <span class="k">def</span> <span class="nf">clean_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">ignore_features</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basic data cleaning: Drops any instances with a missing outcome</span>
+<span class="sd">        value as well as any features (ignore_features) specified by user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Remove instances with missing outcome values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">class_label</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int8&#39;</span><span class="p">)</span>
+        <span class="c1"># Remove columns to be ignored in analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">ignore_features</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

@@ -7,6 +7,13 @@ class KFoldPartitioner(Job):
     Base class for KFold CrossValidation Operations on dataset
     """
     def __init__(self, dataset, experiment_path):
+        """
+        Initialization for KFoldPartitioner base class
+
+        Args:
+            dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file
+            experiment_path: path to experiment the logging directory folder
+        """
         super().__init__()
         if type(dataset) == str:
             self.dataset = Dataset(dataset)
