@@ -155,7 +155,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for KFold CrossValidation Operations on dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">partition_method</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialization for KFoldPartitioner base class</span>
 
@@ -170,31 +170,9 @@
             <span class="k">assert</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">==</span> <span class="n">Dataset</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="n">experiment_path</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="n">experiment_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">=</span> <span class="n">partition_method</span></div>
 
-<span class="c1"># def test_selector(featureName, class_label, data, categorical_variables):</span>
-<span class="c1">#     &quot;&quot;&quot; Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value&quot;&quot;&quot;</span>
-<span class="c1">#     p_val = 0</span>
-<span class="c1">#     # Feature and Outcome are discrete/categorical/binary</span>
-<span class="c1">#     if featureName in categorical_variables:</span>
-<span class="c1">#         # Calculate Contingency Table - Counts</span>
-<span class="c1">#         table = pd.crosstab(data[featureName], data[class_label])</span>
-<span class="c1">#         # Univariate association test (Chi Square Test of Independence - Non-parametric)</span>
-<span class="c1">#         c, p, dof, expected = scs.chi2_contingency(table)</span>
-<span class="c1">#         p_val = p</span>
-<span class="c1">#     # Feature is continuous and Outcome is discrete/categorical/binary</span>
-<span class="c1">#     else:</span>
-<span class="c1">#         # Univariate association test (Mann-Whitney Test - Non-parametric)</span>
-<span class="c1">#         try:  # works in scipy 1.5.0</span>
-<span class="c1">#             c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0],</span>
-<span class="c1">#                                     y=data[featureName].loc[data[class_label] == 1])</span>
-<span class="c1">#         except:  # for scipy 1.8.0</span>
-<span class="c1">#             c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0],</span>
-<span class="c1">#                                     y=data[featureName].loc[data[class_label] == 1], nan_policy=&#39;omit&#39;)</span>
-<span class="c1">#         p_val = p</span>
-<span class="c1">#     return p_val</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
 <span class="c1"># def cv_partitioner(data, cv_partitions, partition_method, class_label, match_label, randomSeed):</span>
 <span class="c1">#     &quot;&quot;&quot; Takes data frame (data), number of cv partitions, partition method (R, S, or M), class label,</span>
 <span class="c1">#     and the column name used for matched CV. Returns list of training and testing dataframe partitions.&quot;&quot;&quot;</span>
