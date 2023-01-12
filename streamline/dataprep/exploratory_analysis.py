@@ -32,15 +32,12 @@ class ExploratoryDataAnalysis(Job):
             explorations: list of names of analysis to do while doing EDA (must be in set X)
             plots: list of analysis plots to save in experiment directory (must be in set Y)
             categorical_cutoff: categorical cut off to consider a feature categorical by analysis
-            sig_cutoff:
+            sig_cutoff: significance cutoff for continuous variables
             random_state: random state to set seeds for reproducibility of algorithms
         """
         super().__init__()
-        if type(dataset) == str:
-            self.dataset = Dataset(dataset)
-        else:
-            assert (type(dataset) == Dataset)
-            self.dataset = dataset
+        assert (type(dataset) == Dataset)
+        self.dataset = dataset
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
         self.random_state = random_state
@@ -97,19 +94,11 @@ class ExploratoryDataAnalysis(Job):
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.mkdir(self.experiment_path + '/' + self.dataset.name + '/exploratory')
 
-    def run_explore(self, class_label, instance_label=None, match_label=None, top_features=20):
+    def run_explore(self, top_features=20):
         """
         Run Exploratory Data Analysis according to EDA object
 
         Args:
-            class_label: column label for the outcome to be predicted in the dataset
-            match_label: column to identify unique groups of instances in the dataset \
-            that have been 'matched' as part of preparing the dataset with cases and controls \
-            that have been matched for some co-variates \
-            Match label is really only used in the cross validation partitioning \
-            It keeps any set of instances with the same match label value in the same partition.
-            instance_label: Instance label is mostly used by the rule based learner in modeling, \
-            we use it to trace back heterogeneous subgroups to the instances in the original dataset
             top_features: no of top features to consider (default=20)
 
         """
@@ -121,20 +110,20 @@ class ExploratoryDataAnalysis(Job):
         # Make analysis folder for target dataset and a folder for the respective exploratory analysis within it
         self.make_log_folders()
 
-        self.drop_ignored_rowcols(class_label, self.ignore_features)
+        self.drop_ignored_rowcols(top_features)
 
         # Account for possibility that only one dataset in folder has a match label.
         # Check for presence of match label (this allows multiple datasets to be analyzed
         # in the pipeline where not all of them have match labels if specified)
-        if not (match_label is None or match_label in self.dataset.data.columns):
-            match_label = None
+        if not (self.dataset.match_label is None or self.dataset.match_label in self.dataset.data.columns):
+            self.dataset.match_label = None
             self.dataset.partition_method = 'S'
             logging.warning("Warning: Specified 'Match label' could not be found in dataset. "
                             "Analysis moving forward assuming there is no 'match label' column using "
                             "stratified (S) CV partitioning.")
 
         # Create features-only version of dataset for some operations
-        x_data = self.dataset.feature_only_data(match_label, class_label, instance_label)
+        x_data = self.dataset.feature_only_data()
 
         if len(self.categorical_features) == 0:
             self.categorical_features = self.identify_feature_types(x_data)
@@ -150,7 +139,7 @@ class ExploratoryDataAnalysis(Job):
             plot = False
             if "Describe" in self.plots:
                 plot = True
-            self.counts_summary(match_label, class_label, instance_label, total_missing, plot)
+            self.counts_summary(total_missing, plot)
 
         # Export feature correlation plot if user specified
         if "Feature Correlation" in self.plots:
@@ -160,19 +149,19 @@ class ExploratoryDataAnalysis(Job):
         # Conduct univariate analyses of association between individual features and class
         if "Univariate analysis" in self.explorations:
             logging.info("Running Univariate Analyses...")
-            sorted_p_list = self.univariate_analysis(class_label, match_label, instance_label, top_features)
+            sorted_p_list = self.univariate_analysis(top_features)
             # Export univariate association plots (for significant features) if user specifies
             if "Univariate analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
-                self.univariate_plots(class_label, match_label, instance_label, sorted_p_list)
+                self.univariate_plots(sorted_p_list)
 
-    def drop_ignored_rowcols(self, class_label, ignore_features):
+    def drop_ignored_rowcols(self, ignore_features):
         """
         Basic data cleaning: Drops any instances with a missing outcome
         value as well as any features (ignore_features) specified by user
         """
         # Remove instances with missing outcome values
-        self.dataset.clean_data(class_label, ignore_features)
+        self.dataset.clean_data(ignore_features)
 
     def identify_feature_types(self, x_data):
         """
@@ -182,7 +171,7 @@ class ExploratoryDataAnalysis(Job):
         being categorical based on user defined cutoff (categorical_cutoff).
         """
         # Identify categorical variables in dataset
-        logging.log(0, "Identifying Feature Types...")
+        logging.info("Identifying Feature Types...")
         # Runs unless user has specified a predefined list of variables to treat as categorical
         if len(self.categorical_features) == 0:
             categorical_variables = []
@@ -240,21 +229,13 @@ class ExploratoryDataAnalysis(Job):
         if plot:
             plt.show()
 
-    def counts_summary(self, class_label, instance_label, match_label, total_missing=None, plot=False, show=False):
+    def counts_summary(self, total_missing=None, plot=False, show=False):
         """
         Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
         features, and class counts. Also saves a simple bar graph of class counts if user specified.
 
         Args:
-            class_label: column label for the outcome to be predicted in the dataset
-            match_label: column to identify unique groups of instances in the dataset \
-            that have been 'matched' as part of preparing the dataset with cases and controls \
-            that have been matched for some co-variates \
-            Match label is really only used in the cross validation partitioning \
-            It keeps any set of instances with the same match label value in the same partition.
-            instance_label: Instance label is mostly used by the rule based learner in modeling, \
-            we use it to trace back heterogeneous subgroups to the instances in the original dataset \
-            total_missing: count of total missing values (optional)
+            total_missing: total missing values (optional, runs again if not given)
             plot: flag to output bar graph in the experiment log folder
             show: flag to output the bar graph in interactive interface
 
@@ -263,9 +244,9 @@ class ExploratoryDataAnalysis(Job):
         """
         # Calculate, print, and export instance and feature counts
         f_count = self.dataset.data.shape[1] - 1
-        if not (instance_label is None):
+        if not (self.dataset.instance_label is None):
             f_count -= 1
-        if not (match_label is None):
+        if not (self.dataset.match_label is None):
             f_count -= 1
         if total_missing is None:
             total_missing = self.missingness_counts()
@@ -282,20 +263,20 @@ class ExploratoryDataAnalysis(Job):
         summary_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'DataCounts.csv',
                           index=False)
         # Calculate, print, and export class counts
-        class_counts = self.dataset.data[class_label].value_counts()
+        class_counts = self.dataset.data[self.dataset.class_label].value_counts()
         class_counts.to_csv(self.experiment_path + '/' + self.dataset.name +
                             '/exploratory/' + 'ClassCounts.csv', header=['Count'],
                             index_label='Class')
 
-        #     print('Data Counts: ----------------')
-        #     print('Instance Count = ' + str(data.shape[0]))
-        #     print('Feature Count = ' + str(fCount))
-        #     print('    Categorical  = ' + str(len(categorical_variables)))
-        #     print('    Quantitative = ' + str(fCount - len(categorical_variables)))
-        #     print('Missing Count = ' + str(totalMissing))
-        #     print('    Missing Percent = ' + str(percentMissing))
-        #     print('Class Counts: ----------------')
-        #     print(class_counts)
+        logging.info('Data Counts: ----------------')
+        logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
+        logging.info('Feature Count = ' + str(f_count))
+        logging.info('    Categorical  = ' + str(len(self.dataset.categorical_variables)))
+        logging.info('    Quantitative = ' + str(f_count - len(self.dataset.categorical_variables)))
+        logging.info('Missing Count = ' + str(total_missing))
+        logging.info('    Missing Percent = ' + str(percent_missing))
+        logging.info('Class Counts: ----------------')
+        logging.info('Class Count Information' + str(class_counts))
 
         # Generate and export class count bar graph
         if plot:
@@ -332,21 +313,13 @@ class ExploratoryDataAnalysis(Job):
         else:
             plt.close('all')
 
-    def univariate_analysis(self, class_label, match_label=None, instance_label=None, top_features=20):
+    def univariate_analysis(self, top_features=20):
         """
         Calculates univariate association significance between each individual feature and class outcome.
         Assumes categorical outcome using Chi-square test for
         categorical features and Mann-Whitney Test for quantitative features.
 
         Args:
-            class_label: column label for the outcome to be predicted in the dataset
-            match_label: column to identify unique groups of instances in the dataset \
-            that have been 'matched' as part of preparing the dataset with cases and controls \
-            that have been matched for some co-variates \
-            Match label is really only used in the cross validation partitioning \
-            It keeps any set of instances with the same match label value in the same partition.
-            instance_label: Instance label is mostly used by the rule based learner in modeling, \
-            we use it to trace back heterogeneous subgroups to the instances in the original dataset
             top_features: no of top features to show/consider
 
         """
@@ -361,8 +334,8 @@ class ExploratoryDataAnalysis(Job):
             # Generate dictionary of p-values for each feature using appropriate test (via test_selector)
             p_value_dict = {}
             for column in self.dataset.data:
-                if column != class_label and column != instance_label:
-                    p_value_dict[column] = self.test_selector(column, class_label)
+                if column != self.dataset.class_label and column != self.dataset.instance_label:
+                    p_value_dict[column] = self.test_selector(column)
 
             sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1])
             # Save p-values to file
@@ -374,20 +347,18 @@ class ExploratoryDataAnalysis(Job):
 
             # Print results for top features across univariate analyses
             f_count = self.dataset.data.shape[1] - 1
-            if not (instance_label is None):
+            if not (self.dataset.instance_label is None):
                 f_count -= 1
-            if not (match_label is None):
+            if not (self.dataset.match_label is None):
                 f_count -= 1
 
-            assert (top_features is None or top_features is 20)
-            # TODO: Update with logging later.
-            #     min_num = min(top_features, f_count)
-            #     sorted_p_list_temp = sorted_p_list[: min_num]
-            #     print('Plotting top significant ' + str(min_num) + ' features.')
-            #     print('###################################################')
-            #     print('Significant Univariate Associations:')
-            #     for each in sorted_p_list_temp[:min_num]:
-            #         print(each[0] + ": (p-val = " + str(each[1]) + ")")
+            min_num = min(top_features, f_count)
+            sorted_p_list_temp = sorted_p_list[: min_num]
+            logging.info('Plotting top significant ' + str(min_num) + ' features.')
+            logging.info('###################################################')
+            logging.info('Significant Univariate Associations:')
+            for each in sorted_p_list_temp[:min_num]:
+                logging.info(each[0] + ": (p-val = " + str(each[1]) + ")")
 
         except Exception:
             sorted_p_list = []  # won't actually be sorted
@@ -396,26 +367,24 @@ class ExploratoryDataAnalysis(Job):
                             'To fix, we recommend updating scipy to version 1.8.0 or greater '
                             'using: pip install --upgrade scipy')
             for column in self.dataset.data:
-                if column != class_label and column != instance_label:
+                if column != self.dataset.class_label and column != self.dataset.instance_label:
                     sorted_p_list.append([column, 'None'])
 
         return sorted_p_list
 
-    def univariate_plots(self, class_label, match_label, instance_label, sorted_p_list):
+    def univariate_plots(self, sorted_p_list=None, top_features=20):
         """
         Checks whether p-value of each feature is less than or equal to significance cutoff.
         If so, calls graph_selector to generate an appropriate plot.
 
         Args:
-            class_label: column label for the outcome to be predicted in the dataset
-            match_label: only required when sorted_p_list is None
-            instance_label: only required when sorted_p_list is None
             sorted_p_list: sorted list of p-values
+            top_features: no of top features to consider (default=20)
 
         """
 
         if sorted_p_list is None:
-            sorted_p_list = self.univariate_analysis(class_label, match_label, instance_label)
+            sorted_p_list = self.univariate_analysis(top_features)
 
         for i in sorted_p_list:  # each feature in sorted p-value dictionary
             if i[1] == 'None':
@@ -423,30 +392,29 @@ class ExploratoryDataAnalysis(Job):
             else:
                 for j in self.dataset.data:  # each feature
                     if j == i[0] and i[1] <= self.sig_cutoff:  # ONLY EXPORTS SIGNIFICANT FEATURES
-                        self.graph_selector(j, class_label)
+                        self.graph_selector(j)
 
-    def graph_selector(self, feature_name, class_label):
+    def graph_selector(self, feature_name):
         """
         Assuming a categorical class outcome, a
         barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature.
 
         Args:
-            feature_name: ?
-            class_label: column label for the outcome to be predicted in the dataset
+            feature_name: feature name of the column the function is doing operation on
 
         """
         # Feature and Outcome are discrete/categorical/binary
         if feature_name in self.dataset.categorical_variables:
             # Generate contingency table count bar plot.
             # Calculate Contingency Table - Counts
-            table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[class_label])
+            table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[self.dataset.class_label])
             geom_bar_data = pd.DataFrame(table)
             geom_bar_data.plot(kind='bar')
             plt.ylabel('Count')
         else:
             # Feature is continuous and Outcome is discrete/categorical/binary
             # Generate boxplot
-            self.dataset.data.boxplot(column=feature_name, by=class_label)
+            self.dataset.data.boxplot(column=feature_name, by=self.dataset.class_label)
             plt.ylabel(feature_name)
             plt.title('')
 
@@ -459,14 +427,14 @@ class ExploratoryDataAnalysis(Job):
                     str(new_feature_name) + ".png", bbox_inches="tight", format='png')
         plt.close('all')
 
-    def test_selector(self, feature_name, class_label):
+    def test_selector(self, feature_name):
         """
         Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value
 
         Args:
             feature_name: name of feature column operation is running on
-            class_label: cl
         """
+        class_label = self.dataset.class_label
         # Feature and Outcome are discrete/categorical/binary
         if feature_name in self.dataset.categorical_variables:
             # Calculate Contingency Table - Counts

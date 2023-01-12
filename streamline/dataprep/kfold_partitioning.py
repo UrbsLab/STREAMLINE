@@ -6,7 +6,7 @@ class KFoldPartitioner(Job):
     """
     Base class for KFold CrossValidation Operations on dataset
     """
-    def __init__(self, dataset, experiment_path):
+    def __init__(self, dataset, partition_method, experiment_path):
         """
         Initialization for KFoldPartitioner base class
 
@@ -22,30 +22,8 @@ class KFoldPartitioner(Job):
             self.dataset = dataset
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
+        self.partition_method = partition_method
 
-# def test_selector(featureName, class_label, data, categorical_variables):
-#     """ Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value"""
-#     p_val = 0
-#     # Feature and Outcome are discrete/categorical/binary
-#     if featureName in categorical_variables:
-#         # Calculate Contingency Table - Counts
-#         table = pd.crosstab(data[featureName], data[class_label])
-#         # Univariate association test (Chi Square Test of Independence - Non-parametric)
-#         c, p, dof, expected = scs.chi2_contingency(table)
-#         p_val = p
-#     # Feature is continuous and Outcome is discrete/categorical/binary
-#     else:
-#         # Univariate association test (Mann-Whitney Test - Non-parametric)
-#         try:  # works in scipy 1.5.0
-#             c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0],
-#                                     y=data[featureName].loc[data[class_label] == 1])
-#         except:  # for scipy 1.8.0
-#             c, p = scs.mannwhitneyu(x=data[featureName].loc[data[class_label] == 0],
-#                                     y=data[featureName].loc[data[class_label] == 1], nan_policy='omit')
-#         p_val = p
-#     return p_val
-#
-#
 # def cv_partitioner(data, cv_partitions, partition_method, class_label, match_label, randomSeed):
 #     """ Takes data frame (data), number of cv partitions, partition method (R, S, or M), class label,
 #     and the column name used for matched CV. Returns list of training and testing dataframe partitions."""
