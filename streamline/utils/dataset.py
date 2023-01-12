@@ -16,6 +16,9 @@ class Dataset:
         self.name = self.path.split('/')[-1].split('.')[0]
         self.format = self.path.split('/')[-1].split('.')[-1]
         self.load_data()
+        self.class_label = None
+        self.match_label = None
+        self.instance_label = None
 
     def load_data(self):
         """
@@ -36,9 +39,14 @@ class Dataset:
         Create features-only version of dataset for some operations
 
         Args:
-            match_label: ?
-            class_label: ?
-            instance_label: ?
+            class_label: column label for the outcome to be predicted in the dataset
+            match_label: column to identify unique groups of instances in the dataset \
+            that have been 'matched' as part of preparing the dataset with cases and controls \
+            that have been matched for some co-variates \
+            Match label is really only used in the cross validation partitioning \
+            It keeps any set of instances with the same match label value in the same partition.
+            instance_label: Instance label is mostly used by the rule based learner in modeling, \
+            we use it to trace back heterogeneous subgroups to the instances in the original dataset
 
         Returns: dataframe x_data with only features
 

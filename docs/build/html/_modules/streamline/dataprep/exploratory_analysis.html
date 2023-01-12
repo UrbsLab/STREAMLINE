@@ -244,14 +244,19 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory&#39;</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExploratoryDataAnalysis.run_explore"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">[docs]</a>    <span class="k">def</span> <span class="nf">run_explore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<div class="viewcode-block" id="ExploratoryDataAnalysis.run_explore"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">[docs]</a>    <span class="k">def</span> <span class="nf">run_explore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">match_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run Exploratory Data Analysis according to EDA object</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            match_label: ?</span>
-<span class="sd">            class_label: ?</span>
-<span class="sd">            instance_label: ?</span>
+<span class="sd">            class_label: column label for the outcome to be predicted in the dataset</span>
+<span class="sd">            match_label: column to identify unique groups of instances in the dataset \</span>
+<span class="sd">            that have been &#39;matched&#39; as part of preparing the dataset with cases and controls \</span>
+<span class="sd">            that have been matched for some co-variates \</span>
+<span class="sd">            Match label is really only used in the cross validation partitioning \</span>
+<span class="sd">            It keeps any set of instances with the same match label value in the same partition.</span>
+<span class="sd">            instance_label: Instance label is mostly used by the rule based learner in modeling, \</span>
+<span class="sd">            we use it to trace back heterogeneous subgroups to the instances in the original dataset</span>
 <span class="sd">            top_features: no of top features to consider (default=20)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -281,7 +286,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identify_feature_types</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">catagorical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">categorical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Running Basic Exploratory Analysis...&quot;</span><span class="p">)</span>
 
@@ -385,17 +390,22 @@
         <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ExploratoryDataAnalysis.counts_summary"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">[docs]</a>    <span class="k">def</span> <span class="nf">counts_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match_label</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ExploratoryDataAnalysis.counts_summary"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">[docs]</a>    <span class="k">def</span> <span class="nf">counts_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">,</span> <span class="n">match_label</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative features, and class counts.</span>
-<span class="sd">        Also saves a simple bar graph of class counts.</span>
+<span class="sd">        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative</span>
+<span class="sd">        features, and class counts. Also saves a simple bar graph of class counts if user specified.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            class_label:</span>
-<span class="sd">            instance_label:</span>
-<span class="sd">            match_label:</span>
-<span class="sd">            plot:</span>
-<span class="sd">            show:</span>
+<span class="sd">            class_label: column label for the outcome to be predicted in the dataset</span>
+<span class="sd">            match_label: column to identify unique groups of instances in the dataset \</span>
+<span class="sd">            that have been &#39;matched&#39; as part of preparing the dataset with cases and controls \</span>
+<span class="sd">            that have been matched for some co-variates \</span>
+<span class="sd">            Match label is really only used in the cross validation partitioning \</span>
+<span class="sd">            It keeps any set of instances with the same match label value in the same partition.</span>
+<span class="sd">            instance_label: Instance label is mostly used by the rule based learner in modeling, \</span>
+<span class="sd">            we use it to trace back heterogeneous subgroups to the instances in the original dataset \</span>
+<span class="sd">            plot: flag to output bar graph in the experiment log folder</span>
+<span class="sd">            show: flag to output the bar graph in interactive interface</span>
 
 <span class="sd">        Returns:</span>
 

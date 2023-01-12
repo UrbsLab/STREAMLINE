@@ -9,3 +9,4 @@ Subpackages
 
    streamline.dataprep
    streamline.utils
+   streamline.featurefns

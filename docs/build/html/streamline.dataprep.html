@@ -91,6 +91,7 @@
 <li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.dataprep package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
 </ul>
 </li>
 </ul>
@@ -192,17 +193,16 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">
-<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative features, and class counts.
-Also saves a simple bar graph of class counts.</p>
+<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
+features, and class counts. Also saves a simple bar graph of class counts if user specified.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>class_label</strong> – </p></li>
-<li><p><strong>instance_label</strong> – </p></li>
-<li><p><strong>match_label</strong> – </p></li>
-<li><p><strong>plot</strong> – </p></li>
-<li><p><strong>show</strong> – </p></li>
+<li><p><strong>class_label</strong> – column label for the outcome to be predicted in the dataset</p></li>
+<li><p><strong>match_label</strong> – column to identify unique groups of instances in the dataset             that have been ‘matched’ as part of preparing the dataset with cases and controls             that have been matched for some co-variates             Match label is really only used in the cross validation partitioning             It keeps any set of instances with the same match label value in the same partition.</p></li>
+<li><p><strong>instance_label</strong> – Instance label is mostly used by the rule based learner in modeling,             we use it to trace back heterogeneous subgroups to the instances in the original dataset             plot: flag to output bar graph in the experiment log folder</p></li>
+<li><p><strong>show</strong> – flag to output the bar graph in interactive interface</p></li>
 </ul>
 </dd>
 </dl>
@@ -269,17 +269,14 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">
-<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run Exploratory Data Analysis according to EDA object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>match_label</strong> – <p>?</p>
-</p></li>
-<li><p><strong>class_label</strong> – <p>?</p>
-</p></li>
-<li><p><strong>instance_label</strong> – <p>?</p>
-</p></li>
+<li><p><strong>class_label</strong> – column label for the outcome to be predicted in the dataset</p></li>
+<li><p><strong>match_label</strong> – column to identify unique groups of instances in the dataset             that have been ‘matched’ as part of preparing the dataset with cases and controls             that have been matched for some co-variates             Match label is really only used in the cross validation partitioning             It keeps any set of instances with the same match label value in the same partition.</p></li>
+<li><p><strong>instance_label</strong> – Instance label is mostly used by the rule based learner in modeling,             we use it to trace back heterogeneous subgroups to the instances in the original dataset</p></li>
 <li><p><strong>top_features</strong> – no of top features to consider (default=20)</p></li>
 </ul>
 </dd>

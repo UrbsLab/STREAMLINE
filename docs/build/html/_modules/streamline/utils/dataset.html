@@ -165,6 +165,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Dataset.load_data"><a class="viewcode-back" href="../../../streamline.utils.html#streamline.utils.dataset.Dataset.load_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -185,9 +188,14 @@
 <span class="sd">        Create features-only version of dataset for some operations</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            match_label: ?</span>
-<span class="sd">            class_label: ?</span>
-<span class="sd">            instance_label: ?</span>
+<span class="sd">            class_label: column label for the outcome to be predicted in the dataset</span>
+<span class="sd">            match_label: column to identify unique groups of instances in the dataset \</span>
+<span class="sd">            that have been &#39;matched&#39; as part of preparing the dataset with cases and controls \</span>
+<span class="sd">            that have been matched for some co-variates \</span>
+<span class="sd">            Match label is really only used in the cross validation partitioning \</span>
+<span class="sd">            It keeps any set of instances with the same match label value in the same partition.</span>
+<span class="sd">            instance_label: Instance label is mostly used by the rule based learner in modeling, \</span>
+<span class="sd">            we use it to trace back heterogeneous subgroups to the instances in the original dataset</span>
 
 <span class="sd">        Returns: dataframe x_data with only features</span>
 

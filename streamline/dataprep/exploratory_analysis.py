@@ -95,14 +95,19 @@ class ExploratoryDataAnalysis(Job):
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.mkdir(self.experiment_path + '/' + self.dataset.name + '/exploratory')
 
-    def run_explore(self, match_label=None, class_label=None, instance_label=None, top_features=20):
+    def run_explore(self, class_label, instance_label=None, match_label=None, top_features=20):
         """
         Run Exploratory Data Analysis according to EDA object
 
         Args:
-            match_label: ?
-            class_label: ?
-            instance_label: ?
+            class_label: column label for the outcome to be predicted in the dataset
+            match_label: column to identify unique groups of instances in the dataset \
+            that have been 'matched' as part of preparing the dataset with cases and controls \
+            that have been matched for some co-variates \
+            Match label is really only used in the cross validation partitioning \
+            It keeps any set of instances with the same match label value in the same partition.
+            instance_label: Instance label is mostly used by the rule based learner in modeling, \
+            we use it to trace back heterogeneous subgroups to the instances in the original dataset
             top_features: no of top features to consider (default=20)
 
         """
@@ -132,7 +137,7 @@ class ExploratoryDataAnalysis(Job):
         if len(self.categorical_features) == 0:
             self.categorical_features = self.identify_feature_types(x_data)
 
-        self.data.catagorical_variables = self.categorical_features
+        self.data.categorical_variables = self.categorical_features
 
         logging.log(0, "Running Basic Exploratory Analysis...")
 
@@ -236,17 +241,22 @@ class ExploratoryDataAnalysis(Job):
         if plot:
             plt.show()
 
-    def counts_summary(self, match_label, class_label, instance_label, plot=False, show=False):
+    def counts_summary(self, class_label, instance_label, match_label, plot=False, show=False):
         """
-        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative features, and class counts.
-        Also saves a simple bar graph of class counts.
+        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
+        features, and class counts. Also saves a simple bar graph of class counts if user specified.
 
         Args:
-            class_label:
-            instance_label:
-            match_label:
-            plot:
-            show:
+            class_label: column label for the outcome to be predicted in the dataset
+            match_label: column to identify unique groups of instances in the dataset \
+            that have been 'matched' as part of preparing the dataset with cases and controls \
+            that have been matched for some co-variates \
+            Match label is really only used in the cross validation partitioning \
+            It keeps any set of instances with the same match label value in the same partition.
+            instance_label: Instance label is mostly used by the rule based learner in modeling, \
+            we use it to trace back heterogeneous subgroups to the instances in the original dataset \
+            plot: flag to output bar graph in the experiment log folder
+            show: flag to output the bar graph in interactive interface
 
         Returns:
 
