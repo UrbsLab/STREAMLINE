@@ -161,6 +161,7 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -208,9 +209,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot">feature_correlation_plot() (streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis method)</a>
 </li>
+      <li><a href="streamline.utils.html#streamline.utils.dataset.Dataset.feature_only_data">feature_only_data() (streamline.utils.dataset.Dataset method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="streamline.utils.html#streamline.utils.dataset.Dataset.feature_only_data">feature_only_data() (streamline.utils.dataset.Dataset method)</a>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance">FeatureImportance (class in streamline.featurefns.importance)</a>
+</li>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection">FeatureSelection (class in streamline.featurefns.selection)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -218,6 +223,12 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection.gen_filtered_datasets">gen_filtered_datasets() (streamline.featurefns.selection.FeatureSelection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="streamline.utils.html#streamline.utils.dataset.Dataset.get_outcome">get_outcome() (streamline.utils.dataset.Dataset method)</a>
+</li>
       <li><a href="streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector">graph_selector() (streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis method)</a>
 </li>
   </ul></td>
@@ -298,16 +309,44 @@
   </ul></td>
 </tr></table>
 
-<h2 id="R">R</h2>
+<h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="streamline.utils.html#streamline.utils.job.Job.run_cluster">run_cluster() (streamline.utils.job.Job method)</a>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.pickle_scores">pickle_scores() (streamline.featurefns.importance.FeatureImportance method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.prepare_data">prepare_data() (streamline.featurefns.importance.FeatureImportance method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection.report_ave_fs">report_ave_fs() (streamline.featurefns.selection.FeatureSelection method)</a>
+</li>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection.report_informative_features">report_informative_features() (streamline.featurefns.selection.FeatureSelection method)</a>
+</li>
+      <li><a href="streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run">run() (streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis method)</a>
+
+      <ul>
+        <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.run">(streamline.featurefns.importance.FeatureImportance method)</a>
+</li>
+        <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection.run">(streamline.featurefns.selection.FeatureSelection method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="streamline.utils.html#streamline.utils.job.Job.run_cluster">run_cluster() (streamline.utils.job.Job method)</a>
+</li>
       <li><a href="streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">run_explore() (streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis method)</a>
 </li>
       <li><a href="streamline.utils.html#streamline.utils.job.Job.run_local">run_local() (streamline.utils.job.Job method)</a>
+</li>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.run_multi_surf">run_multi_surf() (streamline.featurefns.importance.FeatureImportance method)</a>
+</li>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.run_mutual_information">run_mutual_information() (streamline.featurefns.importance.FeatureImportance method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -318,8 +357,18 @@
       <li><a href="streamline.dataprep.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner.save_datasets">save_datasets() (streamline.dataprep.kfold_partitioning.KFoldPartitioner method)</a>
 </li>
       <li><a href="streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime">save_runtime() (streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis method)</a>
+
+      <ul>
+        <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.save_runtime">(streamline.featurefns.importance.FeatureImportance method)</a>
+</li>
+        <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection.save_runtime">(streamline.featurefns.selection.FeatureSelection method)</a>
+</li>
+      </ul></li>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.selection.FeatureSelection.select_features">select_features() (streamline.featurefns.selection.FeatureSelection method)</a>
 </li>
       <li><a href="streamline.utils.html#streamline.utils.dataset.Dataset.set_headers">set_headers() (streamline.utils.dataset.Dataset method)</a>
+</li>
+      <li><a href="streamline.featurefns.html#streamline.featurefns.importance.FeatureImportance.sort_save_fi_scores">sort_save_fi_scores() (streamline.featurefns.importance.FeatureImportance static method)</a>
 </li>
       <li>
     streamline.dataprep
@@ -342,6 +391,8 @@
         <li><a href="streamline.dataprep.html#module-streamline.dataprep.kfold_partitioning">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     streamline.featurefns
 
@@ -349,8 +400,6 @@
         <li><a href="streamline.featurefns.html#module-streamline.featurefns">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     streamline.featurefns.importance
 

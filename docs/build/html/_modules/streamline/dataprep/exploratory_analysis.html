@@ -614,7 +614,17 @@
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/runtime&#39;</span><span class="p">)</span>
         <span class="n">runtime_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/runtime/runtime_exploratory.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
         <span class="n">runtime_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
-        <span class="n">runtime_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.run"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper function to run_explore</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            top_features: no of top features to consider (default=20)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_explore</span><span class="p">(</span><span class="n">top_features</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

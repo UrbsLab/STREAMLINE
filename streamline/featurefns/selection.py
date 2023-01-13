@@ -25,6 +25,16 @@ class FeatureSelection(Job):
         """
         Run all elements of the feature selection: reports average feature importance scores across
         CV sets and applies collective feature selection to generate new feature selected datasets
+
+        Args:
+            export_scores: flag to export top feature scores (default=True)
+            top_features: number of top features to consider (default=20)
+            max_features_to_keep: maximum number of features to keep (default=2000)
+            filter_poor_features: flag to filter poor features (default=True)
+            overwrite_cv: overwrite last cross validation dataset (default=False)
+
+        Returns:
+
         """
         # def job(full_path,do_mutual_info,do_multisurf,max_features_to_keep,
         #         filter_poor_features,top_features,export_scores,class_label,
@@ -74,6 +84,9 @@ class FeatureSelection(Job):
         """
         Saves counts of informative vs uninformative features (i.e. those with feature
         importance scores <= 0) in an csv file.
+        Args:
+            informative_feature_counts: count of informative features to save
+            uninformative_feature_counts count of uninformative features to save
         """
         counts = {'Informative': informative_feature_counts, 'Uninformative': uninformative_feature_counts}
         count_df = pd.DataFrame(counts)
@@ -89,13 +102,13 @@ class FeatureSelection(Job):
         feature importance scores.
 
         Args:
-            algorithm:
-            algorithmlabel:
-            top_features:
-            selected_feature_lists:
-            meta_feature_ranks:
-            export_scores:
-            show:
+            algorithm: name of algorithm reporting for
+            algorithmlabel: label of algorithm reporting for (used for saving logs)
+            top_features: no of top features to consider
+            selected_feature_lists: list of selected features for processing (dictionary for data storage)
+            meta_feature_ranks: dictionary for data storage
+            export_scores: flag to export scores
+            show: flag to output figures
 
         Returns:
 
@@ -190,12 +203,12 @@ class FeatureSelection(Job):
         lists grabbing the top features from each until the max limit is reached.
 
         Args:
-            selected_feature_lists:
-            max_features_to_keep:
-            meta_feature_ranks:
+            selected_feature_lists: dictionary fpr data storage
+            max_features_to_keep: number of maximum features to keep
+            meta_feature_ranks: dictionary for data storage
 
         Returns:
-            cv_selected_List, informative_feature_counts, uninformative_feature_counts
+            cv_selected_list, informative_feature_counts, uninformative_feature_counts
             list of final selected features for each cv
 
         """
@@ -254,12 +267,11 @@ class FeatureSelection(Job):
         testing datasets including only those features.
 
         Args:
-            cv_selected_list:
-            path_to_csv:
-            dataset_name:
-            overwrite_cv:
+            cv_selected_list: list of list for name of features selected for each cv
+            path_to_csv: path to cv splits from the last phase
+            dataset_name: name of dataset
+            overwrite_cv: rename or overwrite old cv splits
 
-        Returns:
 
         """
         # create lists to hold training and testing set dataframes.
@@ -292,21 +304,25 @@ class FeatureSelection(Job):
                 os.rename(path_to_csv+'/'+dataset_name+'_CV_' + str(i) +
                           "_Test.csv", path_to_csv+'/'+dataset_name+'_CVPre_' + str(i) + "_Test.csv")
             # Write new CV files
-            with open(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", mode='w', newline="") as file:
-                writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(td_train.columns.values.tolist())
-                for row in td_train.values:
-                    writer.writerow(row)
-            file.close()
-            with open(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Test.csv", mode='w', newline="") as file:
-                writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(td_test.columns.values.tolist())
-                for row in td_test.values:
-                    writer.writerow(row)
-            file.close()
+            # with open(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", mode='w', newline="") as file:
+            #     writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            #     writer.writerow(td_train.columns.values.tolist())
+            #     for row in td_train.values:
+            #         writer.writerow(row)
+            # file.close()
+            # with open(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Test.csv", mode='w', newline="") as file:
+            #     writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            #     writer.writerow(td_test.columns.values.tolist())
+            #     for row in td_test.values:
+            #         writer.writerow(row)
+            # file.close()
 
     def save_runtime(self, full_path):
-        """ Save phase runtime"""
+        """
+        Save phase runtime
+        Args:
+            full_path: full path of current experiment
+        """
         runtime_file = open(full_path + '/runtime/runtime_featureselection.txt', 'w')
         runtime_file.write(str(time.time() - self.job_start_time))
         runtime_file.close()
