@@ -204,8 +204,7 @@ class ExploratoryDataAnalysis(Job):
 
     def missingness_counts(self):
         """
-        Count and export missing values for all data columns. Also plots a histogram of m
-        issingness across all data columns.
+        Count and export missing values for all data columns.
         """
         # Assess Missingness in all data columns
         missing_count = self.dataset.data.isnull().sum()
