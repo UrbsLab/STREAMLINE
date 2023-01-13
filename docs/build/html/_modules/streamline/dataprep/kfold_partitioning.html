@@ -147,143 +147,100 @@
            <div itemprop="articleBody">
             
   <h1>Source code for streamline.dataprep.kfold_partitioning</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
 <span class="kn">from</span> <span class="nn">streamline.utils.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedGroupKFold</span>
 
 
 <div class="viewcode-block" id="KFoldPartitioner"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner">[docs]</a><span class="k">class</span> <span class="nc">KFoldPartitioner</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for KFold CrossValidation Operations on dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">partition_method</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialization for KFoldPartitioner base class</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file</span>
+<span class="sd">            partition_method: KFold CV method used for partitioning, must be one of [&quot;Random&quot;, &quot;Stratified&quot;, &quot;Group&quot;]</span>
 <span class="sd">            experiment_path: path to experiment the logging directory folder</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">==</span> <span class="n">Dataset</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">==</span> <span class="n">Dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="n">experiment_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">=</span> <span class="n">partition_method</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">=</span> <span class="n">partition_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="kc">None</span>
 
-<span class="c1"># def cv_partitioner(data, cv_partitions, partition_method, class_label, match_label, randomSeed):</span>
-<span class="c1">#     &quot;&quot;&quot; Takes data frame (data), number of cv partitions, partition method (R, S, or M), class label,</span>
-<span class="c1">#     and the column name used for matched CV. Returns list of training and testing dataframe partitions.&quot;&quot;&quot;</span>
-<span class="c1">#     # Shuffle instances to avoid potential order biases in creating partitions</span>
-<span class="c1">#     data = data.sample(frac=1, random_state=randomSeed).reset_index(drop=True)</span>
-<span class="c1">#     # Convert data frame to list of lists (save header for later)</span>
-<span class="c1">#     header = list(data.columns.values)</span>
-<span class="c1">#     datasetList = list(list(x) for x in zip(*(data[x].values.tolist() for x in data.columns)))</span>
-<span class="c1">#     outcomeIndex = data.columns.get_loc(class_label)  # Get classIndex</span>
-<span class="c1">#     if not match_label == &#39;None&#39;:</span>
-<span class="c1">#         matchIndex = data.columns.get_loc(match_label)  # Get match variable column index</span>
-<span class="c1">#     classList = pd.unique(data[class_label]).tolist()</span>
-<span class="c1">#     del data  # memory cleanup</span>
-<span class="c1">#     # Initialize partitions-----------------------------</span>
-<span class="c1">#     partList = []  # Will store partitions</span>
-<span class="c1">#     for x in range(cv_partitions):</span>
-<span class="c1">#         partList.append([])</span>
-<span class="c1">#     # Random Partitioning Method----------------------------------------------------------------</span>
-<span class="c1">#     if partition_method == &#39;R&#39;:</span>
-<span class="c1">#         currPart = 0</span>
-<span class="c1">#         counter = 0</span>
-<span class="c1">#         for row in datasetList:</span>
-<span class="c1">#             partList[currPart].append(row)</span>
-<span class="c1">#             counter += 1</span>
-<span class="c1">#             currPart = counter % cv_partitions</span>
-<span class="c1">#     # Stratified Partitioning Method------------------------------------------------------------</span>
-<span class="c1">#     elif partition_method == &#39;S&#39;:</span>
-<span class="c1">#         # Create data sublists, each having all rows with the same class</span>
-<span class="c1">#         byClassRows = [[] for i in range(len(classList))]  # create list of empty lists (one for each class)</span>
-<span class="c1">#         for row in datasetList:</span>
-<span class="c1">#             # find index in classList corresponding to the class of the current row.</span>
-<span class="c1">#             cIndex = classList.index(row[outcomeIndex])</span>
-<span class="c1">#             byClassRows[cIndex].append(row)</span>
-<span class="c1">#         for classSet in byClassRows:</span>
-<span class="c1">#             currPart = 0</span>
-<span class="c1">#             counter = 0</span>
-<span class="c1">#             for row in classSet:</span>
-<span class="c1">#                 partList[currPart].append(row)</span>
-<span class="c1">#                 counter += 1</span>
-<span class="c1">#                 currPart = counter % cv_partitions</span>
-<span class="c1">#     # Matched partitioning method ---------------------------------------------------------------</span>
-<span class="c1">#     elif partition_method == &#39;M&#39;:</span>
-<span class="c1">#         # Create data sublists, each having all rows with the same match identifier</span>
-<span class="c1">#         matchList = []</span>
-<span class="c1">#         for each in datasetList:</span>
-<span class="c1">#             if each[matchIndex] not in matchList:</span>
-<span class="c1">#                 matchList.append(each[matchIndex])</span>
-<span class="c1">#         byMatchRows = [[] for i in range(len(matchList))]  # create list of empty lists (one for each match group)</span>
-<span class="c1">#         for row in datasetList:</span>
-<span class="c1">#             # find index in matchList corresponding to the matchset of the current row.</span>
-<span class="c1">#             mIndex = matchList.index(row[matchIndex])</span>
-<span class="c1">#             row.pop(matchIndex)  # remove match column from partition output</span>
-<span class="c1">#             byMatchRows[mIndex].append(row)</span>
-<span class="c1">#         currPart = 0</span>
-<span class="c1">#         counter = 0</span>
-<span class="c1">#         for matchSet in byMatchRows:  # Go through each unique set of matched instances</span>
-<span class="c1">#             for row in matchSet:  # put all of the instances</span>
-<span class="c1">#                 partList[currPart].append(row)</span>
-<span class="c1">#             # move on to next matchset being placed in the next partition.</span>
-<span class="c1">#             counter += 1</span>
-<span class="c1">#             currPart = counter % cv_partitions</span>
-<span class="c1">#         header.pop(matchIndex)  # remove match column from partition output</span>
-<span class="c1">#     else:</span>
-<span class="c1">#         raise Exception(&#39;Error: Requested partition method not found.&#39;)</span>
-<span class="c1">#     del datasetList  # memory cleanup</span>
-<span class="c1">#     # Create (cv_partitions) training and testing sets from partitions -------------------------------------------</span>
-<span class="c1">#     train_dfs = []</span>
-<span class="c1">#     test_dfs = []</span>
-<span class="c1">#     for part in range(0, cv_partitions):</span>
-<span class="c1">#         testList = partList[part]  # Assign testing set as the current partition</span>
-<span class="c1">#         trainList = []</span>
-<span class="c1">#         tempList = []</span>
-<span class="c1">#         for x in range(0, cv_partitions):</span>
-<span class="c1">#             tempList.append(x)</span>
-<span class="c1">#         tempList.pop(part)</span>
-<span class="c1">#         for v in tempList:  # for each training partition</span>
-<span class="c1">#             trainList.extend(partList[v])</span>
-<span class="c1">#         train_dfs.append(pd.DataFrame(trainList, columns=header))</span>
-<span class="c1">#         test_dfs.append(pd.DataFrame(testList, columns=header))</span>
-<span class="c1">#     del partList  # memory cleanup</span>
-<span class="c1">#     return train_dfs, test_dfs</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># def saveCVDatasets(experiment_path, dataset_name, train_dfs, test_dfs):</span>
-<span class="c1">#     &quot;&quot;&quot; Saves individual training and testing CV datasets as .csv files&quot;&quot;&quot;</span>
-<span class="c1">#     # Generate folder to contain generated CV datasets</span>
-<span class="c1">#     if not os.path.exists(experiment_path + &#39;/&#39; + dataset_name + &#39;/CVDatasets&#39;):</span>
-<span class="c1">#         os.mkdir(experiment_path + &#39;/&#39; + dataset_name + &#39;/CVDatasets&#39;)</span>
-<span class="c1">#     # Export training datasets</span>
-<span class="c1">#     counter = 0</span>
-<span class="c1">#     for each in train_dfs:</span>
-<span class="c1">#         a = each.values</span>
-<span class="c1">#         with open(experiment_path + &#39;/&#39; + dataset_name + &#39;/CVDatasets/&#39; + dataset_name + &#39;_CV_&#39; + str(</span>
-<span class="c1">#                 counter) + &quot;_Train.csv&quot;, mode=&quot;w&quot;, newline=&quot;&quot;) as file:</span>
-<span class="c1">#             writer = csv.writer(file, delimiter=&#39;,&#39;, quotechar=&#39;&quot;&#39;, quoting=csv.QUOTE_MINIMAL)</span>
-<span class="c1">#             writer.writerow(each.columns.values.tolist())</span>
-<span class="c1">#             for row in a:</span>
-<span class="c1">#                 writer.writerow(row)</span>
-<span class="c1">#         counter += 1</span>
-<span class="c1">#     # Export testing datasets</span>
-<span class="c1">#     counter = 0</span>
-<span class="c1">#     for each in test_dfs:</span>
-<span class="c1">#         a = each.values</span>
-<span class="c1">#         with open(experiment_path + &#39;/&#39; + dataset_name + &#39;/CVDatasets/&#39; + dataset_name + &#39;_CV_&#39; + str(</span>
-<span class="c1">#                 counter) + &quot;_Test.csv&quot;, mode=&quot;w&quot;, newline=&quot;&quot;) as file:</span>
-<span class="c1">#             writer = csv.writer(file, delimiter=&#39;,&#39;, quotechar=&#39;&quot;&#39;, quoting=csv.QUOTE_MINIMAL)</span>
-<span class="c1">#             writer.writerow(each.columns.values.tolist())</span>
-<span class="c1">#             for row in a:</span>
-<span class="c1">#                 writer.writerow(row)</span>
-<span class="c1">#         file.close()</span>
-<span class="c1">#         counter += 1</span>
+<div class="viewcode-block" id="KFoldPartitioner.cv_partitioner"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner.cv_partitioner">[docs]</a>    <span class="k">def</span> <span class="nf">cv_partitioner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">return_dfs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Takes data frame (data), number of cv partitions, partition method (R, S, or M), class label,</span>
+<span class="sd">        and the column name used for matched CV. Returns list of training and testing dataframe partitions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_splits: number of splits in k-fold cross validation</span>
+<span class="sd">            random_state: random seed parameter for data reproducibility</span>
+<span class="sd">            return_dfs: flag to return splits as list of dataframe, returns empty list if set to False</span>
+
+<span class="sd">        Returns: train_df, test_df both list of dataframes of train and test splits</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">train_dfs</span><span class="p">,</span> <span class="n">test_dfs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># Random Partitioning Method</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">==</span> <span class="s1">&#39;Random&#39;</span><span class="p">:</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="c1"># Stratified Partitioning Method</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">==</span> <span class="s1">&#39;Stratified&#39;</span><span class="p">:</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="c1"># Group Partitioning Method</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">==</span> <span class="s1">&#39;Group&#39;</span><span class="p">:</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="n">StratifiedGroupKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error: Requested partition method not found.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_dfs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">==</span> <span class="s2">&quot;Group&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_only_data</span><span class="p">(),</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span><span class="p">],</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span><span class="p">]):</span>
+                    <span class="n">train_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:])</span>
+                    <span class="n">test_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_index</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_only_data</span><span class="p">(),</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span><span class="p">]):</span>
+                    <span class="n">train_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:])</span>
+                    <span class="n">test_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_index</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
+
+        <span class="k">return</span> <span class="n">train_dfs</span><span class="p">,</span> <span class="n">test_dfs</span><span class="p">,</span> <span class="n">cv</span></div>
+
+<div class="viewcode-block" id="KFoldPartitioner.save_datasets"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner.save_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">save_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">,</span> <span class="n">train_dfs</span><span class="p">,</span> <span class="n">test_dfs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Saves individual training and testing CV datasets as .csv files&quot;&quot;&quot;</span>
+        <span class="c1"># Generate folder to contain generated CV datasets</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Export training datasets</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">train_dfs</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> \
+                   <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Train.csv&quot;</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">train_dfs</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> \
+                   <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Test.csv&quot;</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

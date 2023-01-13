@@ -353,8 +353,7 @@
 
 <div class="viewcode-block" id="ExploratoryDataAnalysis.missingness_counts"><a class="viewcode-back" href="../../../streamline.dataprep.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts">[docs]</a>    <span class="k">def</span> <span class="nf">missingness_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Count and export missing values for all data columns. Also plots a histogram of m</span>
-<span class="sd">        issingness across all data columns.</span>
+<span class="sd">        Count and export missing values for all data columns.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Assess Missingness in all data columns</span>
         <span class="n">missing_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
