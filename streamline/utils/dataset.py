@@ -77,6 +77,14 @@ class Dataset:
             y_data = self.data[[self.class_label, self.instance_label, self.match_label]]
         return y_data
 
+    def get_outcome(self):
+        """
+        Function to get outcome value form data
+        Returns: outcome column
+
+        """
+        return self.data[self.class_label]
+
     def clean_data(self, ignore_features):
         """
         Basic data cleaning: Drops any instances with a missing outcome

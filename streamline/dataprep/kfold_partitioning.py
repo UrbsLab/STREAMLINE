@@ -17,6 +17,7 @@ class KFoldPartitioner(Job):
 
         Args:
             dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file
+            partition_method: KFold CV method used for partitioning, must be one of ["Random", "Stratified", "Group"]
             experiment_path: path to experiment the logging directory folder
         """
         super().__init__()

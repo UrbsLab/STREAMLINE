@@ -466,3 +466,13 @@ class ExploratoryDataAnalysis(Job):
         runtime_file = open(self.experiment_path + '/' + self.dataset.name + '/runtime/runtime_exploratory.txt', 'w')
         runtime_file.write(runtime)
         runtime_file.close()
+
+    def run(self, top_features=20):
+        """
+        Wrapper function to run_explore
+
+        Args:
+            top_features: no of top features to consider (default=20)
+
+        """
+        self.run_explore(top_features)
