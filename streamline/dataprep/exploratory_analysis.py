@@ -19,7 +19,7 @@ class ExploratoryDataAnalysis(Job):
 
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
-                 categorical_cutoff=None, sig_cutoff=None,
+                 categorical_cutoff=10, sig_cutoff=0.1,
                  random_state=None):
         """
         Initialization function for Exploratory Data Analysis Class. Parameters are defined below.
@@ -36,7 +36,8 @@ class ExploratoryDataAnalysis(Job):
             random_state: random state to set seeds for reproducibility of algorithms
         """
         super().__init__()
-        assert (type(dataset) == Dataset)
+        if type(dataset) != Dataset:
+            raise (Exception("dataset input is not of type Dataset"))
         self.dataset = dataset
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
@@ -90,9 +91,9 @@ class ExploratoryDataAnalysis(Job):
         Makes folders for logging exploratory data analysis
         """
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name):
-            os.mkdir(self.experiment_path + '/' + self.dataset.name)
+            os.makedirs(self.experiment_path + '/' + self.dataset.name)
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
-            os.mkdir(self.experiment_path + '/' + self.dataset.name + '/exploratory')
+            os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory')
 
     def run_explore(self, top_features=20):
         """
@@ -110,7 +111,7 @@ class ExploratoryDataAnalysis(Job):
         # Make analysis folder for target dataset and a folder for the respective exploratory analysis within it
         self.make_log_folders()
 
-        self.drop_ignored_rowcols(top_features)
+        self.drop_ignored_rowcols()
 
         # Account for possibility that only one dataset in folder has a match label.
         # Check for presence of match label (this allows multiple datasets to be analyzed
@@ -155,15 +156,15 @@ class ExploratoryDataAnalysis(Job):
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
 
-    def drop_ignored_rowcols(self, ignore_features):
+    def drop_ignored_rowcols(self):
         """
         Basic data cleaning: Drops any instances with a missing outcome
         value as well as any features (ignore_features) specified by user
         """
         # Remove instances with missing outcome values
-        self.dataset.clean_data(ignore_features)
+        self.dataset.clean_data(self.ignore_features)
 
-    def identify_feature_types(self, x_data):
+    def identify_feature_types(self, x_data=None):
         """
         Automatically identify categorical vs. quantitative features/variables
         Takes a dataframe (of independent variables) with column labels and
@@ -173,19 +174,25 @@ class ExploratoryDataAnalysis(Job):
         # Identify categorical variables in dataset
         logging.info("Identifying Feature Types...")
         # Runs unless user has specified a predefined list of variables to treat as categorical
+
+        if x_data is None:
+            x_data = self.dataset.feature_only_data()
+
         if len(self.categorical_features) == 0:
             categorical_variables = []
             for each in x_data:
                 if x_data[each].nunique() <= self.categorical_cutoff \
                         or not pd.api.types.is_numeric_dtype(x_data[each]):
                     categorical_variables.append(each)
+            self.dataset.categorical_variables = self.categorical_features
         else:
-            categorical_variables = self.categorical_features
+            self.dataset.categorical_variables = self.categorical_features
 
         # Pickle list of feature names to be treated as categorical variables
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/categorical_variables.pickle', 'wb') as outfile:
             pickle.dump(categorical_variables, outfile)
+
         return categorical_variables
 
     def describe_data(self):
@@ -289,7 +296,7 @@ class ExploratoryDataAnalysis(Job):
             else:
                 plt.close('all')
 
-    def feature_correlation_plot(self, x_data, show=False):
+    def feature_correlation_plot(self, x_data=None, show=False):
         """
         Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
         Due to computational expense this may not be recommended for datasets with a large number of instances
@@ -300,6 +307,8 @@ class ExploratoryDataAnalysis(Job):
             x_data: data with only feature columns
             show: flag to show plot or not
         """
+        if x_data is None:
+            x_data = self.dataset.feature_only_data()
         # Calculate correlation matrix
         correlation_mat = x_data.corr(method='pearson')
         # Generate and export correlation heatmap

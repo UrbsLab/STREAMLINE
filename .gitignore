@@ -3,3 +3,6 @@
 .ipynb_checkpoints/
 *.pyc
 *.ipynb
+__pycache__
+tests
+.pytest_cache

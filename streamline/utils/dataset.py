@@ -1,5 +1,7 @@
 import csv
 import logging
+import os
+
 import pandas as pd
 
 
@@ -24,10 +26,10 @@ class Dataset:
         self.path = dataset_path
         self.name = self.path.split('/')[-1].split('.')[0]
         self.format = self.path.split('/')[-1].split('.')[-1]
-        self.load_data()
         self.class_label = class_label
         self.match_label = match_label
         self.instance_label = instance_label
+        self.load_data()
 
     def load_data(self):
         """
@@ -42,6 +44,13 @@ class Dataset:
             self.data = pd.read_csv(self.path, na_values='NA', sep=' ')
         else:
             raise Exception("Unknown file format")
+
+        if not (self.class_label in self.data.columns):
+            raise Exception("Class label not found in file")
+        if self.match_label and not (self.match_label in self.data.columns):
+            raise Exception("Match label not found in file")
+        if self.instance_label and not (self.instance_label in self.data.columns):
+            raise Exception("Instance label not found in file")
 
     def feature_only_data(self):
         """
@@ -95,13 +104,16 @@ class Dataset:
         self.data = self.data.reset_index(drop=True)
         self.data[self.class_label] = self.data[self.class_label].astype(dtype='int8')
         # Remove columns to be ignored in analysis
-        self.data = self.data.drop(ignore_features, axis=1)
+        if ignore_features:
+            self.data = self.data.drop(ignore_features, axis=1)
 
     def set_headers(self, experiment_path, phase='exploratory'):
         """
         Exports dataset header labels for use as a reference later in the pipeline.
         """
         # Get Original Headers
+        if not os.path.exists(experiment_path + '/' + self.name + '/'+phase):
+            os.makedirs(experiment_path + '/' + self.name + '/'+phase)
         headers = self.data.columns.values.tolist()
         with open(experiment_path + '/' + self.name + '/'+phase+'/OriginalFeatureNames.csv', mode='w',
                   newline="") as file:
