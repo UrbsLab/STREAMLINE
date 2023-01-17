@@ -1,0 +1,12 @@
+matplotlib
+numpy
+optuna
+pandas
+pycodestyle
+scikit-learn
+scipy=
+seaborn
+skrebate==0.7
+Sphinx
+sphinx-rtd-theme
+tqdm

@@ -78,11 +78,11 @@ class FeatureImportance(Job):
         # Save phase runtime
         self.save_runtime(alg_name)
         # Print phase completion
-        logging.info(self.dataset.name + " CV" + str(self.cv_count)
-                     + " phase 3 " + alg_name + " evaluation complete")
+        logging.info(self.dataset.name + " CV" + str(self.cv_count) + " phase 3 "
+                     + alg_name + " evaluation complete")
         job_file = open(
-            self.experiment_path + '/jobsCompleted/job_' + alg_name + '_' + self.dataset.name
-            + '_' + str(self.cv_count) + '.txt', 'w')
+            self.experiment_path + '/jobsCompleted/job_' + alg_name + '_'
+            + self.dataset.name + '_' + str(self.cv_count) + '.txt', 'w')
         job_file.write('complete')
         job_file.close()
 
@@ -101,8 +101,8 @@ class FeatureImportance(Job):
         Run mutual information on target training dataset and return scores as well as file path/name information.
         """
         alg_name = "mutual_information"
-        output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + \
-                      alg_name + '/' + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
+        output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" \
+                      + alg_name + '/' + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
         scores = mutual_info_classif(self.dataset.feature_only_data(), self.dataset.get_outcome(),
                                      random_state=random_state)
         return scores, output_path, alg_name
@@ -125,7 +125,7 @@ class FeatureImportance(Job):
         # Run MultiSURF
         alg_name = "multisurf"
         output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/" \
-                      + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
+                    + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
         if use_turf:
             try:
                 clf = TURF(MultiSURF(n_jobs=n_jobs), pct=turf_pct).fit(data_features, data_phenotypes)

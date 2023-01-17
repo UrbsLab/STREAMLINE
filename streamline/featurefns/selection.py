@@ -288,7 +288,7 @@ class FeatureSelection(Job):
             test_list.append(test_set)
             # Training datasets
             label_list = [self.class_label]
-            if not(self.instance_label is None):
+            if not (self.instance_label is None):
                 label_list.append(self.instance_label)
             label_list = label_list + cv_selected_list[i]
             td_train = train_list[i][label_list]
