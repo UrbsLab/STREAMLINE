@@ -2,6 +2,7 @@ matplotlib
 numpy
 optuna
 pandas
+pip
 pycodestyle
 scikit-learn
 scipy
@@ -10,3 +11,4 @@ skrebate==0.7
 Sphinx
 sphinx-rtd-theme
 tqdm
+wheel
