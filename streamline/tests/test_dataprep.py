@@ -37,7 +37,7 @@ def test_valid_dataset(dataset_path, class_label, match_label, instance_label):
     assert (dataset.get_outcome().equals(dataset.data[dataset.class_label]))
     dataset.clean_data(None)
     dataset.set_headers('./tests/')
-    shutil.rmtree('./tests/')
+    # shutil.rmtree('./tests/')
 
 
 @pytest.mark.parametrize(
@@ -64,7 +64,7 @@ def test_invalid_eda_2():
 
 def test_valid_eda():
     dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
-    eda = ExploratoryDataAnalysis(dataset, "./tests/eda/")
+    eda = ExploratoryDataAnalysis(dataset, "./tests/")
     eda.make_log_folders()
     assert (eda.dataset.data.equals(dataset.data))
     eda.drop_ignored_rowcols()
@@ -87,10 +87,11 @@ def test_valid_eda():
     eda.feature_correlation_plot()
     eda.univariate_analysis()
     eda.univariate_plots()
-    shutil.rmtree('./tests/')
+    # shutil.rmtree('./tests/')
 
 
 def test_valid_eda_general():
     dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
-    eda = ExploratoryDataAnalysis(dataset, "./tests/eda/")
+    eda = ExploratoryDataAnalysis(dataset, "./tests/")
     eda.run()
+    # shutil.rmtree('./tests/')
