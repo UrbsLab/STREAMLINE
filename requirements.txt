@@ -4,7 +4,7 @@ optuna
 pandas
 pycodestyle
 scikit-learn
-scipy=
+scipy
 seaborn
 skrebate==0.7
 Sphinx
