@@ -21,7 +21,7 @@ class FeatureImportance(Job):
         Initializer for Feature Importance Job
 
         Args:
-            cv_train_path:
+            cv_train_path: path for the cross-validation dataset created
             experiment_path:
             class_label:
             instance_label:

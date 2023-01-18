@@ -35,4 +35,4 @@ def test_valid_kfold():
 
     train_dfs, test_dfs = kfold.cv_partitioner(n_splits=5, random_state=42, return_dfs=False, save_dfs=True,
                                                partition_method=partition_method)
-    # shutil.rmtree('./tests/')
+    shutil.rmtree('./tests/')

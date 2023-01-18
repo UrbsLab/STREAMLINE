@@ -1,6 +1,7 @@
 import pytest
 import shutil
 from streamline.utils.dataset import Dataset
+from streamline.dataprep.exploratory_analysis import EDARunner
 from streamline.dataprep.exploratory_analysis import ExploratoryDataAnalysis
 
 
@@ -87,11 +88,11 @@ def test_valid_eda():
     eda.feature_correlation_plot()
     eda.univariate_analysis()
     eda.univariate_plots()
-    # shutil.rmtree('./tests/')
+    shutil.rmtree('./tests/')
 
 
 def test_valid_eda_general():
     dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
     eda = ExploratoryDataAnalysis(dataset, "./tests/")
     eda.run()
-    # shutil.rmtree('./tests/')
+    shutil.rmtree('./tests/')
