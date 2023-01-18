@@ -11,7 +11,7 @@ class KFoldPartitioner(Job):
     Base class for KFold CrossValidation Operations on dataset
     """
 
-    def __init__(self, dataset, partition_method, experiment_path):
+    def __init__(self, dataset, partition_method, experiment_path, n_splits=10, random_state=None):
         """
         Initialization for KFoldPartitioner base class
 
@@ -19,12 +19,16 @@ class KFoldPartitioner(Job):
             dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file
             partition_method: KFold CV method used for partitioning, must be one of ["Random", "Stratified", "Group"]
             experiment_path: path to experiment the logging directory folder
+            n_splits: number of splits in k-fold cross validation
+            random_state: random seed parameter for data reproducibility
         """
         super().__init__()
         assert (type(dataset) == Dataset)
         self.dataset = dataset
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
+        self.n_splits = n_splits
+        self.random_state = random_state
 
         self.supported_ptn_methods = ["Random", "Stratified", "Group"]
 
@@ -38,16 +42,13 @@ class KFoldPartitioner(Job):
         self.test_dfs = None
         self.cv = None
 
-    def cv_partitioner(self, n_splits=5, random_state=42,
-                       return_dfs=True, save_dfs=False, partition_method=None):
+    def cv_partitioner(self, return_dfs=True, save_dfs=True, partition_method=None):
         """
 
         Takes data frame (data), number of cv partitions, partition method (R, S, or M), class label,
         and the column name used for matched CV. Returns list of training and testing dataframe partitions.
 
         Args:
-            n_splits: number of splits in k-fold cross validation
-            random_state: random seed parameter for data reproducibility
             return_dfs: flag to return splits as list of dataframe, returns empty list if set to False
             save_dfs: save dataframes in experiment path folder
             partition_method: override default partition method
@@ -63,13 +64,13 @@ class KFoldPartitioner(Job):
 
         # Random Partitioning Method
         if self.partition_method == 'Random':
-            cv = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+            cv = KFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
         # Stratified Partitioning Method
         elif self.partition_method == 'Stratified':
-            cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+            cv = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
         # Group Partitioning Method
         elif self.partition_method == 'Group':
-            cv = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+            cv = StratifiedGroupKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
         else:
             raise Exception('Error: Requested partition method not found.')
 
@@ -140,3 +141,12 @@ class KFoldPartitioner(Job):
                    + '_CV_' + str(counter) + "_Test.csv"
             df.to_csv(file)
             counter += 1
+
+    def run(self):
+        self.cv_partitioner()
+
+    def start(self):
+        self.run()
+
+    def join(self):
+        pass

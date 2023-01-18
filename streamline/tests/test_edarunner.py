@@ -3,7 +3,7 @@ import time
 import pytest
 import shutil
 import logging
-from streamline.dataprep.exploratory_analysis import EDARunner
+from streamline.dataprep.eda_runner import EDARunner
 
 
 @pytest.mark.parametrize(
@@ -35,4 +35,4 @@ def test_valid_eda():
                     class_label="Class")
     eda.run(run_parallel=True)
     logging.warning("Time running parallely: " + str(time.time() - start))
-    shutil.rmtree('./tests2/')
+    # shutil.rmtree('./tests2/')

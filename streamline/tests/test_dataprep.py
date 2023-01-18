@@ -1,7 +1,6 @@
 import pytest
 import shutil
 from streamline.utils.dataset import Dataset
-from streamline.dataprep.exploratory_analysis import EDARunner
 from streamline.dataprep.exploratory_analysis import ExploratoryDataAnalysis
 
 
