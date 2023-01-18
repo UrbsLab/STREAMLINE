@@ -130,7 +130,7 @@ class KFoldPartitioner(Job):
         # Export training datasets
         counter = 0
         for df in train_dfs:
-            file = experiment_path + '/' + self.dataset.name + '/CVdatasets/' + self.dataset.name \
+            file = experiment_path + '/' + self.dataset.name + '/CVDatasets/' + self.dataset.name \
                    + '_CV_' + str(counter) + "_Train.csv"
             df.to_csv(file)
             counter += 1
