@@ -26,7 +26,7 @@ def test_valid_eda():
     eda = EDARunner("./DemoData/", "./tests2/", 'demo', exploration_list=None, plot_list=None,
                     class_label="Class")
     eda.run(run_parallel=False)
-    logging.warning("Time running serially: " + str(time.time() - start))
+    logging.warning("Exploratory Data Analysis, Time running serially: " + str(time.time() - start))
 
     shutil.rmtree('./tests2/')
 
@@ -34,5 +34,5 @@ def test_valid_eda():
     eda = EDARunner("./DemoData/", "./tests2/", 'demo', exploration_list=None, plot_list=None,
                     class_label="Class")
     eda.run(run_parallel=True)
-    logging.warning("Time running parallely: " + str(time.time() - start))
+    logging.warning("Exploratory Data Analysis, Time running parallely: " + str(time.time() - start))
     shutil.rmtree('./tests2/')

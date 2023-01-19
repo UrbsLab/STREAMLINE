@@ -7,6 +7,7 @@ import logging
 import numpy as np
 import pandas as pd
 import multiprocessing
+from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.preprocessing import StandardScaler
 from streamline.utils.job import Job
@@ -57,6 +58,7 @@ class DataProcessing(Job):
         # Set random seeds for repeatability
         random.seed(self.random_state)
         np.random.seed(self.random_state)
+        print(os.getcwd())
         # Load target training and testing datasets
         data_train, data_test = self.load_data()
         # Grab header labels for features only
@@ -153,8 +155,8 @@ class DataProcessing(Job):
         self.dataset_name = self.cv_train_path.split('/')[-3]
         self.cv_count = self.cv_train_path.split('/')[-1].split("_")[-2]
         # Create folder to store scaling and imputing files
-        if not os.path.exists(self.experiment_path + '/' + self.dataset_name + '/scale_impute'):
-            os.mkdir(self.experiment_path + '/' + self.dataset_name + '/scale_impute')
+        if not os.path.exists(self.experiment_path + '/' + self.dataset_name + '/scale_impute/'):
+            os.makedirs(self.experiment_path + '/' + self.dataset_name + '/scale_impute/')
         # Load training and testing datasets
         data_train = pd.read_csv(self.cv_train_path, na_values='NA', sep=',')
         data_test = pd.read_csv(self.cv_test_path, na_values='NA', sep=',')
@@ -294,8 +296,12 @@ class DataProcessing(Job):
 
     def save_runtime(self):
         """ Save runtime for this phase """
+        if not os.path.exists(self.experiment_path + '/' + self.dataset_name
+                              + '/runtime/'):
+            os.mkdir(self.experiment_path + '/' + self.dataset_name
+                     + '/runtime/')
         runtime_file = open(self.experiment_path + '/' + self.dataset_name
-                            + '/runtime/runtime_preprocessing.txt', 'w')
+                            + '/runtime/runtime_preprocessing.txt', 'w+')
         runtime_file.write(str(time.time() - self.job_start_time))
         runtime_file.close()
 
@@ -349,17 +355,15 @@ class DataProcessRunner:
                 cv_test_path = cv_train_path.replace("Train.csv", "Test.csv")
                 if run_parallel:
                     job_obj = DataProcessing(cv_train_path, cv_test_path,
-                                             self.experiment_name + dataset_directory_path,
-                                             self.scale_data,
-                                             self.impute_data, self.multi_impute, self.overwrite_cv,
+                                             self.output_path + "/" + self.experiment_name,
+                                             self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
                     p = multiprocessing.Process(target=job_obj.run, args=(job_obj, ))
                     job_list.append(p)
                 else:
                     job_obj = DataProcessing(cv_train_path, cv_test_path,
-                                             self.experiment_name + dataset_directory_path,
-                                             self.scale_data,
-                                             self.impute_data, self.multi_impute, self.overwrite_cv,
+                                             self.output_path + "/" + self.experiment_name,
+                                             self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
         if run_parallel:

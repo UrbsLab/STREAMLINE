@@ -155,6 +155,7 @@ class ExploratoryDataAnalysis(Job):
             if "Univariate analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
+        self.save_runtime()
 
     def drop_ignored_rowcols(self):
         """
