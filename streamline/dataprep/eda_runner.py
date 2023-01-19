@@ -159,9 +159,10 @@ class EDARunner:
                 p = multiprocessing.Process(target=paralel_kfold_call, args=(kfold_obj, ))
                 job_list.append(p)
             else:  # Run job locally, serially
-                job_list.append(kfold_obj)
+                kfold_obj.run()
             job_counter += 1
-        self.run_jobs(job_list)
+        if run_parallel:
+            self.run_jobs(job_list)
 
     @staticmethod
     def run_jobs(job_list):

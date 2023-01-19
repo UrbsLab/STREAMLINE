@@ -16,7 +16,8 @@ class FeatureImportance(Job):
     Stuff about feature importance class
     """
 
-    def __init__(self, cv_train_path, experiment_path, class_label, instance_label, instance_subset):
+    def __init__(self, cv_train_path, experiment_path, class_label, instance_label=None, instance_subset=None,
+                 algorithm="MS", use_turf=True, turf_pct=True, random_state=None, n_jobs=None):
         """
         Initializer for Feature Importance Job
 
@@ -26,6 +27,12 @@ class FeatureImportance(Job):
             class_label:
             instance_label:
             instance_subset:
+            algorithm:
+            use_turf:
+            turf_pct:
+            random_state:
+            n_jobs:
+
         """
         super().__init__()
         self.cv_count = None
@@ -35,38 +42,38 @@ class FeatureImportance(Job):
         self.class_label = class_label
         self.instance_label = instance_label
         self.instance_subset = instance_subset
+        self.algorithm = algorithm
+        self.use_turf = use_turf
+        self.turf_pct = turf_pct
+        self.random_state = random_state
+        self.n_jobs = n_jobs
 
-    def run(self, algorithm, use_turf, turf_pct, random_state=42, n_jobs=-1):
+    def run(self):
         """
         Run all elements of the feature importance evaluation:
         applies either mutual information and multisurf and saves a sorted dictionary of features with associated scores
 
-        Args:
-            algorithm:
-            use_turf:
-            turf_pct:
-            random_state:
-            n_jobs:
+
 
         Returns:
 
         """
 
         self.job_start_time = time.time()
-        random.seed(random_state)
-        np.random.seed(random_state)
+        random.seed(self.random_state)
+        np.random.seed(self.random_state)
         self.prepare_data(self.cv_train_path, self.class_label, self.instance_label)
         logging.info('Prepared Train and Test for: ' + str(self.dataset.name) + "_CV_" + str(self.cv_count))
 
-        assert (algorithm == 'MI' or algorithm == 'MS')
+        assert (self.algorithm == 'MI' or self.algorithm == 'MS')
         # Apply mutual information if specified by user
-        if algorithm == 'MI':
+        if self.algorithm == 'MI':
             logging.info('Running Mutual Information...')
-            scores, output_path, alg_name = self.run_mutual_information(random_state)
+            scores, output_path, alg_name = self.run_mutual_information()
         # Apply MultiSURF if specified by user
-        elif algorithm == 'MS':
+        elif self.algorithm == 'MS':
             logging.info('Running MultiSURF...')
-            scores, output_path, alg_name = self.run_multi_surf(use_turf, turf_pct, n_jobs)
+            scores, output_path, alg_name = self.run_multi_surf()
         else:
             raise Exception("Feature importance algorithm not found")
 
@@ -96,7 +103,7 @@ class FeatureImportance(Job):
         self.dataset.class_label = class_label
         self.cv_count = cv_train_path.split('/')[-1].split("_")[-2]
 
-    def run_mutual_information(self, random_state):
+    def run_mutual_information(self):
         """
         Run mutual information on target training dataset and return scores as well as file path/name information.
         """
@@ -104,10 +111,10 @@ class FeatureImportance(Job):
         output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" \
                       + alg_name + '/' + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
         scores = mutual_info_classif(self.dataset.feature_only_data(), self.dataset.get_outcome(),
-                                     random_state=random_state)
+                                     random_state=self.random_state)
         return scores, output_path, alg_name
 
-    def run_multi_surf(self, use_turf, turf_pct, n_jobs):
+    def run_multi_surf(self):
         """
         Run multiSURF (a Relief-based feature importance algorithm able to detect both univariate
         and interaction effects) and return scores as well as file path/name information
@@ -126,13 +133,13 @@ class FeatureImportance(Job):
         alg_name = "multisurf"
         output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/" \
                     + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
-        if use_turf:
+        if self.use_turf:
             try:
-                clf = TURF(MultiSURF(n_jobs=n_jobs), pct=turf_pct).fit(data_features, data_phenotypes)
+                clf = TURF(MultiSURF(n_jobs=self.n_jobs), pct=self.turf_pct).fit(data_features, data_phenotypes)
             except Exception:
                 raise Exception("skrebate verison error")
         else:
-            clf = MultiSURF(n_jobs=n_jobs).fit(data_features, data_phenotypes)
+            clf = MultiSURF(n_jobs=self.n_jobs).fit(data_features, data_phenotypes)
         scores = clf.feature_importances_
         return scores, output_path, alg_name
 

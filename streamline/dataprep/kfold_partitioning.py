@@ -144,9 +144,3 @@ class KFoldPartitioner(Job):
 
     def run(self):
         self.cv_partitioner()
-
-    def start(self):
-        self.run()
-
-    def join(self):
-        pass
