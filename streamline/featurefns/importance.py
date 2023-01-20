@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import csv
 import time
@@ -127,21 +128,34 @@ class FeatureImportance(Job):
         #############
         # Code portion that's problematic
         # TODO: Debug
-        data_features = self.dataset.feature_only_data()
-        print(data_features.shape, self.dataset.get_outcome().shape, self.dataset.data.shape)
-        print(len(self.dataset.data.columns))
-        print(len(data_features.columns))
-        print(data_features.shape, self.dataset.get_outcome().shape)
-        formatted = np.insert(data_features, data_features.shape[1], self.dataset.get_outcome(), 1)
-
-        choices = np.random.choice(formatted.shape[0], min(self.instance_subset, formatted.shape[0]), replace=False)
-        new_l = list()
-        for i in choices:
-            new_l.append(formatted[i])
-        formatted = np.array(new_l)
-        data_features = np.delete(formatted, -1, axis=1)
-        data_phenotypes = formatted[:, -1]
+        # data_features = self.dataset.feature_only_data()
+        # print(data_features.shape, self.dataset.get_outcome().shape, self.dataset.data.shape)
+        # print(len(self.dataset.data.columns))
+        # print(len(data_features.columns))
+        # print(data_features.shape, self.dataset.get_outcome().shape)
+        # formatted = np.insert(data_features, data_features.shape[1], self.dataset.get_outcome(), 1)
+        #
+        # choices = np.random.choice(formatted.shape[0], min(self.instance_subset, formatted.shape[0]), replace=False)
+        # new_l = list()
+        # for i in choices:
+        #     new_l.append(formatted[i])
+        # formatted = np.array(new_l)
+        # data_features = np.delete(formatted, -1, axis=1)
+        # data_phenotypes = formatted[:, -1]
         ##############
+
+        # New code
+        headers = list(self.dataset.data.columns)
+        if self.instance_label:
+            headers.remove(self.instance_label)
+        headers.remove(self.class_label)
+        data_features = self.dataset.data[headers + [self.class_label, ]]
+        n = data_features.shape[0]
+        if self.instance_subset is not None:
+            n = min(data_features.shape[0], self.instance_subset)
+        data_features = data_features.sample(n)
+        data_phenotypes = data_features[self.class_label]
+        data_features = data_features.drop(self.class_label, axis=1)
 
         # Run MultiSURF
         alg_name = "multisurf"
@@ -149,13 +163,18 @@ class FeatureImportance(Job):
             os.makedirs(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/")
         output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/" \
                     + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
+
+        if self.n_jobs is None:
+            self.n_jobs = multiprocessing.cpu_count()
+
         if self.use_turf:
             try:
-                clf = TURF(MultiSURF(n_jobs=self.n_jobs), pct=self.turf_pct).fit(data_features, data_phenotypes)
-            except Exception:
-                raise Exception("skrebate verison error")
+                clf = TURF(MultiSURF(n_jobs=self.n_jobs), pct=self.turf_pct).fit(data_features.values,
+                                                                                 data_phenotypes.values)
+            except ModuleNotFoundError:
+                raise Exception("sk-rebate version error")
         else:
-            clf = MultiSURF(n_jobs=self.n_jobs).fit(data_features, data_phenotypes)
+            clf = MultiSURF(n_jobs=self.n_jobs).fit(data_features.values, data_phenotypes.values)
         scores = clf.feature_importances_
         return scores, output_path, alg_name
 

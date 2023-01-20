@@ -107,4 +107,4 @@ class FeatureImportanceRunner:
 
 
 def runner_fn(job_obj):
-    job_obj.run
+    job_obj.run()

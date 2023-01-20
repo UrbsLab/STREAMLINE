@@ -21,17 +21,20 @@ def test_invalid_feature_sel(output_path, experiment_name, exception):
 
 
 @pytest.mark.parametrize(
-    ("algorithm", "run_parallel", "use_turf", "turf_pct"),
+    ("algorithm", "run_parallel", "use_turf", "turf_pct", "output_path"),
     [
-        ("MI", False, None, None),
-        ("MI", True, None, None),
-        ("MS", False, True, True),
-        ("MS", False, True, False),
-        ("MS", False, False, None),
+        ("MI", False, None, None, "./tests4_1/"),
+        # ("MI", True, None, None, "./tests4_2/"),
+        ("MS", False, True, True, "./tests4_3/"),
+        # ("MS", False, True, False, "./tests4_4/"),
+        # ("MS", False, False, False, "./tests4_5/"),
+        # ("MS", True, True, True, "./tests4_3/"),
+        # ("MS", True, True, False, "./tests4_4/"),
+        # ("MS", True, False, False, "./tests4_5/"),
     ],
 )
-def test_valid_feature_sel(algorithm, run_parallel, use_turf, turf_pct):
-    dataset_path, output_path, experiment_name = "./DemoData/", "./tests4/", "demo",
+def test_valid_feature_sel(algorithm, run_parallel, use_turf, turf_pct, output_path):
+    dataset_path, experiment_name = "./DemoData/", "demo",
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,

@@ -378,4 +378,3 @@ class DataProcessRunner:
 
 def runner_fn(job_obj):
     job_obj.run()
-
