@@ -1,5 +1,4 @@
 import os
-import csv
 import time
 import copy
 import logging
@@ -12,19 +11,12 @@ from streamline.utils.job import Job
 
 
 class FeatureSelection(Job):
-    def __int__(self, full_path, n_splits, algorithms,
-                class_label, instance_label):
-        self.full_path = full_path
-        self.algorithms = algorithms
-        self.n_splits = n_splits
-        self.class_label = class_label
-        self.instance_label = instance_label
-
-    def run(self, export_scores=True, top_features=20, max_features_to_keep=2000,
-            filter_poor_features=True, overwrite_cv=False):
+    def __init__(self, full_path, n_splits, algorithms,
+                 class_label, instance_label, export_scores=True,
+                 top_features=20, max_features_to_keep=2000,
+                 filter_poor_features=True, overwrite_cv=False):
         """
-        Run all elements of the feature selection: reports average feature importance scores across
-        CV sets and applies collective feature selection to generate new feature selected datasets
+        Feature Selection Job for CV Data Splits
 
         Args:
             export_scores: flag to export top feature scores (default=True)
@@ -35,6 +27,22 @@ class FeatureSelection(Job):
 
         Returns:
 
+        """
+        self.full_path = full_path
+        self.algorithms = algorithms
+        self.n_splits = n_splits
+        self.class_label = class_label
+        self.instance_label = instance_label
+        self.export_scores = export_scores
+        self.top_features = top_features
+        self.max_features_to_keep = max_features_to_keep
+        self.filter_poor_features = filter_poor_features
+        self.overwrite_cv = overwrite_cv
+
+    def run(self):
+        """
+        Run all elements of the feature selection: reports average feature importance scores across
+        CV sets and applies collective feature selection to generate new feature selected datasets
         """
         # def job(full_path,do_mutual_info,do_multisurf,max_features_to_keep,
         #         filter_poor_features,top_features,export_scores,class_label,
@@ -48,29 +56,29 @@ class FeatureSelection(Job):
         # total_features = 0
         logging.info('Plotting Feature Importance Scores...')
         # Manage and summarize mutual information feature importance scores
-        if "Mutual Information" in algorithms:
+        if "MI" in algorithms:
             selected_feature_lists, meta_feature_ranks = self.report_ave_fs("Mutual Information",
-                                                                            "mutualinformation", top_features,
+                                                                            "mutual_information", self.top_features,
                                                                             selected_feature_lists, meta_feature_ranks,
-                                                                            export_scores)
+                                                                            self.export_scores)
         # Manage and summarize MultiSURF feature importance scores
-        if "MultiSURF" in algorithms:
-            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MultiSURF", "multisurf", top_features,
+        if "MS" in algorithms:
+            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MultiSURF", "multisurf", self.top_features,
                                                                             selected_feature_lists, meta_feature_ranks,
-                                                                            export_scores)
+                                                                            self.export_scores)
         # Conduct collective feature selection
         logging.info('Applying collective feature selection...')
         if len(algorithms) != 0:
-            if eval(str(filter_poor_features)):
+            if self.filter_poor_features:
                 # Identify top feature subset for each cv
                 cv_selected_list, informative_feature_counts, uninformative_feature_counts = \
                     self.select_features(selected_feature_lists,
-                                         max_features_to_keep, meta_feature_ranks)
+                                         self.max_features_to_keep, meta_feature_ranks)
                 # Save count of features identified as informative for each CV partitions
                 self.report_informative_features(informative_feature_counts, uninformative_feature_counts)
                 # Generate new datasets with selected feature subsets
                 self.gen_filtered_datasets(cv_selected_list, self.full_path + '/CVDatasets',
-                                           dataset_name, overwrite_cv)
+                                           dataset_name, self.overwrite_cv)
         # Save phase runtime
         self.save_runtime(self.full_path)
         # Print phase completion
@@ -86,7 +94,7 @@ class FeatureSelection(Job):
         importance scores <= 0) in an csv file.
         Args:
             informative_feature_counts: count of informative features to save
-            uninformative_feature_counts count of uninformative features to save
+            uninformative_feature_counts: count of uninformative features to save
         """
         counts = {'Informative': informative_feature_counts, 'Uninformative': uninformative_feature_counts}
         count_df = pd.DataFrame(counts)
@@ -154,7 +162,7 @@ class FeatureSelection(Job):
         meta_feature_ranks[algorithm] = feature_name_ranks
 
         # Generate barplot of average scores------------------------------------------------------------------------
-        if eval(export_scores):
+        if export_scores:
             # Get median score for each features
             for v in cv_score_dict:
                 cv_score_dict[v] = median(cv_score_dict[v])
@@ -303,19 +311,9 @@ class FeatureSelection(Job):
                           "_Train.csv", path_to_csv+'/'+dataset_name+'_CVPre_' + str(i) + "_Train.csv")
                 os.rename(path_to_csv+'/'+dataset_name+'_CV_' + str(i) +
                           "_Test.csv", path_to_csv+'/'+dataset_name+'_CVPre_' + str(i) + "_Test.csv")
-            # Write new CV files
-            # with open(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", mode='w', newline="") as file:
-            #     writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            #     writer.writerow(td_train.columns.values.tolist())
-            #     for row in td_train.values:
-            #         writer.writerow(row)
-            # file.close()
-            # with open(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Test.csv", mode='w', newline="") as file:
-            #     writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            #     writer.writerow(td_test.columns.values.tolist())
-            #     for row in td_test.values:
-            #         writer.writerow(row)
-            # file.close()
+
+            td_train.to_csv(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", index=False)
+            td_test.to_csv(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", index=False)
 
     def save_runtime(self, full_path):
         """
