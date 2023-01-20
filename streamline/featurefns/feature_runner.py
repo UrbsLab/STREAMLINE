@@ -1,5 +1,6 @@
 import os
 import glob
+import multiprocessing
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
 
@@ -9,9 +10,9 @@ class FeatureImportanceRunner:
     Runner Class for running feature importance jobs for
     cross-validation splits.
     """
-    def __int__(self, output_path, experiment_name, class_label="Class", instance_label=None,
-                instance_subset=None, algorithm="MS", use_turf=True, turf_pct=True,
-                random_state=None, n_jobs=None):
+    def __init__(self, output_path, experiment_name, class_label="Class", instance_label=None,
+                 instance_subset=None, algorithm="MS", use_turf=True, turf_pct=True,
+                 random_state=None, n_jobs=None):
         """
 
         Args:
@@ -70,14 +71,15 @@ class FeatureImportanceRunner:
                     os.mkdir(full_path + "/feature_selection")
 
             if self.algorithm == "MI":
-                if not os.path.exists(full_path + "/feature_selection/mutualinformation"):
-                    os.mkdir(full_path + "/feature_selection/mutualinformation")
+                if not os.path.exists(full_path + "/feature_selection/mutual_information"):
+                    os.mkdir(full_path + "/feature_selection/mutual_information")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
                                                 self.instance_label, self.instance_subset, self.algorithm,
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
-                        job_list.append(job_obj)
+                        p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                        job_list.append(p)
                     else:
                         job_obj.run()
 
@@ -89,10 +91,12 @@ class FeatureImportanceRunner:
                                                 self.instance_label, self.instance_subset, self.algorithm,
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
-                        job_list.append(job_obj)
+                        p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                        job_list.append(p)
                     else:
                         job_obj.run()
-        self.run_jobs(job_list)
+        if run_parallel:
+            self.run_jobs(job_list)
 
     @staticmethod
     def run_jobs(job_list):
@@ -100,3 +104,7 @@ class FeatureImportanceRunner:
             j.start()
         for j in job_list:
             j.join()
+
+
+def runner_fn(job_obj):
+    job_obj.run

@@ -37,7 +37,7 @@ def test_valid_dataset(dataset_path, class_label, match_label, instance_label):
     assert (dataset.get_outcome().equals(dataset.data[dataset.class_label]))
     dataset.clean_data(None)
     dataset.set_headers('./tests/')
-    # shutil.rmtree('./tests/')
+    shutil.rmtree('./tests/')
 
 
 @pytest.mark.parametrize(

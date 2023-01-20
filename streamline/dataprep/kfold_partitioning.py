@@ -132,14 +132,14 @@ class KFoldPartitioner(Job):
         for df in train_dfs:
             file = experiment_path + '/' + self.dataset.name + '/CVDatasets/' + self.dataset.name \
                    + '_CV_' + str(counter) + "_Train.csv"
-            df.to_csv(file)
+            df.to_csv(file, index=False)
             counter += 1
 
         counter = 0
         for df in test_dfs:
             file = experiment_path + '/' + self.dataset.name + '/CVDatasets/' + self.dataset.name \
                    + '_CV_' + str(counter) + "_Test.csv"
-            df.to_csv(file)
+            df.to_csv(file, index=False)
             counter += 1
 
     def run(self):

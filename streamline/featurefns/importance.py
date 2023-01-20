@@ -51,18 +51,15 @@ class FeatureImportance(Job):
     def run(self):
         """
         Run all elements of the feature importance evaluation:
-        applies either mutual information and multisurf and saves a sorted dictionary of features with associated scores
-
-
-
-        Returns:
+        applies either mutual information and multisurf and saves a sorted dictionary
+        of features with associated scores
 
         """
 
         self.job_start_time = time.time()
         random.seed(self.random_state)
         np.random.seed(self.random_state)
-        self.prepare_data(self.cv_train_path, self.class_label, self.instance_label)
+        self.prepare_data()
         logging.info('Prepared Train and Test for: ' + str(self.dataset.name) + "_CV_" + str(self.cv_count))
 
         assert (self.algorithm == 'MI' or self.algorithm == 'MS')
@@ -78,8 +75,12 @@ class FeatureImportance(Job):
             raise Exception("Feature importance algorithm not found")
 
         logging.info('Sort and pickle feature importance scores...')
+        header = self.dataset.data.columns.values.tolist()
+        header.remove(self.class_label)
+        if self.instance_label is not None:
+            header.remove(self.instance_label)
         # Save sorted feature importance scores:
-        score_dict, score_sorted_features = self.sort_save_fi_scores(scores, output_path, output_path, alg_name)
+        score_dict, score_sorted_features = self.sort_save_fi_scores(scores, header, output_path, alg_name)
         # Pickle feature importance information to be used in Phase 4 (feature selection)
         self.pickle_scores(alg_name, scores, score_dict, score_sorted_features)
         # Save phase runtime
@@ -93,15 +94,15 @@ class FeatureImportance(Job):
         job_file.write('complete')
         job_file.close()
 
-    def prepare_data(self, cv_train_path, class_label, instance_label):
+    def prepare_data(self):
         """
         Loads target cv training dataset, separates class from features and removes instance labels.
         """
-        self.dataset = Dataset(cv_train_path, class_label, instance_label=instance_label)
-        self.dataset.name = cv_train_path.split('/')[-3]
-        self.dataset.instance_label = instance_label
-        self.dataset.class_label = class_label
-        self.cv_count = cv_train_path.split('/')[-1].split("_")[-2]
+        self.dataset = Dataset(self.cv_train_path, self.class_label, instance_label=self.instance_label)
+        self.dataset.name = self.cv_train_path.split('/')[-3]
+        self.dataset.instance_label = self.instance_label
+        self.dataset.class_label = self.class_label
+        self.cv_count = self.cv_train_path.split('/')[-1].split("_")[-2]
 
     def run_mutual_information(self):
         """
@@ -110,6 +111,8 @@ class FeatureImportance(Job):
         alg_name = "mutual_information"
         output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" \
                       + alg_name + '/' + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
+        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/"):
+            os.makedirs(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/")
         scores = mutual_info_classif(self.dataset.feature_only_data(), self.dataset.get_outcome(),
                                      random_state=self.random_state)
         return scores, output_path, alg_name
@@ -120,8 +123,17 @@ class FeatureImportance(Job):
         and interaction effects) and return scores as well as file path/name information
         """
         # Format instance sampled dataset (prevents MultiSURF from running a very long time in large instance spaces)
+
+        #############
+        # Code portion that's problematic
+        # TODO: Debug
         data_features = self.dataset.feature_only_data()
+        print(data_features.shape, self.dataset.get_outcome().shape, self.dataset.data.shape)
+        print(len(self.dataset.data.columns))
+        print(len(data_features.columns))
+        print(data_features.shape, self.dataset.get_outcome().shape)
         formatted = np.insert(data_features, data_features.shape[1], self.dataset.get_outcome(), 1)
+
         choices = np.random.choice(formatted.shape[0], min(self.instance_subset, formatted.shape[0]), replace=False)
         new_l = list()
         for i in choices:
@@ -129,8 +141,12 @@ class FeatureImportance(Job):
         formatted = np.array(new_l)
         data_features = np.delete(formatted, -1, axis=1)
         data_phenotypes = formatted[:, -1]
+        ##############
+
         # Run MultiSURF
         alg_name = "multisurf"
+        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/"):
+            os.makedirs(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/")
         output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/" \
                     + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
         if self.use_turf:

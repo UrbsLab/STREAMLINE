@@ -58,7 +58,6 @@ class DataProcessing(Job):
         # Set random seeds for repeatability
         random.seed(self.random_state)
         np.random.seed(self.random_state)
-        print(os.getcwd())
         # Load target training and testing datasets
         data_train, data_test = self.load_data()
         # Grab header labels for features only
@@ -291,8 +290,8 @@ class DataProcessing(Job):
                       + str(self.cv_count) + "_Test.csv")
 
         # Write new CV files
-        data_train.to_csv(self.cv_train_path)
-        data_test.to_csv(self.cv_test_path)
+        data_train.to_csv(self.cv_train_path, index=False)
+        data_test.to_csv(self.cv_test_path, index=False)
 
     def save_runtime(self):
         """ Save runtime for this phase """
@@ -358,7 +357,7 @@ class DataProcessRunner:
                                              self.output_path + "/" + self.experiment_name,
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
-                    p = multiprocessing.Process(target=job_obj.run, args=(job_obj, ))
+                    p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                     job_list.append(p)
                 else:
                     job_obj = DataProcessing(cv_train_path, cv_test_path,
@@ -375,3 +374,8 @@ class DataProcessRunner:
             j.start()
         for j in job_list:
             j.join()
+
+
+def runner_fn(job_obj):
+    job_obj.run()
+
