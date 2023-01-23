@@ -1,0 +1,51 @@
+Sorted multisurf Scores
+Performance Status*,0.10277730301406639
+Haemoglobin (g/dL),0.09210905307673767
+Alkaline phosphatase (U/L),0.08495771597759773
+Ascites degree*,0.0799020401272244
+Oxygen Saturation (%),0.0788655265695135
+Iron,0.06001597330846726
+Liver Metastasis,0.05928778864830591
+Ferritin (ng/mL),0.05515483765179062
+Portal Vein Thrombosis,0.05136989466095049
+Aspartate transaminase (U/L),0.04771038516048464
+Albumin (mg/dL),0.03898643850579621
+Major dimension of nodule (cm),0.03341016290269579
+Symptoms ,0.03307244177274422
+Direct Bilirubin (mg/dL),0.03167902340012678
+Total Bilirubin(mg/dL),0.025363633920006835
+Diabetes,0.022336208923373995
+Gamma glutamyl transferase (U/L),0.02144415311247042
+Age at diagnosis,0.01883674074752614
+Hepatitis C Virus Antibody,0.018225876171544867
+Alanine transaminase (U/L),0.015382648084866581
+Chronic Renal Insufficiency,0.0152535164416908
+Platelets,0.015109640956327629
+International Normalised Ratio*,0.015069211774534243
+Packs of cigarets per year,0.01490648029058064
+Number of Nodules,0.013727090959926413
+Creatinine (mg/dL),0.009104444039744142
+Mean Corpuscular Volume,0.00813681787091033
+Hepatitis B Surface Antigen,0.003501743598711864
+Alpha-Fetoprotein (ng/mL),0.002209956632438997
+Hepatitis B e Antigen,0.0010017821713959017
+Endemic Countries,0.00044951930679898894
+Cirrhosis,-0.00010277998188940659
+InstanceID,-0.0012816672819760024
+Human Immunodeficiency Virus,-0.0021863600112061515
+Leukocytes(G/L),-0.004873920752623267
+Encephalopathy degree*,-0.004976879869427531
+Hepatitis B Core Antibody,-0.007779188023344671
+Portal Hypertension,-0.009144814906479932
+Total Proteins (g/dL),-0.009593049899155336
+Nonalcoholic Steatohepatitis,-0.01041536748299261
+Hemochromatosis,-0.011182865330918015
+Gender,-0.020208049660840516
+Smoking,-0.023001851647040654
+Obesity,-0.02344769648816059
+Alcohol,-0.02385482636330776
+Grams of Alcohol per day,-0.024282027195105645
+Arterial Hypertension,-0.031144308985500156
+Esophageal Varices,-0.035590659585240936
+Radiological Hallmark,-0.037520768975396065
+Splenomegaly,-0.05361288307876082

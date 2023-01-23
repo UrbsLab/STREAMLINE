@@ -11,7 +11,7 @@ class FeatureImportanceRunner:
     cross-validation splits.
     """
     def __init__(self, output_path, experiment_name, class_label="Class", instance_label=None,
-                 instance_subset=None, algorithm="MS", use_turf=True, turf_pct=True,
+                 instance_subset=None, algorithm="MS", n_splits=10, use_turf=True, turf_pct=True,
                  random_state=None, n_jobs=None):
         """
 
@@ -22,6 +22,7 @@ class FeatureImportanceRunner:
             instance_label:
             instance_subset:
             algorithm:
+            n_splits:
             use_turf:
             turf_pct:
             random_state:
@@ -169,16 +170,16 @@ class FeatureSelectionRunner:
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
             experiment_path = self.output_path + '/' + self.experiment_name
-            for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
-                job_obj = FeatureSelection(cv_train_path, self.n_splits, self.algorithms,
-                                           self.class_label, self.instance_label, self.export_scores,
-                                           self.top_features, self.max_features_to_keep,
-                                           self.filter_poor_features, self.overwrite_cv)
-                if run_parallel:
-                    p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                    job_list.append(p)
-                else:
-                    job_obj.run()
+            cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
+            job_obj = FeatureSelection(full_path, len(cv_dataset_paths), self.algorithms,
+                                       self.class_label, self.instance_label, self.export_scores,
+                                       self.top_features, self.max_features_to_keep,
+                                       self.filter_poor_features, self.overwrite_cv)
+            if run_parallel:
+                p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                job_list.append(p)
+            else:
+                job_obj.run()
         if run_parallel:
             self.run_jobs(job_list)
 

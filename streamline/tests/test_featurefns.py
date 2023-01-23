@@ -6,6 +6,19 @@ import logging
 from streamline.dataprep.eda_runner import EDARunner
 from streamline.dataprep.data_process import DataProcessRunner
 from streamline.featurefns.feature_runner import FeatureImportanceRunner
+from streamline.featurefns.feature_runner import FeatureSelectionRunner
+
+
+@pytest.mark.parametrize(
+    ("output_path", "experiment_name", "exception"),
+    [
+        ("./tests/", 'demo', Exception),
+        ("./tests/", ".@!#@", Exception),
+    ],
+)
+def test_invalid_feature_imp(output_path, experiment_name, exception):
+    with pytest.raises(exception):
+        FeatureImportanceRunner(output_path, experiment_name)
 
 
 @pytest.mark.parametrize(
@@ -17,7 +30,7 @@ from streamline.featurefns.feature_runner import FeatureImportanceRunner
 )
 def test_invalid_feature_sel(output_path, experiment_name, exception):
     with pytest.raises(exception):
-        FeatureImportanceRunner(output_path, experiment_name)
+        FeatureSelectionRunner(output_path, experiment_name)
 
 
 @pytest.mark.parametrize(
@@ -33,7 +46,7 @@ def test_invalid_feature_sel(output_path, experiment_name, exception):
         # ("MS", True, False, False, "./tests4_5/"),
     ],
 )
-def test_valid_feature_sel(algorithm, run_parallel, use_turf, turf_pct, output_path):
+def test_valid_feature_imp(algorithm, run_parallel, use_turf, turf_pct, output_path):
     dataset_path, experiment_name = "./DemoData/", "demo",
     if not os.path.exists(output_path):
         os.mkdir(output_path)
@@ -57,3 +70,46 @@ def test_valid_feature_sel(algorithm, run_parallel, use_turf, turf_pct, output_p
                     ", Time running " + how + ": " + str(time.time() - start))
 
     shutil.rmtree(output_path)
+
+
+@pytest.mark.parametrize(
+    ("algorithms", "run_parallel", "output_path"),
+    [
+        (["MI", "MS"], False, "./tests5_1/"),
+        # (["MI", "MS"], True, "./tests5_2/"),
+    ],
+)
+def test_valid_feature_sel(algorithms, run_parallel, output_path):
+    dataset_path, experiment_name = "./DemoData/", "demo",
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+    eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
+                    class_label="Class")
+    eda.run(run_parallel=False)
+    del eda
+
+    dpr = DataProcessRunner(output_path, experiment_name)
+    dpr.run(run_parallel=False)
+    del dpr
+
+    f_imp_mi = FeatureImportanceRunner(output_path, experiment_name, algorithm="MI")
+    f_imp_mi.run(run_parallel=False)
+    del f_imp_mi
+    f_imp_ms = FeatureImportanceRunner(output_path, experiment_name, algorithm="MS")
+    f_imp_ms.run(run_parallel=False)
+    f_imp_ms
+
+    start = time.time()
+
+    logging.warning("Running Feature Selection")
+    f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms, overwrite_cv=False)
+    f_sel.run(run_parallel)
+
+    if run_parallel:
+        how = "parallely"
+    else:
+        how = "serially"
+    logging.warning("Feature Selection Step with " + str(algorithms) +
+                    ", Time running " + how + ": " + str(time.time() - start))
+
+    # shutil.rmtree(output_path)

@@ -1,0 +1,49 @@
+Sorted multisurf Scores
+Performance Status*,0.0839827480072298
+Alkaline phosphatase (U/L),0.07622427478756165
+Haemoglobin (g/dL),0.07590681761241118
+Ascites degree*,0.069126661814647
+Liver Metastasis,0.06725860434998847
+Oxygen Saturation (%),0.05838407914322471
+Iron,0.04893566433439661
+Portal Vein Thrombosis,0.04843334818600347
+Albumin (mg/dL),0.0466332537404117
+Ferritin (ng/mL),0.04156092600587231
+Symptoms ,0.03638236222326105
+Diabetes,0.03620003133454635
+Gamma glutamyl transferase (U/L),0.028325159441290812
+Aspartate transaminase (U/L),0.026006456215858578
+Major dimension of nodule (cm),0.02425141468847387
+Mean Corpuscular Volume,0.022045994607431885
+International Normalised Ratio*,0.021126749008200336
+Chronic Renal Insufficiency,0.021116186447642515
+Total Bilirubin(mg/dL),0.018474064591500257
+Direct Bilirubin (mg/dL),0.014443037883800205
+Packs of cigarets per year,0.013906954890630404
+Hepatitis C Virus Antibody,0.012318270196268258
+Alanine transaminase (U/L),0.012052956537186138
+Platelets,0.011861188869542752
+Creatinine (mg/dL),0.009008630075339747
+Alpha-Fetoprotein (ng/mL),0.007679855476987932
+Number of Nodules,0.0073174245083966255
+Endemic Countries,0.0006897680627459067
+Hepatitis B Surface Antigen,0.0001231586410533821
+Hepatitis B e Antigen,0.0
+Human Immunodeficiency Virus,-0.0010373220820442046
+Portal Hypertension,-0.0011651298204680798
+Cirrhosis,-0.0024687017337633
+Hemochromatosis,-0.0039217397825386515
+Total Proteins (g/dL),-0.004318643218061922
+Leukocytes(G/L),-0.008906460907260076
+InstanceID,-0.009428901318850916
+Encephalopathy degree*,-0.010136792526214966
+Nonalcoholic Steatohepatitis,-0.010855963628691113
+Smoking,-0.01621900176916935
+Grams of Alcohol per day,-0.016354314858675088
+Obesity,-0.01681415902804699
+Alcohol,-0.024744331400971917
+Arterial Hypertension,-0.026803781120637644
+Hepatitis B Core Antibody,-0.028211304173187138
+Esophageal Varices,-0.033046560138061086
+Radiological Hallmark,-0.03800628728032727
+Splenomegaly,-0.04191730965871014

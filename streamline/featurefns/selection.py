@@ -11,10 +11,8 @@ from streamline.utils.job import Job
 
 
 class FeatureSelection(Job):
-    def __init__(self, full_path, n_splits, algorithms,
-                 class_label, instance_label, export_scores=True,
-                 top_features=20, max_features_to_keep=2000,
-                 filter_poor_features=True, overwrite_cv=False):
+    def __init__(self, full_path, n_splits, algorithms, class_label, instance_label, export_scores=True,
+                 top_features=20, max_features_to_keep=2000, filter_poor_features=True, overwrite_cv=False):
         """
         Feature Selection Job for CV Data Splits
 
@@ -28,6 +26,7 @@ class FeatureSelection(Job):
         Returns:
 
         """
+        super().__init__()
         self.full_path = full_path
         self.algorithms = algorithms
         self.n_splits = n_splits
@@ -52,23 +51,23 @@ class FeatureSelection(Job):
         dataset_name = self.full_path.split('/')[-1]
         selected_feature_lists = {}
         meta_feature_ranks = {}
-        algorithms = []
         # total_features = 0
         logging.info('Plotting Feature Importance Scores...')
         # Manage and summarize mutual information feature importance scores
-        if "MI" in algorithms:
-            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("Mutual Information",
-                                                                            "mutual_information", self.top_features,
-                                                                            selected_feature_lists, meta_feature_ranks,
-                                                                            self.export_scores)
+        # logging.warning("MI in algorithms" + str("MI" in self.algorithms))
+        # logging.warning("MS in algorithms" + str("MS" in self.algorithms))
+        # logging.warning("len(algorithms):" + str(len(self.algorithms)))
+        if "MI" in self.algorithms:
+            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MI",
+                                                                            "mutual_information",
+                                                                            selected_feature_lists, meta_feature_ranks)
         # Manage and summarize MultiSURF feature importance scores
-        if "MS" in algorithms:
-            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MultiSURF", "multisurf", self.top_features,
-                                                                            selected_feature_lists, meta_feature_ranks,
-                                                                            self.export_scores)
+        if "MS" in self.algorithms:
+            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MS", "multisurf",
+                                                                            selected_feature_lists, meta_feature_ranks)
         # Conduct collective feature selection
         logging.info('Applying collective feature selection...')
-        if len(algorithms) != 0:
+        if len(self.algorithms) != 0:
             if self.filter_poor_features:
                 # Identify top feature subset for each cv
                 cv_selected_list, informative_feature_counts, uninformative_feature_counts = \
@@ -101,8 +100,8 @@ class FeatureSelection(Job):
         count_df.to_csv(self.full_path + "/feature_selection/InformativeFeatureSummary.csv",
                         index_label='CV_Partition')
 
-    def report_ave_fs(self, algorithm, algorithmlabel, top_features,
-                      selected_feature_lists, meta_feature_ranks, export_scores, show=False):
+    def report_ave_fs(self, algorithm, algorithmlabel,
+                      selected_feature_lists, meta_feature_ranks, show=False):
         """
         Loads feature importance results from phase 3, stores sorted feature importance scores for all
         cvs, creates a list of all feature names that have a feature importance score greater than 0
@@ -112,10 +111,8 @@ class FeatureSelection(Job):
         Args:
             algorithm: name of algorithm reporting for
             algorithmlabel: label of algorithm reporting for (used for saving logs)
-            top_features: no of top features to consider
             selected_feature_lists: list of selected features for processing (dictionary for data storage)
             meta_feature_ranks: dictionary for data storage
-            export_scores: flag to export scores
             show: flag to output figures
 
         Returns:
@@ -162,7 +159,7 @@ class FeatureSelection(Job):
         meta_feature_ranks[algorithm] = feature_name_ranks
 
         # Generate barplot of average scores------------------------------------------------------------------------
-        if export_scores:
+        if self.export_scores:
             # Get median score for each features
             for v in cv_score_dict:
                 cv_score_dict[v] = median(cv_score_dict[v])
@@ -182,14 +179,20 @@ class FeatureSelection(Job):
             ns = pd.DataFrame(names_scores)
             ns = ns.sort_values(by='Scores', ascending=False)
             # Select top 'n' to report and plot
-            ns = ns.head(top_features)
+            ns = ns.head(self.top_features)
             # Visualize sorted feature scores
             ns['Scores'].plot(kind='barh', figsize=(6, 12))
             plt.ylabel('Features')
-            plt.xlabel(str(algorithm) + ' Median Score')
+            algorithm_name = ""
+            if algorithm == "MI":
+                algorithm_name = "Mutual Information"
+            elif algorithm == "MS":
+                algorithm_name = "MultiSURF"
+            plt.xlabel(str(algorithm_name) + ' Median Score')
             plt.yticks(np.arange(len(ns['Names'])), ns['Names'])
-            plt.title('Sorted Median ' + str(algorithm) + ' Scores')
-            plt.savefig((self.full_path+"/feature_selection/"+algorithmlabel+"/TopAverageScores.png"),
+            plt.title('Sorted Median ' + str(algorithm_name) + ' Scores')
+            print(self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png")
+            plt.savefig((self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png"),
                         bbox_inches="tight")
             if eval(str(show)):
                 plt.show()
@@ -224,6 +227,7 @@ class FeatureSelection(Job):
         num_algorithms = len(self.algorithms)
         informative_feature_counts = []
         uninformative_feature_counts = []
+        logging.warning(meta_feature_ranks.keys())
         total_features = len(meta_feature_ranks[self.algorithms[0]][0])
     #     'Interesting' features determined by union of feature selection results (from different algorithms)
         if num_algorithms > 1:
@@ -234,7 +238,7 @@ class FeatureSelection(Job):
                 for j in range(1, num_algorithms):  # number of union comparisons
                     union_list = list(set(union_list) | set(selected_feature_lists[self.algorithms[j]][i]))
                 informative_feature_counts.append(len(union_list))
-                uninformative_feature_counts.append(total_features-len(union_list))
+                uninformative_feature_counts.append(total_features - len(union_list))
                 # Further reduce selected feature set if it is larger than max_features_to_keep
                 if len(union_list) > max_features_to_keep:  # Apply further filtering if more than max features remains
                     # Create score list dictionary with indexes in union list
@@ -255,7 +259,7 @@ class FeatureSelection(Job):
             for i in range(self.n_splits):
                 feature_list = selected_feature_lists[self.algorithms[0]][i]  # grab first algorithm's lists
                 informative_feature_counts.append(len(feature_list))
-                uninformative_feature_counts.append(total_features-informative_feature_counts)
+                uninformative_feature_counts.append(total_features - informative_feature_counts)
                 # Apply further filtering if more than max features remains
                 if len(feature_list) > max_features_to_keep:
                     # Create score list dictionary with indexes in union list
@@ -291,7 +295,7 @@ class FeatureSelection(Job):
                                     + "_Train.csv", na_values='NA', sep=",")
             train_list.append(train_set)
             # Load testing partition
-            test_set = pd.read_csv(path_to_csv+'/'+dataset_name+'_CV_' + str(i)
+            test_set = pd.read_csv(path_to_csv + '/' + dataset_name + '_CV_' + str(i)
                                    + "_Test.csv", na_values='NA', sep=",")
             test_list.append(test_set)
             # Training datasets
@@ -301,19 +305,19 @@ class FeatureSelection(Job):
             label_list = label_list + cv_selected_list[i]
             td_train = train_list[i][label_list]
             td_test = test_list[i][label_list]
-            if eval(overwrite_cv):
+            if overwrite_cv:
                 # Remove old CV files
-                os.remove(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv")
-                os.remove(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Test.csv")
+                os.remove(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Train.csv")
+                os.remove(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Test.csv")
             else:
                 # Rename old CV files
-                os.rename(path_to_csv+'/'+dataset_name+'_CV_' + str(i) +
-                          "_Train.csv", path_to_csv+'/'+dataset_name+'_CVPre_' + str(i) + "_Train.csv")
-                os.rename(path_to_csv+'/'+dataset_name+'_CV_' + str(i) +
-                          "_Test.csv", path_to_csv+'/'+dataset_name+'_CVPre_' + str(i) + "_Test.csv")
+                os.rename(path_to_csv + '/' + dataset_name + '_CV_' + str(i) +
+                          "_Train.csv", path_to_csv + '/' + dataset_name + '_CVPre_' + str(i) + "_Train.csv")
+                os.rename(path_to_csv + '/' + dataset_name + '_CV_' + str(i) +
+                          "_Test.csv", path_to_csv + '/' + dataset_name + '_CVPre_' + str(i) + "_Test.csv")
 
-            td_train.to_csv(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", index=False)
-            td_test.to_csv(path_to_csv+'/'+dataset_name+'_CV_' + str(i) + "_Train.csv", index=False)
+            td_train.to_csv(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Train.csv", index=False)
+            td_test.to_csv(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Train.csv", index=False)
 
     def save_runtime(self, full_path):
         """

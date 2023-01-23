@@ -1,0 +1,51 @@
+Sorted mutual_information Scores
+Alkaline phosphatase (U/L),0.13905620252305173
+Iron,0.0976222874146011
+Oxygen Saturation (%),0.09367513504176594
+Performance Status*,0.08540697280958076
+Alpha-Fetoprotein (ng/mL),0.08035530592512918
+Major dimension of nodule (cm),0.0758648298889546
+Mean Corpuscular Volume,0.06942879220291687
+Alanine transaminase (U/L),0.05839454403631583
+Haemoglobin (g/dL),0.05158182546604895
+Leukocytes(G/L),0.0513139067699202
+Gender,0.044073076222201024
+Symptoms ,0.043093622814341925
+Ferritin (ng/mL),0.03594376393267207
+Direct Bilirubin (mg/dL),0.034573299219816
+Ascites degree*,0.03278088889479691
+Creatinine (mg/dL),0.031002757598476816
+Encephalopathy degree*,0.025832382981507918
+Albumin (mg/dL),0.02528832426220573
+Cirrhosis,0.022028798992165255
+Radiological Hallmark,0.015450628849753567
+Hepatitis B Surface Antigen,0.013714799685518697
+Aspartate transaminase (U/L),0.012111418999321
+Splenomegaly,0.00995490460402948
+Hemochromatosis,0.005519878294003133
+Portal Vein Thrombosis,0.001352958502083279
+InstanceID,0.0
+Alcohol,0.0
+Hepatitis B e Antigen,0.0
+Hepatitis B Core Antibody,0.0
+Hepatitis C Virus Antibody,0.0
+Endemic Countries,0.0
+Smoking,0.0
+Diabetes,0.0
+Obesity,0.0
+Arterial Hypertension,0.0
+Chronic Renal Insufficiency,0.0
+Human Immunodeficiency Virus,0.0
+Nonalcoholic Steatohepatitis,0.0
+Esophageal Varices,0.0
+Portal Hypertension,0.0
+Liver Metastasis,0.0
+Age at diagnosis,0.0
+Grams of Alcohol per day,0.0
+Packs of cigarets per year,0.0
+International Normalised Ratio*,0.0
+Platelets,0.0
+Total Bilirubin(mg/dL),0.0
+Gamma glutamyl transferase (U/L),0.0
+Total Proteins (g/dL),0.0
+Number of Nodules,0.0

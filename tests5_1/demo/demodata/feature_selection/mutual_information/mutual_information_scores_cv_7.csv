@@ -1,0 +1,51 @@
+Sorted mutual_information Scores
+Alpha-Fetoprotein (ng/mL),0.11564057605825484
+Alkaline phosphatase (U/L),0.11359669634500968
+Performance Status*,0.09764787103683314
+Symptoms ,0.08406679896744063
+Iron,0.0839067078989415
+Ferritin (ng/mL),0.075416874058293
+Haemoglobin (g/dL),0.07372424728592941
+Splenomegaly,0.06614321589601735
+Albumin (mg/dL),0.06511498263810567
+Major dimension of nodule (cm),0.05200682027911174
+Obesity,0.04936416604800864
+Hepatitis B Core Antibody,0.04347945092959482
+Chronic Renal Insufficiency,0.04246768305541071
+Mean Corpuscular Volume,0.03854775609462324
+Endemic Countries,0.03751770858806558
+Portal Hypertension,0.035190759754997636
+Direct Bilirubin (mg/dL),0.03326595445464653
+Encephalopathy degree*,0.032023165845200596
+Ascites degree*,0.028714813124096406
+Number of Nodules,0.0233852740401157
+Oxygen Saturation (%),0.02211747025553379
+Age at diagnosis,0.016945654563635504
+Portal Vein Thrombosis,0.016851019725407923
+Cirrhosis,0.016720304036219824
+Esophageal Varices,0.016293577518889046
+Liver Metastasis,0.015431675679885126
+Alanine transaminase (U/L),0.015423639346345386
+Hemochromatosis,0.013577632017708785
+Total Proteins (g/dL),0.009569181907592483
+International Normalised Ratio*,0.008520329141613825
+Total Bilirubin(mg/dL),0.004318748711253262
+Alcohol,0.001526195385735285
+Packs of cigarets per year,0.0010860632934119874
+InstanceID,0.0
+Gender,0.0
+Hepatitis B Surface Antigen,0.0
+Hepatitis B e Antigen,0.0
+Hepatitis C Virus Antibody,0.0
+Smoking,0.0
+Diabetes,0.0
+Arterial Hypertension,0.0
+Human Immunodeficiency Virus,0.0
+Nonalcoholic Steatohepatitis,0.0
+Radiological Hallmark,0.0
+Grams of Alcohol per day,0.0
+Leukocytes(G/L),0.0
+Platelets,0.0
+Aspartate transaminase (U/L),0.0
+Gamma glutamyl transferase (U/L),0.0
+Creatinine (mg/dL),0.0
