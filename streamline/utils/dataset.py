@@ -35,7 +35,7 @@ class Dataset:
         """
         Function to load data in dataset
         """
-        logging.info("Loading Dataset: "+str(self.name))
+        logging.info("Loading Dataset: " + str(self.name))
         if self.format == 'csv':
             self.data = pd.read_csv(self.path, na_values='NA', sep=',')
         elif self.format == 'tsv':
@@ -112,10 +112,10 @@ class Dataset:
         Exports dataset header labels for use as a reference later in the pipeline.
         """
         # Get Original Headers
-        if not os.path.exists(experiment_path + '/' + self.name + '/'+phase):
-            os.makedirs(experiment_path + '/' + self.name + '/'+phase)
+        if not os.path.exists(experiment_path + '/' + self.name + '/' + phase):
+            os.makedirs(experiment_path + '/' + self.name + '/' + phase)
         headers = self.data.columns.values.tolist()
-        with open(experiment_path + '/' + self.name + '/'+phase+'/OriginalFeatureNames.csv', mode='w',
+        with open(experiment_path + '/' + self.name + '/' + phase + '/OriginalFeatureNames.csv', mode='w',
                   newline="") as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(headers)
