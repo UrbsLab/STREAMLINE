@@ -112,4 +112,4 @@ def test_valid_feature_sel(algorithms, run_parallel, output_path):
     logging.warning("Feature Selection Step with " + str(algorithms) +
                     ", Time running " + how + ": " + str(time.time() - start))
 
-    # shutil.rmtree(output_path)
+    shutil.rmtree(output_path)
