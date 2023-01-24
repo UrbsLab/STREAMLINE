@@ -1,7 +1,0 @@
-Variable,Count
-instances,165.0
-features,47.0
-categorical_features,26.0
-quantitative_features,21.0
-missing_values,826.0
-missing_percent,0.10651
