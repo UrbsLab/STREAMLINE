@@ -11,11 +11,12 @@
 #     author_email='harsh.bandhey@cshs.org',
 #     license='MIT',
 #     packages=[
-#         'dataprep',
-#         'featurefns',
-#         'modelling',
-#         'models',
-#         'utils',
+#         'streamline'
+#         'streamline.dataprep',
+#         'streamline.featurefns',
+#         'streamline.modelling',
+#         'streamline.models',
+#         'streamline.utils',
 #               ],
 #     install_requires=[
 #         'mpi4py>=2.0',
