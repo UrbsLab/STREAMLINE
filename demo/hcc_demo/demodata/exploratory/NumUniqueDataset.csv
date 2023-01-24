@@ -1,0 +1,52 @@
+Variable,Count
+InstanceID,165
+Gender,2
+Symptoms ,2
+Alcohol,2
+Hepatitis B Surface Antigen,2
+Hepatitis B e Antigen,2
+Hepatitis B Core Antibody,2
+Hepatitis C Virus Antibody,2
+Cirrhosis,2
+Endemic Countries,2
+Smoking,2
+Diabetes,2
+Obesity,2
+Hemochromatosis,2
+Arterial Hypertension,2
+Chronic Renal Insufficiency,2
+Human Immunodeficiency Virus,2
+Nonalcoholic Steatohepatitis,2
+Esophageal Varices,2
+Splenomegaly,2
+Portal Hypertension,2
+Portal Vein Thrombosis,2
+Liver Metastasis,2
+Radiological Hallmark,2
+Age at diagnosis,51
+Grams of Alcohol per day,19
+Packs of cigarets per year,30
+Performance Status*,5
+Encephalopathy degree*,3
+Ascites degree*,3
+International Normalised Ratio*,87
+Alpha-Fetoprotein (ng/mL),132
+Haemoglobin (g/dL),71
+Mean Corpuscular Volume,128
+Leukocytes(G/L),105
+Platelets,131
+Albumin (mg/dL),41
+Total Bilirubin(mg/dL),62
+Alanine transaminase (U/L),93
+Aspartate transaminase (U/L),107
+Gamma glutamyl transferase (U/L),139
+Alkaline phosphatase (U/L),124
+Total Proteins (g/dL),46
+Creatinine (mg/dL),84
+Number of Nodules,6
+Major dimension of nodule (cm),68
+Direct Bilirubin (mg/dL),41
+Iron,68
+Oxygen Saturation (%),57
+Ferritin (ng/mL),84
+Class,2

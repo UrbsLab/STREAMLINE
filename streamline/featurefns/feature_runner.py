@@ -11,7 +11,7 @@ class FeatureImportanceRunner:
     cross-validation splits.
     """
     def __init__(self, output_path, experiment_name, class_label="Class", instance_label=None,
-                 instance_subset=None, algorithm="MS", n_splits=10, use_turf=True, turf_pct=True,
+                 instance_subset=None, algorithms=("MI", "MS"), n_splits=10, use_turf=True, turf_pct=True,
                  random_state=None, n_jobs=None):
         """
 
@@ -21,7 +21,7 @@ class FeatureImportanceRunner:
             class_label:
             instance_label:
             instance_subset:
-            algorithm:
+            algorithms:
             n_splits:
             use_turf:
             turf_pct:
@@ -38,8 +38,8 @@ class FeatureImportanceRunner:
         self.class_label = class_label
         self.instance_label = instance_label
         self.instance_subset = instance_subset
-        self.algorithm = algorithm
-        assert (algorithm in ["MI", "MS"])
+        self.algorithms = list(algorithms)
+        # assert (algorithms in ["MI", "MS"])
         self.use_turf = use_turf
         self.turf_pct = turf_pct
         self.random_state = random_state
@@ -67,16 +67,16 @@ class FeatureImportanceRunner:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
             experiment_path = self.output_path + '/' + self.experiment_name
 
-            if self.algorithm:
+            if self.algorithms is not None or self.algorithms != []:
                 if not os.path.exists(full_path + "/feature_selection"):
                     os.mkdir(full_path + "/feature_selection")
 
-            if self.algorithm == "MI":
+            if "MI" in self.algorithms:
                 if not os.path.exists(full_path + "/feature_selection/mutual_information"):
                     os.mkdir(full_path + "/feature_selection/mutual_information")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
-                                                self.instance_label, self.instance_subset, self.algorithm,
+                                                self.instance_label, self.instance_subset, "MI",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
                         p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
@@ -84,12 +84,12 @@ class FeatureImportanceRunner:
                     else:
                         job_obj.run()
 
-            if self.algorithm == "MS":
+            if "MS" in self.algorithms:
                 if not os.path.exists(full_path + "/feature_selection/multisurf"):
                     os.mkdir(full_path + "/feature_selection/multisurf")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
-                                                self.instance_label, self.instance_subset, self.algorithm,
+                                                self.instance_label, self.instance_subset, "MS",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
                         p = multiprocessing.Process(target=runner_fn, args=(job_obj,))

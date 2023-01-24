@@ -34,19 +34,20 @@ def test_invalid_feature_sel(output_path, experiment_name, exception):
 
 
 @pytest.mark.parametrize(
-    ("algorithm", "run_parallel", "use_turf", "turf_pct", "output_path"),
+    ("algorithms", "run_parallel", "use_turf", "turf_pct", "output_path"),
     [
-        ("MI", False, None, None, "./tests4_1/"),
-        # ("MI", True, None, None, "./tests4_2/"),
-        ("MS", False, True, True, "./tests4_3/"),
-        # ("MS", False, True, False, "./tests4_4/"),
-        # ("MS", False, False, False, "./tests4_5/"),
-        # ("MS", True, True, True, "./tests4_3/"),
-        # ("MS", True, True, False, "./tests4_4/"),
-        # ("MS", True, False, False, "./tests4_5/"),
+        (["MI"], False, None, None, "./tests4_1/"),
+        (["MS"], False, True, True, "./tests4_2/"),
+        (["MI", "MS"], False, True, True, "./tests4_3/"),
+        # (["MI"], True, None, None, "./tests4_2/"),
+        # (["MS"], False, True, False, "./tests4_4/"),
+        # (["MS"], False, False, False, "./tests4_5/"),
+        # (["MS"], True, True, True, "./tests4_3/"),
+        # (["MS"], True, True, False, "./tests4_4/"),
+        # (["MS"], True, False, False, "./tests4_5/"),
     ],
 )
-def test_valid_feature_imp(algorithm, run_parallel, use_turf, turf_pct, output_path):
+def test_valid_feature_imp(algorithms, run_parallel, use_turf, turf_pct, output_path):
     dataset_path, experiment_name = "./DemoData/", "demo",
     if not os.path.exists(output_path):
         os.mkdir(output_path)
@@ -59,14 +60,14 @@ def test_valid_feature_imp(algorithm, run_parallel, use_turf, turf_pct, output_p
 
     start = time.time()
 
-    f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithm=algorithm,
+    f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithms=algorithms,
                                     use_turf=use_turf, turf_pct=turf_pct)
     f_imp.run(run_parallel=run_parallel)
     if run_parallel:
         how = "parallely"
     else:
         how = "serially"
-    logging.warning("Feature Importance Step with " + algorithm +
+    logging.warning("Feature Importance Step with " + str(algorithms) +
                     ", Time running " + how + ": " + str(time.time() - start))
 
     shutil.rmtree(output_path)
@@ -92,17 +93,14 @@ def test_valid_feature_sel(algorithms, run_parallel, output_path):
     dpr.run(run_parallel=False)
     del dpr
 
-    f_imp_mi = FeatureImportanceRunner(output_path, experiment_name, algorithm="MI")
-    f_imp_mi.run(run_parallel=False)
-    del f_imp_mi
-    f_imp_ms = FeatureImportanceRunner(output_path, experiment_name, algorithm="MS")
-    f_imp_ms.run(run_parallel=False)
-    f_imp_ms
+    f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithms=algorithms)
+    f_imp.run(run_parallel=False)
+    del f_imp
 
     start = time.time()
 
     logging.warning("Running Feature Selection")
-    f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms, overwrite_cv=False)
+    f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms, overwrite_cv=False)
     f_sel.run(run_parallel)
 
     if run_parallel:

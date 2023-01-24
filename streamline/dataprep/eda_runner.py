@@ -94,9 +94,9 @@ class EDARunner:
         self.n_splits = n_splits
         self.partition_method = partition_method
 
-        if self.exploration_list is None:
+        if self.exploration_list is None or self.exploration_list == []:
             self.explorations_list = ["Describe", "Differentiate", "Univariate Analysis"]
-        if self.plot_list is None:
+        if self.plot_list is None or self.plot_list == []:
             self.plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         self.random_state = random_state
         self.sig_cutoff = sig_cutoff

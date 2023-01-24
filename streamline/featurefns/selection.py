@@ -163,7 +163,9 @@ class FeatureSelection(Job):
             # Get median score for each features
             for v in cv_score_dict:
                 cv_score_dict[v] = median(cv_score_dict[v])
-            logging.info(str(cv_score_dict))
+            df_string = pd.DataFrame(cv_score_dict.items(), columns=['Feature', 'Importance'])\
+                .sort_values('Importance', ascending=False).head(10).to_string()
+            logging.info(df_string)
             """
             # Make the sum of scores an average
             for v in scoreSum:
@@ -191,7 +193,8 @@ class FeatureSelection(Job):
             plt.xlabel(str(algorithm_name) + ' Median Score')
             plt.yticks(np.arange(len(ns['Names'])), ns['Names'])
             plt.title('Sorted Median ' + str(algorithm_name) + ' Scores')
-            print(self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png")
+            logging.info("Saved Feature Importance Plots at")
+            logging.info(self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png")
             plt.savefig((self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png"),
                         bbox_inches="tight")
             if eval(str(show)):
