@@ -39,7 +39,7 @@
 #     classifiers=[
 #         'Development Status :: 2 - Restructuring',
 #         'Intended Audience :: Science/Research',
-#         'License :: MIT License',
+#         'License :: GPL 4 License',
 #         'Operating System :: POSIX :: Linux',
 #         'Programming Language :: Python :: 3',
 #         'Programming Language :: Python :: 3.6',

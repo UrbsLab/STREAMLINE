@@ -148,7 +148,7 @@ class ModelJob(Job):
         # else:
         #     fi = pow(math.e, model.coef_[0])
         # return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
-        return []
+        return list()
 
     def data_prep(self):
         """

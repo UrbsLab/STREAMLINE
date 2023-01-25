@@ -20,4 +20,5 @@ class Objective(object):
         mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
                                         scoring=self.scoring_metric,
                                         cv=self.cv, n_jobs=-1).mean()
+
         return mean_cv_score
