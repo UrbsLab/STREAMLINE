@@ -1,6 +1,6 @@
 from sklearn import clone
 from sklearn.model_selection import cross_val_score
-from streamline.models.basemodel import BaseModel
+from streamline.modeling.basemodel import BaseModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.linear_model import LogisticRegression as LogR
 
@@ -10,6 +10,7 @@ class LogisticRegression(BaseModel):
                  metric_direction='maximize', random_state=None, cv=None):
         super().__init__(LogR, "Logistic Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)
+        self.small_name = "LR"
 
     def objective(self, trial):
         self.params = {

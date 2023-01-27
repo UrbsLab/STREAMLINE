@@ -1,18 +1,21 @@
 import copy
 import os
 import logging
+import pickle
 import random
 import time
 import numpy as np
 import optuna
 import pandas as pd
+from sklearn.inspection import permutation_importance
+
 from streamline.utils.job import Job
 
 
 class ModelJob(Job):
     def __init__(self, full_path, output_path, experiment_name, cv_count, class_label="Class",
                  instance_label=None, scoring_metric='primary_metric', n_trails=None, timeout=None,
-                 save_plot=False, random_state=None):
+                 uniform_fi=False, save_plot=False, random_state=None):
         super().__init__()
         self.algorithm = ""
         self.output_path = output_path
@@ -43,11 +46,14 @@ class ModelJob(Job):
         self.n_trails = n_trails
         self.timeout = timeout
         self.random_state = random_state
+        self.uniform_fi = uniform_fi
+        self.feature_importance = None
         self.save_plot = save_plot
         self.param_grid = None
 
     def run(self, model):
         self.job_start_time = time.time()  # for tracking phase runtime
+        self.algorithm = model.small_name
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
         self.run_model(model)
 
@@ -69,34 +75,43 @@ class ModelJob(Job):
         np.random.seed(self.random_state)
         # Load training and testing datasets separating features from outcome for scikit-learn-based modeling
         x_train, y_train, x_test, y_test = self.data_prep()
-        model.optmize(x_train, y_train, self.n_trails, self.timeout)
+        model.fit(x_train, y_train, self.n_trails, self.timeout)
 
         if not model.is_single:
             if self.save_plot:
                 try:
                     fig = optuna.visualization.plot_parallel_coordinate(model.study)
-                    fig.write_image(self.full_path + '/models/LR_ParamOptimization_' + str() + '.png')
+                    fig.write_image(self.full_path + '/models/' + self.algorithm +
+                                    '_ParamOptimization_' + str() + '.png')
                 except Exception:
                     logging.warning('Warning: Optuna Optimization Visualization Generation Failed for '
                                     'Due to Known Release Issue.  '
                                     'Please install Optuna 2.0.0 to avoid this issue.')
             # Print results and hyperparamter values for best hyperparameter sweep trial
-            logging.info('Best trial:')
-            best_trial = model.study.best_trial
-            logging.info('  Value: ', best_trial.value)
-            logging.info('  Params: ')
-            for key, value in best_trial.params.items():
-                logging.info('    {}: {}'.format(key, value))
-            # Specify model with optimized hyperparameters
-            # Export final model hyperparamters to csv file
-            self.export_best_params(self.full_path + '/models/_bestparams' + str(self.cv_count) + '.csv',
-                                    model.study.best_trial.params)
+            self.export_best_params(self.full_path + '/models/' + self.algorithm +
+                                    '_bestparams' + str(self.cv_count) + '.csv',
+                                    model.model.params)
         else:  # Specify hyperparameter values (no sweep)
-            params = copy.deepcopy(model.param_grid)
-            for key, value in model.param_grid.items():
-                params[key] = value[0]
-            self.export_best_params(self.full_path + '/models/LR_usedparams' + str(self.cv_count) + '.csv',
-                                    params)  # Export final model hyperparamters to csv file
+            self.export_best_params(self.full_path + '/models/' + self.algorithm +
+                                    '_usedparams' + str(self.cv_count) + '.csv',
+                                    model.model.params)
+
+        if self.uniform_fi:
+            results = permutation_importance(model, x_train, y_train, n_repeats=10, random_state=self.random_state,
+                                             scoring=self.scoring_metric)
+            self.feature_importance = results.importances_mean
+        else:
+            self.feature_importance = model.model.feature_importances_
+
+        with open(self.full_path + '/models/pickledModels/' + self.algorithm +
+                  '_' + str(self.cv_count) + '.pickle', 'wb') as file:
+            pickle.dump(model.model, file)
+
+        metric_list, fpr, tpr, roc_auc, prec, recall, \
+            prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
+        fi = self.feature_importance
+
+        return [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
 
     def data_prep(self):
         """
