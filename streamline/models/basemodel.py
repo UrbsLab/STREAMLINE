@@ -47,9 +47,6 @@ class BaseModel:
             self.study.optimize(lambda trial: self.objective(trial), n_trials=n_trails, timeout=timeout,
                                 catch=(ValueError,))
 
-
-        return list()
-
     def fit(self, x, y):
         self.model.fit(x, y)
 
