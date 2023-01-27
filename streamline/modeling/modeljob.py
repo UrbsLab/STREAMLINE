@@ -1,15 +1,12 @@
 import copy
 import os
 import logging
-import pickle
 import random
 import time
 import numpy as np
 import optuna
 import pandas as pd
 from streamline.utils.job import Job
-from streamline.utils.param_grid import hyperparameters
-from streamline.utils.objective import Objective
 
 
 class ModelJob(Job):
@@ -49,16 +46,10 @@ class ModelJob(Job):
         self.save_plot = save_plot
         self.param_grid = None
 
-    def run(self):
+    def run(self, model):
         self.job_start_time = time.time()  # for tracking phase runtime
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
-        ret = self.run_model()
-
-        # Pickle all evaluation metrics for ML model training and evaluation
-        if not os.path.exists(self.full_path + '/model_evaluation/pickled_metrics'):
-            os.mkdir(self.full_path + '/model_evaluation/pickled_metrics')
-        pickle.dump(ret, open(self.full_path + '/model_evaluation/pickled_metrics/'
-                              + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
+        self.run_model(model)
 
         # Save runtime of ml algorithm training and evaluation
         self.save_runtime()
@@ -77,78 +68,35 @@ class ModelJob(Job):
         random.seed(self.random_state)
         np.random.seed(self.random_state)
         # Load training and testing datasets separating features from outcome for scikit-learn-based modeling
-        param_grid = model.param_grid
-        model = model.model
         x_train, y_train, x_test, y_test = self.data_prep()
+        model.optmize(x_train, y_train, self.n_trails, self.timeout)
 
-        param_grid = hyperparameters()
-
-        is_single = True
-        for key, value in param_grid.items():
-            if len(value) > 1:
-                is_single = False
-        # Specify algorithm for hyperparameter optimization
-        objective = Objective(model, param_grid, x_train, y_train, self.cv_folds,
-                              self.scoring_metric, self.random_state)
-        if not is_single:
-            # Run hyperparameter sweep
-            # Apply Optuna
-            # Make the sampler behave in a deterministic way.
-            sampler = optuna.samplers.TPESampler(seed=self.random_state)
-            study = optuna.create_study(direction='maximize', sampler=sampler)
-            optuna.logging.set_verbosity(optuna.logging.INFO)
-            study.optimize(objective, n_trials=self.n_trails, timeout=self.timeout, catch=(ValueError,))
-
-            # study.best_trial.user_attrs['params']
-            # Export hyperparameter optimization search visualization if specified by user
+        if not model.is_single:
             if self.save_plot:
                 try:
-                    fig = optuna.visualization.plot_parallel_coordinate(study)
-                    fig.write_image(self.full_path + '/models/LR_ParamOptimization_' + str(self.cv_count) + '.png')
+                    fig = optuna.visualization.plot_parallel_coordinate(model.study)
+                    fig.write_image(self.full_path + '/models/LR_ParamOptimization_' + str() + '.png')
                 except Exception:
-                    print('Warning: Optuna Optimization Visualization Generation Failed '
-                          'for LR Due to Known Release Issue.  '
-                          'Please install Optuna 2.0.0 to avoid this issue.')
-
+                    logging.warning('Warning: Optuna Optimization Visualization Generation Failed for '
+                                    'Due to Known Release Issue.  '
+                                    'Please install Optuna 2.0.0 to avoid this issue.')
             # Print results and hyperparamter values for best hyperparameter sweep trial
             logging.info('Best trial:')
-            best_trial = study.best_trial
+            best_trial = model.study.best_trial
             logging.info('  Value: ', best_trial.value)
             logging.info('  Params: ')
             for key, value in best_trial.params.items():
                 logging.info('    {}: {}'.format(key, value))
-
             # Specify model with optimized hyperparameters
-            est = model()
-            clf = est.set_params(**best_trial.params)
-            self.export_best_params(self.full_path + '/models/LR_bestparams' + str(self.cv_count) + '.csv',
-                                    best_trial.params)  # Export final model hyperparamters to csv file
+            # Export final model hyperparamters to csv file
+            self.export_best_params(self.full_path + '/models/_bestparams' + str(self.cv_count) + '.csv',
+                                    model.study.best_trial.params)
         else:  # Specify hyperparameter values (no sweep)
-            params = copy.deepcopy(param_grid)
-            for key, value in param_grid.items():
+            params = copy.deepcopy(model.param_grid)
+            for key, value in model.param_grid.items():
                 params[key] = value[0]
-            est = self.model()
-            clf = est.set_params(**params)
-            self.export_best_params(self.full_path + '/models/LR_usedparams' + str(self.cv_count) + '.csv', params)
-
-        # # Print basic classifier info/hyperparmeters for verification
-        # logging.info(str(clf))
-        # # Train final model using whole training dataset and 'best' hyperparameters
-        # model = clf.fit(x_train, y_train)
-        # # Save model with pickle so it can be applied in the future
-        # pickle.dump(model, open(full_path + '/models/pickledModels/LR_' + str(i) + '.pickle', 'wb'))
-        # # Evaluate model
-        # metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = \
-        #     modelEvaluation(clf, model, x_test, y_test)
-        # # Feature Importance Estimates
-        # if eval(use_uniform_FI):
-        #     results = permutation_importance(model, x_train, y_train, n_repeats=10, random_state=random_state,
-        #                                      scoring=primary_metric)
-        #     fi = results.importances_mean
-        # else:
-        #     fi = pow(math.e, model.coef_[0])
-        # return [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
-        return list()
+            self.export_best_params(self.full_path + '/models/LR_usedparams' + str(self.cv_count) + '.csv',
+                                    params)  # Export final model hyperparamters to csv file
 
     def data_prep(self):
         """
