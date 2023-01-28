@@ -230,7 +230,6 @@ class FeatureSelection(Job):
         num_algorithms = len(self.algorithms)
         informative_feature_counts = []
         uninformative_feature_counts = []
-        logging.warning(meta_feature_ranks.keys())
         total_features = len(meta_feature_ranks[self.algorithms[0]][0])
     #     'Interesting' features determined by union of feature selection results (from different algorithms)
         if num_algorithms > 1:
@@ -320,7 +319,7 @@ class FeatureSelection(Job):
                           "_Test.csv", path_to_csv + '/' + dataset_name + '_CVPre_' + str(i) + "_Test.csv")
 
             td_train.to_csv(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Train.csv", index=False)
-            td_test.to_csv(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Train.csv", index=False)
+            td_test.to_csv(path_to_csv + '/' + dataset_name + '_CV_' + str(i) + "_Test.csv", index=False)
 
     def save_runtime(self, full_path):
         """

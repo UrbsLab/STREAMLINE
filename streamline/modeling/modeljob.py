@@ -14,8 +14,8 @@ from streamline.utils.job import Job
 
 class ModelJob(Job):
     def __init__(self, full_path, output_path, experiment_name, cv_count, class_label="Class",
-                 instance_label=None, scoring_metric='primary_metric', n_trails=None, timeout=None,
-                 uniform_fi=False, save_plot=False, random_state=None):
+                 instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trails=200,
+                 timeout=900, uniform_fi=False, save_plot=False, random_state=None):
         super().__init__()
         self.algorithm = ""
         self.output_path = output_path
@@ -23,6 +23,7 @@ class ModelJob(Job):
         self.class_label = class_label
         self.instance_label = instance_label
         self.scoring_metric = scoring_metric
+        self.metric_direction = metric_direction
         self.full_path = full_path
         self.cv_count = cv_count
         self.data_name = self.full_path.split('/')[-1]
@@ -31,7 +32,7 @@ class ModelJob(Job):
         self.test_file_path = self.full_path + '/CVDatasets/' + self.data_name \
                               + '_CV_' + str(self.cv_count) + '_Test.csv'
 
-        feature_names = pd.read_csv(self.test_file_path).columns.values.tolist()
+        feature_names = pd.read_csv(self.train_file_path).columns.values.tolist()
         if self.instance_label is not None:
             feature_names.remove(self.instance_label)
         feature_names.remove(self.class_label)
@@ -77,6 +78,9 @@ class ModelJob(Job):
         x_train, y_train, x_test, y_test = self.data_prep()
         model.fit(x_train, y_train, self.n_trails, self.timeout)
 
+        if not os.path.exists(self.full_path + '/models/'):
+            os.makedirs(self.full_path + '/models/')
+
         if not model.is_single:
             if self.save_plot:
                 try:
@@ -90,18 +94,26 @@ class ModelJob(Job):
             # Print results and hyperparamter values for best hyperparameter sweep trial
             self.export_best_params(self.full_path + '/models/' + self.algorithm +
                                     '_bestparams' + str(self.cv_count) + '.csv',
-                                    model.model.params)
+                                    model.params)
         else:  # Specify hyperparameter values (no sweep)
             self.export_best_params(self.full_path + '/models/' + self.algorithm +
                                     '_usedparams' + str(self.cv_count) + '.csv',
-                                    model.model.params)
+                                    model.params)
 
         if self.uniform_fi:
             results = permutation_importance(model, x_train, y_train, n_repeats=10, random_state=self.random_state,
                                              scoring=self.scoring_metric)
             self.feature_importance = results.importances_mean
         else:
-            self.feature_importance = model.model.feature_importances_
+            try:
+                self.feature_importance = model.model.feature_importances_
+            except AttributeError:
+                results = permutation_importance(model, x_train, y_train, n_repeats=10, random_state=self.random_state,
+                                                 scoring=self.scoring_metric)
+                self.feature_importance = results.importances_mean
+
+        if not os.path.exists(self.full_path + '/models/pickledModels/'):
+            os.makedirs(self.full_path + '/models/pickledModels/')
 
         with open(self.full_path + '/models/pickledModels/' + self.algorithm +
                   '_' + str(self.cv_count) + '.pickle', 'wb') as file:
@@ -118,16 +130,15 @@ class ModelJob(Job):
         Loads target cv training dataset, separates class from features and removes instance labels.
         """
         train = pd.read_csv(self.train_file_path)
+        test = pd.read_csv(self.test_file_path)
         if self.instance_label is not None:
             train = train.drop(self.instance_label, axis=1)
+            test = test.drop(self.instance_label, axis=1)
         x_train = train.drop(self.class_label, axis=1).values
         y_train = train[self.class_label].values
-        del train  # memory cleanup
-        test = pd.read_csv(self.test_file_path)
-        if self.instance_label != 'None':
-            test = test.drop(self.instance_label, axis=1)
         x_test = test.drop(self.class_label, axis=1).values
         y_test = test[self.class_label].values
+        del train  # memory cleanup
         del test  # memory cleanup
         return x_train, y_train, x_test, y_test
 

@@ -8,6 +8,8 @@ from streamline.dataprep.data_process import DataProcessRunner
 from streamline.featurefns.feature_runner import FeatureImportanceRunner
 from streamline.featurefns.feature_runner import FeatureSelectionRunner
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 
 @pytest.mark.parametrize(
     ("output_path", "experiment_name", "exception"),

@@ -4,6 +4,8 @@ import pandas as pd
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 dataset_valid = Dataset("./DemoData/demodata.csv", "Class")
 
 

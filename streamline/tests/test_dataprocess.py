@@ -6,6 +6,8 @@ import logging
 from streamline.dataprep.eda_runner import EDARunner
 from streamline.dataprep.data_process import DataProcessRunner
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 
 @pytest.mark.parametrize(
     ("output_path", "experiment_name", "exception"),

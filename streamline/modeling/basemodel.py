@@ -1,10 +1,12 @@
 import copy
 import logging
 import optuna
-from sklearn import clone, metrics
+from sklearn import metrics
 from sklearn.metrics import auc
 from sklearn.model_selection import StratifiedKFold
 from streamline.utils.evaluation import class_eval
+from sklearn.utils._testing import ignore_warnings
+from sklearn.exceptions import ConvergenceWarning
 
 
 class BaseModel:
@@ -12,7 +14,7 @@ class BaseModel:
                  cv_folds=5, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  random_state=None, cv=None, sampler=None):
         self.is_single = True
-        self.model = model
+        self.model = model()
         self.small_name = model_name.replace(" ", "_")
         self.model_name = model_name
         self.y_train = None
@@ -32,11 +34,12 @@ class BaseModel:
         else:
             self.sampler = sampler
         self.study = None
-        optuna.logging.set_verbosity(optuna.logging.INFO)
+        optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     def objective(self, trail):
         raise NotImplementedError
 
+    @ignore_warnings(category=ConvergenceWarning)
     def optimize(self, x_train, y_train, n_trails, timeout):
         self.x_train = x_train
         self.y_train = y_train
@@ -51,19 +54,19 @@ class BaseModel:
                                 catch=(ValueError,))
             logging.info('Best trial:')
             best_trial = self.study.best_trial
-            logging.info('  Value: ', best_trial.value)
+            logging.info('  Value: ' + str(best_trial.value))
             logging.info('  Params: ')
             for key, value in best_trial.params.items():
                 logging.info('    {}: {}'.format(key, value))
             # Specify model with optimized hyperparameters
             # Export final model hyperparamters to csv file
-
-            self.model = self.study.best_trial
+            self.params = best_trial.params
+            self.model = copy.deepcopy(self.model).set_params(**best_trial.params)
         else:
             self.params = copy.deepcopy(self.param_grid)
             for key, value in self.param_grid.items():
                 self.params[key] = value[0]
-            self.model = clone(self.model).set_params(**self.params)
+            self.model = copy.deepcopy(self.model).set_params(**self.params)
 
     def feature_importance(self):
         raise NotImplementedError
@@ -91,4 +94,4 @@ class BaseModel:
         self.model.fit(x_train, y_train)
 
     def predict(self, x_in):
-        self.model.predict(x_in)
+        return self.model.predict(x_in)

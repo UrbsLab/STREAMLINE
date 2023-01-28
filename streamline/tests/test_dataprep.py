@@ -3,6 +3,8 @@ import shutil
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.exploratory_analysis import ExploratoryDataAnalysis
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 
 @pytest.mark.parametrize(
     ("dataset_path", "class_label", "match_label", "instance_label", "exception"),

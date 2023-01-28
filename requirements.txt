@@ -1,6 +1,8 @@
 matplotlib
 numpy
-optuna
+optuna==2.0.0
+sqlalchemy<2.0
+plotly>=4.0.0
 pandas
 pip
 pycodestyle
