@@ -1,2 +1,5 @@
 import shutil
-# shutil.rmtree('tests/')
+
+
+def test_stub():
+    shutil.rmtree('./tests/')
