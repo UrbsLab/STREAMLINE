@@ -1,7 +1,4 @@
-import copy
-import logging
 from abc import ABC
-from sklearn.model_selection import cross_val_score
 from streamline.modeling.basemodel import BaseModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.naive_bayes import GaussianNB as NB
@@ -17,10 +14,5 @@ class NaiveBayes(BaseModel, ABC):
 
     def objective(self, trial):
         self.params = {}
-        model = copy.deepcopy(self.model).set_params(**self.params)
-
-        mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
-                                        scoring=self.scoring_metric,
-                                        cv=self.cv, n_jobs=self.n_jobs).mean()
-        logging.debug("Trail Completed")
+        mean_cv_score = self.hypereval(trial)
         return mean_cv_score

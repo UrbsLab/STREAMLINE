@@ -1,7 +1,4 @@
-import copy
-import logging
 from abc import ABC
-from sklearn.model_selection import cross_val_score
 from streamline.modeling.basemodel import BaseModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.linear_model import LogisticRegression as LogR
@@ -29,11 +26,12 @@ class LogisticRegression(BaseModel, ABC):
             if self.params['penalty'] == 'l2':
                 self.params['dual'] = trial.suggest_categorical('dual', self.param_grid['dual'])
 
-        logging.debug("Trial Parameters" + str(self.params))
-        model = copy.deepcopy(self.model).set_params(**self.params)
-
-        mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
-                                        scoring=self.scoring_metric,
-                                        cv=self.cv, n_jobs=self.n_jobs).mean()
-        logging.debug("Trail Completed")
+        mean_cv_score = self.hypereval(trial)
+        # logging.debug("Trial Parameters" + str(self.params))
+        # model = copy.deepcopy(self.model).set_params(**self.params)
+        #
+        # mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
+        #                                 scoring=self.scoring_metric,
+        #                                 cv=self.cv, n_jobs=self.n_jobs).mean()
+        # logging.debug("Trail Completed")
         return mean_cv_score

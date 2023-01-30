@@ -3,10 +3,10 @@ import logging
 import optuna
 from sklearn import metrics
 from sklearn.metrics import auc
-from sklearn.model_selection import StratifiedKFold
 from streamline.utils.evaluation import class_eval
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 
 class BaseModel:
@@ -70,6 +70,16 @@ class BaseModel:
 
     def feature_importance(self):
         raise NotImplementedError
+
+    def hypereval(self, trial):
+        logging.debug("Trial Parameters" + str(self.params))
+        model = copy.deepcopy(self.model).set_params(**self.params)
+
+        mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
+                                        scoring=self.scoring_metric,
+                                        cv=self.cv, n_jobs=self.n_jobs).mean()
+        logging.debug("Trail Completed")
+        return mean_cv_score
 
     def model_evaluation(self, x_test, y_test):
         """ Runs commands to gather all evaluations for later summaries and plots. """
