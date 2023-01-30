@@ -9,7 +9,7 @@ SUPPORTED_MODELS = [
     'Category Gradient Boosting',
     'Support Vector Machine',
     'Artificial Neural Network',
-    'K-Nearest Neightbors',
+    'K-Nearest Neighbors',
     'Genetic Programming',
     'eLCS',
     'XCS',
