@@ -5,7 +5,7 @@ from gplearn.genetic import SymbolicClassifier as GP
 
 
 class GPClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GP, "Artificial Neural Network", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)

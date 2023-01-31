@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier as RF
 
 
 class RandomForestClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(RF, "Random Forest", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)

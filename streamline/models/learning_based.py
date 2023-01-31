@@ -7,7 +7,7 @@ from skExSTraCS import ExSTraCS
 
 
 class eLCSClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
                  iterations=None, N=None, nu=None):
         super().__init__(eLCS, "eLCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
@@ -29,7 +29,7 @@ class eLCSClassifier(BaseModel, ABC):
 
 
 class XCSClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
                  iterations=None, N=None, nu=None):
         super().__init__(XCS, "XCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
@@ -51,7 +51,7 @@ class XCSClassifier(BaseModel, ABC):
 
 
 class ExSTraCSClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
                  iterations=None, N=None, nu=None):
         super().__init__(ExSTraCS, "ExSTraCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
