@@ -77,10 +77,10 @@ parameters = {'Naive Bayes': {},
                                             'batch_size': ['auto'],
                                             'alpha': [0.0001, 0.05],
                                             'max_iter': [200]},
-              'K-Nearest Neightbors': {'n_neighbors': [1, 100],
-                                       'weights': ['uniform', 'distance'],
-                                       'p': [1, 5],
-                                       'metric': ['euclidean', 'minkowski']},
+              'K-Nearest Neighbors': {'n_neighbors': [1, 100],
+                                      'weights': ['uniform', 'distance'],
+                                      'p': [1, 5],
+                                      'metric': ['euclidean', 'minkowski']},
               'Genetic Programming': {'population_size': [100, 1000],
                                       'generations': [10, 500],
                                       'tournament_size': [3, 50],
@@ -112,7 +112,18 @@ parameters = {'Naive Bayes': {},
                                                         'cos',
                                                         'tan']],
                                       'parsimony_coefficient': [0.001, 0.01],
-                                      'low_memory': [True]}
+                                      'low_memory': [True]},
+
+              # eLCS
+              "eLCS": {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
+                       'nu': [1, 10], },
+              # XCS
+              "XCS": {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
+                      'nu': [1, 10], },
+              # ExSTraCS
+              "ExSTraCS": {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
+                           'nu': [1, 10],
+                           'rule_compaction': ['None', 'QRF']}
               }
 
 

@@ -1,6 +1,6 @@
 matplotlib
 numpy
-optuna==2.0.0
+optuna
 sqlalchemy<2.0
 plotly>=4.0.0
 pandas
@@ -9,7 +9,7 @@ pycodestyle
 scikit-learn
 scipy
 seaborn
-skrebate==0.7
+skrebate
 Sphinx
 sphinx-rtd-theme
 tqdm
@@ -21,3 +21,6 @@ catboost
 gplearn
 ipython
 fpdf
+scikit-XCS
+scikit-ExSTraCS
+scikit-eLCS
