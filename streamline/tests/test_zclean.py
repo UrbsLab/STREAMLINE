@@ -1,5 +1,7 @@
 import shutil
+DEBUG = False
 
 
 def test_stub():
-    shutil.rmtree('./tests/')
+    if not DEBUG:
+        shutil.rmtree('./tests/')
