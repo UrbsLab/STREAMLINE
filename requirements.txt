@@ -9,7 +9,7 @@ pycodestyle
 scikit-learn
 scipy
 seaborn
-skrebate
+skrebate==0.7
 Sphinx
 sphinx-rtd-theme
 tqdm
