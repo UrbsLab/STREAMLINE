@@ -1,4 +1,3 @@
-import copy
 import os
 import logging
 import pickle
@@ -14,7 +13,7 @@ from streamline.utils.job import Job
 
 class ModelJob(Job):
     def __init__(self, full_path, output_path, experiment_name, cv_count, class_label="Class",
-                 instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trails=200,
+                 instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trials=200,
                  timeout=900, uniform_fi=False, save_plot=False, random_state=None):
         super().__init__()
         self.algorithm = ""
@@ -44,7 +43,7 @@ class ModelJob(Job):
         if not os.path.exists(self.output_path + '/' + self.experiment_name):
             raise Exception("Experiment must exist (from phase 1) before phase 5 can begin")
 
-        self.n_trails = n_trails
+        self.n_trials = n_trials
         self.timeout = timeout
         self.random_state = random_state
         self.uniform_fi = uniform_fi
@@ -76,7 +75,7 @@ class ModelJob(Job):
         np.random.seed(self.random_state)
         # Load training and testing datasets separating features from outcome for scikit-learn-based modeling
         x_train, y_train, x_test, y_test = self.data_prep()
-        model.fit(x_train, y_train, self.n_trails, self.timeout)
+        model.fit(x_train, y_train, self.n_trials, self.timeout)
 
         if not os.path.exists(self.full_path + '/models/'):
             os.makedirs(self.full_path + '/models/')

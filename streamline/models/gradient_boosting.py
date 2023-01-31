@@ -7,8 +7,8 @@ from lightgbm import LGBMClassifier as LGB
 from catboost import CatBoostClassifier as CGB
 
 
-class GradientBoostingClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+class GBClassifier(BaseModel, ABC):
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GB, "Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)
@@ -37,7 +37,7 @@ class GradientBoostingClassifier(BaseModel, ABC):
 
 
 class XGBClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(XGB, "Extreme Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)
@@ -82,7 +82,7 @@ class XGBClassifier(BaseModel, ABC):
 
 
 class LGBClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LGB, "Light Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)
@@ -125,7 +125,7 @@ class LGBClassifier(BaseModel, ABC):
 
 
 class CGBClassifier(BaseModel, ABC):
-    def __init__(self, cv_folds=5, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(CGB, "Category Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state,
                          cv)

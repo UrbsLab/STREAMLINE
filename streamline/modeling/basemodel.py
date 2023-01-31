@@ -15,7 +15,7 @@ warnings.simplefilter(action='ignore', category=ConvergenceWarning)
 
 class BaseModel:
     def __init__(self, model, model_name,
-                 cv_folds=5, scoring_metric='balanced_accuracy', metric_direction='maximize',
+                 cv_folds=3, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  random_state=None, cv=None, sampler=None):
         self.is_single = True
         self.model = model()
