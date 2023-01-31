@@ -14,3 +14,10 @@ Sphinx
 sphinx-rtd-theme
 tqdm
 wheel
+pytest
+xgboost
+lightgbm
+catboost
+gplearn
+ipython
+fpdf

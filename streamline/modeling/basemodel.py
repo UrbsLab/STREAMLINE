@@ -40,7 +40,7 @@ class BaseModel:
         self.study = None
         optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-    def objective(self, trail):
+    def objective(self, trial, params=None):
         raise NotImplementedError
 
     @ignore_warnings(category=ConvergenceWarning)
@@ -54,8 +54,17 @@ class BaseModel:
 
         if not self.is_single:
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
-            self.study.optimize(lambda trial: self.objective(trial), n_trials=n_trails, timeout=timeout,
-                                catch=(ValueError,))
+            if self.model.small_name is "XGB":
+                pos_inst = sum(y_train)
+                neg_inst = len(y_train) - pos_inst
+                class_weight = neg_inst / float(pos_inst)
+                self.study.optimize(lambda trial: self.objective(trial, {'class_weight': class_weight}),
+                                    n_trials=n_trails, timeout=timeout,
+                                    catch=(ValueError,))
+            else:
+                self.study.optimize(lambda trial: self.objective(trial), n_trials=n_trails, timeout=timeout,
+                                    catch=(ValueError,))
+
             logging.info('Best trial:')
             best_trial = self.study.best_trial
             logging.info('  Value: ' + str(best_trial.value))

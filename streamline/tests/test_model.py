@@ -9,8 +9,8 @@ from streamline.dataprep.data_process import DataProcessRunner
 from streamline.featurefns.feature_runner import FeatureImportanceRunner
 from streamline.featurefns.feature_runner import FeatureSelectionRunner
 from streamline.modeling.modeljob import ModelJob
-from streamline.models.logistic_regression import LogisticRegression
-from streamline.models.naive_bayes import NaiveBayes
+from streamline.models.linear_model import LogisticRegression
+from streamline.models.naive_bayes import NaiveBayesClassifier
 
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
@@ -41,7 +41,7 @@ def test_setup():
     ("model", ),
     [
         (LogisticRegression(), ),
-        (NaiveBayes(), ),
+        (NaiveBayesClassifier(), ),
     ],
 )
 def test_valid_models(model):

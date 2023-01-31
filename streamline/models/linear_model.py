@@ -11,9 +11,10 @@ class LogisticRegression(BaseModel, ABC):
         self.param_grid = get_parameters(self.model_name)
         self.param_grid['random_state'] = [random_state, ]
         self.small_name = "LR"
+        self.color = "dimgrey"
         self.n_jobs = n_jobs
 
-    def objective(self, trial):
+    def objective(self, trial, params=None):
         self.params = {
             'solver': trial.suggest_categorical('solver', self.param_grid['solver']),
             'C': trial.suggest_loguniform('C', self.param_grid['C'][0], self.param_grid['C'][1]),
