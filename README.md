@@ -12,15 +12,22 @@ development of this pipeline focused on
 5) capturing complex associations in data (e.g. feature interactions)
 6) enhancing interpretability of output. 
 
-Overall, the goal of this pipeline is to provide a transparent framework to learn from data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
+Overall, the goal of this pipeline is to provide a transparent framework to learn from data as well as identify 
+the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
 
-A preprint introducing and applying STREAMLINE is now available https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw.
+A preprint introducing and applying STREAMLINE is now available 
+[here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
-See [below](#citation) for how to cite this preprint and/or the codebase prior to the availability of the final peer-reviewed publication.
+See [below](#citations) for how to cite this preprint and/or the codebase prior to the availability of the final 
+peer-reviewed publication.
 
 ## STREAMLINE Schematic
 
-This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
+This schematic breaks the overall pipeline down into 4 basic components: 
+(1) preprocessing and feature transformation, 
+(2) feature importance evaluation and selection, 
+(3) modeling, and 
+(4) postprocessing.
 
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/ML_pipe_schematic.png?raw=true)
 
@@ -30,7 +37,16 @@ STREAMLINE is coded in Python 3 relying heavily on pandas and scikit-learn as we
 
 ***
 ### Disclaimer
-We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification problem, nor that the included ML modeling algorithms will yield the best performance possible. We intend many expansions/improvements to this pipeline in the future to make it easier to use and hopefully more effective in application.  We welcome feedback, suggestions, and contributions for improvement.
+We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given 
+classification problem, nor that the included ML modeling algorithms will yield the best performance possible. 
+We intend many expansions/improvements to this pipeline in the future to make it easier to use and hopefully more effective in application.  We welcome feedback, suggestions, and contributions for improvement.
+
+#### General Guidelines for STREAMLINE Use
+* SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
+* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise `use_uniform_FI` should be True.
+* While the STREAMLINE includes `impute_data` as an option that can be turned off in `DataPreprocessing`, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. 
+* In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
+
 
 ***
 ## Installation and Use
@@ -42,22 +58,17 @@ pip install streamline
 ```
 
 ***
-# General Guidelines for STREAMLINE Use
-* SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
-* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise `use_uniform_FI` should be True.
-* While the STREAMLINE includes `impute_data` as an option that can be turned off in `DataPreprocessing`, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
 
 ***
 
-# Demonstration data
-Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of pipeline efficacy. New users can easily run the included jupyter notebook 'as-is', and it will be run automatically on these datasets. The first dataset `hcc-data_example.csv` is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. It includes 165 instances, 49 fetaures, and a binary class label. It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).  To illustrate how STREAMLINE can be applied to more than one dataset at once, we created a second dataset from this HCC dataset called `hcc-data_example_no_covariates.csv`, which is the same as the first but we have removed two covariates, i.e. `Age at Diagnosis`, and `Gender`.
-
-Furthermore, to demonstrate how STREAMLINE-trained models may be applied to new data in the future through the phase 9 `ApplyModel.py` we have simply added a copy of `hcc-data_example.csv`, renamed as `hcc-data_example_rep.csv` to the folder `DemoRepData`. While this is not a true replication dataset (as none was available for this example) it does illustrate the functionality of `ApplyModel`. Since the cross validation (CV)-trained models are being applied to all of the original target data, the `ApplyModel.py` results in this demonstration are predictably overfit.  When applying trained models to a true replication dataset model prediction performance is generally expected to be as good or less well performing than the individual testing evaluations completed for each CV model.
-
-***
-# Troubleshooting
-
-## STREAMLINE fails to run to completion
+## Demonstration 
+Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of pipeline efficacy. 
+New users can easily run the included jupyter notebook 'as-is', and it will be run automatically on these datasets. 
+The first dataset `hcc-data_example.csv` is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. 
+It includes 165 instances, 49 fetaures, and a binary class label. 
+It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).  
+To illustrate how STREAMLINE can be applied to more than one 
+dataset at once, we created a second dataset from this HCC dataset called `hcc-data_example_no_covariates.csv`, which is the same as the first but we have removed two covariates, i.e. `Age at Diagnosis`, and `Gender`.
 
 ***
 # Acknowledgements
