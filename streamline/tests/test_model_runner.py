@@ -46,7 +46,7 @@ for algorithm in SUPPORTED_MODELS_SMALL[:2]:
         (['NB'], False),
         (["LR"], False),
         (["NB"], True),
-        (["NB", "LR",], True),
+        (["NB", "LR", ], True),
         # # (['NB'], False),
         # (['CGB'], False),
         # (['LGB'], False),
