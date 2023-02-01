@@ -66,11 +66,11 @@ Included with this pipeline is a folder named `DemoData` including two small dat
 
 New users can easily run the included [jupyter notebook](https://github.com/raptor419/STREAMLINE_Dev/blob/main/STREAMLINE-Notebook.ipynb) 'as-is', and it will be run automatically on these datasets. 
 The first dataset `hcc-data_example.csv` is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. 
-It includes 165 instances, 49 fetaures, and a binary class label. 
-It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).  
+It includes 165 instances, 49 features, and a binary class label. 
+It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 survived (class 0).  
 
 To illustrate how STREAMLINE can be applied to more than one 
-dataset at once, we created a second dataset from this HCC dataset called `hcc-data_example_no_covariates.csv`, which is the same as the first but we have removed two covariates, i.e. `Age at Diagnosis`, and `Gender`.
+dataset at once, we created a second dataset from this HCC dataset called `hcc-data_example_no_covariates.csv`, which is the same as the first, but we have removed two co-variates, i.e. `Age at Diagnosis`, and `Gender`.
 
 ***
 # Acknowledgements
