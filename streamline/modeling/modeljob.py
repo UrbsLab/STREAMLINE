@@ -55,7 +55,14 @@ class ModelJob(Job):
         self.job_start_time = time.time()  # for tracking phase runtime
         self.algorithm = model.small_name
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
-        self.run_model(model)
+        ret = self.run_model(model)
+
+        # Pickle all evaluation metrics for ML model training and evaluation
+        if not os.path.exists(self.full_path + '/model_evaluation/pickled_metrics'):
+            os.mkdir(self.full_path + '/model_evaluation/pickled_metrics')
+        pickle.dump(ret, open(self.full_path
+                              + '/model_evaluation/pickled_metrics/'
+                              + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
 
         # Save runtime of ml algorithm training and evaluation
         self.save_runtime()
@@ -133,10 +140,10 @@ class ModelJob(Job):
         if self.instance_label is not None:
             train = train.drop(self.instance_label, axis=1)
             test = test.drop(self.instance_label, axis=1)
-        x_train = train.drop(self.class_label, axis=1).values
-        y_train = train[self.class_label].values
-        x_test = test.drop(self.class_label, axis=1).values
-        y_test = test[self.class_label].values
+        x_train = train.drop(self.class_label, axis=1)
+        y_train = train[self.class_label]
+        x_test = test.drop(self.class_label, axis=1)
+        y_test = test[self.class_label]
         del train  # memory cleanup
         del test  # memory cleanup
         return x_train, y_train, x_test, y_test

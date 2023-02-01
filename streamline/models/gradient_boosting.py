@@ -75,7 +75,7 @@ class XGBClassifier(BaseModel, ABC):
                                                                  param_grid['colsample_bytree'][1]),
                        'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
                        'nthread': trial.suggest_categorical('nthread', param_grid['nthread']),
-                       'random_state': trial.suggest_categorical('seed', param_grid['seed'])}
+                       'random_state': trial.suggest_categorical('random_state', param_grid['random_state']), }
 
         mean_cv_score = self.hypereval(trial)
         return mean_cv_score
@@ -117,9 +117,8 @@ class LGBClassifier(BaseModel, ABC):
                        'n_estimators': trial.suggest_int('n_estimators', param_grid['n_estimators'][0],
                                                          param_grid['n_estimators'][1]),
                        'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
-                       'num_threads': trial.suggest_categorical('num_threads', param_grid['num_threads']),
-                       'random_state': trial.suggest_categorical('seed', param_grid['seed'])}
-
+                       'random_state': trial.suggest_categorical('random_state', param_grid['random_state'])}
+        print(self.model.get_params())
         mean_cv_score = self.hypereval(trial)
         return mean_cv_score
 
@@ -131,7 +130,7 @@ class CGBClassifier(BaseModel, ABC):
                          cv)
         self.param_grid = get_parameters(self.model_name)
         self.param_grid['random_state'] = [random_state, ]
-        self.small_name = "LGB"
+        self.small_name = "CGB"
         self.color = "magenta"
         self.n_jobs = n_jobs
 
@@ -144,7 +143,8 @@ class CGBClassifier(BaseModel, ABC):
                        'l2_leaf_reg': trial.suggest_int('l2_leaf_reg', self.param_grid['l2_leaf_reg'][0],
                                                         self.param_grid['l2_leaf_reg'][1]),
                        'loss_function': trial.suggest_categorical('loss_function', self.param_grid['loss_function']),
-                       'random_seed': trial.suggest_categorical('random_seed', self.param_grid['random_seed'])}
+                       'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state']),
+                       }
 
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hypereval(self.params)
         return mean_cv_score

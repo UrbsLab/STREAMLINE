@@ -44,11 +44,20 @@ for algorithm in SUPPORTED_MODELS_SMALL[:2]:
     ("algorithms", "run_parallel"),
     [
         (['NB'], False),
-        # (["LR"], False),
-        # (["LR"], True),
-        # (["NB", "LR", "DT"], True),
-        # (SUPPORTED_MODELS_SMALL, True),
+        (["LR"], False),
+        (["NB"], True),
+        (["NB", "LR",], True),
+        # # (['NB'], False),
+        # (['CGB'], False),
+        # (['LGB'], False),
+        # (['XGB'], False),
+        # (['GP'], False),
+        # (['XCS'], True),
+        # ([SUPPORTED_MODELS_SMALL[-1]], True),
+
     ]
+    # +
+    # [([algo], False) for algo in SUPPORTED_MODELS_SMALL]
 )
 def test_valid_model_runner(algorithms, run_parallel):
     start = time.time()

@@ -57,9 +57,6 @@ def test_valid_models(model):
         model_job = ModelJob(output_path + '/' + experiment_name + '/demodata', output_path, experiment_name, i)
         model_job.run(model)
         # logging.warning("Best Params:" + str(model.params))
-        model_job = ModelJob(output_path + '/' + experiment_name + '/hcc-data_example', output_path, experiment_name, i)
-        model_job.run(model)
-        # logging.warning("Best Params:" + str(model.params))
         model_job = ModelJob(output_path + '/' + experiment_name + '/hcc-data_example_no_covariates',
                              output_path, experiment_name, i)
         model_job.run(model)

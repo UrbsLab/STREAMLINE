@@ -1,10 +1,10 @@
 import copy
 import logging
 import optuna
-from sklearn import metrics
+from sklearn import metrics, clone
+from catboost import CatBoostClassifier
 from sklearn.metrics import auc
 from streamline.utils.evaluation import class_eval
-from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 import warnings
@@ -16,7 +16,7 @@ warnings.simplefilter(action='ignore', category=ConvergenceWarning)
 class BaseModel:
     def __init__(self, model, model_name,
                  cv_folds=3, scoring_metric='balanced_accuracy', metric_direction='maximize',
-                 random_state=None, cv=None, sampler=None):
+                 random_state=None, cv=None, sampler=None, n_jobs=None):
         self.is_single = True
         self.model = model()
         self.small_name = model_name.replace(" ", "_")
@@ -39,12 +39,12 @@ class BaseModel:
             self.sampler = sampler
         self.study = None
         optuna.logging.set_verbosity(optuna.logging.WARNING)
+        self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
         raise NotImplementedError
 
-    @ignore_warnings(category=ConvergenceWarning)
-    def optimize(self, x_train, y_train, n_trails, timeout):
+    def optimize(self, x_train, y_train, n_trails, timeout, feature_names=None):
         self.x_train = x_train
         self.y_train = y_train
         for key, value in self.param_grid.items():
@@ -54,11 +54,16 @@ class BaseModel:
 
         if not self.is_single:
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
-            if self.model_name in ["Extreme Gradient Boosting", "Category Gradient Boosting"]:
+            if self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
                 pos_inst = sum(y_train)
                 neg_inst = len(y_train) - pos_inst
                 class_weight = neg_inst / float(pos_inst)
-                self.study.optimize(lambda trial: self.objective(trial, {'class_weight': class_weight}),
+                self.study.optimize(lambda trial: self.objective(trial, params={'class_weight': class_weight}),
+                                    n_trials=n_trails, timeout=timeout,
+                                    catch=(ValueError,))
+            elif self.model_name == "Genetic Programming":
+                feature_names = list(x_train.columns)
+                self.study.optimize(lambda trial: self.objective(trial, params={'feature_names': feature_names}),
                                     n_trials=n_trails, timeout=timeout,
                                     catch=(ValueError,))
             else:
@@ -84,13 +89,19 @@ class BaseModel:
     def feature_importance(self):
         raise NotImplementedError
 
-    def hypereval(self, trial):
+    def hypereval(self, params):
         logging.debug("Trial Parameters" + str(self.params))
-        model = copy.deepcopy(self.model).set_params(**self.params)
-
-        mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
-                                        scoring=self.scoring_metric,
-                                        cv=self.cv, n_jobs=self.n_jobs).mean()
+        try:
+            model = copy.deepcopy(self.model).set_params(**self.params)
+            mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
+                                            scoring=self.scoring_metric,
+                                            cv=self.cv, n_jobs=self.n_jobs).mean()
+        except KeyError:
+            model_class = self.model.__class__
+            model = model_class(**self.params)
+            mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
+                                            scoring=self.scoring_metric,
+                                            cv=self.cv, n_jobs=self.n_jobs).mean()
         logging.debug("Trail Completed")
         return mean_cv_score
 

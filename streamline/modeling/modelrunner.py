@@ -1,3 +1,4 @@
+import logging
 import os
 import glob
 import multiprocessing
@@ -13,9 +14,9 @@ class ModelExperimentRunner:
     cross-validation splits.
     """
 
-    def __init__(self, output_path, experiment_name, algorithms=None, class_label="Class", instance_label=None,
-                 scoring_metric='balanced_accuracy', metric_direction='maximize', training_subsample=0,
-                 use_uniform_fi=True, n_trials=200,
+    def __init__(self, output_path, experiment_name, algorithms=None, exclude=None, class_label="Class",
+                 instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
+                 training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                  lcs_timeout=1200, random_state=None, n_jobs=None):
 
@@ -47,6 +48,7 @@ class ModelExperimentRunner:
             lcs_timeout: seconds until hyperparameter sweep stops for LCS algorithms, default=1200
 
         """
+        # TODO: What does training subsample do
         self.cv_count = None
         self.dataset = None
         self.output_path = output_path
@@ -56,6 +58,12 @@ class ModelExperimentRunner:
 
         if algorithms is None:
             self.algorithms = SUPPORTED_MODELS
+            if exclude is not None:
+                for algorithm in exclude:
+                    try:
+                        self.algorithms.remove(algorithm)
+                    except Exception:
+                        logging.error("Unknown algorithm in exclude: " + str(algorithm))
         else:
             for algorithm in algorithms:
                 assert is_supported_model(algorithm)
@@ -107,6 +115,7 @@ class ModelExperimentRunner:
             cv_partitions = len(cv_dataset_paths)
             for cv_count in range(cv_partitions):
                 for algorithm in self.algorithms:
+                    # logging.info("Running Model "+str(algorithm))
                     if (not self.do_lcs_sweep) or (algorithm not in ['eLCS', 'XCS', 'ExSTraCS']):
                         model = model_str_to_obj(algorithm)(cv_folds=3,
                                                             scoring_metric=self.scoring_metric,

@@ -53,8 +53,31 @@ SUPPORTED_MODELS_OBJ = [
     ExSTraCSClassifier,
 ]
 
+COLOR_LIST = ['silver'
+              'dimgrey',
+              'yellow',
+              'blue',
+              'cornflowerblue',
+              'cyan',
+              'pink',
+              'magenta',
+              'orange',
+              'red',
+              'chocolate',
+              'purple',
+              'green',
+              'olive',
+              'lawngreen', ]
+
 MODEL_DICT = dict(zip(SUPPORTED_MODELS + SUPPORTED_MODELS_SMALL,
                       SUPPORTED_MODELS_OBJ + SUPPORTED_MODELS_OBJ))
+
+LABELS = dict(zip(SUPPORTED_MODELS + SUPPORTED_MODELS_SMALL,
+                  SUPPORTED_MODELS + SUPPORTED_MODELS))
+
+ABBREVIATION = dict(zip(SUPPORTED_MODELS, SUPPORTED_MODELS_SMALL))
+
+COLORS = dict(zip(SUPPORTED_MODELS, COLOR_LIST))
 
 
 def is_supported_model(string):
