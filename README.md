@@ -64,7 +64,7 @@ pip install streamline
 ## Demonstration 
 Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of pipeline efficacy. 
 
-New users can easily run the included jupyter notebook 'as-is', and it will be run automatically on these datasets. 
+New users can easily run the included [jupyter notebook](https://github.com/raptor419/STREAMLINE_Dev/blob/main/STREAMLINE-Notebook.ipynb) 'as-is', and it will be run automatically on these datasets. 
 The first dataset `hcc-data_example.csv` is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. 
 It includes 165 instances, 49 fetaures, and a binary class label. 
 It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).  
