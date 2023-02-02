@@ -30,5 +30,5 @@ class GPClassifier(BaseModel, ABC):
                        'feature_names': trial.suggest_categorical('feature_names', [feature_names]),
                        'low_memory': trial.suggest_categorical('low_memory', self.param_grid['low_memory']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score

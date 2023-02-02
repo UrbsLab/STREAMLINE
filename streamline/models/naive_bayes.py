@@ -15,5 +15,5 @@ class NaiveBayesClassifier(BaseModel, ABC):
 
     def objective(self, trial, params=None):
         self.params = {}
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score

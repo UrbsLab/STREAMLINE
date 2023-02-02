@@ -32,7 +32,7 @@ class GBClassifier(BaseModel, ABC):
                                                       self.param_grid['max_depth'][1]),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
 
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score
 
 
@@ -77,7 +77,7 @@ class XGBClassifier(BaseModel, ABC):
                        'nthread': trial.suggest_categorical('nthread', param_grid['nthread']),
                        'random_state': trial.suggest_categorical('random_state', param_grid['random_state']), }
 
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score
 
 
@@ -119,7 +119,7 @@ class LGBClassifier(BaseModel, ABC):
                        'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
                        'random_state': trial.suggest_categorical('random_state', param_grid['random_state'])}
         print(self.model.get_params())
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score
 
 
@@ -146,5 +146,5 @@ class CGBClassifier(BaseModel, ABC):
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state']),
                        }
 
-        mean_cv_score = self.hypereval(self.params)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score

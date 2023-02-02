@@ -25,5 +25,5 @@ class MLPClassifier(BaseModel, ABC):
                                                          self.param_grid['alpha'][1]),
                        'max_iter': trial.suggest_categorical('max_iter', self.param_grid['max_iter']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score

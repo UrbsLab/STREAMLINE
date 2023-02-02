@@ -144,10 +144,12 @@ class ModelExperimentRunner:
 
     @staticmethod
     def run_jobs(job_list):
-        for j in job_list:
-            j.start()
-        for j in job_list:
-            j.join()
+        for j in range(len(job_list)):
+            job_list[j].start()
+            # logging.debug("Running Job " + str(j))
+        for j in range(len(job_list)):
+            job_list[j].join()
+            # logging.debug("Job " + str(j) + "Finished")
 
 
 def runner_fn(job_obj, model):

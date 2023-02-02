@@ -23,5 +23,5 @@ class SupportVectorClassifier(BaseModel, ABC):
                        'probability': trial.suggest_categorical('probability', self.param_grid['probability']),
                        'class_weight': trial.suggest_categorical('class_weight', self.param_grid['class_weight']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score

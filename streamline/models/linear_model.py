@@ -27,7 +27,7 @@ class LogisticRegression(BaseModel, ABC):
             if self.params['penalty'] == 'l2':
                 self.params['dual'] = trial.suggest_categorical('dual', self.param_grid['dual'])
 
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         # logging.debug("Trial Parameters" + str(self.params))
         # model = copy.deepcopy(self.model).set_params(**self.params)
         #

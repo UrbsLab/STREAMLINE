@@ -1,10 +1,10 @@
 import copy
 import logging
 import optuna
-from sklearn import metrics, clone
-from catboost import CatBoostClassifier
+from sklearn import metrics
 from sklearn.metrics import auc
 from streamline.utils.evaluation import class_eval
+from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 import warnings
@@ -44,6 +44,7 @@ class BaseModel:
     def objective(self, trial, params=None):
         raise NotImplementedError
 
+    @ignore_warnings(category=ConvergenceWarning)
     def optimize(self, x_train, y_train, n_trails, timeout, feature_names=None):
         self.x_train = x_train
         self.y_train = y_train
@@ -62,7 +63,6 @@ class BaseModel:
                                     n_trials=n_trails, timeout=timeout,
                                     catch=(ValueError,))
             elif self.model_name == "Genetic Programming":
-                feature_names = list(x_train.columns)
                 self.study.optimize(lambda trial: self.objective(trial, params={'feature_names': feature_names}),
                                     n_trials=n_trails, timeout=timeout,
                                     catch=(ValueError,))
@@ -89,7 +89,7 @@ class BaseModel:
     def feature_importance(self):
         raise NotImplementedError
 
-    def hypereval(self, params):
+    def hyper_eval(self):
         logging.debug("Trial Parameters" + str(self.params))
         try:
             model = copy.deepcopy(self.model).set_params(**self.params)
@@ -97,11 +97,12 @@ class BaseModel:
                                             scoring=self.scoring_metric,
                                             cv=self.cv, n_jobs=self.n_jobs).mean()
         except KeyError:
+            logging.error("KeyError while copying model")
             model_class = self.model.__class__
             model = model_class(**self.params)
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
                                             scoring=self.scoring_metric,
-                                            cv=self.cv, n_jobs=self.n_jobs).mean()
+                                            cv=self.cv).mean()
         logging.debug("Trail Completed")
         return mean_cv_score
 
@@ -123,8 +124,8 @@ class BaseModel:
         ave_prec = metrics.average_precision_score(y_test, probas_[:, 1])
         return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
 
-    def fit(self, x_train, y_train, n_trails, timeout):
-        self.optimize(x_train, y_train, n_trails, timeout)
+    def fit(self, x_train, y_train, n_trails, timeout, feature_names=None):
+        self.optimize(x_train, y_train, n_trails, timeout, feature_names)
         self.model.fit(x_train, y_train)
 
     def predict(self, x_in):

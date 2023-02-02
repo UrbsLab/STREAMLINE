@@ -45,9 +45,7 @@ for algorithm in SUPPORTED_MODELS_SMALL[:2]:
     [
         (['NB'], False),
         (["LR"], False),
-        (["NB"], True),
-        (["NB", "LR", ], True),
-        # # (['NB'], False),
+        # (["NB", "LR", "DT"], True),
         # (['CGB'], False),
         # (['LGB'], False),
         # (['XGB'], False),
@@ -56,8 +54,8 @@ for algorithm in SUPPORTED_MODELS_SMALL[:2]:
         # ([SUPPORTED_MODELS_SMALL[-1]], True),
 
     ]
-    # +
-    # [([algo], False) for algo in SUPPORTED_MODELS_SMALL]
+    +
+    [([algo], True) for algo in SUPPORTED_MODELS_SMALL]
 )
 def test_valid_model_runner(algorithms, run_parallel):
     start = time.time()
@@ -67,7 +65,7 @@ def test_valid_model_runner(algorithms, run_parallel):
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, algorithms, save_plots=True)
-    runner.run(False)
+    runner.run(run_parallel)
 
     if run_parallel:
         how = "parallely"

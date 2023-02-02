@@ -82,7 +82,7 @@ class ModelJob(Job):
         np.random.seed(self.random_state)
         # Load training and testing datasets separating features from outcome for scikit-learn-based modeling
         x_train, y_train, x_test, y_test = self.data_prep()
-        model.fit(x_train, y_train, self.n_trials, self.timeout)
+        model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
 
         if not os.path.exists(self.full_path + '/models/'):
             os.makedirs(self.full_path + '/models/')
@@ -140,10 +140,10 @@ class ModelJob(Job):
         if self.instance_label is not None:
             train = train.drop(self.instance_label, axis=1)
             test = test.drop(self.instance_label, axis=1)
-        x_train = train.drop(self.class_label, axis=1)
-        y_train = train[self.class_label]
-        x_test = test.drop(self.class_label, axis=1)
-        y_test = test[self.class_label]
+        x_train = train.drop(self.class_label, axis=1).values
+        y_train = train[self.class_label].values
+        x_test = test.drop(self.class_label, axis=1).values
+        y_test = test[self.class_label].values
         del train  # memory cleanup
         del test  # memory cleanup
         return x_train, y_train, x_test, y_test

@@ -7,3 +7,5 @@ __pycache__
 demo/
 catboost_info/
 tests/
+prof/
+profile.html

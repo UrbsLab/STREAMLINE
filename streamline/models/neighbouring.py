@@ -21,5 +21,5 @@ class KNNClassifier(BaseModel, ABC):
             'weights': trial.suggest_categorical('weights', self.param_grid['weights']),
             'p': trial.suggest_int('p', self.param_grid['p'][0], self.param_grid['p'][1]),
             'metric': trial.suggest_categorical('metric', self.param_grid['metric'])}
-        mean_cv_score = self.hypereval(trial)
+        mean_cv_score = self.hyper_eval()
         return mean_cv_score
