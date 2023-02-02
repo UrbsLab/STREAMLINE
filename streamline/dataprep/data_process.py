@@ -11,13 +11,13 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.preprocessing import StandardScaler
 from streamline.utils.job import Job
+from streamline.utils.runners import runner_fn, run_jobs
 
 
 class DataProcessing(Job):
     """
     Data Processing Job Class for Scaling and Imputation of CV Datasets
     """
-
     def __init__(self, cv_train_path, cv_test_path, experiment_path, scale_data=True, impute_data=True,
                  multi_impute=True, overwrite_cv=True, class_label="Class", instance_label=None, random_state=None):
         """
@@ -309,7 +309,6 @@ class DataProcessRunner:
     """
     Runner class for Data Processing Jobs of CV Splits
     """
-
     def __init__(self, output_path, experiment_name, scale_data=True, impute_data=True,
                  multi_impute=True, overwrite_cv=True, class_label="Class", instance_label=None, random_state=None):
         """
@@ -366,15 +365,4 @@ class DataProcessRunner:
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
         if run_parallel:
-            self.run_jobs(job_list)
-
-    @staticmethod
-    def run_jobs(job_list):
-        for j in job_list:
-            j.start()
-        for j in job_list:
-            j.join()
-
-
-def runner_fn(job_obj):
-    job_obj.run()
+            run_jobs(job_list)

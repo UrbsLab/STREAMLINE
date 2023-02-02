@@ -1,6 +1,4 @@
 """
-streamline.
-
 Simple Transparent End-To-End Automated Machine Learning
 Pipeline for Supervised Learning in Tabular Binary Classification Data
 """

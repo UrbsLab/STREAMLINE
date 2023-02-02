@@ -8,6 +8,16 @@ def class_eval(y_true, y_pred):
     Calculates standard classification metrics including:
     True positives, false positives, true negative, false negatives, standard accuracy, balanced accuracy
     recall, precision, f1 score, negative predictive value, likelihood ratio positive, and likelihood ratio negative
+
+    Args:
+        y_true: True Labels
+        y_pred: Predicted Labels
+
+    Returns: list [bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm]
+    ordered list of balanced accuracy, accuracy, F1-score, recall, specificity, precision,
+    true positive, true negatives, false positives, false negatives, negative predictive value,
+    likelihood ratio positive, and likelihood ratio negative
+
     """
     # Calculate true positive, true negative, false positive, and false negative.
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()

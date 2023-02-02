@@ -8,12 +8,11 @@ from sklearn.model_selection import StratifiedGroupKFold
 
 class KFoldPartitioner(Job):
     """
-    Base class for KFold CrossValidation Operations on dataset
+    Base class for KFold CrossValidation Operations on dataset, Initialization for KFoldPartitioner base class
     """
 
     def __init__(self, dataset, partition_method, experiment_path, n_splits=10, random_state=None):
         """
-        Initialization for KFoldPartitioner base class
 
         Args:
             dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file

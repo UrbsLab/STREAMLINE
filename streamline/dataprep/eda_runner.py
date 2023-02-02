@@ -6,17 +6,8 @@ import multiprocessing
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.exploratory_analysis import ExploratoryDataAnalysis
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
-
-
-def parallel_eda_call(eda_job, params):
-    if params and 'top_features' in params:
-        eda_job.run(params['top_features'])
-    else:
-        eda_job.run()
-
-
-def paralel_kfold_call(kfold_job):
-    kfold_job.run()
+from streamline.utils.runners import parallel_kfold_call, parallel_eda_call
+from streamline.utils.runners import run_jobs
 
 
 class EDARunner:
@@ -136,7 +127,7 @@ class EDARunner:
                     job_counter += 1
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
-        self.run_jobs(job_list)
+        run_jobs(job_list)
         self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):
@@ -156,20 +147,13 @@ class EDARunner:
                                          self.partition_method, self.output_path + self.experiment_name,
                                          self.n_splits, self.random_state)
             if run_parallel:  # Run as job in parallel
-                p = multiprocessing.Process(target=paralel_kfold_call, args=(kfold_obj, ))
+                p = multiprocessing.Process(target=parallel_kfold_call, args=(kfold_obj, ))
                 job_list.append(p)
             else:  # Run job locally, serially
                 kfold_obj.run()
             job_counter += 1
         if run_parallel:
-            self.run_jobs(job_list)
-
-    @staticmethod
-    def run_jobs(job_list):
-        for j in job_list:
-            j.start()
-        for j in job_list:
-            j.join()
+            run_jobs(job_list)
 
     def check_old(self):
         """

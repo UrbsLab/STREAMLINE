@@ -128,4 +128,12 @@ parameters = {'Naive Bayes': {},
 
 
 def get_parameters(algorithm_name):
+    """
+    Get default model parameter range by model name
+    Args:
+        algorithm_name: name of model
+
+    Returns: default parameter grid as dict
+
+    """
     return parameters[algorithm_name]

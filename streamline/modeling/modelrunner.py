@@ -6,6 +6,7 @@ from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
+from streamline.utils.runners import runner_fn, run_jobs
 
 
 class ModelExperimentRunner:
@@ -140,17 +141,4 @@ class ModelExperimentRunner:
                     else:
                         job_obj.run(model)
         if run_parallel:
-            self.run_jobs(job_list)
-
-    @staticmethod
-    def run_jobs(job_list):
-        for j in range(len(job_list)):
-            job_list[j].start()
-            # logging.debug("Running Job " + str(j))
-        for j in range(len(job_list)):
-            job_list[j].join()
-            # logging.debug("Job " + str(j) + "Finished")
-
-
-def runner_fn(job_obj, model):
-    job_obj.run(model)
+            run_jobs(job_list)

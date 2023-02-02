@@ -32,6 +32,25 @@ class StatsJob(Job):
     def __init__(self, full_path, algorithms, class_label, instance_label, scoring_metric='balanced_accuracy',
                  cv_partitions=5, top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_date=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=True):
+        """
+
+        Args:
+            full_path:
+            algorithms:
+            class_label:
+            instance_label:
+            scoring_metric:
+            cv_partitions:
+            top_features:
+            sig_cutoff:
+            metric_weight:
+            scale_date:
+            plot_roc:
+            plot_prc:
+            plot_fi_box:
+            plot_metric_boxplots:
+            show_plots:
+        """
         super().__init__()
         self.full_path = full_path
         self.algorithms = algorithms
@@ -469,7 +488,8 @@ class StatsJob(Job):
             plt.close('all')
 
     def save_metric_stats(self, metrics, metric_dict):
-        """ Exports csv file with mean, median and std dev metric values
+        """
+        Exports csv file with mean, median and std dev metric values
         (over all CVs) for each ML modeling algorithm
         """
         # TODO: Clean this function up, save everything together
@@ -584,7 +604,8 @@ class StatsJob(Job):
         to determine if there is a statistically significant difference in
         algorithm performance across CV runs. Test statistic will be zero if
         all scores from one set are
-        larger than the other."""
+        larger than the other.
+        """
         for metric in metrics:
             if kruskal_summary['Sig(*)'][metric] == '*':
                 wilcoxon_stats = []
@@ -799,7 +820,9 @@ class StatsJob(Job):
             algorithm_counter += 1
 
     def do_fi_histogram(self, fi_med_list, algorithms):
-        """ Generate histogram showing distribution of median feature importance scores for each algorithm. """
+        """
+        Generate histogram showing distribution of median feature importance scores for each algorithm.
+        """
         algorithm_counter = 0
         for algorithm in algorithms:  # each algorithms
             med_scores = fi_med_list[algorithm_counter]

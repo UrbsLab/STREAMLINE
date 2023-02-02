@@ -110,6 +110,8 @@ class Dataset:
     def set_headers(self, experiment_path, phase='exploratory'):
         """
         Exports dataset header labels for use as a reference later in the pipeline.
+
+        Returns: list of headers labels
         """
         # Get Original Headers
         if not os.path.exists(experiment_path + '/' + self.name + '/' + phase):

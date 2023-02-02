@@ -16,7 +16,6 @@ class ExploratoryDataAnalysis(Job):
     """
     Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE
     """
-
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
                  categorical_cutoff=10, sig_cutoff=0.1,

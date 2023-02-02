@@ -17,6 +17,20 @@ class BaseModel:
     def __init__(self, model, model_name,
                  cv_folds=3, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  random_state=None, cv=None, sampler=None, n_jobs=None):
+        """
+        Base Model Class for all ML Models
+
+        Args:
+            model:
+            model_name:
+            cv_folds:
+            scoring_metric:
+            metric_direction:
+            random_state:
+            cv:
+            sampler:
+            n_jobs:
+        """
         self.is_single = True
         self.model = model()
         self.small_name = model_name.replace(" ", "_")
@@ -42,10 +56,27 @@ class BaseModel:
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
+        """
+        Unimplemented objective function stub, needs to be overridden
+        Args:
+            trial: optuna trial object
+            params: dict of optional params or None
+        """
         raise NotImplementedError
 
     @ignore_warnings(category=ConvergenceWarning)
     def optimize(self, x_train, y_train, n_trails, timeout, feature_names=None):
+        """
+        Common model optimization function
+
+        Args:
+            x_train: train data
+            y_train: label data
+            n_trails: number of optuna trials
+            timeout: maximum time for optuna trial timeout
+            feature_names: header/name of features
+
+        """
         self.x_train = x_train
         self.y_train = y_train
         for key, value in self.param_grid.items():
@@ -87,9 +118,16 @@ class BaseModel:
             self.model = copy.deepcopy(self.model).set_params(**self.params)
 
     def feature_importance(self):
+        """
+        Unimplemented feature importance function stub
+        """
         raise NotImplementedError
 
     def hyper_eval(self):
+        """
+        Hyper eval for objective function
+        Returns: Returns hyper eval for objective function
+        """
         logging.debug("Trial Parameters" + str(self.params))
         try:
             model = copy.deepcopy(self.model).set_params(**self.params)
@@ -107,7 +145,9 @@ class BaseModel:
         return mean_cv_score
 
     def model_evaluation(self, x_test, y_test):
-        """ Runs commands to gather all evaluations for later summaries and plots. """
+        """
+        Runs commands to gather all evaluations for later summaries and plots.
+        """
         # Prediction evaluation
         y_pred = self.model.predict(x_test)
         metric_list = class_eval(y_test, y_pred)
@@ -125,8 +165,19 @@ class BaseModel:
         return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
 
     def fit(self, x_train, y_train, n_trails, timeout, feature_names=None):
+        """
+        Caller function to optimize
+        """
         self.optimize(x_train, y_train, n_trails, timeout, feature_names)
         self.model.fit(x_train, y_train)
 
     def predict(self, x_in):
+        """
+        Function to predict with trained model
+        Args:
+            x_in: input data
+
+        Returns: predictions y_pred
+
+        """
         return self.model.predict(x_in)

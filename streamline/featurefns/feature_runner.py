@@ -3,6 +3,7 @@ import glob
 import multiprocessing
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
+from streamline.utils.runners import runner_fn, run_jobs
 
 
 class FeatureImportanceRunner:
@@ -97,14 +98,7 @@ class FeatureImportanceRunner:
                     else:
                         job_obj.run()
         if run_parallel:
-            self.run_jobs(job_list)
-
-    @staticmethod
-    def run_jobs(job_list):
-        for j in job_list:
-            j.start()
-        for j in job_list:
-            j.join()
+            run_jobs(job_list)
 
 
 class FeatureSelectionRunner:
@@ -181,15 +175,4 @@ class FeatureSelectionRunner:
             else:
                 job_obj.run()
         if run_parallel:
-            self.run_jobs(job_list)
-
-    @staticmethod
-    def run_jobs(job_list):
-        for j in job_list:
-            j.start()
-        for j in job_list:
-            j.join()
-
-
-def runner_fn(job_obj):
-    job_obj.run()
+            run_jobs(job_list)

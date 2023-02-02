@@ -8,7 +8,7 @@ class Job:
         self.cluster = None
         self.job_start_time = time.time()
 
-    def run_local(self):
+    def run(self):
         pass
 
     def run_cluster(self):

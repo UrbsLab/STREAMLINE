@@ -15,6 +15,23 @@ class ModelJob(Job):
     def __init__(self, full_path, output_path, experiment_name, cv_count, class_label="Class",
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trials=200,
                  timeout=900, uniform_fi=False, save_plot=False, random_state=None):
+        """
+
+        Args:
+            full_path:
+            output_path:
+            experiment_name:
+            cv_count:
+            class_label:
+            instance_label:
+            scoring_metric:
+            metric_direction:
+            n_trials:
+            timeout:
+            uniform_fi:
+            save_plot:
+            random_state:
+        """
         super().__init__()
         self.algorithm = ""
         self.output_path = output_path
@@ -52,6 +69,12 @@ class ModelJob(Job):
         self.param_grid = None
 
     def run(self, model):
+        """
+
+        Args:
+            model: model object
+
+        """
         self.job_start_time = time.time()  # for tracking phase runtime
         self.algorithm = model.small_name
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
@@ -77,6 +100,14 @@ class ModelJob(Job):
         job_file.close()
 
     def run_model(self, model):
+        """
+
+        Args:
+            model: model object
+
+        Returns: list of metrics [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas]
+
+        """
         # Set random seeds for reproducibility
         random.seed(self.random_state)
         np.random.seed(self.random_state)

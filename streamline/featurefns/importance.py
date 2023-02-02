@@ -14,13 +14,12 @@ from streamline.utils.dataset import Dataset
 
 class FeatureImportance(Job):
     """
-    Stuff about feature importance class
+    Initializer for Feature Importance Job
     """
 
     def __init__(self, cv_train_path, experiment_path, class_label, instance_label=None, instance_subset=None,
                  algorithm="MS", use_turf=True, turf_pct=True, random_state=None, n_jobs=None):
         """
-        Initializer for Feature Importance Job
 
         Args:
             cv_train_path: path for the cross-validation dataset created

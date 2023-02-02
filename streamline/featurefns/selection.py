@@ -11,10 +11,12 @@ from streamline.utils.job import Job
 
 
 class FeatureSelection(Job):
+    """
+    Feature Selection Job for CV Data Splits
+    """
     def __init__(self, full_path, n_splits, algorithms, class_label, instance_label, export_scores=True,
                  top_features=20, max_features_to_keep=2000, filter_poor_features=True, overwrite_cv=False):
         """
-        Feature Selection Job for CV Data Splits
 
         Args:
             export_scores: flag to export top feature scores (default=True)

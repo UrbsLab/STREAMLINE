@@ -9,3 +9,4 @@ catboost_info/
 tests/
 prof/
 profile.html
+testlogs/
