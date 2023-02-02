@@ -1,45 +1,48 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>streamline.featurefns package &mdash; STREAMLINE 2 documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="streamline.utils package" href="streamline.utils.html" /> 
+    <link rel="next" title="streamline.featurefns.feature_runner module" href="streamline.featurefns.feature_runner.html" />
+    <link rel="prev" title="streamline.dataprep.kfold_partitioning module" href="streamline.dataprep.kfold_partitioning.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -76,6 +79,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,12 +89,16 @@
             
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE Package Documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">STREAMLINE Package</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
 </ul>
 </li>
 </ul>
@@ -102,6 +110,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -136,22 +145,24 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="modules.html">STREAMLINE Package Documentation</a> &raquo;</li>
+          <li><a href="modules.html">STREAMLINE API Documentation</a> &raquo;</li>
         
-          <li><a href="streamline.html">STREAMLINE Package</a> &raquo;</li>
+          <li><a href="streamline.html">streamline package</a> &raquo;</li>
         
       <li>streamline.featurefns package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/streamline.featurefns.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -165,213 +176,51 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="streamline-featurefns-package">
-<h1>streamline.featurefns package<a class="headerlink" href="#streamline-featurefns-package" title="Permalink to this heading">¶</a></h1>
+  <section id="module-streamline.featurefns">
+<span id="streamline-featurefns-package"></span><h1>streamline.featurefns package<a class="headerlink" href="#module-streamline.featurefns" title="Permalink to this heading">¶</a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="streamline.featurefns.feature_runner.html">streamline.featurefns.feature_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.featurefns.feature_runner.html#streamline.featurefns.feature_runner.FeatureImportanceRunner"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.feature_runner.html#streamline.featurefns.feature_runner.FeatureImportanceRunner.run"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.featurefns.feature_runner.html#streamline.featurefns.feature_runner.FeatureSelectionRunner"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.feature_runner.html#streamline.featurefns.feature_runner.FeatureSelectionRunner.run"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.featurefns.importance.html">streamline.featurefns.importance module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance"><code class="docutils literal notranslate"><span class="pre">FeatureImportance</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.pickle_scores"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.pickle_scores()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.prepare_data"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.prepare_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.run"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.run_multi_surf"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.run_multi_surf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.run_mutual_information"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.run_mutual_information()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.save_runtime"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.save_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.sort_save_fi_scores"><code class="docutils literal notranslate"><span class="pre">FeatureImportance.sort_save_fi_scores()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.featurefns.selection.html">streamline.featurefns.selection module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection"><code class="docutils literal notranslate"><span class="pre">FeatureSelection</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.gen_filtered_datasets"><code class="docutils literal notranslate"><span class="pre">FeatureSelection.gen_filtered_datasets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.report_ave_fs"><code class="docutils literal notranslate"><span class="pre">FeatureSelection.report_ave_fs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.report_informative_features"><code class="docutils literal notranslate"><span class="pre">FeatureSelection.report_informative_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.run"><code class="docutils literal notranslate"><span class="pre">FeatureSelection.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.save_runtime"><code class="docutils literal notranslate"><span class="pre">FeatureSelection.save_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.select_features"><code class="docutils literal notranslate"><span class="pre">FeatureSelection.select_features()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
 </section>
-<section id="module-streamline.featurefns.importance">
-<span id="streamline-featurefns-importance-module"></span><h2>streamline.featurefns.importance module<a class="headerlink" href="#module-streamline.featurefns.importance" title="Permalink to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.featurefns.importance.</span></span><span class="sig-name descname"><span class="pre">FeatureImportance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cv_train_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_subset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
-<p>Stuff about feature importance class</p>
-<p>Initializer for Feature Importance Job</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cv_train_path</strong> – </p></li>
-<li><p><strong>experiment_path</strong> – </p></li>
-<li><p><strong>class_label</strong> – </p></li>
-<li><p><strong>instance_label</strong> – </p></li>
-<li><p><strong>instance_subset</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.pickle_scores">
-<span class="sig-name descname"><span class="pre">pickle_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_sorted_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.pickle_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.pickle_scores" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pickle the scores, score dictionary and features sorted by score to be used primarily
-in phase 4 (feature selection) of pipeline</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.prepare_data">
-<span class="sig-name descname"><span class="pre">prepare_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cv_train_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.prepare_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.prepare_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads target cv training dataset, separates class from features and removes instance labels.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_turf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turf_pct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run all elements of the feature importance evaluation:
-applies either mutual information and multisurf and saves a sorted dictionary of features with associated scores</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> – </p></li>
-<li><p><strong>use_turf</strong> – </p></li>
-<li><p><strong>turf_pct</strong> – </p></li>
-<li><p><strong>random_state</strong> – </p></li>
-<li><p><strong>n_jobs</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.run_multi_surf">
-<span class="sig-name descname"><span class="pre">run_multi_surf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_turf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turf_pct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.run_multi_surf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.run_multi_surf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run multiSURF (a Relief-based feature importance algorithm able to detect both univariate
-and interaction effects) and return scores as well as file path/name information</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.run_mutual_information">
-<span class="sig-name descname"><span class="pre">run_mutual_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">random_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.run_mutual_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.run_mutual_information" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run mutual information on target training dataset and return scores as well as file path/name information.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.save_runtime">
-<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.save_runtime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save phase runtime
-:param output_name: name of the output tag</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.importance.FeatureImportance.sort_save_fi_scores">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_save_fi_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered_feature_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algo_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/importance.html#FeatureImportance.sort_save_fi_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.importance.FeatureImportance.sort_save_fi_scores" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a feature score dictionary and a dictionary sorted by decreasing feature importance scores.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>scores</strong> – </p></li>
-<li><p><strong>ordered_feature_names</strong> – </p></li>
-<li><p><strong>filename</strong> – </p></li>
-<li><p><strong>algo_name</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-<p>Returns: score_dict, score_sorted_features - dictionary of scores and score sorted name of features</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="module-streamline.featurefns.selection">
-<span id="streamline-featurefns-selection-module"></span><h2>streamline.featurefns.selection module<a class="headerlink" href="#module-streamline.featurefns.selection" title="Permalink to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.featurefns.selection.</span></span><span class="sig-name descname"><span class="pre">FeatureSelection</span></span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection.gen_filtered_datasets">
-<span class="sig-name descname"><span class="pre">gen_filtered_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cv_selected_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_csv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection.gen_filtered_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection.gen_filtered_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes the lists of final features to be kept and creates new filtered cv training and
-testing datasets including only those features.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cv_selected_list</strong> – list of list for name of features selected for each cv</p></li>
-<li><p><strong>path_to_csv</strong> – path to cv splits from the last phase</p></li>
-<li><p><strong>dataset_name</strong> – name of dataset</p></li>
-<li><p><strong>overwrite_cv</strong> – rename or overwrite old cv splits</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection.report_ave_fs">
-<span class="sig-name descname"><span class="pre">report_ave_fs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithmlabel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_feature_lists</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_feature_ranks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export_scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection.report_ave_fs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection.report_ave_fs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads feature importance results from phase 3, stores sorted feature importance scores for all
-cvs, creates a list of all feature names that have a feature importance score greater than 0
-(i.e. some evidence that it may be informative), and creates a barplot of average
-feature importance scores.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> – name of algorithm reporting for</p></li>
-<li><p><strong>algorithmlabel</strong> – label of algorithm reporting for (used for saving logs)</p></li>
-<li><p><strong>top_features</strong> – no of top features to consider</p></li>
-<li><p><strong>selected_feature_lists</strong> – list of selected features for processing (dictionary for data storage)</p></li>
-<li><p><strong>meta_feature_ranks</strong> – dictionary for data storage</p></li>
-<li><p><strong>export_scores</strong> – flag to export scores</p></li>
-<li><p><strong>show</strong> – flag to output figures</p></li>
-</ul>
-</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection.report_informative_features">
-<span class="sig-name descname"><span class="pre">report_informative_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">informative_feature_counts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uninformative_feature_counts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection.report_informative_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection.report_informative_features" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves counts of informative vs uninformative features (i.e. those with feature
-importance scores &lt;= 0) in an csv file.
-:param informative_feature_counts: count of informative features to save
-:param uninformative_feature_counts count of uninformative features to save:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">export_scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_features_to_keep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_poor_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run all elements of the feature selection: reports average feature importance scores across
-CV sets and applies collective feature selection to generate new feature selected datasets</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>export_scores</strong> – flag to export top feature scores (default=True)</p></li>
-<li><p><strong>top_features</strong> – number of top features to consider (default=20)</p></li>
-<li><p><strong>max_features_to_keep</strong> – maximum number of features to keep (default=2000)</p></li>
-<li><p><strong>filter_poor_features</strong> – flag to filter poor features (default=True)</p></li>
-<li><p><strong>overwrite_cv</strong> – overwrite last cross validation dataset (default=False)</p></li>
-</ul>
-</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection.save_runtime">
-<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection.save_runtime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save phase runtime
-:param full_path: full path of current experiment</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.featurefns.selection.FeatureSelection.select_features">
-<span class="sig-name descname"><span class="pre">select_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_feature_lists</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_features_to_keep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_feature_ranks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/featurefns/selection.html#FeatureSelection.select_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.featurefns.selection.FeatureSelection.select_features" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to select features</p>
-<p>Identifies feature to keep for each cv.
-If more than one feature importance algorithm was applied, collective feature selection
-is applied so that the union of informative features is preserved.
-Overall, only informative features (i.e. those with a score &gt; 0 are preserved).
-If there are more informative features than the max_features_to_keep,
-then only those top scoring features are preserved.
-To reduce the feature list to some max limit, we alternate between algorithm ranked feature
-lists grabbing the top features from each until the max limit is reached.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>selected_feature_lists</strong> – dictionary fpr data storage</p></li>
-<li><p><strong>max_features_to_keep</strong> – number of maximum features to keep</p></li>
-<li><p><strong>meta_feature_ranks</strong> – dictionary for data storage</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>cv_selected_list, informative_feature_counts, uninformative_feature_counts
-list of final selected features for each cv</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-streamline.featurefns"></span></section>
 </section>
 
 
@@ -379,27 +228,29 @@ list of final selected features for each cv</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="streamline.utils.html" class="btn btn-neutral float-left" title="streamline.utils package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="streamline.featurefns.feature_runner.html" class="btn btn-neutral float-right" title="streamline.featurefns.feature_runner module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="streamline.dataprep.kfold_partitioning.html" class="btn btn-neutral float-left" title="streamline.dataprep.kfold_partitioning module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey
+        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -407,7 +258,6 @@ list of final selected features for each cv</p>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

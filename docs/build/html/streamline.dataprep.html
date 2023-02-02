@@ -1,46 +1,48 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>streamline.dataprep package &mdash; STREAMLINE 2 documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="streamline.utils package" href="streamline.utils.html" />
-    <link rel="prev" title="STREAMLINE Package" href="streamline.html" /> 
+    <link rel="next" title="streamline.dataprep.data_process module" href="streamline.dataprep.data_process.html" />
+    <link rel="prev" title="streamline package" href="streamline.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -77,6 +79,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -86,12 +89,16 @@
             
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE Package Documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">STREAMLINE Package</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.dataprep package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
 </ul>
 </li>
 </ul>
@@ -103,6 +110,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -137,22 +145,24 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="modules.html">STREAMLINE Package Documentation</a> &raquo;</li>
+          <li><a href="modules.html">STREAMLINE API Documentation</a> &raquo;</li>
         
-          <li><a href="streamline.html">STREAMLINE Package</a> &raquo;</li>
+          <li><a href="streamline.html">streamline package</a> &raquo;</li>
         
       <li>streamline.dataprep package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/streamline.dataprep.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -166,231 +176,73 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="streamline-dataprep-package">
-<h1>streamline.dataprep package<a class="headerlink" href="#streamline-dataprep-package" title="Permalink to this heading">¶</a></h1>
-<section id="module-streamline.dataprep.exploratory_analysis">
-<span id="streamline-dataprep-exploratory-analysis-module"></span><h2>streamline.dataprep.exploratory_analysis module<a class="headerlink" href="#module-streamline.dataprep.exploratory_analysis" title="Permalink to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.exploratory_analysis.</span></span><span class="sig-name descname"><span class="pre">ExploratoryDataAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
-<p>Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE</p>
-<p>Initialization function for Exploratory Data Analysis Class. Parameters are defined below.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> – a streamline.utils.dataset.Dataset object or a path to dataset text file</p></li>
-<li><p><strong>experiment_path</strong> – path to experiment the logging directory folder</p></li>
-<li><p><strong>ignore_features</strong> – list of row names of features to ignore</p></li>
-<li><p><strong>categorical_features</strong> – list of row names of categorical features</p></li>
-<li><p><strong>explorations</strong> – list of names of analysis to do while doing EDA (must be in set X)</p></li>
-<li><p><strong>plots</strong> – list of analysis plots to save in experiment directory (must be in set Y)</p></li>
-<li><p><strong>categorical_cutoff</strong> – categorical cut off to consider a feature categorical by analysis</p></li>
-<li><p><strong>sig_cutoff</strong> – significance cutoff for continuous variables</p></li>
-<li><p><strong>random_state</strong> – random state to set seeds for reproducibility of algorithms</p></li>
+  <section id="module-streamline.dataprep">
+<span id="streamline-dataprep-package"></span><h1>streamline.dataprep package<a class="headerlink" href="#module-streamline.dataprep" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="streamline.dataprep.data_process.html">streamline.dataprep.data_process module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessRunner"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessRunner.run"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.run()</span></code></a></li>
 </ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">
-<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
-features, and class counts. Also saves a simple bar graph of class counts if user specified.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>total_missing</strong> – total missing values (optional, runs again if not given)</p></li>
-<li><p><strong>plot</strong> – flag to output bar graph in the experiment log folder</p></li>
-<li><p><strong>show</strong> – flag to output the bar graph in interactive interface</p></li>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing"><code class="docutils literal notranslate"><span class="pre">DataProcessing</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing.data_scaling"><code class="docutils literal notranslate"><span class="pre">DataProcessing.data_scaling()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing.impute_cv_data"><code class="docutils literal notranslate"><span class="pre">DataProcessing.impute_cv_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing.load_data"><code class="docutils literal notranslate"><span class="pre">DataProcessing.load_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing.run"><code class="docutils literal notranslate"><span class="pre">DataProcessing.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing.save_runtime"><code class="docutils literal notranslate"><span class="pre">DataProcessing.save_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.data_process.html#streamline.dataprep.data_process.DataProcessing.write_cv_files"><code class="docutils literal notranslate"><span class="pre">DataProcessing.write_cv_files()</span></code></a></li>
 </ul>
-</dd>
-</dl>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data">
-<span class="sig-name descname"><span class="pre">describe_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.describe_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Conduct and export basic dataset descriptions including basic column statistics, column variable types
-(i.e. int64 vs. float64), and unique value counts for each column</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols">
-<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols" title="Permalink to this definition">¶</a></dt>
-<dd><p>Basic data cleaning: Drops any instances with a missing outcome
-value as well as any features (ignore_features) specified by user</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot">
-<span class="sig-name descname"><span class="pre">feature_correlation_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.feature_correlation_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
-Due to computational expense this may not be recommended for datasets with a large number of instances
-and/or features unless needed. The generated heatmap will be difficult to read with a large number
-of features in the target dataset.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x_data</strong> – data with only feature columns</p></li>
-<li><p><strong>show</strong> – flag to show plot or not</p></li>
+</li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector">
-<span class="sig-name descname"><span class="pre">graph_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.graph_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assuming a categorical class outcome, a
-barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>feature_name</strong> – feature name of the column the function is doing operation on</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types">
-<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types" title="Permalink to this definition">¶</a></dt>
-<dd><p>Automatically identify categorical vs. quantitative features/variables
-Takes a dataframe (of independent variables) with column labels and
-returns a list of column names identified as
-being categorical based on user defined cutoff (categorical_cutoff).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders">
-<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders" title="Permalink to this definition">¶</a></dt>
-<dd><p>Makes folders for logging exploratory data analysis</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot">
-<span class="sig-name descname"><span class="pre">missing_count_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.missing_count_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots a histogram of missingness across all data columns.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts">
-<span class="sig-name descname"><span class="pre">missingness_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.missingness_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count and export missing values for all data columns.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper function to run_explore</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>top_features</strong> – no of top features to consider (default=20)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">
-<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run Exploratory Data Analysis according to EDA object</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>top_features</strong> – no of top features to consider (default=20)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime">
-<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export runtime for this phase of the pipeline on current target dataset</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.test_selector">
-<span class="sig-name descname"><span class="pre">test_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.test_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.test_selector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>feature_name</strong> – name of feature column operation is running on</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_analysis">
-<span class="sig-name descname"><span class="pre">univariate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.univariate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_analysis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates univariate association significance between each individual feature and class outcome.
-Assumes categorical outcome using Chi-square test for
-categorical features and Mann-Whitney Test for quantitative features.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>top_features</strong> – no of top features to show/consider</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_plots">
-<span class="sig-name descname"><span class="pre">univariate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sorted_p_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.univariate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_plots" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether p-value of each feature is less than or equal to significance cutoff.
-If so, calls graph_selector to generate an appropriate plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sorted_p_list</strong> – sorted list of p-values</p></li>
-<li><p><strong>top_features</strong> – no of top features to consider (default=20)</p></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.dataprep.eda_runner.html">streamline.dataprep.eda_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.dataprep.eda_runner.html#streamline.dataprep.eda_runner.EDARunner"><code class="docutils literal notranslate"><span class="pre">EDARunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.eda_runner.html#streamline.dataprep.eda_runner.EDARunner.check_old"><code class="docutils literal notranslate"><span class="pre">EDARunner.check_old()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.eda_runner.html#streamline.dataprep.eda_runner.EDARunner.make_dir_tree"><code class="docutils literal notranslate"><span class="pre">EDARunner.make_dir_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.eda_runner.html#streamline.dataprep.eda_runner.EDARunner.run"><code class="docutils literal notranslate"><span class="pre">EDARunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.eda_runner.html#streamline.dataprep.eda_runner.EDARunner.run_kfold"><code class="docutils literal notranslate"><span class="pre">EDARunner.run_kfold()</span></code></a></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html">streamline.dataprep.exploratory_analysis module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.counts_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.describe_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.drop_ignored_rowcols()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.feature_correlation_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.graph_selector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.identify_feature_types()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.join"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.join()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.make_log_folders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.missing_count_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.missingness_counts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.run_explore()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.save_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.start"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.start()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.test_selector"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.test_selector()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_analysis"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.univariate_analysis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_plots"><code class="docutils literal notranslate"><span class="pre">ExploratoryDataAnalysis.univariate_plots()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.dataprep.kfold_partitioning.html">streamline.dataprep.kfold_partitioning module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.dataprep.kfold_partitioning.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner"><code class="docutils literal notranslate"><span class="pre">KFoldPartitioner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.kfold_partitioning.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner.cv_partitioner"><code class="docutils literal notranslate"><span class="pre">KFoldPartitioner.cv_partitioner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.kfold_partitioning.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner.run"><code class="docutils literal notranslate"><span class="pre">KFoldPartitioner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.dataprep.kfold_partitioning.html#streamline.dataprep.kfold_partitioning.KFoldPartitioner.save_datasets"><code class="docutils literal notranslate"><span class="pre">KFoldPartitioner.save_datasets()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
 </section>
-<section id="module-streamline.dataprep.kfold_partitioning">
-<span id="streamline-dataprep-kfold-partitioning-module"></span><h2>streamline.dataprep.kfold_partitioning module<a class="headerlink" href="#module-streamline.dataprep.kfold_partitioning" title="Permalink to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="streamline.dataprep.kfold_partitioning.KFoldPartitioner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.kfold_partitioning.</span></span><span class="sig-name descname"><span class="pre">KFoldPartitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/kfold_partitioning.html#KFoldPartitioner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.kfold_partitioning.KFoldPartitioner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="streamline.utils.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
-<p>Base class for KFold CrossValidation Operations on dataset</p>
-<p>Initialization for KFoldPartitioner base class</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> – a streamline.utils.dataset.Dataset object or a path to dataset text file</p></li>
-<li><p><strong>partition_method</strong> – KFold CV method used for partitioning, must be one of [“Random”, “Stratified”, “Group”]</p></li>
-<li><p><strong>experiment_path</strong> – path to experiment the logging directory folder</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.kfold_partitioning.KFoldPartitioner.cv_partitioner">
-<span class="sig-name descname"><span class="pre">cv_partitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/kfold_partitioning.html#KFoldPartitioner.cv_partitioner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.kfold_partitioning.KFoldPartitioner.cv_partitioner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes data frame (data), number of cv partitions, partition method (R, S, or M), class label,
-and the column name used for matched CV. Returns list of training and testing dataframe partitions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n_splits</strong> – number of splits in k-fold cross validation</p></li>
-<li><p><strong>random_state</strong> – random seed parameter for data reproducibility</p></li>
-<li><p><strong>return_dfs</strong> – flag to return splits as list of dataframe, returns empty list if set to False</p></li>
-</ul>
-</dd>
-</dl>
-<p>Returns: train_df, test_df both list of dataframes of train and test splits</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.kfold_partitioning.KFoldPartitioner.save_datasets">
-<span class="sig-name descname"><span class="pre">save_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_dfs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dfs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/kfold_partitioning.html#KFoldPartitioner.save_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.kfold_partitioning.KFoldPartitioner.save_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves individual training and testing CV datasets as .csv files</p>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-streamline.dataprep"></span></section>
 </section>
 
 
@@ -398,29 +250,29 @@ and the column name used for matched CV. Returns list of training and testing da
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="streamline.utils.html" class="btn btn-neutral float-right" title="streamline.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="streamline.html" class="btn btn-neutral float-left" title="STREAMLINE Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="streamline.dataprep.data_process.html" class="btn btn-neutral float-right" title="streamline.dataprep.data_process module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="streamline.html" class="btn btn-neutral float-left" title="streamline package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey
+        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -428,7 +280,6 @@ and the column name used for matched CV. Returns list of training and testing da
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

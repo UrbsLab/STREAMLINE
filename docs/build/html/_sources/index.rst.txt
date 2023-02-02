@@ -3,11 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to STREAMLINE's documentation!
+STREAMLINE
 ======================================
 
 Overview
-=========
+--------------------------------------
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
 that empowers anyone to easily run,interpret, and apply a rigorous and
 customizable analysis for data mining or predictive modeling.
@@ -27,19 +27,24 @@ Overall, the goal of this pipeline is to provide a transparent framework to lear
 data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
 
 Preprint
-==========
+--------------------------------------
 
-A preprint introducing and applying STREAMLINE is now available
-https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw.
+A preprint introducing and applying STREAMLINE is now available on `Arxiv
+<https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw>`_
 
-Documentation
-===============
-This ReadTheDocs provides documentation for the STREAMLINE code and its parameters.
-Given below is the table of contents for its subpackages and modules
+API Documentation
+--------------------------------------
+This ReadTheDocs provides documentation for the STREAMLINE code and its parameters and can be found here: :doc:`./modules`
+
+
+
 
 .. toctree::
-   :maxdepth: 7
+   :maxdepth: 2
+   :hidden:
    :caption: Table of Contents:
 
+
+   self
    modules
 

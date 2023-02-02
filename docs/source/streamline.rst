@@ -1,12 +1,20 @@
-STREAMLINE Package
-=================================
+streamline package
+==================
+
+.. automodule:: streamline
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 7
+   :maxdepth: 4
 
    streamline.dataprep
-   streamline.utils
    streamline.featurefns
+   streamline.modeling
+   streamline.models
+   streamline.postanalysis
+   streamline.utils
