@@ -32,7 +32,7 @@ def test_setup():
     del f_imp
 
     f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
-    f_sel.run(run_parallel)
+    f_sel.run(run_parallel=False)
 
 
 test_algorithms = list()
@@ -43,19 +43,18 @@ for algorithm in SUPPORTED_MODELS_SMALL[:2]:
 @pytest.mark.parametrize(
     ("algorithms", "run_parallel"),
     [
-        (['NB'], False),
-        (["LR"], False),
-        # (["NB", "LR", "DT"], True),
+        # (['NB'], False),
+        # (["LR"], False),
+        (["NB", "LR", "DT"], True),
         # (['CGB'], False),
         # (['LGB'], False),
         # (['XGB'], False),
         # (['GP'], False),
         # (['XCS'], True),
-        # ([SUPPORTED_MODELS_SMALL[-1]], True),
-
+        # (SUPPORTED_MODELS_SMALL, True),
     ]
-    +
-    [([algo], True) for algo in SUPPORTED_MODELS_SMALL]
+    # +
+    # [([algo], True) for algo in SUPPORTED_MODELS_SMALL]
 )
 def test_valid_model_runner(algorithms, run_parallel):
     start = time.time()

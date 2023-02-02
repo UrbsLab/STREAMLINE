@@ -102,7 +102,7 @@ class BaseModel:
             model = model_class(**self.params)
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
                                             scoring=self.scoring_metric,
-                                            cv=self.cv).mean()
+                                            cv=self.cv, n_jobs=self.n_jobs).mean()
         logging.debug("Trail Completed")
         return mean_cv_score
 

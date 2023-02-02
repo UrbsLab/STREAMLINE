@@ -1,0 +1,341 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.8.15, pytest-7.2.1, pluggy-1.0.0 -- /Users/bandheyh/opt/anaconda3/envs/streamline/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev
+plugins: pycodestyle-2.3.1, anyio-3.5.0, profiling-1.7.0
+collecting ... collected 50 items / 6 skipped
+
+setup.py::PYCODESTYLE SKIPPED (previously passed pycodestyle checks)     [  2%]
+docs/source/conf.py::PYCODESTYLE SKIPPED (previously passed pycodest...) [  4%]
+streamline/__init__.py::PYCODESTYLE SKIPPED (previously passed pycod...) [  6%]
+streamline/dataprep/__init__.py::PYCODESTYLE SKIPPED (previously pas...) [  8%]
+streamline/dataprep/data_process.py::PYCODESTYLE SKIPPED (previously...) [ 10%]
+streamline/dataprep/eda_runner.py::PYCODESTYLE SKIPPED (previously p...) [ 12%]
+streamline/dataprep/exploratory_analysis.py::PYCODESTYLE SKIPPED (pr...) [ 14%]
+streamline/dataprep/kfold_partitioning.py::PYCODESTYLE SKIPPED (prev...) [ 16%]
+streamline/featurefns/__init__.py::PYCODESTYLE SKIPPED (previously p...) [ 18%]
+streamline/featurefns/feature_runner.py::PYCODESTYLE SKIPPED (previo...) [ 20%]
+streamline/featurefns/importance.py::PYCODESTYLE SKIPPED (previously...) [ 22%]
+streamline/featurefns/selection.py::PYCODESTYLE SKIPPED (previously ...) [ 24%]
+streamline/modeling/__init__.py::PYCODESTYLE SKIPPED (previously pas...) [ 26%]
+streamline/modeling/basemodel.py::PYCODESTYLE SKIPPED (previously pa...) [ 28%]
+streamline/modeling/modeljob.py::PYCODESTYLE SKIPPED (previously pas...) [ 30%]
+streamline/modeling/modelrunner.py::PYCODESTYLE SKIPPED (previously ...) [ 32%]
+streamline/modeling/parameters.py::PYCODESTYLE SKIPPED (previously p...) [ 34%]
+streamline/modeling/utils.py::PYCODESTYLE SKIPPED (previously passed...) [ 36%]
+streamline/models/__init__.py::PYCODESTYLE SKIPPED (previously passe...) [ 38%]
+streamline/models/artificial_neural_network.py::PYCODESTYLE SKIPPED      [ 40%]
+streamline/models/decision_tree.py::PYCODESTYLE SKIPPED (previously ...) [ 42%]
+streamline/models/genetic_programming.py::PYCODESTYLE SKIPPED (previ...) [ 44%]
+streamline/models/gradient_boosting.py::PYCODESTYLE SKIPPED (previou...) [ 46%]
+streamline/models/learning_based.py::PYCODESTYLE SKIPPED (previously...) [ 48%]
+streamline/models/linear_model.py::PYCODESTYLE SKIPPED (previously p...) [ 50%]
+streamline/models/naive_bayes.py::PYCODESTYLE SKIPPED (previously pa...) [ 52%]
+streamline/models/neighbouring.py::PYCODESTYLE SKIPPED (previously p...) [ 54%]
+streamline/models/random_forest.py::PYCODESTYLE SKIPPED (previously ...) [ 56%]
+streamline/models/support_vector_machine.py::PYCODESTYLE SKIPPED (pr...) [ 58%]
+streamline/postanalysis/__init__.py::PYCODESTYLE SKIPPED (previously...) [ 60%]
+streamline/postanalysis/statistics.py::PYCODESTYLE SKIPPED (previous...) [ 62%]
+streamline/tests/__init__.py::PYCODESTYLE SKIPPED (previously passed...) [ 64%]
+streamline/tests/test_dataprep.py::PYCODESTYLE SKIPPED (previously p...) [ 66%]
+streamline/tests/test_dataprocess.py::PYCODESTYLE SKIPPED (previousl...) [ 68%]
+streamline/tests/test_edarunner.py::PYCODESTYLE SKIPPED (previously ...) [ 70%]
+streamline/tests/test_featurefns.py::PYCODESTYLE SKIPPED (previously...) [ 72%]
+streamline/tests/test_kfold.py::PYCODESTYLE SKIPPED (previously pass...) [ 74%]
+streamline/tests/test_model.py::PYCODESTYLE SKIPPED (previously pass...) [ 76%]
+streamline/tests/test_model_runner.py::PYCODESTYLE SKIPPED (previous...) [ 78%]
+streamline/tests/test_model_runner.py::test_setup PASSED                 [ 80%]
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms0-False] 
+-------------------------------- live log call ---------------------------------
+WARNING  root:test_model_runner.py:62 Running Modelling Phase
+WARNING  root:test_model_runner.py:73 Modelling Step with ['NB'], Time running serially: 1.3977930545806885
+PASSED                                                                   [ 82%]
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms1-False] 
+-------------------------------- live log call ---------------------------------
+WARNING  root:test_model_runner.py:62 Running Modelling Phase
+WARNING  root:test_model_runner.py:73 Modelling Step with ['LR'], Time running serially: 64.1520676612854
+PASSED                                                                   [ 84%]
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms2-False] 
+-------------------------------- live log call ---------------------------------
+WARNING  root:test_model_runner.py:62 Running Modelling Phase
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+ERROR    root:basemodel.py:100 KeyError while copying model
+
+
+=============================== warnings summary ===============================
+../../../../opt/anaconda3/envs/streamline/lib/python3.8/site-packages/jupyter_client/connect.py:27
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/jupyter_client/connect.py:27: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+  given by the platformdirs library.  To remove this warning and
+  see the appropriate new directories, set the environment variable
+  `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.
+  The use of platformdirs will be the default in `jupyter_core` v6
+    from jupyter_core.paths import jupyter_data_dir
+
+streamline/tests/test_model_runner.py: 2200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/linear_model.py:20: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms1-False]
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/sklearn/svm/_base.py:1244: ConvergenceWarning:
+  
+  Liblinear failed to converge, increase the number of iterations.
+
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms1-False]
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms1-False]
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms1-False]
+streamline/tests/test_model_runner.py::test_valid_model_runner[algorithms2-False]
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/sklearn/linear_model/_sag.py:350: ConvergenceWarning:
+  
+  The max_iter was reached which means the coef_ did not converge
+
+streamline/tests/test_model_runner.py: 45 warnings
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/sklearn/tree/_classes.py:269: FutureWarning:
+  
+  `max_features='auto'` has been deprecated in 1.1 and will be removed in 1.3. To keep the past behaviour, explicitly set `max_features='sqrt'`.
+
+streamline/tests/test_model_runner.py: 120 warnings
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/sklearn/ensemble/_forest.py:425: FutureWarning:
+  
+  `max_features='auto'` has been deprecated in 1.1 and will be removed in 1.3. To keep the past behaviour, explicitly set `max_features='sqrt'` or remove this parameter as it is also the default value for RandomForestClassifiers and ExtraTreesClassifiers.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:24: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 427 warnings
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/sklearn/ensemble/_gb.py:280: FutureWarning:
+  
+  The loss parameter name 'deviance' was deprecated in v1.1 and will be removed in version 1.3. Use the new parameter name 'log_loss' which is equivalent.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:55: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:57: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:58: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:59: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:69: FutureWarning:
+  
+  suggest_uniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:71: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:74: FutureWarning:
+  
+  suggest_uniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 601 warnings
+  /Users/bandheyh/opt/anaconda3/envs/streamline/lib/python3.8/site-packages/xgboost/sklearn.py:1224: UserWarning:
+  
+  The use of label encoder in XGBClassifier is deprecated and will be removed in a future release. To remove this warning, do the following: 1) Pass option use_label_encoder=False when constructing XGBClassifier object; and 2) Encode your labels (y) as integers starting with 0, i.e. 0, 1, 2, ..., [num_class - 1].
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:105: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:107: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:109: FutureWarning:
+  
+  suggest_uniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 200 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:111: FutureWarning:
+  
+  suggest_uniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+streamline/tests/test_model_runner.py: 165 warnings
+  /Users/bandheyh/Local/Cedars/UrbsLab/STREAMLINE_Dev/streamline/models/gradient_boosting.py:138: FutureWarning:
+  
+  suggest_loguniform has been deprecated in v3.0.0. This feature will be removed in v6.0.0. See https://github.com/optuna/optuna/releases/tag/v3.0.0. Use :func:`~optuna.trial.Trial.suggest_float` instead.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========== 3 passed, 45 skipped, 5964 warnings in 799.92s (0:13:19) ===========
