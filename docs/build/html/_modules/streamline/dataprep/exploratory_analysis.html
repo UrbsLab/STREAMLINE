@@ -1,0 +1,698 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>streamline.dataprep.exploratory_analysis &mdash; STREAMLINE 2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> STREAMLINE
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">STREAMLINE API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>streamline.dataprep.exploratory_analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for streamline.dataprep.exploratory_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">chi2_contingency</span><span class="p">,</span> <span class="n">mannwhitneyu</span>
+
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis">[docs]</a><span class="k">class</span> <span class="nc">ExploratoryDataAnalysis</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">,</span> <span class="n">ignore_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">categorical_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">explorations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">categorical_cutoff</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sig_cutoff</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                 <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialization function for Exploratory Data Analysis Class. Parameters are defined below.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file</span>
+<span class="sd">            experiment_path: path to experiment the logging directory folder</span>
+<span class="sd">            ignore_features: list of row names of features to ignore</span>
+<span class="sd">            categorical_features: list of row names of categorical features</span>
+<span class="sd">            explorations: list of names of analysis to do while doing EDA (must be in set X)</span>
+<span class="sd">            plots: list of analysis plots to save in experiment directory (must be in set Y)</span>
+<span class="sd">            categorical_cutoff: categorical cut off to consider a feature categorical by analysis, default=10</span>
+<span class="sd">            sig_cutoff: significance cutoff for continuous variables, default=0.05</span>
+<span class="sd">            random_state: random state to set seeds for reproducibility of algorithms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Dataset</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;dataset input is not of type Dataset&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="n">experiment_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="n">explorations_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Describe&quot;</span><span class="p">,</span> <span class="s2">&quot;Differentiate&quot;</span><span class="p">,</span> <span class="s2">&quot;Univariate Analysis&quot;</span><span class="p">]</span>
+        <span class="n">plot_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Describe&quot;</span><span class="p">,</span> <span class="s2">&quot;Univariate Analysis&quot;</span><span class="p">,</span> <span class="s2">&quot;Feature Correlation&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Allows user to specify features that should be ignored.</span>
+        <span class="k">if</span> <span class="n">ignore_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ignore_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">ignore_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">ignore_features</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ignore_features</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ignore_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ignore_features</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">ignore_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ignore_features</span> <span class="o">=</span> <span class="n">ignore_features</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+        <span class="c1"># Allows user to specify features that should be treated as categorical whenever possible,</span>
+        <span class="c1"># rather than relying on pipelines automated strategy for distinguishing categorical vs.</span>
+        <span class="c1"># quantitative features using the categorical_cutoff parameter.</span>
+        <span class="k">if</span> <span class="n">categorical_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">categorical_features</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="n">categorical_features</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_cutoff</span> <span class="o">=</span> <span class="n">categorical_cutoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span> <span class="o">=</span> <span class="n">sig_cutoff</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span> <span class="o">=</span> <span class="n">explorations</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span> <span class="o">=</span> <span class="n">explorations_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="o">=</span> <span class="n">plots</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="o">=</span> <span class="n">plot_list</span>
+
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">explorations_list</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Exploration &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is not known/implemented&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">explorations_list</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Plot &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is not known/implemented&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.make_log_folders"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders">[docs]</a>    <span class="k">def</span> <span class="nf">make_log_folders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes folders for logging exploratory data analysis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.run_explore"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">[docs]</a>    <span class="k">def</span> <span class="nf">run_explore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run Exploratory Data Analysis according to EDA object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            top_features: no of top features to consider (default=20)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="c1"># Load csv file as dataset object for exploratory analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">load_data</span><span class="p">()</span>
+        <span class="c1"># Make analysis folder for target dataset and a folder for the respective exploratory analysis within it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_log_folders</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_ignored_rowcols</span><span class="p">()</span>
+
+        <span class="c1"># Account for possibility that only one dataset in folder has a match label.</span>
+        <span class="c1"># Check for presence of match label (this allows multiple datasets to be analyzed</span>
+        <span class="c1"># in the pipeline where not all of them have match labels if specified)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">partition_method</span> <span class="o">=</span> <span class="s1">&#39;S&#39;</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Warning: Specified &#39;Match label&#39; could not be found in dataset. &quot;</span>
+                            <span class="s2">&quot;Analysis moving forward assuming there is no &#39;match label&#39; column using &quot;</span>
+                            <span class="s2">&quot;stratified (S) CV partitioning.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create features-only version of dataset for some operations</span>
+        <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_only_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">set_headers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identify_feature_types</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running Basic Exploratory Analysis...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Describe and save description if user specified</span>
+        <span class="k">if</span> <span class="s2">&quot;Describe&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">describe_data</span><span class="p">()</span>
+            <span class="n">total_missing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">missingness_counts</span><span class="p">()</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="s2">&quot;Describe&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">:</span>
+                <span class="n">plot</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">counts_summary</span><span class="p">(</span><span class="n">total_missing</span><span class="p">,</span> <span class="n">plot</span><span class="p">)</span>
+
+        <span class="c1"># Export feature correlation plot if user specified</span>
+        <span class="k">if</span> <span class="s2">&quot;Feature Correlation&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating Feature Correlation Heatmap...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_correlation_plot</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span>
+
+        <span class="k">del</span> <span class="n">x_data</span>
+
+        <span class="c1"># Conduct univariate analyses of association between individual features and class</span>
+        <span class="k">if</span> <span class="s2">&quot;Univariate analysis&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorations</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running Univariate Analyses...&quot;</span><span class="p">)</span>
+            <span class="n">sorted_p_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">univariate_analysis</span><span class="p">(</span><span class="n">top_features</span><span class="p">)</span>
+            <span class="c1"># Export univariate association plots (for significant features) if user specifies</span>
+            <span class="k">if</span> <span class="s2">&quot;Univariate analysis&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating Univariate Analysis Plots...&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">univariate_plots</span><span class="p">(</span><span class="n">sorted_p_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_runtime</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.drop_ignored_rowcols"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols">[docs]</a>    <span class="k">def</span> <span class="nf">drop_ignored_rowcols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Basic data cleaning: Drops any instances with a missing outcome</span>
+<span class="sd">        value as well as any features (ignore_features) specified by user</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Remove instances with missing outcome values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">clean_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.identify_feature_types"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types">[docs]</a>    <span class="k">def</span> <span class="nf">identify_feature_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Automatically identify categorical vs. quantitative features/variables</span>
+<span class="sd">        Takes a dataframe (of independent variables) with column labels and</span>
+<span class="sd">        returns a list of column names identified as</span>
+<span class="sd">        being categorical based on user defined cutoff (categorical_cutoff).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Identify categorical variables in dataset</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Identifying Feature Types...&quot;</span><span class="p">)</span>
+        <span class="c1"># Runs unless user has specified a predefined list of variables to treat as categorical</span>
+
+        <span class="k">if</span> <span class="n">x_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_only_data</span><span class="p">()</span>
+        <span class="n">categorical_variables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">x_data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x_data</span><span class="p">[</span><span class="n">each</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_cutoff</span> \
+                        <span class="ow">or</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">x_data</span><span class="p">[</span><span class="n">each</span><span class="p">]):</span>
+                    <span class="n">categorical_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+            <span class="n">categorical_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span>
+
+        <span class="c1"># Pickle list of feature names to be treated as categorical variables</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span>
+                  <span class="s1">&#39;/exploratory/categorical_variables.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">categorical_variables</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">categorical_variables</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.describe_data"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data">[docs]</a>    <span class="k">def</span> <span class="nf">describe_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Conduct and export basic dataset descriptions including basic column statistics, column variable types</span>
+<span class="sd">        (i.e. int64 vs. float64), and unique value counts for each column</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span>
+                                            <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;DescribeDataset.csv&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span>
+                                        <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;DtypesDataset.csv&#39;</span><span class="p">,</span>
+                                        <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DataType&#39;</span><span class="p">],</span> <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Variable&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span>
+                                           <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;NumUniqueDataset.csv&#39;</span><span class="p">,</span>
+                                           <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Count&#39;</span><span class="p">],</span> <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Variable&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.missingness_counts"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts">[docs]</a>    <span class="k">def</span> <span class="nf">missingness_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Count and export missing values for all data columns.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Assess Missingness in all data columns</span>
+        <span class="n">missing_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">total_missing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">missing_count</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;DataMissingness.csv&#39;</span><span class="p">,</span>
+                             <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Count&#39;</span><span class="p">],</span> <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Variable&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total_missing</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.missing_count_plot"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot">[docs]</a>    <span class="k">def</span> <span class="nf">missing_count_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots a histogram of missingness across all data columns.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">missing_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="c1"># Plot a histogram of the missingness observed over all columns in the dataset</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">missing_count</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Missing Value Counts&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Histogram of Missing Value Counts in Dataset&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;DataMissingnessHistogram.png&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.counts_summary"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">[docs]</a>    <span class="k">def</span> <span class="nf">counts_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_missing</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative</span>
+<span class="sd">        features, and class counts. Also saves a simple bar graph of class counts if user specified.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            total_missing: total missing values (optional, runs again if not given)</span>
+<span class="sd">            plot: flag to output bar graph in the experiment log folder</span>
+<span class="sd">            show: flag to output the bar graph in interactive interface</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate, print, and export instance and feature counts</span>
+        <span class="n">f_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">f_count</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">f_count</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">total_missing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total_missing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">missingness_counts</span><span class="p">()</span>
+        <span class="n">percent_missing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_missing</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">f_count</span><span class="p">)</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;instances&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                   <span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">,</span> <span class="n">f_count</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s1">&#39;categorical_features&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span><span class="p">)],</span>
+                   <span class="p">[</span><span class="s1">&#39;quantitative_features&#39;</span><span class="p">,</span> <span class="n">f_count</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span><span class="p">)],</span>
+                   <span class="p">[</span><span class="s1">&#39;missing_values&#39;</span><span class="p">,</span> <span class="n">total_missing</span><span class="p">],</span>
+                   <span class="p">[</span><span class="s1">&#39;missing_percent&#39;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">percent_missing</span><span class="p">,</span> <span class="mi">5</span><span class="p">)]]</span>
+
+        <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Variable&#39;</span><span class="p">,</span> <span class="s1">&#39;Count&#39;</span><span class="p">])</span>
+
+        <span class="n">summary_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;DataCounts.csv&#39;</span><span class="p">,</span>
+                          <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># Calculate, print, and export class counts</span>
+        <span class="n">class_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+        <span class="n">class_counts</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span>
+                            <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;ClassCounts.csv&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Count&#39;</span><span class="p">],</span>
+                            <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Class&#39;</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Data Counts: ----------------&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Instance Count = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Feature Count = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">f_count</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;    Categorical  = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span><span class="p">)))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;    Quantitative = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">f_count</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span><span class="p">)))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Missing Count = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_missing</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;    Missing Percent = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">percent_missing</span><span class="p">))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Class Counts: ----------------&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Class Count Information&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">class_counts</span><span class="p">))</span>
+
+        <span class="c1"># Generate and export class count bar graph</span>
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="n">class_counts</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Class Counts&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;ClassCountsBarPlot.png&#39;</span><span class="p">,</span>
+                        <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.feature_correlation_plot"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot">[docs]</a>    <span class="k">def</span> <span class="nf">feature_correlation_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.</span>
+<span class="sd">        Due to computational expense this may not be recommended for datasets with a large number of instances</span>
+<span class="sd">        and/or features unless needed. The generated heatmap will be difficult to read with a large number</span>
+<span class="sd">        of features in the target dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x_data: data with only feature columns</span>
+<span class="sd">            show: flag to show plot or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_only_data</span><span class="p">()</span>
+        <span class="c1"># Calculate correlation matrix</span>
+        <span class="n">correlation_mat</span> <span class="o">=</span> <span class="n">x_data</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">)</span>
+        <span class="c1"># Generate and export correlation heatmap</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">correlation_mat</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">square</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/&#39;</span> <span class="o">+</span> <span class="s1">&#39;FeatureCorrelations.png&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.univariate_analysis"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">univariate_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates univariate association significance between each individual feature and class outcome.</span>
+<span class="sd">        Assumes categorical outcome using Chi-square test for</span>
+<span class="sd">        categorical features and Mann-Whitney Test for quantitative features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            top_features: no of top features to show/consider</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Try loop added to deal with versions specific change to using</span>
+            <span class="c1"># mannwhitneyu in scipy and avoid STREAMLINE crash in those circumstances.</span>
+            <span class="c1"># Create folder for univariate analysis results</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
+                                  <span class="o">+</span> <span class="s1">&#39;/exploratory/univariate_analyses&#39;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
+                         <span class="o">+</span> <span class="s1">&#39;/exploratory/univariate_analyses&#39;</span><span class="p">)</span>
+            <span class="c1"># Generate dictionary of p-values for each feature using appropriate test (via test_selector)</span>
+            <span class="n">p_value_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">column</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span> <span class="ow">and</span> <span class="n">column</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">instance_label</span><span class="p">:</span>
+                    <span class="n">p_value_dict</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_selector</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+
+            <span class="n">sorted_p_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p_value_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># Save p-values to file</span>
+            <span class="n">pval_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">p_value_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
+            <span class="n">pval_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
+                <span class="o">+</span> <span class="s1">&#39;/exploratory/univariate_analyses/Univariate_Significance.csv&#39;</span><span class="p">,</span>
+                <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;Feature&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;p-value&#39;</span><span class="p">])</span>
+
+            <span class="c1"># Print results for top features across univariate analyses</span>
+            <span class="n">f_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">f_count</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">f_count</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="n">min_num</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">top_features</span><span class="p">,</span> <span class="n">f_count</span><span class="p">)</span>
+            <span class="n">sorted_p_list_temp</span> <span class="o">=</span> <span class="n">sorted_p_list</span><span class="p">[:</span> <span class="n">min_num</span><span class="p">]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Plotting top significant &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_num</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; features.&#39;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;###################################################&#39;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Significant Univariate Associations:&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">sorted_p_list_temp</span><span class="p">[:</span><span class="n">min_num</span><span class="p">]:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">each</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;: (p-val = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">each</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">sorted_p_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># won&#39;t actually be sorted</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;WARNING: Exploratory univariate analysis failed due to scipy package &#39;</span>
+                            <span class="s1">&#39;version error when running mannwhitneyu test. &#39;</span>
+                            <span class="s1">&#39;To fix, we recommend updating scipy to version 1.8.0 or greater &#39;</span>
+                            <span class="s1">&#39;using: pip install --upgrade scipy&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">column</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span> <span class="ow">and</span> <span class="n">column</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">instance_label</span><span class="p">:</span>
+                    <span class="n">sorted_p_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">column</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">sorted_p_list</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.univariate_plots"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_plots">[docs]</a>    <span class="k">def</span> <span class="nf">univariate_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sorted_p_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether p-value of each feature is less than or equal to significance cutoff.</span>
+<span class="sd">        If so, calls graph_selector to generate an appropriate plot.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sorted_p_list: sorted list of p-values</span>
+<span class="sd">            top_features: no of top features to consider (default=20)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">sorted_p_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sorted_p_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">univariate_analysis</span><span class="p">(</span><span class="n">top_features</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorted_p_list</span><span class="p">:</span>  <span class="c1"># each feature in sorted p-value dictionary</span>
+            <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>  <span class="c1"># each feature</span>
+                    <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span><span class="p">:</span>  <span class="c1"># ONLY EXPORTS SIGNIFICANT FEATURES</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">graph_selector</span><span class="p">(</span><span class="n">j</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.graph_selector"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector">[docs]</a>    <span class="k">def</span> <span class="nf">graph_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assuming a categorical class outcome, a</span>
+<span class="sd">        barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_name: feature name of the column the function is doing operation on</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Feature and Outcome are discrete/categorical/binary</span>
+        <span class="k">if</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span><span class="p">:</span>
+            <span class="c1"># Generate contingency table count bar plot.</span>
+            <span class="c1"># Calculate Contingency Table - Counts</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span><span class="p">])</span>
+            <span class="n">geom_bar_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+            <span class="n">geom_bar_data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Feature is continuous and Outcome is discrete/categorical/binary</span>
+            <span class="c1"># Generate boxplot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Deal with the dataset specific characters causing problems in this dataset.</span>
+        <span class="n">new_feature_name</span> <span class="o">=</span> <span class="n">feature_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">new_feature_name</span> <span class="o">=</span> <span class="n">new_feature_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">new_feature_name</span> <span class="o">=</span> <span class="n">new_feature_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
+                    <span class="o">+</span> <span class="s1">&#39;/exploratory/univariate_analyses/&#39;</span> <span class="o">+</span> <span class="s1">&#39;Barplot_&#39;</span> <span class="o">+</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">new_feature_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.test_selector"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.test_selector">[docs]</a>    <span class="k">def</span> <span class="nf">test_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_name: name of feature column operation is running on</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">class_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span>
+        <span class="c1"># Feature and Outcome are discrete/categorical/binary</span>
+        <span class="k">if</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">categorical_variables</span><span class="p">:</span>
+            <span class="c1"># Calculate Contingency Table - Counts</span>
+            <span class="n">table_temp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">])</span>
+            <span class="c1"># Univariate association test (Chi Square Test of Independence - Non-parametric)</span>
+            <span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">dof</span><span class="p">,</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">chi2_contingency</span><span class="p">(</span><span class="n">table_temp</span><span class="p">)</span>
+            <span class="n">p_val</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="c1"># Feature is continuous and Outcome is discrete/categorical/binary</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Univariate association test (Mann-Whitney Test - Non-parametric)</span>
+            <span class="k">try</span><span class="p">:</span>  <span class="c1"># works in scipy 1.5.0</span>
+                <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">mannwhitneyu</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># for scipy 1.8.0</span>
+                <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">mannwhitneyu</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">class_label</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
+            <span class="n">p_val</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="k">return</span> <span class="n">p_val</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.save_runtime"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime">[docs]</a>    <span class="k">def</span> <span class="nf">save_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export runtime for this phase of the pipeline on current target dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">runtime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;PHASE 1 Completed: Runtime=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">runtime</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/runtime&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/runtime&#39;</span><span class="p">)</span>
+        <span class="n">runtime_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/runtime/runtime_exploratory.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.run"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper function to run_explore</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            top_features: no of top features to consider (default=20)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_explore</span><span class="p">(</span><span class="n">top_features</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.start"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_explore</span><span class="p">(</span><span class="n">top_features</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExploratoryDataAnalysis.join"><a class="viewcode-back" href="../../../streamline.dataprep.exploratory_analysis.html#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.join">[docs]</a>    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

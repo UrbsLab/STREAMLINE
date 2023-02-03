@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>streamline.modeling.utils &mdash; STREAMLINE 2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> STREAMLINE
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">STREAMLINE API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>streamline.modeling.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for streamline.modeling.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">streamline.models.artificial_neural_network</span> <span class="kn">import</span> <span class="n">MLPClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.decision_tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.genetic_programming</span> <span class="kn">import</span> <span class="n">GPClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.gradient_boosting</span> <span class="kn">import</span> <span class="n">GBClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.gradient_boosting</span> <span class="kn">import</span> <span class="n">XGBClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.gradient_boosting</span> <span class="kn">import</span> <span class="n">CGBClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.gradient_boosting</span> <span class="kn">import</span> <span class="n">LGBClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.learning_based</span> <span class="kn">import</span> <span class="n">eLCSClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.learning_based</span> <span class="kn">import</span> <span class="n">XCSClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.learning_based</span> <span class="kn">import</span> <span class="n">ExSTraCSClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">streamline.models.naive_bayes</span> <span class="kn">import</span> <span class="n">NaiveBayesClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.neighbouring</span> <span class="kn">import</span> <span class="n">KNNClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.random_forest</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">streamline.models.support_vector_machine</span> <span class="kn">import</span> <span class="n">SupportVectorClassifier</span>
+
+<span class="n">SUPPORTED_MODELS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Naive Bayes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Logistic Regression&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Decision Tree&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Random Forest&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Gradient Boosting&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Extreme Gradient Boosting&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Light Gradient Boosting&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Category Gradient Boosting&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Support Vector Machine&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Artificial Neural Network&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;K-Nearest Neighbors&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Genetic Programming&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;eLCS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;XCS&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ExSTraCS&#39;</span>
+<span class="p">]</span>
+
+<span class="n">SUPPORTED_MODELS_SMALL</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NB&#39;</span><span class="p">,</span> <span class="s1">&#39;LR&#39;</span><span class="p">,</span> <span class="s1">&#39;DT&#39;</span><span class="p">,</span> <span class="s1">&#39;RF&#39;</span><span class="p">,</span> <span class="s1">&#39;GB&#39;</span><span class="p">,</span> <span class="s1">&#39;XGB&#39;</span><span class="p">,</span> <span class="s1">&#39;LGB&#39;</span><span class="p">,</span> <span class="s1">&#39;CGB&#39;</span><span class="p">,</span> <span class="s1">&#39;SVM&#39;</span><span class="p">,</span> <span class="s1">&#39;ANN&#39;</span><span class="p">,</span> <span class="s1">&#39;KNN&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;GP&#39;</span><span class="p">,</span> <span class="s1">&#39;eLCS&#39;</span><span class="p">,</span> <span class="s1">&#39;XCS&#39;</span><span class="p">,</span> <span class="s1">&#39;ExSTraCS&#39;</span><span class="p">]</span>
+
+<span class="n">SUPPORTED_MODELS_OBJ</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">NaiveBayesClassifier</span><span class="p">,</span>
+    <span class="n">LogisticRegression</span><span class="p">,</span>
+    <span class="n">DecisionTreeClassifier</span><span class="p">,</span>
+    <span class="n">RandomForestClassifier</span><span class="p">,</span>
+    <span class="n">GBClassifier</span><span class="p">,</span>
+    <span class="n">XGBClassifier</span><span class="p">,</span>
+    <span class="n">LGBClassifier</span><span class="p">,</span>
+    <span class="n">CGBClassifier</span><span class="p">,</span>
+    <span class="n">SupportVectorClassifier</span><span class="p">,</span>
+    <span class="n">MLPClassifier</span><span class="p">,</span>
+    <span class="n">KNNClassifier</span><span class="p">,</span>
+    <span class="n">GPClassifier</span><span class="p">,</span>
+    <span class="n">eLCSClassifier</span><span class="p">,</span>
+    <span class="n">XCSClassifier</span><span class="p">,</span>
+    <span class="n">ExSTraCSClassifier</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">COLOR_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;silver&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;dimgrey&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;yellow&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;cornflowerblue&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;cyan&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;pink&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;magenta&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;red&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;chocolate&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;purple&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;olive&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;lawngreen&#39;</span><span class="p">,</span> <span class="p">]</span>
+
+<span class="n">MODEL_DICT</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">SUPPORTED_MODELS</span> <span class="o">+</span> <span class="n">SUPPORTED_MODELS_SMALL</span><span class="p">,</span>
+                      <span class="n">SUPPORTED_MODELS_OBJ</span> <span class="o">+</span> <span class="n">SUPPORTED_MODELS_OBJ</span><span class="p">))</span>
+
+<span class="n">LABELS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">SUPPORTED_MODELS</span> <span class="o">+</span> <span class="n">SUPPORTED_MODELS_SMALL</span><span class="p">,</span>
+                  <span class="n">SUPPORTED_MODELS</span> <span class="o">+</span> <span class="n">SUPPORTED_MODELS</span><span class="p">))</span>
+
+<span class="n">ABBREVIATION</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">SUPPORTED_MODELS</span><span class="p">,</span> <span class="n">SUPPORTED_MODELS_SMALL</span><span class="p">))</span>
+
+<span class="n">COLORS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">SUPPORTED_MODELS</span><span class="p">,</span> <span class="n">COLOR_LIST</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="is_supported_model"><a class="viewcode-back" href="../../../streamline.modeling.utils.html#streamline.modeling.utils.is_supported_model">[docs]</a><span class="k">def</span> <span class="nf">is_supported_model</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">LABELS</span><span class="p">[</span><span class="n">string</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown Model&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="model_str_to_obj"><a class="viewcode-back" href="../../../streamline.modeling.utils.html#streamline.modeling.utils.model_str_to_obj">[docs]</a><span class="k">def</span> <span class="nf">model_str_to_obj</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">is_supported_model</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">MODEL_DICT</span><span class="p">[</span><span class="n">string</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
