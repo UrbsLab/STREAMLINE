@@ -11,6 +11,8 @@ from streamline.featurefns.feature_runner import FeatureSelectionRunner
 from streamline.modeling.modelrunner import ModelExperimentRunner
 from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
 

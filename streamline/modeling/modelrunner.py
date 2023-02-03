@@ -6,7 +6,7 @@ from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
-from streamline.utils.runners import runner_fn, run_jobs
+from streamline.utils.runners import model_runner_fn, run_jobs
 
 
 class ModelExperimentRunner:
@@ -66,9 +66,9 @@ class ModelExperimentRunner:
                     except Exception:
                         logging.error("Unknown algorithm in exclude: " + str(algorithm))
         else:
+            self.algorithms = list()
             for algorithm in algorithms:
-                assert is_supported_model(algorithm)
-            self.algorithms = algorithms
+                self.algorithms.append(is_supported_model(algorithm))
 
         self.scoring_metric = scoring_metric
         self.metric_direction = metric_direction
@@ -136,7 +136,7 @@ class ModelExperimentRunner:
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
                                        self.timeout, self.uniform_fi, self.save_plots, self.random_state)
                     if run_parallel:
-                        p = multiprocessing.Process(target=runner_fn, args=(job_obj, model))
+                        p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
                         job_list.append(p)
                     else:
                         job_obj.run(model)

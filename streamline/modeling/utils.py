@@ -53,7 +53,7 @@ SUPPORTED_MODELS_OBJ = [
     ExSTraCSClassifier,
 ]
 
-COLOR_LIST = ['silver'
+COLOR_LIST = ['silver',
               'dimgrey',
               'yellow',
               'blue',
@@ -81,7 +81,10 @@ COLORS = dict(zip(SUPPORTED_MODELS, COLOR_LIST))
 
 
 def is_supported_model(string):
-    return string in SUPPORTED_MODELS or string in SUPPORTED_MODELS_SMALL
+    try:
+        return LABELS[string]
+    except KeyError:
+        raise Exception("Unknown Model")
 
 
 def model_str_to_obj(string):

@@ -18,7 +18,7 @@ class ExploratoryDataAnalysis(Job):
     """
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
-                 categorical_cutoff=10, sig_cutoff=0.1,
+                 categorical_cutoff=10, sig_cutoff=0.05,
                  random_state=None):
         """
         Initialization function for Exploratory Data Analysis Class. Parameters are defined below.
@@ -30,8 +30,8 @@ class ExploratoryDataAnalysis(Job):
             categorical_features: list of row names of categorical features
             explorations: list of names of analysis to do while doing EDA (must be in set X)
             plots: list of analysis plots to save in experiment directory (must be in set Y)
-            categorical_cutoff: categorical cut off to consider a feature categorical by analysis
-            sig_cutoff: significance cutoff for continuous variables
+            categorical_cutoff: categorical cut off to consider a feature categorical by analysis, default=10
+            sig_cutoff: significance cutoff for continuous variables, default=0.05
             random_state: random state to set seeds for reproducibility of algorithms
         """
         super().__init__()
@@ -124,6 +124,7 @@ class ExploratoryDataAnalysis(Job):
 
         # Create features-only version of dataset for some operations
         x_data = self.dataset.feature_only_data()
+        self.dataset.set_headers(self.experiment_path)
 
         if len(self.categorical_features) == 0:
             self.categorical_features = self.identify_feature_types(x_data)
@@ -145,6 +146,8 @@ class ExploratoryDataAnalysis(Job):
         if "Feature Correlation" in self.plots:
             logging.info("Generating Feature Correlation Heatmap...")
             self.feature_correlation_plot(x_data)
+
+        del x_data
 
         # Conduct univariate analyses of association between individual features and class
         if "Univariate analysis" in self.explorations:
