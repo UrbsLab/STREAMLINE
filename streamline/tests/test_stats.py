@@ -67,4 +67,4 @@ def test_valid_stats(algorithms, run_parallel):
     logging.warning("Statistics Step with " + str(algorithms) +
                     ", Time running " + how + ": " + str(time.time() - start))
 
-    shutil.rmtree(output_path)
+    # shutil.rmtree(output_path)
