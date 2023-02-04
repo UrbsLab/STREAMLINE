@@ -11,9 +11,10 @@ from matplotlib import rc
 from statistics import mean, median, stdev
 from matplotlib import pyplot as plt
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
-
 from streamline.utils.job import Job
 from streamline.modeling.utils import ABBREVIATION, COLORS
+# import seaborn as sns
+# sns.set_theme()
 
 
 class StatsJob(Job):
@@ -123,6 +124,9 @@ class StatsJob(Job):
             self.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
+        # Run FI Related stats and plots
+        self.fi_stats(metric_dict)
+
         # Export phase runtime
         self.save_runtime()
 
@@ -130,7 +134,7 @@ class StatsJob(Job):
         self.parse_runtime()
 
         # Print phase completion
-        print(self.data_name + " phase 5 complete")
+        logging.info(self.data_name + " phase 5 complete")
         job_file = open(self.experiment_path + '/jobsCompleted/job_stats_' + self.data_name + '.txt', 'w')
         job_file.write('complete')
         job_file.close()
@@ -166,10 +170,10 @@ class StatsJob(Job):
         self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
                                'Normalized Median Feature Importance')
 
-        # Fractionate FI scores for normalized and fractionated composite FI plot
+        # # Fractionate FI scores for normalized and fractionated composite FI plot
         # frac_lists = self.frac_fi(top_fi_med_norm_list)
 
-        # Generate Normalized and Fractionated composite FI plot
+        # # Generate Normalized and Fractionated composite FI plot
         # composite_fi_plot(frac_lists, algorithms, list(colors.values()),
         #                   all_feature_list_to_viz, 'Norm_Frac',
         #                   'Normalized and Fractionated Feature Importance')
@@ -197,6 +201,8 @@ class StatsJob(Job):
         # Create Directory
         if not os.path.exists(self.full_path + '/model_evaluation'):
             os.mkdir(self.full_path + '/model_evaluation')
+        if not os.path.exists(self.full_path + '/model_evaluation/feature_importance/'):
+            os.mkdir(self.full_path + '/model_evaluation/feature_importance/')
 
     def primary_stats(self):
         """
@@ -911,6 +917,7 @@ class StatsJob(Job):
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
         plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")
         # Export and/or show plot
+        print("Here")
         plt.savefig(self.full_path + '/model_evaluation/feature_importance/Compare_FI_' + fig_name + '.png',
                     bbox_inches='tight')
         if self.show_plots:

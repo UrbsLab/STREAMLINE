@@ -8,6 +8,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from statistics import median
 from streamline.utils.job import Job
+import seaborn as sns
+sns.set_theme()
 
 
 class FeatureSelection(Job):

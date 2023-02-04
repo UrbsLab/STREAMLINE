@@ -8,10 +8,12 @@ from streamline.dataprep.eda_runner import EDARunner
 from streamline.dataprep.data_process import DataProcessRunner
 from streamline.featurefns.feature_runner import FeatureImportanceRunner
 from streamline.featurefns.feature_runner import FeatureSelectionRunner
-from streamline.modeling.modelrunner import ModelExperimentRunner
-from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
+from streamline.modeling.modeljob import ModelJob
+from streamline.models.linear_model import LogisticRegression
+from streamline.models.naive_bayes import NaiveBayesClassifier
 
 pytest.skip("Tested Already", allow_module_level=True)
+
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
@@ -34,45 +36,35 @@ def test_setup():
     del f_imp
 
     f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
-    f_sel.run(run_parallel=False)
+    f_sel.run(run_parallel)
 
-
-test_algorithms = list()
-for algorithm in SUPPORTED_MODELS_SMALL[:2]:
-    test_algorithms.append(([algorithm, ],))
+    del f_sel
 
 
 @pytest.mark.parametrize(
-    ("algorithms", "run_parallel"),
+    ("model", ),
     [
-        # (['NB'], False),
-        # (["LR"], False),
-        (["NB", "LR", "DT"], True),
-        # (['CGB'], False),
-        # (['LGB'], False),
-        # (['XGB'], False),
-        # (['GP'], False),
-        # (['XCS'], True),
-        # (SUPPORTED_MODELS_SMALL, True),
-    ]
-    # +
-    # [([algo], True) for algo in SUPPORTED_MODELS_SMALL]
+        (LogisticRegression(), ),
+        (NaiveBayesClassifier(), ),
+    ],
 )
-def test_valid_model_runner(algorithms, run_parallel):
+def test_valid_models(model):
+
     start = time.time()
 
-    logging.warning("Running Modelling Phase")
+    logging.warning("Running " + model.small_name + " Model Optimization")
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
+    for i in range(1):
+        model_job = ModelJob(output_path + '/' + experiment_name + '/demodata', output_path, experiment_name, i)
+        model_job.run(model)
+        # logging.warning("Best Params:" + str(model.params))
+        model_job = ModelJob(output_path + '/' + experiment_name + '/hcc-data_example_no_covariates',
+                             output_path, experiment_name, i)
+        model_job.run(model)
+        # logging.warning("Best Params:" + str(model.params))
 
-    runner = ModelExperimentRunner(output_path, experiment_name, algorithms, save_plots=True)
-    runner.run(run_parallel)
+    logging.warning(model.small_name + " Optimization Step, "
+                                       "Time running" + "" + ": " + str(time.time() - start))
 
-    if run_parallel:
-        how = "parallely"
-    else:
-        how = "serially"
-    logging.warning("Modelling Step with " + str(algorithms) +
-                    ", Time running " + how + ": " + str(time.time() - start))
-
-    # shutil.rmtree(output_path)
+    shutil.rmtree(output_path)

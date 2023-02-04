@@ -105,6 +105,8 @@ def test_valid_feature_sel(algorithms, run_parallel, output_path):
     f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms, overwrite_cv=False)
     f_sel.run(run_parallel)
 
+    del f_sel
+
     if run_parallel:
         how = "parallely"
     else:

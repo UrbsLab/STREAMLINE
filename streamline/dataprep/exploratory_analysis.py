@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
 from scipy.stats import chi2_contingency, mannwhitneyu
+import seaborn as sns
+sns.set_theme()
 
 
 class ExploratoryDataAnalysis(Job):

@@ -1,5 +1,5 @@
 import shutil
-DEBUG = False
+DEBUG = True
 
 
 def test_stub():
