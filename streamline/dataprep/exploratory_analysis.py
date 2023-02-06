@@ -152,11 +152,11 @@ class ExploratoryDataAnalysis(Job):
         del x_data
 
         # Conduct univariate analyses of association between individual features and class
-        if "Univariate analysis" in self.explorations:
+        if "Univariate Analysis" in self.explorations:
             logging.info("Running Univariate Analyses...")
             sorted_p_list = self.univariate_analysis(top_features)
             # Export univariate association plots (for significant features) if user specifies
-            if "Univariate analysis" in self.plots:
+            if "Univariate Analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
         self.save_runtime()
@@ -432,6 +432,11 @@ class ExploratoryDataAnalysis(Job):
             plt.title('')
 
         # Deal with the dataset specific characters causing problems in this dataset.
+        if not os.path.exists(self.experiment_path + '/' + self.dataset.name
+                              + '/exploratory/univariate_analyses/'):
+            os.makedirs(self.experiment_path + '/' + self.dataset.name
+                        + '/exploratory/univariate_analyses/')
+
         new_feature_name = feature_name.replace(" ", "")
         new_feature_name = new_feature_name.replace("*", "")
         new_feature_name = new_feature_name.replace("/", "")
