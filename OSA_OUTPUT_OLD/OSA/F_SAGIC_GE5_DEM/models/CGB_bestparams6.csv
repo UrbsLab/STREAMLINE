@@ -1,2 +1,0 @@
-learning_rate,iterations,depth,l2_leaf_reg,loss_function,random_state
-0.17312951139954727,282,2,1,Logloss,42

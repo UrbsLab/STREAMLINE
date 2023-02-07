@@ -1,2 +1,0 @@
-activation,learning_rate,momentum,solver,batch_size,alpha,max_iter,random_state
-relu,invscaling,0.7750743495850239,adam,auto,0.03818651700271352,200,42

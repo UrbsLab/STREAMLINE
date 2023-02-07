@@ -10,6 +10,7 @@ catboost_info/
 prof/
 profile.html
 testlogs/
-./OSA_OUTPUT/
-./OSA/
+OSA_OUTPUT_OLD/
+OSA_OUTPUT/
+OSA/
 logs.log

@@ -1,2 +1,0 @@
-objective,metric,verbosity,boosting_type,num_leaves,max_depth,lambda_l1,lambda_l2,feature_fraction,bagging_fraction,bagging_freq,min_child_samples,n_estimators,scale_pos_weight,random_state
-binary,binary_logloss,-1,gbdt,5,7,7.87289720583656e-08,0.0008227838357163917,0.7475875928067259,0.8709098102853147,6,13,50,0.45303580695381424,42

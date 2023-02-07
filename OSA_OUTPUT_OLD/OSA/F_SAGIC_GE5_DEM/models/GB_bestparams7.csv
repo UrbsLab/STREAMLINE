@@ -1,2 +1,0 @@
-n_estimators,loss,learning_rate,min_samples_leaf,min_samples_split,max_depth,random_state
-695,exponential,0.02456379569137424,18,46,2,42

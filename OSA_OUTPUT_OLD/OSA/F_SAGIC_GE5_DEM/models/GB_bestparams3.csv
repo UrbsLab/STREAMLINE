@@ -1,2 +1,0 @@
-n_estimators,loss,learning_rate,min_samples_leaf,min_samples_split,max_depth,random_state
-206,deviance,0.03394472834237512,27,16,5,42

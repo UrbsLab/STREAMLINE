@@ -1,2 +1,0 @@
-kernel,C,gamma,degree,probability,class_weight,random_state
-rbf,0.18016561995191124,scale,5,True,balanced,42
