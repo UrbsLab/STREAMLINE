@@ -1,4 +1,10 @@
+import os
 import logging
+import multiprocessing
+
+num_cores = os.environ.get('SLURM_CPUS_PER_TASK', None)
+if num_cores is None:
+    num_cores = multiprocessing.cpu_count()
 
 
 def parallel_eda_call(eda_job, params):
@@ -36,7 +42,12 @@ def run_jobs(job_list):
     """
     Function to start and join a list of job objects
     """
-    for j in job_list:
-        j.start()
-    for j in job_list:
-        j.join()
+    for i in range(0, len(job_list), num_cores):
+        sub_jobs(job_list[i:i + num_cores])
+
+
+def sub_jobs(job_list):
+    for job in job_list:
+        job.start()
+    for job in job_list:
+        job.join()

@@ -1,0 +1,2 @@
+criterion,splitter,max_depth,min_samples_split,min_samples_leaf,max_features,class_weight,random_state
+gini,best,5,34,17,,balanced,42

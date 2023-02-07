@@ -1,0 +1,2 @@
+population_size,generations,tournament_size,function_set,init_method,parsimony_coefficient,feature_names,low_memory,random_state
+651,78,17,"['add', 'sub', 'mul', 'div', 'sqrt', 'log', 'abs', 'neg', 'inv', 'max', 'min', 'sin', 'cos', 'tan']",half and half,0.0014180537144799796,"['aframer', 'age', 'bmi', 'csamer', 'male']",True,42

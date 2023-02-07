@@ -1,0 +1,2 @@
+booster,objective,verbosity,reg_lambda,alpha,eta,gamma,max_depth,grow_policy,n_estimators,min_samples_split,min_samples_leaf,subsample,min_child_weight,colsample_bytree,scale_pos_weight,nthread,random_state
+gbtree,binary:logistic,0,2.9060428976800826e-06,0.003031315422990495,0.00011273836484469392,0.009053386353759315,5,depthwise,466,49,46,0.7780806532989077,1.474782022266074,0.7775746694243371,0.45251686559418786,1,42

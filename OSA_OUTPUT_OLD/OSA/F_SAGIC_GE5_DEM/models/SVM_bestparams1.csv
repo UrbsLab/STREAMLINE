@@ -1,0 +1,2 @@
+kernel,C,gamma,degree,probability,class_weight,random_state
+linear,511.536556613111,scale,1,True,balanced,42

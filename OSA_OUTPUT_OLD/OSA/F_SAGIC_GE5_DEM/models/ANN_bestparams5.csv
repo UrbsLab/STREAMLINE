@@ -1,0 +1,2 @@
+activation,learning_rate,momentum,solver,batch_size,alpha,max_iter,random_state
+logistic,constant,0.1646030073251,adam,auto,0.004457901322069359,200,42

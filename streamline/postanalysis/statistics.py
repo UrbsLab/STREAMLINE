@@ -13,8 +13,8 @@ from matplotlib import pyplot as plt
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 from streamline.utils.job import Job
 from streamline.modeling.utils import ABBREVIATION, COLORS
-# import seaborn as sns
-# sns.set_theme()
+import seaborn as sns
+sns.set_theme()
 
 
 class StatsJob(Job):

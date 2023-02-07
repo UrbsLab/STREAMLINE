@@ -1,0 +1,2 @@
+population_size,generations,tournament_size,function_set,init_method,parsimony_coefficient,feature_names,low_memory,random_state
+973,390,48,"['add', 'sub', 'mul', 'div', 'sqrt', 'log', 'abs', 'neg', 'inv', 'max', 'min', 'sin', 'cos', 'tan']",full,0.003927972976869379,"['aframer', 'age', 'asian', 'bmi', 'caucasian', 'csamer', 'male', 'other']",True,42

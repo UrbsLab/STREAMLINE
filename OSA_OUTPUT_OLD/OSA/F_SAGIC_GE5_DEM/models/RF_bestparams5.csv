@@ -1,0 +1,2 @@
+n_estimators,criterion,max_depth,min_samples_split,min_samples_leaf,max_features,bootstrap,oob_score,class_weight,random_state
+441,gini,13,20,25,auto,True,False,balanced,42

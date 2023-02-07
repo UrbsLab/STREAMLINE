@@ -1,0 +1,2 @@
+activation,learning_rate,momentum,solver,batch_size,alpha,max_iter,random_state
+identity,adaptive,0.4455560149136927,adam,auto,0.00023795221163877263,200,42

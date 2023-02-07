@@ -1,0 +1,2 @@
+n_estimators,criterion,max_depth,min_samples_split,min_samples_leaf,max_features,bootstrap,oob_score,class_weight,random_state
+305,entropy,5,39,12,log2,True,True,balanced,42
