@@ -2,6 +2,9 @@ import logging
 import os
 import glob
 import multiprocessing
+import pickle
+
+from streamline.modeling.utils import ABBREVIATION
 from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
@@ -19,7 +22,7 @@ class ModelExperimentRunner:
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
-                 lcs_timeout=1200, random_state=None, n_jobs=None):
+                 lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None):
 
         """
         Args:
@@ -83,6 +86,7 @@ class ModelExperimentRunner:
         self.lcs_iterations = lcs_iterations
         self.lcs_timeout = lcs_timeout
 
+        self.resubmit = resubmit
         self.random_state = random_state
         self.n_jobs = n_jobs
 
@@ -92,17 +96,28 @@ class ModelExperimentRunner:
         if not os.path.exists(self.output_path + '/' + self.experiment_name):
             raise Exception("Experiment must exist (from phase 1) before phase 4 can begin")
 
+        self.save_metadata()
+
     def run(self, run_parallel):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
-        remove_list = ['jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks']
+        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted',
+                       'logs', 'jobs', 'DatasetComparisons']
 
         for text in remove_list:
             if text in dataset_paths:
                 dataset_paths.remove(text)
 
         job_list = list()
+
+        if self.resubmit:
+            phase5completed = []
+            for filename in glob.glob(self.output_path + "/" + self.experiment_name + '/jobsCompleted/job_model*'):
+                ref = filename.split('/')[-1]
+                phase5completed.append(ref)
+        else:
+            phase5completed = []
 
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
@@ -116,6 +131,13 @@ class ModelExperimentRunner:
             cv_partitions = len(cv_dataset_paths)
             for cv_count in range(cv_partitions):
                 for algorithm in self.algorithms:
+                    abbrev = ABBREVIATION[algorithm]
+                    target_file = 'job_model_' + dataset_directory_path + '_' + str(cv_count) + '_' + \
+                                  abbrev + '.txt'
+                    if target_file in phase5completed:
+                        continue
+                        # target for a re-submit
+
                     # logging.info("Running Model "+str(algorithm))
                     if (not self.do_lcs_sweep) or (algorithm not in ['eLCS', 'XCS', 'ExSTraCS']):
                         model = model_str_to_obj(algorithm)(cv_folds=3,
@@ -142,3 +164,41 @@ class ModelExperimentRunner:
                         job_obj.run(model)
         if run_parallel:
             run_jobs(job_list)
+
+    def save_metadata(self):
+        # Load metadata
+        file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+        metadata = pickle.load(file)
+        file.close()
+        # Update metadata
+        metadata['Naive Bayes'] = str('Naive Bayes' in self.algorithms)
+        metadata['Logistic Regression'] = str('Logistic Regression' in self.algorithms)
+        metadata['Decision Tree'] = str('Decision Tree' in self.algorithms)
+        metadata['Random Forest'] = str('Random Forest' in self.algorithms)
+        metadata['Gradient Boosting'] = str('Gradient Boosting' in self.algorithms)
+        metadata['Extreme Gradient Boosting'] = str('Extreme Gradient Boosting' in self.algorithms)
+        metadata['Light Gradient Boosting'] = str('Light Gradient Boosting' in self.algorithms)
+        metadata['Category Gradient Boosting'] = str('Category Gradient Boosting' in self.algorithms)
+        metadata['Support Vector Machine'] = str('Support Vector Machine' in self.algorithms)
+        metadata['Artificial Neural Network'] = str('Artificial Neural Network' in self.algorithms)
+        metadata['K-Nearest Neighbors'] = str('K-Nearest Neighbors' in self.algorithms)
+        metadata['Genetic Programming'] = str('Genetic Programming' in self.algorithms)
+        metadata['eLCS'] = str('eLCS' in self.algorithms)
+        metadata['XCS'] = str('XCS' in self.algorithms)
+        metadata['ExSTraCS'] = str('ExSTraCS' in self.algorithms)
+        # Add new algorithms here...
+        metadata['Primary Metric'] = self.scoring_metric
+        metadata['Training Subsample for KNN,ANN,SVM,and XGB'] = self.training_subsample
+        metadata['Uniform Feature Importance Estimation (Models)'] = self.uniform_fi
+        metadata['Hyperparameter Sweep Number of Trials'] = self.n_trials
+        metadata['Hyperparameter Timeout'] = self.timeout
+        metadata['Export Hyperparameter Sweep Plots'] = self.save_plots
+        metadata['Do LCS Hyperparameter Sweep'] = self.do_lcs_sweep
+        metadata['nu'] = self.lcs_nu
+        metadata['Training Iterations'] = self.lcs_iterations
+        metadata['N (Rule Population Size)'] = self.lcs_n
+        metadata['LCS Hyperparameter Sweep Timeout'] = self.lcs_timeout
+        # Pickle the metadata for future use
+        pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
+        pickle.dump(metadata, pickle_out)
+        pickle_out.close()

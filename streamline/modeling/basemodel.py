@@ -85,6 +85,7 @@ class BaseModel:
                 break
 
         if not self.is_single:
+            optuna.logging.set_verbosity(optuna.logging.WARNING)
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
             if self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
                 pos_inst = sum(y_train)

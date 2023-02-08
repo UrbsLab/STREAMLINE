@@ -1,4 +1,5 @@
 import os
+import pickle
 import re
 import glob
 import shutil
@@ -96,6 +97,7 @@ class EDARunner:
         except Exception as e:
             shutil.rmtree(self.output_path)
             raise e
+        self.save_metadata()
 
     def run(self, run_parallel=True):
         file_count, job_counter = 0, 0
@@ -147,7 +149,7 @@ class EDARunner:
                                          self.partition_method, self.output_path + self.experiment_name,
                                          self.n_splits, self.random_state)
             if run_parallel:  # Run as job in parallel
-                p = multiprocessing.Process(target=parallel_kfold_call, args=(kfold_obj, ))
+                p = multiprocessing.Process(target=parallel_kfold_call, args=(kfold_obj,))
                 job_list.append(p)
             else:  # Run job locally, serially
                 kfold_obj.run()
@@ -205,3 +207,26 @@ class EDARunner:
         os.mkdir(self.output_path + '/' + self.experiment_name + '/jobsCompleted')
         os.mkdir(self.output_path + '/' + self.experiment_name + '/jobs')
         os.mkdir(self.output_path + '/' + self.experiment_name + '/logs')
+
+    def save_metadata(self):
+        metadata = dict()
+        metadata['Data Path'] = self.data_path
+        metadata['Output Path'] = self.output_path
+        metadata['Experiment Name'] = self.experiment_name
+        metadata['Class Label'] = self.class_label
+        metadata['Instance Label'] = self.instance_label
+        metadata['Ignored Features'] = self.ignore_features
+        metadata['Specified Categorical Features'] = self.categorical_features
+        metadata['CV Partitions'] = self.n_splits
+        metadata['Partition Method'] = self.partition_method
+        metadata['Match Label'] = self.match_label
+        metadata['Categorical Cutoff'] = self.categorical_cutoff
+        metadata['Statistical Significance Cutoff'] = self.sig_cutoff
+        metadata['Export Feature Correlations'] = "Feature Correlations" in self.plot_list
+        metadata['Export Univariate Plots'] = "Univariate Analysis" in self.plot_list
+        metadata['Random Seed'] = self.random_state
+        metadata['Run From Jupyter Notebook'] = False
+        # Pickle the metadata for future use
+        pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
+        pickle.dump(metadata, pickle_out)
+        pickle_out.close()

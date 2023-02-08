@@ -1,6 +1,8 @@
 import os
 import glob
 import multiprocessing
+import pickle
+
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
 from streamline.utils.runners import runner_fn, run_jobs
@@ -52,11 +54,14 @@ class FeatureImportanceRunner:
         if not os.path.exists(self.output_path + '/' + self.experiment_name):
             raise Exception("Experiment must exist (from phase 1) before phase 3 can begin")
 
+        self.save_metadata()
+
     def run(self, run_parallel):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
-        remove_list = ['jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks']
+        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted',
+                       'logs', 'jobs', 'DatasetComparisons']
 
         for text in remove_list:
             if text in dataset_paths:
@@ -99,6 +104,19 @@ class FeatureImportanceRunner:
                         job_obj.run()
         if run_parallel:
             run_jobs(job_list)
+
+    def save_metadata(self):
+        file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+        metadata = pickle.load(file)
+        file.close()
+        metadata['Use Mutual Information'] = "MI" in self.algorithms
+        metadata['Use MultiSURF'] = "MS" in self.algorithms
+        metadata['Use TURF'] = self.use_turf
+        metadata['TURF Cutoff'] = self.turf_pct
+        metadata['MultiSURF Instance Subset'] = self.instance_subset
+        pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
+        pickle.dump(metadata, pickle_out)
+        pickle_out.close()
 
 
 class FeatureSelectionRunner:
@@ -149,11 +167,14 @@ class FeatureSelectionRunner:
         if not os.path.exists(self.output_path + '/' + self.experiment_name):
             raise Exception("Experiment must exist (from phase 1) before phase 4 can begin")
 
+        self.save_metadata()
+
     def run(self, run_parallel):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
-        remove_list = ['jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks']
+        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted',
+                       'logs', 'jobs', 'DatasetComparisons']
 
         for text in remove_list:
             if text in dataset_paths:
@@ -176,3 +197,16 @@ class FeatureSelectionRunner:
                 job_obj.run()
         if run_parallel:
             run_jobs(job_list)
+
+    def save_metadata(self):
+        file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+        metadata = pickle.load(file)
+        file.close()
+        metadata['Max Features to Keep'] = self.max_features_to_keep
+        metadata['Filter Poor Features'] = self.filter_poor_features
+        metadata['Top Features to Display'] = self.top_features
+        metadata['Export Feature Importance Plot'] = self.export_scores
+        metadata['Overwrite CV Datasets'] = self.overwrite_cv
+        pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
+        pickle.dump(metadata, pickle_out)
+        pickle_out.close()

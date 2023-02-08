@@ -3,7 +3,7 @@ import time
 import pytest
 import shutil
 import logging
-from streamline.dataprep.eda_runner import EDARunner
+from streamline.runners.eda_runner import EDARunner
 
 pytest.skip("Tested Already", allow_module_level=True)
 

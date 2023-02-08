@@ -2,6 +2,7 @@ import glob
 import logging
 import math
 import os
+import pickle
 from datetime import datetime
 
 import pandas as pd
@@ -32,7 +33,8 @@ class ReportJob(Job):
             self.output_path = self.experiment_path.split('/')[-2]
 
         self.datasets = os.listdir(self.experiment_path)
-        remove_list = ['jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks',
+        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'logs', 'jobs',
+                       'DatasetComparisons', 'UsefulNotebooks',
                        self.experiment_name + '_ML_Pipeline_Report.pdf']
         for text in remove_list:
             if text in self.datasets:
@@ -53,7 +55,8 @@ class ReportJob(Job):
         # Find folders inside directory
         if self.training:
             self.datasets = os.listdir(self.experiment_path)
-            remove_list = ['DatasetComparisons', 'jobs', 'jobsCompleted', 'logs', 'KeyFileCopy',
+            remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+                           'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs', 'KeyFileCopy',
                            experiment_name + '_ML_Pipeline_Report.pdf']
             for item in remove_list:
                 if item in self.datasets:
@@ -86,10 +89,10 @@ class ReportJob(Job):
                 self.algorithms.append(is_supported_model(algorithm))
 
         # Unpickle metadata from previous phase
-        # file = open(self.experiment_path + '/' + "metadata.pickle", 'rb')
-        # self.metadata = pickle.load(file)
-        # file.close()
-        self.metadata = {}
+        file = open(self.experiment_path + '/' + "metadata.pickle", 'rb')
+        self.metadata = pickle.load(file)
+        file.close()
+        # self.metadata = {}
 
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
         self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)

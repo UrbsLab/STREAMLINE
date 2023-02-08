@@ -2,13 +2,12 @@ import os
 import time
 import optuna
 import pytest
-import shutil
 import logging
-from streamline.dataprep.eda_runner import EDARunner
-from streamline.dataprep.data_process import DataProcessRunner
-from streamline.featurefns.feature_runner import FeatureImportanceRunner
-from streamline.featurefns.feature_runner import FeatureSelectionRunner
-from streamline.modeling.model_runner import ModelExperimentRunner
+from streamline.runners.eda_runner import EDARunner
+from streamline.runners.dataprocess_runner import DataProcessRunner
+from streamline.runners.feature_runner import FeatureImportanceRunner
+from streamline.runners.feature_runner import FeatureSelectionRunner
+from streamline.runners.model_runner import ModelExperimentRunner
 from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
 
 pytest.skip("Tested Already", allow_module_level=True)

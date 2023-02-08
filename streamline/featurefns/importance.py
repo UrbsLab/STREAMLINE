@@ -17,7 +17,7 @@ class FeatureImportance(Job):
     Initializer for Feature Importance Job
     """
 
-    def __init__(self, cv_train_path, experiment_path, class_label, instance_label=None, instance_subset=None,
+    def __init__(self, cv_train_path, experiment_path, class_label, instance_label=None, instance_subset=2000,
                  algorithm="MS", use_turf=True, turf_pct=True, random_state=None, n_jobs=None):
         """
 

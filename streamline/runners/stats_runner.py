@@ -2,6 +2,8 @@ import logging
 import os
 import glob
 import multiprocessing
+import pickle
+
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.statistics import StatsJob
@@ -77,11 +79,15 @@ class StatsRunner:
         if not os.path.exists(self.output_path + '/' + self.experiment_name):
             raise Exception("Experiment must exist (from phase 1) before phase 6 can begin")
 
+        self.save_metadata()
+
     def run(self, run_parallel):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
-        remove_list = ['jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks']
+        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted',
+                       'logs', 'jobs', 'DatasetComparisons',
+                       self.experiment_name + '_ML_Pipeline_Report.pdf']
 
         for text in remove_list:
             if text in dataset_paths:
@@ -110,3 +116,18 @@ class StatsRunner:
                 job_obj.run()
         if run_parallel:
             run_jobs(job_list)
+
+    def save_metadata(self):
+        file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+        metadata = pickle.load(file)
+        file.close()
+        metadata['Export ROC Plot'] = self.plot_roc
+        metadata['Export PRC Plot'] = self.plot_prc
+        metadata['Export Metric Boxplots'] = self.plot_metric_boxplots
+        metadata['Export Feature Importance Boxplots'] = self.plot_fi_box
+        metadata['Metric Weighting Composite FI Plots'] = self.metric_weight
+        metadata['Top Model Features To Display'] = self.top_features
+        # Pickle the metadata for future use
+        pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
+        pickle.dump(metadata, pickle_out)
+        pickle_out.close()

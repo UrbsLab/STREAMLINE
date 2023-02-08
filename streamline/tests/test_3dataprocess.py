@@ -3,8 +3,8 @@ import time
 import pytest
 import shutil
 import logging
-from streamline.dataprep.eda_runner import EDARunner
-from streamline.dataprep.data_process import DataProcessRunner
+from streamline.runners.eda_runner import EDARunner
+from streamline.runners.dataprocess_runner import DataProcessRunner
 
 pytest.skip("Tested Already", allow_module_level=True)
 

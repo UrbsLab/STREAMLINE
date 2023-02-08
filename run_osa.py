@@ -2,16 +2,15 @@ import os
 import time
 import optuna
 import logging
-import sys
 from run_config import *
-from streamline.dataprep.eda_runner import EDARunner
+from streamline.runners.eda_runner import EDARunner
 from streamline.dataprep.data_process import DataProcessRunner
-from streamline.featurefns.feature_runner import FeatureImportanceRunner
-from streamline.featurefns.feature_runner import FeatureSelectionRunner
-from streamline.modeling.model_runner import ModelExperimentRunner
-from streamline.postanalysis.stats_runner import StatsRunner
-from streamline.postanalysis.compare_runner import CompareRunner
-from streamline.postanalysis.report_runner import ReportRunner
+from streamline.runners.feature_runner import FeatureImportanceRunner
+from streamline.runners.feature_runner import FeatureSelectionRunner
+from streamline.runners.model_runner import ModelExperimentRunner
+from streamline.runners.stats_runner import StatsRunner
+from streamline.runners.compare_runner import CompareRunner
+from streamline.runners.report_runner import ReportRunner
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 logger = logging.getLogger()
@@ -29,7 +28,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
-def run(obj, phase_str, run_parallel=True):
+def run(obj, phase_str, run_parallel=False):
     start = time.time()
     obj.run(run_parallel=run_parallel)
     print("Ran " + phase_str + " Phase in " + str(time.time() - start))

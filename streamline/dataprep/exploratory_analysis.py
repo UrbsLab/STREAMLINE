@@ -5,7 +5,6 @@ import random
 import logging
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset

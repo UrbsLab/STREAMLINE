@@ -917,7 +917,6 @@ class StatsJob(Job):
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
         plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")
         # Export and/or show plot
-        print("Here")
         plt.savefig(self.full_path + '/model_evaluation/feature_importance/Compare_FI_' + fig_name + '.png',
                     bbox_inches='tight')
         if self.show_plots:

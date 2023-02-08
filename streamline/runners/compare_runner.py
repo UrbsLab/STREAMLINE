@@ -1,6 +1,8 @@
 import os
 import logging
 import multiprocessing
+import pickle
+
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.dataset_compare import CompareJob
