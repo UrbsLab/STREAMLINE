@@ -19,7 +19,7 @@ class ReportJob(Job):
     """
 
     def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None, exclude=None,
-                 training=False, data_path=None, rep_data_path=None):
+                 training=True, data_path=None, rep_data_path=None):
         super().__init__()
         self.time = None
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)
@@ -32,28 +32,13 @@ class ReportJob(Job):
             self.experiment_name = self.experiment_path.split('/')[-1]
             self.output_path = self.experiment_path.split('/')[-2]
 
-        self.datasets = os.listdir(self.experiment_path)
-        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'logs', 'jobs',
-                       'DatasetComparisons', 'UsefulNotebooks',
-                       self.experiment_name + '_ML_Pipeline_Report.pdf']
-        for text in remove_list:
-            if text in self.datasets:
-                self.datasets.remove(text)
-        # ensures consistent ordering of self.datasets and assignment of temporary identifier
-        self.datasets = sorted(self.datasets)
-
-        dataset_directory_paths = []
-        for dataset in self.datasets:
-            full_path = self.experiment_path + "/" + dataset
-            dataset_directory_paths.append(full_path)
-
-        self.dataset_directory_paths = dataset_directory_paths
-
         self.training = training
 
         self.train_name = None
         # Find folders inside directory
+        print(self.training)
         if self.training:
+            print("Here1")
             self.datasets = os.listdir(self.experiment_path)
             remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                            'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs', 'KeyFileCopy',
@@ -65,6 +50,7 @@ class ReportJob(Job):
                 self.datasets.remove('.idea')
             self.datasets = sorted(self.datasets)
         else:
+            print("Here2")
             self.train_name = data_path.split('/')[-1].split('.')[0]
             self.datasets = []
             for dataset_filename in glob.glob(rep_data_path + '/*'):
@@ -75,6 +61,13 @@ class ReportJob(Job):
                 self.datasets.append(apply_name)
             self.datasets = sorted(self.datasets)
 
+        dataset_directory_paths = []
+        for dataset in self.datasets:
+            full_path = self.experiment_path + "/" + dataset
+            dataset_directory_paths.append(full_path)
+
+        self.dataset_directory_paths = dataset_directory_paths
+
         if algorithms is None:
             self.algorithms = SUPPORTED_MODELS
             if exclude is not None:
@@ -82,7 +75,7 @@ class ReportJob(Job):
                     try:
                         self.algorithms.remove(algorithm)
                     except Exception:
-                        logging.error("Unknown algorithm in exclude: " + str(algorithm))
+                        Exception("Unknown algorithm in exclude: " + str(algorithm))
         else:
             self.algorithms = list()
             for algorithm in algorithms:

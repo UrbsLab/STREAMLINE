@@ -32,7 +32,8 @@ class BaseModel:
             n_jobs:
         """
         self.is_single = True
-        self.model = model()
+        if model is not None:
+            self.model = model()
         self.small_name = model_name.replace(" ", "_")
         self.model_name = model_name
         self.y_train = None

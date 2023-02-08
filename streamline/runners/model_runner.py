@@ -4,7 +4,7 @@ import glob
 import multiprocessing
 import pickle
 
-from streamline.modeling.utils import ABBREVIATION
+from streamline.modeling.utils import ABBREVIATION, COLORS
 from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
@@ -67,7 +67,7 @@ class ModelExperimentRunner:
                     try:
                         self.algorithms.remove(algorithm)
                     except Exception:
-                        logging.error("Unknown algorithm in exclude: " + str(algorithm))
+                        Exception("Unknown algorithm in exclude: " + str(algorithm))
         else:
             self.algorithms = list()
             for algorithm in algorithms:
@@ -97,6 +97,7 @@ class ModelExperimentRunner:
             raise Exception("Experiment must exist (from phase 1) before phase 4 can begin")
 
         self.save_metadata()
+        self.save_alginfo()
 
     def run(self, run_parallel):
 
@@ -201,4 +202,17 @@ class ModelExperimentRunner:
         # Pickle the metadata for future use
         pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
         pickle.dump(metadata, pickle_out)
+        pickle_out.close()
+
+    def save_alginfo(self):
+        alg_info = dict()
+        for algorithm in SUPPORTED_MODELS:
+            if algorithm in self.algorithms:
+                alg_info[algorithm] = [True, ABBREVIATION[algorithm], COLORS[algorithm]]
+            else:
+                alg_info[algorithm] = [False, ABBREVIATION[algorithm], COLORS[algorithm]]
+
+        # Pickle the algorithm information dictionary for future use
+        pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'wb')
+        pickle.dump(alg_info, pickle_out)
         pickle_out.close()

@@ -10,6 +10,8 @@ from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
 from streamline.runners.stats_runner import StatsRunner
 from streamline.runners.compare_runner import CompareRunner
+from streamline.runners.report_runner import ReportRunner
+from streamline.runners.replicate_runner import ReplicationRunner
 
 pytest.skip("Tested Already", allow_module_level=True)
 
@@ -37,37 +39,43 @@ def test_setup():
 
     f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
     f_sel.run(run_parallel=False)
-
     del f_sel
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms)
     runner.run(run_parallel=True)
-
     del runner
 
     stats = StatsRunner(output_path, experiment_name, model_algorithms)
-    stats.run(run_parallel=run_parallel)
-
+    stats.run(run_parallel=False)
     del stats
+
+    compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms)
+    compare.run(run_parallel=False)
+    del compare
+
+    report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms)
+    report.run(run_parallel=False)
+    del report
 
     logging.warning("Ran Setup in " + str(time.time() - start))
 
 
 @pytest.mark.parametrize(
-    ("algorithms", "run_parallel"),
+    ("rep_data_path", "run_parallel"),
     [
-        (model_algorithms, False),
+        ("./DemoRepData/", False),
     ]
 )
-def test_valid_datacomp(algorithms, run_parallel):
+def test_valid_repl(rep_data_path, run_parallel):
     start = time.time()
 
-    logging.warning("Running Compare Phase")
+    logging.warning("Running Replication Phase")
 
-    compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms)
-    compare.run(run_parallel)
+    repl = ReplicationRunner(rep_data_path, dataset_path + 'demodata.csv', output_path, experiment_name,
+                             load_algo=True)
+    repl.run(run_parallel)
 
     if run_parallel:
         how = "parallely"

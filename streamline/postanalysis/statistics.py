@@ -72,8 +72,16 @@ class StatsJob(Job):
         self.sig_cutoff = sig_cutoff
         self.metric_weight = metric_weight
         self.show_plots = show_plots
-        self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
-                                            sep=',').columns.values.tolist()  # Get Original Headers
+        if self.plot_fi_box:
+            self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
+                                                sep=',').columns.values.tolist()  # Get Original Headers
+        else:
+            try:
+                self.original_headers = pd.read_csv(self.full_path
+                                                    + "/exploratory/OriginalFeatureNames.csv",
+                                                    sep=',').columns.values.tolist()  # Get Original Headers
+            except Exception:
+                self.original_headers = None
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
         self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
 
@@ -204,7 +212,7 @@ class StatsJob(Job):
         if not os.path.exists(self.full_path + '/model_evaluation/feature_importance/'):
             os.mkdir(self.full_path + '/model_evaluation/feature_importance/')
 
-    def primary_stats(self):
+    def primary_stats(self, master_list=None, rep_data=None):
         """
         Combine classification metrics and model feature importance scores
         as well as ROC and PRC plot data across all CV datasets.
@@ -243,16 +251,31 @@ class StatsJob(Job):
             # Gather statistics over all CV partitions
             for cv_count in range(0, self.cv_partitions):
 
-                # Unpickle saved metrics from previous phase
-                result_file = self.full_path + '/model_evaluation/pickled_metrics/' \
-                              + self.abbrev[algorithm] + "_CV_" + str(cv_count) + "_metrics.pickle"
-                file = open(result_file, 'rb')
-                results = pickle.load(file)
-                # [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
-                file.close()
+                if master_list is None:
 
-                # Separate pickled results
-                metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_ = results
+                    # Unpickle saved metrics from previous phase
+                    result_file = self.full_path + '/model_evaluation/pickled_metrics/' \
+                                  + self.abbrev[algorithm] + "_CV_" + str(cv_count) + "_metrics.pickle"
+                    file = open(result_file, 'rb')
+                    results = pickle.load(file)
+                    # [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
+                    file.close()
+
+                    # Separate pickled results
+                    metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_ = results
+                else:
+                    results = master_list[cv_count][algorithm]
+                    # grabs evalDict for a specific algorithm entry (with data values)
+                    metric_list = results[0]
+                    fpr = results[1]
+                    tpr = results[2]
+                    roc_auc = results[3]
+                    prec = results[4]
+                    recall = results[5]
+                    prec_rec_auc = results[6]
+                    ave_prec = results[7]
+                    fi = results[8]
+                    probas_ = results[9]
 
                 # Separate metrics from metricList
                 s_bac.append(metric_list[0])
@@ -283,26 +306,27 @@ class StatsJob(Job):
                 praucs.append(prec_rec_auc)
                 aveprecs.append(ave_prec)
 
-                # Format feature importance scores as list
-                # (takes into account that all features are not in each CV partition)
-                temp_list = []
-                j = 0
-                headers = pd.read_csv(
-                    self.full_path + '/CVDatasets/' + self.data_name
-                    + '_CV_' + str(cv_count) + '_Test.csv').columns.values.tolist()
-                if self.instance_label is not None:
-                    headers.remove(self.instance_label)
-                headers.remove(self.class_label)
-                for each in self.original_headers:
-                    # Check if current feature from original dataset was in the partition
-                    if each in headers:
-                        # Deal with features not being in original order (find index of current feature list.index()
-                        f_index = headers.index(each)
-                        temp_list.append(fi[f_index])
-                    else:
-                        temp_list.append(0)
-                    j += 1
-                fi_all.append(temp_list)
+                if master_list is None:
+                    # Format feature importance scores as list
+                    # (takes into account that all features are not in each CV partition)
+                    temp_list = []
+                    j = 0
+                    headers = pd.read_csv(
+                        self.full_path + '/CVDatasets/' + self.data_name
+                        + '_CV_' + str(cv_count) + '_Test.csv').columns.values.tolist()
+                    if self.instance_label is not None:
+                        headers.remove(self.instance_label)
+                    headers.remove(self.class_label)
+                    for each in self.original_headers:
+                        # Check if current feature from original dataset was in the partition
+                        if each in headers:
+                            # Deal with features not being in original order (find index of current feature list.index()
+                            f_index = headers.index(each)
+                            temp_list.append(fi[f_index])
+                        else:
+                            temp_list.append(0)
+                        j += 1
+                    fi_all.append(temp_list)
 
             logging.info("Running stats on " + algorithm)
 
@@ -317,7 +341,10 @@ class StatsJob(Job):
             mean_prec = np.mean(precs, axis=0)
             mean_pr_auc = np.mean(praucs)
             if self.plot_prc:
-                self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table)
+                if master_list is None:
+                    self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table)
+                else:
+                    self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table, rep_data, True)
 
             # Export and save all CV metric stats for each individual algorithm
             results = {'Balanced Accuracy': s_bac, 'Accuracy': s_ac, 'F1 Score': s_f1, 'Sensitivity (Recall)': s_re,
@@ -330,7 +357,8 @@ class StatsJob(Job):
             metric_dict[algorithm] = results
 
             # Save Median FI Stats
-            self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
+            if master_list is None:
+                self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
 
             # Store ave metrics for creating global ROC and PRC plots later
             mean_ave_prec = np.mean(aveprecs)
@@ -403,7 +431,7 @@ class StatsJob(Job):
             else:
                 plt.close('all')
 
-    def do_model_prc(self, algorithm, precs, praucs, mean_recall, alg_result_table):
+    def do_model_prc(self, algorithm, precs, praucs, mean_recall, alg_result_table, rep_data=None, replicate=False):
         # Define values for the mean PRC line (mean of individual CVs)
         mean_prec = np.mean(precs, axis=0)
         mean_pr_auc = np.mean(praucs)
@@ -420,10 +448,16 @@ class StatsJob(Job):
             # Technically there could be a unique no-skill line for each CV dataset based
             # on final class balance (however only one is needed, and stratified CV attempts
             # to keep partitions with similar/same class balance)
-            test = pd.read_csv(
-                self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
 
-            test_y = test[self.class_label].values
+            if not replicate:
+                # Estimate no skill line based on the fraction of cases found in the first test dataset
+                test = pd.read_csv(
+                    self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
+
+                test_y = test[self.class_label].values
+            else:
+                test_y = rep_data[self.class_label].values
+
             no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
             # Plot no-skill line
             plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill', alpha=.8)
@@ -482,7 +516,7 @@ class StatsJob(Job):
         else:
             plt.close('all')
 
-    def do_plot_prc(self, result_table):
+    def do_plot_prc(self, result_table, rep_data=None, replicate=False):
         """
         Generate PRC plot comparing average ML algorithm performance
         (over all CV training/testing sets)
@@ -494,12 +528,18 @@ class StatsJob(Job):
                      label="{}, AUC={:.3f}, APS={:.3f}".format(i, result_table.loc[i]['pr_auc'],
                                                                result_table.loc[i]['ave_prec']))
             count += 1
-        # Estimate no skill line based on the fraction of cases found in the first test dataset
-        test = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
-        if self.instance_label is not None:
-            test = test.drop(self.instance_label, axis=1)
-        test_y = test[self.class_label].values
+
+        if not replicate:
+            # Estimate no skill line based on the fraction of cases found in the first test dataset
+            test = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
+            if self.instance_label is not None:
+                test = test.drop(self.instance_label, axis=1)
+            test_y = test[self.class_label].values
+        else:
+            test_y = rep_data[self.class_label].values
+
         no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
+
         # Plot no-skill line
         plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill', alpha=.8)
         # Specify plot axes,labels, and legend
@@ -1009,7 +1049,8 @@ class StatsJob(Job):
         """
         Loads runtime summaries from entire pipeline and parses them into a single summary file.
         """
-        dict_obj = {}
+        dict_obj = dict()
+        dict_obj['preprocessing'] = 0
         for file_path in glob.glob(self.full_path + '/runtime/*.txt'):
             f = open(file_path, 'r')
             val = float(f.readline())
@@ -1017,6 +1058,8 @@ class StatsJob(Job):
             if ref in self.abbrev:
                 ref = self.abbrev[ref]
             if not (ref in dict_obj):
+                if 'preprocessing' in ref:
+                    dict_obj['preprocessing'] += val
                 dict_obj[ref] = val
             else:
                 dict_obj[ref] += val

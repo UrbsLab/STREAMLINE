@@ -49,7 +49,7 @@ class ReportRunner:
                     try:
                         self.algorithms.remove(algorithm)
                     except Exception:
-                        logging.error("Unknown algorithm in exclude: " + str(algorithm))
+                        Exception("Unknown algorithm in exclude: " + str(algorithm))
             self.exclude = None
         else:
             self.algorithms = list()

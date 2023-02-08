@@ -194,6 +194,41 @@ def main(argv):
     parser.add_argument('--top-features', dest='top_model_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
 
+    # Phase 7
+    parser.add_argument('--do-compare-dataset', dest='do_compare_dataset', type=bool,
+                        help='flag to run compare dataset dataset', default=True)
+
+    # Phase 8
+    parser.add_argument('--do-report', dest='do_report', type=bool,
+                        help='flag to run report dataset', default=True)
+
+    # Phase 9
+    parser.add_argument('--do-rep', dest='rep_data_path', type=bool,
+                        help='flag to run replication dataset', default=False)
+
+    parser.add_argument('--rep-path', dest='rep_data_path', type=str,
+                        help='path to directory containing replication or hold-out testing datasets (must have at '
+                             'least all features with same labels as in original training dataset)', default="")
+    # Defaults available
+    parser.add_argument('--rep-export-fc', dest='rep_export_feature_correlations', type=bool,
+                        help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
+    parser.add_argument('--rep-plot-ROC', dest='rep-plot_ROC', type=bool,
+                        help='Plot ROC curves individually for each algorithm including all CV results and averages',
+                        default=True)
+    parser.add_argument('--rep-plot-PRC', dest='rep_plot_PRC', type=bool,
+                        help='Plot PRC curves individually for each algorithm including all CV results and averages',
+                        default=True)
+    parser.add_argument('--rep-plot-box', dest='rep_plot_metric_boxplots', type=bool,
+                        help='Plot box plot summaries comparing algorithms for each metric', default=True)
+
+    # Phase 10
+    parser.add_argument('--do-rep-report', dest='do_rep_report', type=bool,
+                        help='flag to run replication report', default=False)
+
+    # Phase 11
+    parser.add_argument('--do-cleanup', dest='do_cleanup', type=bool,
+                        help='flag to run cleanup', default=False)
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

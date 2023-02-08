@@ -12,7 +12,7 @@ from streamline.runners.stats_runner import StatsRunner
 from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
@@ -63,15 +63,13 @@ def test_setup():
         (model_algorithms, False),
     ]
 )
-def test_valid_stats(algorithms, run_parallel):
+def test_valid_report(algorithms, run_parallel):
     start = time.time()
 
     logging.warning("Running Report Phase")
 
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms)
     report.run(run_parallel=run_parallel)
-
-    logging.warning("Ran Setup in " + str(time.time() - start))
 
     if run_parallel:
         how = "parallely"

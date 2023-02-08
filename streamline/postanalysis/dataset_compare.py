@@ -61,7 +61,7 @@ class CompareJob(Job):
                     try:
                         self.algorithms.remove(algorithm)
                     except Exception:
-                        logging.error("Unknown algorithm in exclude: " + str(algorithm))
+                        Exception("Unknown algorithm in exclude: " + str(algorithm))
         else:
             self.algorithms = list()
             for algorithm in algorithms:

@@ -297,6 +297,7 @@ class DataProcessing(Job):
             os.mkdir(self.experiment_path + '/' + self.dataset_name
                      + '/runtime/')
         runtime_file = open(self.experiment_path + '/' + self.dataset_name
-                            + '/runtime/runtime_preprocessing.txt', 'w+')
+                            + '/runtime/runtime_preprocessing'
+                            + self.cv_count + '.txt', 'w+')
         runtime_file.write(str(time.time() - self.job_start_time))
         runtime_file.close()

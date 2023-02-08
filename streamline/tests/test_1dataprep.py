@@ -1,7 +1,7 @@
 import pytest
 import shutil
 from streamline.utils.dataset import Dataset
-from streamline.dataprep.exploratory_analysis import ExploratoryDataAnalysis
+from streamline.dataprep.exploratory_analysis import EDAJob
 
 pytest.skip("Tested Already", allow_module_level=True)
 
@@ -51,7 +51,7 @@ def test_valid_dataset(dataset_path, class_label, match_label, instance_label):
 )
 def test_invalid_eda(dataset, experiment_path, exception):
     with pytest.raises(exception):
-        ExploratoryDataAnalysis(dataset, experiment_path)
+        EDAJob(dataset, experiment_path)
 
 
 def test_invalid_eda_2():
@@ -59,14 +59,14 @@ def test_invalid_eda_2():
     explorations = ["sdasd"]
     plots = ["dsfsdf"]
     with pytest.raises(Exception):
-        ExploratoryDataAnalysis(dataset, experiment_path, explorations=explorations)
+        EDAJob(dataset, experiment_path, explorations=explorations)
     with pytest.raises(Exception):
-        ExploratoryDataAnalysis(dataset, experiment_path, plots=plots)
+        EDAJob(dataset, experiment_path, plots=plots)
 
 
 def test_valid_eda():
     dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
-    eda = ExploratoryDataAnalysis(dataset, "./tests/")
+    eda = EDAJob(dataset, "./tests/")
     eda.make_log_folders()
     assert (eda.dataset.data.equals(dataset.data))
     eda.drop_ignored_rowcols()
@@ -94,6 +94,6 @@ def test_valid_eda():
 
 def test_valid_eda_general():
     dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
-    eda = ExploratoryDataAnalysis(dataset, "./tests/")
+    eda = EDAJob(dataset, "./tests/")
     eda.run()
     shutil.rmtree('./tests/')

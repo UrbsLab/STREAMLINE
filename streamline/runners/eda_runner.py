@@ -5,7 +5,7 @@ import glob
 import shutil
 import multiprocessing
 from streamline.utils.dataset import Dataset
-from streamline.dataprep.exploratory_analysis import ExploratoryDataAnalysis
+from streamline.dataprep.exploratory_analysis import EDAJob
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from streamline.utils.runners import parallel_kfold_call, parallel_eda_call
 from streamline.utils.runners import run_jobs
@@ -114,11 +114,11 @@ class EDARunner:
                     unique_datanames.append(data_name)
                     file_count += 1
                     dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
-                    job_obj = ExploratoryDataAnalysis(dataset, self.output_path + self.experiment_name,
-                                                      self.ignore_features,
-                                                      self.categorical_features, self.exploration_list, self.plot_list,
-                                                      self.categorical_cutoff, self.sig_cutoff,
-                                                      self.random_state)
+                    job_obj = EDAJob(dataset, self.output_path + self.experiment_name,
+                                     self.ignore_features,
+                                     self.categorical_features, self.exploration_list, self.plot_list,
+                                     self.categorical_cutoff, self.sig_cutoff,
+                                     self.random_state)
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
                     if run_parallel:  # Run as job in parallel

@@ -13,7 +13,7 @@ import seaborn as sns
 sns.set_theme()
 
 
-class ExploratoryDataAnalysis(Job):
+class EDAJob(Job):
     """
     Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE
     """
