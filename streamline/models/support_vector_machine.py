@@ -5,6 +5,10 @@ from sklearn.svm import SVC as SVC
 
 
 class SupportVectorClassifier(BaseModel, ABC):
+    model_name = "Support Vector Machine"
+    small_name = "SVM"
+    color = "orange"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(SVC, "Support Vector Machine", cv_folds, scoring_metric, metric_direction, random_state, cv)

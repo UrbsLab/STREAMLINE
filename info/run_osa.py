@@ -21,7 +21,7 @@ formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 # stdout_handler.setLevel(logging.DEBUG)
 # stdout_handler.setFormatter(formatter)
 
-file_handler = logging.FileHandler('logs.log')
+file_handler = logging.FileHandler('../logs.log')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 

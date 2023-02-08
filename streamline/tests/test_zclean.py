@@ -1,7 +1,12 @@
+import os
+import pytest
 import shutil
 DEBUG = False
+
+# pytest.skip("Tested Already", allow_module_level=True)
 
 
 def test_stub():
     if not DEBUG:
-        shutil.rmtree('./tests/')
+        if os.path.exists('/tests/'):
+            shutil.rmtree('./tests/')

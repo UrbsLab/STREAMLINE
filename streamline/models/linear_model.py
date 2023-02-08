@@ -5,6 +5,10 @@ from sklearn.linear_model import LogisticRegression as LogR
 
 
 class LogisticRegression(BaseModel, ABC):
+    model_name = "Logistic Regression"
+    small_name = "LR"
+    color = "dimgrey"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LogR, "Logistic Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)

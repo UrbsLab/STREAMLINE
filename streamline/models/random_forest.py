@@ -5,6 +5,10 @@ from sklearn.ensemble import RandomForestClassifier as RF
 
 
 class RandomForestClassifier(BaseModel, ABC):
+    model_name = "Random Forest"
+    small_name = "RF"
+    color = "blue"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(RF, "Random Forest", cv_folds, scoring_metric, metric_direction, random_state, cv)

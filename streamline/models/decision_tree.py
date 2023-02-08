@@ -5,6 +5,10 @@ from sklearn.tree import DecisionTreeClassifier as DT
 
 
 class DecisionTreeClassifier(BaseModel, ABC):
+    model_name = "Decision Tree"
+    small_name = "DT"
+    color = "yellow"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(DT, "Decision Tree", cv_folds, scoring_metric, metric_direction, random_state, cv)

@@ -5,6 +5,10 @@ from sklearn.neural_network import MLPClassifier as MLP
 
 
 class MLPClassifier(BaseModel, ABC):
+    model_name = "Artificial Neural Network"
+    small_name = "ANN"
+    color = "red"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(MLP, "Artificial Neural Network", cv_folds, scoring_metric, metric_direction, random_state, cv)

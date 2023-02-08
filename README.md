@@ -18,7 +18,7 @@ the strengths and weaknesses of ML modeling algorithms or other AutoML algorithm
 A preprint introducing and applying STREAMLINE is now available 
 [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
-See [CITATIONS.md](./CITATIONS.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
+See [CITATIONS.md](info/CITATIONS.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
 peer-reviewed publication.
 
 ## STREAMLINE Schematic
@@ -48,7 +48,7 @@ We intend many expansions/improvements to this pipeline in the future to make it
 * In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
 
 ### More Information
-More information about the nature of STREAMLINE can be found in [INFO.md](./INFO.md).
+More information about the nature of STREAMLINE can be found in [INFO.md](info/INFO.md).
 
 ***
 ## Installation and Use

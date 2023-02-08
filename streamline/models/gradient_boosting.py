@@ -8,6 +8,10 @@ from catboost import CatBoostClassifier as CGB
 
 
 class GBClassifier(BaseModel, ABC):
+    model_name = "Gradient Boosting"
+    small_name = "GB"
+    color = "cornflowerblue"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GB, "Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
@@ -37,6 +41,10 @@ class GBClassifier(BaseModel, ABC):
 
 
 class XGBClassifier(BaseModel, ABC):
+    model_name = "Extreme Gradient Boosting"
+    small_name = "XGB"
+    color = "cyan"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(XGB, "Extreme Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
@@ -82,6 +90,10 @@ class XGBClassifier(BaseModel, ABC):
 
 
 class LGBClassifier(BaseModel, ABC):
+    model_name = "Light Gradient Boosting"
+    small_name = "LGB"
+    color = "pink"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LGB, "Light Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
@@ -124,6 +136,10 @@ class LGBClassifier(BaseModel, ABC):
 
 
 class CGBClassifier(BaseModel, ABC):
+    model_name = "Category Gradient Boosting"
+    small_name = "CGB"
+    color = "magenta"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(CGB, "Category Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state,

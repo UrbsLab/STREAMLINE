@@ -5,6 +5,10 @@ from gplearn.genetic import SymbolicClassifier as GP
 
 
 class GPClassifier(BaseModel, ABC):
+    model_name = "Genetic Programming"
+    small_name = "GP"
+    color = "purple"
+
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GP, "Genetic Programming", cv_folds, scoring_metric, metric_direction, random_state, cv)
