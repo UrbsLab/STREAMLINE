@@ -18,7 +18,7 @@ the strengths and weaknesses of ML modeling algorithms or other AutoML algorithm
 A preprint introducing and applying STREAMLINE is now available 
 [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
-See [CITATIONS.md](info/CITATIONS.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
+See [./info/CITATIONS.md](info/CITATIONS.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
 peer-reviewed publication.
 
 ## STREAMLINE Schematic
@@ -48,29 +48,32 @@ We intend many expansions/improvements to this pipeline in the future to make it
 * In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
 
 ### More Information
-More information about the nature of STREAMLINE can be found in [INFO.md](info/INFO.md).
+More information about the nature of STREAMLINE can be found in [./info/INFO.md](info/INFO.md).
 
 ***
 ## Installation and Use
 
-*TODO*
+STREAMLINE can be ready for use by the simple two following steps:
 
 ```
-pip install streamline
+git clone git@github.com:raptor419/STREAMLINE_Dev.git
+cd STREAMLINE_Dev
+pip install -r requirements.txt
 ```
+
+Now your STREAMLINE package is ready to use from the `STREAMLINE_Dev` folder.
 
 ***
 
 ## Demonstration 
-Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of pipeline efficacy. 
+Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of 
+pipeline efficacy. 
 
-New users can easily run the included [jupyter notebook](https://github.com/raptor419/STREAMLINE_Dev/blob/main/STREAMLINE-Notebook.ipynb) 'as-is', and it will be run automatically on these datasets. 
-The first dataset `hcc-data_example.csv` is the Hepatocellular Carcinoma (HCC) dataset taken from the UCI Machine Learning repository. 
-It includes 165 instances, 49 features, and a binary class label. 
-It also includes a mix of categorical and numeric features, about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 survived (class 0).  
+New users can easily run the 
+included [jupyter notebook](https://github.com/raptor419/STREAMLINE_Dev/blob/main/STREAMLINE-Notebook.ipynb) 
+'as-is', and it will be run automatically on these datasets. 
 
-To illustrate how STREAMLINE can be applied to more than one 
-dataset at once, we created a second dataset from this HCC dataset called `hcc-data_example_no_covariates.csv`, which is the same as the first, but we have removed two co-variates, i.e. `Age at Diagnosis`, and `Gender`.
+Detailed info about advanced features and commandline implementation can be found in  [./info/DEMO.md](info/DEMO.md)
 
 ***
 # Acknowledgements
