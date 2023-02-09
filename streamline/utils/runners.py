@@ -2,7 +2,7 @@ import os
 import logging
 import multiprocessing
 
-num_cores = os.environ.get('SLURM_CPUS_PER_TASK', None)
+num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', None))
 if num_cores is None:
     num_cores = multiprocessing.cpu_count()
 
