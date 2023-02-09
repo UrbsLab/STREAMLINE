@@ -64,18 +64,18 @@ if __name__ == "__main__":
                                    class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=42)
     run(f_sel, "Feature Sel.")
 
-    model = ModelExperimentRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=None, exclude=["XCS", "eLCS"],
+    model = ModelExperimentRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"],
                                   class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, lcs_iterations=500000,
                                   random_state=RANDOM_STATE)
     run(model, "Modelling", True)
 
-    stats = StatsRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS)
+    stats = StatsRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"])
     run(stats, "Stats")
 
-    compare = CompareRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS)
+    compare = CompareRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"])
     run(compare, "Dataset Compare")
 
-    report = ReportRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS)
+    report = ReportRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"])
     run(report, "Reporting")
 
     print("DONE!!!")
