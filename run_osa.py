@@ -4,7 +4,7 @@ import optuna
 import logging
 from run_config import *
 from streamline.runners.eda_runner import EDARunner
-from streamline.dataprep.data_process import DataProcessRunner
+from streamline.runners.dataprocess_runner import DataProcessRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
