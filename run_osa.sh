@@ -7,7 +7,7 @@
 #SBATCH --time=1-20:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=100
+#SBATCH --cpus-per-task=32
 source /home/${USER}/.bashrc
 source activate streamline
 srun python run_osa.py
