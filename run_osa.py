@@ -18,11 +18,14 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.INFO)
-stdout_handler.setFormatter(formatter)
+num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', None))
 
-logger.addHandler(stdout_handler)
+if num_cores:
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(logging.INFO)
+    stdout_handler.setFormatter(formatter)
+
+    logger.addHandler(stdout_handler)
 
 file_handler = logging.FileHandler(OUTPUT_PATH+'/logs.log')
 file_handler.setLevel(logging.INFO)
