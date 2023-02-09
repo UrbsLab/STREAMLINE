@@ -36,9 +36,7 @@ class ReportJob(Job):
 
         self.train_name = None
         # Find folders inside directory
-        print(self.training)
         if self.training:
-            print("Here1")
             self.datasets = os.listdir(self.experiment_path)
             remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                            'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs', 'KeyFileCopy',
@@ -50,7 +48,6 @@ class ReportJob(Job):
                 self.datasets.remove('.idea')
             self.datasets = sorted(self.datasets)
         else:
-            print("Here2")
             self.train_name = data_path.split('/')[-1].split('.')[0]
             self.datasets = []
             for dataset_filename in glob.glob(rep_data_path + '/*'):
@@ -85,6 +82,10 @@ class ReportJob(Job):
         file = open(self.experiment_path + '/' + "metadata.pickle", 'rb')
         self.metadata = pickle.load(file)
         file.close()
+
+        file = open(self.experiment_path + '/' + "algInfo.pickle", 'rb')
+        self.alg_info = pickle.load(file)
+        file.close()
         # self.metadata = {}
 
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
@@ -108,6 +109,13 @@ class ReportJob(Job):
             ars_dic.append(str(self.metadata[key]))
             ars_dic.append('\n')
 
+        # Turn alg_info dictionary into text list
+        ars_dic_2 = []
+        for key in self.alg_info:
+            ars_dic_2.append(str(key) + ':')
+            ars_dic_2.append(str(self.alg_info[key][0]))
+            ars_dic_2.append('\n')
+
         # Analysis Settings, Global Analysis Settings, ML Modeling Algorithms
         self.analysis_report.set_margins(left=10, top=5, right=10, )
         self.analysis_report.add_page(orientation='P')
@@ -118,7 +126,8 @@ class ReportJob(Job):
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
         ls1 = ars_dic[0:87]  # DataPath to OverwriteCVDatasets - filter poor [0:87]
-        ls2 = ars_dic[87:132]  # ML modeling algorithms (NaiveB - ExSTraCS) [87:132]
+        # ls2 = ars_dic[87:132]  # ML modeling algorithms (NaiveB - ExSTraCS) [87:132]
+        ls2 = ars_dic_2
         ls3 = ars_dic[132:150]  # primary metric - Export Hyperparameter SweepPLot  [132:150]
         ls4 = ars_dic[150:165]  # DoLCS Hyperparameter Sweep LCS hyper-sweep timeout) [150:165]
         ls5 = ars_dic[165:183]  # ExportROCPlot to Top Model Features to Display [165:180]

@@ -1,3 +1,5 @@
+import logging
+
 from streamline.modeling.load_models import load_class_from_folder
 
 
@@ -5,6 +7,9 @@ SUPPORTED_MODELS_OBJ = load_class_from_folder()
 
 
 SUPPORTED_MODELS = [m.model_name for m in SUPPORTED_MODELS_OBJ]
+
+
+# logging.warning(SUPPORTED_MODELS)
 
 
 SUPPORTED_MODELS_SMALL = [m.small_name for m in SUPPORTED_MODELS_OBJ]
