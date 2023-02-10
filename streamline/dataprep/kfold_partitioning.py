@@ -143,3 +143,6 @@ class KFoldPartitioner(Job):
 
     def run(self):
         self.cv_partitioner()
+        job_file = open(self.experiment_path + '/jobsCompleted/job_exploratory_' + self.dataset.name + '.txt', 'w')
+        job_file.write('complete')
+        job_file.close()
