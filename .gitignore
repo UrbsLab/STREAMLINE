@@ -13,4 +13,6 @@ testlogs/
 OSA_OUTPUT_OLD/
 OSA_OUTPUT/
 OSA/
+OSA.o
+OSA.e
 logs.log
