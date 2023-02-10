@@ -24,14 +24,12 @@ if num_cores:
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
     stdout_handler.setFormatter(formatter)
-
     logger.addHandler(stdout_handler)
-
-file_handler = logging.FileHandler(OUTPUT_PATH + '/logs.log')
-file_handler.setLevel(logging.INFO)
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
+else:
+    file_handler = logging.FileHandler(OUTPUT_PATH + '/logs.log')
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
 
 
 def run(obj, phase_str, run_parallel=False):
