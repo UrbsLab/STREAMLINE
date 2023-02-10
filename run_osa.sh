@@ -4,7 +4,7 @@
 #SBATCH --mem=20G
 #SBATCH -o OSA.o
 #SBATCH -e OSA.e
-#SBATCH --time=1-20:00:00
+#SBATCH --time=1-48:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
