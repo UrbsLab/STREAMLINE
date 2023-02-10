@@ -20,6 +20,9 @@ formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
 num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', None))
 
+if not os.path.exists(OUTPUT_PATH):
+    os.mkdir(OUTPUT_PATH)
+
 if num_cores:
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
@@ -42,9 +45,6 @@ def run(obj, phase_str, run_parallel=False):
 if __name__ == "__main__":
 
     start_g = time.time()
-
-    if not os.path.exists(OUTPUT_PATH):
-        os.mkdir(OUTPUT_PATH)
 
     eda = EDARunner(DATASET_PATH, OUTPUT_PATH, EXPERIMENT_NAME,
                     class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=42)
