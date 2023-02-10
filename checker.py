@@ -145,7 +145,7 @@ FN_LIST = [check_phase_1, check_phase_2, check_phase_3, check_phase_4,
            check_phase_9, check_phase_10, ]
 
 
-def check_phase(output_path, experiment_name, phase, len_only=True):
+def check_phase(output_path, experiment_name, phase=5, len_only=True):
     datasets = os.listdir(output_path + "/" + experiment_name)
     remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'logs', 'jobs',
                    'DatasetComparisons', 'UsefulNotebooks']
@@ -153,7 +153,7 @@ def check_phase(output_path, experiment_name, phase, len_only=True):
         if text in datasets:
             datasets.remove(text)
 
-    phase_jobs = FN_LIST[phase + 1](output_path, experiment_name, datasets)
+    phase_jobs = FN_LIST[phase-1](output_path, experiment_name, datasets)
     for job in phase_jobs:
         print(job)
     if len(phase_jobs) == 0:
@@ -168,7 +168,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description='program to check if run is complete')
     parser.add_argument('--out-path', dest='output_path', type=str, help='path to output directory')
     parser.add_argument('--exp-name', dest='experiment_name', type=str, help='name of experiment (no spaces)')
-    parser.add_argument('--phase', dest='phase', type=int, help='phase to check')
+    parser.add_argument('--phase', dest='phase', type=int, default=5, help='phase to check')
     parser.add_argument('--count-only', dest='len_only', type=bool, default=False, help='show only no of jobs')
     options = parser.parse_args(argv[1:])
     check_phase(options.output_path, options.experiment_name, options.phase, options.len_only)
