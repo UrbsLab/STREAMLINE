@@ -26,7 +26,7 @@ class ReplicateJob(Job):
     """
 
     def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
-                 algorithms=None, exclude=None, cv_partitions=3,
+                 algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy'):

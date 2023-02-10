@@ -20,7 +20,8 @@ class CompareJob(Job):
     Also compares the best overall model for each target dataset, for each evaluation metric.
     This runs once for the entire pipeline analysis.
     """
-    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None, exclude=None,
+    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
+                 exclude=("XCS", "eLCS"),
                  class_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False):
         super().__init__()
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)

@@ -18,7 +18,7 @@ class ModelExperimentRunner:
     cross-validation splits.
     """
 
-    def __init__(self, output_path, experiment_name, algorithms=None, exclude=None, class_label="Class",
+    def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"), class_label="Class",
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,

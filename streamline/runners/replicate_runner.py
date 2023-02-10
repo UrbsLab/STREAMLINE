@@ -18,7 +18,8 @@ class ReplicationRunner:
     evaluates all trained models on one or more previously unseen hold-out or replication study dataset(s).
     """
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
-                 class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True, exclude=None,
+                 class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
+                 exclude=("XCS", "eLCS"),
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True):
         """
 
@@ -134,7 +135,7 @@ class ReplicationRunner:
                     unique_datanames.append(apply_name)
                     job_obj = ReplicateJob(dataset_filename,
                                            self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
-                                           self.match_label, algorithms=self.algorithms, exclude=None,
+                                           self.match_label, algorithms=self.algorithms, exclude=("XCS", "eLCS"),
                                            cv_partitions=self.cv_partitions,
                                            export_feature_correlations=self.export_feature_correlations,
                                            plot_roc=self.plot_roc, plot_prc=self.plot_prc,

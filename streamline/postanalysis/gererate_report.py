@@ -18,7 +18,8 @@ class ReportJob(Job):
     pipeline results It is run once for the whole pipeline analysis.
     """
 
-    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None, exclude=None,
+    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
+                 exclude=("XCS", "eLCS"),
                  training=True, data_path=None, rep_data_path=None):
         super().__init__()
         self.time = None

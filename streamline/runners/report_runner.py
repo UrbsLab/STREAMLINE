@@ -13,7 +13,8 @@ class ReportRunner:
     Runner Class for collating dataset compare job
     """
 
-    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None, exclude=None,
+    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
+                 exclude=("XCS", "eLCS"),
                  training=True, rep_data_path=None, dataset_for_rep=None):
         """
         Args:

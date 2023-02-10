@@ -15,7 +15,7 @@ class StatsRunner:
     Runner Class for collating statistics of all the models
     """
 
-    def __init__(self, output_path, experiment_name, algorithms=None, exclude=None,
+    def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"),
                  class_label="Class", instance_label=None, scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False):

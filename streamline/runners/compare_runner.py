@@ -14,7 +14,7 @@ class CompareRunner:
     Runner Class for collating dataset compare job
     """
 
-    def __init__(self, output_path, experiment_name, experiment_path=None, algorithms=None, exclude=None,
+    def __init__(self, output_path, experiment_name, experiment_path=None, algorithms=None, exclude=("XCS", "eLCS"),
                  class_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False):
         """
         Args:

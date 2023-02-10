@@ -27,7 +27,7 @@ if num_cores:
 
     logger.addHandler(stdout_handler)
 
-file_handler = logging.FileHandler(OUTPUT_PATH+'/logs.log')
+file_handler = logging.FileHandler(OUTPUT_PATH + '/logs.log')
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 
@@ -67,15 +67,15 @@ if __name__ == "__main__":
     model = ModelExperimentRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"],
                                   class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, lcs_iterations=500000,
                                   random_state=RANDOM_STATE)
-    run(model, "Modelling", True)
+    run(model, "Modelling", RUN_PARALLEL)
 
-    stats = StatsRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"])
+    stats = StatsRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
     run(stats, "Stats")
 
-    compare = CompareRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"])
+    compare = CompareRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
     run(compare, "Dataset Compare")
 
-    report = ReportRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"])
+    report = ReportRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
     run(report, "Reporting")
 
     print("DONE!!!")
