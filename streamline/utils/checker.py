@@ -164,11 +164,11 @@ def check_phase(output_path, experiment_name, phase=5, len_only=True,
     else:
         raise Exception("Unknown Phase")
 
-    for job in phase_jobs:
-        print(job)
     if len(phase_jobs) == 0:
         print("All Phase " + str(phase) + " Jobs Completed")
     elif len_only:
-        print(str(len(phase_jobs)) + " Phase" + str(phase) + "Jobs Left")
+        print(str(len(phase_jobs)) + " Phase " + str(phase) + " Jobs Left")
     else:
-        print("Above Phase " + str(phase) + " Jobs Not Completed")
+        print("Below Phase " + str(phase) + " Jobs Not Completed:")
+        for job in phase_jobs:
+            print(job)
