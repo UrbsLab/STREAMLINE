@@ -8,6 +8,6 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-source /home/${USER}/.bashrc
+source /common/bandheyh/anaconda3/etc/profile.d/conda.sh
 source activate streamline
 srun python run_osa.py
