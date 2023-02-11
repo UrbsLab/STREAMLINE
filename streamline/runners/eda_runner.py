@@ -36,14 +36,15 @@ class EDARunner:
             text-based values. However, both instance_label and match_label values may be either numeric or text.
         - One or more target datasets for analysis should be included in the same data_path folder. The path to this \
             folder is a critical pipeline run parameter. No spaces are allowed in filenames (this will lead to
-          'invalid literal' by export_exploratory_analysis. If multiple datasets are being analyzed they must have the \
+            'invalid literal' by export_exploratory_analysis.) \
+            If multiple datasets are being analyzed they must have the \
             same class_label, and (if present) the same instance_label and match_label.
 
     """
 
     def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
                  class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
-                 ignore_features=None, categorical_features=None,
+                 ignore_features=None, categorical_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05,
                  random_state=None):
         """
@@ -81,6 +82,7 @@ class EDARunner:
         self.ignore_features = ignore_features
         self.categorical_cutoff = categorical_cutoff
         self.categorical_features = categorical_features
+        self.top_features = top_features
         self.exploration_list = exploration_list
         self.plot_list = plot_list
         self.n_splits = n_splits
@@ -122,14 +124,16 @@ class EDARunner:
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
                     if run_parallel:  # Run as job in parallel
-                        p = multiprocessing.Process(target=parallel_eda_call, args=(job_obj, {'top_features': 20}))
+                        p = multiprocessing.Process(target=parallel_eda_call,
+                                                    args=(job_obj, {'top_features': self.top_features}))
                         job_list.append(p)
                     else:  # Run job locally, serially
-                        job_list.append(job_obj)
+                        job_obj.run(self.top_features)
                     job_counter += 1
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
-        run_jobs(job_list)
+        if run_parallel:
+            run_jobs(job_list)
         self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):
