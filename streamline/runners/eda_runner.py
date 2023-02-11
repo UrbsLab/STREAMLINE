@@ -3,12 +3,12 @@ import pickle
 import re
 import glob
 import shutil
-import multiprocessing
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.exploratory_analysis import EDAJob
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from streamline.utils.runners import parallel_kfold_call, parallel_eda_call
-from streamline.utils.runners import run_jobs
+from joblib import Parallel, delayed
+
 
 
 class EDARunner:
@@ -124,16 +124,15 @@ class EDARunner:
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
                     if run_parallel:  # Run as job in parallel
-                        p = multiprocessing.Process(target=parallel_eda_call,
-                                                    args=(job_obj, {'top_features': self.top_features}))
-                        job_list.append(p)
+                        job_list.append(job_obj)
                     else:  # Run job locally, serially
                         job_obj.run(self.top_features)
                     job_counter += 1
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
         if run_parallel:
-            run_jobs(job_list)
+            Parallel()(delayed(parallel_eda_call)(job_obj, 
+                                                  {'top_features': self.top_features}) for job_obj in job_obj_list)
         self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):
@@ -153,13 +152,12 @@ class EDARunner:
                                          self.partition_method, self.output_path + self.experiment_name,
                                          self.n_splits, self.random_state)
             if run_parallel:  # Run as job in parallel
-                p = multiprocessing.Process(target=parallel_kfold_call, args=(kfold_obj,))
-                job_list.append(p)
+                job_list.append(kfold_obj)
             else:  # Run job locally, serially
                 kfold_obj.run()
             job_counter += 1
         if run_parallel:
-            run_jobs(job_list)
+            Parallel()(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
 
     def check_old(self):
         """

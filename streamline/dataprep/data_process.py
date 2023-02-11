@@ -150,9 +150,6 @@ class DataProcessing(Job):
         # Grab path name components
         self.dataset_name = self.cv_train_path.split('/')[-3]
         self.cv_count = self.cv_train_path.split('/')[-1].split("_")[-2]
-        # Create folder to store scaling and imputing files
-        if not os.path.exists(self.experiment_path + '/' + self.dataset_name + '/scale_impute/'):
-            os.makedirs(self.experiment_path + '/' + self.dataset_name + '/scale_impute/')
         # Load training and testing datasets
         data_train = pd.read_csv(self.cv_train_path, na_values='NA', sep=',')
         data_test = pd.read_csv(self.cv_test_path, na_values='NA', sep=',')

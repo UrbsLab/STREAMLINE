@@ -43,7 +43,7 @@ def check_phase_3(output_path, experiment_name, datasets):
             if do_multisurf:
                 phase3_jobs.append('job_multisurf_' + dataset + '_' + str(cv) + '.txt')
             if do_mutual_info:
-                phase3_jobs.append('job_mutualinformation_' + dataset + '_' + str(cv) + '.txt')
+                phase3_jobs.append('job_mutual_information_' + dataset + '_' + str(cv) + '.txt')
 
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_mu*'):
         ref = filename.split('/')[-1]
@@ -63,30 +63,32 @@ def check_phase_4(output_path, experiment_name, datasets):
 
 
 def check_phase_5(output_path, experiment_name, datasets):
-    file = open(output_path + '/' + experiment_name + '/' + "metadata.pickle", 'rb')
-    cv_partitions = pickle.load(file)['CV Partitions']
-    file.close()
+    try:
+        file = open(output_path + '/' + experiment_name + '/' + "metadata.pickle", 'rb')
+        cv_partitions = pickle.load(file)['CV Partitions']
+        file.close()
 
-    pickle_in = open(output_path + '/' + experiment_name + '/' + "algInfo.pickle", 'rb')
-    alg_info = pickle.load(pickle_in)
-    algorithms = list()
-    ABBREVIATION = dict()
-    for algorithm in alg_info.keys():
-        ABBREVIATION[algorithm] = alg_info[algorithm][1]
-        if alg_info[algorithm][0]:
-            algorithms.append(algorithm)
-    pickle_in.close()
+        pickle_in = open(output_path + '/' + experiment_name + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        ABBREVIATION = dict()
+        for algorithm in alg_info.keys():
+            ABBREVIATION[algorithm] = alg_info[algorithm][1]
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+        pickle_in.close()
+        phase5_jobs = []
+        for dataset in datasets:
+            for cv in range(cv_partitions):
+                for algorithm in algorithms:
+                    phase5_jobs.append('job_model_' + dataset + '_' + str(cv) + '_' + ABBREVIATION[algorithm] + '.txt')
 
-    phase5_jobs = []
-    for dataset in datasets:
-        for cv in range(cv_partitions):
-            for algorithm in algorithms:
-                phase5_jobs.append('job_model_' + dataset + '_' + str(cv) + '_' + ABBREVIATION[algorithm] + '.txt')
-
-    for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_model*'):
-        ref = filename.split('/')[-1]
-        phase5_jobs.remove(ref)
-    return phase5_jobs
+        for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_model*'):
+            ref = filename.split('/')[-1]
+            phase5_jobs.remove(ref)
+        return phase5_jobs
+    except Exception:
+        return ['NOT REACHED YET']
 
 
 def check_phase_6(output_path, experiment_name, datasets):
@@ -106,6 +108,7 @@ def check_phase_7(output_path, experiment_name, datasets=None):
             return []
         else:
             return ['job_data_compare.txt']
+    return ['job_data_compare.txt']
 
 
 def check_phase_8(output_path, experiment_name, datasets=None):
@@ -116,6 +119,7 @@ def check_phase_8(output_path, experiment_name, datasets=None):
             return []
         else:
             return ['job_data_pdf_training.txt']
+    return ['job_data_pdf_training.txt']
 
 
 def check_phase_9(output_path, experiment_name, rep_data_path):
@@ -138,6 +142,7 @@ def check_phase_10(output_path, experiment_name, dataset_for_rep):
             return []
         else:
             return ['job_data_pdf_apply_' + str(train_name) + '.txt']
+    return ['job_data_pdf_apply_' + str(train_name) + '.txt']
 
 
 FN_LIST = [check_phase_1, check_phase_2, check_phase_3, check_phase_4,

@@ -35,7 +35,7 @@ else:
     logger.addHandler(file_handler)
 
 
-def run(obj, phase_str, run_parallel=False):
+def run(obj, phase_str, run_parallel=True):
     start = time.time()
     obj.run(run_parallel=run_parallel)
     print("Ran " + phase_str + " Phase in " + str(time.time() - start))
@@ -47,30 +47,32 @@ if __name__ == "__main__":
     start_g = time.time()
 
     eda = EDARunner(DATASET_PATH, OUTPUT_PATH, EXPERIMENT_NAME,
-                    class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=42)
+                    class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=RANDOM_STATE)
     run(eda, "Exploratory")
 
     dpr = DataProcessRunner(OUTPUT_PATH, EXPERIMENT_NAME,
-                            class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=42)
+                            class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=RANDOM_STATE)
     run(dpr, "Data Process")
 
     f_imp = FeatureImportanceRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=FEATURE_ALGORITHMS,
-                                    class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=42)
+                                    class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=RANDOM_STATE)
     run(f_imp, "Feature Imp.")
 
     f_sel = FeatureSelectionRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=FEATURE_ALGORITHMS,
-                                   class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=42)
+                                   class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, random_state=RANDOM_STATE)
     run(f_sel, "Feature Sel.")
 
-    model = ModelExperimentRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=["XCS", "eLCS"],
+    model = ModelExperimentRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE,
                                   class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL, lcs_iterations=500000,
                                   random_state=RANDOM_STATE)
-    run(model, "Modelling", RUN_PARALLEL)
+    run(model, "Modelling")
 
-    stats = StatsRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
+    stats = StatsRunner(OUTPUT_PATH, EXPERIMENT_NAME, class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL,
+                        algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
     run(stats, "Stats")
 
-    compare = CompareRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
+    compare = CompareRunner(OUTPUT_PATH, EXPERIMENT_NAME, class_label=CLASS_LABEL, instance_label=INSTANCE_LABEL,
+                            algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)
     run(compare, "Dataset Compare")
 
     report = ReportRunner(OUTPUT_PATH, EXPERIMENT_NAME, algorithms=MODEL_ALGORITHMS, exclude=EXCLUDE)

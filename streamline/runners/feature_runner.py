@@ -80,6 +80,9 @@ class FeatureImportanceRunner:
             if "MI" in self.algorithms:
                 if not os.path.exists(full_path + "/feature_selection/mutual_information"):
                     os.mkdir(full_path + "/feature_selection/mutual_information")
+                if not os.path.exists(full_path + "/feature_selection/mutual_information/pickledForPhase4"):
+                    os.mkdir(full_path + "/feature_selection/mutual_information/pickledForPhase4")
+        
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
                                                 self.instance_label, self.instance_subset, "MI",
@@ -93,6 +96,8 @@ class FeatureImportanceRunner:
             if "MS" in self.algorithms:
                 if not os.path.exists(full_path + "/feature_selection/multisurf"):
                     os.mkdir(full_path + "/feature_selection/multisurf")
+                if not os.path.exists(full_path + "/feature_selection/multisurf/pickledForPhase4"):
+                    os.mkdir(full_path + "/feature_selection/multisurf/pickledForPhase4")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
                                                 self.instance_label, self.instance_subset, "MS",

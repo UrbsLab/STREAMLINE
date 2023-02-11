@@ -1,10 +1,10 @@
 import os
 import glob
-import multiprocessing
 import pickle
+from joblib import Parallel, delayed
 
 from streamline.dataprep.data_process import DataProcessing
-from streamline.utils.runners import runner_fn, run_jobs
+from streamline.utils.runners import runner_fn
 
 
 class DataProcessRunner:
@@ -53,6 +53,11 @@ class DataProcessRunner:
 
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
+
+            # Create folder to store scaling and imputing files
+            if not os.path.exists(full_path + '/scale_impute/'):
+                os.makedirs(full_path + '/scale_impute/')
+
             for cv_train_path in glob.glob(full_path + "/CVDatasets/*Train.csv"):
                 job_counter += 1
                 cv_test_path = cv_train_path.replace("Train.csv", "Test.csv")
@@ -61,8 +66,8 @@ class DataProcessRunner:
                                              self.output_path + "/" + self.experiment_name,
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
-                    p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
-                    job_list.append(p)
+                    # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
+                    job_list.append(job_obj)
                 else:
                     job_obj = DataProcessing(cv_train_path, cv_test_path,
                                              self.output_path + "/" + self.experiment_name,
@@ -70,7 +75,7 @@ class DataProcessRunner:
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
         if run_parallel:
-            run_jobs(job_list)
+            Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

@@ -183,10 +183,6 @@ class FeatureImportance(Job):
         in phase 4 (feature selection) of pipeline
         """
         # Save Scores to pickled file for later use
-        if not os.path.exists(self.experiment_path + '/' + self.dataset.name
-                              + "/feature_selection/" + output_name + "/pickledForPhase4"):
-            os.mkdir(self.experiment_path + '/' + self.dataset.name
-                     + "/feature_selection/" + output_name + "/pickledForPhase4")
         outfile = open(
             self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + output_name
             + "/pickledForPhase4/" + str(self.cv_count) + '.pickle', 'wb')
