@@ -4,6 +4,8 @@ import glob
 import multiprocessing
 import pickle
 
+from joblib import Parallel, delayed
+
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.statistics import StatsJob
@@ -110,12 +112,12 @@ class StatsRunner:
                                self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
                                self.show_plots)
             if run_parallel:
-                p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
-                job_list.append(p)
+                # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
+                job_list.append(job_obj)
             else:
                 job_obj.run()
         if run_parallel:
-            run_jobs(job_list)
+            Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

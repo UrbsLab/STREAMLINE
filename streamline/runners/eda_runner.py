@@ -10,7 +10,6 @@ from streamline.utils.runners import parallel_kfold_call, parallel_eda_call
 from joblib import Parallel, delayed
 
 
-
 class EDARunner:
     """
     Description: Phase 1 of STREAMLINE - This 'Main' script manages Phase 1 run parameters, \
@@ -131,8 +130,10 @@ class EDARunner:
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
         if run_parallel:
-            Parallel()(delayed(parallel_eda_call)(job_obj, 
-                                                  {'top_features': self.top_features}) for job_obj in job_obj_list)
+            Parallel()(
+                delayed(
+                    parallel_eda_call
+                )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
         self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):

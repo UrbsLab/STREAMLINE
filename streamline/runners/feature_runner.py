@@ -3,6 +3,8 @@ import glob
 import multiprocessing
 import pickle
 
+from joblib import Parallel, delayed
+
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
 from streamline.utils.runners import runner_fn, run_jobs
@@ -82,7 +84,6 @@ class FeatureImportanceRunner:
                     os.mkdir(full_path + "/feature_selection/mutual_information")
                 if not os.path.exists(full_path + "/feature_selection/mutual_information/pickledForPhase4"):
                     os.mkdir(full_path + "/feature_selection/mutual_information/pickledForPhase4")
-        
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
                                                 self.instance_label, self.instance_subset, "MI",
@@ -103,12 +104,12 @@ class FeatureImportanceRunner:
                                                 self.instance_label, self.instance_subset, "MS",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
-                        p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                        job_list.append(p)
+                        # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                        job_list.append(job_obj)
                     else:
                         job_obj.run()
         if run_parallel:
-            run_jobs(job_list)
+            Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

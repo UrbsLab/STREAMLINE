@@ -3,6 +3,8 @@ import glob
 import pickle
 import multiprocessing
 
+from joblib import Parallel, delayed
+
 from streamline.modeling.utils import SUPPORTED_MODELS, is_supported_model
 from streamline.postanalysis.model_replicate import ReplicateJob
 
@@ -146,12 +148,12 @@ class ReplicationRunner:
                                            multi_impute=self.multi_impute, show_plots=self.show_plots,
                                            scoring_metric=self.scoring_metric)
                     if run_parallel:
-                        p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                        job_list.append(p)
+                        # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                        job_list.append(job_obj)
                     else:
                         job_obj.run()
                 if run_parallel:
-                    run_jobs(job_list)
+                    Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if file_count == 0:
             # Check that there was at least 1 dataset
             raise Exception("There must be at least one .txt or .csv dataset in rep_data_path directory")

@@ -4,6 +4,8 @@ import glob
 import multiprocessing
 import pickle
 
+from joblib import Parallel, delayed
+
 from streamline.modeling.utils import ABBREVIATION, COLORS
 from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
@@ -159,12 +161,12 @@ class ModelExperimentRunner:
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
                                        self.timeout, self.uniform_fi, self.save_plots, self.random_state)
                     if run_parallel:
-                        p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
-                        job_list.append(p)
+                        # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
+                        job_list.append((job_obj, model))
                     else:
                         job_obj.run(model)
         if run_parallel:
-            run_jobs(job_list)
+            Parallel()(delayed(model_runner_fn)(job_obj, model) for job_obj, model in job_list)
 
     def save_metadata(self):
         # Load metadata
