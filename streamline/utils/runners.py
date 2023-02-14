@@ -1,6 +1,7 @@
 import os
-import logging
 import multiprocessing
+
+from joblib import Parallel, delayed
 
 num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', -1))
 if num_cores is -1:
@@ -47,7 +48,6 @@ def run_jobs(job_list):
 
 
 def sub_jobs(job_list):
-    for job in job_list:
-        job.start()
-    for job in job_list:
-        job.join()
+    Parallel(n_jobs=num_cores)(
+        delayed(model_runner_fn)(job_obj, model
+                                 ) for job_obj, model in job_list)

@@ -7,7 +7,7 @@ from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
-from streamline.utils.runners import model_runner_fn, num_cores
+from streamline.utils.runners import model_runner_fn, num_cores, run_jobs
 
 
 class ModelExperimentRunner:
@@ -165,7 +165,7 @@ class ModelExperimentRunner:
                     else:
                         job_obj.run(model)
         if run_parallel:
-            # run_jobs(job_list)
+            run_jobs(job_list)
             Parallel(n_jobs=num_cores)(
                 delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in job_list)
