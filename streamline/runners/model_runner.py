@@ -126,6 +126,8 @@ class ModelExperimentRunner:
                 os.mkdir(full_path + '/model_evaluation')
             if not os.path.exists(full_path + '/models/pickledModels'):
                 os.mkdir(full_path + '/models/pickledModels')
+            if not os.path.exists(full_path + '/model_evaluation/pickled_metrics'):
+                os.mkdir(full_path + '/model_evaluation/pickled_metrics')
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
             cv_partitions = len(cv_dataset_paths)
             for cv_count in range(cv_partitions):

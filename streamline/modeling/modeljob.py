@@ -81,8 +81,6 @@ class ModelJob(Job):
         ret = self.run_model(model)
 
         # Pickle all evaluation metrics for ML model training and evaluation
-        if not os.path.exists(self.full_path + '/model_evaluation/pickled_metrics'):
-            os.mkdir(self.full_path + '/model_evaluation/pickled_metrics')
         pickle.dump(ret, open(self.full_path
                               + '/model_evaluation/pickled_metrics/'
                               + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
