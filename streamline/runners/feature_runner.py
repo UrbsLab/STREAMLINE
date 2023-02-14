@@ -48,7 +48,7 @@ class FeatureImportanceRunner:
         self.n_jobs = n_jobs
 
         if self.n_jobs is None:
-            self.n_jobs = num_cores
+            self.n_jobs = 1
 
         # Argument checks
         if not os.path.exists(self.output_path):
