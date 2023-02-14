@@ -1,13 +1,11 @@
+import logging
 import os
 import glob
-import multiprocessing
 import pickle
-
 from joblib import Parallel, delayed
-
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
-from streamline.utils.runners import runner_fn, run_jobs, num_cores
+from streamline.utils.runners import runner_fn, num_cores
 
 
 class FeatureImportanceRunner:
@@ -16,7 +14,7 @@ class FeatureImportanceRunner:
     cross-validation splits.
     """
     def __init__(self, output_path, experiment_name, class_label="Class", instance_label=None,
-                 instance_subset=None, algorithms=("MI", "MS"), n_splits=10, use_turf=True, turf_pct=True,
+                 instance_subset=None, algorithms=("MI", "MS"), use_turf=True, turf_pct=True,
                  random_state=None, n_jobs=None):
         """
 
@@ -27,7 +25,6 @@ class FeatureImportanceRunner:
             instance_label:
             instance_subset:
             algorithms:
-            n_splits:
             use_turf:
             turf_pct:
             random_state:
@@ -89,8 +86,8 @@ class FeatureImportanceRunner:
                                                 self.instance_label, self.instance_subset, "MI",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
-                        p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                        job_list.append(p)
+                        # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                        job_list.append(job_obj)
                     else:
                         job_obj.run()
 

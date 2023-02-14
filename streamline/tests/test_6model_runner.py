@@ -12,7 +12,7 @@ from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
 from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', multiprocessing.cpu_count()))
 

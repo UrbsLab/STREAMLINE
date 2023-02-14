@@ -130,7 +130,7 @@ class LGBClassifier(BaseModel, ABC):
                                                          param_grid['n_estimators'][1]),
                        'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
                        'random_state': trial.suggest_categorical('random_state', param_grid['random_state'])}
-        print(self.model.get_params())
+        # print(self.model.get_params())
         mean_cv_score = self.hyper_eval()
         return mean_cv_score
 

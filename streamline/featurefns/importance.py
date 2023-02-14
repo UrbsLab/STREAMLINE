@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import csv
 import time
@@ -10,6 +9,7 @@ from sklearn.feature_selection import mutual_info_classif
 from skrebate import MultiSURF, TURF
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
+from streamline.modeling.utils import num_cores
 
 
 class FeatureImportance(Job):
@@ -80,7 +80,7 @@ class FeatureImportance(Job):
         if self.instance_label is not None:
             header.remove(self.instance_label)
         # Save sorted feature importance scores:
-        score_dict, score_sorted_features = self.sort_save_fi_scores(scores, header, output_path, alg_name)
+        score_dict, score_sorted_features = self.sort_save_fi_scores(scores, header, alg_name)
         # Pickle feature importance information to be used in Phase 4 (feature selection)
         self.pickle_scores(alg_name, scores, score_dict, score_sorted_features)
         # Save phase runtime
@@ -164,7 +164,7 @@ class FeatureImportance(Job):
                     + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
 
         if self.n_jobs is None:
-            self.n_jobs = multiprocessing.cpu_count()
+            self.n_jobs = 1
 
         if self.use_turf:
             try:
@@ -201,16 +201,14 @@ class FeatureImportance(Job):
         runtime_file.write(str(time.time() - self.job_start_time))
         runtime_file.close()
 
-    @staticmethod
-    def sort_save_fi_scores(scores, ordered_feature_names, filename, algo_name):
+    def sort_save_fi_scores(self, scores, ordered_feature_names, alg_name):
         """
         Creates a feature score dictionary and a dictionary sorted by decreasing feature importance scores.
 
         Args:
             scores:
             ordered_feature_names:
-            filename:
-            algo_name:
+            alg_name:
 
         Returns: score_dict, score_sorted_features - dictionary of scores and score sorted name of features
 
@@ -222,12 +220,31 @@ class FeatureImportance(Job):
             score_dict[each] = scores[i]
             i += 1
         # Sort features by decreasing score
+        filename = self.experiment_path + '/' \
+                   + self.dataset.name + "/feature_selection/" \
+                   + alg_name + '/' + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
+
         score_sorted_features = sorted(score_dict, key=lambda x: score_dict[x], reverse=True)
         # Save scores to 'formatted' file
         with open(filename, mode='w', newline="") as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(["Sorted " + algo_name + " Scores"])
+            writer.writerow(["Sorted " + alg_name + " Scores"])
             for k in score_sorted_features:
                 writer.writerow([k, score_dict[k]])
         file.close()
         return score_dict, score_sorted_features
+
+    # def __getstate__(self):
+    #     """called when pickling - this hack allows subprocesses to
+    #        be spawned without the AuthenticationString raising an error"""
+    #     state = self.__dict__.copy()
+    #     conf = state['_config']
+    #     if 'authkey' in conf:
+    #         # del conf['authkey']
+    #         conf['authkey'] = bytes(conf['authkey'])
+    #     return state
+    #
+    # def __setstate__(self, state):
+    #     """for unpickling"""
+    #     state['_config']['authkey'] = state['_config']['authkey']
+    #     self.__dict__.update(state)

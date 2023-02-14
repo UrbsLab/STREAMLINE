@@ -13,7 +13,7 @@ from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
@@ -26,19 +26,19 @@ def test_setup():
         os.mkdir(output_path)
     eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
                     class_label="Class", n_splits=5)
-    eda.run(run_parallel=False)
+    eda.run(run_parallel=True)
     del eda
 
     dpr = DataProcessRunner(output_path, experiment_name)
-    dpr.run(run_parallel=False)
+    dpr.run(run_parallel=True)
     del dpr
 
     f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithms=algorithms)
-    f_imp.run(run_parallel=False)
+    f_imp.run(run_parallel=True)
     del f_imp
 
     f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
-    f_sel.run(run_parallel=False)
+    f_sel.run(run_parallel=True)
     del f_sel
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -48,15 +48,15 @@ def test_setup():
     del runner
 
     stats = StatsRunner(output_path, experiment_name, model_algorithms)
-    stats.run(run_parallel=False)
+    stats.run(run_parallel=True)
     del stats
 
     compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms)
-    compare.run(run_parallel=False)
+    compare.run(run_parallel=True)
     del compare
 
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms)
-    report.run(run_parallel=False)
+    report.run(run_parallel=True)
     del report
 
     repl = ReplicationRunner('./DemoRepData', dataset_path + 'demodata.csv', output_path, experiment_name,
@@ -69,7 +69,7 @@ def test_setup():
 @pytest.mark.parametrize(
     ("rep_data_path", "run_parallel"),
     [
-        ("./DemoRepData/", False),
+        ("./DemoRepData/", True),
     ]
 )
 def test_valid_report2(rep_data_path, run_parallel):

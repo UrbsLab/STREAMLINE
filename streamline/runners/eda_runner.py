@@ -160,32 +160,6 @@ class EDARunner:
         if run_parallel:
             Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
 
-    def check_old(self):
-        """
-        Instead of running job, checks whether previously run jobs were successfully completed
-        """
-        datasets = os.listdir(self.output_path + "/" + self.experiment_name)
-        datasets.remove('logs')
-        datasets.remove('jobs')
-        datasets.remove('jobsCompleted')
-        if 'metadata.pickle' in datasets:
-            datasets.remove('metadata.pickle')
-        if 'DatasetComparisons' in datasets:
-            datasets.remove('DatasetComparisons')
-        phase1jobs = []
-        for dataset in datasets:
-            phase1jobs.append('job_exploratory_' + dataset + '.txt')
-        for filename in glob.glob(
-                self.output_path + "/" + self.experiment_name + '/jobsCompleted/job_exploratory*'):
-            ref = filename.split('/')[-1]
-            phase1jobs.remove(ref)
-        for job in phase1jobs:
-            print(job)
-        if len(phase1jobs) == 0:
-            print("All Phase 1 Jobs Completed")
-        else:
-            print("Above Phase 1 Jobs Not Completed")
-
     def make_dir_tree(self):
         """
         Checks existence of data folder path.
