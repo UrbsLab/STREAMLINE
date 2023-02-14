@@ -1,7 +1,5 @@
-import glob
 import os
-import logging
-import multiprocessing
+from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.gererate_report import ReportJob
@@ -68,8 +66,9 @@ class ReportRunner:
         job_obj = ReportJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                             self.training, self.train_data_path, self.rep_data_path)
         if run_parallel:
-            p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
-            p.start()
-            p.join()
+            # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
+            # p.start()
+            # p.join()
+            Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
         else:
             job_obj.run()

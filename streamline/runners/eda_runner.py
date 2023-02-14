@@ -115,7 +115,7 @@ class EDARunner:
                     unique_datanames.append(data_name)
                     file_count += 1
                     dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
-                    job_obj = EDAJob(dataset, self.output_path + self.experiment_name,
+                    job_obj = EDAJob(dataset, self.output_path + '/' + self.experiment_name,
                                      self.ignore_features,
                                      self.categorical_features, self.exploration_list, self.plot_list,
                                      self.categorical_cutoff, self.sig_cutoff,
@@ -150,7 +150,7 @@ class EDARunner:
         job_list, job_obj_list = [], []
         for obj in eda_obj_list:
             kfold_obj = KFoldPartitioner(obj.dataset,
-                                         self.partition_method, self.output_path + self.experiment_name,
+                                         self.partition_method, self.output_path + '/' + self.experiment_name,
                                          self.n_splits, self.random_state)
             if run_parallel:  # Run as job in parallel
                 job_list.append(kfold_obj)

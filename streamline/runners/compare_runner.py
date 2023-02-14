@@ -1,8 +1,6 @@
 import os
-import logging
 import multiprocessing
-import pickle
-
+from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.dataset_compare import CompareJob
@@ -56,8 +54,9 @@ class CompareRunner:
         job_obj = CompareJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                              self.class_label, self.instance_label, self.sig_cutoff, self.show_plots)
         if run_parallel:
-            p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
-            p.start()
-            p.join()
+            # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
+            # p.start()
+            # p.join()
+            Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
         else:
             job_obj.run()
