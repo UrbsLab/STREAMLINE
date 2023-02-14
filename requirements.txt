@@ -24,3 +24,4 @@ fpdf
 scikit-XCS
 scikit-ExSTraCS
 scikit-eLCS
+kaleido

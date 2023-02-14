@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
-from streamline.utils.runners import runner_fn, run_jobs
+from streamline.utils.runners import runner_fn, run_jobs, num_cores
 
 
 class FeatureImportanceRunner:
@@ -109,7 +109,7 @@ class FeatureImportanceRunner:
                     else:
                         job_obj.run()
         if run_parallel:
-            Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
+            Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
@@ -197,12 +197,12 @@ class FeatureSelectionRunner:
                                        self.top_features, self.max_features_to_keep,
                                        self.filter_poor_features, self.overwrite_cv)
             if run_parallel:
-                p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                job_list.append(p)
+                # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                job_list.append(job_obj)
             else:
                 job_obj.run()
         if run_parallel:
-            run_jobs(job_list)
+            Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

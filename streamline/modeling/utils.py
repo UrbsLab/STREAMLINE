@@ -1,7 +1,9 @@
+import os
 import logging
-
+import multiprocessing
 from streamline.modeling.load_models import load_class_from_folder
 
+num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', multiprocessing.cpu_count()))
 
 SUPPORTED_MODELS_OBJ = load_class_from_folder()
 

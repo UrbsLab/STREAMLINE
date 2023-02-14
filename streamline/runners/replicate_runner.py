@@ -9,7 +9,7 @@ from streamline.modeling.utils import SUPPORTED_MODELS, is_supported_model
 from streamline.postanalysis.model_replicate import ReplicateJob
 
 
-from streamline.utils.runners import run_jobs, runner_fn
+from streamline.utils.runners import num_cores, runner_fn
 
 
 class ReplicationRunner:
@@ -153,7 +153,7 @@ class ReplicationRunner:
                     else:
                         job_obj.run()
                 if run_parallel:
-                    Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
+                    Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if file_count == 0:
             # Check that there was at least 1 dataset
             raise Exception("There must be at least one .txt or .csv dataset in rep_data_path directory")

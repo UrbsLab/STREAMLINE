@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.statistics import StatsJob
-from streamline.utils.runners import runner_fn, run_jobs
+from streamline.utils.runners import runner_fn, num_cores
 
 
 class StatsRunner:
@@ -117,7 +117,7 @@ class StatsRunner:
             else:
                 job_obj.run()
         if run_parallel:
-            Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
+            Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

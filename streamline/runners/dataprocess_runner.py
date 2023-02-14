@@ -4,7 +4,7 @@ import pickle
 from joblib import Parallel, delayed
 
 from streamline.dataprep.data_process import DataProcessing
-from streamline.utils.runners import runner_fn
+from streamline.utils.runners import runner_fn, num_cores
 
 
 class DataProcessRunner:
@@ -75,7 +75,7 @@ class DataProcessRunner:
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
         if run_parallel:
-            Parallel()(delayed(runner_fn)(job_obj) for job_obj in job_list)
+            Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

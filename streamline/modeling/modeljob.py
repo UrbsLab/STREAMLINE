@@ -124,7 +124,8 @@ class ModelJob(Job):
                     fig = optuna.visualization.plot_parallel_coordinate(model.study)
                     fig.write_image(self.full_path + '/models/' + self.algorithm +
                                     '_ParamOptimization_' + str() + '.png')
-                except Exception:
+                except Exception as e:
+                    logging.warning(str(e))
                     logging.warning('Warning: Optuna Optimization Visualization Generation Failed for '
                                     'Due to Known Release Issue.  '
                                     'Please install Optuna 2.0.0 to avoid this issue.')

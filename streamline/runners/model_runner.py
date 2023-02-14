@@ -1,17 +1,13 @@
-import logging
 import os
 import glob
-import multiprocessing
 import pickle
-
 from joblib import Parallel, delayed
-
 from streamline.modeling.utils import ABBREVIATION, COLORS
 from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
-from streamline.utils.runners import model_runner_fn, run_jobs
+from streamline.utils.runners import model_runner_fn, num_cores
 
 
 class ModelExperimentRunner:
@@ -162,11 +158,15 @@ class ModelExperimentRunner:
                                        self.timeout, self.uniform_fi, self.save_plots, self.random_state)
                     if run_parallel:
                         # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
+                        # job_list.append(p)
                         job_list.append((job_obj, model))
                     else:
                         job_obj.run(model)
         if run_parallel:
-            Parallel()(delayed(model_runner_fn)(job_obj, model) for job_obj, model in job_list)
+            # run_jobs(job_list)
+            Parallel(n_jobs=num_cores)(
+                delayed(model_runner_fn)(job_obj, model
+                                         ) for job_obj, model in job_list)
 
     def save_metadata(self):
         # Load metadata

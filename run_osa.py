@@ -3,6 +3,7 @@ import sys
 import time
 import optuna
 import logging
+import multiprocessing
 from run_config import *
 from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
@@ -18,12 +19,13 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
-num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', None))
+num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', multiprocessing.cpu_count()))
+VERBOSE = False
 
 if not os.path.exists(OUTPUT_PATH):
     os.mkdir(OUTPUT_PATH)
 
-if num_cores:
+if VERBOSE:
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.INFO)
     stdout_handler.setFormatter(formatter)
@@ -38,7 +40,11 @@ else:
 def run(obj, phase_str, run_parallel=True):
     start = time.time()
     obj.run(run_parallel=run_parallel)
-    print("Ran " + phase_str + " Phase in " + str(time.time() - start))
+    if run_parallel:
+        how = "parallely"
+    else:
+        how = "serially"
+    print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
     del obj
 
 

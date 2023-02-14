@@ -6,7 +6,7 @@ import shutil
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.exploratory_analysis import EDAJob
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
-from streamline.utils.runners import parallel_kfold_call, parallel_eda_call
+from streamline.utils.runners import parallel_kfold_call, parallel_eda_call, num_cores
 from joblib import Parallel, delayed
 
 
@@ -130,7 +130,7 @@ class EDARunner:
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
         if run_parallel:
-            Parallel()(
+            Parallel(n_jobs=num_cores)(
                 delayed(
                     parallel_eda_call
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
@@ -158,7 +158,7 @@ class EDARunner:
                 kfold_obj.run()
             job_counter += 1
         if run_parallel:
-            Parallel()(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
+            Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
 
     def check_old(self):
         """

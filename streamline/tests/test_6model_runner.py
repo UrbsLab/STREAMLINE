@@ -1,8 +1,10 @@
+import multiprocessing
 import os
 import time
 import optuna
 import pytest
 import logging
+import multiprocessing
 from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
@@ -10,7 +12,9 @@ from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
 from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
+
+num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', multiprocessing.cpu_count()))
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
@@ -48,6 +52,7 @@ for algorithm in SUPPORTED_MODELS_SMALL[:2]:
     [
         # (['NB'], False),
         # (["LR"], False),
+        (["NB", "LR", "DT"], False),
         (["NB", "LR", "DT"], True),
         # (['CGB'], False),
         # (['LGB'], False),
@@ -63,7 +68,7 @@ def test_valid_model_runner(algorithms, run_parallel):
     start = time.time()
 
     logging.warning("Running Modelling Phase")
-
+    logging.warning("Using " + str(num_cores) + " CPUs")
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, algorithms, save_plots=True)
