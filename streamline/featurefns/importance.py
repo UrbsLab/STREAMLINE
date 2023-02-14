@@ -164,7 +164,7 @@ class FeatureImportance(Job):
                     + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
 
         if self.n_jobs is None:
-            self.n_jobs = 1
+            self.n_jobs = num_cores
 
         if self.use_turf:
             try:

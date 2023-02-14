@@ -47,6 +47,9 @@ class FeatureImportanceRunner:
         self.random_state = random_state
         self.n_jobs = n_jobs
 
+        if self.n_jobs is None:
+            self.n_jobs = num_cores
+
         # Argument checks
         if not os.path.exists(self.output_path):
             raise Exception("Output path must exist (from phase 1) before phase 3 can begin")
