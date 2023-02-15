@@ -15,6 +15,9 @@ from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 from streamline.runners.clean_runner import CleanRunner
 from streamline.utils.parser import parser_function
+from streamline.utils.checker import check_phase
+import warnings
+warnings.filterwarnings("ignore")
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
@@ -23,13 +26,20 @@ logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
 
-def runner(obj, phase_str, run_parallel=True):
+def runner(obj, phase_str, run_parallel=True, params=None):
     start = time.time()
     obj.run(run_parallel=run_parallel)
     if run_parallel:
         how = "parallely"
     else:
         how = "serially"
+    if params:
+        print(params['run_cluster'])
+        if params['run_cluster']:
+            while check_phase(params['output_path'], params['experiment_name'],
+                              phase=5, output=False) != 0:
+                time.sleep(60)
+            how = "clusters"
     print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
     del obj
 
@@ -116,8 +126,12 @@ def run(params):
                                       lcs_n=params['lcs_n'],
                                       lcs_iterations=params['lcs_iterations'],
                                       lcs_timeout=params['lcs_timeout'], resubmit=False,
-                                      random_state=params['random_state'], n_jobs=params['n_jobs'])
-        runner(model, "Modelling", run_parallel=params['run_parallel'])
+                                      random_state=params['random_state'], n_jobs=params['n_jobs'],
+                                      run_cluster=params['run_cluster'],
+                                      queue=params['queue'],
+                                      reserved_memory=params['reserved_memory'])
+
+        runner(model, "Modelling", run_parallel=params['run_parallel'], params=params)
 
     if params['do_stats']:
         stats = StatsRunner(params['output_path'], params['experiment_name'], algorithms=params['algorithms'],

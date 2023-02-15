@@ -1,6 +1,10 @@
+import multiprocessing
 import os
 import glob
 import pickle
+import time
+from tqdm import tqdm
+from pathlib import Path
 from joblib import Parallel, delayed
 from streamline.modeling.utils import ABBREVIATION, COLORS
 from streamline.modeling.modeljob import ModelJob
@@ -20,7 +24,8 @@ class ModelExperimentRunner:
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
-                 lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None):
+                 lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None, run_cluster=False,
+                 queue='defq', reserved_memory='4G'):
 
         """
         Args:
@@ -63,6 +68,7 @@ class ModelExperimentRunner:
             if exclude is not None:
                 for algorithm in exclude:
                     try:
+                        algorithm = is_supported_model(algorithm)
                         self.algorithms.remove(algorithm)
                     except Exception:
                         Exception("Unknown algorithm in exclude: " + str(algorithm))
@@ -70,6 +76,15 @@ class ModelExperimentRunner:
             self.algorithms = list()
             for algorithm in algorithms:
                 self.algorithms.append(is_supported_model(algorithm))
+            if exclude is not None:
+                for algorithm in exclude:
+                    try:
+                        algorithm = is_supported_model(algorithm)
+                        self.algorithms.remove(algorithm)
+                    except Exception:
+                        Exception("Unknown algorithm in exclude: " + str(algorithm))
+
+        # print(self.algorithms)
 
         self.scoring_metric = scoring_metric
         self.metric_direction = metric_direction
@@ -87,6 +102,10 @@ class ModelExperimentRunner:
         self.resubmit = resubmit
         self.random_state = random_state
         self.n_jobs = n_jobs
+
+        self.run_cluster = run_cluster
+        self.queue = queue
+        self.reserved_memory = reserved_memory
 
         # Argument checks
         if not os.path.exists(self.output_path):
@@ -130,14 +149,18 @@ class ModelExperimentRunner:
                 os.mkdir(full_path + '/model_evaluation/pickled_metrics')
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
             cv_partitions = len(cv_dataset_paths)
-            for cv_count in range(cv_partitions):
-                for algorithm in self.algorithms:
+            for cv_count in tqdm(range(cv_partitions), leave=False):
+                for algorithm in tqdm(self.algorithms, leave=False):
                     abbrev = ABBREVIATION[algorithm]
                     target_file = 'job_model_' + dataset_directory_path + '_' + str(cv_count) + '_' + \
                                   abbrev + '.txt'
                     if target_file in phase5completed:
                         continue
                         # target for a re-submit
+
+                    if self.run_cluster:
+                        self.submit_cluster_job(full_path, abbrev, cv_count)
+                        continue
 
                     # logging.info("Running Model "+str(algorithm))
                     if (not self.do_lcs_sweep) or (algorithm not in ['eLCS', 'XCS', 'ExSTraCS']):
@@ -165,10 +188,10 @@ class ModelExperimentRunner:
                     else:
                         job_obj.run(model)
         if run_parallel:
-            run_jobs(job_list)
+            # run_jobs(job_list)
             Parallel(n_jobs=num_cores)(
                 delayed(model_runner_fn)(job_obj, model
-                                         ) for job_obj, model in job_list)
+                                         ) for job_obj, model in tqdm(job_list))
 
     def save_metadata(self):
         # Load metadata
@@ -220,3 +243,41 @@ class ModelExperimentRunner:
         pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'wb')
         pickle.dump(alg_info, pickle_out)
         pickle_out.close()
+
+    def get_cluster_params(self, full_path, algorithm, cv_count):
+        cluster_params = [full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
+                          self.instance_label, self.scoring_metric, self.metric_direction,
+                          self.n_trials,
+                          self.timeout, self.uniform_fi, self.save_plots, self.random_state]
+        cluster_params += [algorithm, self.n_jobs, self.do_lcs_sweep,
+                           self.lcs_iterations, self.lcs_n, self.lcs_nu]
+        return cluster_params
+
+    def submit_cluster_job(self, full_path, algorithm, cv_count):
+        """
+         Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
+         and ML modeling algorithm.
+         Runs in parallel on a Linux-based computing cluster that uses SLURM for job scheduling.
+         """
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P5_' + str(algorithm) \
+                   + '_' + str(cv_count) + '_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#SBATCH -p ' + self.queue + '\n')
+        sh_file.write('#SBATCH --job-name=' + job_ref + '\n')
+        sh_file.write('#SBATCH --mem=' + str(self.reserved_memory) + 'G' + '\n')
+        # sh_file.write('#BSUB -M '+str(maximum_memory)+'GB'+'\n')
+        sh_file.write(
+            '#SBATCH -o ' + self.output_path + '/' + self.experiment_name + '/logs/P5_'
+            + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.o\n')
+        sh_file.write(
+            '#SBATCH -e ' + self.output_path + '/' + self.experiment_name + '/logs/P5_'
+            + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent) + '/modeling/modeljob.py'
+        cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
+        command = ''.join(['srun', 'python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('sbatch ' + job_name)

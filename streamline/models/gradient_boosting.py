@@ -114,22 +114,23 @@ class LGBClassifier(BaseModel, ABC):
                                                        param_grid['num_leaves'][1]),
                        'max_depth': trial.suggest_int('max_depth', param_grid['max_depth'][0],
                                                       param_grid['max_depth'][1]),
-                       'lambda_l1': trial.suggest_loguniform('lambda_l1', param_grid['lambda_l1'][0],
-                                                             param_grid['lambda_l1'][1]),
-                       'lambda_l2': trial.suggest_loguniform('lambda_l2', param_grid['lambda_l2'][0],
-                                                             param_grid['lambda_l2'][1]),
-                       'feature_fraction': trial.suggest_uniform('feature_fraction', param_grid['feature_fraction'][0],
-                                                                 param_grid['feature_fraction'][1]),
-                       'bagging_fraction': trial.suggest_uniform('bagging_fraction', param_grid['bagging_fraction'][0],
-                                                                 param_grid['bagging_fraction'][1]),
-                       'bagging_freq': trial.suggest_int('bagging_freq', param_grid['bagging_freq'][0],
-                                                         param_grid['bagging_freq'][1]),
+                       'reg_alpha': trial.suggest_loguniform('reg_alpha', param_grid['reg_alpha'][0],
+                                                             param_grid['reg_alpha'][1]),
+                       'reg_lambda': trial.suggest_loguniform('reg_lambda', param_grid['reg_lambda'][0],
+                                                              param_grid['reg_lambda'][1]),
+                       'colsample_bytree': trial.suggest_uniform('colsample_bytree', param_grid['colsample_bytree'][0],
+                                                                 param_grid['colsample_bytree'][1]),
+                       'subsample': trial.suggest_uniform('subsample', param_grid['subsample'][0],
+                                                          param_grid['subsample'][1]),
+                       'subsample_freq': trial.suggest_int('subsample_freq', param_grid['subsample_freq'][0],
+                                                           param_grid['subsample_freq'][1]),
                        'min_child_samples': trial.suggest_int('min_child_samples', param_grid['min_child_samples'][0],
                                                               param_grid['min_child_samples'][1]),
                        'n_estimators': trial.suggest_int('n_estimators', param_grid['n_estimators'][0],
                                                          param_grid['n_estimators'][1]),
                        'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
-                       'random_state': trial.suggest_categorical('random_state', param_grid['random_state'])}
+                       'random_state': trial.suggest_categorical('random_state', param_grid['random_state']),
+                       }
         # print(self.model.get_params())
         mean_cv_score = self.hyper_eval()
         return mean_cv_score
@@ -160,6 +161,7 @@ class CGBClassifier(BaseModel, ABC):
                                                         self.param_grid['l2_leaf_reg'][1]),
                        'loss_function': trial.suggest_categorical('loss_function', self.param_grid['loss_function']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state']),
+                       'verbose': trial.suggest_categorical('verbose', self.param_grid['verbose']),
                        }
 
         mean_cv_score = self.hyper_eval()

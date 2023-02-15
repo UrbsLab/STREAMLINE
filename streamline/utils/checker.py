@@ -151,7 +151,7 @@ FN_LIST = [check_phase_1, check_phase_2, check_phase_3, check_phase_4,
 
 
 def check_phase(output_path, experiment_name, phase=5, len_only=True,
-                rep_data_path=None, dataset_for_rep=None):
+                rep_data_path=None, dataset_for_rep=None, output=True):
     datasets = os.listdir(output_path + "/" + experiment_name)
     remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'logs', 'jobs',
                    'DatasetComparisons', 'UsefulNotebooks',
@@ -169,11 +169,13 @@ def check_phase(output_path, experiment_name, phase=5, len_only=True,
     else:
         raise Exception("Unknown Phase")
 
-    if len(phase_jobs) == 0:
-        print("All Phase " + str(phase) + " Jobs Completed")
-    elif len_only:
-        print(str(len(phase_jobs)) + " Phase " + str(phase) + " Jobs Left")
-    else:
-        print("Below Phase " + str(phase) + " Jobs Not Completed:")
-        for job in phase_jobs:
-            print(job)
+    if output:
+        if len(phase_jobs) == 0:
+            print("All Phase " + str(phase) + " Jobs Completed")
+        elif len_only:
+            print(str(len(phase_jobs)) + " Phase " + str(phase) + " Jobs Left")
+        else:
+            print("Below Phase " + str(phase) + " Jobs Not Completed:")
+            for job in phase_jobs:
+                print(job)
+    return len(phase_jobs)

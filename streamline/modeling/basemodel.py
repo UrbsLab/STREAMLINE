@@ -8,9 +8,9 @@ from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=DeprecationWarning)
-warnings.simplefilter(action='ignore', category=ConvergenceWarning)
+warnings.filterwarnings(action='ignore', module='sklearn')
+warnings.filterwarnings(action='ignore', module='scipy')
+warnings.filterwarnings(action='ignore', module='optuna')
 
 
 class BaseModel:

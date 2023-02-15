@@ -6,6 +6,7 @@ def comma_sep_choices(choices):
     """
     Return a function that splits and checks comma-separated values.
     """
+
     def splitarg(arg):
         values = arg.split(',')
         for value in values:
@@ -14,6 +15,7 @@ def comma_sep_choices(choices):
                     'invalid choice: {!r} (choose from {})'
                     .format(value, ', '.join(map(repr, choices))))
         return values
+
     return splitarg
 
 
@@ -67,9 +69,13 @@ def parser_function(argv):
                         help='"Dont Panic" - sets a specific random seed for reproducible results', default=42)
     # Logistical arguments
     parser.add_argument('--run-parallel', dest='run_parallel', type=bool,
-                        help='if run parallel on LSF compatible computing cluster', default=True)
+                        help='if run parallel on through multiprocessing', default=True)
+    parser.add_argument('--run-cluster', dest='run_cluster', type=bool,
+                        help='if run parallel through SLURM process', default=False)
     parser.add_argument('--res-mem', dest='reserved_memory', type=int,
-                        help='reserved memory for the job (in Gigabytes)', default=15)
+                        help='reserved memory for the job (in Gigabytes)', default=4)
+    parser.add_argument('--queue', dest='queue', type=str,
+                        help='default partition queue', default="defq")
 
     # Defaults available - Phase 2
     parser.add_argument('--do-dataprep', dest='do_dataprep', type=bool,
@@ -216,7 +222,6 @@ def parser_function(argv):
                         default=2000)
     parser.add_argument('--lcs-timeout', dest='lcs_timeout', type=int, help='seconds until hyper parameter sweep stops '
                                                                             'for LCS algorithms', default=1200)
-
 
     # Defaults available - Phase 6
     parser.add_argument('--do-stats', dest='do_stats', type=bool,
