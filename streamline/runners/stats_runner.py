@@ -10,7 +10,6 @@ from streamline.utils.runners import runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
 
 
-
 class StatsRunner:
     """
     Runner Class for collating statistics of all the models
@@ -110,15 +109,15 @@ class StatsRunner:
                                cv_partitions, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                                self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
                                self.show_plots)
-            if run_parallel and run_parallel != False:
+            if run_parallel and run_parallel != "False":
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                 job_list.append(job_obj)
             else:
                 job_obj.run()
-        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
-            get_cluster(run_parallel) 
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+            get_cluster(run_parallel)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):

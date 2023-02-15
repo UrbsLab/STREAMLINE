@@ -43,7 +43,7 @@ def run_cluster(argv):
                                             iterations=lcs_iterations,
                                             N=lcs_n, nu=lcs_nu)
     job_obj.run(model)
-    
+
 
 if __name__ == "__main__":
     sys.exit(run_cluster(sys.argv))

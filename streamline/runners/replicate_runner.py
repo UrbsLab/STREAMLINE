@@ -16,6 +16,7 @@ class ReplicationRunner:
     cluster (parallelized). This script runs ApplyModelJob.py which applies and
     evaluates all trained models on one or more previously unseen hold-out or replication study dataset(s).
     """
+
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
                  class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
                  exclude=("XCS", "eLCS"),
@@ -149,10 +150,10 @@ class ReplicationRunner:
                         job_list.append(job_obj)
                     else:
                         job_obj.run()
-                if run_parallel and (run_parallel in ["multiprocessing", "True"]):
+                if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
                     Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-                if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
-                    get_cluster(run_parallel) 
+                if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+                    get_cluster(run_parallel)
                     dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
         if file_count == 0:
             # Check that there was at least 1 dataset

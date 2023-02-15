@@ -55,13 +55,13 @@ class CompareRunner:
     def run(self, run_parallel=False):
         job_obj = CompareJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                              self.class_label, self.instance_label, self.sig_cutoff, self.show_plots)
-        if run_parallel in ["multiprocessing", "True"]:
+        if run_parallel in ["multiprocessing", "True", True]:
             # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
             # p.start()
             # p.join()
             Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
-        elif run_parallel and (run_parallel in ["multiprocessing", "True", "False"]):
-            get_cluster(run_parallel) 
+        elif run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+            get_cluster(run_parallel)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]])
         else:
             job_obj.run()

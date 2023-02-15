@@ -110,10 +110,10 @@ class FeatureImportanceRunner:
                         job_list.append(job_obj)
                     else:
                         job_obj.run()
-        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
-            get_cluster(run_parallel) 
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+            get_cluster(run_parallel)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):
@@ -206,10 +206,10 @@ class FeatureSelectionRunner:
                 job_list.append(job_obj)
             else:
                 job_obj.run()
-        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
-            get_cluster(run_parallel) 
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+            get_cluster(run_parallel)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):

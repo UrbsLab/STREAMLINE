@@ -12,6 +12,7 @@ class DataProcessRunner:
     """
     Runner class for Data Processing Jobs of CV Splits
     """
+
     def __init__(self, output_path, experiment_name, scale_data=True, impute_data=True,
                  multi_impute=True, overwrite_cv=True, class_label="Class", instance_label=None, random_state=None):
         """
@@ -75,10 +76,10 @@ class DataProcessRunner:
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
-        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
-            get_cluster(run_parallel) 
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+            get_cluster(run_parallel)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):

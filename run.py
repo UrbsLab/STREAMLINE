@@ -32,12 +32,12 @@ def runner(obj, phase_str, run_parallel=True, params=None):
     obj.run(run_parallel=run_parallel)
     if not run_parallel or run_parallel == "False":
         how = "serially"
-    elif run_parallel in ["multiprocessing", "True"]:
+    elif run_parallel in ["multiprocessing", "True", True]:
         how = "parallely"
     else:
         how = "with " + run_parallel + " dask cluster"
     if params and (params['run_cluster'] == "SLURMOld" and phase_str == "Modeling"):
-        while check_phase(params['output_path'], params['experiment_name'], 
+        while check_phase(params['output_path'], params['experiment_name'],
                           phase=5, output=False) != 0:
             time.sleep(5)
             how = "with SLURM Manual Jobs"
