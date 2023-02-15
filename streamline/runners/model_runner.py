@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import glob
 import pickle
@@ -276,7 +275,7 @@ class ModelExperimentRunner:
             '#SBATCH -e ' + self.output_path + '/' + self.experiment_name + '/logs/P5_'
             + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
 
-        file_path = str(Path(__file__).parent.parent) + '/modeling/modeljob.py'
+        file_path = str(Path(__file__).parent.parent.parent) + '/ModelMain.py'
         cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
         command = ' '.join(['srun', 'python', file_path] + cluster_params)
         sh_file.write(command + '\n')
