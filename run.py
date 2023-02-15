@@ -203,7 +203,7 @@ if __name__ == '__main__':
     else:
         config_dict = vars(parser_function(sys.argv))
 
-    print("Running with " + num_cores + "CPUs")
+    print("Running with " + str(num_cores) + "CPUs")
 
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(config_dict['output_path'])
