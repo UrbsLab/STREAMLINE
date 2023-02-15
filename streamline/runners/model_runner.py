@@ -278,7 +278,7 @@ class ModelExperimentRunner:
 
         file_path = str(Path(__file__).parent.parent) + '/modeling/modeljob.py'
         cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
-        command = ''.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + cluster_params)
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
