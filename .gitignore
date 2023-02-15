@@ -5,6 +5,7 @@
 __pycache__
 .pytest_cache
 demo/
+demo2/
 catboost_info/
 ./tests/
 prof/
@@ -13,6 +14,6 @@ testlogs/
 OUTPUT/
 OSA_OUTPUT/
 OSA/
-OSA.o
-OSA.e
+job.o
+job.e
 logs.log

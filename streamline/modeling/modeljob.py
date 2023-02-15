@@ -120,7 +120,7 @@ class ModelJob(Job):
                 try:
                     fig = optuna.visualization.plot_parallel_coordinate(model.study)
                     fig.write_image(self.full_path + '/models/' + self.algorithm +
-                                    '_ParamOptimization_' + str() + '.png')
+                                    '_ParamOptimization_' + str(self.cv_count) + '.png')
                 except Exception as e:
                     logging.warning(str(e))
                     logging.warning('Warning: Optuna Optimization Visualization Generation Failed for '

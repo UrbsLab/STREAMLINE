@@ -9,16 +9,16 @@ def run_cluster(argv):
     experiment_name = argv[3]
     cv_count = int(argv[4])
     class_label = argv[5]
-    instance_label = argv[6] if argv[6] is not None else None
+    instance_label = argv[6] if argv[6] != "None" else None
     scoring_metric = argv[7]
     metric_direction = argv[8]
     n_trials = int(argv[9])
     timeout = int(argv[10])
     uniform_fi = eval(argv[11])
     save_plot = eval(argv[12])
-    random_state = None if argv[13] is None else int(argv[13])
+    random_state = None if argv[13] == "None" else int(argv[13])
     algorithm = argv[14]
-    n_jobs = None if argv[15] is None else int(argv[15])
+    n_jobs = None if argv[15] == "None" else int(argv[15])
     do_lcs_sweep = eval(argv[16])
     lcs_iterations = int(argv[17])
     lcs_n = int(argv[18])
@@ -42,9 +42,8 @@ def run_cluster(argv):
                                             cv=None, n_jobs=n_jobs,
                                             iterations=lcs_iterations,
                                             N=lcs_n, nu=lcs_nu)
-
-        job_obj.run(model)
-
+    job_obj.run(model)
+    
 
 if __name__ == "__main__":
     sys.exit(run_cluster(sys.argv))

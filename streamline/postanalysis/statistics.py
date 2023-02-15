@@ -933,9 +933,9 @@ class StatsJob(Job):
         for i in range(len(self.algorithms) - 1):
             for j in range(i + 1):
                 if j == 0:
-                    bottom = np.array(fi_list[0])
+                    bottom = np.array(fi_list[0]).astype('float64')
                 else:
-                    bottom += np.array(fi_list[j])
+                    bottom += np.array(fi_list[j]).astype('float64')
             bottoms.append(bottom)
         if not isinstance(bottoms, list):
             bottoms = bottoms.tolist()
