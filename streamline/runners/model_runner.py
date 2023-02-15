@@ -251,6 +251,7 @@ class ModelExperimentRunner:
                           self.timeout, self.uniform_fi, self.save_plots, self.random_state]
         cluster_params += [algorithm, self.n_jobs, self.do_lcs_sweep,
                            self.lcs_iterations, self.lcs_n, self.lcs_nu]
+        cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 
     def submit_cluster_job(self, full_path, algorithm, cv_count):
