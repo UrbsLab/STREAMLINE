@@ -193,12 +193,10 @@ class ModelExperimentRunner:
             Parallel(n_jobs=num_cores)(
                 delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in tqdm(job_list))
-        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
             get_cluster(run_parallel) 
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in job_list])
-        else:
-            raise Exception("Error in Parellization Code")
             
 
     def save_metadata(self):

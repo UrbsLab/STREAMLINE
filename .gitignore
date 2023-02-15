@@ -11,6 +11,7 @@ catboost_info/
 prof/
 profile.html
 testlogs/
+dask_logs/
 OUTPUT/
 OSA_OUTPUT/
 OSA/

@@ -112,11 +112,9 @@ class FeatureImportanceRunner:
                         job_obj.run()
         if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
             get_cluster(run_parallel) 
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
-        else:
-            raise Exception("Error in Parellization Code")
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
@@ -210,11 +208,9 @@ class FeatureSelectionRunner:
                 job_obj.run()
         if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
             get_cluster(run_parallel) 
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
-        else:
-            raise Exception("Error in Parellization Code")
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

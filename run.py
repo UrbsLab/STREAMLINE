@@ -36,13 +36,12 @@ def runner(obj, phase_str, run_parallel=True, params=None):
         how = "parallely"
     else:
         how = "with " + run_parallel + " dask cluster"
-    try:
-        if params['run_cluster'] == "SLURMOld" and phase_str == "Modeling":
-            while check_phase(params['output_path'], params['experiment_name'], phase=5) != 0:
-                time.sleep(5)
-                how = "with SLURM Manual Jobs"
-    except:
-        pass
+    if params and (params['run_cluster'] == "SLURMOld" and phase_str == "Modeling"):
+        while check_phase(params['output_path'], params['experiment_name'], 
+                          phase=5, output=False) != 0:
+            time.sleep(5)
+            how = "with SLURM Manual Jobs"
+
     print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
     del obj
 
@@ -134,7 +133,7 @@ def run(params):
                                       queue=params['queue'],
                                       reserved_memory=params['reserved_memory'])
 
-        runner(model, "Modelling", run_parallel=params['run_parallel'], params=params)
+        runner(model, "Modeling", run_parallel=params['run_parallel'], params=params)
 
     if params['do_stats']:
         stats = StatsRunner(params['output_path'], params['experiment_name'], algorithms=params['algorithms'],
@@ -146,7 +145,7 @@ def run(params):
                             scale_data=params['scale_data'],
                             plot_roc=params['plot_roc'], plot_prc=params['plot_prc'], plot_fi_box=params['plot_fi_box'],
                             plot_metric_boxplots=params['plot_metric_boxplots'], show_plots=False)
-        runner(stats, "Stats", run_parallel=params['run_parallel'])
+        runner(stats, "Stats", run_parallel=params['run_parallel'], params=params)
 
     if params['do_compare_dataset']:
         compare = CompareRunner(params['output_path'], params['experiment_name'], experiment_path=None,

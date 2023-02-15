@@ -72,7 +72,7 @@ class ReportRunner:
             # p.start()
             # p.join()
             Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
-        elif run_parallel and (run_parallel in ["multiprocessing", "True"]):
+        elif run_parallel and (run_parallel in ["multiprocessing", "True", "False"]):
             get_cluster(run_parallel) 
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]])
         else:

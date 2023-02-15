@@ -137,13 +137,11 @@ class EDARunner:
                 delayed(
                     parallel_eda_call
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
             get_cluster(run_parallel) 
             dask.compute([dask.delayed(
                     parallel_eda_call
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
-        else:
-            raise Exception("Error in Parellization Code")
         self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):
@@ -169,11 +167,9 @@ class EDARunner:
             job_counter += 1
         if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+        if run_parallel and (run_parallel not in ["multiprocessing", "True", "False"]):
             get_cluster(run_parallel) 
             dask.compute([dask.delayed(parallel_kfold_call)(job_obj) for job_obj in job_list])
-        else:
-            raise Exception("Error in Parellization Code")
 
     def make_dir_tree(self):
         """
