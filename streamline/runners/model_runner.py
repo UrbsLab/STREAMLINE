@@ -2,6 +2,7 @@ import os
 import glob
 import pickle
 import time
+import dask
 from tqdm import tqdm
 from pathlib import Path
 from joblib import Parallel, delayed
@@ -11,6 +12,7 @@ from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.utils.runners import model_runner_fn, num_cores, run_jobs
+from streamline.utils.cluster import get_cluster
 
 
 class ModelExperimentRunner:
@@ -24,7 +26,7 @@ class ModelExperimentRunner:
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                  lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None, run_cluster=False,
-                 queue='defq', reserved_memory='4G'):
+                 queue='defq', reserved_memory=4):
 
         """
         Args:
@@ -148,8 +150,8 @@ class ModelExperimentRunner:
                 os.mkdir(full_path + '/model_evaluation/pickled_metrics')
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
             cv_partitions = len(cv_dataset_paths)
-            for cv_count in tqdm(range(cv_partitions), leave=False):
-                for algorithm in tqdm(self.algorithms, leave=False):
+            for cv_count in range(cv_partitions):
+                for algorithm in self.algorithms:
                     abbrev = ABBREVIATION[algorithm]
                     target_file = 'job_model_' + dataset_directory_path + '_' + str(cv_count) + '_' + \
                                   abbrev + '.txt'
@@ -157,8 +159,8 @@ class ModelExperimentRunner:
                         continue
                         # target for a re-submit
 
-                    if self.run_cluster:
-                        self.submit_cluster_job(full_path, abbrev, cv_count)
+                    if self.run_cluster == "SLURMOld":
+                        self.submit_slurm_cluster_job(full_path, abbrev, cv_count)
                         continue
 
                     # logging.info("Running Model "+str(algorithm))
@@ -180,17 +182,24 @@ class ModelExperimentRunner:
                     job_obj = ModelJob(full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
                                        self.timeout, self.uniform_fi, self.save_plots, self.random_state)
-                    if run_parallel:
+                    if run_parallel or run_parallel != "False":
                         # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
                         # job_list.append(p)
                         job_list.append((job_obj, model))
                     else:
                         job_obj.run(model)
-        if run_parallel:
+        if run_parallel and run_parallel in ["multiprocessing", "True"]:
             # run_jobs(job_list)
             Parallel(n_jobs=num_cores)(
                 delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in tqdm(job_list))
+        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+            get_cluster(run_parallel) 
+            dask.compute([dask.delayed(model_runner_fn)(job_obj, model
+                                         ) for job_obj, model in job_list])
+        else:
+            raise Exception("Error in Parellization Code")
+            
 
     def save_metadata(self):
         # Load metadata
@@ -253,7 +262,7 @@ class ModelExperimentRunner:
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 
-    def submit_cluster_job(self, full_path, algorithm, cv_count):
+    def submit_slurm_cluster_job(self, full_path, algorithm, cv_count):
         """
          Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
          and ML modeling algorithm.

@@ -25,3 +25,5 @@ scikit-XCS
 scikit-ExSTraCS
 scikit-eLCS
 kaleido
+dask-jobqueue
+dask

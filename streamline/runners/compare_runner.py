@@ -1,10 +1,12 @@
 import os
+import dask
 import multiprocessing
 from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.dataset_compare import CompareJob
 from streamline.utils.runners import runner_fn
+from streamline.utils.cluster import get_cluster
 
 
 class CompareRunner:
@@ -53,10 +55,13 @@ class CompareRunner:
     def run(self, run_parallel=False):
         job_obj = CompareJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                              self.class_label, self.instance_label, self.sig_cutoff, self.show_plots)
-        if run_parallel:
+        if run_parallel in ["multiprocessing", "True"]:
             # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
             # p.start()
             # p.join()
             Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
+        elif run_parallel and (run_parallel in ["multiprocessing", "True"]):
+            get_cluster(run_parallel) 
+            dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]])
         else:
             job_obj.run()

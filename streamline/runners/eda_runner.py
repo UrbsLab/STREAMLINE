@@ -3,11 +3,14 @@ import pickle
 import re
 import glob
 import shutil
+import dask
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.exploratory_analysis import EDAJob
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from streamline.utils.runners import parallel_kfold_call, parallel_eda_call, num_cores
 from joblib import Parallel, delayed
+from streamline.utils.cluster import get_cluster
+
 
 
 class EDARunner:
@@ -129,11 +132,18 @@ class EDARunner:
                     job_counter += 1
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
-        if run_parallel:
+        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(
                 delayed(
                     parallel_eda_call
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
+        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+            get_cluster(run_parallel) 
+            dask.compute([dask.delayed(
+                    parallel_eda_call
+                )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
+        else:
+            raise Exception("Error in Parellization Code")
         self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):
@@ -152,13 +162,18 @@ class EDARunner:
             kfold_obj = KFoldPartitioner(obj.dataset,
                                          self.partition_method, self.output_path + '/' + self.experiment_name,
                                          self.n_splits, self.random_state)
-            if run_parallel:  # Run as job in parallel
+            if run_parallel or run_parallel != "False":  # Run as job in parallel
                 job_list.append(kfold_obj)
             else:  # Run job locally, serially
                 kfold_obj.run()
             job_counter += 1
-        if run_parallel:
+        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
+        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+            get_cluster(run_parallel) 
+            dask.compute([dask.delayed(parallel_kfold_call)(job_obj) for job_obj in job_list])
+        else:
+            raise Exception("Error in Parellization Code")
 
     def make_dir_tree(self):
         """

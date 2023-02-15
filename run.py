@@ -30,16 +30,19 @@ formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 def runner(obj, phase_str, run_parallel=True, params=None):
     start = time.time()
     obj.run(run_parallel=run_parallel)
-    if run_parallel:
+    if not run_parallel or run_parallel == "False":
+        how = "serially"
+    elif run_parallel in ["multiprocessing", "True"]:
         how = "parallely"
     else:
-        how = "serially"
-    if params:
-        if params['run_cluster']:
-            while check_phase(params['output_path'], params['experiment_name'],
-                              phase=5, output=False) != 0:
-                time.sleep(60)
-            how = "clusters"
+        how = "with " + run_parallel + " dask cluster"
+    try:
+        if params['run_cluster'] == "SLURMOld" and phase_str == "Modeling":
+            while check_phase(params['output_path'], params['experiment_name'], phase=5) != 0:
+                time.sleep(5)
+                how = "with SLURM Manual Jobs"
+    except:
+        pass
     print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
     del obj
 
@@ -80,7 +83,7 @@ def run(params):
                         categorical_cutoff=params['categorical_cutoff'], sig_cutoff=params['sig_cutoff'],
                         random_state=params['random_state'])
 
-        runner(eda, "Exploratory", run_parallel=params['run_parallel'])
+        runner(eda, "Exploratory", run_parallel=params['run_parallel'], params=params)
 
     if params['do_dataprep']:
         dpr = DataProcessRunner(params['output_path'], params['experiment_name'], scale_data=params['scale_data'],
@@ -88,7 +91,7 @@ def run(params):
                                 multi_impute=params['multi_impute'], overwrite_cv=params['overwrite_cv'],
                                 class_label=params['class_label'],
                                 instance_label=params['instance_label'], random_state=params['random_state'])
-        runner(dpr, "Data Process", run_parallel=params['run_parallel'])
+        runner(dpr, "Data Process", run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_imp']:
         f_imp = FeatureImportanceRunner(params['output_path'], params['experiment_name'],
@@ -98,7 +101,7 @@ def run(params):
                                         use_turf=params['use_turf'],
                                         turf_pct=params['turf_pct'],
                                         random_state=params['random_state'], n_jobs=params['n_jobs'])
-        runner(f_imp, "Feature Imp.", run_parallel=params['run_parallel'])
+        runner(f_imp, "Feature Imp.", run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_sel']:
         f_sel = FeatureSelectionRunner(params['output_path'], params['experiment_name'],
@@ -110,7 +113,7 @@ def run(params):
                                        top_features=params['top_features'], export_scores=params['export_scores'],
                                        overwrite_cv=params['overwrite_cv_feat'], random_state=params['random_state'],
                                        n_jobs=params['n_jobs'])
-        runner(f_sel, "Feature Sel.", run_parallel=params['run_parallel'])
+        runner(f_sel, "Feature Sel.", run_parallel=params['run_parallel'], params=params)
 
     if params['do_model']:
         model = ModelExperimentRunner(params['output_path'], params['experiment_name'],
@@ -152,13 +155,13 @@ def run(params):
                                 class_label=params['class_label'], instance_label=params['instance_label'],
                                 sig_cutoff=params['sig_cutoff'],
                                 show_plots=False)
-        runner(compare, "Dataset Compare", run_parallel=params['run_parallel'])
+        runner(compare, "Dataset Compare", run_parallel=params['run_parallel'], params=params)
 
     if params['do_report']:
         report = ReportRunner(output_path=params['output_path'], experiment_name=params['experiment_name'],
                               experiment_path=None,
                               algorithms=params['algorithms'], exclude=params['exclude'])
-        runner(report, "Reporting", run_parallel=params['run_parallel'])
+        runner(report, "Reporting", run_parallel=params['run_parallel'], params=params)
 
     if params['do_replicate']:
         replicate = ReplicationRunner(params['rep_data_path'], params['dataset_for_rep'], params['output_path'],
@@ -170,7 +173,7 @@ def run(params):
                                       export_feature_correlations=params['rep_export_feature_correlations'],
                                       plot_roc=params['rep_plot_roc'], plot_prc=params['rep_plot_prc'],
                                       plot_metric_boxplots=params['rep_plot_metric_boxplots'])
-        runner(replicate, "Replication", run_parallel=params['run_parallel'])
+        runner(replicate, "Replication", run_parallel=params['run_parallel'], params=params)
 
     if params['do_rep_report']:
         report = ReportRunner(output_path=params['output_path'], experiment_name=params['experiment_name'],
@@ -178,12 +181,12 @@ def run(params):
                               algorithms=params['algorithms'], exclude=params['exclude'], training=False,
                               rep_data_path=params['rep_data_path'],
                               dataset_for_rep=params['dataset_for_rep'])
-        runner(report, "Replicate Report", run_parallel=params['run_parallel'])
+        runner(report, "Replicate Report", run_parallel=params['run_parallel'], params=params)
 
     if params['do_cleanup']:
         clean = CleanRunner(params['output_path'], params['experiment_name'],
                             del_time=params['del_time'], del_old_cv=params['del_old_cv'])
-        runner(clean, "Cleaning", run_parallel=params['run_parallel'])
+        runner(clean, "Cleaning", run_parallel=params['run_parallel'], params=params)
 
     print("DONE!!!")
     print("Ran in " + str(time.time() - start_g))

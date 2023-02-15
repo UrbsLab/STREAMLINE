@@ -5,7 +5,7 @@
 __pycache__
 .pytest_cache
 demo/
-demo2/
+demo_old/
 catboost_info/
 ./tests/
 prof/

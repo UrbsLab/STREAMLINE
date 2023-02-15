@@ -1,11 +1,14 @@
 import os
 import glob
+import dask
 import pickle
 from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.runners import runner_fn, num_cores
+from streamline.utils.cluster import get_cluster
+
 
 
 class StatsRunner:
@@ -107,13 +110,18 @@ class StatsRunner:
                                cv_partitions, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                                self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
                                self.show_plots)
-            if run_parallel:
+            if run_parallel and run_parallel != False:
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                 job_list.append(job_obj)
             else:
                 job_obj.run()
-        if run_parallel:
+        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
+        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+            get_cluster(run_parallel) 
+            dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
+        else:
+            raise Exception("Error in Parellization Code")
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')

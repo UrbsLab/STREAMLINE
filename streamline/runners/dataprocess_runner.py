@@ -1,10 +1,11 @@
 import os
 import glob
 import pickle
+import dask
 from joblib import Parallel, delayed
-
 from streamline.dataprep.data_process import DataProcessing
 from streamline.utils.runners import runner_fn, num_cores
+from streamline.utils.cluster import get_cluster
 
 
 class DataProcessRunner:
@@ -61,7 +62,7 @@ class DataProcessRunner:
             for cv_train_path in glob.glob(full_path + "/CVDatasets/*Train.csv"):
                 job_counter += 1
                 cv_test_path = cv_train_path.replace("Train.csv", "Test.csv")
-                if run_parallel:
+                if run_parallel and run_parallel != "False":
                     job_obj = DataProcessing(cv_train_path, cv_test_path,
                                              self.output_path + "/" + self.experiment_name,
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
@@ -74,8 +75,13 @@ class DataProcessRunner:
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
-        if run_parallel:
+        if run_parallel and (run_parallel in ["multiprocessing", "True"]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
+        if run_parallel and (run_parallel not in ["multiprocessing", "True"]):
+            get_cluster(run_parallel) 
+            dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
+        else:
+            raise Exception("Error in Parellization Code")
 
     def save_metadata(self):
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
