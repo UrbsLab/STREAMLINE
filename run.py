@@ -16,6 +16,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 from streamline.runners.clean_runner import CleanRunner
 from streamline.utils.parser import parser_function
 from streamline.utils.checker import check_phase
+from streamline.utils.runners import num_cores
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -34,7 +35,6 @@ def runner(obj, phase_str, run_parallel=True, params=None):
     else:
         how = "serially"
     if params:
-        print(params['run_cluster'])
         if params['run_cluster']:
             while check_phase(params['output_path'], params['experiment_name'],
                               phase=5, output=False) != 0:
@@ -202,6 +202,8 @@ if __name__ == '__main__':
             config_dict.update({k: eval(v) for k, v in config.items(s)})
     else:
         config_dict = vars(parser_function(sys.argv))
+
+    print("Running with " + num_cores + "CPUs")
 
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(config_dict['output_path'])
