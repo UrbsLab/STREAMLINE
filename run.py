@@ -18,6 +18,7 @@ from streamline.utils.parser import parser_function
 from streamline.utils.checker import check_phase
 from streamline.utils.runners import num_cores
 import warnings
+
 warnings.filterwarnings("ignore")
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -221,13 +222,13 @@ if __name__ == '__main__':
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-    
+
     if config_dict['do_till_report']:
         config_dict["do_eda"] = True
-        config_dict["do_dataprep"]  = True
-        config_dict["do_feat_sel"]  = True
-        config_dict["do_model"]  = True
-        config_dict["do_compare_dataset"]  = True
-        config_dict["do_report"]  = True
+        config_dict["do_dataprep"] = True
+        config_dict["do_feat_sel"] = True
+        config_dict["do_model"] = True
+        config_dict["do_compare_dataset"] = True
+        config_dict["do_report"] = True
 
     sys.exit(run(config_dict))

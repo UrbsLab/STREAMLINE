@@ -67,7 +67,6 @@ class ReportRunner:
     def run(self, run_parallel=False):
         job_obj = ReportJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                             self.training, self.train_data_path, self.rep_data_path)
-        
         # running direct because it's faster
         job_obj.run()
 
