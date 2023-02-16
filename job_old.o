@@ -1,0 +1,71 @@
+Running with 48CPUs
+Ran Exploratory Phase with SLURM dask cluster in 13.444172143936157
+Ran Data Process Phase with SLURM dask cluster in 7.839841604232788
+Ran Feature Imp. Phase with SLURM dask cluster in 8.263333082199097
+Ran Feature Sel. Phase with SLURM dask cluster in 13.642866134643555
+Ran Modeling Phase with SLURM dask cluster in 22.764172554016113
+Ran Stats Phase with SLURM dask cluster in 22.006479024887085
+Ran Dataset Compare Phase with SLURM dask cluster in 9.669694423675537
+Ran Reporting Phase with SLURM dask cluster in 27.925694227218628
+DONE!!!
+Ran in 125.6354992389679
+
+Running with 48CPUs
+Ran Exploratory Phase with SLURM dask cluster in 13.62443995475769
+Ran Data Process Phase with SLURM dask cluster in 7.886909246444702
+Ran Feature Imp. Phase with SLURM dask cluster in 8.526399612426758
+Ran Feature Sel. Phase with SLURM dask cluster in 6.125885009765625
+Ran Modeling Phase with SLURM Manual Jobs in 27.12003779411316
+Ran Stats Phase with SLURM dask cluster in 20.571609497070312
+Ran Dataset Compare Phase with SLURM dask cluster in 9.68553352355957
+Ran Reporting Phase with SLURM dask cluster in 30.375267505645752
+DONE!!!
+Ran in 124.02550649642944
+
+Running with 48CPUs
+Ran Exploratory Phase with SLURM dask cluster in 13.365909576416016
+Ran Data Process Phase with SLURM dask cluster in 7.856504917144775
+Ran Feature Imp. Phase with SLURM dask cluster in 8.335251092910767
+Ran Feature Sel. Phase with SLURM dask cluster in 6.431936025619507
+Ran Modeling Phase with SLURM dask cluster in 20.666651010513306
+Ran Stats Phase with SLURM dask cluster in 27.054938554763794
+Ran Dataset Compare Phase with SLURM dask cluster in 9.431143522262573
+Ran Reporting Phase with SLURM dask cluster in 56.70772457122803
+DONE!!!
+Ran in 149.90931296348572
+
+Running with 48CPUs
+Ran Exploratory Phase parallely in 5.573450803756714
+Ran Data Process Phase parallely in 1.75217604637146
+Ran Feature Imp. Phase parallely in 4.129317760467529
+Ran Feature Sel. Phase parallely in 1.597184419631958
+Ran Modeling Phase parallely in 5.336133003234863
+Ran Stats Phase parallely in 8.82911992073059
+Ran Dataset Compare Phase parallely in 3.766847848892212
+Ran Reporting Phase parallely in 24.290554523468018
+DONE!!!
+Ran in 55.329636335372925
+
+Running with 48CPUs
+Ran Exploratory Phase with SLURM dask cluster in 31.005990505218506
+Ran Data Process Phase with SLURM dask cluster in 81.32980942726135
+Ran Feature Imp. Phase with SLURM dask cluster in 143.16707038879395
+Ran Feature Sel. Phase with SLURM dask cluster in 16.081923723220825
+Ran Modeling Phase with SLURM dask cluster in 447.73497676849365
+Ran Stats Phase with SLURM dask cluster in 30.756742000579834
+Ran Dataset Compare Phase with SLURM dask cluster in 30.39741587638855
+Ran Reporting Phase with SLURM dask cluster in 211.88017344474792
+DONE!!!
+Ran in 992.4327704906464
+
+Running with 48CPUs
+Ran Exploratory Phase parallely in 9.764734745025635
+Ran Data Process Phase parallely in 49.27669405937195
+Ran Feature Imp. Phase parallely in 149.72532534599304
+Ran Feature Sel. Phase parallely in 3.2380001544952393
+Ran Modeling Phase parallely in 442.3606975078583
+Ran Stats Phase parallely in 12.658838987350464
+Ran Dataset Compare Phase parallely in 29.919363737106323
+Ran Reporting Phase parallely in 91.28666663169861
+DONE!!!
+Ran in 788.301023721695

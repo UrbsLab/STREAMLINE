@@ -15,6 +15,7 @@ dask_logs/
 OUTPUT/
 OSA_OUTPUT/
 OSA/
+job_old.e
 job.o
 job.e
 logs.log

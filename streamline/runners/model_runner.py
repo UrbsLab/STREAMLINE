@@ -188,12 +188,13 @@ class ModelExperimentRunner:
                         job_list.append((job_obj, model))
                     else:
                         job_obj.run(model)
-        if run_parallel and run_parallel in ["multiprocessing", "True", True]:
+        if self.run_cluster != "SLURMOld" and run_parallel and run_parallel in ["multiprocessing", "True", True]:
             # run_jobs(job_list)
             Parallel(n_jobs=num_cores)(
                 delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in tqdm(job_list))
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+        if self.run_cluster != "SLURMOld" and run_parallel \
+            and (run_parallel not in ["multiprocessing", "True", True, "False"]):
             get_cluster(run_parallel)
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
                                                         ) for job_obj, model in job_list])

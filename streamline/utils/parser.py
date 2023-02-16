@@ -34,10 +34,12 @@ def parser_function(argv):
                         help='give output to command line')
     parser.add_argument('--inst-label', dest='instance_label', type=str,
                         help='instance label of all datasets (if present)', default="")
+    parser.add_argument('--do-till-report', dest='do_till_report', type=bool,
+                        help='flag to do all phases', default=False)
 
     # Phase 1
     parser.add_argument('--do-eda', dest='do_eda', type=bool,
-                        help='flag to eda', default=True)
+                        help='flag to eda', default=False)
     parser.add_argument('--fi', dest='ignore_features_path', type=str,
                         help='path to .csv file with feature labels to be ignored in analysis '
                              '(e.g. ./droppedFeatures.csv))',
@@ -79,7 +81,7 @@ def parser_function(argv):
 
     # Defaults available - Phase 2
     parser.add_argument('--do-dataprep', dest='do_dataprep', type=bool,
-                        help='flag to data preprocessing', default=True)
+                        help='flag to data preprocessing', default=False)
     parser.add_argument('--scale', dest='scale_data', type=bool,
                         help='perform data scaling (required for SVM, and to use '
                              'Logistic regression with non-uniform feature importance estimation)',
@@ -97,7 +99,7 @@ def parser_function(argv):
 
     # Defaults available - Phase 3
     parser.add_argument('--do-feat-imp', dest='do_feat_imp', type=bool,
-                        help='flag to feature importance', default=True)
+                        help='flag to feature importance', default=False)
     parser.add_argument('--do-mi', dest='do_mutual_info', type=bool, help='do mutual information analysis',
                         default=True)
     parser.add_argument('--do-ms', dest='do_multisurf', type=bool, help='do multiSURF analysis', default=True)
@@ -119,7 +121,7 @@ def parser_function(argv):
 
     # Defaults available - Phase 4
     parser.add_argument('--do-feat-sel', dest='do_feat_sel', type=bool,
-                        help='flag to feature selection', default=True)
+                        help='flag to feature selection', default=False)
     parser.add_argument('--max-feat', dest='max_features_to_keep', type=int,
                         help='max features to keep (only applies if filter_poor_features is True)', default=2000)
     parser.add_argument('--filter-feat', dest='filter_poor_features', type=bool,
@@ -134,7 +136,7 @@ def parser_function(argv):
 
     # Defaults available - Phase 5
     parser.add_argument('--do-model', dest='do_model', type=bool,
-                        help='flag to run models', default=True)
+                        help='flag to run models', default=False)
     # Sets default run all or none to make algorithm selection from command line simpler
     parser.add_argument('--do-all', dest='do_all', type=bool,
                         help='run all modeling algorithms by default (when set False, individual algorithms are '
@@ -225,7 +227,7 @@ def parser_function(argv):
 
     # Defaults available - Phase 6
     parser.add_argument('--do-stats', dest='do_stats', type=bool,
-                        help='flag to run statistics', default=True)
+                        help='flag to run statistics', default=False)
     parser.add_argument('--plot-ROC', dest='plot_roc', type=str,
                         help='Plot ROC curves individually for each algorithm including all CV results and averages',
                         default='True')
@@ -245,11 +247,11 @@ def parser_function(argv):
 
     # Phase 7
     parser.add_argument('--do-compare-dataset', dest='do_compare_dataset', type=bool,
-                        help='flag to run compare dataset dataset', default=True)
+                        help='flag to run compare dataset dataset', default=False)
 
     # Phase 8
     parser.add_argument('--do-report', dest='do_report', type=bool,
-                        help='flag to run report dataset', default=True)
+                        help='flag to run report dataset', default=False)
 
     # Phase 9
     parser.add_argument('--do-replicate', dest='do_replicate', type=bool,

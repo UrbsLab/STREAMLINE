@@ -37,6 +37,7 @@ def runner(obj, phase_str, run_parallel=True, params=None):
     else:
         how = "with " + run_parallel + " dask cluster"
     if params and (params['run_cluster'] == "SLURMOld" and phase_str == "Modeling"):
+        print("Waiting Manual Jobs to Finish")
         while check_phase(params['output_path'], params['experiment_name'],
                           phase=5, output=False) != 0:
             time.sleep(5)
@@ -220,5 +221,13 @@ if __name__ == '__main__':
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
+    
+    if config_dict['do_till_report']:
+        config_dict["do_eda"] = True
+        config_dict["do_dataprep"]  = True
+        config_dict["do_feat_sel"]  = True
+        config_dict["do_model"]  = True
+        config_dict["do_compare_dataset"]  = True
+        config_dict["do_report"]  = True
 
     sys.exit(run(config_dict))
