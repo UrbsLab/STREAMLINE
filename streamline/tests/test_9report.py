@@ -12,7 +12,7 @@ from streamline.runners.stats_runner import StatsRunner
 from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
