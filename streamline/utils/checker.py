@@ -178,4 +178,4 @@ def check_phase(output_path, experiment_name, phase=5, len_only=True,
             print("Below Phase " + str(phase) + " Jobs Not Completed:")
             for job in phase_jobs:
                 print(job)
-    return len(phase_jobs)
+    return phase_jobs

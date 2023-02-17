@@ -11,7 +11,9 @@ from streamline.featurefns.selection import FeatureSelection
 def run_cluster(argv):
     full_path = argv[1]
     n_datasets = int(argv[2])
+    MI, MS = "MI", "MS"
     algorithms = None if argv[3] == "None" else eval(argv[3])
+    print(algorithms)
     class_label = argv[4]
     instance_label = argv[5] if argv[5] != "None" else None
     export_scores = bool(argv[6])

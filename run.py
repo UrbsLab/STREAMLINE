@@ -34,18 +34,24 @@ phase_list = ["", "Exploratory", "Data Process", "Feature Imp.",
 
 def runner(obj, phase, run_parallel=True, params=None):
     start = time.time()
-    obj.run(run_parallel=run_parallel)
 
     phase_str = phase_list[phase]
-    how = None
+    print()
+    print("Running " + phase_str + " Phase " + "(" + str(phase) + ")" 
+          + " with " + str(params['run_cluster']) + " Setup")
+    how = "with SLURM Manual Jobs"
     if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
-        print("Waiting" + phase_str + "Manual Jobs to Finish")
-        while check_phase(params['output_path'], params['experiment_name'],
-                          phase=phase, output=False) != 0:
+        obj.run(run_parallel=run_parallel)
+        if phase == 1:
             time.sleep(5)
-            how = "with SLURM Manual Jobs"
-
+        while len(check_phase(params['output_path'], params['experiment_name'], 
+                          phase=phase, output=True)) != 0:
+            print()
+            print("Waiting for " + phase_str + " Manual Jobs to Finish")
+            time.sleep(5)
+        print()
     else:
+        obj.run(run_parallel=run_parallel)
         if not run_parallel or run_parallel == "False":
             how = "serially"
         elif run_parallel in ["multiprocessing", "True", True]:

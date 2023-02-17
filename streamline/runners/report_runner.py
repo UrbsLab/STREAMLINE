@@ -73,7 +73,7 @@ class ReportRunner:
 
     def run(self, run_parallel=False):
 
-        if self.run_cluster and self.run_cluster != "False":
+        if self.run_cluster in ["SLURMOld", "LSFOld"]:
             if self.run_cluster == "SLURMOld":
                 self.submit_slurm_cluster_job()
 
@@ -126,7 +126,7 @@ class ReportRunner:
             '#SBATCH -e ' + self.output_path + '/' + self.experiment_name +
             '/logs/PDF_' + job_ref + '.e\n')
 
-        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/CompareJobSubmit.py'
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ReportJobSubmit.py'
         cluster_params = self.get_cluster_params()
         command = ' '.join(['srun', 'python', file_path] + cluster_params)
         sh_file.write(command + '\n')
@@ -149,7 +149,7 @@ class ReportRunner:
             '#BSUB -e ' + self.output_path + '/' + self.experiment_name +
             '/logs/PDF_' + job_ref + '.e\n')
 
-        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/CompareJobSubmit.py'
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ReportJobSubmit.py'
         cluster_params = self.get_cluster_params()
         command = ' '.join(['python', file_path] + cluster_params)
         sh_file.write(command + '\n')

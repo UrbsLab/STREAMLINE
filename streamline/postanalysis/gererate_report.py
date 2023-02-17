@@ -20,7 +20,7 @@ class ReportJob(Job):
 
     def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
                  exclude=("XCS", "eLCS"),
-                 training=True, data_path=None, rep_data_path=None):
+                 training=True, data_path=None, rep_data_path=None, load_algo=True):
         super().__init__()
         self.time = None
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)
@@ -88,6 +88,13 @@ class ReportJob(Job):
         self.alg_info = pickle.load(file)
         file.close()
         # self.metadata = {}
+
+        if load_algo:
+            temp_algo = []
+            for key in self.alg_info:
+                if self.alg_info[key][0]:
+                    temp_algo.append(key)
+            self.algorithms = temp_algo
 
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
         self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)

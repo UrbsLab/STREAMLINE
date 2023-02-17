@@ -123,11 +123,11 @@ class EDARunner:
                     file_count += 1
 
                     if self.run_cluster == "SLURMOld":
-                        self.submit_slurm_cluster_job()
+                        self.submit_slurm_cluster_job(dataset_path)
                         continue
 
                     if self.run_cluster == "LSFOld":
-                        self.submit_lsf_cluster_job()
+                        self.submit_lsf_cluster_job(dataset_path)
                         continue
 
                     dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
@@ -159,7 +159,7 @@ class EDARunner:
                 parallel_eda_call
             )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
 
-        if not self.run_cluster:
+        if self.run_cluster not in ["SLURMOld", "LSFOld"]:
             self.run_kfold(job_obj_list, run_parallel)
 
     def run_kfold(self, eda_obj_list, run_parallel=True):
@@ -237,8 +237,8 @@ class EDARunner:
         pickle.dump(metadata, pickle_out)
         pickle_out.close()
 
-    def get_cluster_params(self):
-        cluster_params = [self.data_path, self.output_path, self.experiment_name, None, None,
+    def get_cluster_params(self, dataset_path):
+        cluster_params = [dataset_path, self.output_path, self.experiment_name, None, None,
                           self.class_label, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method,
                           self.ignore_features, self.categorical_features, self.top_features,
@@ -246,7 +246,7 @@ class EDARunner:
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 
-    def submit_slurm_cluster_job(self):
+    def submit_slurm_cluster_job(self, dataset_path):
         """
          Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
          and ML modeling algorithm.
@@ -268,13 +268,13 @@ class EDARunner:
             '/logs/P1_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/EDAJobSubmit.py'
-        cluster_params = self.get_cluster_params()
+        cluster_params = self.get_cluster_params(dataset_path)
         command = ' '.join(['srun', 'python', file_path] + cluster_params)
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
-    def submit_lsf_cluster_job(self):
+    def submit_lsf_cluster_job(self, dataset_path):
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
@@ -291,7 +291,7 @@ class EDARunner:
             '/logs/P1_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/EDAJobSubmit.py'
-        cluster_params = self.get_cluster_params()
+        cluster_params = self.get_cluster_params(dataset_path)
         command = ' '.join(['python', file_path] + cluster_params)
         sh_file.write(command + '\n')
         sh_file.close()

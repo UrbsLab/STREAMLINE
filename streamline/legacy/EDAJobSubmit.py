@@ -14,12 +14,12 @@ def run_cluster(argv):
     dataset_path = argv[1]
     output_path = argv[2]
     experiment_name = argv[3]
-    exploration_list = argv[4]
-    plot_list = argv[5]
+    exploration_list = eval(argv[4])
+    plot_list = eval(argv[5])
     class_label = argv[6]
     instance_label = argv[7] if argv[7] != "None" else None
     match_label = argv[8] if argv[8] != "None" else None
-    n_splits = argv[9]
+    n_splits = int(argv[9])
     partition_method = argv[10]
     ignore_features = None if argv[11] == "None" else eval(argv[11])
     categorical_features = None if argv[12] == "None" else eval(argv[12])

@@ -59,7 +59,7 @@ class CompareRunner:
             raise Exception("Experiment must exist (from phase 1) before phase 6 can begin")
 
     def run(self, run_parallel=False):
-        if self.run_cluster and self.run_cluster != "False":
+        if self.run_cluster in ["SLURMOld", "LSFOld"]:
             if self.run_cluster == "SLURMOld":
                 self.submit_slurm_cluster_job()
 
@@ -80,7 +80,7 @@ class CompareRunner:
                 job_obj.run()
 
     def get_cluster_params(self):
-        cluster_params = [self.output_path, self.experiment_name, None, self.algorithms, None,
+        cluster_params = [self.output_path, self.experiment_name, None, False, None,
                           self.class_label, self.instance_label, self.sig_cutoff, self.show_plots]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
