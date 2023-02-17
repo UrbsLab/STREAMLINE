@@ -18,7 +18,8 @@ class StatsRunner:
     def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"),
                  class_label="Class", instance_label=None, scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
-                 plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False):
+                 plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False,
+                 run_cluster=False, queue='defq', reserved_memory=4):
         """
         Args:
             output_path: path to output directory
@@ -73,6 +74,10 @@ class StatsRunner:
         self.metric_weight = metric_weight
         self.top_features = top_features
 
+        self.run_cluster = run_cluster
+        self.queue = queue
+        self.reserved_memory = reserved_memory
+
         # Argument checks
         if not os.path.exists(self.output_path):
             raise Exception("Output path must exist (from phase 1) before phase 6 can begin")
@@ -117,7 +122,7 @@ class StatsRunner:
         if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel)
+            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):

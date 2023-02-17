@@ -27,25 +27,45 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
+phase_list = ["", "Exploratory", "Data Process", "Feature Imp.",
+              "Feature Sel.", "Modeling", "Stats", "Dataset Compare",
+              "Reporting", "Replication", "Replicate Report", "Cleaning"]
 
-def runner(obj, phase_str, run_parallel=True, params=None):
+
+def runner(obj, phase, run_parallel=True, params=None):
     start = time.time()
     obj.run(run_parallel=run_parallel)
-    if not run_parallel or run_parallel == "False":
-        how = "serially"
-    elif run_parallel in ["multiprocessing", "True", True]:
-        how = "parallely"
-    else:
-        how = "with " + run_parallel + " dask cluster"
-    if params and (params['run_cluster'] == "SLURMOld" and phase_str == "Modeling"):
-        print("Waiting Manual Jobs to Finish")
+
+    phase_str = phase_list[phase]
+    how = None
+    if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
+        print("Waiting" + phase_str + "Manual Jobs to Finish")
         while check_phase(params['output_path'], params['experiment_name'],
-                          phase=5, output=False) != 0:
+                          phase=phase, output=False) != 0:
             time.sleep(5)
             how = "with SLURM Manual Jobs"
 
+    else:
+        if not run_parallel or run_parallel == "False":
+            how = "serially"
+        elif run_parallel in ["multiprocessing", "True", True]:
+            how = "parallely"
+        else:
+            how = "with " + str(run_parallel) + " dask cluster"
+
     print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
     del obj
+
+
+def len_datasets(output_path, experiment_name):
+    datasets = os.listdir(output_path + '/' + experiment_name)
+    remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+                   'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks',
+                   experiment_name + '_ML_Pipeline_Report.pdf']
+    for text in remove_list:
+        if text in datasets:
+            datasets.remove(text)
+    return len(datasets)
 
 
 def run(params):
@@ -82,17 +102,23 @@ def run(params):
                         categorical_features=params['categorical_feature_path'],
                         top_features=params['top_features'],
                         categorical_cutoff=params['categorical_cutoff'], sig_cutoff=params['sig_cutoff'],
-                        random_state=params['random_state'])
+                        random_state=params['random_state'],
+                        run_cluster=params['run_cluster'],
+                        queue=params['queue'],
+                        reserved_memory=params['reserved_memory'])
 
-        runner(eda, "Exploratory", run_parallel=params['run_parallel'], params=params)
+        runner(eda, 1, run_parallel=params['run_parallel'], params=params)
 
     if params['do_dataprep']:
         dpr = DataProcessRunner(params['output_path'], params['experiment_name'], scale_data=params['scale_data'],
                                 impute_data=params['impute_data'],
                                 multi_impute=params['multi_impute'], overwrite_cv=params['overwrite_cv'],
                                 class_label=params['class_label'],
-                                instance_label=params['instance_label'], random_state=params['random_state'])
-        runner(dpr, "Data Process", run_parallel=params['run_parallel'], params=params)
+                                instance_label=params['instance_label'], random_state=params['random_state'],
+                                run_cluster=params['run_cluster'],
+                                queue=params['queue'],
+                                reserved_memory=params['reserved_memory'])
+        runner(dpr, 2, run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_imp']:
         f_imp = FeatureImportanceRunner(params['output_path'], params['experiment_name'],
@@ -101,8 +127,11 @@ def run(params):
                                         instance_subset=params['instance_subset'], algorithms=params['feat_algorithms'],
                                         use_turf=params['use_turf'],
                                         turf_pct=params['turf_pct'],
-                                        random_state=params['random_state'], n_jobs=params['n_jobs'])
-        runner(f_imp, "Feature Imp.", run_parallel=params['run_parallel'], params=params)
+                                        random_state=params['random_state'], n_jobs=params['n_jobs'],
+                                        run_cluster=params['run_cluster'],
+                                        queue=params['queue'],
+                                        reserved_memory=params['reserved_memory'])
+        runner(f_imp, 3, run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_sel']:
         f_sel = FeatureSelectionRunner(params['output_path'], params['experiment_name'],
@@ -113,8 +142,11 @@ def run(params):
                                        filter_poor_features=params['filter_poor_features'],
                                        top_features=params['top_features'], export_scores=params['export_scores'],
                                        overwrite_cv=params['overwrite_cv_feat'], random_state=params['random_state'],
-                                       n_jobs=params['n_jobs'])
-        runner(f_sel, "Feature Sel.", run_parallel=params['run_parallel'], params=params)
+                                       n_jobs=params['n_jobs'],
+                                       run_cluster=params['run_cluster'],
+                                       queue=params['queue'],
+                                       reserved_memory=params['reserved_memory'])
+        runner(f_sel, 4, run_parallel=params['run_parallel'], params=params)
 
     if params['do_model']:
         model = ModelExperimentRunner(params['output_path'], params['experiment_name'],
@@ -135,7 +167,7 @@ def run(params):
                                       queue=params['queue'],
                                       reserved_memory=params['reserved_memory'])
 
-        runner(model, "Modeling", run_parallel=params['run_parallel'], params=params)
+        runner(model, 5, run_parallel=params['run_parallel'], params=params)
 
     if params['do_stats']:
         stats = StatsRunner(params['output_path'], params['experiment_name'], algorithms=params['algorithms'],
@@ -146,23 +178,33 @@ def run(params):
                             metric_weight=params['metric_weight'],
                             scale_data=params['scale_data'],
                             plot_roc=params['plot_roc'], plot_prc=params['plot_prc'], plot_fi_box=params['plot_fi_box'],
-                            plot_metric_boxplots=params['plot_metric_boxplots'], show_plots=False)
-        runner(stats, "Stats", run_parallel=params['run_parallel'], params=params)
+                            plot_metric_boxplots=params['plot_metric_boxplots'], show_plots=False,
+                            run_cluster=params['run_cluster'],
+                            queue=params['queue'],
+                            reserved_memory=params['reserved_memory'])
+        runner(stats, 6, run_parallel=params['run_parallel'], params=params)
 
     if params['do_compare_dataset']:
-        compare = CompareRunner(params['output_path'], params['experiment_name'], experiment_path=None,
-                                algorithms=params['algorithms'],
-                                exclude=params['exclude'],
-                                class_label=params['class_label'], instance_label=params['instance_label'],
-                                sig_cutoff=params['sig_cutoff'],
-                                show_plots=False)
-        runner(compare, "Dataset Compare", run_parallel=params['run_parallel'], params=params)
+        if len_datasets(params['output_path'], params['experiment_name']):
+            compare = CompareRunner(params['output_path'], params['experiment_name'], experiment_path=None,
+                                    algorithms=params['algorithms'],
+                                    exclude=params['exclude'],
+                                    class_label=params['class_label'], instance_label=params['instance_label'],
+                                    sig_cutoff=params['sig_cutoff'],
+                                    show_plots=False,
+                                    run_cluster=params['run_cluster'],
+                                    queue=params['queue'],
+                                    reserved_memory=params['reserved_memory'])
+            runner(compare, 7, run_parallel=params['run_parallel'], params=params)
 
     if params['do_report']:
         report = ReportRunner(output_path=params['output_path'], experiment_name=params['experiment_name'],
                               experiment_path=None,
-                              algorithms=params['algorithms'], exclude=params['exclude'])
-        runner(report, "Reporting", run_parallel=params['run_parallel'], params=params)
+                              algorithms=params['algorithms'], exclude=params['exclude'],
+                              run_cluster=params['run_cluster'],
+                              queue=params['queue'],
+                              reserved_memory=params['reserved_memory'])
+        runner(report, 8, run_parallel=params['run_parallel'], params=params)
 
     if params['do_replicate']:
         replicate = ReplicationRunner(params['rep_data_path'], params['dataset_for_rep'], params['output_path'],
@@ -173,16 +215,22 @@ def run(params):
                                       exclude=params['exclude'],
                                       export_feature_correlations=params['rep_export_feature_correlations'],
                                       plot_roc=params['rep_plot_roc'], plot_prc=params['rep_plot_prc'],
-                                      plot_metric_boxplots=params['rep_plot_metric_boxplots'])
-        runner(replicate, "Replication", run_parallel=params['run_parallel'], params=params)
+                                      plot_metric_boxplots=params['rep_plot_metric_boxplots'],
+                                      run_cluster=params['run_cluster'],
+                                      queue=params['queue'],
+                                      reserved_memory=params['reserved_memory'])
+        runner(replicate, 9, run_parallel=params['run_parallel'], params=params)
 
     if params['do_rep_report']:
         report = ReportRunner(output_path=params['output_path'], experiment_name=params['experiment_name'],
                               experiment_path=None,
                               algorithms=params['algorithms'], exclude=params['exclude'], training=False,
                               rep_data_path=params['rep_data_path'],
-                              dataset_for_rep=params['dataset_for_rep'])
-        runner(report, "Replicate Report", run_parallel=params['run_parallel'], params=params)
+                              dataset_for_rep=params['dataset_for_rep'],
+                              run_cluster=params['run_cluster'],
+                              queue=params['queue'],
+                              reserved_memory=params['reserved_memory'])
+        runner(report, 10, run_parallel=params['run_parallel'], params=params)
 
     if params['do_cleanup']:
         clean = CleanRunner(params['output_path'], params['experiment_name'],
@@ -210,7 +258,7 @@ if __name__ == '__main__':
     print("Running with " + str(num_cores) + "CPUs")
 
     if not os.path.exists(config_dict['output_path']):
-        os.mkdir(config_dict['output_path'])
+        os.mkdir(str(config_dict['output_path']))
 
     if config_dict['verbose']:
         stdout_handler = logging.StreamHandler(sys.stdout)
@@ -218,7 +266,7 @@ if __name__ == '__main__':
         stdout_handler.setFormatter(formatter)
         logger.addHandler(stdout_handler)
     else:
-        file_handler = logging.FileHandler(config_dict['output_path'] + '/logs.log')
+        file_handler = logging.FileHandler(str(config_dict['output_path']) + '/logs.log')
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)

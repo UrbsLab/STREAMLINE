@@ -1,4 +1,10 @@
+import os
 import sys
+from pathlib import Path
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(str(Path(SCRIPT_DIR).parent.parent))
+
 from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 

@@ -11,7 +11,7 @@ from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
-from streamline.utils.runners import model_runner_fn, num_cores, run_jobs
+from streamline.utils.runners import model_runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
 
 
@@ -163,6 +163,10 @@ class ModelExperimentRunner:
                         self.submit_slurm_cluster_job(full_path, abbrev, cv_count)
                         continue
 
+                    if self.run_cluster == "LSFOld":
+                        self.submit_lsf_cluster_job(full_path, abbrev, cv_count)
+                        continue
+
                     # logging.info("Running Model "+str(algorithm))
                     if (not self.do_lcs_sweep) or (algorithm not in ['eLCS', 'XCS', 'ExSTraCS']):
                         model = model_str_to_obj(algorithm)(cv_folds=3,
@@ -195,7 +199,7 @@ class ModelExperimentRunner:
                                          ) for job_obj, model in tqdm(job_list))
         if self.run_cluster != "SLURMOld" and run_parallel \
                 and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel)
+            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
                                                         ) for job_obj, model in job_list])
 
@@ -282,9 +286,33 @@ class ModelExperimentRunner:
             '#SBATCH -e ' + self.output_path + '/' + self.experiment_name + '/logs/P5_'
             + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
 
-        file_path = str(Path(__file__).parent.parent.parent) + '/ModelMain.py'
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ModelJobSubmit.py'
         cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
         command = ' '.join(['srun', 'python', file_path] + cluster_params)
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
+
+    def submit_lsf_cluster_job(self, full_path, algorithm, cv_count):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name \
+                   + '/jobs/P5_' + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#BSUB -q ' + self.queue + '\n')
+        sh_file.write('#BSUB -J ' + job_ref + '\n')
+        sh_file.write('#BSUB -R "rusage[mem=' + str(self.reserved_memory) + 'G]"' + '\n')
+        sh_file.write('#BSUB -M ' + str(self.reserved_memory) + 'GB' + '\n')
+        sh_file.write(
+            '#BSUB -o ' + self.output_path + '/' + self.experiment_name
+            + '/logs/P5_' + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.o\n')
+        sh_file.write(
+            '#BSUB -e ' + self.output_path + '/' + self.experiment_name
+            + '/logs/P5_' + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ModelJobSubmit.py'
+        cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
+        command = ' '.join(['python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('bsub < ' + job_name)

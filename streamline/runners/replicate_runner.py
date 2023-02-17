@@ -20,7 +20,8 @@ class ReplicationRunner:
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
                  class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
                  exclude=("XCS", "eLCS"),
-                 export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True):
+                 export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
+                 run_cluster=False, queue='defq', reserved_memory=4):
         """
 
         Args:
@@ -78,6 +79,10 @@ class ReplicationRunner:
         self.multi_impute = metadata['Use Multivariate Imputation']
         self.show_plots = False
         self.scoring_metric = metadata['Primary Metric']
+
+        self.run_cluster = run_cluster
+        self.queue = queue
+        self.reserved_memory = reserved_memory
 
         # Argument checks
         if not os.path.exists(self.output_path):
@@ -153,7 +158,7 @@ class ReplicationRunner:
                 if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
                     Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
                 if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-                    get_cluster(run_parallel)
+                    get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
                     dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
         if file_count == 0:
             # Check that there was at least 1 dataset

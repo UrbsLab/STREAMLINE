@@ -1,8 +1,9 @@
-import logging
 import os
 import glob
 import pickle
+import time
 import dask
+from pathlib import Path
 from joblib import Parallel, delayed
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
@@ -15,9 +16,11 @@ class FeatureImportanceRunner:
     Runner Class for running feature importance jobs for
     cross-validation splits.
     """
+
     def __init__(self, output_path, experiment_name, class_label="Class", instance_label=None,
                  instance_subset=None, algorithms=("MI", "MS"), use_turf=True, turf_pct=True,
-                 random_state=None, n_jobs=None):
+                 random_state=None, n_jobs=None,
+                 run_cluster=False, queue='defq', reserved_memory=4):
         """
 
         Args:
@@ -48,6 +51,9 @@ class FeatureImportanceRunner:
         self.turf_pct = turf_pct
         self.random_state = random_state
         self.n_jobs = n_jobs
+        self.run_cluster = run_cluster
+        self.queue = queue
+        self.reserved_memory = reserved_memory
 
         if self.n_jobs is None:
             self.n_jobs = 1
@@ -87,6 +93,15 @@ class FeatureImportanceRunner:
                 if not os.path.exists(full_path + "/feature_selection/mutual_information/pickledForPhase4"):
                     os.mkdir(full_path + "/feature_selection/mutual_information/pickledForPhase4")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
+
+                    if self.run_cluster == "SLURMOld":
+                        self.submit_slurm_cluster_job(cv_train_path, experiment_path, "MI")
+                        continue
+
+                    if self.run_cluster == "LSFOld":
+                        self.submit_lsf_cluster_job(cv_train_path, experiment_path, "MI")
+                        continue
+
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
                                                 self.instance_label, self.instance_subset, "MI",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
@@ -102,6 +117,15 @@ class FeatureImportanceRunner:
                 if not os.path.exists(full_path + "/feature_selection/multisurf/pickledForPhase4"):
                     os.mkdir(full_path + "/feature_selection/multisurf/pickledForPhase4")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
+
+                    if self.run_cluster == "SLURMOld":
+                        self.submit_slurm_cluster_job(cv_train_path, experiment_path, "MS")
+                        continue
+
+                    if self.run_cluster == "LSFOld":
+                        self.submit_lsf_cluster_job(cv_train_path, experiment_path, "MS")
+                        continue
+
                     job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
                                                 self.instance_label, self.instance_subset, "MS",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
@@ -113,7 +137,7 @@ class FeatureImportanceRunner:
         if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel)
+            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):
@@ -129,15 +153,70 @@ class FeatureImportanceRunner:
         pickle.dump(metadata, pickle_out)
         pickle_out.close()
 
+    def get_cluster_params(self, cv_train_path, experiment_path, algorithm):
+        cluster_params = [cv_train_path, experiment_path, self.class_label,
+                          self.instance_label, self.instance_subset, algorithm,
+                          self.use_turf, self.turf_pct, self.random_state, self.n_jobs]
+        cluster_params = [str(i) for i in cluster_params]
+        return cluster_params
+
+    def submit_slurm_cluster_job(self, cv_train_path, experiment_path, algorithm):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#SBATCH -p ' + self.queue + '\n')
+        sh_file.write('#SBATCH --job-name=' + job_ref + '\n')
+        sh_file.write('#SBATCH --mem=' + str(self.reserved_memory) + 'G' + '\n')
+        # sh_file.write('#BSUB -M '+str(maximum_memory)+'GB'+'\n')
+        sh_file.write(
+            '#SBATCH -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P3_' + job_ref + '.o\n')
+        sh_file.write(
+            '#SBATCH -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P3_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FImpJobSubmit.py'
+        cluster_params = self.get_cluster_params(cv_train_path, experiment_path, algorithm)
+        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('sbatch ' + job_name)
+
+    def submit_lsf_cluster_job(self, cv_train_path, experiment_path, algorithm):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#BSUB -q ' + self.queue + '\n')
+        sh_file.write('#BSUB -J ' + job_ref + '\n')
+        sh_file.write('#BSUB -R "rusage[mem=' + str(self.reserved_memory) + 'G]"' + '\n')
+        sh_file.write('#BSUB -M ' + str(self.reserved_memory) + 'GB' + '\n')
+        sh_file.write(
+            '#BSUB -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P3_' + job_ref + '.o\n')
+        sh_file.write(
+            '#BSUB -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P3_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FImpJobSubmit.py'
+        cluster_params = self.get_cluster_params(cv_train_path, experiment_path, algorithm)
+        command = ' '.join(['python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('bsub < ' + job_name)
+
 
 class FeatureSelectionRunner:
     """
     Runner Class for running feature selection jobs for
     cross-validation splits.
     """
+
     def __init__(self, output_path, experiment_name, algorithms, class_label="Class", instance_label=None,
                  max_features_to_keep=2000, filter_poor_features=True, top_features=40, export_scores=True,
-                 overwrite_cv=True, random_state=None, n_jobs=None):
+                 overwrite_cv=True, random_state=None, n_jobs=None,
+                 run_cluster=False, queue='defq', reserved_memory=4):
         """
 
         Args:
@@ -172,6 +251,10 @@ class FeatureSelectionRunner:
         self.random_state = random_state
         self.n_jobs = n_jobs
 
+        self.run_cluster = run_cluster
+        self.queue = queue
+        self.reserved_memory = reserved_memory
+
         # Argument checks
         if not os.path.exists(self.output_path):
             raise Exception("Output path must exist (from phase 1) before phase 4 can begin")
@@ -196,7 +279,17 @@ class FeatureSelectionRunner:
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
             experiment_path = self.output_path + '/' + self.experiment_name
+
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
+
+            if self.run_cluster == "SLURMOld":
+                self.submit_slurm_cluster_job(full_path, len(cv_dataset_paths))
+                continue
+
+            if self.run_cluster == "LSFOld":
+                self.submit_lsf_cluster_job(full_path, len(cv_dataset_paths))
+                continue
+
             job_obj = FeatureSelection(full_path, len(cv_dataset_paths), self.algorithms,
                                        self.class_label, self.instance_label, self.export_scores,
                                        self.top_features, self.max_features_to_keep,
@@ -209,7 +302,7 @@ class FeatureSelectionRunner:
         if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel)
+            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):
@@ -224,3 +317,57 @@ class FeatureSelectionRunner:
         pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
         pickle.dump(metadata, pickle_out)
         pickle_out.close()
+
+    def get_cluster_params(self, full_path, n_datasets):
+        cluster_params = [full_path, n_datasets, self.algorithms,
+                          self.class_label, self.instance_label, self.export_scores,
+                          self.top_features, self.max_features_to_keep,
+                          self.filter_poor_features, self.overwrite_cv]
+        cluster_params = [str(i) for i in cluster_params]
+        return cluster_params
+
+    def submit_slurm_cluster_job(self, full_path, n_datasets):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#SBATCH -p ' + self.queue + '\n')
+        sh_file.write('#SBATCH --job-name=' + job_ref + '\n')
+        sh_file.write('#SBATCH --mem=' + str(self.reserved_memory) + 'G' + '\n')
+        # sh_file.write('#BSUB -M '+str(maximum_memory)+'GB'+'\n')
+        sh_file.write(
+            '#SBATCH -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P4_' + job_ref + '.o\n')
+        sh_file.write(
+            '#SBATCH -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P4_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FSelJobSubmit.py'
+        cluster_params = self.get_cluster_params(full_path, n_datasets)
+        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('sbatch ' + job_name)
+
+    def submit_lsf_cluster_job(self, full_path, n_datasets):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#BSUB -q ' + self.queue + '\n')
+        sh_file.write('#BSUB -J ' + job_ref + '\n')
+        sh_file.write('#BSUB -R "rusage[mem=' + str(self.reserved_memory) + 'G]"' + '\n')
+        sh_file.write('#BSUB -M ' + str(self.reserved_memory) + 'GB' + '\n')
+        sh_file.write(
+            '#BSUB -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P4_' + job_ref + '.o\n')
+        sh_file.write(
+            '#BSUB -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P4_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FSelJobSubmit.py'
+        cluster_params = self.get_cluster_params(full_path, n_datasets)
+        command = ' '.join(['python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('bsub < ' + job_name)
