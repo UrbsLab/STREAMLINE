@@ -154,7 +154,7 @@ class EDARunner:
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
 
         if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+            get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(
                 parallel_eda_call
             )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
@@ -186,7 +186,7 @@ class EDARunner:
         if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
             Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
         if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+            get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(parallel_kfold_call)(job_obj) for job_obj in job_list])
 
     def make_dir_tree(self):

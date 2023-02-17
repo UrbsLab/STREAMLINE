@@ -199,7 +199,7 @@ class ModelExperimentRunner:
                                          ) for job_obj, model in tqdm(job_list))
         if self.run_cluster != "SLURMOld" and run_parallel \
                 and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-            get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+            get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
                                                         ) for job_obj, model in job_list])
 

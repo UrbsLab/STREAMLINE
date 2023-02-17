@@ -158,7 +158,7 @@ class ReplicationRunner:
                 if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
                     Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
                 if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
-                    get_cluster(run_parallel, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+                    get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
                     dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
         if file_count == 0:
             # Check that there was at least 1 dataset
