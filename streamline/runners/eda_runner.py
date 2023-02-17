@@ -147,13 +147,13 @@ class EDARunner:
             if file_count == 0:  # Check that there was at least 1 dataset
                 raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
 
-        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
+        if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(
                 delayed(
                     parallel_eda_call
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
 
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+        if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(
                 parallel_eda_call
@@ -183,9 +183,9 @@ class EDARunner:
             else:  # Run job locally, serially
                 kfold_obj.run()
             job_counter += 1
-        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
+        if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+        if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(parallel_kfold_call)(job_obj) for job_obj in job_list])
 

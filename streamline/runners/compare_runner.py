@@ -73,7 +73,7 @@ class CompareRunner:
                 # p.start()
                 # p.join()
                 Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
-            elif run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+            elif self.run_cluster and "Old" not in self.run_cluster:
                 get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
                 dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]])
             else:

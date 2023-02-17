@@ -92,9 +92,9 @@ class DataProcessRunner:
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
                                              self.class_label, self.instance_label, self.random_state)
                     job_obj.run()
-        if run_parallel and (run_parallel in ["multiprocessing", "True", True]):
+        if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
-        if run_parallel and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+        if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
