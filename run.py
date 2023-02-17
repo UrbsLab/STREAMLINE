@@ -74,8 +74,18 @@ def len_datasets(output_path, experiment_name):
     return len(datasets)
 
 
-def run(params):
-    start_g = time.time()
+def process_params(params):
+
+    if config_dict['run_cluster'] and not "Old" in config_dict['run_cluster']:
+        config_dict['run_parallel'] = config_dict['run_cluster']
+
+    if config_dict['do_till_report']:
+        config_dict["do_eda"] = True
+        config_dict["do_dataprep"] = True
+        config_dict["do_feat_sel"] = True
+        config_dict["do_model"] = True
+        config_dict["do_compare_dataset"] = True
+        config_dict["do_report"] = True
 
     if 'feat_algorithms' not in params:
         feat_algorithms = list()
@@ -96,6 +106,12 @@ def run(params):
         params['match_label'] = None
     if params['instance_label'] == '':
         params['instance_label'] = None
+
+    return params
+
+
+def run(params):
+    start_g = time.time()
 
     if params['do_eda']:
         eda = EDARunner(params['dataset_path'], params['output_path'], params['experiment_name'], exploration_list=None,
@@ -261,7 +277,7 @@ if __name__ == '__main__':
     else:
         config_dict = vars(parser_function(sys.argv))
 
-    print("Running with " + str(num_cores) + "CPUs")
+    # print("Running with " + str(num_cores) + " CPUs")
 
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(str(config_dict['output_path']))
@@ -277,12 +293,6 @@ if __name__ == '__main__':
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
-    if config_dict['do_till_report']:
-        config_dict["do_eda"] = True
-        config_dict["do_dataprep"] = True
-        config_dict["do_feat_sel"] = True
-        config_dict["do_model"] = True
-        config_dict["do_compare_dataset"] = True
-        config_dict["do_report"] = True
+    config_dict = process_params(config_dict)
 
     sys.exit(run(config_dict))
