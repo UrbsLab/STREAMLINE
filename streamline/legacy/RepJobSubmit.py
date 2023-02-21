@@ -11,8 +11,8 @@ from streamline.postanalysis.model_replicate import ReplicateJob
 
 def run_cluster(argv):
     dataset_filename = argv[1]
-    dataset_for_rep = argv[2] if argv[2] != "None" else None
-    full_path = argv[3] if argv[3] != "None" else None
+    dataset_for_rep = argv[2]
+    full_path = argv[3]
     class_label = argv[4]
     instance_label = argv[5] if argv[5] != "None" else None
     match_label = argv[6] if argv[6] != "None" else None
@@ -26,7 +26,7 @@ def run_cluster(argv):
             temp_algo.append(key)
     algorithms = temp_algo
     exclude = None
-    len_cv = argv[9] if argv[9] != "None" else None
+    len_cv = int(argv[9])
     export_feature_correlations = bool(argv[10])
     plot_roc = bool(argv[11])
     plot_prc = bool(argv[12])

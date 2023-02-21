@@ -45,7 +45,10 @@ def runner(obj, phase, run_parallel=True, params=None):
         if phase == 1:
             time.sleep(5)
         while len(check_phase(params['output_path'], params['experiment_name'], 
-                          phase=phase, output=True)) != 0:
+                              phase=phase, len_only=True,
+                              rep_data_path=params['rep_data_path'], 
+                              dataset_for_rep=params['dataset_for_rep'], 
+                              output=True)) != 0:
             print()
             print("Waiting for " + phase_str + " Manual Jobs to Finish")
             time.sleep(5)

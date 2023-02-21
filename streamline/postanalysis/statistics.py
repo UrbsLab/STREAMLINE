@@ -619,10 +619,12 @@ class StatsJob(Job):
             for algorithm in self.algorithms:
                 temp_list.append(metric_dict[algorithm][metric])
             td = pd.DataFrame(temp_list)
-            td = td.transpose()
+            td = td.transpose().astype('float')
+
             td.columns = self.algorithms
+
             # Generate boxplot
-            td.boxplot(column=self.algorithms, rot=90)
+            td.plot(kind='box', rot=90)
             # Specify plot labels
             plt.ylabel(str(metric))
             plt.xlabel('ML Algorithm')
