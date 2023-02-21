@@ -150,7 +150,7 @@ class ReplicationRunner:
                                            impute_data=self.impute_data,
                                            multi_impute=self.multi_impute, show_plots=self.show_plots,
                                            scoring_metric=self.scoring_metric)
-                    if run_parallel or run_parallel != "False":
+                    if run_parallel and run_parallel != "False":
                         # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
                         job_list.append(job_obj)
                     else:

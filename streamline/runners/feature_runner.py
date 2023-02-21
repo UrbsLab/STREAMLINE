@@ -294,7 +294,7 @@ class FeatureSelectionRunner:
                                        self.class_label, self.instance_label, self.export_scores,
                                        self.top_features, self.max_features_to_keep,
                                        self.filter_poor_features, self.overwrite_cv)
-            if run_parallel or run_parallel != "False":
+            if run_parallel and run_parallel != "False":
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
                 job_list.append(job_obj)
             else:

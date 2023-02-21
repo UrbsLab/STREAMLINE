@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 import re
@@ -178,7 +179,7 @@ class EDARunner:
             kfold_obj = KFoldPartitioner(obj.dataset,
                                          self.partition_method, self.output_path + '/' + self.experiment_name,
                                          self.n_splits, self.random_state)
-            if run_parallel or run_parallel != "False":  # Run as job in parallel
+            if run_parallel and run_parallel != "False":  # Run as job in parallel
                 job_list.append(kfold_obj)
             else:  # Run job locally, serially
                 kfold_obj.run()

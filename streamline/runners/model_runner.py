@@ -186,7 +186,7 @@ class ModelExperimentRunner:
                     job_obj = ModelJob(full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
                                        self.timeout, self.uniform_fi, self.save_plots, self.random_state)
-                    if run_parallel or run_parallel != "False":
+                    if run_parallel and run_parallel != "False":
                         # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
                         # job_list.append(p)
                         job_list.append((job_obj, model))
