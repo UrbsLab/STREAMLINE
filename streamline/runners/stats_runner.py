@@ -1,7 +1,9 @@
 import os
 import glob
+import time
 import dask
 import pickle
+from pathlib import Path
 from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS
 from streamline.modeling.utils import is_supported_model
@@ -86,7 +88,7 @@ class StatsRunner:
 
         self.save_metadata()
 
-    def run(self, run_parallel):
+    def run(self, run_parallel=False):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
@@ -110,6 +112,15 @@ class StatsRunner:
 
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
             cv_partitions = len(cv_dataset_paths)
+
+            if self.run_cluster == "SLURMOld":
+                self.submit_slurm_cluster_job(full_path, cv_partitions)
+                continue
+
+            if self.run_cluster == "LSFOld":
+                self.submit_lsf_cluster_job(full_path, cv_partitions)
+                continue
+
             job_obj = StatsJob(full_path, self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
                                cv_partitions, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                                self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
@@ -139,3 +150,57 @@ class StatsRunner:
         pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
         pickle.dump(metadata, pickle_out)
         pickle_out.close()
+
+    def get_cluster_params(self, full_path, len_cv):
+        cluster_params = [full_path, None, self.class_label, self.instance_label, self.scoring_metric,
+                          len_cv, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
+                          self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
+                          self.show_plots]
+        cluster_params = [str(i) for i in cluster_params]
+        return cluster_params
+
+    def submit_slurm_cluster_job(self, dataset_path, len_cv):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#SBATCH -p ' + self.queue + '\n')
+        sh_file.write('#SBATCH --job-name=' + job_ref + '\n')
+        sh_file.write('#SBATCH --mem=' + str(self.reserved_memory) + 'G' + '\n')
+        # sh_file.write('#BSUB -M '+str(maximum_memory)+'GB'+'\n')
+        sh_file.write(
+            '#SBATCH -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P6_' + job_ref + '.o\n')
+        sh_file.write(
+            '#SBATCH -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P6_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/StatsJobSubmit.py'
+        cluster_params = self.get_cluster_params(dataset_path, len_cv)
+        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('sbatch ' + job_name)
+
+    def submit_lsf_cluster_job(self, dataset_path, len_cv):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#BSUB -q ' + self.queue + '\n')
+        sh_file.write('#BSUB -J ' + job_ref + '\n')
+        sh_file.write('#BSUB -R "rusage[mem=' + str(self.reserved_memory) + 'G]"' + '\n')
+        sh_file.write('#BSUB -M ' + str(self.reserved_memory) + 'GB' + '\n')
+        sh_file.write(
+            '#BSUB -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P6_' + job_ref + '.o\n')
+        sh_file.write(
+            '#BSUB -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P6_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/StatsJobSubmit.py'
+        cluster_params = self.get_cluster_params(dataset_path, len_cv)
+        command = ' '.join(['python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('bsub < ' + job_name)

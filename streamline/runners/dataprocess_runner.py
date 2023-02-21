@@ -50,7 +50,7 @@ class DataProcessRunner:
 
         self.save_metadata()
 
-    def run(self, run_parallel=True):
+    def run(self, run_parallel=False):
         job_counter = 0
         job_list = []
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
@@ -119,11 +119,6 @@ class DataProcessRunner:
         return cluster_params
 
     def submit_slurm_cluster_job(self, cv_train_path, cv_test_path):
-        """
-         Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
-         and ML modeling algorithm.
-         Runs in parallel on a Linux-based computing cluster that uses SLURM for job scheduling.
-         """
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')

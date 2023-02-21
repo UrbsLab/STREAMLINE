@@ -83,9 +83,9 @@ class ReportRunner:
             job_obj = ReportJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                                 self.training, self.train_data_path, self.rep_data_path)
             # running direct because it's faster
-            HACK = True
+            HACK = not run_parallel
             if not HACK:
-                if run_parallel and run_parallel in ["multiprocessing", "True", True]:
+                if run_parallel and run_parallel != "False" and not self.run_cluster:
                     # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                     # p.start()
                     # p.join()
@@ -106,11 +106,6 @@ class ReportRunner:
         return cluster_params
 
     def submit_slurm_cluster_job(self):
-        """
-         Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
-         and ML modeling algorithm.
-         Runs in parallel on a Linux-based computing cluster that uses SLURM for job scheduling.
-         """
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/PDF_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')

@@ -117,7 +117,7 @@ class ModelExperimentRunner:
         self.save_metadata()
         self.save_alginfo()
 
-    def run(self, run_parallel):
+    def run(self, run_parallel=False):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
@@ -192,13 +192,12 @@ class ModelExperimentRunner:
                         job_list.append((job_obj, model))
                     else:
                         job_obj.run(model)
-        if self.run_cluster != "SLURMOld" and run_parallel and run_parallel in ["multiprocessing", "True", True]:
+        if run_parallel and run_parallel != "False" and not self.run_cluster:
             # run_jobs(job_list)
             Parallel(n_jobs=num_cores)(
                 delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in tqdm(job_list))
-        if self.run_cluster != "SLURMOld" and run_parallel \
-                and (run_parallel not in ["multiprocessing", "True", True, "False"]):
+        if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
                                                         ) for job_obj, model in job_list])
@@ -265,11 +264,6 @@ class ModelExperimentRunner:
         return cluster_params
 
     def submit_slurm_cluster_job(self, full_path, algorithm, cv_count):
-        """
-         Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
-         and ML modeling algorithm.
-         Runs in parallel on a Linux-based computing cluster that uses SLURM for job scheduling.
-         """
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P5_' + str(algorithm) \
                    + '_' + str(cv_count) + '_' + job_ref + '_run.sh'

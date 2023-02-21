@@ -108,7 +108,7 @@ class EDARunner:
             raise e
         self.save_metadata()
 
-    def run(self, run_parallel=True):
+    def run(self, run_parallel=False):
         file_count, job_counter = 0, 0
         unique_datanames = []
         job_list, job_obj_list = [], []
@@ -248,11 +248,6 @@ class EDARunner:
         return cluster_params
 
     def submit_slurm_cluster_job(self, dataset_path):
-        """
-         Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
-         and ML modeling algorithm.
-         Runs in parallel on a Linux-based computing cluster that uses SLURM for job scheduling.
-         """
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')

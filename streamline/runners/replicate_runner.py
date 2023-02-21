@@ -1,7 +1,9 @@
 import os
 import glob
 import pickle
+import time
 import dask
+from pathlib import Path
 from joblib import Parallel, delayed
 from streamline.modeling.utils import SUPPORTED_MODELS, is_supported_model
 from streamline.postanalysis.model_replicate import ReplicateJob
@@ -120,7 +122,7 @@ class ReplicationRunner:
 
         self.save_metadata()
 
-    def run(self, run_parallel):
+    def run(self, run_parallel=False):
         # Determine file extension of datasets in target folder:
         file_count = 0
         unique_datanames = list()
@@ -138,9 +140,18 @@ class ReplicationRunner:
                 if apply_name not in unique_datanames:
                     file_count += 1
                     unique_datanames.append(apply_name)
+
+                    if self.run_cluster == "SLURMOld":
+                        self.submit_slurm_cluster_job(dataset_filename)
+                        continue
+
+                    if self.run_cluster == "LSFOld":
+                        self.submit_lsf_cluster_job(dataset_filename)
+                        continue
+
                     job_obj = ReplicateJob(dataset_filename,
                                            self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
-                                           self.match_label, algorithms=self.algorithms, exclude=("XCS", "eLCS"),
+                                           self.match_label, algorithms=self.algorithms, exclude=None,
                                            cv_partitions=self.cv_partitions,
                                            export_feature_correlations=self.export_feature_correlations,
                                            plot_roc=self.plot_roc, plot_prc=self.plot_prc,
@@ -189,3 +200,58 @@ class ReplicationRunner:
                 algorithms.append(algorithm)
         self.algorithms = algorithms
         pickle_in.close()
+
+    def get_cluster_params(self, dataset_filename):
+        cluster_params = [dataset_filename, self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
+                          self.match_label, None, None, self.cv_partitions, self.export_feature_correlations,
+                          self.plot_roc, self.plot_prc, self.plot_metric_boxplots,
+                          self.categorical_cutoff, self.sig_cutoff, self.scale_data, self.impute_data,
+                          self.multi_impute, self.show_plots, self.scoring_metric]
+        cluster_params = [str(i) for i in cluster_params]
+        return cluster_params
+
+    def submit_slurm_cluster_job(self, dataset_filename):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P9_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#SBATCH -p ' + self.queue + '\n')
+        sh_file.write('#SBATCH --job-name=' + job_ref + '\n')
+        sh_file.write('#SBATCH --mem=' + str(self.reserved_memory) + 'G' + '\n')
+        # sh_file.write('#BSUB -M '+str(maximum_memory)+'GB'+'\n')
+        sh_file.write(
+            '#SBATCH -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P9_' + job_ref + '.o\n')
+        sh_file.write(
+            '#SBATCH -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P9_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/RepJobSubmit.py'
+        cluster_params = self.get_cluster_params(dataset_filename)
+        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('sbatch ' + job_name)
+
+    def submit_lsf_cluster_job(self, dataset_filename):
+        job_ref = str(time.time())
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P9_' + job_ref + '_run.sh'
+        sh_file = open(job_name, 'w')
+        sh_file.write('#!/bin/bash\n')
+        sh_file.write('#BSUB -q ' + self.queue + '\n')
+        sh_file.write('#BSUB -J ' + job_ref + '\n')
+        sh_file.write('#BSUB -R "rusage[mem=' + str(self.reserved_memory) + 'G]"' + '\n')
+        sh_file.write('#BSUB -M ' + str(self.reserved_memory) + 'GB' + '\n')
+        sh_file.write(
+            '#BSUB -o ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P9_' + job_ref + '.o\n')
+        sh_file.write(
+            '#BSUB -e ' + self.output_path + '/' + self.experiment_name +
+            '/logs/P9_' + job_ref + '.e\n')
+
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/RepJobSubmit.py'
+        cluster_params = self.get_cluster_params(dataset_filename)
+        command = ' '.join(['python', file_path] + cluster_params)
+        sh_file.write(command + '\n')
+        sh_file.close()
+        os.system('bsub < ' + job_name)

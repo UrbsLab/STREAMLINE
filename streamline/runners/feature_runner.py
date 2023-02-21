@@ -66,7 +66,7 @@ class FeatureImportanceRunner:
 
         self.save_metadata()
 
-    def run(self, run_parallel):
+    def run(self, run_parallel=False):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
@@ -263,7 +263,7 @@ class FeatureSelectionRunner:
 
         self.save_metadata()
 
-    def run(self, run_parallel):
+    def run(self, run_parallel=False):
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)

@@ -86,11 +86,6 @@ class CompareRunner:
         return cluster_params
 
     def submit_slurm_cluster_job(self):
-        """
-         Runs ModelJob. once for each combination of cv dataset (for each original target dataset)
-         and ML modeling algorithm.
-         Runs in parallel on a Linux-based computing cluster that uses SLURM for job scheduling.
-         """
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
