@@ -1,161 +1,83 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>streamline.featurefns.importance &mdash; STREAMLINE 2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../../index.html" class="icon icon-home"> STREAMLINE
           
-
-          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">STREAMLINE API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">STREAMLINE</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>streamline.featurefns.importance</li>
-    
-    
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.featurefns.importance</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for streamline.featurefns.importance</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">random</span>
@@ -166,16 +88,17 @@
 <span class="kn">from</span> <span class="nn">skrebate</span> <span class="kn">import</span> <span class="n">MultiSURF</span><span class="p">,</span> <span class="n">TURF</span>
 <span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
 <span class="kn">from</span> <span class="nn">streamline.utils.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">num_cores</span>
 
 
 <div class="viewcode-block" id="FeatureImportance"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance">[docs]</a><span class="k">class</span> <span class="nc">FeatureImportance</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initializer for Feature Importance Job</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_train_path</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instance_subset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_train_path</span><span class="p">,</span> <span class="n">experiment_path</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">instance_subset</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
                  <span class="n">algorithm</span><span class="o">=</span><span class="s2">&quot;MS&quot;</span><span class="p">,</span> <span class="n">use_turf</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">turf_pct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            cv_train_path: path for the cross-validation dataset created</span>
@@ -205,7 +128,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
 
 <div class="viewcode-block" id="FeatureImportance.run"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run all elements of the feature importance evaluation:</span>
 <span class="sd">        applies either mutual information and multisurf and saves a sorted dictionary</span>
 <span class="sd">        of features with associated scores</span>
@@ -236,7 +159,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">header</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
         <span class="c1"># Save sorted feature importance scores:</span>
-        <span class="n">score_dict</span><span class="p">,</span> <span class="n">score_sorted_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_save_fi_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">)</span>
+        <span class="n">score_dict</span><span class="p">,</span> <span class="n">score_sorted_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_save_fi_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">)</span>
         <span class="c1"># Pickle feature importance information to be used in Phase 4 (feature selection)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pickle_scores</span><span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">score_dict</span><span class="p">,</span> <span class="n">score_sorted_features</span><span class="p">)</span>
         <span class="c1"># Save phase runtime</span>
@@ -251,7 +174,7 @@
         <span class="n">job_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="FeatureImportance.prepare_data"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.prepare_data">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads target cv training dataset, separates class from features and removes instance labels.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_train_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
@@ -261,7 +184,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cv_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_train_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="FeatureImportance.run_mutual_information"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.run_mutual_information">[docs]</a>    <span class="k">def</span> <span class="nf">run_mutual_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run mutual information on target training dataset and return scores as well as file path/name information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">alg_name</span> <span class="o">=</span> <span class="s2">&quot;mutual_information&quot;</span>
@@ -274,7 +197,7 @@
         <span class="k">return</span> <span class="n">scores</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">alg_name</span></div>
 
 <div class="viewcode-block" id="FeatureImportance.run_multi_surf"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.run_multi_surf">[docs]</a>    <span class="k">def</span> <span class="nf">run_multi_surf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run multiSURF (a Relief-based feature importance algorithm able to detect both univariate</span>
 <span class="sd">        and interaction effects) and return scores as well as file path/name information</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -320,7 +243,7 @@
                     <span class="o">+</span> <span class="n">alg_name</span> <span class="o">+</span> <span class="s2">&quot;_scores_cv_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_turf</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -334,15 +257,11 @@
         <span class="k">return</span> <span class="n">scores</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">alg_name</span></div>
 
 <div class="viewcode-block" id="FeatureImportance.pickle_scores"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.pickle_scores">[docs]</a>    <span class="k">def</span> <span class="nf">pickle_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_name</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">score_dict</span><span class="p">,</span> <span class="n">score_sorted_features</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pickle the scores, score dictionary and features sorted by score to be used primarily</span>
 <span class="sd">        in phase 4 (feature selection) of pipeline</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Save Scores to pickled file for later use</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
-                              <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> <span class="o">+</span> <span class="n">output_name</span> <span class="o">+</span> <span class="s2">&quot;/pickledForPhase4&quot;</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
-                     <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> <span class="o">+</span> <span class="n">output_name</span> <span class="o">+</span> <span class="s2">&quot;/pickledForPhase4&quot;</span><span class="p">)</span>
         <span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> <span class="o">+</span> <span class="n">output_name</span>
             <span class="o">+</span> <span class="s2">&quot;/pickledForPhase4/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
@@ -350,7 +269,7 @@
         <span class="n">outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="FeatureImportance.save_runtime"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.save_runtime">[docs]</a>    <span class="k">def</span> <span class="nf">save_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save phase runtime</span>
 <span class="sd">        Args:</span>
 <span class="sd">            output_name: name of the output tag</span>
@@ -361,16 +280,14 @@
         <span class="n">runtime_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span><span class="p">))</span>
         <span class="n">runtime_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="FeatureImportance.sort_save_fi_scores"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.sort_save_fi_scores">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">sort_save_fi_scores</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">ordered_feature_names</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">algo_name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FeatureImportance.sort_save_fi_scores"><a class="viewcode-back" href="../../../streamline.featurefns.importance.html#streamline.featurefns.importance.FeatureImportance.sort_save_fi_scores">[docs]</a>    <span class="k">def</span> <span class="nf">sort_save_fi_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">ordered_feature_names</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a feature score dictionary and a dictionary sorted by decreasing feature importance scores.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            scores:</span>
 <span class="sd">            ordered_feature_names:</span>
-<span class="sd">            filename:</span>
-<span class="sd">            algo_name:</span>
+<span class="sd">            alg_name:</span>
 
 <span class="sd">        Returns: score_dict, score_sorted_features - dictionary of scores and score sorted name of features</span>
 
@@ -382,58 +299,61 @@
             <span class="n">score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="c1"># Sort features by decreasing score</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> \
+                   <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> \
+                   <span class="o">+</span> <span class="n">alg_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">alg_name</span> <span class="o">+</span> <span class="s2">&quot;_scores_cv_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+
         <span class="n">score_sorted_features</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">score_dict</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">score_dict</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># Save scores to &#39;formatted&#39; file</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="n">quoting</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_MINIMAL</span><span class="p">)</span>
-            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;Sorted &quot;</span> <span class="o">+</span> <span class="n">algo_name</span> <span class="o">+</span> <span class="s2">&quot; Scores&quot;</span><span class="p">])</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;Sorted &quot;</span> <span class="o">+</span> <span class="n">alg_name</span> <span class="o">+</span> <span class="s2">&quot; Scores&quot;</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">score_sorted_features</span><span class="p">:</span>
                 <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">k</span><span class="p">,</span> <span class="n">score_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]])</span>
         <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">score_dict</span><span class="p">,</span> <span class="n">score_sorted_features</span></div></div>
+
+    <span class="c1"># def __getstate__(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;called when pickling - this hack allows subprocesses to</span>
+    <span class="c1">#        be spawned without the AuthenticationString raising an error&quot;&quot;&quot;</span>
+    <span class="c1">#     state = self.__dict__.copy()</span>
+    <span class="c1">#     conf = state[&#39;_config&#39;]</span>
+    <span class="c1">#     if &#39;authkey&#39; in conf:</span>
+    <span class="c1">#         # del conf[&#39;authkey&#39;]</span>
+    <span class="c1">#         conf[&#39;authkey&#39;] = bytes(conf[&#39;authkey&#39;])</span>
+    <span class="c1">#     return state</span>
+    <span class="c1">#</span>
+    <span class="c1"># def __setstate__(self, state):</span>
+    <span class="c1">#     &quot;&quot;&quot;for unpickling&quot;&quot;&quot;</span>
+    <span class="c1">#     state[&#39;_config&#39;][&#39;authkey&#39;] = state[&#39;_config&#39;][&#39;authkey&#39;]</span>
+    <span class="c1">#     self.__dict__.update(state)</span>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
-
-    </p>
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

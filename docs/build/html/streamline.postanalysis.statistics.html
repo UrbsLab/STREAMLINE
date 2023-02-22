@@ -1,96 +1,58 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>streamline.postanalysis.statistics module &mdash; STREAMLINE 2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="streamline.postanalysis.stats_runner module" href="streamline.postanalysis.stats_runner.html" />
-    <link rel="prev" title="streamline.postanalysis package" href="streamline.postanalysis.html" /> 
+    <link rel="next" title="streamline.runners package" href="streamline.runners.html" />
+    <link rel="prev" title="streamline.postanalysis.model_replicate module" href="streamline.postanalysis.model_replicate.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> STREAMLINE
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE API Documentation</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Code Documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
@@ -98,6 +60,7 @@
 <li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
 </ul>
 </li>
@@ -107,82 +70,38 @@
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">STREAMLINE</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="modules.html">STREAMLINE API Documentation</a> &raquo;</li>
-        
-          <li><a href="streamline.html">streamline package</a> &raquo;</li>
-        
-          <li><a href="streamline.postanalysis.html">streamline.postanalysis package</a> &raquo;</li>
-        
-      <li>streamline.postanalysis.statistics module</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+          <li class="breadcrumb-item"><a href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+      <li class="breadcrumb-item active">streamline.postanalysis.statistics module</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/streamline.postanalysis.statistics.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-streamline.postanalysis.statistics">
-<span id="streamline-postanalysis-statistics-module"></span><h1>streamline.postanalysis.statistics module<a class="headerlink" href="#module-streamline.postanalysis.statistics" title="Permalink to this heading">¶</a></h1>
+<span id="streamline-postanalysis-statistics-module"></span><h1>streamline.postanalysis.statistics module<a class="headerlink" href="#module-streamline.postanalysis.statistics" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.postanalysis.statistics.</span></span><span class="sig-name descname"><span class="pre">StatsJob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced_accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced_accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_roc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_prc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fi_box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_metric_boxplots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.postanalysis.statistics.</span></span><span class="sig-name descname"><span class="pre">StatsJob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced_accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced_accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_roc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_prc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_fi_box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_metric_boxplots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="streamline.utils.job.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
 <p>This ‘Job’ script creates summaries of ML classification evaluation statistics
 (means and standard deviations), ROC and PRC plots (comparing CV performance
@@ -217,7 +136,7 @@ dataset folder (data_path) in Phase 1 (i.e. stats summary completed for all cv d
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.composite_fi_plot">
-<span class="sig-name descname"><span class="pre">composite_fi_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_feature_list_to_viz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.composite_fi_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.composite_fi_plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">composite_fi_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_feature_list_to_viz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label_text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.composite_fi_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.composite_fi_plot" title="Permalink to this definition"></a></dt>
 <dd><p>Generate composite feature importance plot given list of feature names
 and associated feature importance scores for each algorithm.
 This is run for different transformations of the normalized feature importance scores.</p>
@@ -225,48 +144,48 @@ This is run for different transformations of the normalized feature importance s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.do_fi_boxplots">
-<span class="sig-name descname"><span class="pre">do_fi_boxplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_df_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fi_med_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_fi_boxplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_fi_boxplots" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">do_fi_boxplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_df_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fi_med_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_fi_boxplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_fi_boxplots" title="Permalink to this definition"></a></dt>
 <dd><p>Generate individual feature importance boxplot for each algorithm</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.do_fi_histogram">
-<span class="sig-name descname"><span class="pre">do_fi_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_med_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_fi_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_fi_histogram" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">do_fi_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_med_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_fi_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_fi_histogram" title="Permalink to this definition"></a></dt>
 <dd><p>Generate histogram showing distribution of median feature importance scores for each algorithm.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.do_model_prc">
-<span class="sig-name descname"><span class="pre">do_model_prc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">praucs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_recall</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg_result_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_model_prc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_model_prc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">do_model_prc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">praucs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_recall</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg_result_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_model_prc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_model_prc" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.do_model_roc">
-<span class="sig-name descname"><span class="pre">do_model_roc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tprs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aucs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_fpr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg_result_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_model_roc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_model_roc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">do_model_roc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tprs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aucs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_fpr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg_result_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_model_roc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_model_roc" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.do_plot_prc">
-<span class="sig-name descname"><span class="pre">do_plot_prc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_plot_prc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_plot_prc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">do_plot_prc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_plot_prc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_plot_prc" title="Permalink to this definition"></a></dt>
 <dd><p>Generate PRC plot comparing average ML algorithm performance
 (over all CV training/testing sets)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.do_plot_roc">
-<span class="sig-name descname"><span class="pre">do_plot_roc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_plot_roc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_plot_roc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">do_plot_roc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_table</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.do_plot_roc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.do_plot_roc" title="Permalink to this definition"></a></dt>
 <dd><p>Generate ROC plot comparing average ML algorithm performance
 (over all CV training/testing sets)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.fi_stats">
-<span class="sig-name descname"><span class="pre">fi_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.fi_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.fi_stats" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fi_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.fi_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.fi_stats" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.frac_fi">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frac_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_fi_med_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.frac_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.frac_fi" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frac_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_fi_med_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.frac_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.frac_fi" title="Permalink to this definition"></a></dt>
 <dd><p>Transforms feature scores so that they sum to 1 over all features
 for a given algorithm.  This way the normalized and fracionated composit bar plot
 offers equal total bar area for every algorithm. The intuition
@@ -280,7 +199,7 @@ transformation has the potential to alter total algorithm FI bar height ranking 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.get_fi_to_viz_sorted">
-<span class="sig-name descname"><span class="pre">get_fi_to_viz_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_to_viz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_feature_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fi_med_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.get_fi_to_viz_sorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.get_fi_to_viz_sorted" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_fi_to_viz_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_to_viz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_feature_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fi_med_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.get_fi_to_viz_sorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.get_fi_to_viz_sorted" title="Permalink to this definition"></a></dt>
 <dd><p>Takes a list of top features names for visualisation, gets their
 indexes. In every composite FI plot features are ordered the same way
 they are selected for visualisation (i.e. normalized and performance
@@ -290,7 +209,7 @@ descending order for the normalized + performance weighted composite plot.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.kruskal_wallis">
-<span class="sig-name descname"><span class="pre">kruskal_wallis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.kruskal_wallis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.kruskal_wallis" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">kruskal_wallis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.kruskal_wallis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.kruskal_wallis" title="Permalink to this definition"></a></dt>
 <dd><p>Apply non-parametric Kruskal Wallis one-way ANOVA on ranks.
 Determines if there is a statistically significant difference in algorithm performance across CV runs.
 Completed for each standard metric separately.</p>
@@ -298,7 +217,7 @@ Completed for each standard metric separately.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.mann_whitney_u">
-<span class="sig-name descname"><span class="pre">mann_whitney_u</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kruskal_summary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.mann_whitney_u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.mann_whitney_u" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mann_whitney_u</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kruskal_summary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.mann_whitney_u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.mann_whitney_u" title="Permalink to this definition"></a></dt>
 <dd><p>Apply non-parametric Mann Whitney U-test (pairwise comparisons).
 If a significant Kruskal Wallis algorithm difference was found for
 a given metric, Mann Whitney tests individual algorithm pairs
@@ -309,33 +228,33 @@ zero if all scores from one set are larger than the other.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.metric_boxplots">
-<span class="sig-name descname"><span class="pre">metric_boxplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.metric_boxplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.metric_boxplots" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">metric_boxplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.metric_boxplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.metric_boxplots" title="Permalink to this definition"></a></dt>
 <dd><p>Export boxplots comparing algorithm performance for each standard metric</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.parse_runtime">
-<span class="sig-name descname"><span class="pre">parse_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.parse_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.parse_runtime" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.parse_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.parse_runtime" title="Permalink to this definition"></a></dt>
 <dd><p>Loads runtime summaries from entire pipeline and parses them into a single summary file.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.prep_fi">
-<span class="sig-name descname"><span class="pre">prep_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.prep_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.prep_fi" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">prep_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.prep_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.prep_fi" title="Permalink to this definition"></a></dt>
 <dd><p>Organizes and prepares model feature importance
 data for boxplot and composite feature importance figure generation.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.preparation">
-<span class="sig-name descname"><span class="pre">preparation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.preparation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.preparation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">preparation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.preparation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.preparation" title="Permalink to this definition"></a></dt>
 <dd><p>Creates directory for all results files, decodes included ML modeling
 algorithms that were run</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.primary_stats">
-<span class="sig-name descname"><span class="pre">primary_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.primary_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.primary_stats" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">primary_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rep_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.primary_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.primary_stats" title="Permalink to this definition"></a></dt>
 <dd><p>Combine classification metrics and model feature importance scores
 as well as ROC and PRC plot data across all CV datasets.
 Generate ROC and PRC plots comparing separate CV models for each individual modeling algorithm.</p>
@@ -343,32 +262,32 @@ Generate ROC and PRC plots comparing separate CV models for each individual mode
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.run" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.save_fi">
-<span class="sig-name descname"><span class="pre">save_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_feature_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.save_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.save_fi" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fi_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_feature_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.save_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.save_fi" title="Permalink to this definition"></a></dt>
 <dd><p>Creates directory to store model feature importance results and,
 for each algorithm, exports a file of feature importance scores from each CV.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.save_metric_stats">
-<span class="sig-name descname"><span class="pre">save_metric_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.save_metric_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.save_metric_stats" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save_metric_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.save_metric_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.save_metric_stats" title="Permalink to this definition"></a></dt>
 <dd><p>Exports csv file with mean, median and std dev metric values
 (over all CVs) for each ML modeling algorithm</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.save_runtime">
-<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.save_runtime" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.save_runtime" title="Permalink to this definition"></a></dt>
 <dd><p>Save phase runtime</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.select_for_composite_viz">
-<span class="sig-name descname"><span class="pre">select_for_composite_viz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">non_zero_union_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_zero_union_indexes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ave_metric_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fi_ave_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.select_for_composite_viz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.select_for_composite_viz" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">select_for_composite_viz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">non_zero_union_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_zero_union_indexes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ave_metric_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fi_ave_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.select_for_composite_viz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.select_for_composite_viz" title="Permalink to this definition"></a></dt>
 <dd><p>Identify list of top features over all algorithms to visualize
 (note that best features to visualize are chosen using algorithm
 performance weighting and normalization:
@@ -380,7 +299,7 @@ determined by the sum of performance
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.weight_fi">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">med_metric_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_fi_med_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.weight_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.weight_fi" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">med_metric_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_fi_med_norm_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.weight_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.weight_fi" title="Permalink to this definition"></a></dt>
 <dd><p>Weights the feature importance scores by algorithm performance
 (intuitive because when interpreting feature importances we want
 to place more weight on better performing algorithms)</p>
@@ -388,13 +307,13 @@ to place more weight on better performing algorithms)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.weight_frac_fi">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight_frac_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frac_lists</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.weight_frac_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.weight_frac_fi" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight_frac_fi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frac_lists</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.weight_frac_fi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.weight_frac_fi" title="Permalink to this definition"></a></dt>
 <dd><p>Weight normalized and fractionated feature importances.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="streamline.postanalysis.statistics.StatsJob.wilcoxon_rank">
-<span class="sig-name descname"><span class="pre">wilcoxon_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kruskal_summary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.wilcoxon_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.wilcoxon_rank" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">wilcoxon_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kruskal_summary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/postanalysis/statistics.html#StatsJob.wilcoxon_rank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.postanalysis.statistics.StatsJob.wilcoxon_rank" title="Permalink to this definition"></a></dt>
 <dd><p>Apply non-parametric Wilcoxon signed-rank test (pairwise comparisons).
 If a significant Kruskal Wallis algorithm difference was found for a
 given metric, Wilcoxon tests individual algorithm pairs
@@ -410,50 +329,33 @@ larger than the other.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="streamline.postanalysis.stats_runner.html" class="btn btn-neutral float-right" title="streamline.postanalysis.stats_runner module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="streamline.postanalysis.html" class="btn btn-neutral float-left" title="streamline.postanalysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.postanalysis.model_replicate.html" class="btn btn-neutral float-left" title="streamline.postanalysis.model_replicate module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.runners.html" class="btn btn-neutral float-right" title="streamline.runners package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
-
-    </p>
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

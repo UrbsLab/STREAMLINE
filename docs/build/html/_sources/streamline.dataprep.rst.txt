@@ -13,6 +13,5 @@ Submodules
    :maxdepth: 4
 
    streamline.dataprep.data_process
-   streamline.dataprep.eda_runner
    streamline.dataprep.exploratory_analysis
    streamline.dataprep.kfold_partitioning

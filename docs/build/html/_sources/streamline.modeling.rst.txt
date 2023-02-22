@@ -13,7 +13,7 @@ Submodules
    :maxdepth: 4
 
    streamline.modeling.basemodel
+   streamline.modeling.load_models
    streamline.modeling.modeljob
-   streamline.modeling.modelrunner
    streamline.modeling.parameters
    streamline.modeling.utils

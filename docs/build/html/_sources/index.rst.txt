@@ -1,15 +1,10 @@
-.. STREAMLINE documentation master file, created by
-   sphinx-quickstart on Wed Jan 11 13:01:46 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 STREAMLINE
 ======================================
 
 Overview
 --------------------------------------
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
-that empowers anyone to easily run,interpret, and apply a rigorous and
+that empowers anyone to easily run, interpret, and apply a rigorous and
 customizable analysis for data mining or predictive modeling.
 
 Notably, this tool is currently limited to supervised learning on tabular,
@@ -38,7 +33,6 @@ This ReadTheDocs provides documentation for the STREAMLINE code and its paramete
 
 
 
-
 .. toctree::
    :maxdepth: 2
    :hidden:
@@ -46,5 +40,10 @@ This ReadTheDocs provides documentation for the STREAMLINE code and its paramete
 
 
    self
+   about
+   installation
+   usage
+   development
+   citation
    modules
 

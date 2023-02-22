@@ -14,6 +14,7 @@ Submodules
 
    streamline.models.artificial_neural_network
    streamline.models.decision_tree
+   streamline.models.elastic_net
    streamline.models.genetic_programming
    streamline.models.gradient_boosting
    streamline.models.learning_based

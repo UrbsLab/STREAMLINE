@@ -12,6 +12,5 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   streamline.featurefns.feature_runner
    streamline.featurefns.importance
    streamline.featurefns.selection

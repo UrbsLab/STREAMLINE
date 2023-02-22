@@ -17,4 +17,5 @@ Subpackages
    streamline.modeling
    streamline.models
    streamline.postanalysis
+   streamline.runners
    streamline.utils

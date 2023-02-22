@@ -1,158 +1,81 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>streamline.postanalysis.statistics &mdash; STREAMLINE 2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../../index.html" class="icon icon-home"> STREAMLINE
           
-
-          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">STREAMLINE API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">STREAMLINE</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>streamline.postanalysis.statistics</li>
-    
-    
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.postanalysis.statistics</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for streamline.postanalysis.statistics</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">glob</span>
@@ -167,13 +90,15 @@
 <span class="kn">from</span> <span class="nn">statistics</span> <span class="kn">import</span> <span class="n">mean</span><span class="p">,</span> <span class="n">median</span><span class="p">,</span> <span class="n">stdev</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">kruskal</span><span class="p">,</span> <span class="n">wilcoxon</span><span class="p">,</span> <span class="n">mannwhitneyu</span>
-
 <span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
 <span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">ABBREVIATION</span><span class="p">,</span> <span class="n">COLORS</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="StatsJob"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob">[docs]</a><span class="k">class</span> <span class="nc">StatsJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This &#39;Job&#39; script creates summaries of ML classification evaluation statistics</span>
 <span class="sd">    (means and standard deviations), ROC and PRC plots (comparing CV performance</span>
 <span class="sd">    in the same ML algorithm and comparing average performance</span>
@@ -189,7 +114,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span>
                  <span class="n">cv_partitions</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">sig_cutoff</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">metric_weight</span><span class="o">=</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span> <span class="n">scale_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">plot_roc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_prc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_fi_box</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plot_metric_boxplots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            full_path:</span>
@@ -227,8 +152,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span> <span class="o">=</span> <span class="n">sig_cutoff</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="n">metric_weight</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span> <span class="o">=</span> <span class="n">show_plots</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/exploratory/OriginalFeatureNames.csv&quot;</span><span class="p">,</span>
-                                            <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># Get Original Headers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_fi_box</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/exploratory/OriginalFeatureNames.csv&quot;</span><span class="p">,</span>
+                                                <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># Get Original Headers</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span>
+                                                    <span class="o">+</span> <span class="s2">&quot;/exploratory/OriginalFeatureNames.csv&quot;</span><span class="p">,</span>
+                                                    <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># Get Original Headers</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ABBREVIATION</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">colors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">COLORS</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">COLORS</span><span class="p">)</span>
 
@@ -279,6 +212,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">wilcoxon_rank</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">kruskal_summary</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mann_whitney_u</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">kruskal_summary</span><span class="p">)</span>
 
+        <span class="c1"># Run FI Related stats and plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fi_stats</span><span class="p">(</span><span class="n">metric_dict</span><span class="p">)</span>
+
         <span class="c1"># Export phase runtime</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_runtime</span><span class="p">()</span>
 
@@ -286,7 +222,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_runtime</span><span class="p">()</span>
 
         <span class="c1"># Print phase completion</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s2">&quot; phase 5 complete&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s2">&quot; phase 5 complete&quot;</span><span class="p">)</span>
         <span class="n">job_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/jobsCompleted/job_stats_&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
         <span class="n">job_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;complete&#39;</span><span class="p">)</span>
         <span class="n">job_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
@@ -322,10 +258,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">composite_fi_plot</span><span class="p">(</span><span class="n">top_fi_med_norm_list</span><span class="p">,</span> <span class="n">all_feature_list_to_viz</span><span class="p">,</span> <span class="s1">&#39;Norm&#39;</span><span class="p">,</span>
                                <span class="s1">&#39;Normalized Median Feature Importance&#39;</span><span class="p">)</span>
 
-        <span class="c1"># Fractionate FI scores for normalized and fractionated composite FI plot</span>
+        <span class="c1"># # Fractionate FI scores for normalized and fractionated composite FI plot</span>
         <span class="c1"># frac_lists = self.frac_fi(top_fi_med_norm_list)</span>
 
-        <span class="c1"># Generate Normalized and Fractionated composite FI plot</span>
+        <span class="c1"># # Generate Normalized and Fractionated composite FI plot</span>
         <span class="c1"># composite_fi_plot(frac_lists, algorithms, list(colors.values()),</span>
         <span class="c1">#                   all_feature_list_to_viz, &#39;Norm_Frac&#39;,</span>
         <span class="c1">#                   &#39;Normalized and Fractionated Feature Importance&#39;)</span>
@@ -346,16 +282,18 @@
         <span class="c1">#                        &#39;Normalized, Fractionated, and Weighted Feature Importance&#39;)</span>
 
 <div class="viewcode-block" id="StatsJob.preparation"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.preparation">[docs]</a>    <span class="k">def</span> <span class="nf">preparation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates directory for all results files, decodes included ML modeling</span>
 <span class="sd">        algorithms that were run</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create Directory</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation&#39;</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation&#39;</span><span class="p">)</span></div>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/feature_importance/&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/feature_importance/&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="StatsJob.primary_stats"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.primary_stats">[docs]</a>    <span class="k">def</span> <span class="nf">primary_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="StatsJob.primary_stats"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.primary_stats">[docs]</a>    <span class="k">def</span> <span class="nf">primary_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">master_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rep_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Combine classification metrics and model feature importance scores</span>
 <span class="sd">        as well as ROC and PRC plot data across all CV datasets.</span>
 <span class="sd">        Generate ROC and PRC plots comparing separate CV models for each individual modeling algorithm.</span>
@@ -393,16 +331,31 @@
             <span class="c1"># Gather statistics over all CV partitions</span>
             <span class="k">for</span> <span class="n">cv_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_partitions</span><span class="p">):</span>
 
-                <span class="c1"># Unpickle saved metrics from previous phase</span>
-                <span class="n">result_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/pickled_metrics/&#39;</span> \
-                              <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_CV_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_metrics.pickle&quot;</span>
-                <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">result_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
-                <span class="n">results</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-                <span class="c1"># [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]</span>
-                <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">master_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-                <span class="c1"># Separate pickled results</span>
-                <span class="n">metric_list</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">prec_rec_auc</span><span class="p">,</span> <span class="n">ave_prec</span><span class="p">,</span> <span class="n">fi</span><span class="p">,</span> <span class="n">probas_</span> <span class="o">=</span> <span class="n">results</span>
+                    <span class="c1"># Unpickle saved metrics from previous phase</span>
+                    <span class="n">result_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/pickled_metrics/&#39;</span> \
+                                  <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_CV_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_metrics.pickle&quot;</span>
+                    <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">result_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+                    <span class="c1"># [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+                    <span class="c1"># Separate pickled results</span>
+                    <span class="n">metric_list</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">prec_rec_auc</span><span class="p">,</span> <span class="n">ave_prec</span><span class="p">,</span> <span class="n">fi</span><span class="p">,</span> <span class="n">probas_</span> <span class="o">=</span> <span class="n">results</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="n">master_list</span><span class="p">[</span><span class="n">cv_count</span><span class="p">][</span><span class="n">algorithm</span><span class="p">]</span>
+                    <span class="c1"># grabs evalDict for a specific algorithm entry (with data values)</span>
+                    <span class="n">metric_list</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">fpr</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">tpr</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">roc_auc</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="n">prec</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="n">recall</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+                    <span class="n">prec_rec_auc</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                    <span class="n">ave_prec</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                    <span class="n">fi</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                    <span class="n">probas_</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
 
                 <span class="c1"># Separate metrics from metricList</span>
                 <span class="n">s_bac</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -433,26 +386,27 @@
                 <span class="n">praucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prec_rec_auc</span><span class="p">)</span>
                 <span class="n">aveprecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ave_prec</span><span class="p">)</span>
 
-                <span class="c1"># Format feature importance scores as list</span>
-                <span class="c1"># (takes into account that all features are not in each CV partition)</span>
-                <span class="n">temp_list</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">headers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span>
-                    <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_Test.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">headers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
-                <span class="n">headers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span><span class="p">:</span>
-                    <span class="c1"># Check if current feature from original dataset was in the partition</span>
-                    <span class="k">if</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">:</span>
-                        <span class="c1"># Deal with features not being in original order (find index of current feature list.index()</span>
-                        <span class="n">f_index</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
-                        <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fi</span><span class="p">[</span><span class="n">f_index</span><span class="p">])</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">fi_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">master_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Format feature importance scores as list</span>
+                    <span class="c1"># (takes into account that all features are not in each CV partition)</span>
+                    <span class="n">temp_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">headers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span>
+                        <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_Test.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">headers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+                    <span class="n">headers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span><span class="p">:</span>
+                        <span class="c1"># Check if current feature from original dataset was in the partition</span>
+                        <span class="k">if</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">:</span>
+                            <span class="c1"># Deal with features not being in original order (find index of current feature list.index()</span>
+                            <span class="n">f_index</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
+                            <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fi</span><span class="p">[</span><span class="n">f_index</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">fi_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running stats on &quot;</span> <span class="o">+</span> <span class="n">algorithm</span><span class="p">)</span>
 
@@ -467,7 +421,10 @@
             <span class="n">mean_prec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">precs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">mean_pr_auc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">praucs</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_prc</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">do_model_prc</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">precs</span><span class="p">,</span> <span class="n">praucs</span><span class="p">,</span> <span class="n">mean_recall</span><span class="p">,</span> <span class="n">alg_result_table</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">master_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">do_model_prc</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">precs</span><span class="p">,</span> <span class="n">praucs</span><span class="p">,</span> <span class="n">mean_recall</span><span class="p">,</span> <span class="n">alg_result_table</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">do_model_prc</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">precs</span><span class="p">,</span> <span class="n">praucs</span><span class="p">,</span> <span class="n">mean_recall</span><span class="p">,</span> <span class="n">alg_result_table</span><span class="p">,</span> <span class="n">rep_data</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># Export and save all CV metric stats for each individual algorithm</span>
             <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Balanced Accuracy&#39;</span><span class="p">:</span> <span class="n">s_bac</span><span class="p">,</span> <span class="s1">&#39;Accuracy&#39;</span><span class="p">:</span> <span class="n">s_ac</span><span class="p">,</span> <span class="s1">&#39;F1 Score&#39;</span><span class="p">:</span> <span class="n">s_f1</span><span class="p">,</span> <span class="s1">&#39;Sensitivity (Recall)&#39;</span><span class="p">:</span> <span class="n">s_re</span><span class="p">,</span>
@@ -480,7 +437,8 @@
             <span class="n">metric_dict</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span>
 
             <span class="c1"># Save Median FI Stats</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_fi</span><span class="p">(</span><span class="n">fi_all</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">master_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_fi</span><span class="p">(</span><span class="n">fi_all</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_headers</span><span class="p">)</span>
 
             <span class="c1"># Store ave metrics for creating global ROC and PRC plots later</span>
             <span class="n">mean_ave_prec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">aveprecs</span><span class="p">)</span>
@@ -498,7 +456,7 @@
         <span class="k">return</span> <span class="n">result_table</span><span class="p">,</span> <span class="n">metric_dict</span></div>
 
 <div class="viewcode-block" id="StatsJob.save_fi"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.save_fi">[docs]</a>    <span class="k">def</span> <span class="nf">save_fi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fi_all</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">global_feature_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates directory to store model feature importance results and,</span>
 <span class="sd">        for each algorithm, exports a file of feature importance scores from each CV.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -553,7 +511,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="StatsJob.do_model_prc"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_model_prc">[docs]</a>    <span class="k">def</span> <span class="nf">do_model_prc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">precs</span><span class="p">,</span> <span class="n">praucs</span><span class="p">,</span> <span class="n">mean_recall</span><span class="p">,</span> <span class="n">alg_result_table</span><span class="p">):</span>
+<div class="viewcode-block" id="StatsJob.do_model_prc"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_model_prc">[docs]</a>    <span class="k">def</span> <span class="nf">do_model_prc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">precs</span><span class="p">,</span> <span class="n">praucs</span><span class="p">,</span> <span class="n">mean_recall</span><span class="p">,</span> <span class="n">alg_result_table</span><span class="p">,</span> <span class="n">rep_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">replicate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1"># Define values for the mean PRC line (mean of individual CVs)</span>
         <span class="n">mean_prec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">precs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">mean_pr_auc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">praucs</span><span class="p">)</span>
@@ -570,10 +528,16 @@
             <span class="c1"># Technically there could be a unique no-skill line for each CV dataset based</span>
             <span class="c1"># on final class balance (however only one is needed, and stratified CV attempts</span>
             <span class="c1"># to keep partitions with similar/same class balance)</span>
-            <span class="n">test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_0_Test.csv&#39;</span><span class="p">)</span>
 
-            <span class="n">test_y</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">replicate</span><span class="p">:</span>
+                <span class="c1"># Estimate no skill line based on the fraction of cases found in the first test dataset</span>
+                <span class="n">test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_0_Test.csv&#39;</span><span class="p">)</span>
+
+                <span class="n">test_y</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">test_y</span> <span class="o">=</span> <span class="n">rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
             <span class="n">no_skill</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">[</span><span class="n">test_y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">)</span>  <span class="c1"># Fraction of cases</span>
             <span class="c1"># Plot no-skill line</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">no_skill</span><span class="p">,</span> <span class="n">no_skill</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;No-Skill&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.8</span><span class="p">)</span>
@@ -603,7 +567,7 @@
                 <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatsJob.do_plot_roc"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_plot_roc">[docs]</a>    <span class="k">def</span> <span class="nf">do_plot_roc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_table</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate ROC plot comparing average ML algorithm performance</span>
 <span class="sd">        (over all CV training/testing sets)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -632,8 +596,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="StatsJob.do_plot_prc"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_plot_prc">[docs]</a>    <span class="k">def</span> <span class="nf">do_plot_prc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_table</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="StatsJob.do_plot_prc"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_plot_prc">[docs]</a>    <span class="k">def</span> <span class="nf">do_plot_prc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_table</span><span class="p">,</span> <span class="n">rep_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">replicate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate PRC plot comparing average ML algorithm performance</span>
 <span class="sd">        (over all CV training/testing sets)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -644,12 +608,18 @@
                      <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">, AUC=</span><span class="si">{:.3f}</span><span class="s2">, APS=</span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">result_table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;pr_auc&#39;</span><span class="p">],</span>
                                                                <span class="n">result_table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;ave_prec&#39;</span><span class="p">]))</span>
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="c1"># Estimate no skill line based on the fraction of cases found in the first test dataset</span>
-        <span class="n">test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_0_Test.csv&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">test_y</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">replicate</span><span class="p">:</span>
+            <span class="c1"># Estimate no skill line based on the fraction of cases found in the first test dataset</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_0_Test.csv&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">test</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">test_y</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">test_y</span> <span class="o">=</span> <span class="n">rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
         <span class="n">no_skill</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">[</span><span class="n">test_y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">)</span>  <span class="c1"># Fraction of cases</span>
+
         <span class="c1"># Plot no-skill line</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">no_skill</span><span class="p">,</span> <span class="n">no_skill</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;No-Skill&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.8</span><span class="p">)</span>
         <span class="c1"># Specify plot axes,labels, and legend</span>
@@ -666,7 +636,7 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatsJob.save_metric_stats"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.save_metric_stats">[docs]</a>    <span class="k">def</span> <span class="nf">save_metric_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Exports csv file with mean, median and std dev metric values</span>
 <span class="sd">        (over all CVs) for each ML modeling algorithm</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -718,7 +688,7 @@
         <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="StatsJob.metric_boxplots"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.metric_boxplots">[docs]</a>    <span class="k">def</span> <span class="nf">metric_boxplots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Export boxplots comparing algorithm performance for each standard metric</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/metricBoxplots&#39;</span><span class="p">):</span>
@@ -728,10 +698,12 @@
             <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
                 <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_dict</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
             <span class="n">td</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
-            <span class="n">td</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">td</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float&#39;</span><span class="p">)</span>
+
             <span class="n">td</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span>
+
             <span class="c1"># Generate boxplot</span>
-            <span class="n">td</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
             <span class="c1"># Specify plot labels</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;ML Algorithm&#39;</span><span class="p">)</span>
@@ -744,7 +716,7 @@
                 <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatsJob.kruskal_wallis"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.kruskal_wallis">[docs]</a>    <span class="k">def</span> <span class="nf">kruskal_wallis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply non-parametric Kruskal Wallis one-way ANOVA on ranks.</span>
 <span class="sd">        Determines if there is a statistically significant difference in algorithm performance across CV runs.</span>
 <span class="sd">        Completed for each standard metric separately.</span>
@@ -775,7 +747,7 @@
         <span class="k">return</span> <span class="n">kruskal_summary</span></div>
 
 <div class="viewcode-block" id="StatsJob.wilcoxon_rank"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.wilcoxon_rank">[docs]</a>    <span class="k">def</span> <span class="nf">wilcoxon_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">kruskal_summary</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply non-parametric Wilcoxon signed-rank test (pairwise comparisons).</span>
 <span class="sd">        If a significant Kruskal Wallis algorithm difference was found for a</span>
 <span class="sd">        given metric, Wilcoxon tests individual algorithm pairs</span>
@@ -816,7 +788,7 @@
                                            <span class="s1">&#39;WilcoxonRank_&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatsJob.mann_whitney_u"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.mann_whitney_u">[docs]</a>    <span class="k">def</span> <span class="nf">mann_whitney_u</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">kruskal_summary</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply non-parametric Mann Whitney U-test (pairwise comparisons).</span>
 <span class="sd">        If a significant Kruskal Wallis algorithm difference was found for</span>
 <span class="sd">        a given metric, Mann Whitney tests individual algorithm pairs</span>
@@ -855,7 +827,7 @@
                                      <span class="s1">&#39;statistical_comparisons/MannWhitneyU_&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatsJob.prep_fi"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.prep_fi">[docs]</a>    <span class="k">def</span> <span class="nf">prep_fi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Organizes and prepares model feature importance</span>
 <span class="sd">        data for boxplot and composite feature importance figure generation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -921,7 +893,7 @@
 <div class="viewcode-block" id="StatsJob.select_for_composite_viz"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.select_for_composite_viz">[docs]</a>    <span class="k">def</span> <span class="nf">select_for_composite_viz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">non_zero_union_features</span><span class="p">,</span>
                                  <span class="n">non_zero_union_indexes</span><span class="p">,</span>
                                  <span class="n">ave_metric_list</span><span class="p">,</span> <span class="n">fi_ave_norm_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Identify list of top features over all algorithms to visualize</span>
 <span class="sd">        (note that best features to visualize are chosen using algorithm</span>
 <span class="sd">        performance weighting and normalization:</span>
@@ -959,7 +931,7 @@
         <span class="k">return</span> <span class="n">features_to_viz</span>  <span class="c1"># list of feature names to visualize in composite FI plots.</span></div>
 
 <div class="viewcode-block" id="StatsJob.do_fi_boxplots"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_fi_boxplots">[docs]</a>    <span class="k">def</span> <span class="nf">do_fi_boxplots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fi_df_list</span><span class="p">,</span> <span class="n">fi_med_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate individual feature importance boxplot for each algorithm</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">algorithm_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -998,7 +970,7 @@
             <span class="n">algorithm_counter</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="StatsJob.do_fi_histogram"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_fi_histogram">[docs]</a>    <span class="k">def</span> <span class="nf">do_fi_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fi_med_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate histogram showing distribution of median feature importance scores for each algorithm.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">algorithm_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1020,7 +992,7 @@
 
 <div class="viewcode-block" id="StatsJob.composite_fi_plot"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.composite_fi_plot">[docs]</a>    <span class="k">def</span> <span class="nf">composite_fi_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fi_list</span><span class="p">,</span> <span class="n">all_feature_list_to_viz</span><span class="p">,</span> <span class="n">fig_name</span><span class="p">,</span>
                           <span class="n">y_label_text</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate composite feature importance plot given list of feature names</span>
 <span class="sd">        and associated feature importance scores for each algorithm.</span>
 <span class="sd">        This is run for different transformations of the normalized feature importance scores.</span>
@@ -1043,9 +1015,9 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fi_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fi_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">bottom</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fi_list</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                    <span class="n">bottom</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fi_list</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
             <span class="n">bottoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bottoms</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">bottoms</span> <span class="o">=</span> <span class="n">bottoms</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -1075,7 +1047,7 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="StatsJob.get_fi_to_viz_sorted"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.get_fi_to_viz_sorted">[docs]</a>    <span class="k">def</span> <span class="nf">get_fi_to_viz_sorted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_to_viz</span><span class="p">,</span> <span class="n">all_feature_list</span><span class="p">,</span> <span class="n">fi_med_norm_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a list of top features names for visualisation, gets their</span>
 <span class="sd">        indexes. In every composite FI plot features are ordered the same way</span>
 <span class="sd">        they are selected for visualisation (i.e. normalized and performance</span>
@@ -1098,7 +1070,7 @@
 
 <div class="viewcode-block" id="StatsJob.frac_fi"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.frac_fi">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">frac_fi</span><span class="p">(</span><span class="n">top_fi_med_norm_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Transforms feature scores so that they sum to 1 over all features</span>
 <span class="sd">        for a given algorithm.  This way the normalized and fracionated composit bar plot</span>
 <span class="sd">        offers equal total bar area for every algorithm. The intuition</span>
@@ -1122,7 +1094,7 @@
 
 <div class="viewcode-block" id="StatsJob.weight_fi"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.weight_fi">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">weight_fi</span><span class="p">(</span><span class="n">med_metric_list</span><span class="p">,</span> <span class="n">top_fi_med_norm_list</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Weights the feature importance scores by algorithm performance</span>
 <span class="sd">        (intuitive because when interpreting feature importances we want</span>
 <span class="sd">        to place more weight on better performing algorithms)</span>
@@ -1148,7 +1120,7 @@
 
 <div class="viewcode-block" id="StatsJob.weight_frac_fi"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.weight_frac_fi">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">weight_frac_fi</span><span class="p">(</span><span class="n">frac_lists</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Weight normalized and fractionated feature importances. &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; Weight normalized and fractionated feature importances. &quot;&quot;&quot;</span>
         <span class="n">weighted_frac_lists</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frac_lists</span><span class="p">)):</span>
             <span class="n">weight_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">frac_lists</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -1156,10 +1128,11 @@
         <span class="k">return</span> <span class="n">weighted_frac_lists</span></div>
 
 <div class="viewcode-block" id="StatsJob.parse_runtime"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.parse_runtime">[docs]</a>    <span class="k">def</span> <span class="nf">parse_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads runtime summaries from entire pipeline and parses them into a single summary file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dict_obj</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_obj</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">dict_obj</span><span class="p">[</span><span class="s1">&#39;preprocessing&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/runtime/*.txt&#39;</span><span class="p">):</span>
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
@@ -1167,6 +1140,8 @@
             <span class="k">if</span> <span class="n">ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">:</span>
                 <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ref</span> <span class="ow">in</span> <span class="n">dict_obj</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s1">&#39;preprocessing&#39;</span> <span class="ow">in</span> <span class="n">ref</span><span class="p">:</span>
+                    <span class="n">dict_obj</span><span class="p">[</span><span class="s1">&#39;preprocessing&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span>
                 <span class="n">dict_obj</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dict_obj</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span>
@@ -1189,7 +1164,7 @@
             <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">&quot;Stats Summary&quot;</span><span class="p">,</span> <span class="n">dict_obj</span><span class="p">[</span><span class="s1">&#39;Stats&#39;</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="StatsJob.save_runtime"><a class="viewcode-back" href="../../../streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.save_runtime">[docs]</a>    <span class="k">def</span> <span class="nf">save_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save phase runtime</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">runtime_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/runtime/runtime_Stats.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
@@ -1198,46 +1173,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
-
-    </p>
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,12 +1,16 @@
-STREAMLINE API Documentation
+Code Documentation
 =================================
 
 Each of the Phases in the research architecture is
-divided into a packages within streamline which can be run independently.
+divided into a packages within streamline which can be run independently
+or run together using the runners package.
 
-The API documentation for each of them is given below.
+The API documentation for each of them is given below for complementing further
+development with STREAMLINE.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    streamline
+
+

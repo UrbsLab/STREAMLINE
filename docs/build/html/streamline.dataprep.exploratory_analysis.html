@@ -1,96 +1,58 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>streamline.dataprep.exploratory_analysis module &mdash; STREAMLINE 2 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="streamline.dataprep.kfold_partitioning module" href="streamline.dataprep.kfold_partitioning.html" />
-    <link rel="prev" title="streamline.dataprep.eda_runner module" href="streamline.dataprep.eda_runner.html" /> 
+    <link rel="prev" title="streamline.dataprep.data_process module" href="streamline.dataprep.data_process.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home"> STREAMLINE
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">STREAMLINE API Documentation</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Code Documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
@@ -98,6 +60,7 @@
 <li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
 </ul>
 </li>
@@ -107,82 +70,38 @@
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">STREAMLINE</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="modules.html">STREAMLINE API Documentation</a> &raquo;</li>
-        
-          <li><a href="streamline.html">streamline package</a> &raquo;</li>
-        
-          <li><a href="streamline.dataprep.html">streamline.dataprep package</a> &raquo;</li>
-        
-      <li>streamline.dataprep.exploratory_analysis module</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+          <li class="breadcrumb-item"><a href="streamline.dataprep.html">streamline.dataprep package</a></li>
+      <li class="breadcrumb-item active">streamline.dataprep.exploratory_analysis module</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/streamline.dataprep.exploratory_analysis.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-streamline.dataprep.exploratory_analysis">
-<span id="streamline-dataprep-exploratory-analysis-module"></span><h1>streamline.dataprep.exploratory_analysis module<a class="headerlink" href="#module-streamline.dataprep.exploratory_analysis" title="Permalink to this heading">¶</a></h1>
+<span id="streamline-dataprep-exploratory-analysis-module"></span><h1>streamline.dataprep.exploratory_analysis module<a class="headerlink" href="#module-streamline.dataprep.exploratory_analysis" title="Permalink to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.exploratory_analysis.</span></span><span class="sig-name descname"><span class="pre">ExploratoryDataAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.exploratory_analysis.</span></span><span class="sig-name descname"><span class="pre">EDAJob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explorations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="streamline.utils.job.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
 <p>Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE</p>
 <p>Initialization function for Exploratory Data Analysis Class. Parameters are defined below.</p>
@@ -202,8 +121,8 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary">
-<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.counts_summary" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.counts_summary">
+<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.counts_summary" title="Permalink to this definition"></a></dt>
 <dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
 features, and class counts. Also saves a simple bar graph of class counts if user specified.</p>
 <dl class="field-list simple">
@@ -219,22 +138,22 @@ features, and class counts. Also saves a simple bar graph of class counts if use
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data">
-<span class="sig-name descname"><span class="pre">describe_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.describe_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.describe_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.describe_data">
+<span class="sig-name descname"><span class="pre">describe_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.describe_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.describe_data" title="Permalink to this definition"></a></dt>
 <dd><p>Conduct and export basic dataset descriptions including basic column statistics, column variable types
 (i.e. int64 vs. float64), and unique value counts for each column</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols">
-<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.drop_ignored_rowcols" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.drop_ignored_rowcols">
+<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.drop_ignored_rowcols" title="Permalink to this definition"></a></dt>
 <dd><p>Basic data cleaning: Drops any instances with a missing outcome
 value as well as any features (ignore_features) specified by user</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot">
-<span class="sig-name descname"><span class="pre">feature_correlation_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.feature_correlation_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.feature_correlation_plot" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.feature_correlation_plot">
+<span class="sig-name descname"><span class="pre">feature_correlation_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.feature_correlation_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.feature_correlation_plot" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
 Due to computational expense this may not be recommended for datasets with a large number of instances
 and/or features unless needed. The generated heatmap will be difficult to read with a large number
@@ -250,8 +169,8 @@ of features in the target dataset.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector">
-<span class="sig-name descname"><span class="pre">graph_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.graph_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.graph_selector" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.graph_selector">
+<span class="sig-name descname"><span class="pre">graph_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.graph_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.graph_selector" title="Permalink to this definition"></a></dt>
 <dd><p>Assuming a categorical class outcome, a
 barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature.</p>
 <dl class="field-list simple">
@@ -262,8 +181,8 @@ barplot is generated given a categorical feature, and a boxplot is generated giv
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types">
-<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.identify_feature_types" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.identify_feature_types">
+<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.identify_feature_types" title="Permalink to this definition"></a></dt>
 <dd><p>Automatically identify categorical vs. quantitative features/variables
 Takes a dataframe (of independent variables) with column labels and
 returns a list of column names identified as
@@ -271,31 +190,31 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.join">
-<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.join"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.join" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.join">
+<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.join"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.join" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders">
-<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.make_log_folders" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.make_log_folders">
+<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.make_log_folders" title="Permalink to this definition"></a></dt>
 <dd><p>Makes folders for logging exploratory data analysis</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot">
-<span class="sig-name descname"><span class="pre">missing_count_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.missing_count_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missing_count_plot" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.missing_count_plot">
+<span class="sig-name descname"><span class="pre">missing_count_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.missing_count_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.missing_count_plot" title="Permalink to this definition"></a></dt>
 <dd><p>Plots a histogram of missingness across all data columns.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts">
-<span class="sig-name descname"><span class="pre">missingness_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.missingness_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.missingness_counts" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.missingness_counts">
+<span class="sig-name descname"><span class="pre">missingness_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.missingness_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.missingness_counts" title="Permalink to this definition"></a></dt>
 <dd><p>Count and export missing values for all data columns.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.run" title="Permalink to this definition"></a></dt>
 <dd><p>Wrapper function to run_explore</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -305,8 +224,8 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore">
-<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.run_explore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.run_explore">
+<span class="sig-name descname"><span class="pre">run_explore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.run_explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.run_explore" title="Permalink to this definition"></a></dt>
 <dd><p>Run Exploratory Data Analysis according to EDA object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -316,19 +235,19 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime">
-<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.save_runtime" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.save_runtime">
+<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.save_runtime" title="Permalink to this definition"></a></dt>
 <dd><p>Export runtime for this phase of the pipeline on current target dataset</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.start" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.start" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.test_selector">
-<span class="sig-name descname"><span class="pre">test_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.test_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.test_selector" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.test_selector">
+<span class="sig-name descname"><span class="pre">test_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.test_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.test_selector" title="Permalink to this definition"></a></dt>
 <dd><p>Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -338,8 +257,8 @@ being categorical based on user defined cutoff (categorical_cutoff).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_analysis">
-<span class="sig-name descname"><span class="pre">univariate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.univariate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_analysis" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.univariate_analysis">
+<span class="sig-name descname"><span class="pre">univariate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.univariate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.univariate_analysis" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates univariate association significance between each individual feature and class outcome.
 Assumes categorical outcome using Chi-square test for
 categorical features and Mann-Whitney Test for quantitative features.</p>
@@ -351,8 +270,8 @@ categorical features and Mann-Whitney Test for quantitative features.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_plots">
-<span class="sig-name descname"><span class="pre">univariate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sorted_p_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#ExploratoryDataAnalysis.univariate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.ExploratoryDataAnalysis.univariate_plots" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="streamline.dataprep.exploratory_analysis.EDAJob.univariate_plots">
+<span class="sig-name descname"><span class="pre">univariate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sorted_p_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/streamline/dataprep/exploratory_analysis.html#EDAJob.univariate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.exploratory_analysis.EDAJob.univariate_plots" title="Permalink to this definition"></a></dt>
 <dd><p>Checks whether p-value of each feature is less than or equal to significance cutoff.
 If so, calls graph_selector to generate an appropriate plot.</p>
 <dl class="field-list simple">
@@ -371,50 +290,33 @@ If so, calls graph_selector to generate an appropriate plot.</p>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.dataprep.data_process.html" class="btn btn-neutral float-left" title="streamline.dataprep.data_process module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="streamline.dataprep.kfold_partitioning.html" class="btn btn-neutral float-right" title="streamline.dataprep.kfold_partitioning module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="streamline.dataprep.eda_runner.html" class="btn btn-neutral float-left" title="streamline.dataprep.eda_runner module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.
-
-    </p>
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
