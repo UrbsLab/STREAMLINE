@@ -11,6 +11,6 @@ development with STREAMLINE.
 .. toctree::
    :maxdepth: 4
 
-   streamline
+   codedocs/streamline
 
 
