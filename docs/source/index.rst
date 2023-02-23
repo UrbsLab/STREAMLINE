@@ -27,10 +27,12 @@ Preprint
 A preprint introducing and applying STREAMLINE is now available on `Arxiv
 <https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw>`_
 
-API Documentation
+Disclaimer
 --------------------------------------
-This ReadTheDocs provides documentation for the STREAMLINE code and its parameters and can be found here: :doc:`./modules`
-
+We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification
+problem, nor that the included ML modeling algorithms will yield the best performance possible.
+We intend many expansions/improvements to this pipeline in the future to make it easier to use and
+hopefully more effective in application. We welcome feedback, suggestions, and contributions for improvement.
 
 
 .. toctree::
@@ -41,6 +43,7 @@ This ReadTheDocs provides documentation for the STREAMLINE code and its paramete
 
    self
    about
+   sample
    installation
    usage
    development
