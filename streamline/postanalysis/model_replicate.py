@@ -120,7 +120,7 @@ class ReplicateJob(Job):
         eda = EDAJob(rep_data, self.full_path, ignore_features=None,
                      categorical_features=categorical_variables, explorations=[], plots=[],
                      categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
-                     random_state=None)
+                     random_state=None, show_plots=self.show_plots)
 
         # ExploratoryAnalysis - basic data cleaning
         eda.dataset.clean_data([])
@@ -132,14 +132,14 @@ class ReplicateJob(Job):
 
         total_missing = eda.missingness_counts()
 
-        eda.counts_summary(total_missing, True, self.show_plots)
+        eda.counts_summary(total_missing, True)
 
         # Create features-only version of dataset for some operations
         x_rep_data = eda.dataset.feature_only_data()
 
         # Export feature correlation plot if user specified
         if self.export_feature_correlations:
-            eda.feature_correlation_plot(x_rep_data, self.show_plots)
+            eda.feature_correlation_plot(x_rep_data)
         del x_rep_data  # memory cleanup
 
         # Rep Data Preparation for each Training Partition Model set

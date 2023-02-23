@@ -17,7 +17,8 @@ class FeatureSelection(Job):
     Feature Selection Job for CV Data Splits
     """
     def __init__(self, full_path, n_splits, algorithms, class_label, instance_label, export_scores=True,
-                 top_features=20, max_features_to_keep=2000, filter_poor_features=True, overwrite_cv=False):
+                 top_features=20, max_features_to_keep=2000, filter_poor_features=True, overwrite_cv=False,
+                 show_plots=False):
         """
 
         Args:
@@ -26,8 +27,7 @@ class FeatureSelection(Job):
             max_features_to_keep: maximum number of features to keep (default=2000)
             filter_poor_features: flag to filter poor features (default=True)
             overwrite_cv: overwrite last cross validation dataset (default=False)
-
-        Returns:
+            show_plots: flag to show plots (default=False)
 
         """
         super().__init__()
@@ -41,6 +41,7 @@ class FeatureSelection(Job):
         self.max_features_to_keep = max_features_to_keep
         self.filter_poor_features = filter_poor_features
         self.overwrite_cv = overwrite_cv
+        self.show_plots = show_plots
 
     def run(self):
         """
@@ -105,7 +106,7 @@ class FeatureSelection(Job):
                         index_label='CV_Partition')
 
     def report_ave_fs(self, algorithm, algorithmlabel,
-                      selected_feature_lists, meta_feature_ranks, show=False):
+                      selected_feature_lists, meta_feature_ranks):
         """
         Loads feature importance results from phase 3, stores sorted feature importance scores for all
         cvs, creates a list of all feature names that have a feature importance score greater than 0
@@ -201,7 +202,7 @@ class FeatureSelection(Job):
             logging.info(self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png")
             plt.savefig((self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png"),
                         bbox_inches="tight")
-            if eval(str(show)):
+            if self.show_plots:
                 plt.show()
             else:
                 plt.close('all')

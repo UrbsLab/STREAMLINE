@@ -44,8 +44,11 @@ hopefully more effective in application. We welcome feedback, suggestions, and c
    self
    about
    sample
-   installation
-   usage
+   colab
+   local
+   cluster
+   analysis
+   parameters
    development
    citation
    modules

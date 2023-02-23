@@ -216,7 +216,7 @@ class FeatureSelectionRunner:
     def __init__(self, output_path, experiment_name, algorithms, class_label="Class", instance_label=None,
                  max_features_to_keep=2000, filter_poor_features=True, top_features=40, export_scores=True,
                  overwrite_cv=True, random_state=None, n_jobs=None,
-                 run_cluster=False, queue='defq', reserved_memory=4):
+                 run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
 
         Args:
@@ -254,6 +254,7 @@ class FeatureSelectionRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.show_plots = show_plots
 
         # Argument checks
         if not os.path.exists(self.output_path):
@@ -293,7 +294,7 @@ class FeatureSelectionRunner:
             job_obj = FeatureSelection(full_path, len(cv_dataset_paths), self.algorithms,
                                        self.class_label, self.instance_label, self.export_scores,
                                        self.top_features, self.max_features_to_keep,
-                                       self.filter_poor_features, self.overwrite_cv)
+                                       self.filter_poor_features, self.overwrite_cv, self.show_plots)
             if run_parallel and run_parallel != "False":
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
                 job_list.append(job_obj)

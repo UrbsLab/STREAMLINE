@@ -23,7 +23,7 @@ class ReplicationRunner:
                  class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
                  exclude=("XCS", "eLCS"),
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
-                 run_cluster=False, queue='defq', reserved_memory=4):
+                 run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
 
         Args:
@@ -79,7 +79,7 @@ class ReplicationRunner:
         self.scale_data = metadata['Use Data Scaling']
         self.impute_data = metadata['Use Data Imputation']
         self.multi_impute = metadata['Use Multivariate Imputation']
-        self.show_plots = False
+        self.show_plots = show_plots
         self.scoring_metric = metadata['Primary Metric']
 
         self.run_cluster = run_cluster

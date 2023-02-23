@@ -7,11 +7,9 @@ pandas
 pip
 pycodestyle
 scikit-learn
-scipy
+scipy>=1.8.0
 seaborn
 skrebate==0.7
-Sphinx
-sphinx-rtd-theme
 tqdm
 wheel
 pytest

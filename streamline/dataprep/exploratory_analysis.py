@@ -20,7 +20,7 @@ class EDAJob(Job):
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05,
-                 random_state=None):
+                 random_state=None, show_plots=False):
         """
         Initialization function for Exploratory Data Analysis Class. Parameters are defined below.
 
@@ -71,6 +71,7 @@ class EDAJob(Job):
 
         self.categorical_cutoff = categorical_cutoff
         self.sig_cutoff = sig_cutoff
+        self.show_plots = show_plots
 
         self.explorations = explorations
         if self.explorations is None:
@@ -239,7 +240,7 @@ class EDAJob(Job):
         if plot:
             plt.show()
 
-    def counts_summary(self, total_missing=None, plot=False, show=False):
+    def counts_summary(self, total_missing=None, plot=False):
         """
         Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
         features, and class counts. Also saves a simple bar graph of class counts if user specified.
@@ -247,7 +248,6 @@ class EDAJob(Job):
         Args:
             total_missing: total missing values (optional, runs again if not given)
             plot: flag to output bar graph in the experiment log folder
-            show: flag to output the bar graph in interactive interface
 
         Returns:
 
@@ -295,12 +295,12 @@ class EDAJob(Job):
             plt.title('Class Counts')
             plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'ClassCountsBarPlot.png',
                         bbox_inches='tight')
-            if show:
+            if self.show_plots:
                 plt.show()
             else:
                 plt.close('all')
 
-    def feature_correlation_plot(self, x_data=None, show=False):
+    def feature_correlation_plot(self, x_data=None):
         """
         Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
         Due to computational expense this may not be recommended for datasets with a large number of instances
@@ -309,7 +309,6 @@ class EDAJob(Job):
 
         Args:
             x_data: data with only feature columns
-            show: flag to show plot or not
         """
         if x_data is None:
             x_data = self.dataset.feature_only_data()
@@ -320,7 +319,7 @@ class EDAJob(Job):
         sns.heatmap(correlation_mat, vmax=1, square=True)
         plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'FeatureCorrelations.png',
                     bbox_inches='tight')
-        if show:
+        if self.show_plots:
             plt.show()
         else:
             plt.close('all')

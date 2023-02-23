@@ -50,7 +50,7 @@ class EDARunner:
                  class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
                  ignore_features=None, categorical_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05,
-                 random_state=None, run_cluster=False, queue='defq', reserved_memory=4):
+                 random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
         Initializer for a runner class for Exploratory Data Analysis Jobs
 
@@ -94,6 +94,7 @@ class EDARunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.show_plots = show_plots
 
         if self.exploration_list is None or self.exploration_list == []:
             self.explorations_list = ["Describe", "Differentiate", "Univariate Analysis"]
@@ -136,7 +137,7 @@ class EDARunner:
                                      self.ignore_features,
                                      self.categorical_features, self.exploration_list, self.plot_list,
                                      self.categorical_cutoff, self.sig_cutoff,
-                                     self.random_state)
+                                     self.random_state, self.show_plots)
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
                     if run_parallel:  # Run as job in parallel
