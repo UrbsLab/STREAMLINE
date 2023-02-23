@@ -8,14 +8,12 @@ demo/
 demo_old/
 catboost_info/
 ./tests/
-prof/
-profile.html
 testlogs/
 dask_logs/
 OUTPUT/
 OSA_OUTPUT/
 OSA/
-docs/
+docs/build/
 job_old.e
 job.o
 job.e
