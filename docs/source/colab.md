@@ -65,7 +65,7 @@ by opening the file-explorer pane on the left.
 
 How to analyze this output can be found in the [Analyzing Outputs](analysis.md) section.
 
-## Running on your own datasets (TODO)
+## Running on your own datasets TBD
 This section explains how to update the Google Colaboratory Notebook to run on one or more user specified 
 datasets rather than the [demonstration datasets](sample.md#demonstration-data). This instructions are 
 effectively the same for running STREAMLINE from Jupyter Notebook. Note that, for brevity, 

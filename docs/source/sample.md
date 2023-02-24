@@ -38,4 +38,4 @@ https://drive.google.com/drive/folders/15qIaE4ZxRuoYlm-Y8HU-bkwwMs7JHxmL?usp=sha
 
 
 ## Figures Summary
-![alttext](Pictures/STREAMLINE_Figures.png)
+![alttext](pictures/STREAMLINE_Figures.png)

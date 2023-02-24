@@ -53,15 +53,23 @@ More information about the nature of STREAMLINE can be found in [./info/INFO.md]
 ***
 ## Installation and Use
 
+### Google Colab
+There is no local installation or additional steps required to run 
+STREAMLINE on Google Colab.
+Just have a Google Account and open this Colab Link:
+[https://colab.research.google.com/drive/17s55GajtN5WCEV-DfegtiFhvGp73Haj4?usp=sharing](https://colab.research.google.com/drive/17s55GajtN5WCEV-DfegtiFhvGp73Haj4?usp=sharing)
+
+
+### Local
 STREAMLINE can be ready for use by the simple two following steps:
 
 ```
-git clone git@github.com:raptor419/STREAMLINE_Dev.git
-cd STREAMLINE_Dev
+git clone -b dev --single-branch https://github.com/UrbsLab/STREAMLINE
+cd STREAMLINE
 pip install -r requirements.txt
 ```
 
-Now your STREAMLINE package is ready to use from the `STREAMLINE_Dev` folder.
+Now your STREAMLINE package is ready to use from the `STREAMLINE` folder.
 
 ***
 
@@ -70,7 +78,7 @@ Included with this pipeline is a folder named `DemoData` including two small dat
 pipeline efficacy. 
 
 New users can easily run the 
-included [jupyter notebook](https://github.com/raptor419/STREAMLINE_Dev/blob/main/STREAMLINE-Notebook.ipynb) 
+included [jupyter notebook](https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb) 
 'as-is', and it will be run automatically on these datasets. 
 
 Detailed info about advanced features and commandline implementation can be found in  [./info/DEMO.md](info/DEMO.md)
