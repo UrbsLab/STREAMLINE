@@ -1,6 +1,8 @@
 STREAMLINE
 ======================================
 
+.. image:: pictures/STREAMLINE_LOGO.jpg
+
 Overview
 --------------------------------------
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
@@ -20,6 +22,13 @@ The development of this pipeline focused on
 
 Overall, the goal of this pipeline is to provide a transparent framework to learn from
 data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
+
+
+Schematic
+--------------------------------------
+This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
+
+.. image:: pictures/ML_pipe_schematic.png
 
 Preprint
 --------------------------------------

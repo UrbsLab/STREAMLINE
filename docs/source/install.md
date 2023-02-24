@@ -10,7 +10,19 @@ Just have a Google Account and open this Colab Link:
 To install the STREAMLINE locally:
 (bleeding edge development/to be updated on merge to main)
 
-Use the following commands on the command-line terminal:
+
+If you don't have git installed, install git
+(you can test by typing `git` on your command-line):\
+Reference for installation: [https://github.com/git-guides/install-git](https://github.com/git-guides/install-git)
+
+While it is fine to run STREAMLINE on python, we recommend using Anaconda3 \
+(you can test by typing `conda` on your command-line) \
+Reference for installation: [https://docs.anaconda.com/anaconda/install/index.html](https://docs.anaconda.com/anaconda/install/index.html)
+
+STREAMLINE can run on native python, but it is not recommend as resolution for issues becomes complex, especially in MacOS based systems.
+
+After confirming that you have the above
+use the following commands on the command-line terminal:
 ```
 git clone -b dev --single-branch https://github.com/UrbsLab/STREAMLINE
 cd STREAMLINE
@@ -44,7 +56,6 @@ Additional tools that may help in running big jobs include terminal emulators li
 In most likelihood they would be installed in your cluster or available as modules in your cluster.
 
 We recommend using `tmux`, a quick guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux)
-
 
 ## Known Issues
 

@@ -94,33 +94,53 @@ This tool can be run or utilized in a number of ways to suite a variety experien
 levels of problem/data complexity.
 
 ***
-## STREAMLINE Run Modes
+## STREAMLINE Run Modes 
 This multi-phase pipeline has been set up to run in one of four ways:
 
 1. A 'Notebook' within Google Colaboratory [Almost Anyone]:
-    * Advantages: (1) No coding or PC environment experience needed, (2) computing can be performed directly on Google Cloud, (3) one-click run of whole pipeline
-    * Disadvantages: (1) Can only run pipeline serially, (2) slowest of the run options, (3) limited by google cloud computing allowances
+    * Advantages
+      * No coding or PC environment experience needed
+      * Computing can be performed directly on Google Cloud
+      * One-click run of whole pipeline
+    * Disadvantages:
+      * Can only run pipeline serially
+      * slowest of the run options
+      * limited by google cloud computing allowances
     * Notes: Requires a Google and Google Drive account (free)
 
 2. A Jupyter Notebook (included) [Basic Experience]:
-    * Advantages: (1) Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience, (2) offers in-notebook viewing of results, (3) offers in-notebook documentation of the run phases, (4) one-click run of whole pipeline
-    * Disadvantages: (1) Can only run pipeline serially, (2) slower runtime than from command-line
+    * Advantages:
+      * Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience, 
+      * offers in-notebook viewing of results
+      * offers in-notebook documentation of the run phases
+      * one-click run of whole pipeline
+    * Disadvantages:
+      * Can only run pipeline serially
+      * slower runtime than from command-line
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
 3. Locally from the command line [Command-line Users]:
-    * Advantages: (1) Typically runs faster than within Jupyter Notebook, (2) an easier more versatile option for those with command-line experience
-    * Disadvantages: (1) Can only run pipeline serially, (2) command-line experience recommended
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
+    * Advantages: 
+      * Typically runs faster than within Jupyter Notebook
+      * an easier more versatile option for those with command-line experience
+    * Disadvantages: 
+      * Can only run pipeline serially
+      * command-line experience recommended
+    * Notes: Requires Python3, and several other minor Python package installations
 
-4. Run in parallel from the command line using a computing cluster (only Linux-based cluster currently tested) [Computing Cluster Users]:
-    * Advantages: (1) By far the fastest, most efficient way to run STREAMLINE, (2) offers parallelization within pipeline phases over separate datasets, cross-validation partitions, and ML algorithms.
-    * Disadvantages: (1) Experience with command-line recommended (2) access to a computing cluster required
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations. Parallelization occurs within phases. Individual phases must be run in sequence.
+4. On HPC Clusters from command line (Currently only tested on SLURM Clusters) [Computing Cluster Users]:
+    * Advantages: 
+      * By far the fastest, most efficient way to run STREAMLINE
+      * offers ability to run STREAMLINE over 7 types of HPC systems
+    * Disadvantages: 
+      * Experience with command-line recommended
+      * access to a computing cluster required
+    * Notes: Requires Python3, and several other minor Python package installations. Parallelization occurs within phases. Individual phases must be run in sequence.
 
-Cluster runs of STREAMLINE were set up using dask-jobque and can support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html)
-***
+Cluster runs of STREAMLINE were set up using `dask-jobqueue` and can support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html)
+More setting may need to be done for non SLURM clusters.
 
-## Unique Characteristics of STREAMLINE
+## Unique Characteristics of STREAMLINE (consider rewriting)
 * Pipeline includes reliable default run parameters that can be adjusted for further customization.
 * Easily compare ML performance between multiple target datasets (e.g. with different feature subsets)
 * Easily conduct an exploratory analysis including: (1) basic dataset characteristics: data dimensions, feature stats, missing value counts, and class balance, (2) detection of categorical vs. quantiative features, (3) feature correlation (with heatmap), and (4) univariate analyses with Chi-Square (categorical features), or Mann-Whitney U-Test (quantitative features).

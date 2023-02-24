@@ -3,11 +3,12 @@ This section describes the files in the experiment directory with reference to a
 sample run on the [demonstration dataset](sample.md#demonstration-data)
 
 If this is a demo run the saved experiment folder that was output by the run, called `demo`. 
-If you changed the `experiment_name` parameter or if this is a custom run it may be different.
+If you changed the `experiment_name` parameter or if this is a custom run it may be different and be named the same as
+`experiment_name` your parameter.
 
 Within this folder you should find the following:
 
-* `demo_ML_Pipeline_Report.pdf` [File]: This is an automatically formatted PDF summarizing key findings during the model training and evaluation. A great place to start!
+* `<experiment_name>_ML_Pipeline_Report.pdf` [File]: This is an automatically formatted PDF summarizing key findings during the model training and evaluation. A great place to start!
 * `metadata.csv` [File]: Another way to view the STREAMLINE parameters used by the pipeline.  These are also organized on the first page of the PDF report.
 * `metadata.pickle` [File]: A binary 'pickle' file of the metadata for easy loading by the 11 pipeline phases. (For more experienced users)
 * `algInfo.pickle` [File]: A binary 'pickle' file including a dictionary indicating which ML algorithms were used, along with abbreviations of names for figures/filenames, and colors to use for each algorithm in figures. (For more experienced users)
