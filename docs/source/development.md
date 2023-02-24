@@ -1,7 +1,7 @@
 # Development notes 
 Have ideas on how to improve this pipeline? We welcome suggestions, contributions, and collaborations.
 
-## Code History
+## History
 STREAMLINE is based on our initial development repository https://github.com/UrbsLab/STREAMLINE. STREAMLINE's codebase and functionalities have been reorganized and extended, along with the name rebranding. This STREAMLINE repository will be developed further in the future while AutoMLPipe-BC will remain as is.
 
 ## Planned extensions/improvements
