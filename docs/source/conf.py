@@ -37,6 +37,7 @@ extensions = [
 ]
 
 extensions += ['myst_parser']
+myst_heading_anchors = 3
 
 source_suffix = ['.rst', '.md']
 

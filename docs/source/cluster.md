@@ -1,1 +1,1 @@
-# Runnning on HPC Clusters
+# Running on HPC Clusters

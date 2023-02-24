@@ -44,11 +44,14 @@ hopefully more effective in application. We welcome feedback, suggestions, and c
    self
    about
    sample
+   install
    colab
    local
+   jupyter
    cluster
    analysis
    parameters
+   tips
    development
    citation
    modules
