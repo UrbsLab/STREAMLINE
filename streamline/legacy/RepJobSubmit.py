@@ -40,10 +40,10 @@ def run_cluster(argv):
     scoring_metric = argv[20]
 
     job_obj = ReplicateJob(dataset_filename, dataset_for_rep, full_path, class_label, instance_label,
-                          match_label, algorithms, exclude, len_cv, export_feature_correlations,
-                          plot_roc, plot_prc, plot_metric_boxplots,
-                          categorical_cutoff, sig_cutoff, scale_data, impute_data,
-                          multi_impute, show_plots, scoring_metric)
+                           match_label, algorithms, exclude, len_cv, export_feature_correlations,
+                           plot_roc, plot_prc, plot_metric_boxplots,
+                           categorical_cutoff, sig_cutoff, scale_data, impute_data,
+                           multi_impute, show_plots, scoring_metric)
     job_obj.run()
 
 

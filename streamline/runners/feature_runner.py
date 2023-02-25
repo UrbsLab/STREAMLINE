@@ -320,7 +320,7 @@ class FeatureSelectionRunner:
         pickle_out.close()
 
     def get_cluster_params(self, full_path, n_datasets):
-        algorithms = "'['"+"','".join(self.algorithms)+"']'"
+        algorithms = "'['" + "','".join(self.algorithms) + "']'"
         cluster_params = [full_path, n_datasets, algorithms,
                           self.class_label, self.instance_label, self.export_scores,
                           self.top_features, self.max_features_to_keep,

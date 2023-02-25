@@ -37,17 +37,17 @@ def runner(obj, phase, run_parallel=True, params=None):
 
     phase_str = phase_list[phase]
     print()
-    print("Running " + phase_str + " Phase " + "(" + str(phase) + ")" 
+    print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
           + " with " + str(params['run_cluster']) + " Setup")
     how = "with SLURM Manual Jobs"
     if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
         obj.run(run_parallel=run_parallel)
         if phase == 1:
             time.sleep(5)
-        while len(check_phase(params['output_path'], params['experiment_name'], 
+        while len(check_phase(params['output_path'], params['experiment_name'],
                               phase=phase, len_only=True,
-                              rep_data_path=params['rep_data_path'], 
-                              dataset_for_rep=params['dataset_for_rep'], 
+                              rep_data_path=params['rep_data_path'],
+                              dataset_for_rep=params['dataset_for_rep'],
                               output=True)) != 0:
             print()
             print("Waiting for " + phase_str + " Manual Jobs to Finish")
@@ -79,7 +79,7 @@ def len_datasets(output_path, experiment_name):
 
 def process_params(params):
 
-    if config_dict['run_cluster'] and not "Old" in config_dict['run_cluster']:
+    if config_dict['run_cluster'] and not ("Old" in config_dict['run_cluster']):
         config_dict['run_parallel'] = config_dict['run_cluster']
 
     if config_dict['do_till_report']:

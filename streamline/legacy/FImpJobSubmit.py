@@ -21,8 +21,8 @@ def run_cluster(argv):
     n_jobs = None if argv[10] == "None" else int(argv[10])
 
     job_obj = FeatureImportance(cv_train_path, experiment_path, class_label,
-                          instance_label, instance_subset, algorithm,
-                          use_turf, turf_pct, random_state, n_jobs)
+                                instance_label, instance_subset, algorithm,
+                                use_turf, turf_pct, random_state, n_jobs)
     job_obj.run()
 
 
