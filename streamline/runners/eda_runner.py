@@ -66,15 +66,22 @@ class EDARunner:
             instance_label: instance label of all datasets (if present)
             match_label: only applies when M selected for partition-method; indicates column with \
                             matched instance ids
-            n_splits: no of splits in cross-validation
-            partition_method: method of partitioning in cross-validation must be in ["Random", "Stratified", "Group"]
+            n_splits: no of splits in cross-validation (default=10)
+            partition_method: method of partitioning in cross-validation must be in ["Random", "Stratified", "Group"]\
+                                (default="Stratified")
             ignore_features: list of string of column names of features to ignore or \
-                            path to .csv file with feature labels to be ignored in analysis
+                            path to .csv file with feature labels to be ignored in analysis (default=None)
             categorical_features: list of string of column names of features to ignore or \
-                            path to .csv file with feature labels specified to be treated as categorical where possible
-            categorical_cutoff: number of unique values for a variable is considered to be quantitative vs categorical
-            sig_cutoff: significance cutoff used throughout pipeline
-            random_state: sets a specific random seed for reproducible results
+                            path to .csv file with feature labels specified to be treated as categorical where possible\
+                            (default=None)
+            categorical_cutoff: number of unique values for a variable is considered to be quantitative vs categorical\
+                            (default=10)
+            sig_cutoff: significance cutoff used throughout pipeline (default=0.05)
+            random_state: sets a specific random seed for reproducible results (default=None)
+            run_cluster: name of cluster run setting or False (default=False)
+            queue: name of queue to be used in cluster run (default="defq")
+            reserved_memory: reserved memory for cluster run in GB (in default=4)
+            show_plots: flag to output plots for notebooks (default=False)
         """
 
         self.data_path = data_path
