@@ -11,7 +11,7 @@ jobs:
           pip install sphinx sphinx_rtd_theme myst-parser
       - name: Sphinx build
         run: |
-          sphinx-build docs/source docs/build/html
+          sphinx-build -b html docs/source docs/build/html -E -a
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
