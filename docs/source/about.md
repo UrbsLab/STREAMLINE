@@ -140,7 +140,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
 Cluster runs of STREAMLINE were set up using `dask-jobqueue` and can support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html)
 More setting may need to be done for non SLURM clusters.
 
-## Unique Characteristics of STREAMLINE (consider rewriting)
+## Implementation Highlights
 * Pipeline includes reliable default run parameters that can be adjusted for further customization.
 * Easily compare ML performance between multiple target datasets (e.g. with different feature subsets)
 * Easily conduct an exploratory analysis including: (1) basic dataset characteristics: data dimensions, feature stats, missing value counts, and class balance, (2) detection of categorical vs. quantiative features, (3) feature correlation (with heatmap), and (4) univariate analyses with Chi-Square (categorical features), or Mann-Whitney U-Test (quantitative features).

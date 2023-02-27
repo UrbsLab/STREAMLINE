@@ -30,10 +30,9 @@ pip install -r requirements.txt
 ```
 
 These 3 commands specifically:
-1. Download the bleeding edge development repository of STREAMLINE
+1. Download the most recent release repository of STREAMLINE
 2. Go to the root STREAMLINE folder from where the package can run
-3. Install all the requirements for the STREAMLINE package to run on the local system.
-
+3. Install all packages required to run STREAMLINE on the local system
 
 Now the complete STREAMLINE package can be run 
 from the STREAMLINE root directory.
@@ -53,6 +52,19 @@ The Jupyter notebook usage is the same as Local installation with two additional
 Cluster installation may carry extra steps as per your HPC setup, but is essentially the same as the Local Setup.
 
 Additional tools that may help in running big jobs include terminal emulators like `tmux` and `screen`. 
+
+These programs allow you to create several "pseudo terminals" from a single terminal.
+They decouple your programs from the main terminal, 
+protecting them from accidentally disconnecting. 
+You can detach tmux or screen from the login terminal, 
+and all your programs will continue to run safely in the background. 
+Later, we can reattach them to the same or a different terminal to 
+monitor the process.
+
+These are also very useful for running multiple programs with a single connection, 
+such as when you're remotely connecting to a machine using Secure Shell (SSH).
+
+
 In most likelihood they would be installed in your cluster or available as modules in your cluster.
 
 We recommend using `tmux`, a quick guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux)
@@ -61,5 +73,5 @@ We recommend using `tmux`, a quick guide on using it can be found [here](https:/
 
 1. Scipy version error, the way the STREAMLINE is set up it needs scipy>=1.8.0. If you find this is not true or 
    get a version error output, please run `pip install --upgrade scipy`
-2. The lightgbm package on pypi doesn't work out of the box using conda. The following command should solve the problem:
+2. The lightgbm package on pypi doesn't work out of the box using pip on MacOS. The following command should solve the problem:
    ```conda install -c conda-forge lightgbm```

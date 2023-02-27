@@ -68,12 +68,12 @@ Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and 
    install
    colab
    local
-   jupyter
    cluster
    analysis
    parameters
    tips
    development
+   models
    citation
    modules
 

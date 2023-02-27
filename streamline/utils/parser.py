@@ -21,7 +21,8 @@ def comma_sep_choices(choices):
 
 def parser_function(argv):
     # Parse arguments
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Arguments with no defaults - Global Args
     parser.add_argument('--data-path', dest='dataset_path', type=str, help='path to directory containing datasets')
     parser.add_argument('--out-path', dest='output_path', type=str, help='path to output directory')

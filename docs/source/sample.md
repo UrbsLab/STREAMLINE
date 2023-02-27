@@ -28,13 +28,14 @@ expected to be as good or less well performing than the individual testing evalu
 ## Run Pipeline and Output Folders
 * To quickly pre-view the pipeline (pre-run on included [demonstration datasets](#demonstration-data) without any installation whatsoever, open the following link:
 
-https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb
+[https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb](https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb)
 
 Note, that with this link, you can only view the pre-run STREAMLINE Jupyter Notebook and will not be able to run or permanently edit the code. This is an easy way to get a feel for what the pipeline is and does.
 
 * To quickly pre-view the folder of output files generated when running STREAMLINE on the [demonstration datasets](#demonstration-data), open the following link:
 
-https://drive.google.com/drive/folders/15qIaE4ZxRuoYlm-Y8HU-bkwwMs7JHxmL?usp=sharing
+[https://drive.google.com/drive/folders/15qIaE4ZxRuoYlm-Y8HU-bkwwMs7JHxmL?usp=sharing](https://drive.google.com/drive/folders/15qIaE4ZxRuoYlm-Y8HU-bkwwMs7JHxmL?usp=sharing
+)
 
 
 ## Figures Summary
