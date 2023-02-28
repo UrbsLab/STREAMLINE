@@ -45,7 +45,7 @@ class ElasticNetClassifier(BaseModel, ABC):
         return mean_cv_score
 ```
 
-This .py file can be kept in the `strealine/models` folders and it will be automatically picked up by the STREAMLINE 
+This .py file can be kept in the `streamline/models` folders and it will be automatically picked up by the STREAMLINE 
 pipeline dynamically
 
 To make your own model make an arbitrarily named Class Derived form the `BaseModel` class in STREAMLINE.
