@@ -36,7 +36,7 @@ def parser_function(argv):
     parser.add_argument('--inst-label', dest='instance_label', type=str,
                         help='instance label of all datasets (if present)', default="")
     parser.add_argument('--do-till-report', dest='do_till_report', type=bool,
-                        help='flag to do all phases', default=False)
+                        help='flag to do all phases', default=True)
 
     # Phase 1
     parser.add_argument('--do-eda', dest='do_eda', type=bool,

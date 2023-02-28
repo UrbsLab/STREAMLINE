@@ -87,12 +87,21 @@ as defined in the [parameters section](parameters.md)
 Similarly the following additional parameters need to given
 
 ```
-python run.py <other> --run-cluster False --run-parallel True<or Flase, accordingly>
+python run.py <other commands> --run-cluster False --run-parallel True<or Flase, accordingly>
 ```
 
-As example case to run just the EDA phase and 
-all phases till report generation is given below.
+As example case to all phases till report generation is given below:
 
 ```
-example code, to be written
+python run.py --data-path DemoData --out-path demo --exp-name demo \
+               --class-label Class --inst-label InstanceID \
+               --run-cluster False --run-parallel True
+```
+
+To just run EDA Phase:
+```
+python run.py --data-path DemoData --out-path demo --exp-name demo \
+               --class-label Class --inst-label InstanceID \
+               --do-till-report False --do-eda True \
+               --run-cluster False --run-parallel True
 ```

@@ -18,7 +18,7 @@ but may wish to revisit later parts of this section for helpful details.
 * To learn more about Google Colaboratory prior to setup please visit the following link: 
 https://research.google.com/colaboratory/
 
-## Running on DemoDataset
+## Running on Demo Dataset
 Follow the steps below to get STREAMLINE running on the [demonstration datasets](sample.md#demonstration-data). 
 In summary, they detail the process of opening the STREAMLINE Colab Notebook to your Google Drive, 
 and running the notebook called `STREAMLINE-GoogleColab.ipynb` with Google Colaboratory (the link is provided below), running it 
@@ -65,7 +65,7 @@ by opening the file-explorer pane on the left.
 
 How to analyze this output can be found in the [Analyzing Outputs](analysis.md) section.
 
-## Running on your own datasets TBD
+## Running on your own datasets
 This section explains how to update the Google Colaboratory Notebook to run on one or more user specified 
 datasets rather than the [demonstration datasets](sample.md#demonstration-data). This instructions are 
 effectively the same for running STREAMLINE from Jupyter Notebook. Note that, for brevity, 

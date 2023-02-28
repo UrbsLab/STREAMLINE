@@ -60,10 +60,18 @@ python run.py <other commands> --run_cluster SLURMOld --reserved_memory 4 --queu
 ```
 
 
-As example case to run just the EDA phase and 
-all phases till report generation is given below.
-
+As example case to all phases till report generation is given below:
 
 ```
-example code, to be written
+python run.py --data-path DemoData --out-path demo --exp-name demo \
+               --class-label Class --inst-label InstanceID \
+               --run_cluster SLURM --reserved_memory 4 --queue defq
+```
+
+To just run EDA Phase:
+```
+python run.py --data-path DemoData --out-path demo --exp-name demo \
+               --class-label Class --inst-label InstanceID \
+               --do-till-report False --do-eda True \
+               --run_cluster SLURMOld --reserved_memory 4 --queue defq
 ```
