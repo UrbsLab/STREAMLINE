@@ -1,4 +1,4 @@
-### Phase
+### STREAMLINE Phases Described
 The base code for STREAMLINE (located in the `streamline` folder) is organized into a series of script phases designed to best optimize the parallelization of a given analysis. 
 These loosely correspond with the pipeline schematic above. These phases are designed to be run in order. 
 Phases 1-6 make up the core automated pipeline, with Phase 7 and beyond being run optionally based on user needs.
