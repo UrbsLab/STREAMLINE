@@ -39,7 +39,7 @@ This included notebook is set up to run on the included [demonstration datasets]
 Move your custom dataset to the STREAMLINE root directory,
 follow the same steps as in the [Colab Notebook](colab.md#running-on-your-own-datasets-tbd)
 
-## Running on CLI
+## Running on command line interface
 
 The most efficient way of running STREAMLINE is through command line.
 There's two ways to run STREAMLINE thorough a CLI interface.

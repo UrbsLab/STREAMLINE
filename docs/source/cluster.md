@@ -9,6 +9,8 @@ using a cluster setup.
 
 Rest is handled similarly by `run.py` as defined in [local section](local.md#running-on-cli)
 
+## Running using command line interface
+
 ### Using config file
 
 Edit the multiprocessing section of the config file according to your needs.
