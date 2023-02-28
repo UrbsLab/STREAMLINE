@@ -4,7 +4,7 @@ New models can easily be added to STREAMLINE by creating a custom class
 and wrapping it as warped class derived form the STREAMLINE `BaseModel` with 
 specific information such as name, plot colors and hyper parameters for the sweep.
 
-An example wrapped code is given below. This is as given as file in the 
+An example wrapped code is given below. This is also given as file in the 
 info directory of the github [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/info/elastic_net.py)
 
 
@@ -50,7 +50,7 @@ pipeline dynamically
 
 To make your own model make an arbitrarily named Class Derived form the `BaseModel` class in STREAMLINE.
 
-The base class should be give it's own     
+The base class should be given it's own     
     
 * `model_name`
 * `small_name`
