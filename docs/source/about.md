@@ -141,33 +141,38 @@ Cluster runs of STREAMLINE were set up using `dask-jobqueue` and can support 7 t
 More setting may need to be done for non SLURM clusters.
 
 ## Implementation Highlights
-* Pipeline includes reliable default run parameters that can be adjusted for further customization.
-* Easily compare ML performance between multiple target datasets (e.g. with different feature subsets)
-* Easily conduct an exploratory analysis including: (1) basic dataset characteristics: data dimensions, feature stats, missing value counts, and class balance, (2) detection of categorical vs. quantiative features, (3) feature correlation (with heatmap), and (4) univariate analyses with Chi-Square (categorical features), or Mann-Whitney U-Test (quantitative features).
-* Option to manually specify which features to treat as categorical vs. quantitative.
-* Option to manually specify features in loaded dataset to ignore in analysis.
-* Option to utilize 'matched' cross validation partitioning: Case/control pairs or groups that have been matched based on one or more covariates will be kept together within CV data partitions.
-* Imputation is completed using mode imputation for categorical variables first, followed by MICE-based iterative imputation for quantitaive features. There is an option to use mean imputation for quantitative features when imputation computing cost is prohibitive in large datasets.
-* Data scaling, imputation, and feature selection are all conducted within respective CV partitions to prevent data leakage (i.e. testing data is not seen for any aspect of learning until final model evaluation).
-* The scaling, imputation, and feature selection data transformations (based only on the training data) are saved (i.e. 'pickled') so that they can be applied in the same way to testing partitions, and in the future to any replication data.
-* Collective feature selection is used: Both mutual information (proficient at detecting univariate associations) and MultiSURF (a Relief-based algorithm proficient at detecting both univariate and epistatic interactions) are run, and features are only removed from consideration if both algorithms fail to detect an informative signal (i.e. score > 0). This ensures that interacting features that may have no univariate association with class are not removed from the data prior to modeling.
-* Automatically outputs average feature importance bar-plots from feature importance/feature selection phase.
-* Since MultiSURF scales linearly with # of features and quadratically with # of instances, there is an option to select a random instance subset for MultiSURF scoring to reduce computational burden.
-* Includes 3 rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS (to run optionally). These 'learning classifier systems' have been demonstrated to be able to detect complex associations while providing human interpretable models in the form of IF:THEN rule-sets. The ExSTraCS algorithm was developed by our research group to specifically handle the challenges of scalability, noise, and detection of epistasis and genetic heterogeneity in biomedical data mining.  
-* Utilizes the 'optuna' package to conduct automated Bayesian hyperparameter optimization during modeling (and optionally outputs plots summarizing the sweep).
-* We have sought to specify a comprehensive range of relevant hyperparameter options for all included ML algorithms.
-* Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS) These can be used in place of permutation feature importance estimates by setting the parameter `use_uniform_FI` to 'False'.
-* All other algorithms rely on estimating feature importance using permutation feature importance.
-* All models are evaluated, reporting 16 classification metrics: Accuracy, Balanced Accuracy, F1 Score, Sensitivity(Recall), Specificity, Precision (PPV), True Positives (TP), True Negatives (TN), False Positives (FP), False Negatives (FN), Negative Predictive Value (NPV), Likeliehood Ratio + (LR+), Likeliehood Ratio - (LR-), ROC AUC, PRC AUC, and PRC APS.
-* All models are saved as 'pickle' files so that they can be loaded and reapplied in the future.
-* Outputs ROC and PRC plots for each ML modeling algorithm displaying individual n-fold CV runs and average the average curve.
-* Outputs boxplots for each classification metric comparing ML modeling performance (across n-fold CV).
-* Outputs boxplots of feature importance estimation for each ML modeling algorithm (across n-fold CV).
-* Outputs our proposed 'composite feature importance plots' to examine feature importance estimate consistency (or lack of consistency) across all ML models (i.e. all algorithms)
-* Outputs summary ROC and PRC plots comparing average curves across all ML algorithms.
-* Collects run-time information on each phase of the pipeline and for the training of each ML algorithm model.
-* For each dataset, Kruskall-Wallis and subsequent pairwise Mann-Whitney U-Tests evaluates statistical significance of ML algorithm modeling performance differences for all metrics.
-* The same statistical tests (Kruskall-Wallis and Mann-Whitney U-Test) are conducted comparing datasets using the best performing modeling algorithm (for a given metric and dataset).
-* Outputs boxplots comparing performance of multiple datasets analyzed either across CV runs of a single algorithm and metric, or across average for each algorithm for a single metric.
-* A formatted PDF report is automatically generated giving a snapshot of all key pipeline results.
-* A script is included to apply all trained (and 'pickled') models to an external replication dataset to further evaluate model generalizability. This script (1) conducts an exploratory analysis of the new dataset, (2) uses the same scaling, imputation, and feature subsets determined from n-fold cv training, yielding 'n' versions of the replication dataset to be applied to the respective models, (3) applies and evaluates all models with these respective versions of the replication data, (4) outputs the same set of aforementioned boxplots, ROC, and PRC plots, and (5) automatically generates a new, formatted PDF report summarizing these applied results.
+* Overview
+* * Pipeline includes reliable default run parameters that can be adjusted for further customization.
+* * Easily compare ML performance between multiple target datasets (e.g. with different feature subsets)
+* * Easily conduct an exploratory analysis including: (1) basic dataset characteristics: data dimensions, feature stats, missing value counts, and class balance, (2) detection of categorical vs. quantiative features, (3) feature correlation (with heatmap), and (4) univariate analyses with Chi-Square (categorical features), or Mann-Whitney U-Test (quantitative features).
+* Preprocessing
+* * Option to manually specify which features to treat as categorical vs. quantitative.
+* * Option to manually specify features in loaded dataset to ignore in analysis.
+* * Option to utilize 'group' cross validation partitioning: Case/control pairs or groups that have been matched based on one or more covariates will be kept together within CV data partitions.
+* * Imputation is completed using mode imputation for categorical variables first, followed by MICE-based iterative imputation for quantitaive features. There is an option to use mean imputation for quantitative features when imputation computing cost is prohibitive in large datasets.
+* Feature Importance and Selection
+* * Data scaling, imputation, and feature selection are all conducted within respective CV partitions to prevent data leakage (i.e. testing data is not seen for any aspect of learning until final model evaluation).
+* * The scaling, imputation, and feature selection data transformations (based only on the training data) are saved (i.e. 'pickled') so that they can be applied in the same way to testing partitions, and in the future to any replication data.
+* * Collective feature selection is used: Both mutual information (proficient at detecting univariate associations) and MultiSURF (a Relief-based algorithm proficient at detecting both univariate and epistatic interactions) are run, and features are only removed from consideration if both algorithms fail to detect an informative signal (i.e. score > 0). This ensures that interacting features that may have no univariate association with class are not removed from the data prior to modeling.
+* * Automatically outputs average feature importance bar-plots from feature importance/feature selection phase.
+* * Since MultiSURF scales linearly with # of features and quadratically with # of instances, there is an option to select a random instance subset for MultiSURF scoring to reduce computational burden.
+* Modeling
+* * Includes 3 rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS (to run optionally). These 'learning classifier systems' have been demonstrated to be able to detect complex associations while providing human interpretable models in the form of IF:THEN rule-sets. The ExSTraCS algorithm was developed by our research group to specifically handle the challenges of scalability, noise, and detection of epistasis and genetic heterogeneity in biomedical data mining.  
+* * Utilizes the 'optuna' package to conduct automated Bayesian hyperparameter optimization during modeling (and optionally outputs plots summarizing the sweep).
+* * We have sought to specify a comprehensive range of relevant hyperparameter options for all included ML algorithms.
+* * Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS) These can be used in place of permutation feature importance estimates by setting the parameter `use_uniform_fi` to 'False'.
+* * All other algorithms rely on estimating feature importance using permutation feature importance.
+* * All models are evaluated, reporting 16 classification metrics: Accuracy, Balanced Accuracy, F1 Score, Sensitivity(Recall), Specificity, Precision (PPV), True Positives (TP), True Negatives (TN), False Positives (FP), False Negatives (FN), Negative Predictive Value (NPV), Likeliehood Ratio + (LR+), Likeliehood Ratio - (LR-), ROC AUC, PRC AUC, and PRC APS.
+* * All models are saved as 'pickle' files so that they can be loaded and reapplied in the future.
+* Post-Analysis
+* * Outputs ROC and PRC plots for each ML modeling algorithm displaying individual n-fold CV runs and average the average curve.
+* * Outputs boxplots for each classification metric comparing ML modeling performance (across n-fold CV).
+* * Outputs boxplots of feature importance estimation for each ML modeling algorithm (across n-fold CV).
+* * Outputs our proposed 'composite feature importance plots' to examine feature importance estimate consistency (or lack of consistency) across all ML models (i.e. all algorithms)
+* * Outputs summary ROC and PRC plots comparing average curves across all ML algorithms.
+* * Collects run-time information on each phase of the pipeline and for the training of each ML algorithm model.
+* * For each dataset, Kruskall-Wallis and subsequent pairwise Mann-Whitney U-Tests evaluates statistical significance of ML algorithm modeling performance differences for all metrics.
+* * The same statistical tests (Kruskall-Wallis and Mann-Whitney U-Test) are conducted comparing datasets using the best performing modeling algorithm (for a given metric and dataset).
+* * Outputs boxplots comparing performance of multiple datasets analyzed either across CV runs of a single algorithm and metric, or across average for each algorithm for a single metric.
+* * A formatted PDF report is automatically generated giving a snapshot of all key pipeline results.
+* * A script is included to apply all trained (and 'pickled') models to an external replication dataset to further evaluate model generalizability. This script (1) conducts an exploratory analysis of the new dataset, (2) uses the same scaling, imputation, and feature subsets determined from n-fold cv training, yielding 'n' versions of the replication dataset to be applied to the respective models, (3) applies and evaluates all models with these respective versions of the replication data, (4) outputs the same set of aforementioned boxplots, ROC, and PRC plots, and (5) automatically generates a new, formatted PDF report summarizing these applied results.

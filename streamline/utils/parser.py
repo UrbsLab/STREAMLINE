@@ -72,9 +72,9 @@ def parser_function(argv):
                         help='"Dont Panic" - sets a specific random seed for reproducible results', default=42)
     # Logistical arguments
     parser.add_argument('--run-parallel', dest='run_parallel', type=str,
-                        help='if run parallel on through multiprocessing', default="SLURM")
+                        help='if run parallel on through multiprocessing', default=False)
     parser.add_argument('--run-cluster', dest='run_cluster', type=str,
-                        help='if run parallel through SLURM process', default="False")
+                        help='if run parallel through SLURM process', default="SLURM")
     parser.add_argument('--res-mem', dest='reserved_memory', type=int,
                         help='reserved memory for the job (in Gigabytes)', default=4)
     parser.add_argument('--queue', dest='queue', type=str,

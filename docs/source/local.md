@@ -41,6 +41,58 @@ follow the same steps as in the [Colab Notebook](colab.md#running-on-your-own-da
 
 ## Running on CLI
 
+The most efficient way of running STREAMLINE is through command line.
+There's two ways to run STREAMLINE thorough a CLI interface.
+
+1. Through picking up run parameters through a config file.
+2. Through manually inputting run parameters
+
+There is a runner file called run.py which runs the whole or part of STREAMLINE
+pipeline as defined. A few examples are given below.
+
 ### Using config file
 
+`run.py` can also be used with config parameters 
+as defined in the [parameters section](parameters.md)
+
+Then it can be run with the command defined below (considering 
+the config file is `run.cfg`.
+```
+python run.py -c run.cfg
+```
+
+As example config setup to run all steps till report generations
+is given in the config 
+file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/run.cfg)
+
+except specifically the `multiprocessing` section needs to be defined as
+```
+[multiprocessing]
+run_parallel = True <or False, accordingly>
+reserved_memory = 4
+run_cluster = False
+queue = 'defq'
+```
+
+This sets the cluster setting off and makes it run 
+natively on the local machine.
+
+
+
 ### Using command-line parameters
+
+`run.py` can also be used with command line parameters 
+as defined in the [parameters section](parameters.md)
+
+Similarly the following additional parameters need to given
+
+```
+python run.py <other> --run-cluster False --run-parallel True<or Flase, accordingly>
+```
+
+As example case to run just the EDA phase and 
+all phases till report generation is given below.
+
+```
+example code, to be written
+```
