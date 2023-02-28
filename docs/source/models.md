@@ -1,4 +1,4 @@
-# Adding New Models
+# Adding New Modeling Algorithms
 
 New models can easily be added to STREAMLINE by creating a custom class 
 and wrapping it as warped class derived form the STREAMLINE `BaseModel` with 
