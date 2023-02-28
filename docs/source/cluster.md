@@ -70,7 +70,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run EDA Phase:
+To just run Exploratory Phase:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
