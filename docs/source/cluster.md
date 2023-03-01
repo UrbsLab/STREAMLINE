@@ -79,15 +79,9 @@ As example config setup to run all steps till report generations using SLURM das
 is given in the config 
 file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/cedars.cfg)
 
-We specifically focus on the multiprocessing section of the config file [here]()
+We specifically focus on the multiprocessing section of the 
+config file [here](https://github.com/UrbsLab/STREAMLINE/blob/04c89ed02cefa1284ee0f078f2631c1c3852c4a8/cedars.cfg#L8-L12)
 
-```
-[multiprocessing]
-run_parallel = False
-reserved_memory = 4
-run_cluster = "SLURM"
-queue = 'defq'
-```
 
 Now you can run the pipeline using the following command (considering the config file is `config.cfg`): 
 ```
