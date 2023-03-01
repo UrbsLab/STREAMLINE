@@ -110,6 +110,10 @@ As example case to all phases till report generation is given below:
 python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT  --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
+A user can also run phases of STREAMLINE individually, 
+however the user must have run all the phases before the phase he wants to run, i.e. the user must run this
+pipeline sequentially in the given order.
+
 To just run Exploratory Phase (Phase 1):
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT --do-till-report False --do-eda True --run_cluster SLURM --reserved_memory 4 --queue defq
