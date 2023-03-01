@@ -91,104 +91,62 @@ python run.py <other commands> --run-cluster False --run-parallel True<or Flase,
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
-               --run-cluster False --run-parallel True 
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT --run-cluster False --run-parallel True 
 ```
 
 To just run Exploratory Phase (Phase 1):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
-               --do-till-report False --do-eda True \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT --do-till-report False --do-eda True --run-cluster False --run-parallel True
 ```
 
 To just run Data Preparation Phase (Phase 2):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-dataprep True \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-dataprep True --run-cluster False --run-parallel True
 ```
 
 
 To just run Feature Importance Phase (Phase 3):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-feat-imp True \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-feat-imp True --run-cluster False --run-parallel True
 ```
 
 To just run Feature Selection Phase (Phase 4):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-feat-sel True \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-feat-sel True --run-cluster False --run-parallel True
 ```
 
 To just run Modeling Phase (Phase 5):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-model True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID                --do-till-report False --do-model True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 To just run Statistical Analysis Phase (Phase 6):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-stats True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-stats True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 To just run Dataset Compare Phase (Phase 7):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-compare-dataset True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 To just run (Reporting Phase) Phase 8:
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-report True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo  --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \        
-               --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-replicate True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv --class-label Class --inst-label InstanceID --do-till-report False --do-replicate True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
-               --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-rep-report True \ 
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-rep-report True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 To just run Cleaning Phase (Phase 11):
 ```
-python run.py  --out-path demo --exp-name demo \
-               --do-till-report False --do-clean True \
-               --del-time True --del-old-cv
+python run.py  --out-path demo --exp-name demo --do-till-report False --do-clean True --del-time True --del-old-cv
 ```

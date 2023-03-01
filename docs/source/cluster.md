@@ -107,104 +107,62 @@ on the example DemoData on the Cedars SLURM HPC.
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT  --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Exploratory Phase (Phase 1):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
-               --do-till-report False --do-eda True \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT --do-till-report False --do-eda True --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Data Preparation Phase (Phase 2):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-dataprep True \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-dataprep True --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 
 To just run Feature Importance Phase (Phase 3):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-feat-imp True \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-feat-imp True --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Feature Selection Phase (Phase 4):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-feat-sel True \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-feat-sel True --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Modeling Phase (Phase 5):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-model True \
-               --algorithms NB,LR,DT --do-all False \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-model True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Statistical Analysis Phase (Phase 6):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-stats True \
-               --algorithms NB,LR,DT --do-all False \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-stats True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Dataset Compare Phase (Phase 7):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-compare-dataset True \
-               --algorithms NB,LR,DT --do-all False \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run (Reporting Phase) Phase 8:
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-report True \
-               --algorithms NB,LR,DT --do-all False \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \        
-               --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-replicate True \
-               --algorithms NB,LR,DT --do-all False \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-replicate True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
-               --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-rep-report True \ 
-               --algorithms NB,LR,DT --do-all False \
-               --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-rep-report True \--algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Cleaning Phase (Phase 11):
 ```
-python run.py  --out-path demo --exp-name demo \
-               --do-till-report False --do-clean True \
-               --del-time True --del-old-cv
+python run.py  --out-path demo --exp-name demo --do-till-report False --do-clean True --del-time True --del-old-cv
 ```
