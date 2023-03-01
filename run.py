@@ -37,8 +37,12 @@ def runner(obj, phase, run_parallel=True, params=None):
 
     phase_str = phase_list[phase]
     print()
-    print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
-          + " with " + str(params['run_cluster']) + " Setup")
+    if params['run_cluster'] and phase!= 11:
+        print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
+              + " with " + str(params['run_cluster']) + " Setup")
+    else:
+        print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
+              + " with " + "Local" + " Setup")
     how = "with SLURM Manual Jobs"
     if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
         obj.run(run_parallel=run_parallel)
@@ -79,14 +83,13 @@ def len_datasets(output_path, experiment_name):
 
 def process_params(params):
 
-    if config_dict['run_cluster'] and not ("Old" in config_dict['run_cluster']):
-        config_dict['run_parallel'] = config_dict['run_cluster']
-
     if config_dict['do_till_report']:
         config_dict["do_eda"] = True
         config_dict["do_dataprep"] = True
+        config_dict["do_feat_imp"] = True
         config_dict["do_feat_sel"] = True
         config_dict["do_model"] = True
+        config_dict["do_stats"] = True
         config_dict["do_compare_dataset"] = True
         config_dict["do_report"] = True
 
@@ -109,6 +112,12 @@ def process_params(params):
         params['match_label'] = None
     if params['instance_label'] == '':
         params['instance_label'] = None
+    if params['run_cluster'] == "False":
+        params['run_cluster'] = False
+    if params['run_parallel'] == "False":
+        params['run_parallel'] = False
+    if params['run_parallel'] == "True":
+        params['run_parallel'] = True
 
     return params
 
@@ -186,7 +195,7 @@ def run(params):
                                       lcs_nu=params['lcs_nu'],
                                       lcs_n=params['lcs_n'],
                                       lcs_iterations=params['lcs_iterations'],
-                                      lcs_timeout=params['lcs_timeout'], resubmit=False,
+                                      lcs_timeout=params['lcs_timeout'], resubmit=params['model_resubmit'],
                                       random_state=params['random_state'], n_jobs=params['n_jobs'],
                                       run_cluster=params['run_cluster'],
                                       queue=params['queue'],
@@ -260,7 +269,7 @@ def run(params):
     if params['do_cleanup']:
         clean = CleanRunner(params['output_path'], params['experiment_name'],
                             del_time=params['del_time'], del_old_cv=params['del_old_cv'])
-        runner(clean, "Cleaning", run_parallel=params['run_parallel'], params=params)
+        runner(clean, 11, run_parallel=params['run_parallel'], params=params)
 
     print("DONE!!!")
     print("Ran in " + str(time.time() - start_g))
