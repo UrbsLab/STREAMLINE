@@ -73,8 +73,8 @@ python run.py -c run.cfg
 ```
 
 Specifically the `run_cluster` parameter in the `multiprocessing` section has to been defined as
-`run_cluster = "False"` which runs it locally. This specific parameter in the file is located [here]
-(https://github.com/UrbsLab/STREAMLINE/blob/5c66b3286056bbd9b514c202aa0a22758a76f62c/run.cfg#L11)
+`run_cluster = "False"` which runs it locally. This specific parameter in 
+the file is located [here](https://github.com/UrbsLab/STREAMLINE/blob/5c66b3286056bbd9b514c202aa0a22758a76f62c/run.cfg#L11)
 
 
 ### Using command-line parameters
