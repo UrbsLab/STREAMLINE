@@ -51,23 +51,28 @@ The Jupyter notebook usage is the same as Local installation with two additional
 ## Cluster Installation
 Cluster installation may carry extra steps as per your HPC setup, but is essentially the same as the Local Setup.
 
-Additional tools that may help in running big jobs include terminal emulators like `tmux` and `screen`. 
+Additional tools that may help in running big jobs include terminal emulators like `tmux` and `screen`
+and terminal text editors like `nano` and `vim`.
 
-These programs allow you to create several "pseudo terminals" from a single terminal.
+Terminal emulators programs allow you to create several "pseudo terminals" from a single terminal.
 They decouple your programs from the main terminal, 
 protecting them from accidentally disconnecting. 
 You can detach tmux or screen from the login terminal, 
 and all your programs will continue to run safely in the background. 
 Later, we can reattach them to the same or a different terminal to 
-monitor the process.
-
-These are also very useful for running multiple programs with a single connection, 
+monitor the process. These are also very useful for running multiple programs with a single connection, 
 such as when you're remotely connecting to a machine using Secure Shell (SSH).
 
+Terminal text editors are simple text editor programs that allow you to edit files through the terminal.
 
-In most likelihood they would be installed in your cluster or available as modules in your cluster.
+In most likelihood these would be installed in your cluster or available as modules in your cluster.
 
-We recommend using `tmux`, a quick guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux)
+We recommend using `tmux` as a terminal emulator, 
+a quick guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux)
+
+We recommend using `nano` as a text editor, 
+a quick guide on using it can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
+
 
 ## Known Issues
 

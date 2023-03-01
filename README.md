@@ -18,7 +18,7 @@ the strengths and weaknesses of ML modeling algorithms or other AutoML algorithm
 A preprint introducing and applying STREAMLINE is now available 
 [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
-See [./info/CITATIONS.md](info/CITATIONS.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
+See [./info/citations.md](info/citations.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
 peer-reviewed publication.
 
 ## STREAMLINE Schematic
@@ -48,7 +48,7 @@ We intend many expansions/improvements to this pipeline in the future to make it
 * In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
 
 ### More Information
-More information about the nature of STREAMLINE can be found in [./info/INFO.md](info/INFO.md).
+More information about the nature of STREAMLINE can be found in [./info/about.md](info/about.md).
 
 ***
 ## Installation and Use
@@ -81,7 +81,7 @@ New users can easily run the
 included [jupyter notebook](https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb) 
 'as-is', and it will be run automatically on these datasets. 
 
-Detailed info about advanced features and commandline implementation can be found in  [./info/DEMO.md](info/DEMO.md)
+Detailed info about advanced features and commandline implementation can be found in  [./info/demo.md](info/demo.md)
 
 ***
 # Acknowledgements

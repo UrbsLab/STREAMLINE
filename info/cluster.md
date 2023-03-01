@@ -69,23 +69,23 @@ The multiprocessing section has four parameters that need to be defined.
 
 The `run_cluster` parameter is the most important parameter here.
 It is set to False when running locally, to use a cluster implementation, specify as a 
-string type of cluster. Currently, clusters supported by `dask-jobqueue` can be supported.
+string type of cluster. Currently clusters supported by `dask-jobqueue` can be supported.
 
 Additionally, the old method of manual submission can be done using the flags
 `"SLURMOld"` and `"LSFOld"` instead. This will generate and submit jobs using shell files 
 similar to the legacy version of STREAMLINE.
 
-As example config setup to run all steps till report generations using SLURM dask-jobqueue on Cedars-Sinai HPC
+As example config setup to run all steps till report generations
 is given in the config 
-file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/cedars.cfg)
+file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/run.cfg)
 
-We specifically focus on the multiprocessing section of the config file [here]()
+We specifically focus on the multiprocessing section of the config file.
 
 ```
 [multiprocessing]
 run_parallel = False
 reserved_memory = 4
-run_cluster = "SLURM"
+run_cluster = "SLURMOld"
 queue = 'defq'
 ```
 
@@ -118,7 +118,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Exploratory Phase (Phase 1):
+To just run Phase 1:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
@@ -126,7 +126,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Data Preparation Phase (Phase 2):
+To just run Phase 2:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -135,7 +135,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
 ```
 
 
-To just run Feature Importance Phase (Phase 3):
+To just run Phase 3:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -143,7 +143,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Feature Selection Phase (Phase 4):
+To just run Phase 4:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -151,7 +151,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Modeling Phase (Phase 5):
+To just run Phase 5:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -160,7 +160,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Statistical Analysis Phase (Phase 6):
+To just run Phase 6:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -169,7 +169,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Dataset Compare Phase (Phase 7):
+To just run Phase 7:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -178,7 +178,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run (Reporting Phase) Phase 8:
+To just run Phase 8:
 ```
 python run.py --data-path DemoData --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
@@ -188,7 +188,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
 ```
 
 
-To just run Replication Phase (Phase 9):
+To just run Phase 9:
 ```
 python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \        
                --out-path demo --exp-name demo \
@@ -198,7 +198,7 @@ python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Replication Report Phase (Phase 10):
+To just run Phase 10:
 ```
 python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
                --out-path demo --exp-name demo \
@@ -208,7 +208,7 @@ python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
                --run_cluster SLURM --reserved_memory 4 --queue defq
 ```
 
-To just run Cleaning Phase (Phase 11):
+To just run Phase 11:
 ```
 python run.py  --out-path demo --exp-name demo \
                --do-till-report False --do-clean True \
