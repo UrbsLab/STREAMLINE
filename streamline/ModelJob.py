@@ -205,7 +205,7 @@ def objective_LR(trial, est, x_train, y_train, random_state, hype_cv, param_grid
     params = {'solver' : trial.suggest_categorical('solver',param_grid['solver']),
 			  'C' : trial.suggest_loguniform('C', param_grid['C'][0], param_grid['C'][1]),
 			  'class_weight' : trial.suggest_categorical('class_weight',param_grid['class_weight']),
-			  'max_iter' : trial.suggest_loguniform('max_iter',param_grid['max_iter'][0], param_grid['max_iter'][1]),
+			  'max_iter' : trial.suggest_int('max_iter',param_grid['max_iter'][0], param_grid['max_iter'][1], log=True),
               'random_state' : trial.suggest_categorical('random_state',param_grid['random_state'])}
     #Handle the special cases of valid hyperparameter combinations allowed by logistic regression.
     #duel = True only for penalty = l2 and solver = liblinear
