@@ -37,13 +37,13 @@ def runner(obj, phase, run_parallel=True, params=None):
 
     phase_str = phase_list[phase]
     print()
-    if params['run_cluster'] and phase!= 11:
+    if params['run_cluster'] and phase != 11:
         print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
               + " with " + str(params['run_cluster']) + " Setup")
     else:
         print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
               + " with " + "Local" + " Setup")
-    how = "with SLURM Manual Jobs"
+    how = "with " + str(params['run_cluster']) + " Manual Jobs"
     if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
         obj.run(run_parallel=run_parallel)
         if phase == 1:
@@ -82,7 +82,6 @@ def len_datasets(output_path, experiment_name):
 
 
 def process_params(params):
-
     if config_dict['do_till_report']:
         config_dict["do_eda"] = True
         config_dict["do_dataprep"] = True

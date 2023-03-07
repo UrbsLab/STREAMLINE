@@ -41,4 +41,4 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
         client = Client(cluster)
     except Exception:
         raise Exception("Exception: Unknown Exception")
-    return client
+    return client, cluster

@@ -156,7 +156,8 @@ def parser_function(argv):
                         default=True)
     # # ML modeling algorithms: Defaults available
     # parser.add_argument('--do-NB', dest='do_NB', type=str2bool, help='run naive bayes modeling', default=False)
-    # parser.add_argument('--do-LR', dest='do_LR', type=str2bool, help='run logistic regression modeling', default=False)
+    # parser.add_argument('--do-LR', dest='do_LR', type=str2bool, help='run logistic regression modeling',
+    # default=False)
     # parser.add_argument('--do-DT', dest='do_DT', type=str2bool, help='run decision tree modeling', default=False)
     # parser.add_argument('--do-RF', dest='do_RF', type=str2bool, help='run random forest modeling', default=False)
     # parser.add_argument('--do-GB', dest='do_GB', type=str2bool, help='run gradient boosting modeling', default=False)

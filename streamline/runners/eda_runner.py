@@ -163,7 +163,11 @@ class EDARunner:
                 )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list)
 
         if self.run_cluster and "Old" not in self.run_cluster:
-            get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+            client, cluster = get_cluster(self.run_cluster,
+                                          self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+            debug = True
+            if debug:
+                print(cluster.job_script())
             dask.compute([dask.delayed(
                 parallel_eda_call
             )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
