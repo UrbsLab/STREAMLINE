@@ -37,8 +37,9 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
                 cluster.adapt(maximum_jobs=400)
             except KeyError:
                 raise Exception("Unknown or Unsupported Cluster Type")
-
         client = Client(cluster)
     except Exception:
         raise Exception("Exception: Unknown Exception")
-    return client, cluster
+    print("Running dask-cluster")
+    print(client.scheduler_info())
+    return client
