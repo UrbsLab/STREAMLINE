@@ -190,7 +190,8 @@ class FeatureSelection(Job):
             try:
                 ns['Scores'].plot(kind='barh', figsize=(6, 12))
             except Exception:
-                ns.plot(kind='barh', x='Names', y='Scores', figsize=(6, 12))
+                plt.figure(figsize=(6, 12))
+                plt.barh(ns['Names'], ns['Scores'])
             plt.ylabel('Features')
             algorithm_name = ""
             if algorithm == "MI":
