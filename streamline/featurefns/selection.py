@@ -118,7 +118,6 @@ class FeatureSelection(Job):
             algorithmlabel: label of algorithm reporting for (used for saving logs)
             selected_feature_lists: list of selected features for processing (dictionary for data storage)
             meta_feature_ranks: dictionary for data storage
-            show: flag to output figures
 
         Returns:
 
@@ -188,7 +187,10 @@ class FeatureSelection(Job):
             # Select top 'n' to report and plot
             ns = ns.head(self.top_features)
             # Visualize sorted feature scores
-            ns['Scores'].plot(kind='barh', figsize=(6, 12))
+            try:
+                ns['Scores'].plot(kind='barh', figsize=(6, 12))
+            except Exception:
+                ns.plot(kind='barh', x='Names', y='Scores', figsize=(6, 12))
             plt.ylabel('Features')
             algorithm_name = ""
             if algorithm == "MI":

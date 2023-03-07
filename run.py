@@ -16,7 +16,6 @@ from streamline.runners.replicate_runner import ReplicationRunner
 from streamline.runners.clean_runner import CleanRunner
 from streamline.utils.parser import parser_function
 from streamline.utils.checker import check_phase
-from streamline.utils.runners import num_cores
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -61,10 +60,11 @@ def runner(obj, phase, run_parallel=True, params=None):
         obj.run(run_parallel=run_parallel)
         if not run_parallel or run_parallel == "False":
             how = "serially"
-        elif run_parallel in ["multiprocessing", "True", True]:
+        elif run_parallel in ["multiprocessing", "True", True] \
+                and str(params['run_cluster']) == "False":
             how = "parallely"
-        else:
-            how = "with " + str(run_parallel) + " dask cluster"
+        if str(params['run_cluster']) != "False":
+            how = "with " + str(params['run_cluster']) + " dask cluster"
 
     print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
     del obj
