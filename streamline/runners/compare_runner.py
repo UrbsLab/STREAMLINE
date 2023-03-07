@@ -64,7 +64,7 @@ class CompareRunner:
                 self.submit_slurm_cluster_job()
 
             if self.run_cluster == "LSFOld":
-                self.submit_slurm_cluster_job()
+                self.submit_lsf_cluster_job()
         else:
             job_obj = CompareJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                                  self.class_label, self.instance_label, self.sig_cutoff, self.show_plots)
