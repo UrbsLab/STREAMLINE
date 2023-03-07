@@ -21,10 +21,10 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
                                    log_directory=output_path + "/dask_logs/")
             cluster.adapt(maximum_jobs=400)
         elif cluster_type == "LSF":
-            cluster = LSFCluster(queue='i2c2_normal',
+            cluster = LSFCluster(queue=queue,
                                  cores=1,
-                                 memory="4G",
-                                 walltime="12:00:00",
+                                 memory=str(memory) + "G",
+                                 # walltime="12:00:00",
                                  log_directory=output_path + "/dask_logs/")
             cluster.adapt(maximum_jobs=400)
         else:

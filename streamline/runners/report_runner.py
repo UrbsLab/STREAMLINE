@@ -78,7 +78,7 @@ class ReportRunner:
                 self.submit_slurm_cluster_job()
 
             if self.run_cluster == "LSFOld":
-                self.submit_slurm_cluster_job()
+                self.submit_lsf_cluster_job()
         else:
             job_obj = ReportJob(self.output_path, self.experiment_name, None, self.algorithms, None,
                                 self.training, self.train_data_path, self.rep_data_path)
