@@ -4,12 +4,11 @@ import os
 import pickle
 import time
 import logging
-import matplotlib
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from matplotlib import rc
 from statistics import mean, median, stdev
-from matplotlib import pyplot as plt
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 from streamline.utils.job import Job
 from streamline.modeling.utils import ABBREVIATION, COLORS

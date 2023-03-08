@@ -3,7 +3,7 @@ import time
 import logging
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 from streamline.utils.job import Job
 from streamline.modeling.utils import ABBREVIATION, COLORS, is_supported_model
