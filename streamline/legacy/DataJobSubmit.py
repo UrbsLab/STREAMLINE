@@ -12,10 +12,10 @@ def run_cluster(argv):
     cv_train_path = argv[1]
     cv_test_path = argv[2]
     full_path = argv[3]
-    scale_data = bool(argv[4])
-    impute_data = bool(argv[5])
-    multi_impute = bool(argv[6])
-    overwrite_cv = bool(argv[7])
+    scale_data = eval(argv[4])
+    impute_data = eval(argv[5])
+    multi_impute = eval(argv[6])
+    overwrite_cv = eval(argv[7])
     class_label = argv[8] if argv[8] != "None" else None
     instance_label = argv[9] if argv[9] != "None" else None
     random_state = int(argv[10]) if argv[10] != "None" else None

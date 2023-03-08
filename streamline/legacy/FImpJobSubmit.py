@@ -15,8 +15,8 @@ def run_cluster(argv):
     instance_label = argv[4] if argv[4] != "None" else None
     instance_subset = None if argv[5] == "None" else eval(argv[5])
     algorithm = argv[6]
-    use_turf = bool(argv[7])
-    turf_pct = bool(argv[8])
+    use_turf = eval(argv[7])
+    turf_pct = eval(argv[8])
     random_state = None if argv[9] == "None" else int(argv[9])
     n_jobs = None if argv[10] == "None" else int(argv[10])
 

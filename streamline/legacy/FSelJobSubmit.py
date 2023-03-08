@@ -16,11 +16,11 @@ def run_cluster(argv):
     print(algorithms)
     class_label = argv[4]
     instance_label = argv[5] if argv[5] != "None" else None
-    export_scores = bool(argv[6])
+    export_scores = eval(argv[6])
     top_features = int(argv[7])
     max_features_to_keep = int(argv[8])
-    filter_poor_features = bool(argv[9])
-    overwrite_cv = bool(argv[10])
+    filter_poor_features = eval(argv[9])
+    overwrite_cv = eval(argv[10])
 
     job_obj = FeatureSelection(full_path, n_datasets, algorithms,
                                class_label, instance_label, export_scores,

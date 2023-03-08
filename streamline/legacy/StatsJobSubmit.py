@@ -22,7 +22,6 @@ def run_cluster(argv):
             temp_algo.append(key)
     algorithms = temp_algo
 
-    print(algorithms)
     class_label = argv[3]
     instance_label = argv[4] if argv[4] != "None" else None
     scoring_metric = argv[5]
@@ -30,12 +29,12 @@ def run_cluster(argv):
     top_features = int(argv[7]) if argv[7] != "None" else None
     sig_cutoff = float(argv[8]) if argv[8] != "None" else None
     metric_weight = argv[9] if argv[9] != "None" else None
-    scale_data = bool(argv[10])
-    plot_roc = bool(argv[11])
-    plot_prc = bool(argv[12])
-    plot_fi_box = bool(argv[13])
-    plot_metric_boxplots = bool(argv[14])
-    show_plots = bool(argv[15])
+    scale_data = eval(argv[10])
+    plot_roc = eval(argv[11])
+    plot_prc = eval(argv[12])
+    plot_fi_box = eval(argv[13])
+    plot_metric_boxplots = eval(argv[14])
+    show_plots = eval(argv[15])
 
     job_obj = StatsJob(full_path, algorithms, class_label, instance_label, scoring_metric,
                        len_cv, top_features, sig_cutoff, metric_weight, scale_data,

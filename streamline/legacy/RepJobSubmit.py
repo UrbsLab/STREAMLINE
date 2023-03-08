@@ -27,16 +27,16 @@ def run_cluster(argv):
     algorithms = temp_algo
     exclude = None
     len_cv = int(argv[9])
-    export_feature_correlations = bool(argv[10])
-    plot_roc = bool(argv[11])
-    plot_prc = bool(argv[12])
-    plot_metric_boxplots = bool(argv[13])
+    export_feature_correlations = eval(argv[10])
+    plot_roc = eval(argv[11])
+    plot_prc = eval(argv[12])
+    plot_metric_boxplots = eval(argv[13])
     categorical_cutoff = int(argv[14]) if argv[14] != "None" else None
     sig_cutoff = float(argv[15]) if argv[15] != "None" else None
-    scale_data = bool(argv[16])
-    impute_data = bool(argv[17])
-    multi_impute = bool(argv[18])
-    show_plots = bool(argv[19])
+    scale_data = eval(argv[16])
+    impute_data = eval(argv[17])
+    multi_impute = eval(argv[18])
+    show_plots = eval(argv[19])
     scoring_metric = argv[20]
 
     job_obj = ReplicateJob(dataset_filename, dataset_for_rep, full_path, class_label, instance_label,

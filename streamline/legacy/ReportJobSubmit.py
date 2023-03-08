@@ -23,7 +23,7 @@ def run_cluster(argv):
             temp_algo.append(key)
     algorithms = temp_algo
     exclude = None
-    training = bool(argv[6])
+    training = eval(argv[6])
     train_data_path = None if argv[7] == "None" else argv[7]
     rep_data_path = None if argv[8] == "None" else argv[8]
 

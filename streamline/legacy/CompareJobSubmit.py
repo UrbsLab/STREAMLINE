@@ -26,7 +26,7 @@ def run_cluster(argv):
     class_label = argv[6]
     instance_label = argv[7] if argv[7] != "None" else None
     sig_cutoff = float(argv[8])
-    show_plots = bool(argv[9])
+    show_plots = eval(argv[9])
 
     job_obj = CompareJob(output_path, experiment_name, experiment_path, algorithms, exclude,
                          class_label, instance_label, sig_cutoff, show_plots)

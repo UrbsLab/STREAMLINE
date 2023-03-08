@@ -40,6 +40,6 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
         client = Client(cluster)
     except Exception:
         raise Exception("Exception: Unknown Exception")
-    print("Running dask-cluster")
-    print(client.scheduler_info())
+    # print("Running dask-cluster")
+    # print(client.scheduler_info())
     return client

@@ -67,6 +67,7 @@ def runner(obj, phase, run_parallel=True, params=None):
             how = "with " + str(params['run_cluster']) + " dask cluster"
 
     print("Ran " + phase_str + " Phase " + how + " in " + str(time.time() - start))
+    time.sleep(2)
     del obj
 
 
