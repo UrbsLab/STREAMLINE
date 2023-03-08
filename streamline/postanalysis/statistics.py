@@ -431,7 +431,7 @@ class StatsJob(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
 
     def do_model_prc(self, algorithm, precs, praucs, mean_recall, alg_result_table, rep_data=None, replicate=False):
         # Define values for the mean PRC line (mean of individual CVs)
@@ -487,7 +487,7 @@ class StatsJob(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
 
     def do_plot_roc(self, result_table):
         """
@@ -518,7 +518,7 @@ class StatsJob(Job):
             plt.show()
         else:
             plt.close('all')
-            plt.clf()
+            plt.cla()
 
     def do_plot_prc(self, result_table, rep_data=None, replicate=False):
         """
@@ -558,7 +558,7 @@ class StatsJob(Job):
             plt.show()
         else:
             plt.close('all')
-            plt.clf()
+            plt.cla()
 
     def save_metric_stats(self, metrics, metric_dict):
         """
@@ -639,7 +639,7 @@ class StatsJob(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
 
     def kruskal_wallis(self, metrics, metric_dict):
         """
@@ -893,7 +893,7 @@ class StatsJob(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
             # Identify and sort (decreasing) features with top median FI
             algorithm_counter += 1
 
@@ -917,7 +917,7 @@ class StatsJob(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
 
     def composite_fi_plot(self, fi_list, all_feature_list_to_viz, fig_name,
                           y_label_text):
@@ -974,7 +974,7 @@ class StatsJob(Job):
             plt.show()
         else:
             plt.close('all')
-            plt.clf()
+            plt.cla()
 
     def get_fi_to_viz_sorted(self, features_to_viz, all_feature_list, fi_med_norm_list):
         """

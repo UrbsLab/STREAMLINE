@@ -299,7 +299,7 @@ class EDAJob(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
 
     def feature_correlation_plot(self, x_data=None):
         """
@@ -324,7 +324,7 @@ class EDAJob(Job):
             plt.show()
         else:
             plt.close('all')
-            plt.clf()
+            plt.cla()
 
     def univariate_analysis(self, top_features=20):
         """
@@ -444,7 +444,7 @@ class EDAJob(Job):
                     + '/exploratory/univariate_analyses/' + 'Barplot_' +
                     str(new_feature_name) + ".png", bbox_inches="tight", format='png')
         plt.close('all')
-        plt.clf()
+        plt.cla()
 
     def test_selector(self, feature_name):
         """

@@ -209,7 +209,7 @@ class FeatureSelection(Job):
                 plt.show()
             else:
                 plt.close('all')
-                plt.clf()
+                plt.cla()
         return selected_feature_lists, meta_feature_ranks
 
     def select_features(self, selected_feature_lists, max_features_to_keep, meta_feature_ranks):
