@@ -316,6 +316,7 @@ class CompareJob(Job):
                 plt.show()
             else:
                 plt.close('all')
+                plt.clf()
 
     def data_compare_bp(self):
         """
@@ -349,6 +350,7 @@ class CompareJob(Job):
                     plt.show()
                 else:
                     plt.close('all')
+                    plt.clf()
 
     def save_runtime(self):
         """
