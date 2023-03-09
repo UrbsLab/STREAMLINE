@@ -84,6 +84,10 @@ def len_datasets(output_path, experiment_name):
 
 
 def process_params(params):
+
+    if config_dict['run_cluster'] not in [False, "False"]:
+        config_dict['run_parellel'] = True
+
     if config_dict['do_till_report']:
         config_dict["do_eda"] = True
         config_dict["do_dataprep"] = True
