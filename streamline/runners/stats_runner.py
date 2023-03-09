@@ -92,7 +92,7 @@ class StatsRunner:
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
-        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted',
+        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs',
                        'logs', 'jobs', 'DatasetComparisons',
                        self.experiment_name + '_ML_Pipeline_Report.pdf']
 

@@ -25,3 +25,4 @@ scikit-eLCS
 kaleido
 dask-jobqueue
 dask
+joblib

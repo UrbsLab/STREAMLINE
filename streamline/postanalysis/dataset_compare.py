@@ -36,7 +36,8 @@ class CompareJob(Job):
 
         datasets = os.listdir(self.experiment_path)
         remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
-                       'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks',
+                       'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons',
+                       'UsefulNotebooks', 'dask_logs',
                        self.experiment_name + '_ML_Pipeline_Report.pdf']
         for text in remove_list:
             if text in datasets:

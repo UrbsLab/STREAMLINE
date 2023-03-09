@@ -40,7 +40,8 @@ class ReportJob(Job):
         if self.training:
             self.datasets = os.listdir(self.experiment_path)
             remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
-                           'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs', 'KeyFileCopy',
+                           'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs',
+                           'KeyFileCopy', 'dask_logs',
                            experiment_name + '_ML_Pipeline_Report.pdf']
             for item in remove_list:
                 if item in self.datasets:
