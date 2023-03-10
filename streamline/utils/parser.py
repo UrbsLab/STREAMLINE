@@ -9,7 +9,7 @@ from streamline.utils.parser_helpers import PARSER_LIST
 
 def process_params(params):
     if params['run_cluster'] not in [False, "False"]:
-        params['run_parellel'] = True
+        params['run_parallel'] = True
 
     if params['do_till_report']:
         params["do_eda"] = True
