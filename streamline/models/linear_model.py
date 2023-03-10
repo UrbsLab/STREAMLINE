@@ -21,7 +21,7 @@ class LogisticRegression(BaseModel, ABC):
     def objective(self, trial, params=None):
         self.params = {
             'solver': trial.suggest_categorical('solver', self.param_grid['solver']),
-            'C': trial.suggest_loguniform('C', self.param_grid['C'][0], self.param_grid['C'][1]),
+            'C': trial.suggest_float('C', self.param_grid['C'][0], self.param_grid['C'][1], log=True),
             'class_weight': trial.suggest_categorical('class_weight', self.param_grid['class_weight']),
             'max_iter': trial.suggest_int('max_iter', self.param_grid['max_iter'][0],
                                           self.param_grid['max_iter'][1], log=True),

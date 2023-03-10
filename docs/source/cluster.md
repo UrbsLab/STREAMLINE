@@ -21,9 +21,9 @@ for using STREAMLINE through config file.
 
 A detailed guide can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
 
-A gist of the application is that you can edit the `run.cfg` config file by the following steps
+A gist of the application is that you can edit the `cedars.cfg` config file by the following steps
 1. Go to the root streamline folder.
-2. Type `nano run.cfg` in the terminal to open the file in tmux.
+2. Type `nano cedars.cfg` in the terminal to open the file in tmux.
 3. Make the necessary in the changes in the config file.
 4. Press `Ctrl + X` to close the file and `Y` to save the changes.
 
@@ -62,9 +62,9 @@ The steps to take it is as follows:
 Edit the multiprocessing section of the config file according to your needs.
 
 The multiprocessing section has four parameters that need to be defined.
-1. `run_parallel`: Flag to run parallel processing in local job, overridden if `run_cluster` is defined. 
+1. `run_parallel`: Flag to run parallel processing in local job, overridden if `run-cluster` is defined. 
 2. `reserved_memory`: memory reserved per job
-3. `run_cluster`: flag for type of cluster, by far the most important parameter discussed in detail below.
+3. `run-cluster`: flag for type of cluster, by far the most important parameter discussed in detail below.
 4. `queue`: the partition queue used for job submissions.
 
 The `run_cluster` parameter is the most important parameter here.
@@ -83,9 +83,9 @@ We specifically focus on the multiprocessing section of the
 config file [here](https://github.com/UrbsLab/STREAMLINE/blob/04c89ed02cefa1284ee0f078f2631c1c3852c4a8/cedars.cfg#L8-L12)
 
 
-Now you can run the pipeline using the following command (considering the config file is `config.cfg`): 
+Now you can run the pipeline using the following command (considering the config file is `cedars.cfg`): 
 ```
-run.py -c config.cfg
+run.py -c cedars.cfg
 ```
 
 
@@ -98,7 +98,7 @@ As discussed above you need only specify 3 additional parameters in the
 CLI parameters way of running STREAMLINE
 
 ```
-python run.py <other commands> --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py <other commands> --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 We give examples to run all phases separately and together 
@@ -107,7 +107,7 @@ on the example DemoData on the Cedars SLURM HPC.
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT  --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 A user can also run phases of STREAMLINE individually, 
@@ -116,57 +116,57 @@ pipeline sequentially in the given order.
 
 To just run Exploratory Phase (Phase 1):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT --do-till-report False --do-eda True --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Data Preparation Phase (Phase 2):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-dataprep True --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 
 To just run Feature Importance Phase (Phase 3):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-feat-imp True --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Feature Selection Phase (Phase 4):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-feat-sel True --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --do-feat-sel --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Modeling Phase (Phase 5):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-model True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Statistical Analysis Phase (Phase 6):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-stats True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --do-stats --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Dataset Compare Phase (Phase 7):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run (Reporting Phase) Phase 8:
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-replicate True --algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --do-replicate --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-rep-report True \--algorithms NB,LR,DT --do-all False --run_cluster SLURM --reserved_memory 4 --queue defq
+python run.py --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --do-rep-report --run-cluster SLURM --reserved_memory 4 --queue defq
 ```
 
 To just run Cleaning Phase (Phase 11):
 ```
-python run.py  --out-path demo --exp-name demo --do-till-report False --do-clean True --del-time True --del-old-cv
+python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster SLURM --reserved_memory 4 --queue defq
 ```

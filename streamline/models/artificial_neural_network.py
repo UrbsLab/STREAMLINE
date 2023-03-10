@@ -25,8 +25,8 @@ class MLPClassifier(BaseModel, ABC):
                                                          self.param_grid['momentum'][1]),
                        'solver': trial.suggest_categorical('solver', self.param_grid['solver']),
                        'batch_size': trial.suggest_categorical('batch_size', self.param_grid['batch_size']),
-                       'alpha': trial.suggest_loguniform('alpha', self.param_grid['alpha'][0],
-                                                         self.param_grid['alpha'][1]),
+                       'alpha': trial.suggest_float('alpha', self.param_grid['alpha'][0],
+                                                    self.param_grid['alpha'][1], log=True),
                        'max_iter': trial.suggest_categorical('max_iter', self.param_grid['max_iter']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
         mean_cv_score = self.hyper_eval()

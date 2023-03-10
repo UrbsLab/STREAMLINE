@@ -20,7 +20,7 @@ class SupportVectorClassifier(BaseModel, ABC):
 
     def objective(self, trial, params=None):
         self.params = {'kernel': trial.suggest_categorical('kernel', self.param_grid['kernel']),
-                       'C': trial.suggest_loguniform('C', self.param_grid['C'][0], self.param_grid['C'][1]),
+                       'C': trial.suggest_float('C', self.param_grid['C'][0], self.param_grid['C'][1], log=True),
                        'gamma': trial.suggest_categorical('gamma', self.param_grid['gamma']),
                        'degree': trial.suggest_int('degree', self.param_grid['degree'][0],
                                                    self.param_grid['degree'][1]),

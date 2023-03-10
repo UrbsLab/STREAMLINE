@@ -3,7 +3,6 @@ import sys
 import time
 import optuna
 import logging
-import configparser
 from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
@@ -83,55 +82,12 @@ def len_datasets(output_path, experiment_name):
     return len(datasets)
 
 
-def process_params(params):
-
-    if config_dict['run_cluster'] not in [False, "False"]:
-        config_dict['run_parellel'] = True
-
-    if config_dict['do_till_report']:
-        config_dict["do_eda"] = True
-        config_dict["do_dataprep"] = True
-        config_dict["do_feat_imp"] = True
-        config_dict["do_feat_sel"] = True
-        config_dict["do_model"] = True
-        config_dict["do_stats"] = True
-        config_dict["do_compare_dataset"] = True
-        config_dict["do_report"] = True
-
-    if 'feat_algorithms' not in params:
-        feat_algorithms = list()
-        if params['do_mutual_info']:
-            feat_algorithms.append("MI")
-        if params['do_multisurf']:
-            feat_algorithms.append("MS")
-        params['feat_algorithms'] = feat_algorithms
-
-    if params['do_all']:
-        params['algorithms'] = None
-
-    if params['ignore_features_path'] == '':
-        params['ignore_features_path'] = None
-    if params['categorical_feature_path'] == '':
-        params['categorical_feature_path'] = None
-    if params['match_label'] == '':
-        params['match_label'] = None
-    if params['instance_label'] == '':
-        params['instance_label'] = None
-    if params['run_cluster'] == "False":
-        params['run_cluster'] = False
-    if params['run_parallel'] == "False":
-        params['run_parallel'] = False
-    if params['run_parallel'] == "True":
-        params['run_parallel'] = True
-
-    return params
-
-
 def run(params):
     start_g = time.time()
 
     if params['do_eda']:
-        eda = EDARunner(params['dataset_path'], params['output_path'], params['experiment_name'], exploration_list=None,
+        eda = EDARunner(params['dataset_path'], params['output_path'], params['experiment_name'],
+                        exploration_list=None,
                         plot_list=None,
                         class_label=params['class_label'], instance_label=params['instance_label'],
                         match_label=params['match_label'],
@@ -283,18 +239,7 @@ def run(params):
 if __name__ == '__main__':
 
     # NOTE: All keys must be small
-
-    if sys.argv[1] == '-c' or sys.argv[1] == '--config':
-        config_file = sys.argv[2]
-        config = configparser.ConfigParser()
-        config.read(config_file)
-        config_dict = dict()
-        for s in config.sections():
-            config_dict.update({k: eval(v) for k, v in config.items(s)})
-    else:
-        config_dict = vars(parser_function(sys.argv))
-
-    # print("Running with " + str(num_cores) + " CPUs")
+    config_dict = parser_function(sys.argv)
 
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(str(config_dict['output_path']))
@@ -309,7 +254,5 @@ if __name__ == '__main__':
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-
-    config_dict = process_params(config_dict)
 
     sys.exit(run(config_dict))

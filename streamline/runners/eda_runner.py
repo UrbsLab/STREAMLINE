@@ -112,7 +112,7 @@ class EDARunner:
         try:
             self.make_dir_tree()
         except Exception as e:
-            shutil.rmtree(self.output_path)
+            # shutil.rmtree(self.output_path)
             raise e
         self.save_metadata()
 
