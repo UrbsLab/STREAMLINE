@@ -3,16 +3,6 @@ import sys
 import time
 import optuna
 import logging
-from streamline.runners.eda_runner import EDARunner
-from streamline.runners.dataprocess_runner import DataProcessRunner
-from streamline.runners.feature_runner import FeatureImportanceRunner
-from streamline.runners.feature_runner import FeatureSelectionRunner
-from streamline.runners.model_runner import ModelExperimentRunner
-from streamline.runners.stats_runner import StatsRunner
-from streamline.runners.compare_runner import CompareRunner
-from streamline.runners.report_runner import ReportRunner
-from streamline.runners.replicate_runner import ReplicationRunner
-from streamline.runners.clean_runner import CleanRunner
 from streamline.utils.parser import parser_function
 from streamline.utils.checker import check_phase
 import warnings
@@ -86,6 +76,7 @@ def run(params):
     start_g = time.time()
 
     if params['do_eda']:
+        from streamline.runners.eda_runner import EDARunner
         eda = EDARunner(params['dataset_path'], params['output_path'], params['experiment_name'],
                         exploration_list=None,
                         plot_list=None,
@@ -105,6 +96,7 @@ def run(params):
         runner(eda, 1, run_parallel=params['run_parallel'], params=params)
 
     if params['do_dataprep']:
+        from streamline.runners.dataprocess_runner import DataProcessRunner
         dpr = DataProcessRunner(params['output_path'], params['experiment_name'], scale_data=params['scale_data'],
                                 impute_data=params['impute_data'],
                                 multi_impute=params['multi_impute'], overwrite_cv=params['overwrite_cv'],
@@ -116,6 +108,7 @@ def run(params):
         runner(dpr, 2, run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_imp']:
+        from streamline.runners.feature_runner import FeatureImportanceRunner
         f_imp = FeatureImportanceRunner(params['output_path'], params['experiment_name'],
                                         class_label=params['class_label'],
                                         instance_label=params['instance_label'],
@@ -129,6 +122,7 @@ def run(params):
         runner(f_imp, 3, run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_sel']:
+        from streamline.runners.feature_runner import FeatureSelectionRunner
         f_sel = FeatureSelectionRunner(params['output_path'], params['experiment_name'],
                                        algorithms=params['feat_algorithms'],
                                        class_label=params['class_label'],
@@ -144,6 +138,7 @@ def run(params):
         runner(f_sel, 4, run_parallel=params['run_parallel'], params=params)
 
     if params['do_model']:
+        from streamline.runners.model_runner import ModelExperimentRunner
         model = ModelExperimentRunner(params['output_path'], params['experiment_name'],
                                       algorithms=params['algorithms'], exclude=params['exclude'],
                                       class_label=params['class_label'],
@@ -165,6 +160,7 @@ def run(params):
         runner(model, 5, run_parallel=params['run_parallel'], params=params)
 
     if params['do_stats']:
+        from streamline.runners.stats_runner import StatsRunner
         stats = StatsRunner(params['output_path'], params['experiment_name'], algorithms=params['algorithms'],
                             exclude=params['exclude'],
                             class_label=params['class_label'], instance_label=params['instance_label'],
@@ -181,6 +177,7 @@ def run(params):
 
     if params['do_compare_dataset']:
         if len_datasets(params['output_path'], params['experiment_name']):
+            from streamline.runners.compare_runner import CompareRunner
             compare = CompareRunner(params['output_path'], params['experiment_name'], experiment_path=None,
                                     algorithms=params['algorithms'],
                                     exclude=params['exclude'],
@@ -193,6 +190,7 @@ def run(params):
             runner(compare, 7, run_parallel=params['run_parallel'], params=params)
 
     if params['do_report']:
+        from streamline.runners.report_runner import ReportRunner
         report = ReportRunner(output_path=params['output_path'], experiment_name=params['experiment_name'],
                               experiment_path=None,
                               algorithms=params['algorithms'], exclude=params['exclude'],
@@ -202,6 +200,7 @@ def run(params):
         runner(report, 8, run_parallel=params['run_parallel'], params=params)
 
     if params['do_replicate']:
+        from streamline.runners.replicate_runner import ReplicationRunner
         replicate = ReplicationRunner(params['rep_data_path'], params['dataset_for_rep'], params['output_path'],
                                       params['experiment_name'],
                                       class_label=params['class_label'], instance_label=params['instance_label'],
@@ -217,6 +216,7 @@ def run(params):
         runner(replicate, 9, run_parallel=params['run_parallel'], params=params)
 
     if params['do_rep_report']:
+        from streamline.runners.report_runner import ReportRunner
         report = ReportRunner(output_path=params['output_path'], experiment_name=params['experiment_name'],
                               experiment_path=None,
                               algorithms=params['algorithms'], exclude=params['exclude'], training=False,
@@ -228,6 +228,7 @@ def run(params):
         runner(report, 10, run_parallel=params['run_parallel'], params=params)
 
     if params['do_cleanup']:
+        from streamline.runners.clean_runner import CleanRunner
         clean = CleanRunner(params['output_path'], params['experiment_name'],
                             del_time=params['del_time'], del_old_cv=params['del_old_cv'])
         runner(clean, 11, run_parallel=params['run_parallel'], params=params)
