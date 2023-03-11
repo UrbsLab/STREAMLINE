@@ -150,12 +150,12 @@ python run.py --out-path demo --exp-name demo --do-stats --run-cluster LSF --res
 
 To just run Dataset Compare Phase (Phase 7):
 ```
-python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-compare-dataset --run-cluster LSF --res-mem 4 --queue i2c2_normal
 ```
 
 To just run (Reporting Phase) Phase 8:
 ```
-python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-report --run-cluster LSF --res-mem 4 --queue i2c2_normal
 ```
 
 
