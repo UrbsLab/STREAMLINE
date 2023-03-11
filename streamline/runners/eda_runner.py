@@ -164,7 +164,7 @@ class EDARunner:
 
         if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster,
-                        self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(
                 parallel_eda_call
             )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
@@ -196,7 +196,8 @@ class EDARunner:
         if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
         if self.run_cluster and "Old" not in self.run_cluster:
-            get_cluster(self.run_cluster, self.output_path + self.experiment_name, self.queue, self.reserved_memory)
+            get_cluster(self.run_cluster,
+                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(parallel_kfold_call)(job_obj) for job_obj in job_list])
 
     def make_dir_tree(self):

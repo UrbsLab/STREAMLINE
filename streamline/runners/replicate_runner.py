@@ -169,7 +169,7 @@ class ReplicationRunner:
                 if run_parallel and run_parallel != "False" and not self.run_cluster:
                     Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
                 if self.run_cluster and "Old" not in self.run_cluster:
-                    get_cluster(self.run_cluster, self.output_path + self.experiment_name,
+                    get_cluster(self.run_cluster, self.output_path + '/' + self.experiment_name,
                                 self.queue, self.reserved_memory)
                     dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
         if file_count == 0:
