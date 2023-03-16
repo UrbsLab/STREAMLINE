@@ -57,7 +57,7 @@ More information about the nature of STREAMLINE can be found in [./info/about.md
 There is no local installation or additional steps required to run 
 STREAMLINE on Google Colab.
 Just have a Google Account and open this Colab Link:
-[https://colab.research.google.com/drive/17s55GajtN5WCEV-DfegtiFhvGp73Haj4?usp=sharing](https://colab.research.google.com/drive/17s55GajtN5WCEV-DfegtiFhvGp73Haj4?usp=sharing)
+[https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing](https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing)
 
 
 ### Local
