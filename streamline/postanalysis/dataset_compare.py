@@ -138,7 +138,10 @@ class CompareJob(Job):
                     result = kruskal(*temp_array)
                 except Exception:
                     result = ['NA', 1]
-                kruskal_summary.at[metric, 'Statistic'] = str(round(result[0], 6))
+                try:
+                    kruskal_summary.at[metric, 'Statistic'] = str(round(result[0], 6))
+                except TypeError:
+                    kruskal_summary.at[metric, 'Statistic'] = 'NA'
                 kruskal_summary.at[metric, 'P-Value'] = str(round(result[1], 6))
                 if result[1] < self.sig_cutoff:
                     kruskal_summary.at[metric, 'Sig(*)'] = str('*')
