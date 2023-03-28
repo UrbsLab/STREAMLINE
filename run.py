@@ -176,7 +176,7 @@ def run(params):
         runner(stats, 6, run_parallel=params['run_parallel'], params=params)
 
     if params['do_compare_dataset']:
-        if len_datasets(params['output_path'], params['experiment_name']):
+        if len_datasets(params['output_path'], params['experiment_name']) > 1:
             from streamline.runners.compare_runner import CompareRunner
             compare = CompareRunner(params['output_path'], params['experiment_name'], experiment_path=None,
                                     algorithms=params['algorithms'],
