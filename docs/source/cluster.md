@@ -161,12 +161,12 @@ python run.py --out-path demo --exp-name demo --do-report --run-cluster LSF --re
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --do-replicate --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-replicate --run-cluster LSF --res-mem 4 --queue i2c2_normal
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --do-rep-report --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-rep-report --run-cluster LSF --res-mem 4 --queue i2c2_normal
 ```
 
 To just run Cleaning Phase (Phase 11):

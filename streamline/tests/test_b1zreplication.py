@@ -73,7 +73,7 @@ def test_valid_repl(rep_data_path, run_parallel):
 
     logging.warning("Running Replication Phase")
 
-    repl = ReplicationRunner(rep_data_path, dataset_path + 'demodata.csv', output_path, experiment_name,
+    repl = ReplicationRunner(rep_data_path, dataset_path + 'hcc-data_example.csv', output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel)
 

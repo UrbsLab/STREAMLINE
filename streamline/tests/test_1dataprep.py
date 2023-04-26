@@ -10,10 +10,10 @@ pytest.skip("Tested Already", allow_module_level=True)
     ("dataset_path", "class_label", "match_label", "instance_label", "exception"),
     [
         ("", None, None, None, Exception),
-        ("./demodata.csv", "something", None, None, FileNotFoundError),
-        ("./DemoData.csv", "something", None, None, Exception),
-        ("./DemoData.csv", "something", "otherthing", None, Exception),
-        ("./DemoData.csv", "something", None, "otherthing", Exception),
+        ("./hcc-data_example.csv", "something", None, None, FileNotFoundError),
+        ("./hcc-data_example.csv", "something", None, None, Exception),
+        ("./hcc-data_example.csv", "something", "otherthing", None, Exception),
+        ("./hcc-data_example.csv", "something", None, "otherthing", Exception),
     ],
 )
 def test_invalid_datapath(dataset_path, class_label, match_label, instance_label, exception):
@@ -24,7 +24,7 @@ def test_invalid_datapath(dataset_path, class_label, match_label, instance_label
 @pytest.mark.parametrize(
     ("dataset_path", "class_label", "match_label", "instance_label"),
     [
-        ("./DemoData/demodata.csv", "Class", None, None),
+        ("./DemoData/hcc-data_example.csv", "Class", None, None),
     ],
 )
 def test_valid_dataset(dataset_path, class_label, match_label, instance_label):
@@ -55,7 +55,7 @@ def test_invalid_eda(dataset, experiment_path, exception):
 
 
 def test_invalid_eda_2():
-    dataset, experiment_path = "./DemoData/demodata.csv", "./tests/"
+    dataset, experiment_path = "./DemoData/hcc-data_example.csv", "./tests/"
     explorations = ["sdasd"]
     plots = ["dsfsdf"]
     with pytest.raises(Exception):
@@ -65,7 +65,7 @@ def test_invalid_eda_2():
 
 
 def test_valid_eda():
-    dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
+    dataset = Dataset("./DemoData/hcc-data_example.csv", "Class", None, "InstanceID")
     eda = EDAJob(dataset, "./tests/")
     eda.make_log_folders()
     assert (eda.dataset.data.equals(dataset.data))
@@ -93,7 +93,7 @@ def test_valid_eda():
 
 
 def test_valid_eda_general():
-    dataset = Dataset("./DemoData/demodata.csv", "Class", None, "InstanceID")
+    dataset = Dataset("./DemoData/hcc-data_example.csv", "Class", None, "InstanceID")
     eda = EDAJob(dataset, "./tests/")
     eda.run()
     shutil.rmtree('./tests/')

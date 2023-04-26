@@ -6,7 +6,7 @@ from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 
 pytest.skip("Tested Already", allow_module_level=True)
 
-dataset_valid = Dataset("./DemoData/demodata.csv", "Class")
+dataset_valid = Dataset("./DemoData/hcc-data_example.csv", "Class")
 
 
 @pytest.mark.parametrize(

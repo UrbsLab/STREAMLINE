@@ -142,12 +142,12 @@ python run.py --out-path demo --exp-name demo --class-label Class --inst-label I
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --do-replicate --run-cluster False --run-parallel True
+python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-replicate --run-cluster False --run-parallel True
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/demodata.csv --out-path demo --exp-name demo --do-rep-report --run-cluster False --run-parallel True
+python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-rep-report --run-cluster False --run-parallel True
 ```
 
 To just run Cleaning Phase (Phase 11):

@@ -59,7 +59,7 @@ def test_setup():
     report.run(run_parallel=True)
     del report
 
-    repl = ReplicationRunner('./DemoRepData', dataset_path + 'demodata.csv', output_path, experiment_name,
+    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example.csv', output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel)
 
@@ -78,7 +78,7 @@ def test_valid_report2(rep_data_path, run_parallel):
     logging.warning("Running Replication Report Phase")
 
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms,
-                          training=False, rep_data_path=rep_data_path, dataset_for_rep=dataset_path + 'demodata.csv')
+                          training=False, rep_data_path=rep_data_path, dataset_for_rep=dataset_path + 'hcc-data_example.csv')
     report.run(run_parallel)
 
     if run_parallel:

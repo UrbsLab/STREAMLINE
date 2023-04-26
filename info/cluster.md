@@ -190,7 +190,7 @@ python run.py --data-path DemoData --out-path demo --exp-name demo \
 
 To just run Phase 9:
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \        
+python run.py  --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv \        
                --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
                --do-till-report False --do-replicate True \
@@ -200,7 +200,7 @@ python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
 
 To just run Phase 10:
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/demodata.csv \
+python run.py  --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv \
                --out-path demo --exp-name demo \
                --class-label Class --inst-label InstanceID \
                --do-till-report False --do-rep-report True \ 
