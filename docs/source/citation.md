@@ -16,7 +16,7 @@ BibTeX entry:
 }
 ```
 
-If you wish to cite the STREAMLINE codebase, please use the following (indicating the release used in the link):
+If you wish to cite the STREAMLINE codebase, please use the following (indicating the release used in the link: for example, v0.2.5-beta:
 ```
 @misc{streamline2022,
   author = {Urbanowicz, Ryan and Zhang, Robert},

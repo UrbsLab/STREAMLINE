@@ -13,16 +13,10 @@ Running STREAMLINE on Google Colab is best for:
 3. Users that want the quickest/easiest approach to running STREAMLINE
 4. Users that do not have access to a very powerful computer or compute cluster.
 5. Applying STREAMLINE to smaller-scale analyses (in particular when only using free/limited Google Cloud resources):
- * Smaller datasets (e.g. < 500 instances and features)
- * A small number of total datasets (e.g. 1 or 2)
- * Only using the simplest/quickest modeling algorithms (e.g. Naive Bayes, Decision Trees, Logistic Regression)
- * Only using 1 or 2 modeling algorithms
-
-
-This is the easiest but most limited way to run STREAMLINE. These instructions are geared towards those with little
-to no computing experience. All other users can skip to the next more advanced sections
-but may wish to revisit later parts of this section for helpful details.
-
+    * Smaller datasets (e.g. < 500 instances and features)
+    * A small number of total datasets (e.g. 1 or 2)
+    * Only using the simplest/quickest modeling algorithms (e.g. Naive Bayes, Decision Trees, Logistic Regression)
+    * Only using 1 or 2 modeling algorithms
 
 ## Running on Demo Dataset
 Follow the steps below to get STREAMLINE running on the [demonstration datasets](sample.md#demonstration-data).

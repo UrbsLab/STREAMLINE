@@ -1,5 +1,17 @@
 #  About (FAQs)
 
+
+## How is STREAMLINE different from other AutoML tools?
+Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigorously apply
+and compare a variety of ML modeling algorithms and collectively learn from them as opposed
+to only identifying a best performing model and/or attempting to optimize the analysis pipeline
+configuration itself. STREAMLINE adopts a fixed series of purposefully selected steps/phases
+in line with data science best practices. It seeks to automate all domain generalizable
+elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges.
+This tool can be run or utilized in a number of ways to suite a variety experience levels and
+levels of problem/data complexity.
+
+***
 ## What were our goals in developing STREAMLINE?
 The goal of STREAMLINE is to provide an easy and transparent framework
 to learn predictive associations from tabular data. The design of this pipeline
@@ -15,17 +27,6 @@ The overall development of this pipeline focused on:
    5. Capturing complex associations in data (e.g. feature interactions)
    6. Enhancing interpretability of output
    7. Run mode flexibility
-
-***
-## How is STREAMLINE different from other AutoML tools?
-Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigorously apply
-and compare a variety of ML modeling algorithms and collectively learn from them as opposed
-to only identifying a best performing model and/or attempting to optimize the analysis pipeline
-configuration itself. STREAMLINE adopts a fixed series of purposefully selected steps/phases
-in line with data science best practices. It seeks to automate all domain generalizable
-elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges.
-This tool can be run or utilized in a number of ways to suite a variety experience levels and
-levels of problem/data complexity.
 
 ***
 ## What does STREAMLINE automate?
@@ -98,7 +99,7 @@ only removes instances with no class label, or where all feature values are miss
 We recommend users consider conducting these items, as needed, prior to applying STREAMLINE.
 
 ***
-## What can it be used for?
+## What can STREAMLINE be used for?
 STREAMLINE can be used as:
 1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the included modeling algorithms
 2. A framework to compare established scikit-learn compatible ML modeling algorithms to each other or to new algorithms
@@ -179,7 +180,7 @@ number of optimization trials within the user specified time limit on different
 computing resources. However, having a `timeout` value specified helps ensure STREAMLINE run completion
 within a reasonable time frame.
 
-## Pipeline Implementation Highlights
+## STREAMLINE Implementation Highlights
 * Overview
  * Pipeline includes reliable default run parameters that can be adjusted for further customization.
  * Easily compare ML performance between multiple target datasets (e.g. with different feature subsets)
