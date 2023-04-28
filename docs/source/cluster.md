@@ -8,7 +8,7 @@ the [helpful tools](#helpful-tools) section.
 You only need to additionally define 4 additional parameters to run the models
 using a cluster setup.
 
-Rest is handled similarly by `run.py` as defined in [local section](local.md#running-on-cli)
+Rest is handled similarly by `run.py` as defined in the local section.
 
 ## Helpful Tools
 
