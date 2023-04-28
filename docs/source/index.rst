@@ -6,36 +6,38 @@ STREAMLINE
 Overview
 --------------------------------------
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
-that empowers anyone to easily run, interpret, and apply a rigorous and
-customizable analysis for data mining or predictive modeling.
+that empowers anyone to easily train, interpret, and apply predictive models as
+part of a rigorous and customizable data mining analysis. It is programmed in
+Python 3 using many common libraries including `Pandas <https://pandas.pydata.org/>`_
+and `scikit-learn <https://scikit-learn.org/stable/>`_.
 
-Notably, this tool is currently limited to supervised learning on tabular,
-binary classification data but will be expanded as our development continues.
-
-The development of this pipeline focused on
-   1. overall automation
-   2. avoiding and detecting sources of bias,
-   3. optimizing modeling performance,
-   4. ensuring complete reproducibility (under certain STREAMLINE parameter settings),
-   5. capturing complex associations in data (e.g. feature interactions), and
-   6. enhancing interpretability of output.
-
-Overall, the goal of this pipeline is to provide a transparent framework to learn from
-data as well as identify the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
-
-
-Schematic
---------------------------------------
-This schematic breaks the overall pipeline down into 4 basic components: (1) preprocessing and feature transformation, (2) feature importance evaluation and selection, (3) modeling, and (4) postprocessing.
+The schematic below breaks the STREAMLINE analysis pipeline down into 4 basic components:
+(1) preprocessing and feature transformation, (2) feature importance evaluation
+and selection, (3) modeling, and (4) postprocessing. It also summarizes all major
+elements automated within the pipeline.
 
 .. image:: pictures/ML_pipe_schematic.png
 
-Preprint
+We recommend reviewing the 'About (FAQs)' section to gain a deeper understanding
+of STREAMLINE with respect to it's overall design, what it includes, what it
+can be used for, and implementation highlights that differentiate it from other
+AutoML tools.
+
+Current Limitations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+At present, STREAMLINE is limited to supervised learning on tabular,
+binary classification data. We are currently expanding STREAMLINE to multi-class
+and regression outcome data as well.
+
+As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the
+most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
+
+STREAMLINE Publication
 --------------------------------------
+The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to
+simulated benchmark data can be found `here <https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9>`_.
 
-A preprint introducing and applying STREAMLINE is now available on `Arxiv
-<https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw>`_
-
+This paper is also available as a preprint on arxiv, `here <https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw>`_.
 
 Disclaimer
 --------------------------------------
@@ -78,4 +80,3 @@ Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and 
    models
    citation
    modules
-

@@ -1,15 +1,22 @@
-# Citations
+# Citing STREAMLINE
 
-To cite the STREAMLINE preprint on arXiv, please use:
+If you use STREAMLINE in a scientific publication, please consider citing the following paper:
+
+Urbanowicz, Ryan, et al. "STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison." Genetic Programming Theory and Practice XIX. Singapore: Springer Nature Singapore, 2023. 201-231.
+
+BibTeX entry:
 ```
-@article{urbanowicz2022streamline,
+@incollection{urbanowicz2023streamline,
   title={STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison},
-  author={Urbanowicz, Ryan J and Zhang, Robert and Cui, Yuhan and Suri, Pranshu},
-  journal={arXiv preprint arXiv:2206.12002v1},
-  year={2022}
+  author={Urbanowicz, Ryan and Zhang, Robert and Cui, Yuhan and Suri, Pranshu},
+  booktitle={Genetic Programming Theory and Practice XIX},
+  pages={201--231},
+  year={2023},
+  publisher={Springer}
 }
 ```
-If you wish to cite the STREAMLINE codebase, please use:
+
+If you wish to cite the STREAMLINE codebase, please use the following (indicating the release used in the link):
 ```
 @misc{streamline2022,
   author = {Urbanowicz, Ryan and Zhang, Robert},
@@ -17,10 +24,10 @@ If you wish to cite the STREAMLINE codebase, please use:
   year = {2022},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/UrbsLab/STREAMLINE/} }
+  howpublished = {\url{https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.5-beta} }
 }
 ```
-## URBS-lab related research
+## Other STREAMLINE related research
 In developing STREAMLINE we integrated a number of methods and lessons learned from our lab's previous research. We briefly summarize and provide citations for each.
 
 ### A rigorous ML pipeline for binary classification
@@ -31,6 +38,16 @@ A preprint describing an early version of what would become STREAMLINE applied t
   author={Urbanowicz, Ryan J and Suri, Pranshu and Cui, Yuhan and Moore, Jason H and Ruth, Karen and Stolzenberg-Solomon, Rachael and Lynch, Shannon M},
   journal={arXiv preprint arXiv:2008.12829v2},
   year={2020}
+}
+```
+
+The STREAMLINE preprint.
+```
+@article{urbanowicz2022streamline,
+  title={STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison},
+  author={Urbanowicz, Ryan J and Zhang, Robert and Cui, Yuhan and Suri, Pranshu},
+  journal={arXiv preprint arXiv:2206.12002v1},
+  year={2022}
 }
 ```
 
