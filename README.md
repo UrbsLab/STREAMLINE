@@ -3,7 +3,7 @@
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
 that empowers anyone to easily train, interpret, and apply predictive models as
 part of a rigorous and customizable data mining analysis. It is programmed in
-Python 3 using many common libraries including [Pandas](https://pandas.pydata.org/]
+Python 3 using many common libraries including [Pandas](https://pandas.pydata.org/)
 and [scikit-learn](https://scikit-learn.org/stable/).
 
 The schematic below breaks the STREAMLINE analysis pipeline down into 4 basic components:
