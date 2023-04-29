@@ -17,7 +17,7 @@ illustrate how STREAMLINE can be applied to more than one dataset at once.
 
 Furthermore, to demonstrate how STREAMLINE-trained models may be applied to
 new or replication data we have simply added a copy of 'hcc-data_example.csv', renamed 'hcc-data_example_rep.csv' within the DemoRepData folder.
-While this is not a true replication dataset (as none was available for this example) it is useful here to test out the code.
+While this is not a true replication dataset (as none was available for this example) it is useful here to test out the code. However, note that model performance will be higher on this replication dataset example since it includes the data the model was trained on.
 
 When applying trained models to a true replication dataset users should generally expect model performance to be weaker (or similar at best) in comparison to the individual testing evaluations completed for each CV model within.
 

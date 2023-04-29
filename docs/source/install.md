@@ -16,7 +16,7 @@ Install git (if not already installed). You can test for previous installation b
 Reference for installation: [https://github.com/git-guides/install-git](https://github.com/git-guides/install-git)
 
 #### Anaconda
-We recommend installing the most recent stable version of Anaconda3 appropriate for your operating system (if not already installed). This will automatically install Python3 and a number of other common packages
+While STREAMLINE will run on native Python3 (as other required packages will be installed when following the commands below), we recommend installing the most recent stable version of Anaconda3 appropriate for your operating system (if not already installed). This will automatically install Python3 and a number of other common packages
 used by STREAMLINE (e.g. pandas, scikit-learn, etc.).
 
 You can test for previous installation by typing `conda` on your command-line:\

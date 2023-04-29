@@ -27,6 +27,7 @@ The overall development of this pipeline focused on:
    5. Capturing complex associations in data (e.g. feature interactions)
    6. Enhancing interpretability of output
    7. Run mode flexibility
+   8. More advanced users can easily add their own scikit-learn compatible modeling algorithms to STREAMLINE
 
 ***
 ## What does STREAMLINE automate?
@@ -52,22 +53,23 @@ Currently, STREAMLINE automates the following aspects of analysis (see schematic
    8. Applying and evaluating all STREAMLINE-trained models on further/future
       hold out replication data
 
-The following 15 scikit-learn compatible ML modeling algorithms are currently included as options:
+The following 16 scikit-learn compatible ML modeling algorithms are currently included as options:
 1. Naive Bayes (NB)
 2. Logistic Regression (LR)
-3. Decision Tree (DT)
-4. Random Forest (RF)
-5. Gradient Boosting (GB)
-6. XGBoost (XGB)
-7. LGBoost (LGB)
-8. CatBoost (CGB)
-9. Support Vector Machine (SVM)
-10. Artificial Neural Network (ANN)
-11. K-Nearest Neighbors (k-NN)
-12. Genetic Programming (GP)
-13. Eductional Learning Classifier System (eLCS)
-14. 'X' Classifier System (XCS)
-15. Extended Supervised Tracking and Classifying System (ExSTraCS).
+3. Elastic Net (EN)
+4. Decision Tree (DT)
+5. Random Forest (RF)
+6. Gradient Boosting (GB)
+7. XGBoost (XGB)
+8. LGBoost (LGB)
+9. CatBoost (CGB)
+10. Support Vector Machine (SVM)
+11. Artificial Neural Network (ANN)
+12. K-Nearest Neighbors (k-NN)
+13. Genetic Programming (GP)
+14. Eductional Learning Classifier System (eLCS)
+15. 'X' Classifier System (XCS)
+16. Extended Supervised Tracking and Classifying System (ExSTraCS).
 
 Classification-relevant hyperparameter values and ranges have been carefully
 selected for each algorithm and have been pre-specified for the automated (Optuna-driven)

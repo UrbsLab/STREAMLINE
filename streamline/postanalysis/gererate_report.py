@@ -142,7 +142,11 @@ class ReportJob(Job):
         ls5 = ars_dic[165:183]  # ExportROCPlot to Top Model Features to Display [165:180]
 
         self.analysis_report.set_font('Times', 'B', 12)
-        self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Training Summary Report: ' + str(self.time), ln=2,
+        if self.training:
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Evaluation Report: ' + str(self.time), ln=2,
+                                  border=1, align='L')
+        else:
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Evaluation Report: ' + str(self.time), ln=2,
                                   border=1, align='L')
         self.analysis_report.y += 2  # Margin below page header
         top_of_list = self.analysis_report.y  # Page height for start of algorithm settings

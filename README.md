@@ -1,67 +1,80 @@
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/STREAMLINE_LOGO.jpg?raw=true)
 # Overview
-STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline that empowers anyone 
-to easily run, interpret, and apply a rigorous and customizable analysis for data mining 
-or predictive modeling. Notably, this tool is currently limited to supervised learning on 
-tabular, binary classification data but will be expanded as our development continues. The 
-development of this pipeline focused on 
-1) overall automation
-2) avoiding and detecting sources of bias 
-3) optimizing modeling performance
-4) ensuring complete reproducibility (under certain STREAMLINE parameter settings)
-5) capturing complex associations in data (e.g. feature interactions)
-6) enhancing interpretability of output. 
+STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
+that empowers anyone to easily train, interpret, and apply predictive models as
+part of a rigorous and customizable data mining analysis. It is programmed in
+Python 3 using many common libraries including [Pandas](https://pandas.pydata.org/]
+and [scikit-learn](https://scikit-learn.org/stable/).
 
-Overall, the goal of this pipeline is to provide a transparent framework to learn from data as well as identify 
-the strengths and weaknesses of ML modeling algorithms or other AutoML algorithms.
-
-A preprint introducing and applying STREAMLINE is now available 
-[here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
-
-See [./info/citations.md](info/citations.md) for how to cite this preprint and/or the codebase prior to the availability of the final 
-peer-reviewed publication.
-
-## STREAMLINE Schematic
-
-This schematic breaks the overall pipeline down into 4 basic components: 
-(1) preprocessing and feature transformation, 
-(2) feature importance evaluation and selection, 
-(3) modeling, and 
-(4) postprocessing.
+The schematic below breaks the STREAMLINE analysis pipeline down into 4 basic components:
+(1) preprocessing and feature transformation, (2) feature importance evaluation
+and selection, (3) modeling, and (4) postprocessing. It also summarizes all major
+elements automated within the pipeline.
 
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/ML_pipe_schematic.png?raw=true)
 
-***
-### Implementation
-STREAMLINE is coded in Python 3 relying heavily on pandas and scikit-learn as well as a variety of other python packages.
+Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
+
+## Pipeline Design
+The goal of STREAMLINE is to provide an easy and transparent framework
+to learn predictive associations from tabular data. The design of this pipeline
+is meant to not only pick a best performing algorithm/model for a given dataset,
+but to leverage the different algorithm perspectives (i.e. biases, strengths,
+and weaknesses) to gain a broader understanding of the associations in that data.
+
+The overall development of this pipeline focused on:
+   1. Automation and ease of use
+   2. Avoiding and detecting common sources of bias
+   3. Optimizing modeling performance
+   4. Ensuring reproducibility (see STREAMLINE parameter settings)
+   5. Capturing complex associations in data (e.g. feature interactions)
+   6. Enhancing interpretability of output
+   7. Run mode flexibility
+   8. More advanced users can easily add their own scikit-learn compatible modeling algorithms to STREAMLINE
+
+We recommend reviewing [./info/about.md](info/about.md) to gain a deeper understanding
+of STREAMLINE with respect to it's overall design, what it includes, what it
+can be used for, and implementation highlights that differentiate it from other
+AutoML tools.
+
+## Current Limitations
+At present, STREAMLINE is limited to supervised learning on tabular,
+binary classification data. We are currently expanding STREAMLINE to multi-class
+and regression outcome data as well.
+
+As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the
+most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
+
+## STREAMLINE Publication
+The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to
+simulated benchmark data can be found [here](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9).
+
+This paper is also available as a preprint on arxiv, [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
+
+See [./info/citations.md](info/citations.md) for how to cite STREAMLINE.
 
 ***
-### Disclaimer
-We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given 
-classification problem, nor that the included ML modeling algorithms will yield the best performance possible. 
-We intend many expansions/improvements to this pipeline in the future to make it easier to use and hopefully more effective in application.  We welcome feedback, suggestions, and contributions for improvement.
+# Installation and Use
+STREAMLINE can be run using a variety of modes balancing ease of use and efficiency.
+* Serially on Google Cloud in a Google Colab Notebook (best for beginners)
+* Serially/locally in a Jupyter Notebook
+* Serially/locally from the command line
+* In parallel on an HPC (best for efficiency)
 
-#### General Guidelines for STREAMLINE Use
-* SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
-* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise `use_uniform_FI` should be True.
-* While the STREAMLINE includes `impute_data` as an option that can be turned off in `DataPreprocessing`, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. 
-* In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
+See [documentation](https://urbslab.github.io/STREAMLINE/index.html) for installation, requirements, and use details for each.
 
-### More Information
-More information about the nature of STREAMLINE can be found in [./info/about.md](info/about.md).
+Basic installation instructions for use on Google Colab, and local runs are given below.
 
-***
-## Installation and Use
-
-### Google Colab
-There is no local installation or additional steps required to run 
+## Google Colab
+There is no local installation or additional steps required to run
 STREAMLINE on Google Colab.
+
 Just have a Google Account and open this Colab Link:
 [https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing](https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing)
 
 
-### Local
-STREAMLINE can be ready for use by the simple two following steps:
+## Local
+Install STREAMLINE for local use with the following command line commands:
 
 ```
 git clone -b dev --single-branch https://github.com/UrbsLab/STREAMLINE
@@ -69,28 +82,30 @@ cd STREAMLINE
 pip install -r requirements.txt
 ```
 
-Now your STREAMLINE package is ready to use from the `STREAMLINE` folder.
+Now your STREAMLINE package is ready to use from the `STREAMLINE` folder either
+from the included [Jupyter Notebook](https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb) file or the command line.
 
 ***
+# Other Information
+## Demonstration Data
+Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of
+pipeline efficacy. New users can easily test/run STREAMLINE in all run modes set up to run automatically on these datasets.
 
-## Demonstration 
-Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of 
-pipeline efficacy. 
+Detailed info about advanced features and command line implementation can be found in  [./info/demo.md](info/demo.md)
 
-New users can easily run the 
-included [jupyter notebook](https://github.com/UrbsLab/STREAMLINE/blob/dev/STREAMLINE-Notebook.ipynb) 
-'as-is', and it will be run automatically on these datasets. 
-
-Detailed info about advanced features and commandline implementation can be found in  [./info/demo.md](info/demo.md)
+***
+## Disclaimer
+We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given
+classification problem, nor that the included ML modeling algorithms will yield the best performance possible.
+We intend many expansions/improvements to this pipeline in the future to make it easier to use and hopefully more effective in application.  We welcome feedback, suggestions, and contributions for improvement.
 
 ***
 # Acknowledgements
-STREAMLINE is the result of 3 years of on-and-off development gaining feedback from multiple biomedical research collaborators at the University of Pennsylvania, 
-Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center. 
-The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang and Harsh Bandhey. Special thanks to 
-Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang, 
+STREAMLINE is the result of 3 years of on-and-off development gaining feedback from multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
+The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang and Harsh Bandhey. Special thanks to
+Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang,
 and Pedro Ribeiro for their code contributions and feedback.  
 
-We also thank the following collaborators for their feedback on application 
-of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon, 
+We also thank the following collaborators for their feedback on application
+of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon,
 Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and Diego Mazzotti.
