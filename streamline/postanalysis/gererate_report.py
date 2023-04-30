@@ -916,7 +916,7 @@ class ReportJob(Job):
         self.footer()
 
     def format_fn(self, stats_ds, best_metric_list, metric_name_list, ds2):
-        low_val_better = ['FP', 'FN']
+        low_val_better = ['FP', 'FN', 'LR-']
         for metric in metric_name_list:
             if metric in low_val_better:
                 ds2[metric] = ds2[metric].astype(float).round(3)
