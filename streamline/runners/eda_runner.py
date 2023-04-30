@@ -124,7 +124,7 @@ class EDARunner:
             file_extension = dataset_path.split('/')[-1].split('.')[-1]
             data_name = dataset_path.split('/')[-1].split('.')[0]
 
-            if file_extension == 'txt' or file_extension == 'csv':
+            if file_extension == 'txt' or file_extension == 'csv' or file_extension == 'tsv':
                 if data_name not in unique_datanames:
                     unique_datanames.append(data_name)
                     file_count += 1
@@ -152,7 +152,7 @@ class EDARunner:
                     job_counter += 1
 
             if file_count == 0:  # Check that there was at least 1 dataset
-                raise Exception("There must be at least one .txt or .csv dataset in data_path directory")
+                raise Exception("There must be at least one .txt, .tsv, or .csv dataset in data_path directory")
 
         if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(
