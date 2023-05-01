@@ -94,10 +94,7 @@ class ReplicationRunner:
 
         # location of folder containing models respective training dataset
         self.full_path = self.output_path + "/" + self.experiment_name + "/" + self.data_name
-        print(os.getcwd())
-        print(self.full_path)
-        print(os.path.exists(self.full_path))
-        print(os.path.exists(self.full_path+ "/applymodel"))
+
         if not os.path.exists(self.full_path + "/applymodel"):
             os.mkdir(self.full_path + "/applymodel")
 
@@ -139,7 +136,7 @@ class ReplicationRunner:
             if not os.path.exists(self.full_path + "/applymodel/" + apply_name):
                 os.mkdir(self.full_path + "/applymodel/" + apply_name)
 
-            if file_extension == 'txt' or file_extension == 'csv':
+            if file_extension == 'txt' or file_extension == 'csv' or file_extension == 'tsv':
                 if apply_name not in unique_datanames:
                     file_count += 1
                     unique_datanames.append(apply_name)
