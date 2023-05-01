@@ -38,7 +38,7 @@ class Cleaner:
     def run(self):
         # Get dataset paths for all completed dataset analyses in experiment folder
         datasets = os.listdir(self.experiment_path)
-        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+        remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                        'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs',
                        'KeyFileCopy', 'dask_logs',
                        self.experiment_name + '_ML_Pipeline_Report.pdf']

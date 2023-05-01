@@ -73,6 +73,7 @@ class ReplicationRunner:
         self.instance_label = instance_label
         if not instance_label:
             self.instance_label = metadata['Instance Label']
+        self.ignore_features = metadata['Ignored Features']
         self.categorical_cutoff = metadata['Categorical Cutoff']
         self.sig_cutoff = metadata['Statistical Significance Cutoff']
         self.cv_partitions = metadata['CV Partitions']
@@ -96,7 +97,7 @@ class ReplicationRunner:
         self.full_path = self.output_path + "/" + self.experiment_name + "/" + self.data_name
 
         if not os.path.exists(self.full_path + "/applymodel"):
-            os.mkdir(self.full_path + "/applymodel")
+            os.makedirs(self.full_path + "/applymodel")
 
         if not self.show_plots:
             if not os.path.exists(self.output_path + "/" + self.experiment_name + '/jobs'):

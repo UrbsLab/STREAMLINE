@@ -153,7 +153,7 @@ FN_LIST = [check_phase_1, check_phase_2, check_phase_3, check_phase_4,
 def check_phase(output_path, experiment_name, phase=5, len_only=True,
                 rep_data_path=None, dataset_for_rep=None, output=True):
     datasets = os.listdir(output_path + "/" + experiment_name)
-    remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs', 'logs', 'jobs',
+    remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs', 'logs', 'jobs',
                    'DatasetComparisons', 'UsefulNotebooks',
                    experiment_name + '_ML_Pipeline_Report.pdf']
     for text in remove_list:

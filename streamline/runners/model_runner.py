@@ -64,6 +64,9 @@ class ModelExperimentRunner:
         self.class_label = class_label
         self.instance_label = instance_label
 
+        if algorithms == "All":
+            algorithms = None
+
         if algorithms is None:
             self.algorithms = SUPPORTED_MODELS
             if exclude is not None:
@@ -121,7 +124,7 @@ class ModelExperimentRunner:
 
         # Iterate through datasets, ignoring common folders
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
-        remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs',
+        remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs',
                        'logs', 'jobs', 'DatasetComparisons']
 
         for text in remove_list:

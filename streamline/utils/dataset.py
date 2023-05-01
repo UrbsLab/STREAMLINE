@@ -41,7 +41,7 @@ class Dataset:
         elif self.format == 'tsv':
             self.data = pd.read_csv(self.path, na_values='NA', sep='\t')
         elif self.format == 'txt':
-            self.data = pd.read_csv(self.path, na_values='NA', sep=' ')
+            self.data = pd.read_csv(self.path, na_values='NA', delim_whitespace=True)
         else:
             raise Exception("Unknown file format")
 

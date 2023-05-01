@@ -6,7 +6,7 @@ pytest.skip("Tested Already", allow_module_level=True)
 
 output_path, experiment_name = './tests', 'demo'
 datasets = os.listdir(output_path + "/" + experiment_name)
-remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs', 'logs', 'jobs',
+remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs', 'logs', 'jobs',
                'DatasetComparisons', 'UsefulNotebooks',
                experiment_name + '_ML_Pipeline_Report.pdf']
 for text in remove_list:

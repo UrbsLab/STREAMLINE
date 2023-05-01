@@ -63,7 +63,7 @@ def runner(obj, phase, run_parallel=True, params=None):
 
 def len_datasets(output_path, experiment_name):
     datasets = os.listdir(output_path + '/' + experiment_name)
-    remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+    remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                    'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks',
                    experiment_name + '_ML_Pipeline_Report.pdf']
     for text in remove_list:

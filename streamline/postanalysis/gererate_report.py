@@ -39,7 +39,7 @@ class ReportJob(Job):
         # Find folders inside directory
         if self.training:
             self.datasets = os.listdir(self.experiment_path)
-            remove_list = ['metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+            remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                            'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs',
                            'KeyFileCopy', 'dask_logs',
                            experiment_name + '_ML_Pipeline_Report.pdf']
