@@ -94,6 +94,7 @@ class ReplicationRunner:
 
         # location of folder containing models respective training dataset
         self.full_path = self.output_path + "/" + self.experiment_name + "/" + self.data_name
+        print(self.full_path)
         print(os.path.exists(self.full_path))
         print(os.path.exists(self.full_path+ "/applymodel"))
         if not os.path.exists(self.full_path + "/applymodel"):
