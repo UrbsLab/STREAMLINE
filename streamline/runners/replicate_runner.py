@@ -174,7 +174,7 @@ class ReplicationRunner:
                     dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
         if file_count == 0:
             # Check that there was at least 1 dataset
-            raise Exception("There must be at least one .txt or .csv dataset in rep_data_path directory")
+            raise Exception("There must be at least one .txt, .csv, or .tsv dataset in rep_data_path directory")
 
     def save_metadata(self):
         # Update metadata this will alter the relevant
