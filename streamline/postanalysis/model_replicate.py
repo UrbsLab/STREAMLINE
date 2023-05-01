@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import pickle
 
@@ -172,7 +173,7 @@ class ReplicateJob(Job):
                     # thus no imputation files were created, bypass loding of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
-                    raise Exception("Notice: Imputation was not conducted for the following target dataset, "
+                    logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
             # Scale dataframe based on training scaling
