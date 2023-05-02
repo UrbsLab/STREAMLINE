@@ -138,6 +138,11 @@ class EDAJob(Job):
 
         self.dataset.categorical_variables = self.categorical_features
 
+        # Pickle list of feature names to be treated as categorical variables
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+            pickle.dump(self.categorical_variables, outfile)
+
         logging.info("Running Basic Exploratory Analysis...")
 
         # Describe and save description if user specified
@@ -199,11 +204,6 @@ class EDAJob(Job):
         else:
             self.dataset.categorical_variables = self.categorical_features
             categorical_variables = self.categorical_features
-
-        # Pickle list of feature names to be treated as categorical variables
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
-            pickle.dump(categorical_variables, outfile)
 
         return categorical_variables
 
