@@ -215,7 +215,7 @@ def primaryStats(algorithms,original_headers,cv_partitions,full_path,data_name,i
             aveprecs.append(ave_prec)
             # Format feature importance scores as list (takes into account that all features are not in each CV partition)
             tempList = []
-            j = 0
+            #j = 0
             headers = pd.read_csv(full_path+'/CVDatasets/'+data_name+'_CV_'+str(cvCount)+'_Test.csv').columns.values.tolist()
             if instance_label != 'None':
                 headers.remove(instance_label)
@@ -227,7 +227,7 @@ def primaryStats(algorithms,original_headers,cv_partitions,full_path,data_name,i
                     tempList.append(fi[f_index])
                 else:
                     tempList.append(0)
-                j += 1
+                #j += 1
             FI_all.append(tempList)
 
         if jupyterRun:
