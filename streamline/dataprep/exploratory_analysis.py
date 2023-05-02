@@ -133,15 +133,23 @@ class EDAJob(Job):
         x_data = self.dataset.feature_only_data()
         self.dataset.set_headers(self.experiment_path)
 
+        categorical_features_temp = None
         if len(self.categorical_features) == 0:
-            self.categorical_features = self.identify_feature_types(x_data)
+            categorical_features_temp = self.identify_feature_types(x_data)
+        else:
+            categorical_features_temp = self.categorical_features
 
+        categorical_features = list()
+        for item in categorical_features_temp:
+            if item in self.dataset.data.columns:
+                categorical_features.append(item)
+        self.categorical_features = categorical_features
         self.dataset.categorical_variables = self.categorical_features
 
         # Pickle list of feature names to be treated as categorical variables
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/categorical_variables.pickle', 'wb') as outfile:
-            pickle.dump(self.categorical_variables, outfile)
+            pickle.dump(self.categorical_features, outfile)
 
         logging.info("Running Basic Exploratory Analysis...")
 

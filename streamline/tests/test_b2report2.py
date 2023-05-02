@@ -27,7 +27,15 @@ def test_setup():
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                    class_label="Class", n_splits=5, ignore_features=["Alcohol"])
+                    class_label="Class", n_splits=5, ignore_features=["Alcohol"],
+                    categorical_features=['Gender', 'Alcohol', 'Hepatitis B Surface Antigen', 'Hepatitis B e Antigen',
+                                          'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody', 'Cirrhosis',
+                                          'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity', 'Hemochromatosis',
+                                          'Arterial Hypertension', 'Chronic Renal Insufficiency',
+                                          'Human Immunodeficiency Virus', 'Nonalcoholic Steatohepatitis',
+                                          'Esophageal Varices', 'Splenomegaly', 'Portal Hypertension',
+                                          'Portal Vein Thrombosis', 'Liver Metastasis', 'Radiological Hallmark']
+                    )
     eda.run(run_parallel=run_parallel)
     del eda
 
@@ -80,7 +88,8 @@ def test_valid_report2(rep_data_path, run_parallel):
     logging.warning("Running Replication Report Phase")
 
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms,
-                          training=False, rep_data_path=rep_data_path, dataset_for_rep=dataset_path + 'hcc-data_example.csv')
+                          training=False, rep_data_path=rep_data_path,
+                          dataset_for_rep=dataset_path + 'hcc-data_example.csv')
     report.run(run_parallel)
 
     if run_parallel:
