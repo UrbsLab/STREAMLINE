@@ -200,7 +200,7 @@ class ReportJob(Job):
                 i += 1
             # Report self.datasets
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.multi_cell(w=180, h=4, txt='self.datasets:', border=1, align='L')
+            self.analysis_report.multi_cell(w=180, h=4, txt='Datasets', border=1, align='L')
             self.analysis_report.y += 1  # Space below section header
             self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
@@ -746,24 +746,63 @@ class ReportJob(Job):
                         n] + '/exploratory/univariate_analyses/Univariate_Significance.csv')
                 sig_ls = []
                 sig_df = sig_df.nsmallest(10, ['p-value'])
-                for i in range(len(sig_df)):
-                    sig_ls.append(sig_df.iloc[i, 0] + ': ')
-                    sig_ls.append(str(sig_df.iloc[i, 1]))
-                    sig_ls.append('\n')
+
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.multi_cell(w=180, h=4, txt='D' + str(n + 1) + ' = ' + self.datasets[n], border=1,
+                self.analysis_report.multi_cell(w=160, h=6, txt='D' + str(n + 1) + ' = ' + self.datasets[n], border=0,
                                                 align='L')
-                self.analysis_report.y += 1  # Space below section header
-                self.analysis_report.set_font('Times', 'B', 8)
-                self.analysis_report.multi_cell(w=180, h=4, txt='Feature:  P-Value', border=1, align='L')
+
+                # for i in range(len(sig_df)):
+                #     sig_ls.append(sig_df.iloc[i, 0] + '\t\t\t: ')
+                #     sig_ls.append(str(sig_df.iloc[i, 1]))
+                #     sig_ls.append('\t\t\t' + '(' + sig_df.iloc[i, 3] + ',' + str(sig_df.iloc[i, 2]) + ')' + '\n')
+                # self.analysis_report.set_font('Times', 'B', 10)
+                # self.analysis_report.multi_cell(w=180, h=4, txt='D' + str(n + 1) + ' = ' + self.datasets[n], border=1,
+                #                                 align='L')
+                # self.analysis_report.y += 1  # Space below section header
+                # self.analysis_report.set_font('Times', 'B', 8)
+                # self.analysis_report.multi_cell(w=180, h=4, txt='Feature: \t\t\t P-Value \t\t\t (Test, test statistics)', border=1,
+                #                                 align='L')
+                # self.analysis_report.set_font('Times', '', 8)
+                # self.analysis_report.multi_cell(w=180, h=4, txt=' ' + list_to_string(sig_ls), border=1, align='L')
+
                 self.analysis_report.set_font('Times', '', 8)
-                self.analysis_report.multi_cell(w=180, h=4, txt=' ' + list_to_string(sig_ls), border=1, align='L')
-        except Exception:
+                # sig_df = sig_df.round(3)
+                # Format
+                sig_df.reset_index(inplace=True)
+                sig_df = sig_df.columns.to_frame().T.append(sig_df, ignore_index=True)
+                sig_df.columns = range(len(sig_df.columns))
+                th = self.analysis_report.font_size
+                col_width_list = [40, 40, 40, 40, 40, 20]
+                table1 = sig_df.iloc[:, :]
+                table1 = table1.to_numpy()
+
+                # Print table header first
+                row_count = 0
+                col_count = 0
+
+                for row in table1:  # each row
+                    for datum in row:
+                        entry_list = str(datum).split(' ')
+                        try:
+                            if col_count == 0:
+                                pass
+                            else:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
+                                                      align="C")
+                        except Exception:
+                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=1, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                    row_count += 1
+
+        except Exception as e:
             self.analysis_report.x = 5
             self.analysis_report.y = 40
             self.analysis_report.cell(180, 4,
-                                      'WARNING: Univariate analysis failed from scipy package error. To fix: pip '
-                                      'install --upgrade scipy',
+                                      # 'WARNING: Univariate analysis failed from scipy package error. To fix: pip '
+                                      # 'install --upgrade scipy',
+                                      str(e),
                                       1, align="L")
         self.footer()
 

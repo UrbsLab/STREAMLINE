@@ -363,13 +363,14 @@ class EDAJob(Job):
                 if column != self.dataset.class_label and column != self.dataset.instance_label:
                     p_value_dict[column] = self.test_selector(column)
 
-            sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1])
+            sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1][0])
+            sorted_p_list = [item[0] for item in sorted_p_list]
             # Save p-values to file
             pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
             pval_df.to_csv(
                 self.experiment_path + '/' + self.dataset.name
                 + '/exploratory/univariate_analyses/Univariate_Significance.csv',
-                index_label='Feature', header=['p-value'])
+                index_label='Feature', header=['p-value', 'Test-statistic', 'Test-name'])
 
             # Print results for top features across univariate analyses
             f_count = self.dataset.data.shape[1] - 1
@@ -466,6 +467,7 @@ class EDAJob(Job):
         Args:
             feature_name: name of feature column operation is running on
         """
+        test_name, test_stat = None, None
         class_label = self.dataset.class_label
         # Feature and Outcome are discrete/categorical/binary
         if feature_name in self.dataset.categorical_variables:
@@ -474,6 +476,8 @@ class EDAJob(Job):
             # Univariate association test (Chi Square Test of Independence - Non-parametric)
             c, p, dof, expected = chi2_contingency(table_temp)
             p_val = p
+            test_stat = c
+            test_name = "Chi Square Test"
         # Feature is continuous and Outcome is discrete/categorical/binary
         else:
             # Univariate association test (Mann-Whitney Test - Non-parametric)
@@ -486,7 +490,9 @@ class EDAJob(Job):
                     x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
                     y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1], nan_policy='omit')
             p_val = p
-        return p_val
+            test_stat = c
+            test_name = "Mann-Whitney U Test"
+        return p_val, test_stat, test_name
 
     def save_runtime(self):
         """
