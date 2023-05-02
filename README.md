@@ -69,7 +69,7 @@ Basic installation instructions for use on Google Colab, and local runs are give
 There is no local installation or additional steps required to run
 STREAMLINE on Google Colab.
 
-Just have a Google Account and open this Colab Link:
+Just have a Google Account and open this Colab link to run the demo now (takes ~ 6-7 min):
 [https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing](https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing)
 
 
