@@ -267,19 +267,24 @@ class ReportJob(Job):
                     40)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             try:
+                self.analysis_report.set_font('Times', 'B', 10)
+                self.analysis_report.x = 85
+                self.analysis_report.y = 10
+                self.analysis_report.cell(50, 4, 'Pearson Correlation Matrix', 1, align="L")
+                self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         85,
-                        10, 125,
-                        105)
+                        15, 125,
+                        100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 85, 10, 125,
-                        105)
+                            m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125,
+                        100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
             except Exception:
@@ -524,7 +529,7 @@ class ReportJob(Job):
             logging.info("Publishing Dataset Comparison Boxplots")
             self.analysis_report.add_page()
             self.analysis_report.set_font('Times', 'B', 12)
-            self.analysis_report.cell(w=0, h=8, txt="Compare ML Performance Across self.datasets", border=1, align="L",
+            self.analysis_report.cell(w=0, h=8, txt="Compare ML Performance Across Datasets", border=1, align="L",
                                       ln=2)
             self.analysis_report.set_font(family='times', size=9)
             if len(self.datasets) > 1:
@@ -554,7 +559,7 @@ class ReportJob(Job):
 
             self.analysis_report.set_font('Times', 'B', 12)
             self.analysis_report.cell(w=0, h=8,
-                                      txt='Using Best Performing Algorithms (Kruskall Wallis Compare self.datasets)',
+                                      txt='Using Best Performing Algorithms (Kruskall Wallis Compare Datasets)',
                                       border=1, align="L", ln=2)
             self.analysis_report.set_font(family='times', size=7)
 
@@ -566,7 +571,7 @@ class ReportJob(Job):
                 i += 1
             self.analysis_report.x = 5
             self.analysis_report.y = 14
-            self.analysis_report.multi_cell(w=0, h=4, txt='self.datasets: ' + '\n' + list_datasets, border=1, align='L')
+            self.analysis_report.multi_cell(w=0, h=4, txt='Datasets: ' + '\n' + list_datasets, border=1, align='L')
             self.analysis_report.y += 5
 
             success = False

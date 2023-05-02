@@ -42,8 +42,13 @@ class EDAJob(Job):
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
         self.random_state = random_state
-        explorations_list = ["Describe", "Differentiate", "Univariate Analysis"]
+        explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+
+        for item in plot_list:
+            if item not in explorations_list:
+                logging.warning("Notice: Need to run analysis before plotting a result,"
+                                + item + " plot will be skipped")
 
         # Allows user to specify features that should be ignored.
         if ignore_features is None:
@@ -145,17 +150,19 @@ class EDAJob(Job):
             self.counts_summary(total_missing, plot)
 
         # Export feature correlation plot if user specified
-        if "Feature Correlation" in self.plots:
+        if "Feature Correlation" in self.explorations:
             logging.info("Generating Feature Correlation Heatmap...")
-            self.feature_correlation_plot(x_data)
+            if "Feature Correlation" in self.plots:
+                plot = True
+                self.feature_correlation(x_data, plot)
 
         del x_data
 
-        # Conduct univariate analyses of association between individual features and class
+        # Conduct uni-variate analyses of association between individual features and class
         if "Univariate Analysis" in self.explorations:
             logging.info("Running Univariate Analyses...")
             sorted_p_list = self.univariate_analysis(top_features)
-            # Export univariate association plots (for significant features) if user specifies
+            # Export uni-variate association plots (for significant features) if user specifies
             if "Univariate Analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
@@ -301,7 +308,7 @@ class EDAJob(Job):
                 plt.close('all')
                 # plt.cla() # not required
 
-    def feature_correlation_plot(self, x_data=None):
+    def feature_correlation(self, x_data=None, plot=True):
         """
         Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
         Due to computational expense this may not be recommended for datasets with a large number of instances
@@ -309,22 +316,28 @@ class EDAJob(Job):
         of features in the target dataset.
 
         Args:
+            plot:
             x_data: data with only feature columns
         """
         if x_data is None:
             x_data = self.dataset.feature_only_data()
         # Calculate correlation matrix
         correlation_mat = x_data.corr(method='pearson')
-        # Generate and export correlation heatmap
-        plt.subplots(figsize=(40, 20))
-        sns.heatmap(correlation_mat, vmax=1, square=True)
-        plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'FeatureCorrelations.png',
-                    bbox_inches='tight')
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
-            # plt.cla() # not required
+
+        correlation_mat.to_csv(self.experiment_path + '/' + self.dataset.name
+                               + '/exploratory/' + 'FeatureCorrelations.csv')
+
+        if plot:
+            # Generate and export correlation heatmap
+            plt.subplots(figsize=(40, 20))
+            sns.heatmap(correlation_mat, vmax=1, square=True)
+            plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'FeatureCorrelations.png',
+                        bbox_inches='tight')
+            if self.show_plots:
+                plt.show()
+            else:
+                plt.close('all')
+                # plt.cla() # not required
 
     def univariate_analysis(self, top_features=20):
         """

@@ -57,7 +57,7 @@ class EDARunner:
             output_path: path to output directory
             experiment_name: name of experiment output folder (no spaces)
             exploration_list: list of names of analysis to do while doing EDA (must be in set \
-                                ["Describe", "Differentiate", "Univariate Analysis"])
+                                ["Describe", "Univariate Analysis", "Feature Correlation"])
             plot_list: list of analysis plots to save in experiment directory (must be in set \
                                 ["Describe", "Univariate Analysis", "Feature Correlation"])
             class_label: outcome label of all datasets

@@ -140,7 +140,7 @@ class ReplicateJob(Job):
 
         # Export feature correlation plot if user specified
         if self.export_feature_correlations:
-            eda.feature_correlation_plot(x_rep_data)
+            eda.feature_correlation(x_rep_data, True)
         del x_rep_data  # memory cleanup
 
         # Rep Data Preparation for each Training Partition Model set
