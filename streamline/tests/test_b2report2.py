@@ -21,47 +21,49 @@ model_algorithms = ["NB", "LR", "DT"]
 
 
 def test_setup():
+    run_parallel = True
+
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
                     class_label="Class", n_splits=5, ignore_features=["Alcohol"])
-    eda.run(run_parallel=True)
+    eda.run(run_parallel=run_parallel)
     del eda
 
     dpr = DataProcessRunner(output_path, experiment_name)
-    dpr.run(run_parallel=True)
+    dpr.run(run_parallel=run_parallel)
     del dpr
 
     f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithms=algorithms)
-    f_imp.run(run_parallel=True)
+    f_imp.run(run_parallel=run_parallel)
     del f_imp
 
     f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
-    f_sel.run(run_parallel=True)
+    f_sel.run(run_parallel=run_parallel)
     del f_sel
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms)
-    runner.run(run_parallel=True)
+    runner.run(run_parallel=run_parallel)
     del runner
 
     stats = StatsRunner(output_path, experiment_name, model_algorithms)
-    stats.run(run_parallel=True)
+    stats.run(run_parallel=run_parallel)
     del stats
 
     compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms)
-    compare.run(run_parallel=True)
+    compare.run(run_parallel=run_parallel)
     del compare
 
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms)
-    report.run(run_parallel=True)
+    report.run(run_parallel=run_parallel)
     del report
 
     repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example.csv', output_path, experiment_name,
                              load_algo=True)
-    repl.run(run_parallel)
+    repl.run(run_parallel=run_parallel)
 
     logging.warning("Ran Setup in " + str(time.time() - start))
 

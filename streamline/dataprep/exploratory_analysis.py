@@ -364,13 +364,13 @@ class EDAJob(Job):
                     p_value_dict[column] = self.test_selector(column)
 
             sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1][0])
-            sorted_p_list = [item[0] for item in sorted_p_list]
+            sorted_p_list = [(item[0], item[1][0]) for item in sorted_p_list]
             # Save p-values to file
             pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
             pval_df.to_csv(
                 self.experiment_path + '/' + self.dataset.name
                 + '/exploratory/univariate_analyses/Univariate_Significance.csv',
-                index_label='Feature', header=['p-value', 'Test-statistic', 'Test-name'])
+                index_label='Feature', header=['p-value', 'Test-statistic', 'Test-name'], na_rep='NaN')
 
             # Print results for top features across univariate analyses
             f_count = self.dataset.data.shape[1] - 1

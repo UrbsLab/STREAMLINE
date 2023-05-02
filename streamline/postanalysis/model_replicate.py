@@ -168,11 +168,12 @@ class ReplicateJob(Job):
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
                     cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, all_train_feature_list)
-                except Exception:
+                except Exception as e:
                     # If there was no missing data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
+                    logging.warning(e)
                     logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
@@ -181,11 +182,12 @@ class ReplicateJob(Job):
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
                     cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data, all_train_feature_list)
-                except Exception:
+                except Exception as e:
                     # If there was no missing data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
+                    logging.warning(e)
                     logging.warning("Notice: Scaling was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
