@@ -15,7 +15,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 # pytest.skip("Tested Already", allow_module_level=True)
 
-algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
+algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
 model_algorithms = ["NB", "LR", "DT"]
 
@@ -25,8 +25,8 @@ def test_setup():
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = EDARunner(dataset_path, output_path, experiment_name,
-                    exploration_list=["Describe", "Univariate Analysis"],
-                    plot_list=["Describe", "Univariate Analysis"],
+                    exploration_list=None,
+                    plot_list=None,
                     class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=["Alcohol"],
                     categorical_features=['Gender', 'Alcohol', 'Hepatitis B Surface Antigen', 'Hepatitis B e Antigen',
                                           'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody', 'Cirrhosis',

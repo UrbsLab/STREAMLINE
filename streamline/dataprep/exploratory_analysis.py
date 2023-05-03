@@ -325,21 +325,38 @@ class EDAJob(Job):
             x_data = self.dataset.feature_only_data()
         # Calculate correlation matrix
         correlation_mat = x_data.corr(method='pearson')
+        corr_matrix_abs = correlation_mat.abs()
 
-        correlation_mat.to_csv(self.experiment_path + '/' + self.dataset.name
+        corr_matrix_abs.to_csv(self.experiment_path + '/' + self.dataset.name
                                + '/exploratory/' + 'FeatureCorrelations.csv')
 
         if plot:
-            # Generate and export correlation heatmap
-            plt.subplots(figsize=(40, 20))
-            sns.heatmap(correlation_mat, vmax=1, square=True)
+            # Create a mask for the upper triangle of the correlation matrix
+            mask = np.zeros_like(corr_matrix_abs, dtype=bool)
+            mask[np.triu_indices_from(mask)] = True
+
+            # Calculate the number of features in the dataset
+            num_features = len(x_data.columns)
+
+            # Set the fig-size parameter based on the number of features
+            if num_features > 70:  #
+                fig_size = (70 // 2, 70 // 2)
+                # Create a heatmap using Seaborn
+                fig, ax = plt.subplots(figsize=fig_size)
+                heatmap = sns.heatmap(corr_matrix_abs, xticklabels=False, yticklabels=False, mask=mask, vmax=1, vmin=0,
+                                      square=True)
+            else:
+                fig_size = (num_features // 2, num_features // 2)
+                # Create a heatmap using Seaborn
+                fig, ax = plt.subplots(figsize=fig_size)
+                heatmap = sns.heatmap(corr_matrix_abs, mask=mask, vmax=1, vmin=0, square=True)
+
             plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'FeatureCorrelations.png',
                         bbox_inches='tight')
             if self.show_plots:
                 plt.show()
             else:
                 plt.close('all')
-                # plt.cla() # not required
 
     def univariate_analysis(self, top_features=20):
         """
