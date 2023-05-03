@@ -338,6 +338,7 @@ class EDAJob(Job):
             # Calculate the number of features in the dataset
             num_features = len(x_data.columns)
 
+            sns.set_style("white")
             # Set the fig-size parameter based on the number of features
             if num_features > 70:  #
                 fig_size = (70 // 2, 70 // 2)
@@ -357,6 +358,7 @@ class EDAJob(Job):
                 plt.show()
             else:
                 plt.close('all')
+            sns.set_theme()
 
     def univariate_analysis(self, top_features=20):
         """
