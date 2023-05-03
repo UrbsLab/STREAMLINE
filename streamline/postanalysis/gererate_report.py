@@ -270,7 +270,7 @@ class ReportJob(Job):
                 self.analysis_report.set_font('Times', 'B', 10)
                 self.analysis_report.x = 85
                 self.analysis_report.y = 10
-                self.analysis_report.cell(50, 4, 'Pearson Correlation Matrix', 1, align="L")
+                self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
