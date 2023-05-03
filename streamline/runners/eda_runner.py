@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 import re
@@ -117,7 +118,7 @@ class EDARunner:
     def run(self, run_parallel=False):
         file_count, job_counter = 0, 0
         unique_datanames = []
-        job_list, job_obj_list = [], []
+        job_obj_list = []
         for dataset_path in glob.glob(self.data_path + '/*'):
             # Save unique dataset names so that analysis is run only once if there
             # is both a .txt and .csv version of dataset with same name.
@@ -145,10 +146,8 @@ class EDARunner:
                                      self.random_state, self.show_plots)
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
-                    if run_parallel:  # Run as job in parallel
-                        job_list.append(job_obj)
-                    else:  # Run job locally, serially
-                        job_obj.run(self.top_features)
+                    if not run_parallel:  # Run as job in parallel
+                        job_obj_list[-1].run(self.top_features)
                     job_counter += 1
 
             if file_count == 0:  # Check that there was at least 1 dataset
@@ -181,8 +180,10 @@ class EDARunner:
 
         """
         file_count, job_counter = 0, 0
-        job_list, job_obj_list = [], []
+        job_list = []
         for obj in eda_obj_list:
+            if run_parallel and self.ignore_features:
+                obj.dataset.data.drop(self.ignore_features, axis=1, inplace=True, errors='ignore')
             kfold_obj = KFoldPartitioner(obj.dataset,
                                          self.partition_method, self.output_path + '/' + self.experiment_name,
                                          self.n_splits, self.random_state)

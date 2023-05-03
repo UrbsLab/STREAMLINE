@@ -27,10 +27,10 @@ class ReplicateJob(Job):
     """
 
     def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
-                 algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
+                 ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
-                 multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy'):
+                 multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
         super().__init__()
         self.dataset_filename = dataset_filename
         self.dataset_for_rep = dataset_for_rep
@@ -66,6 +66,8 @@ class ReplicateJob(Job):
         self.impute_data = impute_data
         self.scoring_metric = scoring_metric
         self.multi_impute = multi_impute
+        self.ignore_features = ignore_features
+        self.random_state = random_state
 
         self.train_name = self.full_path.split('/')[-1]
         self.experiment_path = '/'.join(self.full_path.split('/')[:-1])
@@ -86,6 +88,7 @@ class ReplicateJob(Job):
         # Load original training dataset (could include 'match label')
         # replication dataset file extension
         train_data = Dataset(self.dataset_for_rep, self.class_label, self.match_label, self.instance_label)
+        # train_data.clean_data(ignore_features=self.ignore_features)
 
         all_train_feature_list = list(train_data.data.columns.values)
         all_train_feature_list.remove(self.class_label)
@@ -118,13 +121,13 @@ class ReplicateJob(Job):
 
         rep_data.categorical_variables = categorical_variables
 
-        eda = EDAJob(rep_data, self.full_path, ignore_features=None,
+        eda = EDAJob(rep_data, self.full_path, ignore_features=self.ignore_features,
                      categorical_features=categorical_variables, explorations=[], plots=[],
                      categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
-                     random_state=None, show_plots=self.show_plots)
+                     random_state=self.random_state, show_plots=self.show_plots)
 
         # ExploratoryAnalysis - basic data cleaning
-        eda.dataset.clean_data([])
+        eda.dataset.clean_data(self.ignore_features)
         # Arguments changed to send to correct locations describe_data(self)
         eda.dataset.name = 'applymodel/' + self.apply_name
 
@@ -159,11 +162,18 @@ class ReplicateJob(Job):
             train_feature_list = list(cv_train_data.columns.values)
             train_feature_list.remove(self.class_label)
             if self.instance_label is not None:
-                train_feature_list.remove(self.instance_label)
+                if self.instance_label in train_feature_list:
+                    train_feature_list.remove(self.instance_label)
             # Working copy of original dataframe -
             # a new version will be created for each CV partition to be applied to each corresponding set of models
             cv_rep_data = rep_data.data.copy()
             # Impute dataframe based on training imputation
+
+            if self.ignore_features is not None:
+                for feature in self.ignore_features:
+                    if feature in all_train_feature_list:
+                        all_train_feature_list.remove(feature)
+
             if self.impute_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
@@ -177,6 +187,8 @@ class ReplicateJob(Job):
                     logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
+                    raise e
+
             # Scale dataframe based on training scaling
             if self.scale_data:
                 try:
@@ -189,8 +201,9 @@ class ReplicateJob(Job):
                     # established internal scheme to conduct imputation.
                     logging.warning(e)
                     logging.warning("Notice: Scaling was not conducted for the following target dataset, "
-                                    "so imputation was not conducted for replication data: "
+                                    "so scaling was not conducted for replication data: "
                                     + str(self.apply_name))
+                    raise e
 
             # Conduct feature selection based on training selection
             # (Filters out any features not in the final cv training dataset)

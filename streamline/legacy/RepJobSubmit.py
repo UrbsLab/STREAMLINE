@@ -25,6 +25,10 @@ def run_cluster(argv):
         if alg_info[key][0]:
             temp_algo.append(key)
     algorithms = temp_algo
+    file = open(experiment_path + '/' + "metadata.pickle", 'rb')
+    metadata = pickle.load(file)
+    file.close()
+    ignore_features = metadata['Ignored Features']
     exclude = None
     len_cv = int(argv[9])
     export_feature_correlations = eval(argv[10])
@@ -38,12 +42,14 @@ def run_cluster(argv):
     multi_impute = eval(argv[18])
     show_plots = eval(argv[19])
     scoring_metric = argv[20]
+    random_state = eval(argv[21])
 
     job_obj = ReplicateJob(dataset_filename, dataset_for_rep, full_path, class_label, instance_label,
-                           match_label, algorithms, exclude, len_cv, export_feature_correlations,
+                           match_label, ignore_features, algorithms, exclude, len_cv,
+                           export_feature_correlations,
                            plot_roc, plot_prc, plot_metric_boxplots,
                            categorical_cutoff, sig_cutoff, scale_data, impute_data,
-                           multi_impute, show_plots, scoring_metric)
+                           multi_impute, show_plots, scoring_metric, random_state)
     job_obj.run()
 
 

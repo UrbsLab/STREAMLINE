@@ -133,23 +133,7 @@ class EDAJob(Job):
         x_data = self.dataset.feature_only_data()
         self.dataset.set_headers(self.experiment_path)
 
-        categorical_features_temp = None
-        if len(self.categorical_features) == 0:
-            categorical_features_temp = self.identify_feature_types(x_data)
-        else:
-            categorical_features_temp = self.categorical_features
-
-        categorical_features = list()
-        for item in categorical_features_temp:
-            if item in self.dataset.data.columns:
-                categorical_features.append(item)
-        self.categorical_features = categorical_features
-        self.dataset.categorical_variables = self.categorical_features
-
-        # Pickle list of feature names to be treated as categorical variables
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
-            pickle.dump(self.categorical_features, outfile)
+        self.identify_feature_types(x_data)
 
         logging.info("Running Basic Exploratory Analysis...")
 
@@ -208,10 +192,20 @@ class EDAJob(Job):
                 if x_data[each].nunique() <= self.categorical_cutoff \
                         or not pd.api.types.is_numeric_dtype(x_data[each]):
                     categorical_variables.append(each)
-            self.dataset.categorical_variables = self.categorical_features
         else:
-            self.dataset.categorical_variables = self.categorical_features
             categorical_variables = self.categorical_features
+
+        categorical_features = list()
+        for item in list(self.dataset.data.columns):
+            if item in categorical_variables:
+                categorical_features.append(item)
+        self.categorical_features = categorical_features
+        self.dataset.categorical_variables = self.categorical_features
+
+        # Pickle list of feature names to be treated as categorical variables
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+            pickle.dump(self.categorical_features, outfile)
 
         return categorical_variables
 
@@ -371,8 +365,9 @@ class EDAJob(Job):
                 if column != self.dataset.class_label and column != self.dataset.instance_label:
                     p_value_dict[column] = self.test_selector(column)
 
-            sorted_p_list = sorted(p_value_dict.items(), key=lambda item: item[1][0])
-            sorted_p_list = [(item[0], item[1][0]) for item in sorted_p_list]
+            dict_items = list(p_value_dict.items())
+            sorted_p_list = sorted(dict_items, key=lambda item: float(item[1][0]))
+            sorted_p_list = [(item[0], float(item[1][0])) for item in sorted_p_list]
             # Save p-values to file
             pval_df = pd.DataFrame.from_dict(p_value_dict, orient='index')
             pval_df.to_csv(
@@ -492,11 +487,10 @@ class EDAJob(Job):
             try:  # works in scipy 1.5.0
                 c, p = mannwhitneyu(
                     x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
-                    y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1])
-            except Exception:  # for scipy 1.8.0
-                c, p = mannwhitneyu(
-                    x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
                     y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1], nan_policy='omit')
+            except Exception as e:  # for scipy 1.8.0
+                logging.error(e)
+                raise Exception("Exception in scipy, must have scipy version>=1.8.0")
             p_val = p
             test_stat = c
             test_name = "Mann-Whitney U Test"

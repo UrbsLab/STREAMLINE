@@ -82,6 +82,7 @@ class ReplicationRunner:
         self.multi_impute = metadata['Use Multivariate Imputation']
         self.show_plots = show_plots
         self.scoring_metric = metadata['Primary Metric']
+        self.random_state = metadata['Random Seed']
 
         self.run_cluster = run_cluster
         self.queue = queue
@@ -152,7 +153,8 @@ class ReplicationRunner:
 
                     job_obj = ReplicateJob(dataset_filename,
                                            self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
-                                           self.match_label, algorithms=self.algorithms, exclude=None,
+                                           self.match_label, ignore_features=self.ignore_features,
+                                           algorithms=self.algorithms, exclude=None,
                                            cv_partitions=self.cv_partitions,
                                            export_feature_correlations=self.export_feature_correlations,
                                            plot_roc=self.plot_roc, plot_prc=self.plot_prc,
@@ -161,7 +163,8 @@ class ReplicationRunner:
                                            sig_cutoff=self.sig_cutoff, scale_data=self.scale_data,
                                            impute_data=self.impute_data,
                                            multi_impute=self.multi_impute, show_plots=self.show_plots,
-                                           scoring_metric=self.scoring_metric)
+                                           scoring_metric=self.scoring_metric,
+                                           random_state=self.random_state)
                     if run_parallel and run_parallel != "False":
                         # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
                         job_list.append(job_obj)
@@ -208,7 +211,7 @@ class ReplicationRunner:
                           self.match_label, None, None, self.cv_partitions, self.export_feature_correlations,
                           self.plot_roc, self.plot_prc, self.plot_metric_boxplots,
                           self.categorical_cutoff, self.sig_cutoff, self.scale_data, self.impute_data,
-                          self.multi_impute, self.show_plots, self.scoring_metric]
+                          self.multi_impute, self.show_plots, self.scoring_metric, self.random_state]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 

@@ -21,13 +21,13 @@ model_algorithms = ["NB", "LR", "DT"]
 
 
 def test_setup():
-    run_parallel = True
-
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                    class_label="Class", n_splits=5, ignore_features=["Alcohol"],
+    eda = EDARunner(dataset_path, output_path, experiment_name,
+                    exploration_list=["Describe", "Univariate Analysis"],
+                    plot_list=["Describe", "Univariate Analysis"],
+                    class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=["Alcohol"],
                     categorical_features=['Gender', 'Alcohol', 'Hepatitis B Surface Antigen', 'Hepatitis B e Antigen',
                                           'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody', 'Cirrhosis',
                                           'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity', 'Hemochromatosis',
@@ -39,29 +39,37 @@ def test_setup():
     eda.run(run_parallel=run_parallel)
     del eda
 
-    dpr = DataProcessRunner(output_path, experiment_name)
+    dpr = DataProcessRunner(output_path, experiment_name,
+                            class_label="Class", instance_label="InstanceID")
     dpr.run(run_parallel=run_parallel)
     del dpr
 
-    f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithms=algorithms)
+    f_imp = FeatureImportanceRunner(output_path, experiment_name,
+                                    class_label="Class", instance_label="InstanceID",
+                                    algorithms=algorithms)
     f_imp.run(run_parallel=run_parallel)
     del f_imp
 
-    f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
+    f_sel = FeatureSelectionRunner(output_path, experiment_name,
+                                   class_label="Class", instance_label="InstanceID",
+                                   algorithms=algorithms)
     f_sel.run(run_parallel=run_parallel)
     del f_sel
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-    runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms)
+    runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms,
+                                   class_label="Class", instance_label="InstanceID")
     runner.run(run_parallel=run_parallel)
     del runner
 
-    stats = StatsRunner(output_path, experiment_name, model_algorithms)
+    stats = StatsRunner(output_path, experiment_name, model_algorithms,
+                        class_label="Class", instance_label="InstanceID")
     stats.run(run_parallel=run_parallel)
     del stats
 
-    compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms)
+    compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms,
+                            class_label="Class", instance_label="InstanceID")
     compare.run(run_parallel=run_parallel)
     del compare
 
@@ -69,7 +77,8 @@ def test_setup():
     report.run(run_parallel=run_parallel)
     del report
 
-    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example.csv', output_path, experiment_name,
+    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example.csv',
+                             output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel=run_parallel)
 
@@ -79,7 +88,7 @@ def test_setup():
 @pytest.mark.parametrize(
     ("rep_data_path", "run_parallel"),
     [
-        ("./DemoRepData/", True),
+        ("./DemoRepData/", run_parallel),
     ]
 )
 def test_valid_report2(rep_data_path, run_parallel):
