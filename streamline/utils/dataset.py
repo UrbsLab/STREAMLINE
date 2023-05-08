@@ -3,6 +3,9 @@ import logging
 import os
 
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_theme()
 
 
 class Dataset:
@@ -122,3 +125,102 @@ class Dataset:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(headers)
         return headers
+
+    def initial_eda(self, experiment_path, plot=True):
+        if not os.path.exists(experiment_path + '/' + self.name + '/exploratory/initial'):
+            os.makedirs(experiment_path + '/' + self.name + '/exploratory/initial')
+        self.describe_data(experiment_path)
+        total_missing = self.missingness_counts(experiment_path)
+        self.missing_count_plot(experiment_path)
+        self.counts_summary(experiment_path, total_missing, plot)
+
+    def describe_data(self, experiment_path):
+        """
+        Conduct and export basic dataset descriptions including basic column statistics, column variable types
+        (i.e. int64 vs. float64), and unique value counts for each column
+        """
+        self.data.describe().to_csv(experiment_path + '/' + self.name +
+                                    '/exploratory/initial/' + 'DescribeDataset.csv')
+        self.data.dtypes.to_csv(experiment_path + '/' + self.name +
+                                '/exploratory/initial/' + 'DtypesDataset.csv',
+                                header=['DataType'], index_label='Variable')
+        self.data.nunique().to_csv(experiment_path + '/' + self.name +
+                                   '/exploratory/initial/' + 'NumUniqueDataset.csv',
+                                   header=['Count'], index_label='Variable')
+
+    def missingness_counts(self, experiment_path):
+        """
+        Count and export missing values for all data columns.
+        """
+        # Assess Missingness in all data columns
+        missing_count = self.data.isnull().sum()
+        total_missing = self.data.isnull().sum().sum()
+        missing_count.to_csv(experiment_path + '/' + self.name + '/exploratory/initial/' + 'DataMissingness.csv',
+                             header=['Count'], index_label='Variable')
+        return total_missing
+
+    def missing_count_plot(self, experiment_path, plot=False):
+        """
+        Plots a histogram of missingness across all data columns.
+        """
+        missing_count = self.data.isnull().sum()
+        # Plot a histogram of the missingness observed over all columns in the dataset
+        plt.hist(missing_count, bins=100)
+        plt.xlabel("Missing Value Counts")
+        plt.ylabel("Frequency")
+        plt.title("Histogram of Missing Value Counts in Dataset")
+        plt.savefig(experiment_path + '/' + self.name + '/exploratory/initial/' + 'DataMissingnessHistogram.png',
+                    bbox_inches='tight')
+        if plot:
+            plt.show()
+
+    def counts_summary(self, experiment_path, total_missing=None, plot=True, show_plots=False):
+        """
+        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
+        features, and class counts. Also saves a simple bar graph of class counts if user specified.
+
+        Args:
+            experiment_path:
+            total_missing: total missing values (optional, runs again if not given)
+            plot: flag to output bar graph in the experiment log folder
+            show_plots: flag to show plots
+
+        Returns:
+
+        """
+        # Calculate, print, and export instance and feature counts
+        f_count = self.data.shape[1] - 1
+        if not (self.instance_label is None):
+            f_count -= 1
+        if not (self.match_label is None):
+            f_count -= 1
+        if total_missing is None:
+            total_missing = self.missingness_counts(experiment_path)
+        percent_missing = int(total_missing) / float(self.data.shape[0] * f_count)
+        summary = [['instances', self.data.shape[0]],
+                   ['features', f_count],
+                   ['missing_values', total_missing],
+                   ['missing_percent', round(percent_missing, 5)]]
+
+        summary_df = pd.DataFrame(summary, columns=['Variable', 'Count'])
+
+        summary_df.to_csv(experiment_path + '/' + self.name + '/exploratory/initial/' + 'DataCounts.csv',
+                          index=False)
+        # Calculate, print, and export class counts
+        class_counts = self.data[self.class_label].value_counts()
+        class_counts.to_csv(experiment_path + '/' + self.name +
+                            '/exploratory/initial/' + 'ClassCounts.csv', header=['Count'],
+                            index_label='Class')
+
+        # Generate and export class count bar graph
+        if plot:
+            class_counts.plot(kind='bar')
+            plt.ylabel('Count')
+            plt.title('Class Counts')
+            plt.savefig(experiment_path + '/' + self.name + '/exploratory/initial/' + 'ClassCountsBarPlot.png',
+                        bbox_inches='tight')
+            if show_plots:
+                plt.show()
+            else:
+                plt.close('all')
+                # plt.cla() # not required

@@ -10,6 +10,7 @@ from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
 from scipy.stats import chi2_contingency, mannwhitneyu
 import seaborn as sns
+
 sns.set_theme()
 
 
@@ -17,6 +18,7 @@ class EDAJob(Job):
     """
     Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE
     """
+
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05,
@@ -101,22 +103,22 @@ class EDAJob(Job):
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory')
 
-    def run_explore(self, top_features=20):
-        """
-        Run Exploratory Data Analysis according to EDA object
+    def feature_engineering(self):
+        # Feature Engineering - Missingness as a feature: (right after an initial EDA, make new missingness feature
+        # engineering phase)  Add new user run parameter defining the minimum missingness of a variable at which
+        # streamline will automatically engineer a new feature (i.e. 0 not missing vs. 1 missing) This parameter
+        # would have value of 0-1 and default of 0.5 meaning any feature with a missingness of >50% will have a
+        # corresponding missinness feature added.  This new feature would have the inserted label of
+        # “Miss_”+originalFeatureName. (update documentation to reflect new run parameter) - also keep a list of
+        # feature names for which a missingness feature was constructed. In the ‘apply’ phase, use this feature list
+        # to build similar new missingness features added to the replication dataset. Store the number of features
+        # added here, for later. I think these new binary features can be included as categorical for the rest of the
+        # pipeline (but make sure that one hot encoding running later only splits one feature into multiple ones,
+        # for features with more than two possible feature values -i.e. Keep binary features as categorical.
+        pass
 
-        Args:
-            top_features: no of top features to consider (default=20)
-
-        """
-        self.job_start_time = time.time()
-        random.seed(self.random_state)
-        np.random.seed(self.random_state)
-        # Load csv file as dataset object for exploratory analysis
-        self.dataset.load_data()
-        # Make analysis folder for target dataset and a folder for the respective exploratory analysis within it
-        self.make_log_folders()
-
+    def data_manipulation(self):
+        # Dropping rows with missing target variable.
         self.drop_ignored_rowcols()
 
         # Account for possibility that only one dataset in folder has a match label.
@@ -135,6 +137,35 @@ class EDAJob(Job):
 
         self.identify_feature_types(x_data)
 
+        return x_data
+
+    def run_explore(self, top_features=20):
+        """
+        Run Exploratory Data Analysis according to EDA object
+
+        Args:
+            top_features: no of top features to consider (default=20)
+
+        """
+        self.job_start_time = time.time()
+        random.seed(self.random_state)
+        np.random.seed(self.random_state)
+        # Load csv file as dataset object for exploratory analysis
+        self.dataset.load_data()
+        # Make analysis folder for target dataset and a folder for the respective exploratory analysis within it
+        self.make_log_folders()
+
+        # ---- INITIAL EDA ----
+
+        # Run initial EDA from the Dataset Class giving in the current experiment folder.
+        self.dataset.initial_eda(self.experiment_path)
+
+        # ------------------ START OF DATA MANIPULATION ------------------
+
+        x_data = self.data_manipulation()
+
+        # ------------------ END OF DATA MANIPULATION ------------------
+
         logging.info("Running Basic Exploratory Analysis...")
 
         # Describe and save description if user specified
@@ -144,6 +175,7 @@ class EDAJob(Job):
             plot = False
             if "Describe" in self.plots:
                 plot = True
+                self.missing_count_plot()
             self.counts_summary(total_missing, plot)
 
         # Export feature correlation plot if user specified
