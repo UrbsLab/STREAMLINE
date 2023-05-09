@@ -131,6 +131,20 @@ class ReplicateJob(Job):
         # Arguments changed to send to correct locations describe_data(self)
         eda.dataset.name = 'applymodel/' + self.apply_name
 
+        eda.dataset.initial_eda(self.experiment_path + '/' + self.train_name)
+
+        # Missingness Feature Reconstruction
+
+        # Read all engineered feature names
+        with open(self.experiment_path + '/' + self.train_name +
+                  '/exploratory/engineered_varaibles.pickle', 'rb') as infile:
+            eda.engineered_features = pickle.load(infile)
+
+        # Recreate missingness features in apply phase
+        for feat in eda.engineered_features:
+            eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
+        engineered_features = ['miss_' + feat for feat in eda.engineered_features]
+
         # Export basic exploratory analysis files
         eda.describe_data()
 
@@ -164,6 +178,8 @@ class ReplicateJob(Job):
             if self.instance_label is not None:
                 if self.instance_label in train_feature_list:
                     train_feature_list.remove(self.instance_label)
+            if self.match_label is not None:
+                train_feature_list.remove(self.match_label)
             # Working copy of original dataframe -
             # a new version will be created for each CV partition to be applied to each corresponding set of models
             cv_rep_data = rep_data.data.copy()
@@ -173,11 +189,13 @@ class ReplicateJob(Job):
                 for feature in self.ignore_features:
                     if feature in all_train_feature_list:
                         all_train_feature_list.remove(feature)
+            logging.warning(all_train_feature_list + eda.engineered_features)
 
             if self.impute_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
-                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, all_train_feature_list)
+                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data,
+                                                       all_train_feature_list + engineered_features)
                 except Exception as e:
                     # If there was no missing data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
@@ -193,7 +211,8 @@ class ReplicateJob(Job):
             if self.scale_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
-                    cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data, all_train_feature_list)
+                    cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data,
+                                                      all_train_feature_list + engineered_features)
                 except Exception as e:
                     # If there was no missing data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.

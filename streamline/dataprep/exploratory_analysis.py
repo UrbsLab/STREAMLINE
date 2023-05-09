@@ -76,7 +76,9 @@ class EDAJob(Job):
         else:
             raise Exception
 
+        self.engineered_features = list()
         self.categorical_cutoff = categorical_cutoff
+        self.missingness_percentage = 0.3
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
 
@@ -103,23 +105,52 @@ class EDAJob(Job):
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory')
 
-    def feature_engineering(self):
-        # Feature Engineering - Missingness as a feature: (right after an initial EDA, make new missingness feature
-        # engineering phase)  Add new user run parameter defining the minimum missingness of a variable at which
-        # streamline will automatically engineer a new feature (i.e. 0 not missing vs. 1 missing) This parameter
-        # would have value of 0-1 and default of 0.5 meaning any feature with a missingness of >50% will have a
-        # corresponding missinness feature added.  This new feature would have the inserted label of
-        # “Miss_”+originalFeatureName. (update documentation to reflect new run parameter) - also keep a list of
-        # feature names for which a missingness feature was constructed. In the ‘apply’ phase, use this feature list
-        # to build similar new missingness features added to the replication dataset. Store the number of features
-        # added here, for later. I think these new binary features can be included as categorical for the rest of the
-        # pipeline (but make sure that one hot encoding running later only splits one feature into multiple ones,
-        # for features with more than two possible feature values -i.e. Keep binary features as categorical.
+    def missingness_feature_engineering(self):
+        """
+        Feature Engineering - Missingness as a feature: (right after an initial EDA, make new missingness feature
+        engineering phase)  Add new user run parameter defining the minimum missingness of a variable at which
+        streamline will automatically engineer a new feature (i.e. 0 not missing vs. 1 missing) This parameter
+        would have value of 0-1 and default of 0.5 meaning any feature with a missingness of >50% will have a
+        corresponding missinness feature added.  This new feature would have the inserted label of
+        “Miss_”+originalFeatureName. (update documentation to reflect new run parameter) - also keep a list of
+        feature names for which a missingness feature was constructed. In the ‘apply’ phase, use this feature list
+        to build similar new missingness features added to the replication dataset. Store the number of features
+        added here, for later. I think these new binary features can be included as categorical for the rest of the
+        pipeline (but make sure that one hot encoding running later only splits one feature into multiple ones,
+        for features with more than two possible feature values -i.e. Keep binary features as categorical.
+        """
+
+        logging.info("Running Feature Engineering")
+
+        # Calculating missingness
+        missingness = self.dataset.data.isnull().sum() / len(self.dataset.data)
+
+        # Finding features with missingness greater than missingness_percentage
+        high_missingness_features = missingness[missingness > self.missingness_percentage]
+        high_missingness_features = list(high_missingness_features.index)
+        self.engineered_features = high_missingness_features
+
+        # For each Feature with high missingness creating a categorical feature.
+        for feat in high_missingness_features:
+            self.dataset.data['miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
+
+    def categorical_feature_encoding(self):
+        """
+        Stub Function for categorical feature encoding
+        """
         pass
 
     def data_manipulation(self):
+        """
+        Wrapper function for all feature engineering data manipulation
+
+        """
         # Dropping rows with missing target variable.
         self.drop_ignored_rowcols()
+
+        self.missingness_feature_engineering()
+
+        self.categorical_feature_encoding()
 
         # Account for possibility that only one dataset in folder has a match label.
         # Check for presence of match label (this allows multiple datasets to be analyzed
@@ -225,7 +256,7 @@ class EDAJob(Job):
                         or not pd.api.types.is_numeric_dtype(x_data[each]):
                     categorical_variables.append(each)
         else:
-            categorical_variables = self.categorical_features
+            categorical_variables = self.categorical_features + ['miss_' + feat for feat in self.engineered_features]
 
         categorical_features = list()
         for item in list(self.dataset.data.columns):
@@ -238,6 +269,10 @@ class EDAJob(Job):
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/categorical_variables.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
+
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/engineered_varaibles.pickle', 'wb') as outfile:
+            pickle.dump(self.engineered_features, outfile)
 
         return categorical_variables
 
