@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
+from sklearn.preprocessing import OneHotEncoder
 from scipy.stats import chi2_contingency, mannwhitneyu
 import seaborn as sns
 
@@ -138,7 +139,9 @@ class EDAJob(Job):
         """
         Stub Function for categorical feature encoding
         """
-        pass
+        non_binary_categoricals = list()
+        for feat in self.categorical_features:
+            feat
 
     def data_manipulation(self):
         """
@@ -149,6 +152,9 @@ class EDAJob(Job):
         self.drop_ignored_rowcols()
 
         self.missingness_feature_engineering()
+
+        x_data = self.dataset.feature_only_data()
+        self.identify_feature_types(x_data)
 
         self.categorical_feature_encoding()
 

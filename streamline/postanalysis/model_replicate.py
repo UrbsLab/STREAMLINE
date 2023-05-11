@@ -189,7 +189,6 @@ class ReplicateJob(Job):
                 for feature in self.ignore_features:
                     if feature in all_train_feature_list:
                         all_train_feature_list.remove(feature)
-            logging.warning(all_train_feature_list + eda.engineered_features)
 
             if self.impute_data:
                 try:
@@ -201,7 +200,7 @@ class ReplicateJob(Job):
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
-                    logging.warning(e)
+                    # logging.warning(e)
                     logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
@@ -218,7 +217,7 @@ class ReplicateJob(Job):
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
-                    logging.warning(e)
+                    # logging.warning(e)
                     logging.warning("Notice: Scaling was not conducted for the following target dataset, "
                                     "so scaling was not conducted for replication data: "
                                     + str(self.apply_name))
