@@ -139,9 +139,14 @@ class EDAJob(Job):
         """
         Stub Function for categorical feature encoding
         """
-        non_binary_categoricals = list()
+        non_binary_categorical = list()
         for feat in self.categorical_features:
-            feat
+            if self.dataset.data[feat].nunique() > 2:
+                non_binary_categorical.append(feat)
+        if len(non_binary_categorical) > 0:
+            one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical])
+            self.dataset.data.drop(non_binary_categorical, inplace=True)
+            self.dataset.data = pd.concat([self.dataset.data, one_hot_df], axis=1)
 
     def data_manipulation(self):
         """
