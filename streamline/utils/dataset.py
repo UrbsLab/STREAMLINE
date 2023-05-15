@@ -173,6 +173,8 @@ class Dataset:
                     bbox_inches='tight')
         if plot:
             plt.show()
+        else:
+            plt.close('all')
 
     def counts_summary(self, experiment_path, total_missing=None, plot=True, show_plots=False):
         """
@@ -214,6 +216,7 @@ class Dataset:
 
         # Generate and export class count bar graph
         if plot:
+            logging.warning(class_counts)
             class_counts.plot(kind='bar')
             plt.ylabel('Count')
             plt.title('Class Counts')

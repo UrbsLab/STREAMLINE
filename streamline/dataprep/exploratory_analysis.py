@@ -122,6 +122,10 @@ class EDAJob(Job):
 
         logging.info("Running Feature Engineering")
 
+        self.dataset.data = self.dataset.data[self.dataset.data.isnull().sum(axis=1) <
+                                              int(self.missingness_percentage *
+                                                  len(self.dataset.feature_only_data().columns))]
+
         # Calculating missingness
         missingness = self.dataset.data.isnull().sum() / len(self.dataset.data)
 
@@ -142,9 +146,10 @@ class EDAJob(Job):
         for feat in self.categorical_features:
             if self.dataset.data[feat].nunique() > 2:
                 non_binary_categorical.append(feat)
+        logging.warning(non_binary_categorical)
         if len(non_binary_categorical) > 0:
             one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical])
-            self.dataset.data.drop(non_binary_categorical, inplace=True)
+            self.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
             self.dataset.data = pd.concat([self.dataset.data, one_hot_df], axis=1)
 
     def data_manipulation(self):
@@ -325,6 +330,8 @@ class EDAJob(Job):
                     bbox_inches='tight')
         if plot:
             plt.show()
+        else:
+            plt.close('all')
 
     def counts_summary(self, total_missing=None, plot=False):
         """

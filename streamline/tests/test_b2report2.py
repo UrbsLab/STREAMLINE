@@ -34,7 +34,9 @@ def test_setup():
                                           'Arterial Hypertension', 'Chronic Renal Insufficiency',
                                           'Human Immunodeficiency Virus', 'Nonalcoholic Steatohepatitis',
                                           'Esophageal Varices', 'Splenomegaly', 'Portal Hypertension',
-                                          'Portal Vein Thrombosis', 'Liver Metastasis', 'Radiological Hallmark']
+                                          'Portal Vein Thrombosis', 'Liver Metastasis', 'Radiological Hallmark',
+                                          'Number of Nodules', 'Performance Status*', 'Encephalopathy degree*',
+                                          'Ascites degree*']
                     )
     eda.run(run_parallel=run_parallel)
     del eda
