@@ -160,7 +160,7 @@ class EDAJob(Job):
         x_data = self.dataset.feature_only_data()
         self.identify_feature_types(x_data)
 
-        self.categorical_feature_encoding()
+        # self.categorical_feature_encoding()
 
         # Account for possibility that only one dataset in folder has a match label.
         # Check for presence of match label (this allows multiple datasets to be analyzed

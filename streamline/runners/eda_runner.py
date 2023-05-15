@@ -239,7 +239,7 @@ class EDARunner:
         metadata['Match Label'] = self.match_label
         metadata['Categorical Cutoff'] = self.categorical_cutoff
         metadata['Statistical Significance Cutoff'] = self.sig_cutoff
-        metadata['Missingness Percentage for Feature Generation'] = self.missingness_percentage
+        metadata['Missingness Percentage Cutoff'] = self.missingness_percentage
         metadata['Export Feature Correlations'] = "Feature Correlations" in self.plot_list
         metadata['Export Univariate Plots'] = "Univariate Analysis" in self.plot_list
         metadata['Random Seed'] = self.random_state

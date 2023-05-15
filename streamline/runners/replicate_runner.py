@@ -76,6 +76,7 @@ class ReplicationRunner:
         self.ignore_features = metadata['Ignored Features']
         self.categorical_cutoff = metadata['Categorical Cutoff']
         self.sig_cutoff = metadata['Statistical Significance Cutoff']
+        self.missingness_percentage = metadata['Missingness Percentage Cutoff']
         self.cv_partitions = metadata['CV Partitions']
         self.scale_data = metadata['Use Data Scaling']
         self.impute_data = metadata['Use Data Imputation']
@@ -161,6 +162,7 @@ class ReplicationRunner:
                                            plot_metric_boxplots=self.plot_metric_boxplots,
                                            categorical_cutoff=self.categorical_cutoff,
                                            sig_cutoff=self.sig_cutoff, scale_data=self.scale_data,
+                                           missingness_percentage=self.missingness_percentage,
                                            impute_data=self.impute_data,
                                            multi_impute=self.multi_impute, show_plots=self.show_plots,
                                            scoring_metric=self.scoring_metric,
@@ -210,7 +212,8 @@ class ReplicationRunner:
         cluster_params = [dataset_filename, self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
                           self.match_label, None, None, self.cv_partitions, self.export_feature_correlations,
                           self.plot_roc, self.plot_prc, self.plot_metric_boxplots,
-                          self.categorical_cutoff, self.sig_cutoff, self.scale_data, self.impute_data,
+                          self.categorical_cutoff, self.sig_cutoff, self.missingness_percentage,
+                          self.scale_data, self.impute_data,
                           self.multi_impute, self.show_plots, self.scoring_metric, self.random_state]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
