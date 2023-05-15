@@ -8,7 +8,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
-from sklearn.preprocessing import OneHotEncoder
 from scipy.stats import chi2_contingency, mannwhitneyu
 import seaborn as sns
 
@@ -22,7 +21,7 @@ class EDAJob(Job):
 
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
-                 categorical_cutoff=10, sig_cutoff=0.05,
+                 categorical_cutoff=10, sig_cutoff=0.05, missingness_percentage=0.5,
                  random_state=None, show_plots=False):
         """
         Initialization function for Exploratory Data Analysis Class. Parameters are defined below.
@@ -79,7 +78,7 @@ class EDAJob(Job):
 
         self.engineered_features = list()
         self.categorical_cutoff = categorical_cutoff
-        self.missingness_percentage = 0.3
+        self.missingness_percentage = missingness_percentage
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
 

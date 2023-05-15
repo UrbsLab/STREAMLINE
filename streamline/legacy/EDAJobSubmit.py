@@ -26,7 +26,8 @@ def run_cluster(argv):
     top_features = int(argv[13])
     categorical_cutoff = int(argv[14])
     sig_cutoff = float(argv[15])
-    random_state = None if argv[16] == "None" else int(argv[16])
+    sig_cutoff = float(argv[16])
+    random_state = None if argv[17] == "None" else int(argv[17])
 
     dataset = Dataset(dataset_path, class_label, match_label, instance_label)
     eda_obj = EDAJob(dataset, output_path + '/' + experiment_name,

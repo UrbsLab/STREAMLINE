@@ -48,7 +48,7 @@ class EDARunner:
     def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
                  class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
                  ignore_features=None, categorical_features=None, top_features=20,
-                 categorical_cutoff=10, sig_cutoff=0.05,
+                 categorical_cutoff=10, sig_cutoff=0.05, missingness_percentage=0.5,
                  random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
         Initializer for a runner class for Exploratory Data Analysis Jobs
@@ -92,6 +92,7 @@ class EDARunner:
         self.ignore_features = ignore_features
         self.categorical_cutoff = categorical_cutoff
         self.categorical_features = categorical_features
+        self.missingness_percentage = missingness_percentage
         self.top_features = top_features
         self.exploration_list = exploration_list
         self.plot_list = plot_list
@@ -142,7 +143,7 @@ class EDARunner:
                     job_obj = EDAJob(dataset, self.output_path + '/' + self.experiment_name,
                                      self.ignore_features,
                                      self.categorical_features, self.exploration_list, self.plot_list,
-                                     self.categorical_cutoff, self.sig_cutoff,
+                                     self.categorical_cutoff, self.sig_cutoff, self.missingness_percentage,
                                      self.random_state, self.show_plots)
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
@@ -238,6 +239,7 @@ class EDARunner:
         metadata['Match Label'] = self.match_label
         metadata['Categorical Cutoff'] = self.categorical_cutoff
         metadata['Statistical Significance Cutoff'] = self.sig_cutoff
+        metadata['Missingness Percentage for Feature Generation'] = self.missingness_percentage
         metadata['Export Feature Correlations'] = "Feature Correlations" in self.plot_list
         metadata['Export Univariate Plots'] = "Univariate Analysis" in self.plot_list
         metadata['Random Seed'] = self.random_state
@@ -252,7 +254,7 @@ class EDARunner:
                           self.class_label, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method,
                           self.ignore_features, self.categorical_features, self.top_features,
-                          self.categorical_cutoff, self.sig_cutoff, self.random_state]
+                          self.categorical_cutoff, self.sig_cutoff, self.missingness_percentage, self.random_state]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 
