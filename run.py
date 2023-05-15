@@ -88,6 +88,7 @@ def run(params):
                         categorical_features=params['categorical_feature_path'],
                         top_features=params['top_features'],
                         categorical_cutoff=params['categorical_cutoff'], sig_cutoff=params['sig_cutoff'],
+                        missingness_percentage=params['missingness_percentage'],
                         random_state=params['random_state'],
                         run_cluster=params['run_cluster'],
                         queue=params['queue'],
