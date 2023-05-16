@@ -5,7 +5,7 @@ import pickle
 
 import pandas as pd
 
-from streamline.dataprep.exploratory_analysis import EDAJob
+from streamline.dataprep.data_process import DataProcess
 from streamline.modeling.basemodel import BaseModel
 from streamline.modeling.utils import ABBREVIATION, SUPPORTED_MODELS, is_supported_model
 from streamline.postanalysis.statistics import StatsJob
@@ -29,7 +29,7 @@ class ReplicateJob(Job):
     def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
                  ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
-                 categorical_cutoff=10, sig_cutoff=0.05, missingness_percentage=0.5, scale_data=True, impute_data=True,
+                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
         super().__init__()
         self.dataset_filename = dataset_filename
@@ -62,7 +62,7 @@ class ReplicateJob(Job):
 
         self.categorical_cutoff = categorical_cutoff
         self.sig_cutoff = sig_cutoff
-        self.missingness_percentage = missingness_percentage
+        self.featureeng_missingness = featureeng_missingness
         self.scale_data = scale_data
         self.impute_data = impute_data
         self.scoring_metric = scoring_metric
@@ -122,11 +122,11 @@ class ReplicateJob(Job):
 
         rep_data.categorical_variables = categorical_variables
 
-        eda = EDAJob(rep_data, self.full_path, ignore_features=self.ignore_features,
-                     categorical_features=categorical_variables, explorations=[], plots=[],
-                     categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
-                     missingness_percentage=self.missingness_percentage,
-                     random_state=self.random_state, show_plots=self.show_plots)
+        eda = DataProcess(rep_data, self.full_path, ignore_features=self.ignore_features,
+                          categorical_features=categorical_variables, explorations=[], plots=[],
+                          categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
+                          featureeng_missingness=self.featureeng_missingness,
+                          random_state=self.random_state, show_plots=self.show_plots)
 
         # ExploratoryAnalysis - basic data cleaning
         eda.dataset.clean_data(self.ignore_features)
@@ -136,10 +136,9 @@ class ReplicateJob(Job):
         eda.dataset.initial_eda(self.experiment_path + '/' + self.train_name)
 
         # Missingness Feature Reconstruction
-
         # Read all engineered feature names
         with open(self.experiment_path + '/' + self.train_name +
-                  '/exploratory/engineered_varaibles.pickle', 'rb') as infile:
+                  '/exploratory/engineered_variables.pickle', 'rb') as infile:
             eda.engineered_features = pickle.load(infile)
 
         # Recreate missingness features in apply phase
@@ -147,19 +146,30 @@ class ReplicateJob(Job):
             eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
         engineered_features = ['miss_' + feat for feat in eda.engineered_features]
 
+        # Removing dropped features
+        with open(self.experiment_path + '/' + self.train_name +
+                  '/exploratory/removed_variables.pickle', 'rb') as infile:
+            removed_features = pickle.load(infile)
+        eda.dataset.clean_data(removed_features)
+
+        with open(self.experiment_path + '/' + self.train_name +
+                  '/exploratory/correlated_features.pickle', 'rb') as infile:
+            correlated_features = pickle.load(infile)
+        eda.dataset.clean_data(correlated_features)
+
         # Export basic exploratory analysis files
-        eda.describe_data()
+        eda.dataset.describe_data(self.experiment_path + '/' + self.train_name)
 
-        total_missing = eda.missingness_counts()
+        total_missing = eda.dataset.missingness_counts(self.experiment_path + '/' + self.train_name)
 
-        eda.counts_summary(total_missing, True)
+        eda.counts_summary(total_missing, plot=True)
 
         # Create features-only version of dataset for some operations
         x_rep_data = eda.dataset.feature_only_data()
 
         # Export feature correlation plot if user specified
         if self.export_feature_correlations:
-            eda.feature_correlation(x_rep_data, True)
+            eda.dataset.feature_correlation(self.experiment_path + '/' + self.train_name, x_rep_data, True)
         del x_rep_data  # memory cleanup
 
         # Rep Data Preparation for each Training Partition Model set
@@ -189,6 +199,11 @@ class ReplicateJob(Job):
 
             if self.ignore_features is not None:
                 for feature in self.ignore_features:
+                    if feature in all_train_feature_list:
+                        all_train_feature_list.remove(feature)
+
+            if removed_features:
+                for feature in removed_features:
                     if feature in all_train_feature_list:
                         all_train_feature_list.remove(feature)
 

@@ -3,8 +3,8 @@ import time
 import pytest
 import shutil
 import logging
-from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
+from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 
@@ -53,11 +53,11 @@ def test_valid_feature_imp(algorithms, run_parallel, use_turf, turf_pct, output_
     dataset_path, experiment_name = "./DemoData/", "demo",
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                    class_label="Class")
+    eda = DataProcessRunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
+                            class_label="Class")
     eda.run(run_parallel=False)
 
-    dpr = DataProcessRunner(output_path, experiment_name)
+    dpr = ImputationRunner(output_path, experiment_name)
     dpr.run(run_parallel=False)
 
     start = time.time()
@@ -86,12 +86,12 @@ def test_valid_feature_sel(algorithms, run_parallel, output_path):
     dataset_path, experiment_name = "./DemoData/", "demo",
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                    class_label="Class")
+    eda = DataProcessRunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
+                            class_label="Class")
     eda.run(run_parallel=False)
     del eda
 
-    dpr = DataProcessRunner(output_path, experiment_name)
+    dpr = ImputationRunner(output_path, experiment_name)
     dpr.run(run_parallel=False)
     del dpr
 

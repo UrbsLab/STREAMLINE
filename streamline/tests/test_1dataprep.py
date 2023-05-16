@@ -1,7 +1,7 @@
 import pytest
 import shutil
 from streamline.utils.dataset import Dataset
-from streamline.dataprep.exploratory_analysis import EDAJob
+from streamline.dataprep.data_process import DataProcess
 
 pytest.skip("Tested Already", allow_module_level=True)
 
@@ -51,7 +51,7 @@ def test_valid_dataset(dataset_path, class_label, match_label, instance_label):
 )
 def test_invalid_eda(dataset, experiment_path, exception):
     with pytest.raises(exception):
-        EDAJob(dataset, experiment_path)
+        DataProcess(dataset, experiment_path)
 
 
 def test_invalid_eda_2():
@@ -59,14 +59,14 @@ def test_invalid_eda_2():
     explorations = ["sdasd"]
     plots = ["dsfsdf"]
     with pytest.raises(Exception):
-        EDAJob(dataset, experiment_path, explorations=explorations)
+        DataProcess(dataset, experiment_path, explorations=explorations)
     with pytest.raises(Exception):
-        EDAJob(dataset, experiment_path, plots=plots)
+        DataProcess(dataset, experiment_path, plots=plots)
 
 
 def test_valid_eda():
     dataset = Dataset("./DemoData/hcc-data_example.csv", "Class", None, "InstanceID")
-    eda = EDAJob(dataset, "./tests/")
+    eda = DataProcess(dataset, "./tests/")
     eda.make_log_folders()
     assert (eda.dataset.data.equals(dataset.data))
     eda.drop_ignored_rowcols()
@@ -86,7 +86,6 @@ def test_valid_eda():
     eda.missingness_counts()
     eda.missing_count_plot()
     eda.counts_summary()
-    eda.feature_correlation_plot()
     eda.univariate_analysis()
     eda.univariate_plots()
     shutil.rmtree('./tests/')
@@ -94,6 +93,6 @@ def test_valid_eda():
 
 def test_valid_eda_general():
     dataset = Dataset("./DemoData/hcc-data_example.csv", "Class", None, "InstanceID")
-    eda = EDAJob(dataset, "./tests/")
+    eda = DataProcess(dataset, "./tests/")
     eda.run()
     shutil.rmtree('./tests/')

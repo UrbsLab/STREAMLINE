@@ -5,7 +5,7 @@ from pathlib import Path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(str(Path(SCRIPT_DIR).parent.parent))
 
-from streamline.dataprep.data_process import DataProcessing
+from streamline.dataprep.scale_and_impute import ScaleAndImpute
 
 
 def run_cluster(argv):
@@ -20,7 +20,7 @@ def run_cluster(argv):
     instance_label = argv[9] if argv[9] != "None" else None
     random_state = int(argv[10]) if argv[10] != "None" else None
 
-    job_obj = DataProcessing(cv_train_path, cv_test_path,
+    job_obj = ScaleAndImpute(cv_train_path, cv_test_path,
                              full_path,
                              scale_data, impute_data, multi_impute, overwrite_cv,
                              class_label, instance_label, random_state)

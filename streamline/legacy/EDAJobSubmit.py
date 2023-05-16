@@ -5,7 +5,7 @@ from pathlib import Path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(str(Path(SCRIPT_DIR).parent.parent))
 
-from streamline.dataprep.exploratory_analysis import EDAJob
+from streamline.dataprep.data_process import DataProcess
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from streamline.utils.dataset import Dataset
 
@@ -26,15 +26,18 @@ def run_cluster(argv):
     top_features = int(argv[13])
     categorical_cutoff = int(argv[14])
     sig_cutoff = float(argv[15])
-    sig_cutoff = float(argv[16])
-    random_state = None if argv[17] == "None" else int(argv[17])
+    featureeng_missingness = float(argv[16])
+    cleaning_missingness = float(argv[17])
+    correlation_removal_threshold = float(argv[18])
+    random_state = None if argv[19] == "None" else int(argv[19])
 
     dataset = Dataset(dataset_path, class_label, match_label, instance_label)
-    eda_obj = EDAJob(dataset, output_path + '/' + experiment_name,
-                     ignore_features,
-                     categorical_features, exploration_list, plot_list,
-                     categorical_cutoff, sig_cutoff,
-                     random_state)
+    eda_obj = DataProcess(dataset, output_path + '/' + experiment_name,
+                          ignore_features,
+                          categorical_features, exploration_list, plot_list,
+                          categorical_cutoff, sig_cutoff, featureeng_missingness,
+                          cleaning_missingness, correlation_removal_threshold,
+                          random_state)
     eda_obj.run(top_features)
     kfold_obj = KFoldPartitioner(dataset,
                                  partition_method, output_path + '/' + experiment_name,

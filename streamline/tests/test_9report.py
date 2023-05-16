@@ -3,8 +3,8 @@ import time
 import optuna
 import pytest
 import logging
-from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
+from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
@@ -23,35 +23,57 @@ def test_setup():
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                    class_label="Class", n_splits=5)
-    eda.run(run_parallel=False)
+    eda = DataProcessRunner(dataset_path, output_path, experiment_name,
+                            exploration_list=None,
+                            plot_list=None,
+                            class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=["Alcohol"],
+                            categorical_features=['Gender', 'Alcohol', 'Hepatitis B Surface Antigen',
+                                                  'Hepatitis B e Antigen',
+                                                  'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody',
+                                                  'Cirrhosis',
+                                                  'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity',
+                                                  'Hemochromatosis',
+                                                  'Arterial Hypertension', 'Chronic Renal Insufficiency',
+                                                  'Human Immunodeficiency Virus', 'Nonalcoholic Steatohepatitis',
+                                                  'Esophageal Varices', 'Splenomegaly', 'Portal Hypertension',
+                                                  'Portal Vein Thrombosis', 'Liver Metastasis', 'Radiological Hallmark',
+                                                  'catTest4', 'catTest10']
+                            )
+    eda.run(run_parallel=run_parallel)
     del eda
 
-    dpr = DataProcessRunner(output_path, experiment_name)
-    dpr.run(run_parallel=False)
+    dpr = ImputationRunner(output_path, experiment_name,
+                           class_label="Class", instance_label="InstanceID")
+    dpr.run(run_parallel=run_parallel)
     del dpr
 
-    f_imp = FeatureImportanceRunner(output_path, experiment_name, algorithms=algorithms)
-    f_imp.run(run_parallel=False)
+    f_imp = FeatureImportanceRunner(output_path, experiment_name,
+                                    class_label="Class", instance_label="InstanceID",
+                                    algorithms=algorithms)
+    f_imp.run(run_parallel=run_parallel)
     del f_imp
 
-    f_sel = FeatureSelectionRunner(output_path, experiment_name, algorithms=algorithms)
-    f_sel.run(run_parallel=False)
+    f_sel = FeatureSelectionRunner(output_path, experiment_name,
+                                   class_label="Class", instance_label="InstanceID",
+                                   algorithms=algorithms)
+    f_sel.run(run_parallel=run_parallel)
     del f_sel
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-    runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms)
-    runner.run(run_parallel=True)
+    runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms,
+                                   class_label="Class", instance_label="InstanceID")
+    runner.run(run_parallel=run_parallel)
     del runner
 
-    stats = StatsRunner(output_path, experiment_name, model_algorithms)
-    stats.run(run_parallel=False)
+    stats = StatsRunner(output_path, experiment_name, model_algorithms,
+                        class_label="Class", instance_label="InstanceID")
+    stats.run(run_parallel=run_parallel)
     del stats
 
-    compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms)
-    compare.run(run_parallel=False)
+    compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms,
+                            class_label="Class", instance_label="InstanceID")
+    compare.run(run_parallel=run_parallel)
     del compare
 
     logging.warning("Ran Setup in " + str(time.time() - start))

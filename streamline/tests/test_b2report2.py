@@ -3,8 +3,8 @@ import time
 import optuna
 import pytest
 import logging
-from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
+from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
@@ -24,25 +24,27 @@ def test_setup():
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    eda = EDARunner(dataset_path, output_path, experiment_name,
-                    exploration_list=None,
-                    plot_list=None,
-                    class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=["Alcohol"],
-                    categorical_features=['Gender', 'Alcohol', 'Hepatitis B Surface Antigen', 'Hepatitis B e Antigen',
-                                          'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody', 'Cirrhosis',
-                                          'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity', 'Hemochromatosis',
-                                          'Arterial Hypertension', 'Chronic Renal Insufficiency',
-                                          'Human Immunodeficiency Virus', 'Nonalcoholic Steatohepatitis',
-                                          'Esophageal Varices', 'Splenomegaly', 'Portal Hypertension',
-                                          'Portal Vein Thrombosis', 'Liver Metastasis', 'Radiological Hallmark',
-                                          'Number of Nodules', 'Performance Status*', 'Encephalopathy degree*',
-                                          'Ascites degree*']
-                    )
+    eda = DataProcessRunner(dataset_path, output_path, experiment_name,
+                            exploration_list=None,
+                            plot_list=None,
+                            class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=["Alcohol"],
+                            categorical_features=['Gender', 'Alcohol', 'Hepatitis B Surface Antigen',
+                                                  'Hepatitis B e Antigen',
+                                                  'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody',
+                                                  'Cirrhosis',
+                                                  'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity',
+                                                  'Hemochromatosis',
+                                                  'Arterial Hypertension', 'Chronic Renal Insufficiency',
+                                                  'Human Immunodeficiency Virus', 'Nonalcoholic Steatohepatitis',
+                                                  'Esophageal Varices', 'Splenomegaly', 'Portal Hypertension',
+                                                  'Portal Vein Thrombosis', 'Liver Metastasis', 'Radiological Hallmark',
+                                                  'catTest4', 'catTest10'],
+                            correlation_removal_threshold=0.7)
     eda.run(run_parallel=run_parallel)
     del eda
 
-    dpr = DataProcessRunner(output_path, experiment_name,
-                            class_label="Class", instance_label="InstanceID")
+    dpr = ImputationRunner(output_path, experiment_name,
+                           class_label="Class", instance_label="InstanceID")
     dpr.run(run_parallel=run_parallel)
     del dpr
 
@@ -79,7 +81,7 @@ def test_setup():
     report.run(run_parallel=run_parallel)
     del report
 
-    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example.csv',
+    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example_phase1_tester.csv',
                              output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel=run_parallel)
@@ -100,7 +102,7 @@ def test_valid_report2(rep_data_path, run_parallel):
 
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms,
                           training=False, rep_data_path=rep_data_path,
-                          dataset_for_rep=dataset_path + 'hcc-data_example.csv')
+                          dataset_for_rep=dataset_path + 'hcc-data_example_phase1_tester.csv')
     report.run(run_parallel)
 
     if run_parallel:

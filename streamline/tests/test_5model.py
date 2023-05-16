@@ -4,8 +4,8 @@ import optuna
 import pytest
 import shutil
 import logging
-from streamline.runners.eda_runner import EDARunner
 from streamline.runners.dataprocess_runner import DataProcessRunner
+from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.modeling.modeljob import ModelJob
@@ -22,12 +22,12 @@ dataset_path, experiment_name = "./DemoData/", "demo",
 def test_setup():
     if not os.path.exists(output_path):
         os.mkdir(output_path)
-    eda = EDARunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                    class_label="Class", n_splits=5)
+    eda = DataProcessRunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
+                            class_label="Class", n_splits=5)
     eda.run(run_parallel=False)
     del eda
 
-    dpr = DataProcessRunner(output_path, experiment_name)
+    dpr = ImputationRunner(output_path, experiment_name)
     dpr.run(run_parallel=False)
     del dpr
 

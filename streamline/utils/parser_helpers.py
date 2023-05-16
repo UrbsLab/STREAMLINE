@@ -101,9 +101,15 @@ def parse_eda(argv, params_dict=None):
                         help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--sig', dest='sig_cutoff', type=float, help='significance cutoff used throughout pipeline',
                         default=0.05)
-    parser.add_argument('--missingness', dest='missingness_percentage', type=float,
-                        help='missingness cutoff used throughout pipeline',
+    parser.add_argument('--feat_miss', dest='featureeng_missingness', type=float,
+                        help='feature missingness cutoff used throughout pipeline',
                         default=0.5)
+    parser.add_argument('--clean_miss', dest='cleaning_missingness', type=float,
+                        help='cleaning missingness cutoff used throughout pipeline',
+                        default=0.5)
+    parser.add_argument('--corr_thresh', dest='correlation_removal_threshold', type=float,
+                        help='correlation removal threshold',
+                        default=0.8)
     parser.add_argument('--export-fc', dest='export_feature_correlations', type=str2bool, nargs='?',
                         help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
     parser.add_argument('--export-up', dest='export_univariate_plots', type=str2bool, nargs='?',

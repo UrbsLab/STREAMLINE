@@ -76,36 +76,38 @@ def run(params):
     start_g = time.time()
 
     if params['do_eda']:
-        from streamline.runners.eda_runner import EDARunner
-        eda = EDARunner(params['dataset_path'], params['output_path'], params['experiment_name'],
-                        exploration_list=None,
-                        plot_list=None,
-                        class_label=params['class_label'], instance_label=params['instance_label'],
-                        match_label=params['match_label'],
-                        n_splits=params['cv_partitions'],
-                        partition_method=params['partition_method'],
-                        ignore_features=params['ignore_features_path'],
-                        categorical_features=params['categorical_feature_path'],
-                        top_features=params['top_features'],
-                        categorical_cutoff=params['categorical_cutoff'], sig_cutoff=params['sig_cutoff'],
-                        missingness_percentage=params['missingness_percentage'],
-                        random_state=params['random_state'],
-                        run_cluster=params['run_cluster'],
-                        queue=params['queue'],
-                        reserved_memory=params['reserved_memory'])
+        from streamline.runners.dataprocess_runner import DataProcessRunner
+        eda = DataProcessRunner(params['dataset_path'], params['output_path'], params['experiment_name'],
+                                exploration_list=None,
+                                plot_list=None,
+                                class_label=params['class_label'], instance_label=params['instance_label'],
+                                match_label=params['match_label'],
+                                n_splits=params['cv_partitions'],
+                                partition_method=params['partition_method'],
+                                ignore_features=params['ignore_features_path'],
+                                categorical_features=params['categorical_feature_path'],
+                                top_features=params['top_features'],
+                                categorical_cutoff=params['categorical_cutoff'], sig_cutoff=params['sig_cutoff'],
+                                featureeng_missingness=params['featureeng_missingness'],
+                                cleaning_missingness=params['cleaning_missingness'],
+                                correlation_removal_threshold=params['correlation_removal_threshold'],
+                                random_state=params['random_state'],
+                                run_cluster=params['run_cluster'],
+                                queue=params['queue'],
+                                reserved_memory=params['reserved_memory'])
 
         runner(eda, 1, run_parallel=params['run_parallel'], params=params)
 
     if params['do_dataprep']:
-        from streamline.runners.dataprocess_runner import DataProcessRunner
-        dpr = DataProcessRunner(params['output_path'], params['experiment_name'], scale_data=params['scale_data'],
-                                impute_data=params['impute_data'],
-                                multi_impute=params['multi_impute'], overwrite_cv=params['overwrite_cv'],
-                                class_label=params['class_label'],
-                                instance_label=params['instance_label'], random_state=params['random_state'],
-                                run_cluster=params['run_cluster'],
-                                queue=params['queue'],
-                                reserved_memory=params['reserved_memory'])
+        from streamline.runners.imputation_runner import ImputationRunner
+        dpr = ImputationRunner(params['output_path'], params['experiment_name'], scale_data=params['scale_data'],
+                               impute_data=params['impute_data'],
+                               multi_impute=params['multi_impute'], overwrite_cv=params['overwrite_cv'],
+                               class_label=params['class_label'],
+                               instance_label=params['instance_label'], random_state=params['random_state'],
+                               run_cluster=params['run_cluster'],
+                               queue=params['queue'],
+                               reserved_memory=params['reserved_memory'])
         runner(dpr, 2, run_parallel=params['run_parallel'], params=params)
 
     if params['do_feat_imp']:

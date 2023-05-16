@@ -2,9 +2,11 @@ import csv
 import logging
 import os
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 sns.set_theme()
 
 
@@ -110,6 +112,21 @@ class Dataset:
         if ignore_features:
             self.data = self.data.drop(ignore_features, axis=1)
 
+    def get_headers(self):
+        """
+        Return feature names of the datasets
+
+        Returns: list of feature names
+
+        """
+        headers = list(self.data.columns.values)
+        headers.remove(self.class_label)
+        if not (self.match_label is None):
+            headers.remove(self.match_label)
+        if not (self.instance_label is None):
+            headers.remove(self.instance_label)
+        return headers
+
     def set_headers(self, experiment_path, phase='exploratory'):
         """
         Exports dataset header labels for use as a reference later in the pipeline.
@@ -126,40 +143,45 @@ class Dataset:
             writer.writerow(headers)
         return headers
 
-    def initial_eda(self, experiment_path, plot=True):
-        if not os.path.exists(experiment_path + '/' + self.name + '/exploratory/initial'):
-            os.makedirs(experiment_path + '/' + self.name + '/exploratory/initial')
-        self.describe_data(experiment_path)
-        total_missing = self.missingness_counts(experiment_path)
-        self.missing_count_plot(experiment_path)
-        self.counts_summary(experiment_path, total_missing, plot)
+    def initial_eda(self, experiment_path, plot=False, initial='initial/'):
+        self.eda(experiment_path, plot=plot, initial=initial)
 
-    def describe_data(self, experiment_path):
+    def eda(self, experiment_path, plot=False, initial=''):
+        if not os.path.exists(experiment_path + '/' + self.name + '/exploratory/' + initial):
+            os.makedirs(experiment_path + '/' + self.name + '/exploratory/' + initial)
+        self.describe_data(experiment_path, initial=initial)
+        total_missing = self.missingness_counts(experiment_path, initial=initial)
+        self.missing_count_plot(experiment_path, plot=plot, initial=initial)
+        self.counts_summary(experiment_path, total_missing, show_plots=plot, initial=initial)
+        self.feature_correlation(experiment_path, None, plot, initial=initial)
+
+    def describe_data(self, experiment_path, initial=''):
         """
         Conduct and export basic dataset descriptions including basic column statistics, column variable types
         (i.e. int64 vs. float64), and unique value counts for each column
         """
         self.data.describe().to_csv(experiment_path + '/' + self.name +
-                                    '/exploratory/initial/' + 'DescribeDataset.csv')
+                                    '/exploratory/' + initial + 'DescribeDataset.csv')
         self.data.dtypes.to_csv(experiment_path + '/' + self.name +
-                                '/exploratory/initial/' + 'DtypesDataset.csv',
+                                '/exploratory/' + initial + 'DtypesDataset.csv',
                                 header=['DataType'], index_label='Variable')
         self.data.nunique().to_csv(experiment_path + '/' + self.name +
-                                   '/exploratory/initial/' + 'NumUniqueDataset.csv',
+                                   '/exploratory/' + initial + 'NumUniqueDataset.csv',
                                    header=['Count'], index_label='Variable')
 
-    def missingness_counts(self, experiment_path):
+    def missingness_counts(self, experiment_path, initial='', save=True):
         """
         Count and export missing values for all data columns.
         """
         # Assess Missingness in all data columns
         missing_count = self.data.isnull().sum()
         total_missing = self.data.isnull().sum().sum()
-        missing_count.to_csv(experiment_path + '/' + self.name + '/exploratory/initial/' + 'DataMissingness.csv',
-                             header=['Count'], index_label='Variable')
+        if save:
+            missing_count.to_csv(experiment_path + '/' + self.name + '/exploratory/' + initial + 'DataMissingness.csv',
+                                 header=['Count'], index_label='Variable')
         return total_missing
 
-    def missing_count_plot(self, experiment_path, plot=False):
+    def missing_count_plot(self, experiment_path, plot=False, initial=''):
         """
         Plots a histogram of missingness across all data columns.
         """
@@ -169,14 +191,14 @@ class Dataset:
         plt.xlabel("Missing Value Counts")
         plt.ylabel("Frequency")
         plt.title("Histogram of Missing Value Counts in Dataset")
-        plt.savefig(experiment_path + '/' + self.name + '/exploratory/initial/' + 'DataMissingnessHistogram.png',
+        plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'DataMissingnessHistogram.png',
                     bbox_inches='tight')
         if plot:
             plt.show()
         else:
             plt.close('all')
 
-    def counts_summary(self, experiment_path, total_missing=None, plot=True, show_plots=False):
+    def counts_summary(self, experiment_path, total_missing=None, plot=True, show_plots=False, initial=''):
         """
         Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
         features, and class counts. Also saves a simple bar graph of class counts if user specified.
@@ -186,6 +208,7 @@ class Dataset:
             total_missing: total missing values (optional, runs again if not given)
             plot: flag to output bar graph in the experiment log folder
             show_plots: flag to show plots
+            initial: flag for initial eda
 
         Returns:
 
@@ -206,24 +229,71 @@ class Dataset:
 
         summary_df = pd.DataFrame(summary, columns=['Variable', 'Count'])
 
-        summary_df.to_csv(experiment_path + '/' + self.name + '/exploratory/initial/' + 'DataCounts.csv',
+        summary_df.to_csv(experiment_path + '/' + self.name + '/exploratory/' + initial + 'DataCounts.csv',
                           index=False)
         # Calculate, print, and export class counts
         class_counts = self.data[self.class_label].value_counts()
         class_counts.to_csv(experiment_path + '/' + self.name +
-                            '/exploratory/initial/' + 'ClassCounts.csv', header=['Count'],
+                            '/exploratory/' + initial + 'ClassCounts.csv', header=['Count'],
                             index_label='Class')
 
         # Generate and export class count bar graph
         if plot:
-            logging.warning(class_counts)
             class_counts.plot(kind='bar')
             plt.ylabel('Count')
             plt.title('Class Counts')
-            plt.savefig(experiment_path + '/' + self.name + '/exploratory/initial/' + 'ClassCountsBarPlot.png',
+            plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'ClassCountsBarPlot.png',
                         bbox_inches='tight')
             if show_plots:
                 plt.show()
             else:
                 plt.close('all')
-                # plt.cla() # not required
+
+    def feature_correlation(self, experiment_path, x_data=None, plot=True, initial=''):
+        """
+        Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
+        Due to computational expense this may not be recommended for datasets with a large number of instances
+        and/or features unless needed. The generated heatmap will be difficult to read with a large number
+        of features in the target dataset.
+
+        Args:
+            initial:
+            experiment_path:
+            plot:
+            x_data: data with only feature columns
+        """
+        if x_data is None:
+            x_data = self.feature_only_data()
+        # Calculate correlation matrix
+        correlation_mat = x_data.corr(method='pearson')
+        # corr_matrix_abs = correlation_mat.abs()
+
+        correlation_mat.to_csv(experiment_path + '/' + self.name
+                               + '/exploratory/' + initial + 'FeatureCorrelations.csv')
+
+        if plot:
+            # Create a mask for the upper triangle of the correlation matrix
+            mask = np.zeros_like(correlation_mat, dtype=bool)
+            mask[np.triu_indices_from(mask)] = True
+
+            # Calculate the number of features in the dataset
+            num_features = len(x_data.columns)
+
+            sns.set_style("white")
+            # Set the fig-size parameter based on the number of features
+            if num_features > 70:  #
+                fig_size = (70 // 2, 70 // 2)
+                # Create a heatmap using Seaborn
+                plt.subplots(figsize=fig_size)
+                sns.heatmap(correlation_mat, xticklabels=False, yticklabels=False, mask=mask, vmax=1, vmin=-1,
+                            square=True, cmap='RdBu')
+            else:
+                fig_size = (num_features // 2, num_features // 2)
+                # Create a heatmap using Seaborn
+                plt.subplots(figsize=fig_size)
+                sns.heatmap(correlation_mat, mask=mask, vmax=1, vmin=-1, square=True, cmap='RdBu')
+
+            plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + 'FeatureCorrelations.png',
+                        bbox_inches='tight')
+            plt.close('all')
+            sns.set_theme()
