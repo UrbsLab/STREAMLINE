@@ -275,6 +275,7 @@ class ReportJob(Job):
             self.analysis_report.y = 10
             self.analysis_report.cell(50, 4, 'Data Processing/Counts Summary', 1, align="L")
             self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.set_fill_color(200)
 
 
             if self.training:
@@ -293,7 +294,7 @@ class ReportJob(Job):
             col_width_list = [10, 10, 10, 10, 10, 10, 10, 10, 10]
             table1 = data_summary.iloc[:, :10]
             table1 = table1.to_numpy()
-            
+
             # Print table header first
             row_count = 0
             col_count = 0
