@@ -137,24 +137,33 @@ class ReplicateJob(Job):
 
         # Missingness Feature Reconstruction
         # Read all engineered feature names
-        with open(self.experiment_path + '/' + self.train_name +
-                  '/exploratory/engineered_variables.pickle', 'rb') as infile:
-            eda.engineered_features = pickle.load(infile)
+        try:
+            with open(self.experiment_path + '/' + self.train_name +
+                      '/exploratory/engineered_variables.pickle', 'rb') as infile:
+                eda.engineered_features = pickle.load(infile)
+        except FileNotFoundError:
+            eda.engineered_features = list()
 
         # Recreate missingness features in apply phase
         for feat in eda.engineered_features:
             eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
         engineered_features = ['miss_' + feat for feat in eda.engineered_features]
 
-        # Removing dropped features
-        with open(self.experiment_path + '/' + self.train_name +
-                  '/exploratory/removed_variables.pickle', 'rb') as infile:
-            removed_features = pickle.load(infile)
-        eda.dataset.clean_data(removed_features)
+        try:
+            # Removing dropped features
+            with open(self.experiment_path + '/' + self.train_name +
+                      '/exploratory/removed_variables.pickle', 'rb') as infile:
+                removed_features = pickle.load(infile)
+            eda.dataset.clean_data(removed_features)
+        except FileNotFoundError:
+            pass
 
-        with open(self.experiment_path + '/' + self.train_name +
-                  '/exploratory/post_processed_vars.pickle', 'rb') as infile:
-            post_processed_vars = pickle.load(infile)
+        try:
+            with open(self.experiment_path + '/' + self.train_name +
+                      '/exploratory/post_processed_vars.pickle', 'rb') as infile:
+                post_processed_vars = pickle.load(infile)
+        except Exception as e:
+            raise e
 
         non_binary_categorical = list()
         for feat in eda.categorical_features:
@@ -178,10 +187,12 @@ class ReplicateJob(Job):
                 eda.dataset.data.drop(feat, axis=1)
 
         # Removing highly correlated features
-
-        with open(self.experiment_path + '/' + self.train_name +
-                  '/exploratory/correlated_features.pickle', 'rb') as infile:
-            correlated_features = pickle.load(infile)
+        try:
+            with open(self.experiment_path + '/' + self.train_name +
+                      '/exploratory/correlated_features.pickle', 'rb') as infile:
+                correlated_features = pickle.load(infile)
+        except FileNotFoundError:
+            correlated_features = list()
         eda.dataset.clean_data(correlated_features)
 
         eda.dataset.data = eda.dataset.data[post_processed_vars]
@@ -198,7 +209,7 @@ class ReplicateJob(Job):
 
         # Export feature correlation plot if user specified
         if self.export_feature_correlations:
-            eda.dataset.feature_correlation(self.experiment_path + '/' + self.train_name, x_rep_data, True)
+            eda.dataset.feature_correlation(self.experiment_path + '/' + self.train_name, x_rep_data, show_plots=False)
         del x_rep_data  # memory cleanup
 
         # Rep Data Preparation for each Training Partition Model set

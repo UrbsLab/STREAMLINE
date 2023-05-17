@@ -1,3 +1,4 @@
+import csv
 import os
 import time
 import pickle
@@ -87,7 +88,7 @@ class DataProcess(Job):
         self.correlation_removal_threshold = correlation_removal_threshold
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
-        self.cat_removed = 0
+        self.cat_removed = list()
         self.n_feat_removed = 0
 
         self.explorations = explorations
@@ -133,7 +134,10 @@ class DataProcess(Job):
                         or not pd.api.types.is_numeric_dtype(x_data[each]):
                     categorical_variables.append(each)
         else:
-            categorical_variables = self.categorical_features
+            categorical_variables = list(self.categorical_features)
+            for feat in self.categorical_features:
+                if feat not in self.dataset.data.columns:
+                    categorical_variables.remove(feat)
 
         self.categorical_features = categorical_variables
         self.dataset.categorical_variables = self.categorical_features
@@ -144,28 +148,6 @@ class DataProcess(Job):
             pickle.dump(self.categorical_features, outfile)
 
         return categorical_variables
-
-    def calculate_feature_counts(self):
-        """
-        Function to calculate number of features per certain category and returns it as a list
-        Returns:
-            [
-                Instance,
-                Total Features,
-                Categorical Features,
-                Total Features - Categorical Features,
-                Missing Val,
-                Class 0,
-                Class 1
-            ]
-
-        """
-        # instance_count = len(self.dataset.data)
-        # total_features = len(self.dataset.feature_only_data())
-        # categorical_features = len(self.categorical_features) + len(self.engineered_features) \
-        #                        + len(self.one_hot_features)
-        # return [instance_count, ]
-        pass
 
     def drop_ignored_rowcols(self):
         """
@@ -205,17 +187,20 @@ class DataProcess(Job):
         for feat in high_missingness_features:
             self.dataset.data['miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
 
-        logging.info("Engineering the following Missingness Features:")
-        for feat in high_missingness_features:
-            logging.info('\t miss_' + feat)
+        if high_missingness_features:
+            logging.info("Engineering the following Missingness Features:")
+            for feat in high_missingness_features:
+                logging.info('\t miss_' + feat)
 
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/engineered_variables.pickle', 'wb') as outfile:
-            pickle.dump(self.engineered_features, outfile)
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/engineered_variables.pickle', 'wb') as outfile:
+                pickle.dump(self.engineered_features, outfile)
 
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/engineered_features.csv', 'w') as outfile:
-            outfile.write("\n".join(self.engineered_features))
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/engineered_features.csv', 'w') as outfile:
+                outfile.write("\n".join(self.engineered_features))
+        else:
+            logging.info("No Features with high missingness found")
 
     def feature_removal(self):
         original_features = self.dataset.get_headers()
@@ -226,18 +211,20 @@ class DataProcess(Job):
         for feat in removed_variables:
             if feat in self.categorical_features + self.engineered_features + self.one_hot_features \
                     and feat not in self.ignore_features:
-                self.cat_removed += 1
+                self.cat_removed.append(feat)
 
-        logging.info("Removing the following Features due to Missingness:")
-        for feat in removed_variables:
-            logging.info('\t' + feat)
-
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/removed_variables.pickle', 'wb') as outfile:
-            pickle.dump(removed_variables, outfile)
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/removed_variables.csv', 'w') as outfile:
-            outfile.write("\n".join(removed_variables))
+        if removed_variables:
+            logging.info("Removing the following Features due to Missingness:")
+            for feat in removed_variables:
+                logging.info('\t' + feat)
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/removed_variables.pickle', 'wb') as outfile:
+                pickle.dump(removed_variables, outfile)
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/missingness_feature_cleaning.csv', 'w') as outfile:
+                outfile.write("\n".join(removed_variables))
+        else:
+            logging.info("Not removing any features due to high missingness")
 
     def instance_removal(self):
         """
@@ -288,9 +275,11 @@ class DataProcess(Job):
             self.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
             self.dataset.data = pd.concat([self.dataset.data, one_hot_df], axis=1)
 
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/one_hot_variables.pickle', 'wb') as outfile:
-            pickle.dump(self.one_hot_features, outfile)
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/one_hot_variables.pickle', 'wb') as outfile:
+                pickle.dump(self.one_hot_features, outfile)
+        else:
+            logging.info("No non-binary categorical features, skipping categorical encoding")
 
     def drop_highly_correlated_features(self):
         # read the matrix or calculate the correlation matrix
@@ -305,11 +294,11 @@ class DataProcess(Job):
         df_corr = df_corr.stack().reset_index()
 
         # rename the columns
-        df_corr.columns = ['Feature_1', 'Feature_2', 'Correlation']
+        df_corr.columns = ['Removed_Feature', 'Correlated_Feature', 'Correlation']
 
         # create a mask to identify rows with duplicate features as mentioned above
-        mask_dups = (df_corr[['Feature_1', 'Feature_2']].apply(frozenset, axis=1).duplicated()) | (
-                df_corr['Feature_1'] == df_corr['Feature_2'])
+        mask_dups = (df_corr[['Removed_Feature', 'Correlated_Feature']].apply(frozenset, axis=1).duplicated()) | (
+                df_corr['Removed_Feature'] == df_corr['Correlated_Feature'])
 
         # apply the mask to clean the correlation dataframe
         df_corr = df_corr[~mask_dups]
@@ -319,25 +308,31 @@ class DataProcess(Job):
         logging.info('Top 10 Correlated Features')
         logging.info(' - {}'.format(df_corr.head(10).to_string()))
 
-        features_to_drop = list(df_corr[abs(df_corr['Correlation']) > self.correlation_removal_threshold]['Feature_1'])
+        df_corr = df_corr[abs(df_corr['Correlation']) > self.correlation_removal_threshold]
+
+        features_to_drop = list(df_corr['Removed_Feature'])
+
+        for feat in features_to_drop:
+            if feat not in self.dataset.data.columns:
+                features_to_drop.remove(feat)
 
         self.dataset.clean_data(features_to_drop)
+        if len(features_to_drop) > 0:
+            logging.info("Removing the following Features due to high correlation:")
+            for feat in features_to_drop:
+                logging.info(feat)
+            for feat in features_to_drop:
+                if feat in self.categorical_features + self.engineered_features + self.one_hot_features:
+                    self.cat_removed.append(feat)
 
-        logging.info("Remove the following Features due to high correlation:")
-        for feat in features_to_drop:
-            logging.info(feat)
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/correlated_features.pickle', 'wb') as outfile:
+                pickle.dump(features_to_drop, outfile)
 
-        for feat in features_to_drop:
-            if feat in self.categorical_features + self.engineered_features + self.one_hot_features and \
-                     feat not in self.ignore_features:
-                self.cat_removed += 1
-
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/correlated_features.pickle', 'wb') as outfile:
-            pickle.dump(features_to_drop, outfile)
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/correlated_features.csv', 'w') as outfile:
-            outfile.write("\n".join(features_to_drop))
+            df_corr.to_csv(self.experiment_path + '/' + self.dataset.name +
+                           '/exploratory/‘correlation_feature_cleaning.csv')
+        else:
+            logging.info("No Features with correlation higher that parameter")
 
     def data_manipulation(self):
         """
@@ -355,6 +350,9 @@ class DataProcess(Job):
         self.drop_ignored_rowcols()  # Completed
         transition_df.loc["C1"] = self.counts_summary(save=False)
 
+        # identify and save categorical variables for intermediate steps before categorical encoding
+        self.identify_feature_types()  # Completed
+
         # Generating categorical features for features with missingness greater that featureeng_missingness percentage
         self.feature_engineering()  # Completed
         transition_df.loc["E1"] = self.counts_summary(save=False)
@@ -367,8 +365,6 @@ class DataProcess(Job):
         self.instance_removal()  # Completed
         transition_df.loc["C3"] = self.counts_summary(save=False)
 
-        # identify and save categorical variables for intermediate steps before categorical encoding
-        self.identify_feature_types()  # Completed
         # Generated onehot categorical feature encoding
         self.categorical_feature_encoding_pandas()
         transition_df.loc["E2"] = self.counts_summary(save=False)
@@ -381,14 +377,15 @@ class DataProcess(Job):
         self.dataset.set_headers(self.experiment_path)  # Already Completed
 
         transition_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/'
-                             + 'FeatureTransitions.csv', index=True)
+                             + '‘DataProcessSummary.csv', index=True)
 
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
             pickle.dump(list(self.dataset.data.columns), outfile)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/post_processed_vars.csv', 'w') as outfile:
-            outfile.write("\n".join(list(self.dataset.data.columns)))
+                  '/exploratory/‘ProcessedFeatureNames.csv', 'w') as outfile:
+            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(list(self.dataset.data.columns))
 
     def run_process(self, top_features=20):
         """
@@ -405,7 +402,8 @@ class DataProcess(Job):
         np.random.seed(self.random_state)
 
         # Load csv file as dataset object for exploratory analysis
-        self.dataset.load_data()
+        # self.dataset.load_data() # no need already loaded.
+
         # Make analysis folder for target dataset and a folder for the respective exploratory analysis within it
         self.make_log_folders()
 
@@ -450,7 +448,7 @@ class DataProcess(Job):
             if "Feature Correlation" in self.plots:
                 plot = True
                 x_data = self.dataset.feature_only_data()
-                self.dataset.feature_correlation(self.experiment_path, x_data, plot)
+                self.dataset.feature_correlation(self.experiment_path, x_data, plot=plot, show_plots=self.show_plots)
         del x_data
 
         # Conduct uni-variate analyses of association between individual features and class
@@ -485,7 +483,7 @@ class DataProcess(Job):
             total_missing = self.dataset.missingness_counts(self.experiment_path, save=False)
         percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
         n_categorical_variables = len(self.categorical_features) + len(self.engineered_features) \
-                                  + len(self.one_hot_features) - self.cat_removed
+                                  + len(self.one_hot_features) - len(self.cat_removed)
         summary = [['instances', self.dataset.data.shape[0]],
                    ['features', f_count],
                    ['categorical_features', n_categorical_variables],
@@ -507,12 +505,17 @@ class DataProcess(Job):
             logging.info('Processed Data Counts: ----------------')
             logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
             logging.info('Feature Count = ' + str(f_count))
-            logging.info('    Categorical  = ' + str(len(self.dataset.categorical_variables)))
-            logging.info('    Quantitative = ' + str(f_count - len(self.dataset.categorical_variables)))
+            logging.info('    Categorical  = ' + str(n_categorical_variables))
+            logging.info('    Quantitative = ' + str(f_count - n_categorical_variables))
             logging.info('Missing Count = ' + str(total_missing))
             logging.info('    Missing Percent = ' + str(percent_missing))
             logging.info('Class Counts: ----------------')
             logging.info('Class Count Information' + str(class_counts))
+
+            logging.info("Categorical Features: " + str(self.categorical_features))
+            logging.info("Engineered Features: " + str(['miss_' + x for x in self.engineered_features]))
+            logging.info("One Hot Features: " + str(self.one_hot_features))
+            logging.info("Removed Categorical Features: " + str(self.cat_removed))
 
             # Generate and export class count bar graph
             if plot:

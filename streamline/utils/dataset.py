@@ -153,7 +153,7 @@ class Dataset:
         total_missing = self.missingness_counts(experiment_path, initial=initial)
         self.missing_count_plot(experiment_path, plot=plot, initial=initial)
         self.counts_summary(experiment_path, total_missing, show_plots=plot, initial=initial)
-        self.feature_correlation(experiment_path, None, plot, initial=initial)
+        self.feature_correlation(experiment_path, None, show_plots=plot, initial=initial)
 
     def describe_data(self, experiment_path, initial=''):
         """
@@ -249,7 +249,7 @@ class Dataset:
             else:
                 plt.close('all')
 
-    def feature_correlation(self, experiment_path, x_data=None, plot=True, initial=''):
+    def feature_correlation(self, experiment_path, x_data=None, plot=True, show_plots=False, initial=''):
         """
         Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
         Due to computational expense this may not be recommended for datasets with a large number of instances
@@ -257,10 +257,12 @@ class Dataset:
         of features in the target dataset.
 
         Args:
-            initial:
+
             experiment_path:
-            plot:
             x_data: data with only feature columns
+            plot:
+            show_plots:
+            initial:
         """
         if x_data is None:
             x_data = self.feature_only_data()
@@ -286,14 +288,20 @@ class Dataset:
                 # Create a heatmap using Seaborn
                 plt.subplots(figsize=fig_size)
                 sns.heatmap(correlation_mat, xticklabels=False, yticklabels=False, mask=mask, vmax=1, vmin=-1,
-                            square=True, cmap='RdBu',cbar_kws={"shrink": .75})
+                            square=True, cmap='RdBu', cbar_kws={"shrink": .75})
             else:
                 fig_size = (num_features // 2, num_features // 2)
                 # Create a heatmap using Seaborn
                 plt.subplots(figsize=fig_size)
-                sns.heatmap(correlation_mat, mask=mask, vmax=1, vmin=-1, square=True, cmap='RdBu',cbar_kws={"shrink": .75})
+                sns.heatmap(correlation_mat, mask=mask, vmax=1, vmin=-1, square=True, cmap='RdBu',
+                            cbar_kws={"shrink": .75})
 
             plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'FeatureCorrelations.png',
                         bbox_inches='tight')
+            if show_plots:
+                plt.show()
+                plt.close('all')
+            else:
+                plt.close('all')
             plt.close('all')
             sns.set_theme()
