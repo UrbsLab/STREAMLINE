@@ -293,7 +293,7 @@ class Dataset:
                 plt.subplots(figsize=fig_size)
                 sns.heatmap(correlation_mat, mask=mask, vmax=1, vmin=-1, square=True, cmap='RdBu')
 
-            plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + 'FeatureCorrelations.png',
+            plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'FeatureCorrelations.png',
                         bbox_inches='tight')
             plt.close('all')
             sns.set_theme()

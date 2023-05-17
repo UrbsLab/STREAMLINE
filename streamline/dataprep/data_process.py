@@ -90,8 +90,6 @@ class DataProcess(Job):
         self.cat_removed = 0
         self.n_feat_removed = 0
 
-        logging.warning(correlation_removal_threshold)
-
         self.explorations = explorations
         if self.explorations is None:
             self.explorations = explorations_list
@@ -275,12 +273,18 @@ class DataProcess(Job):
         """
         non_binary_categorical = list()
         for feat in self.categorical_features:
-            if self.dataset.data[feat].nunique() > 2:
-                non_binary_categorical.append(feat)
-        logging.warning(non_binary_categorical)
+            if feat in self.dataset.data.columns:
+                if self.dataset.data[feat].nunique() > 2:
+                    non_binary_categorical.append(feat)
+
         if len(non_binary_categorical) > 0:
-            one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical])
-            self.one_hot_features = one_hot_df.columns
+            logging.info("One-hot encoding the following features:")
+            for feat in non_binary_categorical:
+                logging.info('\t' + feat)
+            one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical],
+                                        columns=non_binary_categorical)
+            logging.warning(one_hot_df.columns)
+            self.one_hot_features = list(one_hot_df.columns)
             self.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
             self.dataset.data = pd.concat([self.dataset.data, one_hot_df], axis=1)
 
@@ -366,7 +370,7 @@ class DataProcess(Job):
         # identify and save categorical variables for intermediate steps before categorical encoding
         self.identify_feature_types()  # Completed
         # Generated onehot categorical feature encoding
-        # self.categorical_feature_encoding_pandas()
+        self.categorical_feature_encoding_pandas()
         transition_df.loc["E2"] = self.counts_summary(save=False)
 
         # Drop highly correlated features with correlation greater that max_correlation
@@ -378,6 +382,13 @@ class DataProcess(Job):
 
         transition_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/'
                              + 'FeatureTransitions.csv', index=True)
+
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+            pickle.dump(list(self.dataset.data.columns), outfile)
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/post_processed_vars.csv', 'w') as outfile:
+            outfile.write("\n".join(list(self.dataset.data.columns)))
 
     def run_process(self, top_features=20):
         """
@@ -439,6 +450,7 @@ class DataProcess(Job):
             if "Feature Correlation" in self.plots:
                 plot = True
                 x_data = self.dataset.feature_only_data()
+                logging.warning(x_data.columns)
                 self.dataset.feature_correlation(self.experiment_path, x_data, plot)
         del x_data
 

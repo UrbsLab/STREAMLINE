@@ -153,9 +153,38 @@ class ReplicateJob(Job):
         eda.dataset.clean_data(removed_features)
 
         with open(self.experiment_path + '/' + self.train_name +
+                  '/exploratory/post_processed_vars.pickle', 'rb') as infile:
+            post_processed_vars = pickle.load(infile)
+
+        non_binary_categorical = list()
+        for feat in eda.categorical_features:
+            if feat in eda.dataset.data.columns:
+                if eda.dataset.data[feat].nunique() > 2:
+                    non_binary_categorical.append(feat)
+        # logging.warning(non_binary_categorical)
+        if len(non_binary_categorical) > 0:
+            one_hot_df = pd.get_dummies(eda.dataset.data[non_binary_categorical], columns=non_binary_categorical)
+            eda.one_hot_features = one_hot_df.columns
+            eda.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
+            eda.dataset.data = pd.concat([eda.dataset.data, one_hot_df], axis=1)
+        # adding features not seen in test data
+        for feat in post_processed_vars:
+            if feat not in list(eda.dataset.data.columns):
+                eda.dataset.data[feat] = 0
+
+        # removing extra features
+        for feat in eda.dataset.data.columns:
+            if feat not in post_processed_vars:
+                eda.dataset.data.drop(feat, axis=1)
+
+        # Removing highly correlated features
+
+        with open(self.experiment_path + '/' + self.train_name +
                   '/exploratory/correlated_features.pickle', 'rb') as infile:
             correlated_features = pickle.load(infile)
         eda.dataset.clean_data(correlated_features)
+
+        eda.dataset.data = eda.dataset.data[post_processed_vars]
 
         # Export basic exploratory analysis files
         eda.dataset.describe_data(self.experiment_path + '/' + self.train_name)
@@ -197,26 +226,38 @@ class ReplicateJob(Job):
             cv_rep_data = rep_data.data.copy()
             # Impute dataframe based on training imputation
 
-            if self.ignore_features is not None:
-                for feature in self.ignore_features:
-                    if feature in all_train_feature_list:
-                        all_train_feature_list.remove(feature)
+            # if self.ignore_features is not None:
+            #     for feature in self.ignore_features:
+            #         if feature in all_train_feature_list:
+            #             feature_name_list.remove(feature)
+            #
+            # if removed_features:
+            #     for feature in removed_features:
+            #         if feature in all_train_feature_list:
+            #             feature_name_list.remove(feature)
+            #
+            # if correlated_features:
+            #     for feature in correlated_features:
+            #         if feature in all_train_feature_list:
+            #             feature_name_list.remove(feature)
+            # one_hot_list = list()
+            # for var in post_processed_vars:
+            #     if var not in all_train_feature_list:
+            #         one_hot_list.append(var)
+            #
+            # feature_name_list = all_train_feature_list + engineered_features + one_hot_list
 
-            if removed_features:
-                for feature in removed_features:
-                    if feature in all_train_feature_list:
-                        all_train_feature_list.remove(feature)
-
-            if correlated_features:
-                for feature in correlated_features:
-                    if feature in all_train_feature_list:
-                        all_train_feature_list.remove(feature)
+            feature_name_list = list(post_processed_vars)
+            feature_name_list.remove(eda.dataset.class_label)
+            if eda.dataset.instance_label:
+                feature_name_list.remove(eda.dataset.instance_label)
+            if eda.dataset.match_label:
+                feature_name_list.remove(eda.dataset.match_label)
 
             if self.impute_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
-                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data,
-                                                       all_train_feature_list + engineered_features)
+                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, feature_name_list)
                 except Exception as e:
                     # If there was no missing data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
@@ -232,8 +273,7 @@ class ReplicateJob(Job):
             if self.scale_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
-                    cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data,
-                                                      all_train_feature_list + engineered_features)
+                    cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data, feature_name_list)
                 except Exception as e:
                     # If there was no missing data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
