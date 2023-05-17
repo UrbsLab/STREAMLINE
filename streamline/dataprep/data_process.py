@@ -505,7 +505,7 @@ class DataProcess(Job):
                                 '/exploratory/' + 'ClassCounts.csv', header=['Count'],
                                 index_label='Class')
 
-            logging.info('Data Counts: ----------------')
+            logging.info('Processed Data Counts: ----------------')
             logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
             logging.info('Feature Count = ' + str(f_count))
             logging.info('    Categorical  = ' + str(len(self.dataset.categorical_variables)))
