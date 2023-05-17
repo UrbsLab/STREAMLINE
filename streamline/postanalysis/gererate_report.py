@@ -4,7 +4,7 @@ import math
 import os
 import pickle
 from datetime import datetime
-
+from streamline import __version__ as version
 import pandas as pd
 from fpdf import FPDF
 
@@ -120,7 +120,7 @@ class ReportJob(Job):
 
         # Turn alg_info dictionary into text list
         ars_dic_2 = []
-        for key in self.alg_info:
+        for key in sorted(self.alg_info.keys()):
             ars_dic_2.append(str(key) + ':')
             ars_dic_2.append(str(self.alg_info[key][0]))
             ars_dic_2.append('\n')
@@ -1023,7 +1023,8 @@ class ReportJob(Job):
         self.analysis_report.set_y(285)
         self.analysis_report.set_font('Times', 'I', 7)
         self.analysis_report.cell(0, 7,
-                                  'Generated with the URBS-Lab STREAMLINE: (https://github.com/UrbsLab/STREAMLINE)', 0,
+                                  'Generated with STREAMLINE (' + version
+                                  + '): (https://github.com/UrbsLab/STREAMLINE)', 0,
                                   0, 'C')
         self.analysis_report.set_font(family='times', size=9)
 
