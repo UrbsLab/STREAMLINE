@@ -273,8 +273,11 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.x = 1
             self.analysis_report.y = 10
-            self.analysis_report.cell(50, 4, 'Data Processing/Counts Summary', 1, align="L")
-            self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.cell(54, 4, 'Data Processing/Counts Summary', 1, align="L")
+
+            self.analysis_report.x = 1
+            self.analysis_report.y = 15
+            self.analysis_report.set_font('Times', '', 6)
             self.analysis_report.set_fill_color(200)
 
 
@@ -291,7 +294,7 @@ class ReportJob(Job):
             data_summary = data_summary.columns.to_frame().T.append(data_summary, ignore_index=True)
             data_summary.columns = range(len(data_summary.columns))
             th = self.analysis_report.font_size
-            col_width_list = [10, 10, 10, 10, 10, 10, 10, 10, 10]
+            col_width_list = [10, 10, 10, 10, 10, 10, 10, 10, 10] #91 x space total
             table1 = data_summary.iloc[:, :10]
             table1 = table1.to_numpy()
 
@@ -348,16 +351,17 @@ class ReportJob(Job):
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        85,
-                        15, 125,
-                        100)
+                        95, 15, 115, 100)
+                        #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
+                        #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125,
-                        100)
+                            m] + '/exploratory/FeatureCorrelations.png', 95, 15, 115, 100)
+                        #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                        #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
             except Exception:
