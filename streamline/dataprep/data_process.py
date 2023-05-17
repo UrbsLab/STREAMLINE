@@ -377,13 +377,13 @@ class DataProcess(Job):
         self.dataset.set_headers(self.experiment_path)  # Already Completed
 
         transition_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/'
-                             + '‘DataProcessSummary.csv', index=True)
+                             + 'DataProcessSummary.csv', index=True)
 
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
             pickle.dump(list(self.dataset.data.columns), outfile)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/‘ProcessedFeatureNames.csv', 'w') as outfile:
+                  '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(list(self.dataset.data.columns))
 
