@@ -286,12 +286,12 @@ class Dataset:
                 # Create a heatmap using Seaborn
                 plt.subplots(figsize=fig_size)
                 sns.heatmap(correlation_mat, xticklabels=False, yticklabels=False, mask=mask, vmax=1, vmin=-1,
-                            square=True, cmap='RdBu')
+                            square=True, cmap='RdBu',cbar_kws={"shrink": .75})
             else:
                 fig_size = (num_features // 2, num_features // 2)
                 # Create a heatmap using Seaborn
                 plt.subplots(figsize=fig_size)
-                sns.heatmap(correlation_mat, mask=mask, vmax=1, vmin=-1, square=True, cmap='RdBu')
+                sns.heatmap(correlation_mat, mask=mask, vmax=1, vmin=-1, square=True, cmap='RdBu',cbar_kws={"shrink": .75})
 
             plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'FeatureCorrelations.png',
                         bbox_inches='tight')
