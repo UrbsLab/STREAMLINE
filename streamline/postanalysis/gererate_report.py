@@ -120,7 +120,7 @@ class ReportJob(Job):
 
         # Turn alg_info dictionary into text list
         ars_dic_2 = []
-        for key in self.alg_info:
+        for key in sorted(self.alg_info.keys()):
             ars_dic_2.append(str(key) + ':')
             ars_dic_2.append(str(self.alg_info[key][0]))
             ars_dic_2.append('\n')

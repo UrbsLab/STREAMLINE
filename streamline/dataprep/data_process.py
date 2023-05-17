@@ -450,7 +450,6 @@ class DataProcess(Job):
             if "Feature Correlation" in self.plots:
                 plot = True
                 x_data = self.dataset.feature_only_data()
-                logging.warning(x_data.columns)
                 self.dataset.feature_correlation(self.experiment_path, x_data, plot)
         del x_data
 
