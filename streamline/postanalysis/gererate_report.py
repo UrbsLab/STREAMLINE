@@ -252,7 +252,8 @@ class ReportJob(Job):
             # upper left hand coordinates (x,y), then image width then height (image fit to space)
             # upper left hand coordinates (x,y), then image width with height based on image dimensions
             # (retain original image ratio)
-
+            # Insert Class Imbalance barplot
+            """ #REMOVED FOR REFORMATTING
             if self.training:
                 self.analysis_report.image(
                     self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 1,
@@ -266,6 +267,76 @@ class ReportJob(Job):
                         m] + '/exploratory/ClassCountsBarPlot.png', 1, 10, 60,
                     40)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
+            """
+
+            #Insert Data Processing Count Summary
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.x = 1
+            self.analysis_report.y = 10
+            self.analysis_report.cell(50, 4, 'Data Processing/Counts Summary', 1, align="L")
+            self.analysis_report.set_font('Times', '', 8)
+
+
+            if self.training:
+                data_summary = pd.read_csv(
+                    self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv", sep=',', index_col=0)
+            else:
+                data_summary = pd.read_csv(
+                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                        m] + "/exploratory/DataProcessSummary.csv", sep=',', index_col=0)
+            #Format
+            data_summary = data_summary.round(3)
+            data_summary.reset_index(inplace=True)
+            data_summary = data_summary.columns.to_frame().T.append(data_summary, ignore_index=True)
+            data_summary.columns = range(len(data_summary.columns))
+            th = self.analysis_report.font_size
+            col_width_list = [10, 10, 10, 10, 10, 10, 10, 10, 10]
+            table1 = data_summary.iloc[:, :10]
+            table1 = table1.to_numpy()
+            
+            # Print table header first
+            row_count = 0
+            col_count = 0
+
+            for row in table1:  # each row
+                print(str(row)) #Debug
+                if row_count == 0:
+                    # Print first row
+                    for datum in row:
+                        entry_list = str(datum).split(' ')
+                        self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                    # Print second row
+                    for datum in row:
+                        entry_list = str(datum).split(' ')
+                        try:
+                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C")
+                        except Exception:
+                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                else:  # Print table contents
+                    previous_row = None
+                    for datum in row:  # each column
+                        if row_count == 1:
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
+                            previous_row = row
+                        else:
+                            if str(previous_row[col_count]) == row[col_count]: # Value unchanged
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
+                            else:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L",
+                                                          fill=True)
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                row_count += 1
+
+
+            # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
                 self.analysis_report.x = 85
@@ -292,6 +363,8 @@ class ReportJob(Job):
                 self.analysis_report.y = 55
                 self.analysis_report.cell(35, 4, 'No Feature Correlation Plot', 1, align="L")
                 pass
+
+            """ #REMOVED FOR REFORMATTING
             if self.training:
                 data_summary = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataCounts.csv")
@@ -310,6 +383,7 @@ class ReportJob(Job):
             self.analysis_report.multi_cell(w=60, h=4, txt='Dataset Counts Summary:', border=1, align='L')
             self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.multi_cell(w=60, h=4, txt=' ' + list_to_string(info_ls), border=1, align='L')
+            """
 
             # Report Best Algorithms by metric
             if self.training:
