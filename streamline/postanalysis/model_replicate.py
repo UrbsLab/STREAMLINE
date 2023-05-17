@@ -207,6 +207,11 @@ class ReplicateJob(Job):
                     if feature in all_train_feature_list:
                         all_train_feature_list.remove(feature)
 
+            if correlated_features:
+                for feature in correlated_features:
+                    if feature in all_train_feature_list:
+                        all_train_feature_list.remove(feature)
+
             if self.impute_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')

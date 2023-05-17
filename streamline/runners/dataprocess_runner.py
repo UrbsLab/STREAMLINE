@@ -147,7 +147,7 @@ class DataProcessRunner:
                                           self.ignore_features,
                                           self.categorical_features, self.exploration_list, self.plot_list,
                                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
-                                          self.cleaning_missingness,
+                                          self.cleaning_missingness, self.correlation_removal_threshold,
                                           self.random_state, self.show_plots)
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too

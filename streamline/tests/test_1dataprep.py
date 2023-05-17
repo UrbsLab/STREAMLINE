@@ -82,9 +82,9 @@ def test_valid_eda():
                'Encephalopathy degree*', 'Ascites degree*', 'Number of Nodules']
 
     assert (categorical_variables == test_cv)
-    eda.describe_data()
-    eda.missingness_counts()
-    eda.missing_count_plot()
+    eda.dataset.describe_data("./tests/")
+    eda.dataset.missingness_counts("./tests/")
+    eda.dataset.missing_count_plot("./tests/")
     eda.counts_summary()
     eda.univariate_analysis()
     eda.univariate_plots()

@@ -110,7 +110,7 @@ class Dataset:
         self.data[self.class_label] = self.data[self.class_label].astype(dtype='int8')
         # Remove columns to be ignored in analysis
         if ignore_features:
-            self.data = self.data.drop(ignore_features, axis=1)
+            self.data = self.data.drop(ignore_features, axis=1, errors='ignore')
 
     def get_headers(self):
         """

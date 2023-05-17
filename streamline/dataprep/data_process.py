@@ -90,6 +90,8 @@ class DataProcess(Job):
         self.cat_removed = 0
         self.n_feat_removed = 0
 
+        logging.warning(correlation_removal_threshold)
+
         self.explorations = explorations
         if self.explorations is None:
             self.explorations = explorations_list
@@ -205,9 +207,17 @@ class DataProcess(Job):
         for feat in high_missingness_features:
             self.dataset.data['miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
 
+        logging.info("Engineering the following Missingness Features:")
+        for feat in high_missingness_features:
+            logging.info('\t miss_' + feat)
+
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/engineered_variables.pickle', 'wb') as outfile:
             pickle.dump(self.engineered_features, outfile)
+
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/engineered_features.csv', 'w') as outfile:
+            outfile.write("\n".join(self.engineered_features))
 
     def feature_removal(self):
         original_features = self.dataset.get_headers()
@@ -216,12 +226,20 @@ class DataProcess(Job):
         new_features = self.dataset.get_headers()
         removed_variables = [item for item in original_features if item not in new_features]
         for feat in removed_variables:
-            if feat in self.categorical_features + self.engineered_features + self.one_hot_features:
+            if feat in self.categorical_features + self.engineered_features + self.one_hot_features \
+                    and feat not in self.ignore_features:
                 self.cat_removed += 1
+
+        logging.info("Removing the following Features due to Missingness:")
+        for feat in removed_variables:
+            logging.info('\t' + feat)
 
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/removed_variables.pickle', 'wb') as outfile:
             pickle.dump(removed_variables, outfile)
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/removed_variables.csv', 'w') as outfile:
+            outfile.write("\n".join(removed_variables))
 
     def instance_removal(self):
         """
@@ -292,18 +310,30 @@ class DataProcess(Job):
         # apply the mask to clean the correlation dataframe
         df_corr = df_corr[~mask_dups]
 
-        # df_corr = df_corr.sort_values(by='Correlation', key=abs)
+        df_corr = df_corr.sort_values(by='Correlation', key=abs, ascending=False)
+
+        logging.info('Top 10 Correlated Features')
+        logging.info(' - {}'.format(df_corr.head(10).to_string()))
+
         features_to_drop = list(df_corr[abs(df_corr['Correlation']) > self.correlation_removal_threshold]['Feature_1'])
 
-        self.dataset.data.drop(features_to_drop, axis=1, inplace=True)
+        self.dataset.clean_data(features_to_drop)
+
+        logging.info("Remove the following Features due to high correlation:")
+        for feat in features_to_drop:
+            logging.info(feat)
 
         for feat in features_to_drop:
-            if feat in self.categorical_features + self.engineered_features + self.one_hot_features:
+            if feat in self.categorical_features + self.engineered_features + self.one_hot_features and \
+                     feat not in self.ignore_features:
                 self.cat_removed += 1
 
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/correlated_features.pickle', 'wb') as outfile:
             pickle.dump(features_to_drop, outfile)
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/correlated_features.csv', 'w') as outfile:
+            outfile.write("\n".join(features_to_drop))
 
     def data_manipulation(self):
         """
