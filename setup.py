@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='streamline',
-    version='0.2',
+    version='0.2.6',
     description='Simple Transparent End-To-End Automated Machine Learning '
                 'Pipeline for Supervised Learning in Tabular Binary Classification Data',
     url='https://github.com/raptor419/STREAMLINE_Dev/',
