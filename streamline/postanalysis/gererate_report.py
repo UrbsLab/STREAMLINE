@@ -298,6 +298,7 @@ class ReportJob(Job):
             # Print table header first
             row_count = 0
             col_count = 0
+            previous_row = None
 
             for row in table1:  # each row
                 print(str(row)) #Debug
@@ -320,17 +321,17 @@ class ReportJob(Job):
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
                 else:  # Print table contents
-                    previous_row = None
                     for datum in row:  # each column
                         if row_count == 1:
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
                             previous_row = row
                         else:
-                            if str(previous_row[col_count]) == row[col_count]: # Value unchanged
+                            if str(previous_row[col_count]) == str(row[col_count]): # Value unchanged
                                 self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
                             else:
                                 self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L",
                                                           fill=True)
+                            previous_row = row
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
