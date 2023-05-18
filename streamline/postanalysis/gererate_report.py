@@ -3,6 +3,7 @@ import logging
 import math
 import os
 import pickle
+import csv
 from datetime import datetime
 from streamline import __version__ as version
 import pandas as pd
@@ -282,6 +283,86 @@ class ReportJob(Job):
 
 
             if self.training:
+                data_process_path = self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv"
+            else:
+                data_process_path = self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv"
+
+            table1 = []  # Initialize an empty list to store the data
+
+            with open(data_process_path, "r") as csv_file:
+                csv_reader = csv.reader(csv_file)
+                for row in csv_reader:
+                    table1.append(row)
+            #Format
+            #data_summary = data_summary.round(3)
+            th = self.analysis_report.font_size
+            col_width_list = [10, 10, 10, 10, 10, 10, 10, 10, 10] #91 x space total
+
+            # Print table header first
+            row_count = 0
+            col_count = 0
+            previous_row = None
+
+            for row in table1:  # each row
+                print(str(row)) #Debug
+                #Make header
+                if row_count == 0:
+                    for datum in row: # Print first row
+                        entry_list = str(datum).split(' ')
+                        self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                    for datum in row: # Print second row
+                        entry_list = str(datum).split(' ')
+                        try:
+                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C")
+                        except Exception:
+                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                # Fill in data
+                elif row_count == 1:
+                    previous_row = row
+                    for datum in row:
+                        if col_count == 6: # missing percent column
+                            self.analysis_report.cell(col_width_list[col_count], th, str(round(datum,4)), border=1, align="L")
+                        else:
+                            self.analysis_report.cell(col_width_list[col_count], th, str(int(datum)), border=1, align="L")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                else:
+                    for datum in row:
+                        if str(previous_row[col_count]) == str(row[col_count]): # Value unchanged
+                            if col_count == 6: # missing percent column
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(datum,4)), border=1, align="L")
+                            else:
+
+                        else:
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L", fill=True)
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                    previous_row = row
+                row_count += 1
+
+
+"""
+            #Insert Data Processing Count Summary
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.x = 1
+            self.analysis_report.y = 10
+            self.analysis_report.cell(54, 4, 'Data Processing/Counts Summary', 1, align="L")
+
+            self.analysis_report.x = 1
+            self.analysis_report.y = 15
+            self.analysis_report.set_font('Times', '', 6)
+            self.analysis_report.set_fill_color(200)
+
+
+            if self.training:
                 data_summary = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv", sep=',', index_col=0)
             else:
@@ -289,6 +370,7 @@ class ReportJob(Job):
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         m] + "/exploratory/DataProcessSummary.csv", sep=',', index_col=0)
             #Format
+            #data_summary = data_summary.transpose()
             data_summary = data_summary.round(3)
             data_summary.reset_index(inplace=True)
             data_summary = data_summary.columns.to_frame().T.append(data_summary, ignore_index=True)
@@ -339,19 +421,19 @@ class ReportJob(Job):
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
                 row_count += 1
-
+"""
 
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 85
-                self.analysis_report.y = 10
+                self.analysis_report.x = 95
+                self.analysis_report.y = 25
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        95, 15, 115, 100)
+                        95, 30, 100, 90)
                         #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
@@ -359,7 +441,7 @@ class ReportJob(Job):
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 95, 15, 115, 100)
+                            m] + '/exploratory/FeatureCorrelations.png', 95, 30, 100, 90)
                         #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
