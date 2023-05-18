@@ -25,7 +25,7 @@ class DataProcess(Job):
     def __init__(self, dataset, experiment_path, ignore_features=None,
                  categorical_features=None, explorations=None, plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5,
-                 cleaning_missingness=0.5, correlation_removal_threshold=0.8,
+                 cleaning_missingness=0.5, correlation_removal_threshold=1.0,
                  random_state=None, show_plots=False):
         """
         Initialization function for Exploratory Data Analysis Class. Parameters are defined below.

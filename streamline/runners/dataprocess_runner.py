@@ -49,7 +49,7 @@ class DataProcessRunner:
                  class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
                  ignore_features=None, categorical_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
-                 correlation_removal_threshold=0.8,
+                 correlation_removal_threshold=1.0,
                  random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
         Initializer for a runner class for Exploratory Data Analysis Jobs
@@ -244,6 +244,7 @@ class DataProcessRunner:
         metadata['Statistical Significance Cutoff'] = self.sig_cutoff
         metadata['Feature Missingness Cutoff'] = self.featureeng_missingness
         metadata['Cleaning Missingness Cutoff'] = self.cleaning_missingness
+        metadata['Correlation Removal Threshold'] = self.correlation_removal_threshold
         metadata['Export Feature Correlations'] = "Feature Correlations" in self.plot_list
         metadata['Export Univariate Plots'] = "Univariate Analysis" in self.plot_list
         metadata['Random Seed'] = self.random_state

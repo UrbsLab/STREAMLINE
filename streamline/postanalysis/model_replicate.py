@@ -30,7 +30,7 @@ class ReplicateJob(Job):
     def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
                  ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
-                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, scale_data=True, impute_data=True,
+                 categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
         super().__init__()
         self.dataset_filename = dataset_filename
@@ -63,7 +63,6 @@ class ReplicateJob(Job):
 
         self.categorical_cutoff = categorical_cutoff
         self.sig_cutoff = sig_cutoff
-        self.featureeng_missingness = featureeng_missingness
         self.scale_data = scale_data
         self.impute_data = impute_data
         self.scoring_metric = scoring_metric
@@ -126,7 +125,6 @@ class ReplicateJob(Job):
         eda = DataProcess(rep_data, self.full_path, ignore_features=self.ignore_features,
                           categorical_features=categorical_variables, explorations=[], plots=[],
                           categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
-                          featureeng_missingness=self.featureeng_missingness,
                           random_state=self.random_state, show_plots=self.show_plots)
 
         # Arguments changed to send to correct locations describe_data(self)
