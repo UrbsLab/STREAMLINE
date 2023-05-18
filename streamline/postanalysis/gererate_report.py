@@ -308,16 +308,16 @@ class ReportJob(Job):
                 if row_count == 0:
                     for datum in row: # Print first row
                         entry_list = str(datum).split(' ')
-                        self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C", fill=True)
+                        self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
                     for datum in row: # Print second row
                         entry_list = str(datum).split(' ')
                         try:
-                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C", fill=True)
+                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C")
                         except Exception:
-                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C", fill=True)
+                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
@@ -326,11 +326,11 @@ class ReportJob(Job):
                     previous_row = row
                     for datum in row:
                         if col_count == 0:
-                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L", fill=True)
                         elif col_count == 6: # missing percent column
-                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L")
+                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
                         else:
-                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L")
+                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
@@ -362,29 +362,36 @@ class ReportJob(Job):
                         self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
                     else:
                         self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                col_count += 1
 
             self.analysis_report.set_font('Times', 'B', 8)
             self.analysis_report.x = 1
             self.analysis_report.y = 35
             self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
+            self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome', 0, align="L")
+            self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * E1 - Add missingness features', 0, align="L")
+            self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C2 - Remove features with high missingness', 0, align="L")
+            self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C3 - Remove instances with high missingness', 0, align="L")
+            self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * E2 - Add one-hot-encoding of categorical features', 0, align="L")
+            self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C4 - Remove highly correlated features', 0, align="L")
-            
+
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
                 self.analysis_report.x = 95
-                self.analysis_report.y = 35
+                self.analysis_report.y = 40
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        95, 40, 110, 90)
+                        95, 45, 100, 80)
                         #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
@@ -392,7 +399,7 @@ class ReportJob(Job):
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 95, 40, 110, 90)
+                            m] + '/exploratory/FeatureCorrelations.png', 95, 45, 100, 80)
                         #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
