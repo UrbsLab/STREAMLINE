@@ -3,6 +3,7 @@ import logging
 import math
 import os
 import pickle
+import csv
 from datetime import datetime
 from streamline import __version__ as version
 import pandas as pd
@@ -253,45 +254,166 @@ class ReportJob(Job):
             # upper left hand coordinates (x,y), then image width with height based on image dimensions
             # (retain original image ratio)
 
+
+            #Insert Data Processing Count Summary
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.x = 1
+            self.analysis_report.y = 10
+            self.analysis_report.cell(80, 4, 'Data Processing/Counts Summary', 1, align="L")
+
+            self.analysis_report.x = 1
+            self.analysis_report.y = 15
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.set_fill_color(200)
+
+
+            if self.training:
+                data_process_path = self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv"
+            else:
+                data_process_path = self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv"
+
+            table1 = []  # Initialize an empty list to store the data
+
+            with open(data_process_path, "r") as csv_file:
+                csv_reader = csv.reader(csv_file)
+                for row in csv_reader:
+                    table1.append(row)
+            #Format
+            #data_summary = data_summary.round(3)
+            th = self.analysis_report.font_size
+            col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13] #91 x space total
+
+            # Print table header first
+            row_count = 0
+            col_count = 0
+            previous_row = None
+
+            for row in table1:  # each row
+                #Make header
+                if row_count == 0:
+                    for datum in row: # Print first row
+                        entry_list = str(datum).split(' ')
+                        self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                    for datum in row: # Print second row
+                        entry_list = str(datum).split(' ')
+                        try:
+                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C")
+                        except Exception:
+                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                # Fill in data
+                elif row_count == 1:
+                    previous_row = row
+                    for datum in row:
+                        if col_count == 0:
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L", fill=True)
+                        elif col_count == 6: # missing percent column
+                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
+                        else:
+                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                else:
+                    for datum in row:
+                        if col_count == 0:
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
+                        elif str(previous_row[col_count]) == str(row[col_count]): # Value unchanged
+                            if col_count == 6: # missing percent column
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L")
+                            else:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L")
+                        else:
+                            if col_count == 6: # missing percent column
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
+                            else:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                        col_count += 1
+                    self.analysis_report.ln(th)  # critical
+                    col_count = 0
+                    previous_row = row
+                row_count += 1
+            row_count -= 1
+            for datum in table1[row_count]:
+                if col_count == 0:
+                    self.analysis_report.cell(col_width_list[col_count], th, 'Processed', border=1, align="L", fill=True)
+                else:
+                    if col_count == 6: # missing percent column
+                        self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
+                    else:
+                        self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                col_count += 1
+
+            self.analysis_report.set_font('Times', 'B', 8)
+            self.analysis_report.x = 1
+            self.analysis_report.y = 41
+            self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.ln(th)  # critical
+            self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome', 0, align="L")
+            self.analysis_report.ln(th)  # critical
+            self.analysis_report.cell(90, 4, ' * E1 - Add missingness features', 0, align="L")
+            self.analysis_report.ln(th)  # critical
+            self.analysis_report.cell(90, 4, ' * C2 - Remove features with high missingness', 0, align="L")
+            self.analysis_report.ln(th)  # critical
+            self.analysis_report.cell(90, 4, ' * C3 - Remove instances with high missingness', 0, align="L")
+            self.analysis_report.ln(th)  # critical
+            self.analysis_report.cell(90, 4, ' * E2 - Add one-hot-encoding of categorical features', 0, align="L")
+            self.analysis_report.ln(th)  # critical
+            self.analysis_report.cell(90, 4, ' * C4 - Remove highly correlated features', 0, align="L")
+
+            # Insert Class Imbalance barplot
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.x = 63
+            self.analysis_report.y = 42
+            self.analysis_report.cell(45, 4, 'Class Balance (Processed)', 1, align="L")
+            self.analysis_report.set_font('Times', '', 8)
             if self.training:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 1,
-                    10,
-                    60,
-                    40)
+                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             else:
                 self.analysis_report.image(
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/exploratory/ClassCountsBarPlot.png', 1, 10, 60,
-                    40)
+                        m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
+
+
+            # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 85
-                self.analysis_report.y = 10
+                self.analysis_report.x = 135
+                self.analysis_report.y = 42
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        85,
-                        15, 125,
-                        100)
+                        120, 47, 89, 70)
+                        #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
+                        #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125,
-                        100)
+                            m] + '/exploratory/FeatureCorrelations.png', 120, 47, 89, 70)
+                        #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                        #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
             except Exception:
-                self.analysis_report.x = 125
-                self.analysis_report.y = 55
+                self.analysis_report.x = 135
+                self.analysis_report.y = 60
                 self.analysis_report.cell(35, 4, 'No Feature Correlation Plot', 1, align="L")
                 pass
+
+            """ #REMOVED FOR REFORMATTING
             if self.training:
                 data_summary = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataCounts.csv")
@@ -310,6 +432,7 @@ class ReportJob(Job):
             self.analysis_report.multi_cell(w=60, h=4, txt='Dataset Counts Summary:', border=1, align='L')
             self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.multi_cell(w=60, h=4, txt=' ' + list_to_string(info_ls), border=1, align='L')
+            """
 
             # Report Best Algorithms by metric
             if self.training:
