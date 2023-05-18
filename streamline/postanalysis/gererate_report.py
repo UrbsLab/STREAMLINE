@@ -371,7 +371,7 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.x = 63
             self.analysis_report.y = 42
-            self.analysis_report.cell(40, 4, 'Class Balance (Processed)', 1, align="L")
+            self.analysis_report.cell(45, 4, 'Class Balance (Processed)', 1, align="L")
             self.analysis_report.set_font('Times', '', 8)
             if self.training:
                 self.analysis_report.image(
