@@ -330,9 +330,9 @@ class ReportJob(Job):
                         if col_count == 0:
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
                         elif col_count == 6: # missing percent column
-                            self.analysis_report.cell(col_width_list[col_count], th, str(round(datum,4)), border=1, align="L")
+                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L")
                         else:
-                            self.analysis_report.cell(col_width_list[col_count], th, str(int(datum)), border=1, align="L")
+                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L")
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
@@ -342,14 +342,14 @@ class ReportJob(Job):
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
                         elif str(previous_row[col_count]) == str(row[col_count]): # Value unchanged
                             if col_count == 6: # missing percent column
-                                self.analysis_report.cell(col_width_list[col_count], th, str(round(datum,4)), border=1, align="L")
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L")
                             else:
-                                self.analysis_report.cell(col_width_list[col_count], th, str(int(datum)), border=1, align="L")
+                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L")
                         else:
                             if col_count == 6: # missing percent column
-                                self.analysis_report.cell(col_width_list[col_count], th, str(round(datum,4)), border=1, align="L", fill=True)
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
                             else:
-                                self.analysis_report.cell(col_width_list[col_count], th, str(int(datum)), border=1, align="L", fill=True)
+                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
