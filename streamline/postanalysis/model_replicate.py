@@ -1,3 +1,4 @@
+import csv
 import glob
 import logging
 import os
@@ -128,10 +129,22 @@ class ReplicateJob(Job):
                           featureeng_missingness=self.featureeng_missingness,
                           random_state=self.random_state, show_plots=self.show_plots)
 
-        # ExploratoryAnalysis - basic data cleaning
-        eda.dataset.clean_data(self.ignore_features)
         # Arguments changed to send to correct locations describe_data(self)
         eda.dataset.name = 'applymodel/' + self.apply_name
+
+        eda.identify_feature_types()
+
+        transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                              'Categorical Features',
+                                              'Quantitative Features', 'Missing Values',
+                                              'Missing Percent', 'Class 0', 'Class 1'])
+
+        transition_df.loc["Original"] = eda.counts_summary(save=False)
+
+        # ExploratoryAnalysis - basic data cleaning
+        eda.drop_ignored_rowcols()
+
+        transition_df.loc["C1"] = eda.counts_summary(save=False)
 
         eda.dataset.initial_eda(self.experiment_path + '/' + self.train_name)
 
@@ -147,7 +160,9 @@ class ReplicateJob(Job):
         # Recreate missingness features in apply phase
         for feat in eda.engineered_features:
             eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
-        engineered_features = ['miss_' + feat for feat in eda.engineered_features]
+        eda.engineered_features = ['miss_' + feat for feat in eda.engineered_features]
+
+        transition_df.loc["E1"] = eda.counts_summary(save=False)
 
         try:
             # Removing dropped features
@@ -157,6 +172,8 @@ class ReplicateJob(Job):
             eda.dataset.clean_data(removed_features)
         except FileNotFoundError:
             pass
+
+        transition_df.loc["C2"] = eda.counts_summary(save=False)
 
         try:
             with open(self.experiment_path + '/' + self.train_name +
@@ -181,21 +198,43 @@ class ReplicateJob(Job):
             if feat not in list(eda.dataset.data.columns):
                 eda.dataset.data[feat] = 0
 
-        # removing extra features
-        for feat in eda.dataset.data.columns:
-            if feat not in post_processed_vars:
-                eda.dataset.data.drop(feat, axis=1)
-
-        # Removing highly correlated features
         try:
             with open(self.experiment_path + '/' + self.train_name +
                       '/exploratory/correlated_features.pickle', 'rb') as infile:
                 correlated_features = pickle.load(infile)
         except FileNotFoundError:
             correlated_features = list()
+
+        # removing extra features
+        for feat in eda.dataset.data.columns:
+            if feat not in post_processed_vars and feat not in correlated_features:
+                eda.dataset.data.drop(feat, axis=1)
+
+        transition_df.loc["E2"] = eda.counts_summary(save=False)
+
+        # Removing highly correlated features
         eda.dataset.clean_data(correlated_features)
 
+        transition_df.loc["C4"] = eda.counts_summary(save=False)
+
         eda.dataset.data = eda.dataset.data[post_processed_vars]
+
+        transition_df.to_csv(self.full_path + "/applymodel/" + self.apply_name + '/exploratory/'
+                             + 'DataProcessSummary.csv', index=True)
+
+        # Pickle list of feature names to be treated as categorical variables
+        with open(self.full_path + "/applymodel/" + self.apply_name +
+                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+            pickle.dump(eda.categorical_features, outfile)
+
+        # Pickle list of processed feature names
+        with open(self.full_path + "/applymodel/" + self.apply_name +
+                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+            pickle.dump(list(eda.dataset.data.columns), outfile)
+        with open(self.full_path + "/applymodel/" + self.apply_name +
+                  '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
+            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(list(eda.dataset.data.columns))
 
         # Export basic exploratory analysis files
         eda.dataset.describe_data(self.experiment_path + '/' + self.train_name)

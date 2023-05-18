@@ -34,6 +34,7 @@ class Dataset:
         self.class_label = class_label
         self.match_label = match_label
         self.instance_label = instance_label
+        self.categorical_variables = None
         self.load_data()
 
     def load_data(self):
@@ -222,8 +223,11 @@ class Dataset:
         if total_missing is None:
             total_missing = self.missingness_counts(experiment_path)
         percent_missing = int(total_missing) / float(self.data.shape[0] * f_count)
+        n_categorical_variables = len(self.categorical_variables)
         summary = [['instances', self.data.shape[0]],
                    ['features', f_count],
+                   ['categorical_features', n_categorical_variables],
+                   ['quantitative_features', f_count - n_categorical_variables],
                    ['missing_values', total_missing],
                    ['missing_percent', round(percent_missing, 5)]]
 
@@ -236,6 +240,20 @@ class Dataset:
         class_counts.to_csv(experiment_path + '/' + self.name +
                             '/exploratory/' + initial + 'ClassCounts.csv', header=['Count'],
                             index_label='Class')
+
+        logging.info('Initial Data Counts: ----------------')
+        logging.info('Instance Count = ' + str(self.data.shape[0]))
+        logging.info('Feature Count = ' + str(f_count))
+        logging.info('    Categorical  = ' + str(n_categorical_variables))
+        logging.info('    Quantitative = ' + str(f_count - n_categorical_variables))
+        logging.info('Missing Count = ' + str(total_missing))
+        logging.info('    Missing Percent = ' + str(percent_missing))
+        logging.info('Class Counts: ----------------')
+        logging.info('Class Count Information')
+        df_value_counts = pd.DataFrame(class_counts)
+        df_value_counts = df_value_counts.reset_index()
+        df_value_counts.columns = ['Class', 'Instances']
+        logging.info("\n" + df_value_counts.to_string())
 
         # Generate and export class count bar graph
         if plot:
