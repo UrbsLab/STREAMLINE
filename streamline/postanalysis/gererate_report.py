@@ -274,7 +274,7 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.x = 1
             self.analysis_report.y = 10
-            self.analysis_report.cell(54, 4, 'Data Processing/Counts Summary', 1, align="L")
+            self.analysis_report.cell(80, 4, 'Data Processing/Counts Summary', 1, align="L")
 
             self.analysis_report.x = 1
             self.analysis_report.y = 15
@@ -296,7 +296,7 @@ class ReportJob(Job):
             #Format
             #data_summary = data_summary.round(3)
             th = self.analysis_report.font_size
-            col_width_list = [12, 12, 12, 13, 13, 12, 12, 12, 12] #91 x space total
+            col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13] #91 x space total
 
             # Print table header first
             row_count = 0
@@ -366,7 +366,7 @@ class ReportJob(Job):
 
             self.analysis_report.set_font('Times', 'B', 8)
             self.analysis_report.x = 1
-            self.analysis_report.y = 50
+            self.analysis_report.y = 45
             self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
             self.analysis_report.set_font('Times', '', 7)
             self.analysis_report.ln(th)  # critical
@@ -385,14 +385,14 @@ class ReportJob(Job):
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 100
+                self.analysis_report.x = 110
                 self.analysis_report.y = 42
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        100, 47, 90, 70)
+                        110, 47, 90, 70)
                         #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
@@ -400,14 +400,14 @@ class ReportJob(Job):
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 100, 47, 90, 70)
+                            m] + '/exploratory/FeatureCorrelations.png', 110, 47, 90, 70)
                         #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
             except Exception:
-                self.analysis_report.x = 125
-                self.analysis_report.y = 55
+                self.analysis_report.x = 135
+                self.analysis_report.y = 60
                 self.analysis_report.cell(35, 4, 'No Feature Correlation Plot', 1, align="L")
                 pass
 
