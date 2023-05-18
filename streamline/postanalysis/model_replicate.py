@@ -118,7 +118,7 @@ class ReplicateJob(Job):
 
         # Load previously identified list of categorical
         # variables and create an index list to identify respective columns
-        file = open(self.full_path + '/exploratory/categorical_variables.pickle', 'rb')
+        file = open(self.full_path + '/exploratory/initial_categorical_variables.pickle', 'rb')
         categorical_variables = pickle.load(file)
 
         rep_data.categorical_variables = categorical_variables

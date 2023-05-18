@@ -140,6 +140,10 @@ class DataProcess(Job):
         self.categorical_features = categorical_variables
         self.dataset.categorical_variables = self.categorical_features
 
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/initial_categorical_variables.pickle', 'wb') as outfile:
+            pickle.dump(self.categorical_features, outfile)
+
         return categorical_variables
 
     def drop_ignored_rowcols(self):
