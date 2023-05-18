@@ -369,18 +369,18 @@ class ReportJob(Job):
 
             # Insert Class Imbalance barplot
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.x = 50
+            self.analysis_report.x = 63
             self.analysis_report.y = 42
-            self.analysis_report.cell(50, 4, 'Class Balance', 1, align="L")
+            self.analysis_report.cell(40, 4, 'Class Balance', 1, align="L")
             self.analysis_report.set_font('Times', '', 8)
             if self.training:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 50, 47, 45, 35)
+                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             else:
                 self.analysis_report.image(
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/exploratory/ClassCountsBarPlot.png', 50, 47, 45, 35)
+                        m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
 
 
