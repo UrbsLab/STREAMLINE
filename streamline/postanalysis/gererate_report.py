@@ -352,7 +352,7 @@ class ReportJob(Job):
                 row_count += 1
 
 
-"""
+            """
             #Insert Data Processing Count Summary
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.x = 1
@@ -424,7 +424,7 @@ class ReportJob(Job):
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
                 row_count += 1
-"""
+            """
 
             # Insert Feature Correlation Plot
             try:
