@@ -366,8 +366,9 @@ class ReportJob(Job):
 
             self.analysis_report.set_font('Times', 'B', 8)
             self.analysis_report.x = 1
-            self.analysis_report.y = 35
+            self.analysis_report.y = 50
             self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
+            self.analysis_report.set_font('Times', '', 7)
             self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome', 0, align="L")
             self.analysis_report.ln(th)  # critical
@@ -384,14 +385,14 @@ class ReportJob(Job):
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 95
-                self.analysis_report.y = 40
+                self.analysis_report.x = 100
+                self.analysis_report.y = 42
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        95, 45, 100, 80)
+                        100, 47, 90, 70)
                         #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
@@ -399,7 +400,7 @@ class ReportJob(Job):
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 95, 45, 100, 80)
+                            m] + '/exploratory/FeatureCorrelations.png', 100, 47, 90, 70)
                         #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
