@@ -253,22 +253,7 @@ class ReportJob(Job):
             # upper left hand coordinates (x,y), then image width then height (image fit to space)
             # upper left hand coordinates (x,y), then image width with height based on image dimensions
             # (retain original image ratio)
-            # Insert Class Imbalance barplot
-            """ #REMOVED FOR REFORMATTING
-            if self.training:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 1,
-                    10,
-                    60,
-                    40)
-                # upper left hand coordinates (x,y), then image width then height (image fit to space)
-            else:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/exploratory/ClassCountsBarPlot.png', 1, 10, 60,
-                    40)
-                # upper left hand coordinates (x,y), then image width then height (image fit to space)
-            """
+
 
             #Insert Data Processing Count Summary
             self.analysis_report.set_font('Times', 'B', 10)
@@ -366,7 +351,7 @@ class ReportJob(Job):
 
             self.analysis_report.set_font('Times', 'B', 8)
             self.analysis_report.x = 1
-            self.analysis_report.y = 40
+            self.analysis_report.y = 41
             self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
             self.analysis_report.set_font('Times', '', 7)
             self.analysis_report.ln(th)  # critical
@@ -382,17 +367,34 @@ class ReportJob(Job):
             self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C4 - Remove highly correlated features', 0, align="L")
 
+            # Insert Class Imbalance barplot
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.x = 50
+            self.analysis_report.y = 42
+            self.analysis_report.cell(50, 4, 'Class Balance', 1, align="L")
+            self.analysis_report.set_font('Times', '', 8)
+            if self.training:
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 50, 47, 45, 35)
+                # upper left hand coordinates (x,y), then image width then height (image fit to space)
+            else:
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                        m] + '/exploratory/ClassCountsBarPlot.png', 50, 47, 45, 35)
+                # upper left hand coordinates (x,y), then image width then height (image fit to space)
+
+
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 120
+                self.analysis_report.x = 135
                 self.analysis_report.y = 42
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
                 if self.training:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        120, 47, 90, 70)
+                        120, 47, 89, 70)
                         #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         #85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
@@ -400,7 +402,7 @@ class ReportJob(Job):
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/exploratory/FeatureCorrelations.png', 120, 47, 90, 70)
+                            m] + '/exploratory/FeatureCorrelations.png', 120, 47, 89, 70)
                         #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
