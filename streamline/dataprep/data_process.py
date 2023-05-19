@@ -157,6 +157,47 @@ class DataProcess(Job):
                 self.categorical_features.remove(feat)
         self.dataset.clean_data(self.ignore_features)
 
+    def label_encoder(self):
+        """
+        Numerical Data Encoder:
+        for any features in the data (other than the instanceID, but including the class column) if the
+        feature (which should also be considered to be categorical - so check that feature is in the list of features
+        being treated as categorical, and if not add it to that list) has any non-numerical values, numerically encode
+        these values based on alphabetical order of the feature values.
+        As we do this we create a new output .csv file (called Numerical_Encoding_Map.csv),
+        where each row provides the feature that was numerically encoded,
+        and the subsequent columns provide a mapping of the original values to new numerical values.
+        """
+
+        string_type_columns = list()
+        dtypes_dict = self.dataset.data.dtypes.to_dict()
+        for feat, typ in dtypes_dict.items():
+            if self.dataset.instance_label and feat == self.dataset.instance_label:
+                continue
+            if str(typ) == 'object':
+                string_type_columns.append(feat)
+
+        ord_label = pd.DataFrame(columns=['Category', 'Encoding'])
+        if len(string_type_columns) > 0:
+            logging.info("Ordinal encoding the following features:")
+            for feat in string_type_columns:
+                logging.info('\t' + feat)
+                if feat not in self.categorical_features \
+                        and not (feat == self.dataset.class_label or
+                                 (self.dataset.match_label and feat == self.dataset.match_label)):
+                    self.categorical_features.append(feat)
+                self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
+                ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
+
+            ord_label.to_csv(self.experiment_path + '/' + self.dataset.name +
+                             '/exploratory/Numerical_Encoding_Map.csv')
+
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/ordinal_encoding.pickle', 'wb') as outfile:
+                pickle.dump(ord_label, outfile)
+        else:
+            logging.info("No textual categorical features, skipping label encoding")
+
     def feature_engineering(self):
         """
         Feature Engineering - Missingness as a feature (missingness feature engineering phase)
@@ -360,6 +401,9 @@ class DataProcess(Job):
         # identify and save categorical variables for intermediate steps before categorical encoding
         self.identify_feature_types()  # Completed
 
+        # ordinal encode the labels
+        self.label_encoder()
+
         transition_df.loc["Original"] = self.counts_summary(save=False)
         # Dropping rows with missing target variable and users specified features to ignore
         self.drop_ignored_rowcols()  # Completed
@@ -503,7 +547,7 @@ class DataProcess(Job):
         if total_missing is None:
             total_missing = self.dataset.missingness_counts(self.experiment_path, save=False)
         percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
-        n_categorical_variables = len(list(self.categorical_features)) + len(list(self.engineered_features))\
+        n_categorical_variables = len(list(self.categorical_features)) + len(list(self.engineered_features)) \
                                   + len(list(self.one_hot_features))
         summary = [['instances', self.dataset.data.shape[0]],
                    ['features', f_count],

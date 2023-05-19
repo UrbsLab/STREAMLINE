@@ -137,6 +137,26 @@ class ReplicateJob(Job):
                                               'Quantitative Features', 'Missing Values',
                                               'Missing Percent', 'Class 0', 'Class 1'])
 
+        # ordinal decode the variables
+        try:
+            with open(self.experiment_path + '/' + self.train_name +
+                      '/exploratory/ordinal_encoding.pickle', 'rb') as infile:
+                ord_labels = pickle.load(infile)
+                for feat in ord_labels.index:
+                    new_labels = list()
+                    temp_y, labels = pd.factorize(eda.dataset.data[feat])
+                    if set(ord_labels.loc[feat]['Category']) == set(labels):
+                        eda.dataset.data[feat] = temp_y
+                    else:
+                        new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
+                        eda.dataset.data.replace({feat: enumerate(new_labels)})
+                    ord_labels.loc[feat] = [list(labels) + new_labels, list(range(len(list(labels) + new_labels)))]
+            with open(self.full_path + "/applymodel/" + self.apply_name +
+                      '/exploratory/apply_ordinal_encoding.pickle', 'wb') as outfile:
+                pickle.dump(ord_labels, outfile)
+        except FileNotFoundError:
+            pass
+
         transition_df.loc["Original"] = eda.counts_summary(save=False)
 
         # ExploratoryAnalysis - basic data cleaning
