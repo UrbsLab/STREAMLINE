@@ -186,8 +186,14 @@ class DataProcess(Job):
                         and not (feat == self.dataset.class_label or
                                  (self.dataset.match_label and feat == self.dataset.match_label)):
                     self.categorical_features.append(feat)
-                self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
-                ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
+
+                # Not encoding anything except class labels to preserve label in figures
+
+                if feat == self.dataset.class_label:
+                    self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
+                    ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
+                else:
+                    pass
 
             ord_label.to_csv(self.experiment_path + '/' + self.dataset.name +
                              '/exploratory/Numerical_Encoding_Map.csv')
