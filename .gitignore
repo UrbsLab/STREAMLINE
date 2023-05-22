@@ -19,3 +19,7 @@ job.o
 job.e
 logs.log
 Scratchpad.ipynb
+UserData/
+UserRepData/
+UserOutput/
+DemoOutput/
