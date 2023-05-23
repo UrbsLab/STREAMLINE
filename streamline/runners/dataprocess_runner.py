@@ -228,7 +228,7 @@ class DataProcessRunner:
                           self.ignore_features, self.categorical_features, self.top_features,
                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                           self.cleaning_missingness, self.correlation_removal_threshold, self.random_state]
-        cluster_params = [str(i) for i in cluster_params]
+        cluster_params = [str(i) if type(i) != list else '"' + str(i) + '"' for i in cluster_params]
         return cluster_params
 
     def submit_slurm_cluster_job(self, dataset_path):
