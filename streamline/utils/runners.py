@@ -18,13 +18,6 @@ def parallel_eda_call(eda_job, params):
         eda_job.run()
 
 
-def parallel_kfold_call(kfold_job):
-    """
-    Runner function for running cv job objects
-    """
-    kfold_job.run()
-
-
 def model_runner_fn(job, model):
     """
     Runner function for running model job objects

@@ -11,6 +11,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
+from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from scipy.stats import chi2_contingency, mannwhitneyu
 import seaborn as sns
 
@@ -26,6 +27,7 @@ class DataProcess(Job):
                  categorical_features=None, explorations=None, plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5,
                  cleaning_missingness=0.5, correlation_removal_threshold=1.0,
+                 partition_method="Stratified", n_splits=10,
                  random_state=None, show_plots=False):
         """
         Initialization function for Exploratory Data Analysis Class. Parameters are defined below.
@@ -102,6 +104,10 @@ class DataProcess(Job):
         for x in self.explorations:
             if x not in explorations_list:
                 raise Exception("Plot " + str(x) + " is not known/implemented")
+
+        self.cv_partitioner = None
+        self.partition_method = partition_method
+        self.n_splits = n_splits
 
     def make_log_folders(self):
         """
@@ -465,7 +471,6 @@ class DataProcess(Job):
             top_features: no of top features to consider (default=20)
 
         """
-        self.job_start_time = time.time()
 
         # Random seed for reproducibility
         random.seed(self.random_state)
@@ -496,8 +501,6 @@ class DataProcess(Job):
 
         # Running EDA after all the new data processing/manipulation
         self.second_eda(top_features)
-
-        self.save_runtime()
 
     def second_eda(self, top_features=20):
         # Running EDA after all the new data processing/manipulation
@@ -780,16 +783,21 @@ class DataProcess(Job):
 
     def run(self, top_features=20):
         """
-        Wrapper function to run_explore
+        Wrapper function to run_explore and KFoldPartitioner
 
         Args:
             top_features: no of top features to consider (default=20)
 
         """
+        self.job_start_time = time.time()
         self.run_process(top_features)
+        self.cv_partitioner = KFoldPartitioner(self.dataset, self.partition_method,
+                                               self.experiment_path, self.n_splits, self.random_state)
+        self.cv_partitioner.run()
+        self.save_runtime()
 
     def start(self, top_features=20):
-        self.run_process(top_features)
+        self.run(top_features)
 
     def join(self):
         pass

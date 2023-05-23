@@ -15,7 +15,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 # pytest.skip("Tested Already", allow_module_level=True)
 
-algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
+algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
 dataset_path, experiment_name = "./DemoData/", "demo",
 model_algorithms = ["NB", "LR", "DT"]
 

@@ -8,8 +8,7 @@ import dask
 from pathlib import Path
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.data_process import DataProcess
-from streamline.dataprep.kfold_partitioning import KFoldPartitioner
-from streamline.utils.runners import parallel_kfold_call, parallel_eda_call, num_cores
+from streamline.utils.runners import parallel_eda_call, num_cores
 from joblib import Parallel, delayed
 from streamline.utils.cluster import get_cluster
 
@@ -147,6 +146,7 @@ class DataProcessRunner:
                                           list(self.categorical_features), self.exploration_list, self.plot_list,
                                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                                           self.cleaning_missingness, self.correlation_removal_threshold,
+                                          self.partition_method, self.n_splits,
                                           self.random_state, self.show_plots)
                     job_obj_list.append(job_obj)
                     # Cluster vs Non Cluster irrelevant as now local jobs are parallel too
@@ -169,39 +169,6 @@ class DataProcessRunner:
             dask.compute([dask.delayed(
                 parallel_eda_call
             )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])
-
-        if self.run_cluster not in ["SLURMOld", "LSFOld"]:
-            self.run_kfold(job_obj_list, run_parallel)
-
-    def run_kfold(self, eda_obj_list, run_parallel=True):
-        """
-
-        Args:
-            eda_obj_list:
-            run_parallel:
-
-        Returns:
-
-        """
-        file_count, job_counter = 0, 0
-        job_list = []
-        for obj in eda_obj_list:
-            if run_parallel and self.ignore_features:
-                obj.dataset.data.drop(self.ignore_features, axis=1, inplace=True, errors='ignore')
-            kfold_obj = KFoldPartitioner(obj.dataset,
-                                         self.partition_method, self.output_path + '/' + self.experiment_name,
-                                         self.n_splits, self.random_state)
-            if run_parallel and run_parallel != "False":  # Run as job in parallel
-                job_list.append(kfold_obj)
-            else:  # Run job locally, serially
-                kfold_obj.run()
-            job_counter += 1
-        if run_parallel and run_parallel != "False" and not self.run_cluster:
-            Parallel(n_jobs=num_cores)(delayed(parallel_kfold_call)(job_obj) for job_obj in job_list)
-        if self.run_cluster and "Old" not in self.run_cluster:
-            get_cluster(self.run_cluster,
-                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
-            dask.compute([dask.delayed(parallel_kfold_call)(job_obj) for job_obj in job_list])
 
     def make_dir_tree(self):
         """

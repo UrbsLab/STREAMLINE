@@ -36,13 +36,9 @@ def run_cluster(argv):
                           ignore_features,
                           categorical_features, exploration_list, plot_list,
                           categorical_cutoff, sig_cutoff, featureeng_missingness,
-                          cleaning_missingness, correlation_removal_threshold,
+                          cleaning_missingness, correlation_removal_threshold, partition_method, n_splits,
                           random_state)
     eda_obj.run(top_features)
-    kfold_obj = KFoldPartitioner(dataset,
-                                 partition_method, output_path + '/' + experiment_name,
-                                 n_splits, random_state)
-    kfold_obj.run()
 
 
 if __name__ == "__main__":

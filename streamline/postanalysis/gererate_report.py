@@ -145,10 +145,10 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', 'B', 12)
         if self.training:
             self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Evaluation Report: ' + str(self.time), ln=2,
-                                  border=1, align='L')
+                                      border=1, align='L')
         else:
-            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Evaluation Report: ' + str(self.time), ln=2,
-                                  border=1, align='L')
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Evaluation Report: ' + str(self.time),
+                                      ln=2, border=1, align='L')
         self.analysis_report.y += 2  # Margin below page header
         top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
         self.analysis_report.set_font('Times', 'B', 10)
@@ -254,8 +254,7 @@ class ReportJob(Job):
             # upper left hand coordinates (x,y), then image width with height based on image dimensions
             # (retain original image ratio)
 
-
-            #Insert Data Processing Count Summary
+            # Insert Data Processing Count Summary
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.x = 1
             self.analysis_report.y = 10
@@ -266,11 +265,12 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', '', 7)
             self.analysis_report.set_fill_color(200)
 
-
             if self.training:
-                data_process_path = self.experiment_path + '/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv"
+                data_process_path = self.experiment_path + '/' + self.datasets[
+                    m] + "/exploratory/DataProcessSummary.csv"
             else:
-                data_process_path = self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[m] + "/exploratory/DataProcessSummary.csv"
+                data_process_path = self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    m] + "/exploratory/DataProcessSummary.csv"
 
             table1 = []  # Initialize an empty list to store the data
 
@@ -278,10 +278,10 @@ class ReportJob(Job):
                 csv_reader = csv.reader(csv_file)
                 for row in csv_reader:
                     table1.append(row)
-            #Format
-            #data_summary = data_summary.round(3)
+            # Format
+            # data_summary = data_summary.round(3)
             th = self.analysis_report.font_size
-            col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13] #91 x space total
+            col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13]  # 91 x space total
 
             # Print table header first
             row_count = 0
@@ -289,15 +289,15 @@ class ReportJob(Job):
             previous_row = None
 
             for row in table1:  # each row
-                #Make header
+                # Make header
                 if row_count == 0:
-                    for datum in row: # Print first row
+                    for datum in row:  # Print first row
                         entry_list = str(datum).split(' ')
                         self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
-                    for datum in row: # Print second row
+                    for datum in row:  # Print second row
                         entry_list = str(datum).split(' ')
                         try:
                             self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C")
@@ -311,11 +311,14 @@ class ReportJob(Job):
                     previous_row = row
                     for datum in row:
                         if col_count == 0:
-                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L", fill=True)
-                        elif col_count == 6: # missing percent column
-                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L",
+                                                      fill=True)
+                        elif col_count == 6:  # missing percent column
+                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)),
+                                                      border=1, align="L", fill=True)
                         else:
-                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1,
+                                                      align="L", fill=True)
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
@@ -323,16 +326,20 @@ class ReportJob(Job):
                     for datum in row:
                         if col_count == 0:
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
-                        elif str(previous_row[col_count]) == str(row[col_count]): # Value unchanged
-                            if col_count == 6: # missing percent column
-                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L")
+                        elif str(previous_row[col_count]) == str(row[col_count]):  # Value unchanged
+                            if col_count == 6:  # missing percent column
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)),
+                                                          border=1, align="L")
                             else:
-                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L")
+                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))),
+                                                          border=1, align="L")
                         else:
-                            if col_count == 6: # missing percent column
-                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
+                            if col_count == 6:  # missing percent column
+                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)),
+                                                          border=1, align="L", fill=True)
                             else:
-                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))),
+                                                          border=1, align="L", fill=True)
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
@@ -341,12 +348,15 @@ class ReportJob(Job):
             row_count -= 1
             for datum in table1[row_count]:
                 if col_count == 0:
-                    self.analysis_report.cell(col_width_list[col_count], th, 'Processed', border=1, align="L", fill=True)
+                    self.analysis_report.cell(col_width_list[col_count], th, 'Processed', border=1, align="L",
+                                              fill=True)
                 else:
-                    if col_count == 6: # missing percent column
-                        self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum),4)), border=1, align="L", fill=True)
+                    if col_count == 6:  # missing percent column
+                        self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)), border=1,
+                                                  align="L", fill=True)
                     else:
-                        self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1, align="L", fill=True)
+                        self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1,
+                                                  align="L", fill=True)
                 col_count += 1
 
             self.analysis_report.set_font('Times', 'B', 8)
@@ -375,14 +385,14 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', '', 8)
             if self.training:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
+                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45,
+                    35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             else:
                 self.analysis_report.image(
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
-
 
             # Insert Feature Correlation Plot
             try:
@@ -395,16 +405,16 @@ class ReportJob(Job):
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
                         120, 47, 89, 70)
-                        #self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
-                        #85, 15, 125, 100)
+                    # self.experiment_path + '/' + self.datasets[m] + '/exploratory/FeatureCorrelations.png',
+                    # 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
                 else:
                     self.analysis_report.image(
                         self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                             m] + '/exploratory/FeatureCorrelations.png', 120, 47, 89, 70)
-                        #self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
+                    # self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
                     # upper left hand coordinates (x,y),
                     # then image width with hight based on image dimensions (retain original image ratio)
             except Exception:
@@ -883,7 +893,8 @@ class ReportJob(Job):
                 #                                 align='L')
                 # self.analysis_report.y += 1  # Space below section header
                 # self.analysis_report.set_font('Times', 'B', 8)
-                # self.analysis_report.multi_cell(w=180, h=4, txt='Feature: \t\t\t P-Value \t\t\t (Test, test statistics)', border=1,
+                # self.analysis_report.multi_cell(w=180, h=4,
+                # txt='Feature: \t\t\t P-Value \t\t\t (Test, test statistics)', border=1,
                 #                                 align='L')
                 # self.analysis_report.set_font('Times', '', 8)
                 # self.analysis_report.multi_cell(w=180, h=4, txt=' ' + list_to_string(sig_ls), border=1, align='L')
@@ -911,7 +922,7 @@ class ReportJob(Job):
                                 pass
                             else:
                                 self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
-                                                      align="C")
+                                                          align="C")
                         except Exception:
                             self.analysis_report.cell(col_width_list[col_count], th, ' ', border=1, align="C")
                         col_count += 1
