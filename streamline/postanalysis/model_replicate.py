@@ -259,7 +259,7 @@ class ReplicateJob(Job):
 
         total_missing = eda.dataset.missingness_counts(self.experiment_path + '/' + self.train_name)
 
-        eda.counts_summary(total_missing, plot=True)
+        eda.counts_summary(total_missing, plot=True, replicate=True)
 
         # Create features-only version of dataset for some operations
         x_rep_data = eda.dataset.feature_only_data()

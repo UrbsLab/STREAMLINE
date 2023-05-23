@@ -531,7 +531,7 @@ class DataProcess(Job):
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
 
-    def counts_summary(self, total_missing=None, plot=False, save=True):
+    def counts_summary(self, total_missing=None, plot=False, save=True, replicate=False):
         """
         Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
         features, and class counts. Also saves a simple bar graph of class counts if user specified.
@@ -587,11 +587,15 @@ class DataProcess(Job):
             df_value_counts.columns = ['Class', 'Instances']
             logging.info("\n" + df_value_counts.to_string())
 
-            logging.info("Original Categorical Features: " + str(self.categorical_features))
-            logging.info("Engineered Features: " + str(self.engineered_features))
-            logging.info("One Hot Features: " + str(self.one_hot_features))
-            logging.info("Final List of Features:")
-            logging.info(list(self.dataset.get_headers()))
+            if not replicate:
+                logging.info("Original Categorical Features: " + str(self.categorical_features))
+                logging.info("Engineered Features: " + str(self.engineered_features))
+                logging.info("One Hot Features: " + str(self.one_hot_features))
+                logging.info("Final List of Features:")
+                logging.info(list(self.dataset.get_headers()))
+            else:
+                logging.info("Final List of Features:")
+                logging.info(list(self.dataset.get_headers()))
 
             # Generate and export class count bar graph
             if plot:
