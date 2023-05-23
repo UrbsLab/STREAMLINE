@@ -143,7 +143,7 @@ class DataProcessRunner:
                     dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
-                                          list(self.categorical_features), self.exploration_list, self.plot_list,
+                                          self.categorical_features, self.exploration_list, self.plot_list,
                                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                                           self.cleaning_missingness, self.correlation_removal_threshold,
                                           self.partition_method, self.n_splits,
