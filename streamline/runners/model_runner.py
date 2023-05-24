@@ -56,7 +56,6 @@ class ModelExperimentRunner:
             lcs_timeout: seconds until hyperparameter sweep stops for LCS algorithms, default=1200
 
         """
-        # TODO: What does training subsample do
         self.cv_count = None
         self.dataset = None
         self.output_path = output_path
@@ -213,20 +212,19 @@ class ModelExperimentRunner:
         metadata = pickle.load(file)
         file.close()
         # Update metadata
-        metadata['Naive Bayes'] = str('Naive Bayes' in self.algorithms)
-        metadata['Logistic Regression'] = str('Logistic Regression' in self.algorithms)
-        metadata['Decision Tree'] = str('Decision Tree' in self.algorithms)
-        metadata['Random Forest'] = str('Random Forest' in self.algorithms)
-        metadata['Gradient Boosting'] = str('Gradient Boosting' in self.algorithms)
-        metadata['Extreme Gradient Boosting'] = str('Extreme Gradient Boosting' in self.algorithms)
-        metadata['Light Gradient Boosting'] = str('Light Gradient Boosting' in self.algorithms)
-        metadata['Category Gradient Boosting'] = str('Category Gradient Boosting' in self.algorithms)
-        metadata['Support Vector Machine'] = str('Support Vector Machine' in self.algorithms)
-        metadata['Artificial Neural Network'] = str('Artificial Neural Network' in self.algorithms)
-        metadata['K-Nearest Neighbors'] = str('K-Nearest Neighbors' in self.algorithms)
-        metadata['Genetic Programming'] = str('Genetic Programming' in self.algorithms)
-
         # Comment our this metadata, so it doesn't show up in the report.
+        # metadata['Naive Bayes'] = str('Naive Bayes' in self.algorithms)
+        # metadata['Logistic Regression'] = str('Logistic Regression' in self.algorithms)
+        # metadata['Decision Tree'] = str('Decision Tree' in self.algorithms)
+        # metadata['Random Forest'] = str('Random Forest' in self.algorithms)
+        # metadata['Gradient Boosting'] = str('Gradient Boosting' in self.algorithms)
+        # metadata['Extreme Gradient Boosting'] = str('Extreme Gradient Boosting' in self.algorithms)
+        # metadata['Light Gradient Boosting'] = str('Light Gradient Boosting' in self.algorithms)
+        # metadata['Category Gradient Boosting'] = str('Category Gradient Boosting' in self.algorithms)
+        # metadata['Support Vector Machine'] = str('Support Vector Machine' in self.algorithms)
+        # metadata['Artificial Neural Network'] = str('Artificial Neural Network' in self.algorithms)
+        # metadata['K-Nearest Neighbors'] = str('K-Nearest Neighbors' in self.algorithms)
+        # metadata['Genetic Programming'] = str('Genetic Programming' in self.algorithms)
         # metadata['eLCS'] = str('eLCS' in self.algorithms)
         # metadata['XCS'] = str('XCS' in self.algorithms)
         # metadata['ExSTraCS'] = str('ExSTraCS' in self.algorithms)

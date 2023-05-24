@@ -138,9 +138,9 @@ class ReportJob(Job):
         ls1 = ars_dic[0:87]  # DataPath to OverwriteCVDatasets - filter poor [0:87]
         # ls2 = ars_dic[87:132]  # ML modeling algorithms (NaiveB - ExSTraCS) [87:132]
         ls2 = ars_dic_2
-        ls3 = ars_dic[132:150]  # primary metric - Export Hyperparameter SweepPLot  [132:150]
-        ls4 = ars_dic[150:165]  # DoLCS Hyperparameter Sweep LCS hyper-sweep timeout) [150:165]
-        ls5 = ars_dic[165:183]  # ExportROCPlot to Top Model Features to Display [165:180]
+        ls3 = ars_dic[87:105]  # primary metric - Export Hyperparameter SweepPLot  [132:150]
+        ls4 = ars_dic[105:129]  # DoLCS Hyperparameter Sweep LCS hyper-sweep timeout) [150:165]
+        ls5 = ars_dic[129:147]  # ExportROCPlot to Top Model Features to Display [165:180]
 
         self.analysis_report.set_font('Times', 'B', 12)
         if self.training:
