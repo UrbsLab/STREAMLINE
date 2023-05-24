@@ -68,7 +68,7 @@ class ModelExperimentRunner:
             algorithms = None
 
         if algorithms is None:
-            self.algorithms = SUPPORTED_MODELS
+            self.algorithms = list(SUPPORTED_MODELS)
             if exclude is not None:
                 for algorithm in exclude:
                     try:
@@ -225,9 +225,11 @@ class ModelExperimentRunner:
         metadata['Artificial Neural Network'] = str('Artificial Neural Network' in self.algorithms)
         metadata['K-Nearest Neighbors'] = str('K-Nearest Neighbors' in self.algorithms)
         metadata['Genetic Programming'] = str('Genetic Programming' in self.algorithms)
-        metadata['eLCS'] = str('eLCS' in self.algorithms)
-        metadata['XCS'] = str('XCS' in self.algorithms)
-        metadata['ExSTraCS'] = str('ExSTraCS' in self.algorithms)
+
+        # Comment our this metadata, so it doesn't show up in the report.
+        # metadata['eLCS'] = str('eLCS' in self.algorithms)
+        # metadata['XCS'] = str('XCS' in self.algorithms)
+        # metadata['ExSTraCS'] = str('ExSTraCS' in self.algorithms)
         # Add new algorithms here...
         metadata['Primary Metric'] = self.scoring_metric
         metadata['Training Subsample for KNN,ANN,SVM,and XGB'] = self.training_subsample
