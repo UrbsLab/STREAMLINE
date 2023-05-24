@@ -7,13 +7,15 @@ import numpy as np
 import optuna
 import pandas as pd
 from sklearn.inspection import permutation_importance
+from sklearn.model_selection import StratifiedShuffleSplit
+
 from streamline.utils.job import Job
 
 
 class ModelJob(Job):
     def __init__(self, full_path, output_path, experiment_name, cv_count, class_label="Class",
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trials=200,
-                 timeout=900, uniform_fi=False, save_plot=False, random_state=None):
+                 timeout=900, training_subsample=0, uniform_fi=False, save_plot=False, random_state=None):
         """
 
         Args:
@@ -61,6 +63,7 @@ class ModelJob(Job):
 
         self.n_trials = n_trials
         self.timeout = timeout
+        self.training_subsample = training_subsample
         self.random_state = random_state
         self.uniform_fi = uniform_fi
         self.feature_importance = None
@@ -111,6 +114,13 @@ class ModelJob(Job):
         # Load training and testing datasets separating features from outcome for scikit-learn-based modeling
         x_train, y_train, x_test, y_test = self.data_prep()
         model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
+        if 0 < self.training_subsample < x_train.shape[0]:
+            sss = StratifiedShuffleSplit(n_splits=1, train_size=self.training_subsample, random_state=self.random_state)
+            for train_index, _ in sss.split(x_train, y_train):
+                x_train = x_train[train_index]
+                y_train = y_train[train_index]
+            logging.warning('For ' + model.small_name
+                            + ', training sample reduced to ' + str(x_train.shape[0]) + ' instances')
 
         if not os.path.exists(self.full_path + '/models/'):
             os.makedirs(self.full_path + '/models/')

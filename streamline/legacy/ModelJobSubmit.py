@@ -20,15 +20,16 @@ def run_cluster(argv):
     metric_direction = argv[8]
     n_trials = int(argv[9])
     timeout = int(argv[10])
-    uniform_fi = eval(argv[11])
-    save_plot = eval(argv[12])
-    random_state = None if argv[13] == "None" else int(argv[13])
-    algorithm = argv[14]
-    n_jobs = None if argv[15] == "None" else int(argv[15])
-    do_lcs_sweep = eval(argv[16])
-    lcs_iterations = int(argv[17])
-    lcs_n = int(argv[18])
-    lcs_nu = int(argv[19])
+    training_subsample = int(argv[11])
+    uniform_fi = eval(argv[12])
+    save_plot = eval(argv[13])
+    random_state = None if argv[14] == "None" else int(argv[14])
+    algorithm = argv[15]
+    n_jobs = None if argv[16] == "None" else int(argv[16])
+    do_lcs_sweep = eval(argv[17])
+    lcs_iterations = int(argv[18])
+    lcs_n = int(argv[19])
+    lcs_nu = int(argv[20])
 
     job_obj = ModelJob(full_path, output_path, experiment_name, cv_count, class_label,
                        instance_label, scoring_metric, metric_direction, n_trials,

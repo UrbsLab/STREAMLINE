@@ -188,7 +188,8 @@ class ModelExperimentRunner:
 
                     job_obj = ModelJob(full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
-                                       self.timeout, self.uniform_fi, self.save_plots, self.random_state)
+                                       self.timeout, self.training_subsample, self.uniform_fi,
+                                       self.save_plots, self.random_state)
                     if run_parallel and run_parallel != "False":
                         # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
                         # job_list.append(p)
@@ -260,8 +261,8 @@ class ModelExperimentRunner:
     def get_cluster_params(self, full_path, algorithm, cv_count):
         cluster_params = [full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
                           self.instance_label, self.scoring_metric, self.metric_direction,
-                          self.n_trials,
-                          self.timeout, self.uniform_fi, self.save_plots, self.random_state]
+                          self.n_trials, self.timeout, self.training_subsample,
+                          self.uniform_fi, self.save_plots, self.random_state]
         cluster_params += [algorithm, self.n_jobs, self.do_lcs_sweep,
                            self.lcs_iterations, self.lcs_n, self.lcs_nu]
         cluster_params = [str(i) for i in cluster_params]
