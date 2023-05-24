@@ -315,7 +315,8 @@ class StatsJob(Job):
                         self.full_path + '/CVDatasets/' + self.data_name
                         + '_CV_' + str(cv_count) + '_Test.csv').columns.values.tolist()
                     if self.instance_label is not None:
-                        headers.remove(self.instance_label)
+                        if self.instance_label in headers:
+                            headers.remove(self.instance_label)
                     headers.remove(self.class_label)
                     for each in self.original_headers:
                         # Check if current feature from original dataset was in the partition
