@@ -16,7 +16,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 # pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
-dataset_path, experiment_name = "./DemoData/", "demo",
+dataset_path, experiment_name = "./data/DemoData/", "demo",
 model_algorithms = ["NB", "LR", "DT"]
 
 
@@ -81,7 +81,7 @@ def test_setup():
     report.run(run_parallel=run_parallel)
     del report
 
-    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
+    repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
                              output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel=run_parallel)
