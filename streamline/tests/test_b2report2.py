@@ -81,7 +81,7 @@ def test_setup():
     report.run(run_parallel=run_parallel)
     del report
 
-    repl = ReplicationRunner('./DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
+    repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
                              output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel=run_parallel)
