@@ -193,12 +193,17 @@ class DataProcess(Job):
                                  (self.dataset.match_label and feat == self.dataset.match_label)):
                     self.categorical_features.append(feat)
 
-                # Not encoding anything except class labels to preserve label in figures
+                # Not encoding anything except class labels and binary text categorical variable
+                # to preserve label in figures
 
                 if feat == self.dataset.class_label:
                     self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
                     ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
+                elif self.dataset.data[feat].nunique() <= 2:
+                    self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
+                    ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
                 else:
+                    # Do we fake numerical encode a dataset?
                     pass
 
             ord_label.to_csv(self.experiment_path + '/' + self.dataset.name +
@@ -252,7 +257,7 @@ class DataProcess(Job):
                 pickle.dump(high_missingness_features, outfile)
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/engineered_features.csv', 'w') as outfile:
+                      '/exploratory/Missingness_Engineered_Features.csv', 'w') as outfile:
                 outfile.write("\n".join(self.engineered_features))
         else:
             logging.info("No Features with high missingness found")
@@ -279,7 +284,7 @@ class DataProcess(Job):
                       '/exploratory/removed_variables.pickle', 'wb') as outfile:
                 pickle.dump(removed_variables, outfile)
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/missingness_feature_cleaning.csv', 'w') as outfile:
+                      '/exploratory/Missingness_Feature_Cleaning.csv', 'w') as outfile:
                 outfile.write("\n".join(removed_variables))
         else:
             logging.info("Not removing any features due to high missingness")
