@@ -212,8 +212,8 @@ class DataProcessRunner:
         metadata['Feature Missingness Cutoff'] = self.featureeng_missingness
         metadata['Cleaning Missingness Cutoff'] = self.cleaning_missingness
         metadata['Correlation Removal Threshold'] = self.correlation_removal_threshold
-        metadata['Export Feature Correlations'] = "Feature Correlation" in self.plot_list
-        metadata['Export Univariate Plots'] = "Univariate Analysis" in self.plot_list
+        metadata['List of Exploratory Analysis Ran'] = self.exploration_list
+        metadata['List of Exploratory Plots Saved'] = self.plot_list
         metadata['Random Seed'] = self.random_state
         metadata['Run From Notebook'] = self.show_plots
         # Pickle the metadata for future use
