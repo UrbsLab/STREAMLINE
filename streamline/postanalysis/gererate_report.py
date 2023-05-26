@@ -135,6 +135,152 @@ class ReportJob(Job):
         # FRONT PAGE - Summary of Pipeline settings
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
+
+        targetdata1 = ars_dic[0:15] #Datapath to  instance label
+        print(targetdata1)
+        targetdata3 = ars_dic[15:21] #Ignored features to  specified categorical feature_selection
+        print(targetdata3)
+        cv = ars_dic[21:27] #cv partitions to partition Method
+        match = ars_dic[27:30] #match label
+        cat_cut = ars_dic[30:33] #categorical cutoff
+        stat_cut = ars_dic[33:36] #statsistical significance cutoff
+        process = ars_dic[36:51] # feature missingness cutoff to list of exploratory plots saved
+        general = ars_dic[51:57] # random seed to run from notebooks
+        process2 = ars_dic[57:66] # use data scaling to use mulitvariate imputation
+        featsel = ars_dic[66:93] #use mutual info to export feature importance plots
+        overwrite = ars_dic[93:96] # overwrite cv
+        modeling = ars_dic[96:114] # primary metric to expot hyperparameter sweep plots
+        lcs = ars_dic[114:129]
+        stats = ars_dic[129:150]
+
+        ls2 = ars_dic_2
+
+        self.analysis_report.set_font('Times', 'B', 12)
+        if self.training:
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Evaluation Report: ' + str(self.time), ln=2,
+                                      border=1, align='L')
+        else:
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Evaluation Report: ' + str(self.time),
+                                      ln=2, border=1, align='L')
+
+        self.analysis_report.y += 2  # Margin below page header
+        top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='General Pipeline Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.multi_cell(w=90, h=4,
+                                        txt=' ' + list_to_string(cv) + ' ' + list_to_string(
+                                        cat_cut) + ' ' + list_to_string(stat_cut)+ ' ' + list_to_string(
+                                        general),
+                                        border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='EDA and Processing Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.multi_cell(w=90, h=4,
+                                        txt=' ' + list_to_string(process) + ' ' + list_to_string(
+                                        process2)+ ' ' + list_to_string(overwrite),
+                                        border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='Feature Importance/Selection Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.multi_cell(w=90, h=4,
+                                        txt=' ' + list_to_string(featsel),
+                                        border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='Stats and Figure Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.multi_cell(w=90, h=4,
+                                        txt=' ' + list_to_string(stats),
+                                        border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='Target Data Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.multi_cell(w=90, h=4,
+                                        txt=' ' + list_to_string(targetdata1)+ ' ' + list_to_string(
+                                        targetdata3),
+                                        border=1, align='L')
+
+        bottom_of_list = self.analysis_report.y
+
+        self.analysis_report.x += 90
+        self.analysis_report.y = top_of_list  # 96
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='ML Modeling Algorithms:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.x += 90
+        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(ls2), border=1, align='L')
+        self.analysis_report.y += 1
+
+        self.analysis_report.x += 90
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='Modeling Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.x += 90
+        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
+
+        self.analysis_report.x += 90
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.x += 90
+        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
+        self.analysis_report.y = bottom_of_list + 2
+
+        """
+        try_again = True
+        try:
+            self.analysis_report.image('Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
+            try_again = False
+        except Exception:
+            pass
+        if try_again:
+            try:  # Running on Google Colab
+                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/Pictures/STREAMLINE_LOGO.png', 102, 150,
+                                           90)
+            except Exception:
+                pass
+        """
+
+        if self.training:
+            # Get names of self.datasets run in analysis
+            list_datasets = ''
+            i = 1
+            for each in self.datasets:
+                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
+                i += 1
+            # Report self.datasets
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.multi_cell(w=180, h=4, txt='Datasets', border=1, align='L')
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
+        else:
+            self.analysis_report.cell(w=180, h=4, txt='Target Training Dataset: ' + self.train_name, border=1,
+                                      align='L')
+            self.analysis_report.y += 5
+            self.analysis_report.x = 10
+
+            list_datasets = ''
+            i = 1
+            for each in self.datasets:
+                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
+                i += 1
+            self.analysis_report.multi_cell(w=180, h=4, txt='Applied self.datasets: ' + '\n' + list_datasets, border=1,
+                                            align='L')
+
+        """
         ls1 = ars_dic[0:87]  # DataPath to OverwriteCVDatasets - filter poor [0:87]
         # ls2 = ars_dic[87:132]  # ML modeling algorithms (NaiveB - ExSTraCS) [87:132]
         ls2 = ars_dic_2
@@ -218,6 +364,7 @@ class ReportJob(Job):
                 i += 1
             self.analysis_report.multi_cell(w=180, h=4, txt='Applied self.datasets: ' + '\n' + list_datasets, border=1,
                                             align='L')
+        """
         self.footer()
 
         # NEXT PAGE(S) - Exploratory Univariate Analysis for each Dataset
