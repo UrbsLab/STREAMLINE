@@ -106,7 +106,7 @@ class DataProcessRunner:
         self.show_plots = show_plots
 
         if self.exploration_list is None or self.exploration_list == []:
-            self.explorations_list = ["Describe", "Differentiate", "Univariate Analysis"]
+            self.explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         if self.plot_list is None or self.plot_list == []:
             self.plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         self.random_state = random_state
@@ -212,10 +212,10 @@ class DataProcessRunner:
         metadata['Feature Missingness Cutoff'] = self.featureeng_missingness
         metadata['Cleaning Missingness Cutoff'] = self.cleaning_missingness
         metadata['Correlation Removal Threshold'] = self.correlation_removal_threshold
-        metadata['Export Feature Correlations'] = "Feature Correlations" in self.plot_list
+        metadata['Export Feature Correlations'] = "Feature Correlation" in self.plot_list
         metadata['Export Univariate Plots'] = "Univariate Analysis" in self.plot_list
         metadata['Random Seed'] = self.random_state
-        metadata['Run From Jupyter Notebook'] = False
+        metadata['Run From Notebook'] = self.show_plots
         # Pickle the metadata for future use
         pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
         pickle.dump(metadata, pickle_out)
