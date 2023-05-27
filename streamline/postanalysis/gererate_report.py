@@ -164,7 +164,7 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', 'B', 10)
         self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
 
-        self.analysis_report.y += 2  # Margin below page header
+        self.analysis_report.y += 1  # Margin below page header
         top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
         self.analysis_report.set_font('Times', 'B', 10)
         self.analysis_report.multi_cell(w=90, h=4, txt='General Pipeline Settings:', border=1, align='L')
@@ -175,7 +175,7 @@ class ReportJob(Job):
                                         cat_cut) + ' ' + list_to_string(stat_cut)+ ' ' + list_to_string(
                                         general),
                                         border=1, align='L')
-        self.analysis_report.y += 2  # Space below section header
+        self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 10)
         self.analysis_report.multi_cell(w=90, h=4, txt='EDA and Processing Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
@@ -184,7 +184,7 @@ class ReportJob(Job):
                                         txt=' ' + list_to_string(process) + ' ' + list_to_string(
                                         process2)+ ' ' + list_to_string(overwrite),
                                         border=1, align='L')
-        self.analysis_report.y += 2  # Space below section header
+        self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 10)
         self.analysis_report.multi_cell(w=90, h=4, txt='Feature Importance/Selection Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
@@ -192,7 +192,7 @@ class ReportJob(Job):
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(featsel),
                                         border=1, align='L')
-        self.analysis_report.y += 2  # Space below section header
+        self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 10)
         self.analysis_report.multi_cell(w=90, h=4, txt='Target Data Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
@@ -211,7 +211,7 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', '', 8)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(ls2), border=1, align='L')
-        self.analysis_report.y += 2
+        self.analysis_report.y += 1
 
         self.analysis_report.x += 90
         self.analysis_report.set_font('Times', 'B', 10)
@@ -220,7 +220,7 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', '', 8)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
-        self.analysis_report.y += 2
+        self.analysis_report.y += 1
 
         self.analysis_report.x += 90
         self.analysis_report.set_font('Times', 'B', 10)
@@ -229,7 +229,7 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', '', 8)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
-        self.analysis_report.y += 2
+        self.analysis_report.y += 1
 
         self.analysis_report.x += 90
         self.analysis_report.set_font('Times', 'B', 10)
@@ -530,25 +530,25 @@ class ReportJob(Job):
 
             # Insert Class Imbalance barplot
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.x = 65
+            self.analysis_report.x = 70
             self.analysis_report.y = 42
             self.analysis_report.cell(45, 4, 'Class Balance (Processed)', 1, align="L")
             self.analysis_report.set_font('Times', '', 8)
             if self.training:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45,
+                    self.experiment_path + '/' + self.datasets[m] + '/exploratory/ClassCountsBarPlot.png', 68, 47, 45,
                     35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             else:
                 self.analysis_report.image(
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/exploratory/ClassCountsBarPlot.png', 63, 47, 45, 35)
+                        m] + '/exploratory/ClassCountsBarPlot.png', 68, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
 
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 140
+                self.analysis_report.x = 143
                 self.analysis_report.y = 42
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
