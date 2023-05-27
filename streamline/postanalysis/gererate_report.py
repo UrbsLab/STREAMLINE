@@ -161,7 +161,8 @@ class ReportJob(Job):
                                       ln=2, border=1, align='L')
 
         self.analysis_report.y += 2  # Margin below page header
-        self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
+        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
 
         self.analysis_report.y += 2  # Margin below page header
         top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
@@ -408,7 +409,7 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.x = 1
             self.analysis_report.y = 10
-            self.analysis_report.cell(80, 4, 'Data Processing/Counts Summary', 1, align="L")
+            self.analysis_report.cell(119, 4, 'Data Processing/Counts Summary', 1, align="L")
 
             self.analysis_report.x = 1
             self.analysis_report.y = 15
@@ -529,7 +530,7 @@ class ReportJob(Job):
 
             # Insert Class Imbalance barplot
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.x = 63
+            self.analysis_report.x = 65
             self.analysis_report.y = 42
             self.analysis_report.cell(45, 4, 'Class Balance (Processed)', 1, align="L")
             self.analysis_report.set_font('Times', '', 8)
@@ -547,7 +548,7 @@ class ReportJob(Job):
             # Insert Feature Correlation Plot
             try:
                 self.analysis_report.set_font('Times', 'B', 10)
-                self.analysis_report.x = 135
+                self.analysis_report.x = 140
                 self.analysis_report.y = 42
                 self.analysis_report.cell(50, 4, 'Feature Correlations (Pearson)', 1, align="L")
                 self.analysis_report.set_font('Times', '', 8)
