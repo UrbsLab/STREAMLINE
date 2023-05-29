@@ -55,28 +55,26 @@ pipeline as defined. A few examples are given below.
 `run.py` can also be used with config parameters 
 as defined in the [parameters section](parameters.md)
 
-Then it can be run with the command defined below (considering 
-the config file is `run.cfg`.
+Then it can be run with the command defined below.
 ```
-python run.py -c run.cfg
+python run.py -c <config_file>
 ```
 
-As example config setup to run all steps till report generations
+For running the Demo Dataset locally a config file is already provided and 
+the user doesn't need to do any edits.
+
+The example config setup to run all steps till report generations locally on the Demo Dataset
 is given in the config 
 file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/run.cfg)
 
-except specifically the `multiprocessing` section needs to be defined as
+The user can simply run the following command to run the whole pipeline:
 ```
-[multiprocessing]
-run_parallel = True <or False, accordingly>
-reserved_memory = 4
-run_cluster = False
-queue = 'defq'
+python run.py -c local.cfg
 ```
 
-This sets the cluster setting off and makes it run 
-natively on the local machine.
-
+Specifically the `run_cluster` parameter in the `multiprocessing` section has to been defined as
+`run_cluster = "False"` which runs it locally. This specific parameter in 
+the file is located [here](https://github.com/UrbsLab/STREAMLINE/blob/5c66b3286056bbd9b514c202aa0a22758a76f62c/run.cfg#L11)
 
 
 ### Using command-line parameters
@@ -93,104 +91,66 @@ python run.py <other commands> --run-cluster False --run-parallel True<or Flase,
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
-               --run-cluster False --run-parallel True 
+python run.py --data-path DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster False --run-parallel True
 ```
 
-To just run Phase 1:
+A user can also run phases of STREAMLINE individually, 
+however the user must have run all the phases before the phase he wants to run, i.e. the user must run this
+pipeline sequentially in the given order.
+
+To just run Exploratory Phase (Phase 1):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID --do-all False --algorithms=NB,LR,DT \
-               --do-till-report False --do-eda True \
-               --run-cluster False --run-parallel True
+python run.py --data-path DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster False --run-parallel True
 ```
 
-To just run Phase 2:
+To just run Data Preparation Phase (Phase 2):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-dataprep True \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster False --run-parallel True
 ```
 
 
-To just run Phase 3:
+To just run Feature Importance Phase (Phase 3):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-feat-imp True \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster False --run-parallel True
 ```
 
-To just run Phase 4:
+To just run Feature Selection Phase (Phase 4):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-feat-sel True \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --do-feat-sel --run-cluster False --run-parallel True
 ```
 
-To just run Phase 5:
+To just run Modeling Phase (Phase 5):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-model True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT --run-cluster False --run-parallel True
 ```
 
-To just run Phase 6:
+To just run Statistical Analysis Phase (Phase 6):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-stats True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --do-stats --run-cluster False --run-parallel True
 ```
 
-To just run Phase 7:
+To just run Dataset Compare Phase (Phase 7):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-compare-dataset True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
-To just run Phase 8:
+To just run (Reporting Phase) Phase 8:
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-report True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
 ```
 
 
-To just run Phase 9:
+To just run Replication Phase (Phase 9):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv \        
-               --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-replicate True \
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-replicate --run-cluster False --run-parallel True
 ```
 
-To just run Phase 10:
+To just run Replication Report Phase (Phase 10):
 ```
-python run.py  --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv \
-               --out-path demo --exp-name demo \
-               --class-label Class --inst-label InstanceID \
-               --do-till-report False --do-rep-report True \ 
-               --algorithms NB,LR,DT --do-all False \
-               --run-cluster False --run-parallel True
+python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-rep-report --run-cluster False --run-parallel True
 ```
 
-To just run Phase 11:
+To just run Cleaning Phase (Phase 11):
 ```
-python run.py  --out-path demo --exp-name demo \
-               --do-till-report False --do-clean True \
-               --del-time True --del-old-cv
+python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster False --run-parallel True
 ```
