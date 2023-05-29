@@ -11,6 +11,7 @@ import warnings
 warnings.filterwarnings(action='ignore', module='sklearn')
 warnings.filterwarnings(action='ignore', module='scipy')
 warnings.filterwarnings(action='ignore', module='optuna')
+warnings.filterwarnings(action="ignore", category=ConvergenceWarning, module="sklearn")
 
 
 class BaseModel:
