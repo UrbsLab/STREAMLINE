@@ -285,7 +285,7 @@ class Dataset:
         if x_data is None:
             x_data = self.feature_only_data()
         # Calculate correlation matrix
-        correlation_mat = x_data.corr(method='pearson')
+        correlation_mat = x_data.corr(method='pearson', numeric_only=True)
         # corr_matrix_abs = correlation_mat.abs()
 
         correlation_mat.to_csv(experiment_path + '/' + self.name

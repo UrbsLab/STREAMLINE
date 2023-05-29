@@ -878,8 +878,9 @@ class ReportJob(Job):
 
                 # Format
                 kruskal_wallis_datasets.reset_index(inplace=True)
-                kruskal_wallis_datasets = kruskal_wallis_datasets.columns.to_frame().T.append(kruskal_wallis_datasets,
-                                                                                              ignore_index=True)
+                temp_df = pd.concat([kruskal_wallis_datasets.columns.to_frame().T, kruskal_wallis_datasets])
+                temp_df.iloc[0, 0] = 'Metrics'
+                kruskal_wallis_datasets = temp_df
                 kruskal_wallis_datasets.columns = range(len(kruskal_wallis_datasets.columns))
                 # epw = 208  # Amount of Space (width) Available
                 th = self.analysis_report.font_size
@@ -1053,7 +1054,7 @@ class ReportJob(Job):
                 # sig_df = sig_df.round(3)
                 # Format
                 sig_df.reset_index(inplace=True)
-                sig_df = sig_df.columns.to_frame().T.append(sig_df, ignore_index=True)
+                sig_df = pd.concat([sig_df.columns.to_frame().T, sig_df])
                 sig_df.columns = range(len(sig_df.columns))
                 th = self.analysis_report.font_size
                 col_width_list = [40, 40, 40, 40, 40, 20]
@@ -1220,7 +1221,7 @@ class ReportJob(Job):
                 self.analysis_report.x = 1
             time_df = pd.read_csv(self.experiment_path + '/' + self.datasets[n] + '/runtimes.csv')
             time_df.iloc[:, 1] = time_df.iloc[:, 1].round(2)
-            time_df = time_df.columns.to_frame().T.append(time_df, ignore_index=True)
+            time_df = pd.concat([time_df.columns.to_frame().T, time_df])
             time_df = time_df.to_numpy()
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.cell(col_width * 2, 4, str(self.datasets[n]), 1, align="L")
@@ -1257,7 +1258,7 @@ class ReportJob(Job):
         stats_ds = stats_ds.round(3)
         # Format
         stats_ds.reset_index(inplace=True)
-        stats_ds = stats_ds.columns.to_frame().T.append(stats_ds, ignore_index=True)
+        stats_ds = pd.concat([stats_ds.columns.to_frame().T, stats_ds])
         stats_ds.columns = range(len(stats_ds.columns))
         th = self.analysis_report.font_size
         col_width_list = [32, 11, 11, 8, 12, 12, 10, 15, 15, 15, 15, 8, 9, 9, 8, 8, 8]

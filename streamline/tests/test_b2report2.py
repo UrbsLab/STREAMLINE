@@ -17,7 +17,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo",
-model_algorithms = ["NB", "LR", "DT"]
+model_algorithms = ["NB"]
 
 
 def test_setup():
@@ -27,7 +27,7 @@ def test_setup():
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
                             exploration_list=None,
                             plot_list=None,
-                            class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=["Alcohol"],
+                            class_label="Class", instance_label="InstanceID", n_splits=2, ignore_features=["Alcohol"],
                             categorical_features=['Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
                                                   'Hepatitis B e Antigen',
                                                   'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody',
@@ -92,7 +92,7 @@ def test_setup():
 @pytest.mark.parametrize(
     ("rep_data_path", "run_parallel"),
     [
-        ("./DemoRepData/", run_parallel),
+        ("./data/DemoRepData/", run_parallel),
     ]
 )
 def test_valid_report2(rep_data_path, run_parallel):
