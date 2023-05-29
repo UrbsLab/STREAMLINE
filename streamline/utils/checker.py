@@ -145,9 +145,16 @@ def check_phase_10(output_path, experiment_name, dataset_for_rep):
     return ['job_data_pdf_apply_' + str(train_name) + '.txt']
 
 
+def check_phase_11(output_path, experiment_name):
+    # Check if clean job is done
+    not_deleted = list(glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/*')) + \
+                    list(glob.glob(output_path + "/" + experiment_name + '/jobs/*'))
+    return not_deleted
+
+
 FN_LIST = [check_phase_1, check_phase_2, check_phase_3, check_phase_4,
            check_phase_5, check_phase_6, check_phase_7, check_phase_8,
-           check_phase_9, check_phase_10, ]
+           check_phase_9, check_phase_10, check_phase_11]
 
 
 def check_phase(output_path, experiment_name, phase=5, len_only=True,
@@ -167,6 +174,8 @@ def check_phase(output_path, experiment_name, phase=5, len_only=True,
         phase_jobs = FN_LIST[phase - 1](output_path, experiment_name, rep_data_path)
     elif phase == 10:
         phase_jobs = FN_LIST[phase - 1](output_path, experiment_name, dataset_for_rep)
+    elif phase == 11:
+        phase_jobs = FN_LIST[phase - 1](output_path, experiment_name)
     else:
         raise Exception("Unknown Phase")
 
