@@ -15,7 +15,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 # pytest.skip("Tested Already", allow_module_level=True)
 
-algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
+algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo",
 model_algorithms = ["NB", "LR", "DT"]
 
@@ -92,7 +92,7 @@ def test_setup():
 @pytest.mark.parametrize(
     ("rep_data_path", "run_parallel"),
     [
-        ("./DemoRepData/", run_parallel),
+        ("./data/DemoRepData/", run_parallel),
     ]
 )
 def test_valid_report2(rep_data_path, run_parallel):
