@@ -33,7 +33,7 @@ def run_cluster(argv):
 
     job_obj = ModelJob(full_path, output_path, experiment_name, cv_count, class_label,
                        instance_label, scoring_metric, metric_direction, n_trials,
-                       timeout, uniform_fi, save_plot, random_state)
+                       timeout, training_subsample, uniform_fi, save_plot, random_state)
 
     if (not do_lcs_sweep) or (algorithm not in ['eLCS', 'XCS', 'ExSTraCS']):
         model = model_str_to_obj(algorithm)(cv_folds=3,
