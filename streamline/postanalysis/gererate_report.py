@@ -136,17 +136,17 @@ class ReportJob(Job):
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
 
-        targetdata = ars_dic[0:21] #Datapath to  instance label
-        cv = ars_dic[21:27] #cv partitions to partition Method
-        match = ars_dic[27:30] #match label
-        cat_cut = ars_dic[30:33] #categorical cutoff
-        stat_cut = ars_dic[33:36] #statsistical significance cutoff
-        process = ars_dic[36:51] # feature missingness cutoff to list of exploratory plots saved
-        general = ars_dic[51:57] # random seed to run from notebooks
-        process2 = ars_dic[57:66] # use data scaling to use mulitvariate imputation
-        featsel = ars_dic[66:93] #use mutual info to export feature importance plots
-        overwrite = ars_dic[93:96] # overwrite cv
-        modeling = ars_dic[96:114] # primary metric to expot hyperparameter sweep plots
+        targetdata = ars_dic[0:21]  # Data-path to  instance label
+        cv = ars_dic[21:27]  # cv partitions to partition Method
+        match = ars_dic[27:30]  # match label
+        cat_cut = ars_dic[30:33]  # categorical cutoff
+        stat_cut = ars_dic[33:36]  # statistical significance cutoff
+        process = ars_dic[36:51]  # feature missingness cutoff to list of exploratory plots saved
+        general = ars_dic[51:57]  # random seed to run from notebooks
+        process2 = ars_dic[57:66]  # use data scaling to use multivariate imputation
+        featsel = ars_dic[66:93]  # use mutual info to export feature importance plots
+        overwrite = ars_dic[93:96]  # overwrite cv
+        modeling = ars_dic[96:114]  # primary metric to export hyperparameter sweep plots
         lcs = ars_dic[114:129]
         stats = ars_dic[129:150]
 
@@ -172,8 +172,8 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', '', 8)
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(cv) + ' ' + list_to_string(
-                                        cat_cut) + ' ' + list_to_string(stat_cut)+ ' ' + list_to_string(
-                                        general),
+                                            cat_cut) + ' ' + list_to_string(stat_cut) + ' ' + list_to_string(
+                                            general),
                                         border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 10)
@@ -182,7 +182,7 @@ class ReportJob(Job):
         self.analysis_report.set_font('Times', '', 8)
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(process) + ' ' + list_to_string(
-                                        process2)+ ' ' + list_to_string(overwrite),
+                                            process2) + ' ' + list_to_string(overwrite),
                                         border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 10)
@@ -240,7 +240,6 @@ class ReportJob(Job):
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
 
         self.analysis_report.y = bottom_of_list + 2
-
 
         """
         try_again = True

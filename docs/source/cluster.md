@@ -21,9 +21,9 @@ for using STREAMLINE through config file.
 
 A detailed guide can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
 
-A gist of the application is that you can edit the `upenn.cfg` config file by the following steps
+A gist of the application is that you can edit the `cedars.cfg` config file by the following steps
 1. Go to the root streamline folder.
-2. Type `nano upenn.cfg` in the terminal to open the file in tmux.
+2. Type `nano cedars.cfg` in the terminal to open the file in tmux.
 3. Make the necessary in the changes in the config file.
 4. Press `Ctrl + X` to close the file and `Y` to save the changes.
 
@@ -49,7 +49,7 @@ that will stay open even if you disconnect and close your terminal.
 The steps to take it is as follows:
 1. Go to the root streamline folder.
 2. Type and run `tmux new -s mysession`
-3. Open the required config file using nano (e.g. `upenn.cfg`) 
+3. Open the required config file using nano (e.g. `cedars.cfg`) 
 4. Make the necessary in the changes in the config file.
 5. Press `Ctrl + X` to close the file and `Y` to save the changes.
 6. Run required commands.
@@ -77,9 +77,9 @@ Additionally, the old method of manual submission can be done using the flags
 `"SLURMOld"` and `"LSFOld"` instead. This will generate and submit jobs using shell files 
 similar to the legacy version of STREAMLINE.
 
-As example config setup to run all steps till report generations using LSF dask-jobqueue on UPenn I2C2 Cluster Setup.
+As example config setup to run all steps till report generations using SLURM dask-jobqueue on Cedars HPC Cluster Setup.
 is given in the config 
-file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/upenn.cfg)
+file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/cedars.cfg)
 
 We specifically focus on the multiprocessing section of the 
 config file 
@@ -88,7 +88,7 @@ config file
 
 Now you can run the pipeline using the following command (considering the config file is `upenn.cfg`): 
 ```
-python run.py -c upenn.cfg
+python run.py -c cedars.cfg
 ```
 
 
@@ -101,16 +101,16 @@ As discussed above you need only specify 3 additional parameters in the
 CLI parameters way of running STREAMLINE
 
 ```
-python run.py <other commands> --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py <other commands> --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 We give examples to run all phases separately and together 
-on the example DemoData on the Cedars LSF HPC.
+on the example DemoData on the Cedars SLURM HPC.
 
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 A user can also run phases of STREAMLINE individually, 
@@ -119,57 +119,57 @@ pipeline sequentially in the given order.
 
 To just run Exploratory Phase (Phase 1):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Data Preparation Phase (Phase 2):
 ```
-python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 
 To just run Feature Importance Phase (Phase 3):
 ```
-python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Feature Selection Phase (Phase 4):
 ```
-python run.py --out-path demo --exp-name demo --do-feat-sel --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-feat-sel --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Modeling Phase (Phase 5):
 ```
-python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Statistical Analysis Phase (Phase 6):
 ```
-python run.py --out-path demo --exp-name demo --do-stats --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-stats --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Dataset Compare Phase (Phase 7):
 ```
-python run.py --out-path demo --exp-name demo --do-compare-dataset --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-compare-dataset --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run (Reporting Phase) Phase 8:
 ```
-python run.py --out-path demo --exp-name demo --do-report --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-report --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-replicate --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-replicate --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-rep-report --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-rep-report --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 To just run Cleaning Phase (Phase 11):
 ```
-python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster LSF --res-mem 4 --queue i2c2_normal
+python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster SLURM
 ```
