@@ -35,9 +35,9 @@ def process_params(params):
             or params['do_report'] or params['do_replicate'] or params['do_rep_report']:
         if params['do_all']:
             params['algorithms'] = None
+        if params['algorithms'] == 'All':
+            params['algorithms'] = None
 
-    if params['algorithms'] == 'All':
-        params['algorithms'] = None
     if params['ignore_features_path'] == '':
         params['ignore_features_path'] = None
     if params['categorical_feature_path'] == '':
