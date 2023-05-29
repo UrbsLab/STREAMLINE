@@ -21,9 +21,9 @@ for using STREAMLINE through config file.
 
 A detailed guide can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
 
-A gist of the application is that you can edit the `cedars.cfg` config file by the following steps
+A gist of the application is that you can edit the `run_configs/cedars.cfg` config file by the following steps
 1. Go to the root streamline folder.
-2. Type `nano cedars.cfg` in the terminal to open the file in tmux.
+2. Type `nano run_configs/cedars.cfg` in the terminal to open the file in tmux.
 3. Make the necessary in the changes in the config file.
 4. Press `Ctrl + X` to close the file and `Y` to save the changes.
 
@@ -49,7 +49,7 @@ that will stay open even if you disconnect and close your terminal.
 The steps to take it is as follows:
 1. Go to the root streamline folder.
 2. Type and run `tmux new -s mysession`
-3. Open the required config file using nano (e.g. `cedars.cfg`) 
+3. Open the required config file using nano (e.g. `run_configs/cedars.cfg`) 
 4. Make the necessary in the changes in the config file.
 5. Press `Ctrl + X` to close the file and `Y` to save the changes.
 6. Run required commands.
@@ -88,7 +88,7 @@ config file
 
 Now you can run the pipeline using the following command (considering the config file is `upenn.cfg`): 
 ```
-python run.py -c cedars.cfg
+python run.py -c run_configs/cedars.cfg
 ```
 
 

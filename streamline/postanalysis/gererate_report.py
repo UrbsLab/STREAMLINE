@@ -244,13 +244,13 @@ class ReportJob(Job):
         """
         try_again = True
         try:
-            self.analysis_report.image('Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
+            self.analysis_report.image('info/Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
             try_again = False
         except Exception:
             pass
         if try_again:
             try:  # Running on Google Colab
-                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/Pictures/STREAMLINE_LOGO.png', 102, 150,
+                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/info/Pictures/STREAMLINE_LOGO.png', 102, 150,
                                            90)
             except Exception:
                 pass
@@ -330,13 +330,13 @@ class ReportJob(Job):
 
         try_again = True
         try:
-            self.analysis_report.image('Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
+            self.analysis_report.image('info/Pictures/STREAMLINE_LOGO.png', 102, 150, 90)
             try_again = False
         except Exception:
             pass
         if try_again:
             try:  # Running on Google Colab
-                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/Pictures/STREAMLINE_LOGO.png', 102, 150,
+                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/info/Pictures/STREAMLINE_LOGO.png', 102, 150,
                                            90)
             except Exception:
                 pass

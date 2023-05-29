@@ -1,4 +1,4 @@
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/STREAMLINE_LOGO.jpg?raw=true)
+![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_LOGO.jpg?raw=true)
 # Overview
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
 that empowers anyone to easily train, interpret, and apply predictive models as
@@ -11,7 +11,7 @@ The schematic below breaks the STREAMLINE analysis pipeline down into 4 basic co
 and selection, (3) modeling, and (4) postprocessing. It also summarizes all major
 elements automated within the pipeline.
 
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/Pictures/ML_pipe_schematic.png?raw=true)
+![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/ML_pipe_schematic.png?raw=true)
 
 Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
 
