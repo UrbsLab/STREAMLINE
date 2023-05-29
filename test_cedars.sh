@@ -7,6 +7,6 @@ python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT -
 python run.py --out-path demo --exp-name demo --do-stats --run-cluster SLURMOld --res-mem 4 --queue defq
 python run.py --out-path demo --exp-name demo --do-compare-dataset --run-cluster SLURMOld --res-mem 4 --queue defq
 python run.py --out-path demo --exp-name demo --do-report --run-cluster SLURMOld --res-mem 4 --queue defq
-python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom_rep.csv --out-path demo --exp-name demo --do-replicate --run-cluster SLURMOld --res-mem 4 --queue defq
-python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom_rep.csv --out-path demo --exp-name demo --do-rep-report --run-cluster SLURMOld --res-mem 4 --queue defq
+python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-replicate --run-cluster SLURMOld --res-mem 4 --queue defq
+python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-rep-report --run-cluster SLURMOld --res-mem 4 --queue defq
 python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster SLURMOld --r
