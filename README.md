@@ -1,5 +1,9 @@
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_LOGO.jpg?raw=true)
 # Overview
+
+NOTE: We are currently updating the main branch of STREAMLINE with a major update. Please download and use the most recent release rather than the main branch until these updates have been completed and a new release has been created.
+
+
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
 that empowers anyone to easily train, interpret, and apply predictive models as
 part of a rigorous and customizable data mining analysis. It is programmed in
