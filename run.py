@@ -34,12 +34,18 @@ def runner(obj, phase, run_parallel=True, params=None):
     how = "with " + str(params['run_cluster']) + " Manual Jobs"
     if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
         obj.run(run_parallel=run_parallel)
+        try:
+            rep_data_path = params['rep_data_path']
+            dataset_for_rep = params['dataset_for_rep']
+        except KeyError:
+            rep_data_path = None
+            dataset_for_rep = None
         if phase == 1:
             time.sleep(5)
         while len(check_phase(params['output_path'], params['experiment_name'],
                               phase=phase, len_only=True,
-                              rep_data_path=params['rep_data_path'],
-                              dataset_for_rep=params['dataset_for_rep'],
+                              rep_data_path=rep_data_path,
+                              dataset_for_rep=dataset_for_rep,
                               output=True)) != 0:
             print()
             print("Waiting for " + phase_str + " Manual Jobs to Finish")
