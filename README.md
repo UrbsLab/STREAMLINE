@@ -81,7 +81,7 @@ Just have a Google Account and open this Colab link to run the demo now (takes ~
 Install STREAMLINE for local use with the following command line commands:
 
 ```
-git clone -b dev --single-branch https://github.com/UrbsLab/STREAMLINE
+git clone --single-branch https://github.com/UrbsLab/STREAMLINE
 cd STREAMLINE
 pip install -r requirements.txt
 ```
