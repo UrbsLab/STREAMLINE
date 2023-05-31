@@ -133,6 +133,9 @@ class DataProcessRunner:
                     unique_datanames.append(data_name)
                     file_count += 1
 
+                    if not os.path.exists(self.output_path + '/' + self.experiment_name + '/' + data_name):
+                        os.makedirs(self.output_path + '/' + self.experiment_name + '/' + data_name)
+
                     if self.run_cluster == "SLURMOld":
                         self.submit_slurm_cluster_job(dataset_path)
                         continue
