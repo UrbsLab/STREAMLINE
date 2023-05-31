@@ -7,7 +7,7 @@ To run STREAMLINE locally make sure you've done the local installation as per th
 
 As a gist run the following commands or be in the root STREAMLINE folder to run STREAMLINE.
 ```
-git clone -b dev --single-branch https://github.com/UrbsLab/STREAMLINE
+git clone --single-branch https://github.com/UrbsLab/STREAMLINE
 cd STREAMLINE
 pip install -r requirements.txt
 ```

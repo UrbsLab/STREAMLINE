@@ -48,7 +48,8 @@ as a pip package and may not need to be run from the specific root directory.
 The Jupyter notebook installation is the same as above with two additional steps:
 
 1. Make sure the jupyter package is installed using the following command:
-   ```pip install jupyter
+   ```
+   pip install jupyter
    ```
 2. Run jupyter-notebook using the command `jupyter notebook` and open the `STREAMLINE-Notebook.ipynb` in the
    page that opens up in your web browser.
