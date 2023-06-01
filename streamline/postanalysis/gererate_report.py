@@ -171,7 +171,7 @@ class ReportJob(Job):
                 i += 1
             # Report self.datasets
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.multi_cell(w=180, h=4, txt='Datasets', border=1, align='L')
+            self.analysis_report.multi_cell(w=180, h=4, txt='Target Dataset(s)', border=1, align='L')
             self.analysis_report.y += 1  # Space below section header
             self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
