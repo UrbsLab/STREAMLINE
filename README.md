@@ -1,4 +1,4 @@
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_LOGO.jpg?raw=true)
+![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_Logo_Full.png?raw=true)
 # Overview
 
 NOTE: We are currently updating the main branch of STREAMLINE with a major update. Please download and use the most recent release rather than the main branch until these updates have been completed and a new release has been created.
