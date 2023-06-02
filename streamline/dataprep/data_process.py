@@ -347,13 +347,8 @@ class DataProcess(Job):
             logging.info("No non-binary categorical features, skipping categorical encoding")
 
     def drop_highly_correlated_features(self):
-        # read the matrix or calculate the correlation matrix
-        try:
-            df_corr = pd.read_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'initial/' +
-                                  'FeatureCorrelations.csv', index_col=0)
-        except Exception as e:
-            logging.error(e)
-            df_corr = self.dataset.feature_only_data().corr()
+        df_corr = self.dataset.feature_only_data().corr()
+        df_corr_org = df_corr.copy(deep=True)
 
         # calculate the correlation matrix and reshape
         df_corr = df_corr.stack().reset_index()
@@ -399,8 +394,20 @@ class DataProcess(Job):
                       '/exploratory/correlated_features.pickle', 'wb') as outfile:
                 pickle.dump(features_to_drop, outfile)
 
-            df_corr.to_csv(self.experiment_path + '/' + self.dataset.name +
-                           '/exploratory/correlation_feature_cleaning.csv')
+            all_features = set(self.dataset.get_headers())
+            features_kept = list(all_features - set(features_to_drop))
+
+            logging.warning(df_corr_org.columns)
+
+            with open(self.experiment_path + '/' + self.dataset.name +
+                      '/exploratory/correlation_feature_cleaning.csv', 'w') as file:
+                writer = csv.writer(file)
+                writer.writerow(['Retained Feature', 'Deleted Features', ])
+                for feat in features_kept:
+                    corr_feat = list(df_corr_org[df_corr_org[feat] > self.correlation_removal_threshold].index)
+                    corr_feat.remove(feat)
+                    if len(corr_feat) != 0:
+                        writer.writerow([feat, ] + corr_feat)
         else:
             logging.info("No Features with correlation higher that parameter")
 
