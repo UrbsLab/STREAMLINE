@@ -154,13 +154,42 @@ class ReportJob(Job):
 
         self.analysis_report.set_font('Times', 'B', 12)
         if self.training:
-            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Evaluation Report: ' + str(self.time), ln=2,
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Data Evaluation Report: ' + str(self.time), ln=2,
                                       border=1, align='L')
         else:
-            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Evaluation Report: ' + str(self.time),
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Data Evaluation Report: ' + str(self.time),
                                       ln=2, border=1, align='L')
 
         self.analysis_report.y += 2  # Margin below page header
+
+        if self.training:
+            # Get names of self.datasets run in analysis
+            list_datasets = ''
+            i = 1
+            for each in self.datasets:
+                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
+                i += 1
+            # Report self.datasets
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.multi_cell(w=180, h=4, txt='Target Dataset(s)', border=1, align='L')
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
+        else:
+            self.analysis_report.cell(w=180, h=4, txt='Target Training Dataset: ' + self.train_name, border=1,
+                                      align='L')
+            self.analysis_report.y += 5
+            self.analysis_report.x = 10
+
+            list_datasets = ''
+            i = 1
+            for each in self.datasets:
+                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
+                i += 1
+            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
+
+        self.analysis_report.y += 2  # Margin below Datasets
+
         self.analysis_report.set_font('Times', 'B', 10)
         self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
 
@@ -201,7 +230,8 @@ class ReportJob(Job):
                                         txt=' ' + list_to_string(targetdata),
                                         border=1, align='L')
 
-        bottom_of_list = self.analysis_report.y
+        #bottom_of_list = self.analysis_report.y
+        #self.analysis_report.y = bottom_of_list + 2
 
         self.analysis_report.x += 90
         self.analysis_report.y = top_of_list  # 96
@@ -239,7 +269,7 @@ class ReportJob(Job):
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
 
-        self.analysis_report.y = bottom_of_list + 2
+
 
         """
         try_again = True
@@ -256,32 +286,7 @@ class ReportJob(Job):
                 pass
         """
 
-        if self.training:
-            # Get names of self.datasets run in analysis
-            list_datasets = ''
-            i = 1
-            for each in self.datasets:
-                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
-                i += 1
-            # Report self.datasets
-            self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.multi_cell(w=180, h=4, txt='Datasets', border=1, align='L')
-            self.analysis_report.y += 1  # Space below section header
-            self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
-        else:
-            self.analysis_report.cell(w=180, h=4, txt='Target Training Dataset: ' + self.train_name, border=1,
-                                      align='L')
-            self.analysis_report.y += 5
-            self.analysis_report.x = 10
 
-            list_datasets = ''
-            i = 1
-            for each in self.datasets:
-                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
-                i += 1
-            self.analysis_report.multi_cell(w=180, h=4, txt='Applied self.datasets: ' + '\n' + list_datasets, border=1,
-                                            align='L')
 
         """
         ls1 = ars_dic[0:87]  # DataPath to OverwriteCVDatasets - filter poor [0:87]
