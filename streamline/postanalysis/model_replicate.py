@@ -143,17 +143,32 @@ class ReplicateJob(Job):
                       '/exploratory/ordinal_encoding.pickle', 'rb') as infile:
                 ord_labels = pickle.load(infile)
                 for feat in ord_labels.index:
-                    new_labels = list()
+
                     temp_y, labels = pd.factorize(eda.dataset.data[feat])
+
                     if set(ord_labels.loc[feat]['Category']) == set(labels):
                         eda.dataset.data[feat] = temp_y
+                    elif len(ord_labels.loc[feat]['Category']) == 2:
+                        new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
+                        rename_dict = dict(enumerate(labels))
+                        for lab in new_labels:
+                            rename_dict[None] = lab
+                        rename_dict = {v: k for k, v in rename_dict.items()}
+                        eda.dataset.data.replace({feat: rename_dict}, inplace=True)
+                        ord_labels.loc[feat] = [list(labels) + new_labels,
+                                                list(range(len(list(labels)))) + [None, ] * len(new_labels)]
+                        logging.warning("New Value found in Binary Categorical Variable, filling with null value")
                     else:
                         new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
-                        eda.dataset.data.replace({feat: enumerate(new_labels)})
-                    ord_labels.loc[feat] = [list(labels) + new_labels, list(range(len(list(labels) + new_labels)))]
+                        rename_dict = dict(enumerate(list(labels) + new_labels))
+                        rename_dict = {v: k for k, v in rename_dict.items()}
+                        eda.dataset.data.replace({feat: rename_dict}, inplace=True)
+                        ord_labels.loc[feat] = [list(labels) + new_labels, list(range(len(list(labels) + new_labels)))]
             with open(self.full_path + "/applymodel/" + self.apply_name +
                       '/exploratory/apply_ordinal_encoding.pickle', 'wb') as outfile:
                 pickle.dump(ord_labels, outfile)
+            ord_labels.to_csv(self.full_path + "/applymodel/" + self.apply_name +
+                              '/exploratory/Numerical_Encoding_Map.csv')
         except FileNotFoundError:
             pass
 
@@ -331,7 +346,7 @@ class ReplicateJob(Job):
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
-                    # logging.warning(e)
+                    logging.warning(e)
                     logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))

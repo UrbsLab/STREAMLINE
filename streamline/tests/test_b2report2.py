@@ -15,7 +15,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 # pytest.skip("Tested Already", allow_module_level=True)
 
-algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
+algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo",
 model_algorithms = ["LR", "NB", "DT"]
 
@@ -39,7 +39,7 @@ def test_setup():
                                                   'Portal Hypertension', 'Portal Vein Thrombosis', 'Liver Metastasis',
                                                   'Radiological Hallmark',
                                                   'catTest4', 'catTest10', ],
-                            correlation_removal_threshold=0.7)
+                            correlation_removal_threshold=0.9)
     eda.run(run_parallel=run_parallel)
     del eda
 
