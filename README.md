@@ -1,4 +1,4 @@
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_LOGO.jpg?raw=true)
+![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_Logo_Full.png?raw=true)
 # Overview
 
 NOTE: We are currently updating the main branch of STREAMLINE with a major update. Please download and use the most recent release rather than the main branch until these updates have been completed and a new release has been created.
@@ -13,7 +13,7 @@ and [scikit-learn](https://scikit-learn.org/stable/).
 The schematic below describes and breaks the STREAMLINE analysis pipeline 
 down into it's 9 phases.
 
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/ML_pipe_schematic.png?raw=true)
+![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/info/Pictures/STREAMLINE_paper_lightcolor.png?raw=true)
 
 Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
 
