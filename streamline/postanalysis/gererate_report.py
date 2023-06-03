@@ -179,7 +179,6 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.cell(w=180, h=4, txt='Target Training Dataset: ' + self.train_name, border=1,
                                       align='L')
-            self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.y += 5
             self.analysis_report.x = 10
 
@@ -188,7 +187,12 @@ class ReportJob(Job):
             for each in self.datasets:
                 list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
                 i += 1
-            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
+            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ', border=1, align='L')
+            self.analysis_report.y += 1  # Space below section header
+
+            self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.multi_cell(w=180, h=4, txt= list_datasets, border=1, align='L')
+            #self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
 
         self.analysis_report.y += 2  # Margin below Datasets
 
