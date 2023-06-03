@@ -368,7 +368,7 @@ class DataProcess(Job):
         logging.info('Top 10 Correlated Features')
         logging.info("\n" + df_corr.head(10).to_string())
 
-        df_corr = df_corr[abs(df_corr['Correlation']) > self.correlation_removal_threshold]
+        df_corr = df_corr[abs(df_corr['Correlation']) >= self.correlation_removal_threshold]
 
         features_to_drop = list(df_corr['Removed_Feature'])
 
@@ -404,7 +404,7 @@ class DataProcess(Job):
                 writer = csv.writer(file)
                 writer.writerow(['Retained Feature', 'Deleted Features', ])
                 for feat in features_kept:
-                    corr_feat = list(df_corr_org[df_corr_org[feat] > self.correlation_removal_threshold].index)
+                    corr_feat = list(df_corr_org[abs(df_corr_org[feat]) >= self.correlation_removal_threshold].index)
                     corr_feat.remove(feat)
                     if len(corr_feat) != 0:
                         writer.writerow([feat, ] + corr_feat)
@@ -555,7 +555,7 @@ class DataProcess(Job):
             save:
             total_missing: total missing values (optional, runs again if not given)
             plot: flag to output bar graph in the experiment log folder
-
+            replicate:
         Returns:
 
         """
@@ -568,8 +568,8 @@ class DataProcess(Job):
         if total_missing is None:
             total_missing = self.dataset.missingness_counts(self.experiment_path, save=False)
         percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
-        n_categorical_variables = len(list(self.categorical_features)) + len(list(self.engineered_features)) \
-                                  + len(list(self.one_hot_features))
+        n_categorical_variables = len(list(self.categorical_features)) \
+                                  + len(list(self.engineered_features)) + len(list(self.one_hot_features))
         summary = [['instances', self.dataset.data.shape[0]],
                    ['features', f_count],
                    ['categorical_features', n_categorical_variables],
