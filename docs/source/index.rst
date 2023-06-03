@@ -1,7 +1,7 @@
 STREAMLINE
 ======================================
 
-.. image:: pictures/STREAMLINE_LOGO.jpg
+.. image:: pictures/STREAMLINE_Logo_Full.png
 
 Overview
 --------------------------------------
@@ -14,7 +14,7 @@ and `scikit-learn <https://scikit-learn.org/stable/>`_.
 The schematic below describes and breaks the STREAMLINE analysis pipeline
 down into it's 9 phases.
 
-.. image:: pictures/ML_pipe_schematic.png
+.. image:: pictures/STREAMLINE_paper_lightcolor.png
 
 We recommend reviewing the 'About (FAQs)' section to gain a deeper understanding
 of STREAMLINE with respect to it's overall design, what it includes, what it
