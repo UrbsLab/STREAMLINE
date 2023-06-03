@@ -176,8 +176,10 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
         else:
+            self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.cell(w=180, h=4, txt='Target Training Dataset: ' + self.train_name, border=1,
                                       align='L')
+            self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.y += 5
             self.analysis_report.x = 10
 
