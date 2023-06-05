@@ -21,6 +21,8 @@ of STREAMLINE with respect to it's overall design, what it includes, what it
 can be used for, and implementation highlights that differentiate it from other
 AutoML tools.
 
+Run a quick demonstration of STREAMLINE on example data within our `Google Colab Notebook <https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing>`_.
+
 Current Limitations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 At present, STREAMLINE is limited to supervised learning on tabular,

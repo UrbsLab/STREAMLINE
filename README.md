@@ -14,6 +14,8 @@ down into it's 9 phases.
 
 Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
 
+Run a quick demonstration of STREAMLINE on example data within our [Google Colab Notebook](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
+
 ## Pipeline Design
 The goal of STREAMLINE is to provide an easy and transparent framework
 to learn predictive associations from tabular data. The design of this pipeline
@@ -69,7 +71,7 @@ There is no local installation or additional steps required to run
 STREAMLINE on Google Colab.
 
 Just have a Google Account and open this Colab link to run the demo now (takes ~ 6-7 min):
-[https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing](https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing)
+[https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing)
 
 
 ## Local
