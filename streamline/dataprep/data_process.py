@@ -142,6 +142,7 @@ class DataProcess(Job):
             for feat in self.categorical_features:
                 if feat not in self.dataset.data.columns:
                     categorical_variables.remove(feat)
+                    logging.warning("Categorical variable " + feat + " not found in dataset")
 
         self.categorical_features = categorical_variables
         self.dataset.categorical_variables = self.categorical_features

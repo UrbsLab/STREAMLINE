@@ -79,4 +79,5 @@ Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and 
    development
    models
    citation
+   contributing
    modules
