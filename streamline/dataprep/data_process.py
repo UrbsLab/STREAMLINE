@@ -459,7 +459,7 @@ class DataProcess(Job):
                     self.engineered_features.remove(feat)
                 if feat in self.one_hot_features:
                     self.one_hot_features.remove(feat)
-                if feat in self.one_hot_features:
+                if feat in self.quantitative_features:
                     self.quantitative_features.remove(feat)
 
             with open(self.experiment_path + '/' + self.dataset.name +
