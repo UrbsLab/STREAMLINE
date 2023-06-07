@@ -215,7 +215,7 @@ class DataProcess(Job):
             if feat in self.categorical_features:
                 self.categorical_features.remove(feat)
             if feat in self.quantitative_features:
-                self.categorical_features.remove(feat)
+                self.quantitative_features.remove(feat)
         self.dataset.clean_data(self.ignore_features)
 
     def label_encoder(self):
