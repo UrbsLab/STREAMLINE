@@ -210,7 +210,7 @@ class DataProcess(Job):
         Basic data cleaning: Drops any instances with a missing outcome
         value as well as any features (ignore_features) specified by user
         """
-        # Remove instances with missing outcome values
+        # Remove features that are specified to be dropped
         for feat in self.ignore_features:
             if feat in self.categorical_features:
                 self.categorical_features.remove(feat)
@@ -496,11 +496,6 @@ class DataProcess(Job):
 
         # identify and save categorical variables for intermediate steps before categorical encoding
         self.identify_feature_types()  # Completed
-
-        logging.warning('    Categorical  = ' + str(len(self.categorical_features)))
-        logging.warning('    Quantitative = ' + str(len(self.quantitative_features)))
-        logging.warning('    Categorical  = ' + str((self.categorical_features)))
-        logging.warning('    Quantitative = ' + str((self.quantitative_features)))
 
         transition_df.loc["Original"] = self.counts_summary(save=False)
 

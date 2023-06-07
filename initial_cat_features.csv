@@ -1,0 +1,29 @@
+,Categorical Features
+0,Symptoms
+1,Alcohol
+2,Hepatitis B Surface Antigen
+3,Hepatitis B e Antigen
+4,Hepatitis B Core Antibody
+5,Hepatitis C Virus Antibody
+6,Cirrhosis
+7,Endemic Countries
+8,Smoking
+9,Diabetes
+10,Obesity
+11,Hemochromatosis
+12,Arterial Hypertension
+13,Chronic Renal Insufficiency
+14,Human Immunodeficiency Virus
+15,Nonalcoholic Steatohepatitis
+16,Esophageal Varices
+17,Splenomegaly
+18,Portal Hypertension
+19,Portal Vein Thrombosis
+20,Liver Metastasis
+21,Radiological Hallmark
+22,Sim_Cat_2
+23,Sim_Cat_3
+24,Sim_Cat_4
+25,Sim_Text_Cat_2
+26,Sim_Text_Cat_3
+27,Sim_Text_Cat_4

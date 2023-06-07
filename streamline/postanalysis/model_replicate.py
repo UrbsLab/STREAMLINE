@@ -119,11 +119,15 @@ class ReplicateJob(Job):
         # variables and create an index list to identify respective columns
         file = open(self.full_path + '/exploratory/initial_categorical_variables.pickle', 'rb')
         categorical_variables = pickle.load(file)
+        file = open(self.full_path + '/exploratory/initial_quantitative_variables.pickle', 'rb')
+        quantitative_variables = pickle.load(file)
 
         rep_data.categorical_variables = categorical_variables
+        rep_data.quantitative_variables = quantitative_variables
 
         eda = DataProcess(rep_data, self.full_path, ignore_features=self.ignore_features,
-                          categorical_features=categorical_variables, explorations=[], plots=[],
+                          categorical_features=categorical_variables, quantitative_features=quantitative_variables,
+                          explorations=[], plots=[],
                           categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
                           random_state=self.random_state, show_plots=self.show_plots)
 
