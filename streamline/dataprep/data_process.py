@@ -7,7 +7,6 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import OneHotEncoder
 
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
@@ -24,7 +23,7 @@ class DataProcess(Job):
     """
 
     def __init__(self, dataset, experiment_path, ignore_features=None,
-                 categorical_features=None, explorations=None, plots=None,
+                 categorical_features=None, quantitative_features=None, explorations=None, plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5,
                  cleaning_missingness=0.5, correlation_removal_threshold=1.0,
                  partition_method="Stratified", n_splits=10,
@@ -73,12 +72,21 @@ class DataProcess(Job):
         # rather than relying on pipelines automated strategy for distinguishing categorical vs.
         # quantitative features using the categorical_cutoff parameter.
         if categorical_features is None:
-            self.categorical_features = []
+            self.categorical_features = None
         elif type(categorical_features) == str:
             categorical_features = pd.read_csv(categorical_features, sep=',')
             self.categorical_features = list(categorical_features)
         elif type(categorical_features) == list:
-            self.categorical_features = categorical_features
+            self.categorical_features = list(categorical_features)
+        else:
+            raise Exception
+        if quantitative_features is None:
+            self.quantitative_features = None
+        elif type(quantitative_features) == str:
+            quantitative_features = pd.read_csv(quantitative_features, sep=',')
+            self.quantitative_features = list(quantitative_features)
+        elif type(quantitative_features) == list:
+            self.quantitative_features = list(quantitative_features)
         else:
             raise Exception
 
@@ -125,33 +133,77 @@ class DataProcess(Job):
         returns a list of column names identified as
         being categorical based on user defined cutoff (categorical_cutoff).
         """
-        # Identify categorical variables in dataset
-        logging.info("Identifying Feature Types...")
-        # Runs unless user has specified a predefined list of variables to treat as categorical
+        # Validate and Identify categorical variables in dataset
+        logging.info("Validating and Identifying Feature Types...")
 
-        categorical_variables = []
-        if len(self.categorical_features) == 0:
-            if x_data is None:
-                x_data = self.dataset.feature_only_data()
-            for each in x_data:
+        if self.categorical_features is not None:
+            self.categorical_features = [s.strip() for s in self.categorical_features]
+        if self.quantitative_features is not None:
+            self.quantitative_features = [s.strip() for s in self.quantitative_features]
+
+        # If only one list is specified, assign either cat or quant first, and make all other features the opposite.
+        if self.categorical_features is not None and self.quantitative_features is None:
+            logging.warning("Quantitative Features not specified, taking the complement of categorical")
+            self.quantitative_features = list(set(self.dataset.get_headers()) - set(self.categorical_features))
+        if self.quantitative_features is not None and self.categorical_features is None:
+            logging.warning("Categorical Features not specified, taking the complement of quantitative")
+            self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
+
+        if len(list(set(self.categorical_features) & set(self.quantitative_features))) > 0:
+            raise Exception("Common features in both Categorical and Quantitative Variables")
+
+        if x_data is None:
+            x_data = self.dataset.feature_only_data()
+
+        # First putting any binary feature names in the data into the internal categorical name list
+
+        for each in x_data:
+            if x_data[each].nunique() == 2:
+                if each in self.quantitative_features:
+                    logging.warning("Binary Feature " + str(each)
+                                    + " specified as quantitative, STREAMLINE will treat it as categorical")
+                    self.quantitative_features.remove(each)
+                    self.categorical_features.append(each)
+                if each not in self.categorical_features:
+                    logging.warning("Binary Categorical Feature " + str(each)
+                                    + " was not in the categorical list, adding it")
+                    self.categorical_features.append(each)
+
+        # Checking all categorical names in the user uploaded list and any that are not already in the internal list
+        # are added. If any names in the user uploaded list are not in the dataset then throw a warning with an
+        # appropriate message.
+
+        headers = self.dataset.get_headers()
+        for feat in self.categorical_features:
+            if feat not in headers:
+                logging.warning("Categorical Feature " + feat + " not present in data")
+                self.categorical_features.remove(feat)
+        for feat in self.quantitative_features:
+            if feat not in headers:
+                logging.warning("Quantitative Feature " + feat + " not present in data")
+                self.quantitative_features.remove(feat)
+
+        # Any features from the data not yet assigned to the internal categorical or quantitative lists, will have
+        # its feature type determined by the internal categorical cutoff mechanism.
+        for each in x_data:
+            if each not in self.categorical_features and each not in self.quantitative_features:
                 if x_data[each].nunique() <= self.categorical_cutoff \
                         or not pd.api.types.is_numeric_dtype(x_data[each]):
-                    categorical_variables.append(each)
-        else:
-            categorical_variables = list(self.categorical_features)
-            for feat in self.categorical_features:
-                if feat not in self.dataset.data.columns:
-                    categorical_variables.remove(feat)
-                    logging.warning("Categorical variable " + feat + " not found in dataset")
+                    self.categorical_features.append(each)
+                else:
+                    self.quantitative_features.append(each)
 
-        self.categorical_features = categorical_variables
         self.dataset.categorical_variables = self.categorical_features
+        self.dataset.quantitative_variables = self.quantitative_features
 
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/initial_categorical_variables.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/initial_quantitative_variables.pickle', 'wb') as outfile:
+            pickle.dump(self.quantitative_features, outfile)
 
-        return categorical_variables
+        return self.categorical_features, self.quantitative_features
 
     def drop_ignored_rowcols(self):
         """
@@ -161,6 +213,8 @@ class DataProcess(Job):
         # Remove instances with missing outcome values
         for feat in self.ignore_features:
             if feat in self.categorical_features:
+                self.categorical_features.remove(feat)
+            if feat in self.quantitative_features:
                 self.categorical_features.remove(feat)
         self.dataset.clean_data(self.ignore_features)
 
@@ -188,23 +242,33 @@ class DataProcess(Job):
         if len(string_type_columns) > 0:
             logging.info("Ordinal encoding the following features:")
             for feat in string_type_columns:
-                logging.info('\t' + feat)
+                if feat in self.quantitative_features \
+                        and not (feat == self.dataset.class_label or
+                                 (self.dataset.match_label and feat == self.dataset.match_label)):
+                    raise Exception("Text values specified as quantitative, any text value features that need to be "
+                                    "treated as quantitative need to be numerically encoded by the user before "
+                                    "running STREAMLINE")
                 if feat not in self.categorical_features \
                         and not (feat == self.dataset.class_label or
                                  (self.dataset.match_label and feat == self.dataset.match_label)):
                     self.categorical_features.append(feat)
+                    logging.warning("Textual Unknown Feature Added as Categorical")
 
                 # Not encoding anything except class labels and binary text categorical variable
                 # to preserve label in figures
 
                 if feat == self.dataset.class_label:
+                    logging.info('\t' + feat)
                     self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
                     ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
                 elif self.dataset.data[feat].nunique() <= 2:
+                    logging.info('\t' + feat)
                     self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
                     ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
                 else:
                     # Do we fake numerical encode a dataset?
+                    # labels = pd.factorize(self.dataset.data[feat])
+                    # ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
                     pass
 
             ord_label.to_csv(self.experiment_path + '/' + self.dataset.name +
@@ -246,7 +310,7 @@ class DataProcess(Job):
         # For each Feature with high missingness creating a categorical feature.
         for feat in high_missingness_features:
             self.dataset.data['miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
-            # self.categorical_features.append('miss_' + feat)
+            self.categorical_features.append('miss_' + feat)
 
         if high_missingness_features:
             logging.info("Engineering the following Features for missingness:")
@@ -265,17 +329,19 @@ class DataProcess(Job):
 
     def feature_removal(self):
         original_features = self.dataset.get_headers()
-        self.dataset.data.dropna(thresh=self.dataset.data.shape[0] * self.cleaning_missingness,
+        self.dataset.data.dropna(thresh=int(self.dataset.data.shape[0] * self.cleaning_missingness) - 1,
                                  axis=1, inplace=True)
         new_features = self.dataset.get_headers()
         removed_variables = [item for item in original_features if item not in new_features]
         for feat in removed_variables:
             if feat in self.categorical_features:
                 self.categorical_features.remove(feat)
-            elif feat in self.engineered_features:
+            if feat in self.engineered_features:
                 self.engineered_features.remove(feat)
-            elif feat in self.one_hot_features:
+            if feat in self.one_hot_features:
                 self.one_hot_features.remove(feat)
+            if feat in self.quantitative_features:
+                self.quantitative_features.remove(feat)
 
         if removed_variables:
             logging.info("Removing the following Features due to Missingness:")
@@ -305,18 +371,20 @@ class DataProcess(Job):
     def categorical_feature_encoding(self):
         """
         Categorical feature encoding using sklearn onehot encoder
+        not used/implemented
         """
-        enc = OneHotEncoder(handle_unknown='ignore', drop='if_binary', sparse_output=False)
-        enc.fit(self.dataset.feature_only_data(), self.dataset.data[self.dataset.class_label])
-        logging.warning(enc.categories_)
-        feature_only_data = pd.DataFrame(enc.transform(self.dataset.feature_only_data()),
-                                         columns=enc.categories_)
-        label_data = self.dataset.non_feature_data()
-        logging.warning(type(feature_only_data))
-        self.dataset.data = pd.concat([feature_only_data, label_data], axis=1)
-        with open(self.experiment_path + '/' + self.dataset.name
-                  + '/exploratory/one_hot_encoder.pickle') as file:
-            pickle.dump(enc, file)
+        # enc = OneHotEncoder(handle_unknown='ignore', drop='if_binary', sparse_output=False)
+        # enc.fit(self.dataset.feature_only_data(), self.dataset.data[self.dataset.class_label])
+        # logging.warning(enc.categories_)
+        # feature_only_data = pd.DataFrame(enc.transform(self.dataset.feature_only_data()),
+        #                                  columns=enc.categories_)
+        # label_data = self.dataset.non_feature_data()
+        # logging.warning(type(feature_only_data))
+        # self.dataset.data = pd.concat([feature_only_data, label_data], axis=1)
+        # with open(self.experiment_path + '/' + self.dataset.name
+        #           + '/exploratory/one_hot_encoder.pickle') as file:
+        #     pickle.dump(enc, file)
+        raise NotImplementedError
 
     def categorical_feature_encoding_pandas(self):
         """
@@ -340,6 +408,7 @@ class DataProcess(Job):
             for feat in non_binary_categorical:
                 if feat in self.categorical_features:
                     self.categorical_features.remove(feat)
+            self.categorical_features += self.one_hot_features
 
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/one_hot_variables.pickle', 'wb') as outfile:
@@ -386,10 +455,12 @@ class DataProcess(Job):
             for feat in features_to_drop:
                 if feat in self.categorical_features:
                     self.categorical_features.remove(feat)
-                elif feat in self.engineered_features:
+                if feat in self.engineered_features:
                     self.engineered_features.remove(feat)
-                elif feat in self.one_hot_features:
+                if feat in self.one_hot_features:
                     self.one_hot_features.remove(feat)
+                if feat in self.one_hot_features:
+                    self.quantitative_features.remove(feat)
 
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/correlated_features.pickle', 'wb') as outfile:
@@ -398,7 +469,7 @@ class DataProcess(Job):
             all_features = set(self.dataset.get_headers())
             features_kept = list(all_features - set(features_to_drop))
 
-            logging.warning(df_corr_org.columns)
+            # logging.warning(df_corr_org.columns)
 
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/correlation_feature_cleaning.csv', 'w') as file:
@@ -426,10 +497,16 @@ class DataProcess(Job):
         # identify and save categorical variables for intermediate steps before categorical encoding
         self.identify_feature_types()  # Completed
 
+        logging.warning('    Categorical  = ' + str(len(self.categorical_features)))
+        logging.warning('    Quantitative = ' + str(len(self.quantitative_features)))
+        logging.warning('    Categorical  = ' + str((self.categorical_features)))
+        logging.warning('    Quantitative = ' + str((self.quantitative_features)))
+
+        transition_df.loc["Original"] = self.counts_summary(save=False)
+
         # ordinal encode the labels
         self.label_encoder()
 
-        transition_df.loc["Original"] = self.counts_summary(save=False)
         # Dropping rows with missing target variable and users specified features to ignore
         self.drop_ignored_rowcols()  # Completed
         transition_df.loc["C1"] = self.counts_summary(save=False)
@@ -569,12 +646,12 @@ class DataProcess(Job):
         if total_missing is None:
             total_missing = self.dataset.missingness_counts(self.experiment_path, save=False)
         percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
-        n_categorical_variables = len(list(self.categorical_features)) \
-                                  + len(list(self.engineered_features)) + len(list(self.one_hot_features))
+        # n_categorical_variables = len(list(self.categorical_features)) \
+        #                           + len(list(self.engineered_features)) + len(list(self.one_hot_features))
         summary = [['instances', self.dataset.data.shape[0]],
                    ['features', f_count],
-                   ['categorical_features', n_categorical_variables],
-                   ['quantitative_features', f_count - n_categorical_variables],
+                   ['categorical_features', len(self.categorical_features)],
+                   ['quantitative_features', len(self.quantitative_features)],
                    ['missing_values', total_missing],
                    ['missing_percent', round(percent_missing, 5)]]
 
@@ -592,8 +669,8 @@ class DataProcess(Job):
             logging.info('Processed Data Counts: ----------------')
             logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
             logging.info('Feature Count = ' + str(f_count))
-            logging.info('    Categorical  = ' + str(n_categorical_variables))
-            logging.info('    Quantitative = ' + str(f_count - n_categorical_variables))
+            logging.info('    Categorical  = ' + str(len(self.categorical_features)))
+            logging.info('    Quantitative = ' + str(len(self.quantitative_features)))
             logging.info('Missing Count = ' + str(total_missing))
             logging.info('    Missing Percent = ' + str(percent_missing))
             logging.info('Class Counts: ----------------')
@@ -604,9 +681,10 @@ class DataProcess(Job):
             logging.info("\n" + df_value_counts.to_string())
 
             if not replicate:
-                logging.info("Original Categorical Features: " + str(self.categorical_features))
-                logging.info("Engineered Features: " + str(self.engineered_features))
-                logging.info("One Hot Features: " + str(self.one_hot_features))
+                logging.info("Categorical Features: " + str(self.categorical_features))
+                logging.info("\t Engineered Features: " + str(self.engineered_features))
+                logging.info("\t One Hot Features: " + str(self.one_hot_features))
+                logging.info("Quantitative Features: " + str(self.quantitative_features))
                 logging.info("Final List of Features:")
                 logging.info(list(self.dataset.get_headers()))
             else:

@@ -46,8 +46,8 @@ class DataProcessRunner:
 
     def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
                  class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
-                 ignore_features=None, categorical_features=None, top_features=20,
-                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.4, cleaning_missingness=0.5,
+                 ignore_features=None, categorical_features=None, quantitative_features=None, top_features=20,
+                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                  correlation_removal_threshold=1.0,
                  random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
@@ -92,6 +92,7 @@ class DataProcessRunner:
         self.ignore_features = ignore_features
         self.categorical_cutoff = categorical_cutoff
         self.categorical_features = categorical_features
+        self.quantitative_features = quantitative_features
         self.featureeng_missingness = featureeng_missingness
         self.cleaning_missingness = cleaning_missingness
         self.correlation_removal_threshold = correlation_removal_threshold
@@ -146,7 +147,8 @@ class DataProcessRunner:
                     dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
-                                          self.categorical_features, self.exploration_list, self.plot_list,
+                                          self.categorical_features, self.quantitative_features,
+                                          self.exploration_list, self.plot_list,
                                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                                           self.cleaning_missingness, self.correlation_removal_threshold,
                                           self.partition_method, self.n_splits,
@@ -227,8 +229,8 @@ class DataProcessRunner:
     def get_cluster_params(self, dataset_path):
         cluster_params = [dataset_path, self.output_path, self.experiment_name, None, None,
                           self.class_label, self.instance_label, self.match_label, self.n_splits,
-                          self.partition_method,
-                          self.ignore_features, self.categorical_features, self.top_features,
+                          self.partition_method, self.ignore_features, self.categorical_features,
+                          self.quantitative_features, self.top_features,
                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                           self.cleaning_missingness, self.correlation_removal_threshold, self.random_state]
         cluster_params = [str(i) if type(i) != list else '"' + str(i) + '"' for i in cluster_params]

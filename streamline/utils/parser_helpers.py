@@ -89,6 +89,10 @@ def parse_eda(argv, params_dict=None):
                         help='path to .csv file with feature labels specified to '
                              'be treated as categorical where possible',
                         default="")
+    parser.add_argument('--qf', dest='quantitative_feature_path', type=str,
+                        help='path to .csv file with feature labels specified to '
+                             'be treated as categorical where possible',
+                        default="")
 
     parser.add_argument('--cv', dest='cv_partitions', type=int, help='number of CV partitions', default=10)
     parser.add_argument('--part', dest='partition_method', type=str,

@@ -27,19 +27,19 @@ def test_setup():
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
                             exploration_list=None,
                             plot_list=None,
-                            class_label="Class", instance_label="InstanceID", n_splits=2, ignore_features=["Alcohol"],
+                            class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
                             categorical_features=['Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
-                                                  'Hepatitis B e Antigen',
-                                                  'Hepatitis B Core Antibody', 'Hepatitis C Virus Antibody',
-                                                  'Cirrhosis', 'Endemic Countries',
-                                                  'Smoking', 'Diabetes', 'Obesity', 'Hemochromatosis',
-                                                  'Arterial Hypertension', 'Chronic Renal Insufficiency',
-                                                  'Human Immunodeficiency Virus', 'Nonalcoholic Steatohepatitis',
-                                                  'Esophageal Varices', 'Splenomegaly',
+                                                  'Hepatitis B e Antigen', 'Hepatitis B Core Antibody',
+                                                  'Hepatitis C Virus Antibody', 'Cirrhosis',
+                                                  'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity',
+                                                  'Hemochromatosis', 'Arterial Hypertension',
+                                                  'Chronic Renal Insufficiency', 'Human Immunodeficiency Virus',
+                                                  'Nonalcoholic Steatohepatitis', 'Esophageal Varices', 'Splenomegaly',
                                                   'Portal Hypertension', 'Portal Vein Thrombosis', 'Liver Metastasis',
                                                   'Radiological Hallmark',
-                                                  'catTest4', 'catTest10', ],
-                            correlation_removal_threshold=0.9)
+                                                  'Sim_Cat_2', 'Sim_Cat_3', 'Sim_Cat_4', 'Sim_Text_Cat_2',
+                                                  'Sim_Text_Cat_3', 'Sim_Text_Cat_4'],
+                            correlation_removal_threshold=1)
     eda.run(run_parallel=run_parallel)
     del eda
 

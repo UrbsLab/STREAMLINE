@@ -51,6 +51,8 @@ class Dataset:
         else:
             raise Exception("Unknown file format")
 
+        self.data.columns = self.data.columns.str.strip()
+
         if not (self.class_label in self.data.columns):
             raise Exception("Class label not found in file")
         if self.match_label and not (self.match_label in self.data.columns):
