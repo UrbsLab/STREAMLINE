@@ -267,6 +267,10 @@ class DataProcess(Job):
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
 
+        if self.quantitative_features is not None and self.categorical_features is not None:
+            self.quantitative_features = self.specified_quantitative
+            self.categorical_features = self.categorical_features + self.specified_categorical
+
         # Any remaining unassigned features will be assigned to categorical or quanatiative lists based on user specified categorical cutoff
         for each in x_data:
             if each not in self.categorical_features and each not in self.quantitative_features:
@@ -286,12 +290,6 @@ class DataProcess(Job):
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/initial/initial_quantitative_variables.pickle', 'wb') as outfile:
             pickle.dump(self.quantitative_features, outfile)
-
-        # Export feature type lists as .csv file_extension
-        #self.categorical_features.to_csv(self.experiment_path + '/' + self.dataset.name +
-        #                 '/exploratory/initial/initial_categorical_variables.csv')
-        #self.quantitative_features.to_csv(self.experiment_path + '/' + self.dataset.name +
-        #                 '/exploratory/initial/initial_quantitative_variables.csv')
 
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/initial/initial_categorical_variables.csv', 'w') as outfile:
