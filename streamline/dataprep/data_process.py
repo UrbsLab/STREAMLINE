@@ -288,10 +288,19 @@ class DataProcess(Job):
             pickle.dump(self.quantitative_features, outfile)
 
         # Export feature type lists as .csv file_extension
-        self.categorical_features.to_csv(self.experiment_path + '/' + self.dataset.name +
-                         '/exploratory/initial/initial_categorical_variables.csv')
-        self.quantitative_features.to_csv(self.experiment_path + '/' + self.dataset.name +
-                         '/exploratory/initial/initial_quantitative_variables.csv')
+        #self.categorical_features.to_csv(self.experiment_path + '/' + self.dataset.name +
+        #                 '/exploratory/initial/initial_categorical_variables.csv')
+        #self.quantitative_features.to_csv(self.experiment_path + '/' + self.dataset.name +
+        #                 '/exploratory/initial/initial_quantitative_variables.csv')
+
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/initial/initial_categorical_variables.csv', 'w') as outfile:
+            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(self.categorical_features)
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/initial/initial_quantitative_variables.csv', 'w') as outfile:
+            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(self.quantitative_features)
 
         return self.categorical_features, self.quantitative_features
 
