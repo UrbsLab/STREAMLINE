@@ -35,12 +35,14 @@ class Dataset:
         self.match_label = match_label
         self.instance_label = instance_label
         self.categorical_variables = None
+        self.quantitative_variables = None
         self.load_data()
 
     def load_data(self):
         """
         Function to load data in dataset
         """
+        logging.info("------------------------------------------------------- ")
         logging.info("Loading Dataset: " + str(self.name))
         if self.format == 'csv':
             self.data = pd.read_csv(self.path, na_values='NA', sep=',')
@@ -51,6 +53,7 @@ class Dataset:
         else:
             raise Exception("Unknown file format")
 
+        #Remove any whitespace from ends of individual data cells
         self.data.columns = self.data.columns.str.strip()
 
         if not (self.class_label in self.data.columns):
@@ -150,8 +153,6 @@ class Dataset:
         self.eda(experiment_path, plot=plot, initial=initial)
 
     def eda(self, experiment_path, plot=False, initial=''):
-        if not os.path.exists(experiment_path + '/' + self.name + '/exploratory/' + initial):
-            os.makedirs(experiment_path + '/' + self.name + '/exploratory/' + initial)
         self.describe_data(experiment_path, initial=initial)
         total_missing = self.missingness_counts(experiment_path, initial=initial)
         self.missing_count_plot(experiment_path, plot=plot, initial=initial)

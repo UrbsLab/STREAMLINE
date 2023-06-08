@@ -57,7 +57,7 @@ class DataProcess(Job):
                 logging.warning("Notice: Need to run analysis before plotting a result,"
                                 + item + " plot will be skipped")
 
-        # Allows user to specify features that should be ignored.
+        # Set up ignore_features: Allows user to specify features that should be ignored.
         if ignore_features is None:
             self.ignore_features = []
         elif type(ignore_features) == str:
@@ -72,23 +72,26 @@ class DataProcess(Job):
         # rather than relying on pipelines automated strategy for distinguishing categorical vs.
         # quantitative features using the categorical_cutoff parameter.
         if categorical_features is None:
-            self.categorical_features = None
+            self.specified_categorical = None # List of feature names specified by user to be treated as categorical
         elif type(categorical_features) == str:
             categorical_features = pd.read_csv(categorical_features, sep=',')
-            self.categorical_features = list(categorical_features)
+            self.specified_categorical = list(categorical_features)
         elif type(categorical_features) == list:
-            self.categorical_features = list(categorical_features)
+            self.specified_categorical = list(categorical_features)
         else:
             raise Exception
         if quantitative_features is None:
-            self.quantitative_features = None
+            self.specified_quantitative = None # List of feature names specified by user to be treated as quantitative
         elif type(quantitative_features) == str:
             quantitative_features = pd.read_csv(quantitative_features, sep=',')
-            self.quantitative_features = list(quantitative_features)
+            self.specified_quantitative = list(quantitative_features)
         elif type(quantitative_features) == list:
-            self.quantitative_features = list(quantitative_features)
+            self.specified_quantitative = list(quantitative_features)
         else:
             raise Exception
+
+        self.quantitative_features = [] # List of feature names in dataset to be treated as quantitative
+        self.categorical_features = [] # List of feature names in dataset to be treated as categorical
 
         self.engineered_features = list()
         self.one_hot_features = list()
@@ -117,6 +120,66 @@ class DataProcess(Job):
         self.partition_method = partition_method
         self.n_splits = n_splits
 
+    def run(self, top_features=20):
+        """
+        Wrapper function to run_explore and KFoldPartitioner
+
+        Args:
+            top_features: no of top features to consider (default=20)
+
+        """
+        self.job_start_time = time.time()
+
+        #Conduct Exploratory Analysis, Data Cleaning, and Feature Engineering
+        self.run_process(top_features)
+
+        #Conduct k-fold partitioning and generate CV datasets
+        self.cv_partitioner = KFoldPartitioner(self.dataset, self.partition_method,
+                                               self.experiment_path, self.n_splits, self.random_state)
+        self.cv_partitioner.run()
+        self.save_runtime()
+
+    def run_process(self, top_features=20):
+        """
+        Run Exploratory Data Process accordingly on the EDA Object
+
+        Args:
+            top_features: no of top features to consider (default=20)
+        """
+        # Random seed for reproducibility
+        random.seed(self.random_state)
+        np.random.seed(self.random_state)
+
+        # Make analysis folder for target dataset and a folder for the respective exploratory analysis within it
+        self.make_log_folders()
+
+        # Account for possibility that only one dataset in folder has a match label.
+        # Check for presence of match label (this allows multiple datasets to be analyzed
+        # in the pipeline where not all of them have match labels if specified)
+        if not (self.dataset.match_label is None or self.dataset.match_label in self.dataset.data.columns):
+            self.dataset.match_label = None
+            self.dataset.partition_method = 'S'
+            logging.warning("Warning: Specified 'Match label' could not be found in dataset. "
+                            "Analysis moving forward assuming there is no 'match label' column using "
+                            "stratified (S) CV partitioning.")
+
+        # Pass user defined lists of categorical and quanatiative features to dataset object
+        #self.dataset.categorical_variables = self.categorical_features
+        #self.dataset.quantitative_variables = self.quantitative_features
+
+        # Identify and save feature types (i.e. categorical vs. quanatitative)
+        self.identify_feature_types()  # Completed
+
+        # Run initial EDA from the Dataset Class
+        logging.info("Running Initial EDA:")
+        self.dataset.initial_eda(self.experiment_path)
+
+        # Running all data manipulation steps: cleaning and feature engineering
+        self.data_manipulation()
+
+        # Running EDA after all data manipulation
+        self.second_eda(top_features)
+
     def make_log_folders(self):
         """
         Makes folders for logging exploratory data analysis
@@ -125,6 +188,8 @@ class DataProcess(Job):
             os.makedirs(self.experiment_path + '/' + self.dataset.name)
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory')
+        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory/initial'):
+            os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory/initial')
 
     def identify_feature_types(self, x_data=None):
         """
@@ -136,87 +201,241 @@ class DataProcess(Job):
         # Validate and Identify categorical variables in dataset
         logging.info("Validating and Identifying Feature Types...")
 
-        if self.categorical_features is not None:
-            self.categorical_features = [s.strip() for s in self.categorical_features]
-        if self.quantitative_features is not None:
-            self.quantitative_features = [s.strip() for s in self.quantitative_features]
+        #Strip whitespace off user-specified feature names for consistency with dataset loading
+        if self.specified_categorical is not None:
+            self.specified_categorical = [s.strip() for s in self.specified_categorical]
+        if self.specified_quantitative is not None:
+            self.specified_quantitative = [s.strip() for s in self.specified_quantitative]
 
-        # If only one list is specified, assign either cat or quant first, and make all other features the opposite.
-        if self.categorical_features is not None and self.quantitative_features is None:
-            logging.warning("Quantitative Features not specified, taking the complement of categorical")
-            self.quantitative_features = list(set(self.dataset.get_headers()) - set(self.categorical_features))
-        if self.quantitative_features is not None and self.categorical_features is None:
-            logging.warning("Categorical Features not specified, taking the complement of quantitative")
-            self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
+        # Quality control of user-specified feature lists: duplicates check and warnings
+        if self.specified_quantitative is not None and self.specified_categorical is not None:
+            duplicates = list(set(self.specified_categorical) & set(self.specified_quantitative))
+            if len(duplicates) > 0:
+                raise Exception("Following feature(s) assigned by user as both categorical and quantitative:"+str(duplicates))
+            logging.warning("User specified both categorical vs quanatiative features; any unspecified binary features will be treated as categorical, and any remaining features will have their feature types automatically assigned based on categorical_cutoff parameter")
+        if self.specified_quantitative is None and self.specified_categorical is None:
+            logging.warning("User did not specify categorical vs quanatiative features; feature types will be automatically assigned based on categorical_cutoff parameter")
 
-        if len(list(set(self.categorical_features) & set(self.quantitative_features))) > 0:
-            raise Exception("Common features in both Categorical and Quantitative Variables")
+        # Quality control of user-specified feature lists: remove specified features not in target dataset
+        headers = self.dataset.get_headers() #Get feature names included in target dataset
+        cat_not_in_data = []
+        quant_not_in_data = []
+        for feat in self.specified_categorical:
+            if feat not in headers:
+                cat_not_in_data.append(feat)
+                self.specified_categorical.remove(feat)
+        for feat in self.specified_quantitative:
+            if feat not in headers:
+                quant_not_in_data.append(feat)
+                self.specified_quantitative.remove(feat)
+        #Since some datasets might be very large, report this warning as a summary
+        if len(cat_not_in_data) > 0:
+            logging.warning("Following features specified as categorical were not in target dataset: "+str(cat_not_in_data))
+        if len(quant_not_in_data) > 0:
+            logging.warning("Following features specified as quantitative were not in target dataset: "+str(quant_not_in_data))
 
+        #Get feature data
         if x_data is None:
             x_data = self.dataset.feature_only_data()
 
-        # First putting any binary feature names in the data into the internal categorical name list
-
+        #Assign all binary features categorical list
+        quant_to_cat = []
+        unassigned_to_cat = []
         for each in x_data:
             if x_data[each].nunique() == 2:
-                if each in self.quantitative_features:
-                    logging.warning("Binary Feature " + str(each)
-                                    + " specified as quantitative, STREAMLINE will treat it as categorical")
-                    self.quantitative_features.remove(each)
-                    self.categorical_features.append(each)
-                if each not in self.categorical_features:
-                    logging.warning("Binary Categorical Feature " + str(each)
-                                    + " was not in the categorical list, adding it")
-                    self.categorical_features.append(each)
+                self.categorical_features.append(each)
+                if self.specified_quantitative is not None and each in self.specified_quantitative:
+                    quant_to_cat.append(each)
+                    self.specified_quantitative.remove(each) #update user specified list
+                if self.specified_categorical is not None and each not in self.specified_categorical:
+                    unassigned_to_cat.append(each)
+                    self.specified_categorical.remove(each) #update user specified list
+        #Since some datasets might be very large, report this warning as a summary
+        if len(quant_to_cat) > 0:
+            logging.warning("Following binary feature(s) specified as quantitative, but will be treated it as categorical: "+str(quant_to_cat))
+        if len(unassigned_to_cat) > 0:
+            logging.warning("Following binary feature(s) were not in the categorical list, but will be treated as categorical: "+str(unassigned_to_cat))
 
-        # Checking all categorical names in the user uploaded list and any that are not already in the internal list
-        # are added. If any names in the user uploaded list are not in the dataset then throw a warning with an
-        # appropriate message.
+        # Assign remaining user specified features as categorical or quantiative
+        if self.categorical_features is not None and self.quantitative_features is None:
+            logging.warning("No quantitative features specified; non-binary features not specified as categorical will be treated as quanatiative unless they are binary")
+            self.categorical_features = self.categorical_features + self.specified_categorical
+            self.quantitative_features = list(set(self.dataset.get_headers()) - set(self.categorical_features)) #All other features assigned as quantitative
 
-        headers = self.dataset.get_headers()
-        for feat in self.categorical_features:
-            if feat not in headers:
-                logging.warning("Categorical Feature " + feat + " not present in data")
-                self.categorical_features.remove(feat)
-        for feat in self.quantitative_features:
-            if feat not in headers:
-                logging.warning("Quantitative Feature " + feat + " not present in data")
-                self.quantitative_features.remove(feat)
+        if self.quantitative_features is not None and self.categorical_features is None:
+            logging.warning("No categorical features specified; features not specified as quantitative will be treated as categorical")
+            self.quantitative_features = self.specified_quantitative
+            self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
 
-        # Any features from the data not yet assigned to the internal categorical or quantitative lists, will have
-        # its feature type determined by the internal categorical cutoff mechanism.
+        # Any remaining unassigned features will be assigned to categorical or quanatiative lists based on user specified categorical cutoff
         for each in x_data:
             if each not in self.categorical_features and each not in self.quantitative_features:
-                if x_data[each].nunique() <= self.categorical_cutoff \
-                        or not pd.api.types.is_numeric_dtype(x_data[each]):
+                if x_data[each].nunique() <= self.categorical_cutoff or not pd.api.types.is_numeric_dtype(x_data[each]):
                     self.categorical_features.append(each)
                 else:
                     self.quantitative_features.append(each)
 
+        # Assign feature type lists to dataset object
         self.dataset.categorical_variables = self.categorical_features
         self.dataset.quantitative_variables = self.quantitative_features
 
+        # Pickle feature type lists
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial_categorical_variables.pickle', 'wb') as outfile:
+                  '/exploratory/initial/initial_categorical_variables.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial_quantitative_variables.pickle', 'wb') as outfile:
+                  '/exploratory/initial/initial_quantitative_variables.pickle', 'wb') as outfile:
             pickle.dump(self.quantitative_features, outfile)
+
+        # Export feature type lists as .csv file_extension
+        self.categorical_features.to_csv(self.experiment_path + '/' + self.dataset.name +
+                         '/exploratory/initial/initial_categorical_variables.csv')
+        self.quantitative_features.to_csv(self.experiment_path + '/' + self.dataset.name +
+                         '/exploratory/initial/initial_quantitative_variables.csv')
 
         return self.categorical_features, self.quantitative_features
 
-    def drop_ignored_rowcols(self):
+    def data_manipulation(self):
         """
-        Basic data cleaning: Drops any instances with a missing outcome
-        value as well as any features (ignore_features) specified by user
+        Wrapper function for all data cleaning and feature engineering data manipulation
         """
-        # Remove features that are specified to be dropped
-        for feat in self.ignore_features:
-            if feat in self.categorical_features:
-                self.categorical_features.remove(feat)
-            if feat in self.quantitative_features:
-                self.quantitative_features.remove(feat)
-        self.dataset.clean_data(self.ignore_features)
+        # Dataframe to record feature statistics
+        transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                              'Categorical Features',
+                                              'Quantitative Features', 'Missing Values',
+                                              'Missing Percent', 'Class 0', 'Class 1'])
+
+        transition_df.loc["Original"] = self.counts_summary(save=False)
+
+        # ordinal encode the labels
+        self.label_encoder()
+
+        # Dropping rows with missing target variable and users specified features to ignore
+        self.drop_ignored_rowcols()  # Completed
+        transition_df.loc["C1"] = self.counts_summary(save=False)
+
+        # Generating categorical features for features with missingness greater that featureeng_missingness percentage
+        self.feature_engineering()  # Completed
+        transition_df.loc["E1"] = self.counts_summary(save=False)
+
+        # Remove features with missingness greater than cleaning_missingness percentage
+        self.feature_removal()  # Completed
+        transition_df.loc["C2"] = self.counts_summary(save=False)
+
+        # Remove instances with more features missing greater than cleaning_missingness percentage
+        self.instance_removal()  # Completed
+        transition_df.loc["C3"] = self.counts_summary(save=False)
+
+        # Generated onehot categorical feature encoding
+        self.categorical_feature_encoding_pandas()
+        transition_df.loc["E2"] = self.counts_summary(save=False)
+
+        # Drop highly correlated features with correlation greater that max_correlation
+        self.drop_highly_correlated_features()  # Completed
+        transition_df.loc["C4"] = self.counts_summary(save=False)
+
+        # Create features-only version of dataset and save picked variables for future operations
+        self.dataset.set_headers(self.experiment_path)  # Already Completed
+
+        # Save Transition Summary of the data manipulation process
+
+        transition_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/'
+                             + 'DataProcessSummary.csv', index=True)
+
+        # Pickle list of feature names to be treated as categorical variables
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+            pickle.dump(self.categorical_features, outfile)
+
+        # Pickle list of processed feature names
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+            pickle.dump(list(self.dataset.data.columns), outfile)
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
+            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(list(self.dataset.data.columns))
+
+    def counts_summary(self, total_missing=None, plot=False, save=True, replicate=False):
+        """
+        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
+        features, and class counts. Also saves a simple bar graph of class counts if user specified.
+
+        Args:
+            save:
+            total_missing: total missing values (optional, runs again if not given)
+            plot: flag to output bar graph in the experiment log folder
+            replicate:
+        Returns:
+
+        """
+        # Calculate, print, and export instance and feature counts
+        f_count = self.dataset.data.shape[1] - 1
+        if not (self.dataset.instance_label is None):
+            f_count -= 1
+        if not (self.dataset.match_label is None):
+            f_count -= 1
+        if total_missing is None:
+            total_missing = self.dataset.missingness_counts(self.experiment_path, save=False)
+        percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
+        # n_categorical_variables = len(list(self.categorical_features)) \
+        #                           + len(list(self.engineered_features)) + len(list(self.one_hot_features))
+        summary = [['instances', self.dataset.data.shape[0]],
+                   ['features', f_count],
+                   ['categorical_features', len(self.categorical_features)],
+                   ['quantitative_features', len(self.quantitative_features)],
+                   ['missing_values', total_missing],
+                   ['missing_percent', round(percent_missing, 5)]]
+
+        summary_df = pd.DataFrame(summary, columns=['Variable', 'Count'])
+        class_counts = self.dataset.data[self.dataset.class_label].value_counts()
+
+        if save:
+            summary_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'DataCounts.csv',
+                              index=False)
+            # Calculate, print, and export class counts
+            class_counts.to_csv(self.experiment_path + '/' + self.dataset.name +
+                                '/exploratory/' + 'ClassCounts.csv', header=['Count'],
+                                index_label='Class')
+
+            logging.info('Processed Data Counts: ----------------')
+            logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
+            logging.info('Feature Count = ' + str(f_count))
+            logging.info('    Categorical  = ' + str(len(self.categorical_features)))
+            logging.info('    Quantitative = ' + str(len(self.quantitative_features)))
+            logging.info('Missing Count = ' + str(total_missing))
+            logging.info('    Missing Percent = ' + str(percent_missing))
+            logging.info('Class Counts: ----------------')
+            logging.info('Class Count Information')
+            df_value_counts = pd.DataFrame(class_counts)
+            df_value_counts = df_value_counts.reset_index()
+            df_value_counts.columns = ['Class', 'Instances']
+            logging.info("\n" + df_value_counts.to_string())
+
+            if not replicate:
+                logging.info("Categorical Features: " + str(self.categorical_features))
+                logging.info("\t Engineered Features: " + str(self.engineered_features))
+                logging.info("\t One Hot Features: " + str(self.one_hot_features))
+                logging.info("Quantitative Features: " + str(self.quantitative_features))
+                logging.info("Final List of Features:")
+                logging.info(list(self.dataset.get_headers()))
+            else:
+                logging.info("Final List of Features:")
+                logging.info(list(self.dataset.get_headers()))
+
+            # Generate and export class count bar graph
+            if plot:
+                class_counts.plot(kind='bar')
+                plt.ylabel('Count')
+                plt.title('Class Counts')
+                plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'ClassCountsBarPlot.png',
+                            bbox_inches='tight')
+                if self.show_plots:
+                    plt.show()
+                else:
+                    plt.close('all')
+                    # plt.cla() # not required
+        return list(summary_df['Count']) + [class_counts[0], class_counts[1]]
 
     def label_encoder(self):
         """
@@ -279,6 +498,19 @@ class DataProcess(Job):
                 pickle.dump(ord_label, outfile)
         else:
             logging.info("No textual categorical features, skipping label encoding")
+
+    def drop_ignored_rowcols(self):
+        """
+        Basic data cleaning: Drops any instances with a missing outcome
+        value as well as any features (ignore_features) specified by user
+        """
+        # Remove features that are specified to be dropped
+        for feat in self.ignore_features:
+            if feat in self.categorical_features:
+                self.categorical_features.remove(feat)
+            if feat in self.quantitative_features:
+                self.quantitative_features.remove(feat)
+        self.dataset.clean_data(self.ignore_features)
 
     def feature_engineering(self):
         """
@@ -483,6 +715,7 @@ class DataProcess(Job):
         else:
             logging.info("No Features with correlation higher that parameter")
 
+<<<<<<< Updated upstream
     def data_manipulation(self):
         """
         Wrapper function for all feature engineering data manipulation
@@ -588,6 +821,8 @@ class DataProcess(Job):
         # Running EDA after all the new data processing/manipulation
         self.second_eda(top_features)
 
+=======
+>>>>>>> Stashed changes
     def second_eda(self, top_features=20):
         # Running EDA after all the new data processing/manipulation
         logging.info("Running Basic Exploratory Analysis...")
@@ -619,87 +854,6 @@ class DataProcess(Job):
             if "Univariate Analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
-
-    def counts_summary(self, total_missing=None, plot=False, save=True, replicate=False):
-        """
-        Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
-        features, and class counts. Also saves a simple bar graph of class counts if user specified.
-
-        Args:
-            save:
-            total_missing: total missing values (optional, runs again if not given)
-            plot: flag to output bar graph in the experiment log folder
-            replicate:
-        Returns:
-
-        """
-        # Calculate, print, and export instance and feature counts
-        f_count = self.dataset.data.shape[1] - 1
-        if not (self.dataset.instance_label is None):
-            f_count -= 1
-        if not (self.dataset.match_label is None):
-            f_count -= 1
-        if total_missing is None:
-            total_missing = self.dataset.missingness_counts(self.experiment_path, save=False)
-        percent_missing = int(total_missing) / float(self.dataset.data.shape[0] * f_count)
-        # n_categorical_variables = len(list(self.categorical_features)) \
-        #                           + len(list(self.engineered_features)) + len(list(self.one_hot_features))
-        summary = [['instances', self.dataset.data.shape[0]],
-                   ['features', f_count],
-                   ['categorical_features', len(self.categorical_features)],
-                   ['quantitative_features', len(self.quantitative_features)],
-                   ['missing_values', total_missing],
-                   ['missing_percent', round(percent_missing, 5)]]
-
-        summary_df = pd.DataFrame(summary, columns=['Variable', 'Count'])
-        class_counts = self.dataset.data[self.dataset.class_label].value_counts()
-
-        if save:
-            summary_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'DataCounts.csv',
-                              index=False)
-            # Calculate, print, and export class counts
-            class_counts.to_csv(self.experiment_path + '/' + self.dataset.name +
-                                '/exploratory/' + 'ClassCounts.csv', header=['Count'],
-                                index_label='Class')
-
-            logging.info('Processed Data Counts: ----------------')
-            logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
-            logging.info('Feature Count = ' + str(f_count))
-            logging.info('    Categorical  = ' + str(len(self.categorical_features)))
-            logging.info('    Quantitative = ' + str(len(self.quantitative_features)))
-            logging.info('Missing Count = ' + str(total_missing))
-            logging.info('    Missing Percent = ' + str(percent_missing))
-            logging.info('Class Counts: ----------------')
-            logging.info('Class Count Information')
-            df_value_counts = pd.DataFrame(class_counts)
-            df_value_counts = df_value_counts.reset_index()
-            df_value_counts.columns = ['Class', 'Instances']
-            logging.info("\n" + df_value_counts.to_string())
-
-            if not replicate:
-                logging.info("Categorical Features: " + str(self.categorical_features))
-                logging.info("\t Engineered Features: " + str(self.engineered_features))
-                logging.info("\t One Hot Features: " + str(self.one_hot_features))
-                logging.info("Quantitative Features: " + str(self.quantitative_features))
-                logging.info("Final List of Features:")
-                logging.info(list(self.dataset.get_headers()))
-            else:
-                logging.info("Final List of Features:")
-                logging.info(list(self.dataset.get_headers()))
-
-            # Generate and export class count bar graph
-            if plot:
-                class_counts.plot(kind='bar')
-                plt.ylabel('Count')
-                plt.title('Class Counts')
-                plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'ClassCountsBarPlot.png',
-                            bbox_inches='tight')
-                if self.show_plots:
-                    plt.show()
-                else:
-                    plt.close('all')
-                    # plt.cla() # not required
-        return list(summary_df['Count']) + [class_counts[0], class_counts[1]]
 
     def univariate_analysis(self, top_features=20):
         """
@@ -762,6 +916,39 @@ class DataProcess(Job):
 
         return sorted_p_list
 
+    def test_selector(self, feature_name):
+        """
+        Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value
+
+        Args:
+            feature_name: name of feature column operation is running on
+        """
+        # test_name, test_stat = None, None
+        class_label = self.dataset.class_label
+        # Feature and Outcome are discrete/categorical/binary
+        if feature_name in self.dataset.categorical_variables:
+            # Calculate Contingency Table - Counts
+            table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[class_label])
+            # Univariate association test (Chi Square Test of Independence - Non-parametric)
+            c, p, dof, expected = chi2_contingency(table_temp)
+            p_val = p
+            test_stat = c
+            test_name = "Chi Square Test"
+        # Feature is continuous and Outcome is discrete/categorical/binary
+        else:
+            # Univariate association test (Mann-Whitney Test - Non-parametric)
+            try:  # works in scipy 1.5.0
+                c, p = mannwhitneyu(
+                    x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
+                    y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1], nan_policy='omit')
+            except Exception as e:  # for scipy 1.8.0
+                logging.error(e)
+                raise Exception("Exception in scipy, must have scipy version>=1.8.0")
+            p_val = p
+            test_stat = c
+            test_name = "Mann-Whitney U Test"
+        return p_val, test_stat, test_name
+
     def univariate_plots(self, sorted_p_list=None, top_features=20):
         """
         Checks whether p-value of each feature is less than or equal to significance cutoff.
@@ -823,39 +1010,6 @@ class DataProcess(Job):
         plt.close('all')
         # plt.cla() # not required
 
-    def test_selector(self, feature_name):
-        """
-        Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value
-
-        Args:
-            feature_name: name of feature column operation is running on
-        """
-        # test_name, test_stat = None, None
-        class_label = self.dataset.class_label
-        # Feature and Outcome are discrete/categorical/binary
-        if feature_name in self.dataset.categorical_variables:
-            # Calculate Contingency Table - Counts
-            table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[class_label])
-            # Univariate association test (Chi Square Test of Independence - Non-parametric)
-            c, p, dof, expected = chi2_contingency(table_temp)
-            p_val = p
-            test_stat = c
-            test_name = "Chi Square Test"
-        # Feature is continuous and Outcome is discrete/categorical/binary
-        else:
-            # Univariate association test (Mann-Whitney Test - Non-parametric)
-            try:  # works in scipy 1.5.0
-                c, p = mannwhitneyu(
-                    x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
-                    y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1], nan_policy='omit')
-            except Exception as e:  # for scipy 1.8.0
-                logging.error(e)
-                raise Exception("Exception in scipy, must have scipy version>=1.8.0")
-            p_val = p
-            test_stat = c
-            test_name = "Mann-Whitney U Test"
-        return p_val, test_stat, test_name
-
     def save_runtime(self):
         """
         Export runtime for this phase of the pipeline on current target dataset
@@ -867,21 +1021,6 @@ class DataProcess(Job):
         runtime_file = open(self.experiment_path + '/' + self.dataset.name + '/runtime/runtime_exploratory.txt', 'w')
         runtime_file.write(runtime)
         runtime_file.close()
-
-    def run(self, top_features=20):
-        """
-        Wrapper function to run_explore and KFoldPartitioner
-
-        Args:
-            top_features: no of top features to consider (default=20)
-
-        """
-        self.job_start_time = time.time()
-        self.run_process(top_features)
-        self.cv_partitioner = KFoldPartitioner(self.dataset, self.partition_method,
-                                               self.experiment_path, self.n_splits, self.random_state)
-        self.cv_partitioner.run()
-        self.save_runtime()
 
     def start(self, top_features=20):
         self.run(top_features)
