@@ -72,7 +72,7 @@ class DataProcess(Job):
         # rather than relying on pipelines automated strategy for distinguishing categorical vs.
         # quantitative features using the categorical_cutoff parameter.
         if categorical_features is None:
-            self.specified_categorical = None # List of feature names specified by user to be treated as categorical
+            self.specified_categorical = None  # List of feature names specified by user to be treated as categorical
         elif type(categorical_features) == str:
             categorical_features = pd.read_csv(categorical_features, sep=',')
             self.specified_categorical = list(categorical_features)
@@ -81,7 +81,7 @@ class DataProcess(Job):
         else:
             raise Exception
         if quantitative_features is None:
-            self.specified_quantitative = None # List of feature names specified by user to be treated as quantitative
+            self.specified_quantitative = None  # List of feature names specified by user to be treated as quantitative
         elif type(quantitative_features) == str:
             quantitative_features = pd.read_csv(quantitative_features, sep=',')
             self.specified_quantitative = list(quantitative_features)
@@ -90,8 +90,8 @@ class DataProcess(Job):
         else:
             raise Exception
 
-        self.quantitative_features = [] # List of feature names in dataset to be treated as quantitative
-        self.categorical_features = [] # List of feature names in dataset to be treated as categorical
+        self.quantitative_features = []  # List of feature names in dataset to be treated as quantitative
+        self.categorical_features = []  # List of feature names in dataset to be treated as categorical
 
         self.engineered_features = list()
         self.one_hot_features = list()
@@ -130,10 +130,10 @@ class DataProcess(Job):
         """
         self.job_start_time = time.time()
 
-        #Conduct Exploratory Analysis, Data Cleaning, and Feature Engineering
+        # Conduct Exploratory Analysis, Data Cleaning, and Feature Engineering
         self.run_process(top_features)
 
-        #Conduct k-fold partitioning and generate CV datasets
+        # Conduct k-fold partitioning and generate CV datasets
         self.cv_partitioner = KFoldPartitioner(self.dataset, self.partition_method,
                                                self.experiment_path, self.n_splits, self.random_state)
         self.cv_partitioner.run()
@@ -163,11 +163,11 @@ class DataProcess(Job):
                             "Analysis moving forward assuming there is no 'match label' column using "
                             "stratified (S) CV partitioning.")
 
-        # Pass user defined lists of categorical and quanatiative features to dataset object
-        #self.dataset.categorical_variables = self.categorical_features
-        #self.dataset.quantitative_variables = self.quantitative_features
+        # Pass user defined lists of categorical and quantitative features to dataset object
+        # self.dataset.categorical_variables = self.categorical_features
+        # self.dataset.quantitative_variables = self.quantitative_features
 
-        # Identify and save feature types (i.e. categorical vs. quanatitative)
+        # Identify and save feature types (i.e. categorical vs. quantitative)
         self.identify_feature_types()  # Completed
 
         # Run initial EDA from the Dataset Class
@@ -201,47 +201,56 @@ class DataProcess(Job):
         # Validate and Identify categorical variables in dataset
         logging.info("Validating and Identifying Feature Types...")
 
-        #Strip whitespace off user-specified feature names for consistency with dataset loading
+        # Strip whitespace off user-specified feature names for consistency with dataset loading
         if self.specified_categorical is not None:
             self.specified_categorical = [s.strip() for s in self.specified_categorical]
         if self.specified_quantitative is not None:
             self.specified_quantitative = [s.strip() for s in self.specified_quantitative]
-        logging.warning("spec cat: "+str(self.specified_categorical))
-        logging.warning("spec quant: "+str(self.specified_quantitative))
+        logging.warning("spec cat: " + str(self.specified_categorical))
+        logging.warning("spec quant: " + str(self.specified_quantitative))
         # Quality control of user-specified feature lists: duplicates check and warnings
         if self.specified_quantitative is not None and self.specified_categorical is not None:
             duplicates = list(set(self.specified_categorical) & set(self.specified_quantitative))
             if len(duplicates) > 0:
-                raise Exception("Following feature(s) assigned by user as both categorical and quantitative:"+str(duplicates))
-            logging.warning("User specified both categorical vs quanatiative features; any unspecified binary features will be treated as categorical, and any remaining features will have their feature types automatically assigned based on categorical_cutoff parameter")
+                raise Exception(
+                    "Following feature(s) assigned by user as both categorical and quantitative:" + str(duplicates))
+            logging.warning(
+                "User specified both categorical vs quantitative features; any unspecified binary features will be "
+                "treated as categorical, and any remaining features will have their feature types automatically "
+                "assigned based on categorical_cutoff parameter")
         if self.specified_quantitative is None and self.specified_categorical is None:
-            logging.warning("User did not specify categorical vs quanatiative features; feature types will be automatically assigned based on categorical_cutoff parameter")
+            logging.warning(
+                "User did not specify categorical vs quantitative features; feature types will be automatically "
+                "assigned based on categorical_cutoff parameter")
 
-        # Quality control of user-specified feature lists: remove specified features not in target dataset
-        headers = self.dataset.get_headers() #Get feature names included in target dataset
-        logging.warning("data features: "+str(headers)) #TESTING
-        cat_not_in_data = []
-        quant_not_in_data = []
-        for feat in self.specified_categorical:
-            if feat not in headers:
-                cat_not_in_data.append(feat)
-                self.specified_categorical.remove(feat)
-        for feat in self.specified_quantitative:
-            if feat not in headers:
-                quant_not_in_data.append(feat)
-                self.specified_quantitative.remove(feat)
-        #Since some datasets might be very large, report this warning as a summary
-        if len(cat_not_in_data) > 0:
-            logging.warning("Following features specified as categorical were not in target dataset: "+str(cat_not_in_data))
-        if len(quant_not_in_data) > 0:
-            logging.warning("Following features specified as quantitative were not in target dataset: "+str(quant_not_in_data))
-        logging.warning("cleaned spec cat: "+str(self.specified_categorical))
-        logging.warning("cleaned spec quant: "+str(self.specified_quantitative))
-        #Get feature data
+        # Get feature data
         if x_data is None:
             x_data = self.dataset.feature_only_data()
 
-        #Assign all binary features categorical list
+        # Quality control of user-specified feature lists: remove specified features not in target dataset
+        headers = list(x_data.columns)  # Get feature names included in target dataset
+        logging.warning("data features: " + str(headers))  # TESTING
+        cat_not_in_data = []
+        quant_not_in_data = []
+        if self.specified_categorical is not None:
+            cat_not_in_data = list(set(self.specified_categorical) - set(headers))
+            for feat in cat_not_in_data:
+                self.specified_categorical.remove(feat)
+        if self.specified_quantitative is not None:
+            quant_not_in_data = list(set(self.specified_quantitative) - set(headers))
+            for feat in quant_not_in_data:
+                self.quantitative_features.remove(feat)
+        # Since some datasets might be very large, report this warning as a summary
+        if len(cat_not_in_data) > 0:
+            logging.warning(
+                "Following features specified as categorical were not in target dataset: " + str(cat_not_in_data))
+        if len(quant_not_in_data) > 0:
+            logging.warning(
+                "Following features specified as quantitative were not in target dataset: " + str(quant_not_in_data))
+        logging.warning("cleaned spec cat: " + str(self.specified_categorical))
+        logging.warning("cleaned spec quant: " + str(self.specified_quantitative))
+
+        # Assign all binary features categorical list
         quant_to_cat = []
         unassigned_to_cat = []
         for each in x_data:
@@ -249,43 +258,54 @@ class DataProcess(Job):
                 self.categorical_features.append(each)
                 if self.specified_quantitative is not None and each in self.specified_quantitative:
                     quant_to_cat.append(each)
-                    self.specified_quantitative.remove(each) #update user specified list
-                if self.specified_categorical is not None and each in self.specified_categorical:
+                    self.specified_quantitative.remove(each)  # update user specified list
+                if self.specified_categorical is not None and each not in self.specified_categorical:
                     unassigned_to_cat.append(each)
-                    self.specified_categorical.remove(each) #update user specified list  (NOT WORKING)
-        logging.warning("binary cat: "+str(self.categorical_features)) #TESTING
-        #Since some datasets might be very large, report this warning as a summary
-        if len(quant_to_cat) > 0:
-            logging.warning("Following binary feature(s) specified as quantitative, but will be treated it as categorical: "+str(quant_to_cat))
-        if len(unassigned_to_cat) > 0:
-            logging.warning("Following binary feature(s) were not in the categorical list, but will be treated as categorical: "+str(unassigned_to_cat))
+                    # self.specified_categorical.remove(each)  # update user specified list  (NOT WORKING)
 
-        # Assign remaining user specified features as categorical or quantiative
+        logging.warning("binary cat: " + str(self.categorical_features))  # TESTING
+        # Since some datasets might be very large, report this warning as a summary
+        if len(quant_to_cat) > 0:
+            logging.warning(
+                "Following binary feature(s) specified as quantitative, "
+                "but will be treated it as categorical: " + str(quant_to_cat))
+        if len(unassigned_to_cat) > 0:
+            logging.warning(
+                "Following binary feature(s) were not in the categorical list, "
+                "but will be treated as categorical: " + str(unassigned_to_cat))
+
+        # Assign remaining user specified features as categorical or quantitative
         if self.specified_categorical is not None and self.specified_quantitative is None:
-            logging.warning("No quantitative features specified; non-binary features not specified as categorical will be treated as quanatiative unless they are binary")
+            logging.warning(
+                "No quantitative features specified; non-binary features not specified as categorical will be treated "
+                "as quantitative unless they are binary")
             self.categorical_features = self.categorical_features + self.specified_categorical
-            self.quantitative_features = list(set(self.dataset.get_headers()) - set(self.categorical_features)) #All other features assigned as quantitative
+            self.quantitative_features = list(set(self.dataset.get_headers()) - set(
+                self.categorical_features))  # All other features assigned as quantitative
 
         if self.specified_quantitative is not None and self.specified_categorical is None:
-            logging.warning("No categorical features specified; features not specified as quantitative will be treated as categorical")
+            logging.warning(
+                "No categorical features specified; features not specified as quantitative will be treated as "
+                "categorical")
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
 
-        if self.specified_quantitative is not None and self.specified_categorical is not None: #both lists specified
+        if self.specified_quantitative is not None and self.specified_categorical is not None:  # both lists specified
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = self.categorical_features + self.specified_categorical
-        logging.warning("assigned cat: "+str(self.categorical_features)) #TESTING
-        logging.warning("assigned quant: "+str(self.quantitative_features)) #TESTING
+        logging.warning("assigned cat: " + str(self.categorical_features))  # TESTING
+        logging.warning("assigned quant: " + str(self.quantitative_features))  # TESTING
 
-        # Any remaining unassigned features will be assigned to categorical or quanatiative lists based on user specified categorical cutoff
+        # Any remaining unassigned features will be assigned to categorical or quantitative lists based on user
+        # specified categorical cutoff
         for each in x_data:
             if each not in self.categorical_features and each not in self.quantitative_features:
                 if x_data[each].nunique() <= self.categorical_cutoff or not pd.api.types.is_numeric_dtype(x_data[each]):
                     self.categorical_features.append(each)
                 else:
                     self.quantitative_features.append(each)
-        logging.warning("final cat: "+str(self.categorical_features)) #TESTING
-        logging.warning("final quant: "+str(self.quantitative_features)) #TESTING
+        logging.warning("final cat: " + str(self.categorical_features))  # TESTING
+        logging.warning("final quant: " + str(self.quantitative_features))  # TESTING
 
         # Assign feature type lists to dataset object
         self.dataset.categorical_variables = self.categorical_features

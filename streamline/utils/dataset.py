@@ -53,7 +53,7 @@ class Dataset:
         else:
             raise Exception("Unknown file format")
 
-        #Remove any whitespace from ends of individual data cells
+        # Remove any whitespace from ends of individual data cells
         self.data.columns = self.data.columns.str.strip()
 
         if not (self.class_label in self.data.columns):
@@ -226,11 +226,11 @@ class Dataset:
         if total_missing is None:
             total_missing = self.missingness_counts(experiment_path)
         percent_missing = int(total_missing) / float(self.data.shape[0] * f_count)
-        n_categorical_variables = len(self.categorical_variables)
+        # n_categorical_variables = len(self.categorical_variables)
         summary = [['instances', self.data.shape[0]],
                    ['features', f_count],
-                   ['categorical_features', n_categorical_variables],
-                   ['quantitative_features', f_count - n_categorical_variables],
+                   ['categorical_features', str(len(self.categorical_variables))],
+                   ['quantitative_features', str(len(self.quantitative_variables))],
                    ['missing_values', total_missing],
                    ['missing_percent', round(percent_missing, 5)]]
 
@@ -247,8 +247,8 @@ class Dataset:
         logging.info('Initial Data Counts: ----------------')
         logging.info('Instance Count = ' + str(self.data.shape[0]))
         logging.info('Feature Count = ' + str(f_count))
-        logging.info('    Categorical  = ' + str(n_categorical_variables))
-        logging.info('    Quantitative = ' + str(f_count - n_categorical_variables))
+        logging.info('    Categorical  = ' + str(len(self.categorical_variables)))
+        logging.info('    Quantitative = ' + str(len(self.quantitative_variables)))
         logging.info('Missing Count = ' + str(total_missing))
         logging.info('    Missing Percent = ' + str(percent_missing))
         logging.info('Class Counts: ----------------')
