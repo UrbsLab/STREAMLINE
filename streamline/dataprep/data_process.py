@@ -250,7 +250,7 @@ class DataProcess(Job):
                 if self.specified_categorical is not None and each not in self.specified_categorical:
                     unassigned_to_cat.append(each)
                     self.specified_categorical.remove(each) #update user specified list
-        logging.warning("binary cat: "+str(self.specified_categorical)) #TESTING
+        logging.warning("binary cat: "+str(self.categorical_features)) #TESTING
 
         #Since some datasets might be very large, report this warning as a summary
         if len(quant_to_cat) > 0:
@@ -272,8 +272,8 @@ class DataProcess(Job):
         if self.quantitative_features is not None and self.categorical_features is not None:
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = self.categorical_features + self.specified_categorical
-        logging.warning("assigned cat: "+str(self.specified_categorical)) #TESTING
-        logging.warning("assigned quant: "+str(self.specified_quantitative)) #TESTING
+        logging.warning("assigned cat: "+str(self.categorical_features)) #TESTING
+        logging.warning("assigned quant: "+str(self.quantitative_features)) #TESTING
 
         # Any remaining unassigned features will be assigned to categorical or quanatiative lists based on user specified categorical cutoff
         for each in x_data:
@@ -282,8 +282,8 @@ class DataProcess(Job):
                     self.categorical_features.append(each)
                 else:
                     self.quantitative_features.append(each)
-        logging.warning("final cat: "+str(self.specified_categorical)) #TESTING
-        logging.warning("final quant: "+str(self.specified_quantitative)) #TESTING
+        logging.warning("final cat: "+str(self.categorical_features)) #TESTING
+        logging.warning("final quant: "+str(self.quantitative_features)) #TESTING
 
         # Assign feature type lists to dataset object
         self.dataset.categorical_variables = self.categorical_features
