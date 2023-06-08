@@ -250,6 +250,8 @@ class DataProcess(Job):
                 if self.specified_categorical is not None and each not in self.specified_categorical:
                     unassigned_to_cat.append(each)
                     self.specified_categorical.remove(each) #update user specified list
+        logging.warning("binary cat: "+str(self.specified_categorical)) #TESTING
+
         #Since some datasets might be very large, report this warning as a summary
         if len(quant_to_cat) > 0:
             logging.warning("Following binary feature(s) specified as quantitative, but will be treated it as categorical: "+str(quant_to_cat))
@@ -270,14 +272,18 @@ class DataProcess(Job):
         if self.quantitative_features is not None and self.categorical_features is not None:
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = self.categorical_features + self.specified_categorical
+        logging.warning("assigned cat: "+str(self.specified_categorical)) #TESTING
+        logging.warning("assigned quant: "+str(self.specified_quantitative)) #TESTING
 
         # Any remaining unassigned features will be assigned to categorical or quanatiative lists based on user specified categorical cutoff
         for each in x_data:
-            if each not in self.categorical_features or each not in self.quantitative_features:
+            if each not in self.categorical_features and each not in self.quantitative_features:
                 if x_data[each].nunique() <= self.categorical_cutoff or not pd.api.types.is_numeric_dtype(x_data[each]):
                     self.categorical_features.append(each)
                 else:
                     self.quantitative_features.append(each)
+        logging.warning("final cat: "+str(self.specified_categorical)) #TESTING
+        logging.warning("final quant: "+str(self.specified_quantitative)) #TESTING
 
         # Assign feature type lists to dataset object
         self.dataset.categorical_variables = self.categorical_features
