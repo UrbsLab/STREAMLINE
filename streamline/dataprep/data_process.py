@@ -261,7 +261,8 @@ class DataProcess(Job):
                     self.specified_quantitative.remove(each)  # update user specified list
                 if self.specified_categorical is not None and each not in self.specified_categorical:
                     unassigned_to_cat.append(each)
-                    # self.specified_categorical.remove(each)  # update user specified list  (NOT WORKING)
+                if self.specified_categorical is not None and each in self.specified_categorical:
+                    self.specified_categorical.remove(each)  # update user specified list
 
         logging.warning("binary cat: " + str(self.categorical_features))  # TESTING
         # Since some datasets might be very large, report this warning as a summary
