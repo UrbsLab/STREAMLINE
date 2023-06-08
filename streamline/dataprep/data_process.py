@@ -273,7 +273,7 @@ class DataProcess(Job):
 
         # Any remaining unassigned features will be assigned to categorical or quanatiative lists based on user specified categorical cutoff
         for each in x_data:
-            if each not in self.categorical_features and each not in self.quantitative_features:
+            if each not in self.categorical_features or each not in self.quantitative_features:
                 if x_data[each].nunique() <= self.categorical_cutoff or not pd.api.types.is_numeric_dtype(x_data[each]):
                     self.categorical_features.append(each)
                 else:
