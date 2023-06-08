@@ -239,7 +239,7 @@ class DataProcess(Job):
         if self.specified_quantitative is not None:
             quant_not_in_data = list(set(self.specified_quantitative) - set(headers))
             for feat in quant_not_in_data:
-                self.quantitative_features.remove(feat)
+                self.specified_quantitative.remove(feat)
         # Since some datasets might be very large, report this warning as a summary
         if len(cat_not_in_data) > 0:
             logging.warning(
