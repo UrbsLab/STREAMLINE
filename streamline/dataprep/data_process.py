@@ -250,7 +250,7 @@ class DataProcess(Job):
                 if self.specified_quantitative is not None and each in self.specified_quantitative:
                     quant_to_cat.append(each)
                     self.specified_quantitative.remove(each) #update user specified list
-                if self.specified_categorical is not None and each not in self.specified_categorical:
+                if self.specified_categorical is not None and each in self.specified_categorical:
                     unassigned_to_cat.append(each)
                     self.specified_categorical.remove(each) #update user specified list  (NOT WORKING)
         logging.warning("binary cat: "+str(self.categorical_features)) #TESTING
@@ -271,7 +271,7 @@ class DataProcess(Job):
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
 
-        if self.specified_quantitative is not None and self.specified_categorical is not None:
+        if self.specified_quantitative is not None and self.specified_categorical is not None: #both lists specified
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = self.categorical_features + self.specified_categorical
         logging.warning("assigned cat: "+str(self.categorical_features)) #TESTING
