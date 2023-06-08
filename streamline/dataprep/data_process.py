@@ -494,9 +494,6 @@ class DataProcess(Job):
                                               'Quantitative Features', 'Missing Values',
                                               'Missing Percent', 'Class 0', 'Class 1'])
 
-        # identify and save categorical variables for intermediate steps before categorical encoding
-        self.identify_feature_types()  # Completed
-
         transition_df.loc["Original"] = self.counts_summary(save=False)
 
         # ordinal encode the labels
@@ -577,8 +574,12 @@ class DataProcess(Job):
                             "Analysis moving forward assuming there is no 'match label' column using "
                             "stratified (S) CV partitioning.")
 
+        # identify and save categorical variables for intermediate steps before categorical encoding
+        self.identify_feature_types()  # Completed
+
         # Run initial EDA from the Dataset Class giving in the current experiment folder.
         self.dataset.categorical_variables = self.categorical_features
+        self.dataset.quantitative_variables = self.quantitative_features
         self.dataset.initial_eda(self.experiment_path)
 
         # Running all data manipulation steps
