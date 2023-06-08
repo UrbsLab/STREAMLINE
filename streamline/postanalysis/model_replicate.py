@@ -108,6 +108,8 @@ class ReplicateJob(Job):
         # Create Folder hierarchy
         if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'):
             os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory')
+        if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'+ '/' + 'initial'):
+            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'+ '/' + 'initial')
         if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation'):
             os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation')
         if not os.path.exists(
