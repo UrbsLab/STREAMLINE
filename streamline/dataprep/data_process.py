@@ -218,6 +218,7 @@ class DataProcess(Job):
 
         # Quality control of user-specified feature lists: remove specified features not in target dataset
         headers = self.dataset.get_headers() #Get feature names included in target dataset
+        logging.warning("data features: "+str(headers)) #TESTING
         cat_not_in_data = []
         quant_not_in_data = []
         for feat in self.specified_categorical:
@@ -259,17 +260,17 @@ class DataProcess(Job):
             logging.warning("Following binary feature(s) were not in the categorical list, but will be treated as categorical: "+str(unassigned_to_cat))
 
         # Assign remaining user specified features as categorical or quantiative
-        if self.categorical_features is not None and self.quantitative_features is None:
+        if self.specified_categorical is not None and self.specified_quantitative is None:
             logging.warning("No quantitative features specified; non-binary features not specified as categorical will be treated as quanatiative unless they are binary")
             self.categorical_features = self.categorical_features + self.specified_categorical
             self.quantitative_features = list(set(self.dataset.get_headers()) - set(self.categorical_features)) #All other features assigned as quantitative
 
-        if self.quantitative_features is not None and self.categorical_features is None:
+        if self.specified_quantitative is not None and self.specified_categorical is None:
             logging.warning("No categorical features specified; features not specified as quantitative will be treated as categorical")
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = list(set(self.dataset.get_headers()) - set(self.quantitative_features))
 
-        if self.quantitative_features is not None and self.categorical_features is not None:
+        if self.specified_quantitative is not None and self.specified_categorical is not None:
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = self.categorical_features + self.specified_categorical
         logging.warning("assigned cat: "+str(self.categorical_features)) #TESTING
