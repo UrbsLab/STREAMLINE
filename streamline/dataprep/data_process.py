@@ -206,8 +206,8 @@ class DataProcess(Job):
             self.specified_categorical = [s.strip() for s in self.specified_categorical]
         if self.specified_quantitative is not None:
             self.specified_quantitative = [s.strip() for s in self.specified_quantitative]
-        logging.warning("spec cat: " + str(self.specified_categorical))
-        logging.warning("spec quant: " + str(self.specified_quantitative))
+        logging.debug("spec cat: " + str(self.specified_categorical))  # Testing
+        logging.debug("spec quant: " + str(self.specified_quantitative))  # Testing
         # Quality control of user-specified feature lists: duplicates check and warnings
         if self.specified_quantitative is not None and self.specified_categorical is not None:
             duplicates = list(set(self.specified_categorical) & set(self.specified_quantitative))
@@ -229,7 +229,7 @@ class DataProcess(Job):
 
         # Quality control of user-specified feature lists: remove specified features not in target dataset
         headers = list(x_data.columns)  # Get feature names included in target dataset
-        logging.warning("data features: " + str(headers))  # TESTING
+        logging.debug("data features: " + str(headers))  # TESTING
         cat_not_in_data = []
         quant_not_in_data = []
         if self.specified_categorical is not None:
@@ -247,8 +247,8 @@ class DataProcess(Job):
         if len(quant_not_in_data) > 0:
             logging.warning(
                 "Following features specified as quantitative were not in target dataset: " + str(quant_not_in_data))
-        logging.warning("cleaned spec cat: " + str(self.specified_categorical))
-        logging.warning("cleaned spec quant: " + str(self.specified_quantitative))
+        logging.debug("cleaned spec cat: " + str(self.specified_categorical))  # Testing
+        logging.debug("cleaned spec quant: " + str(self.specified_quantitative))  # Testing
 
         # Assign all binary features categorical list
         quant_to_cat = []
@@ -264,7 +264,7 @@ class DataProcess(Job):
                 if self.specified_categorical is not None and each in self.specified_categorical:
                     self.specified_categorical.remove(each)  # update user specified list
 
-        logging.warning("binary cat: " + str(self.categorical_features))  # TESTING
+        logging.debug("binary cat: " + str(self.categorical_features))  # TESTING
         # Since some datasets might be very large, report this warning as a summary
         if len(quant_to_cat) > 0:
             logging.warning(
@@ -294,8 +294,8 @@ class DataProcess(Job):
         if self.specified_quantitative is not None and self.specified_categorical is not None:  # both lists specified
             self.quantitative_features = self.specified_quantitative
             self.categorical_features = self.categorical_features + self.specified_categorical
-        logging.warning("assigned cat: " + str(self.categorical_features))  # TESTING
-        logging.warning("assigned quant: " + str(self.quantitative_features))  # TESTING
+        logging.debug("assigned cat: " + str(self.categorical_features))  # TESTING
+        logging.debug("assigned quant: " + str(self.quantitative_features))  # TESTING
 
         # Any remaining unassigned features will be assigned to categorical or quantitative lists based on user
         # specified categorical cutoff
@@ -305,8 +305,8 @@ class DataProcess(Job):
                     self.categorical_features.append(each)
                 else:
                     self.quantitative_features.append(each)
-        logging.warning("final cat: " + str(self.categorical_features))  # TESTING
-        logging.warning("final quant: " + str(self.quantitative_features))  # TESTING
+        logging.debug("final cat: " + str(self.categorical_features))  # TESTING
+        logging.debug("final quant: " + str(self.quantitative_features))  # TESTING
 
         # Assign feature type lists to dataset object
         self.dataset.categorical_variables = self.categorical_features
@@ -535,13 +535,15 @@ class DataProcess(Job):
         else:
             logging.info("No textual categorical features, skipping label encoding")
 
-    def drop_ignored_rowcols(self):
+    def drop_ignored_rowcols(self, ignored_features=None):
         """
         Basic data cleaning: Drops any instances with a missing outcome
         value as well as any features (ignore_features) specified by user
         """
         # Remove features that are specified to be dropped
-        for feat in self.ignore_features:
+        if ignored_features is None:
+            ignored_features = self.ignore_features
+        for feat in ignored_features:
             if feat in self.categorical_features:
                 self.categorical_features.remove(feat)
             if feat in self.quantitative_features:

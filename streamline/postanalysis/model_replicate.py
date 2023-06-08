@@ -108,8 +108,9 @@ class ReplicateJob(Job):
         # Create Folder hierarchy
         if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'):
             os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory')
-        if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'+ '/' + 'initial'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'+ '/' + 'initial')
+        if not os.path.exists(
+                self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial'):
+            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial')
         if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation'):
             os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation')
         if not os.path.exists(
@@ -142,6 +143,8 @@ class ReplicateJob(Job):
                                               'Categorical Features',
                                               'Quantitative Features', 'Missing Values',
                                               'Missing Percent', 'Class 0', 'Class 1'])
+
+        transition_df.loc["Original"] = eda.counts_summary(save=False)
 
         # ordinal decode the variables
         try:
@@ -178,8 +181,6 @@ class ReplicateJob(Job):
         except FileNotFoundError:
             pass
 
-        transition_df.loc["Original"] = eda.counts_summary(save=False)
-
         # ExploratoryAnalysis - basic data cleaning
         eda.drop_ignored_rowcols()
 
@@ -199,6 +200,7 @@ class ReplicateJob(Job):
         # Recreate missingness features in apply phase
         for feat in eda.engineered_features:
             eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
+            eda.categorical_features.append('miss_' + feat)
         eda.engineered_features = ['miss_' + feat for feat in eda.engineered_features]
 
         transition_df.loc["E1"] = eda.counts_summary(save=False)
@@ -207,8 +209,13 @@ class ReplicateJob(Job):
             # Removing dropped features
             with open(self.experiment_path + '/' + self.train_name +
                       '/exploratory/removed_variables.pickle', 'rb') as infile:
-                removed_features = pickle.load(infile)
-            eda.dataset.clean_data(removed_features)
+                removed_features = list(pickle.load(infile))
+            for feat in removed_features:
+                if feat in eda.categorical_features:
+                    eda.categorical_features.remove(feat)
+                if feat in eda.quantitative_features:
+                    eda.quantitative_features.remove(feat)
+            eda.dataset.data.drop(removed_features, axis=1, inplace=True)
         except FileNotFoundError:
             pass
 
@@ -229,34 +236,51 @@ class ReplicateJob(Job):
         # logging.warning(non_binary_categorical)
         if len(non_binary_categorical) > 0:
             one_hot_df = pd.get_dummies(eda.dataset.data[non_binary_categorical], columns=non_binary_categorical)
-            eda.one_hot_features = one_hot_df.columns
+            eda.one_hot_features = list(one_hot_df.columns)
             eda.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
             eda.dataset.data = pd.concat([eda.dataset.data, one_hot_df], axis=1)
         # adding features not seen in test data
         for feat in post_processed_vars:
             if feat not in list(eda.dataset.data.columns):
                 eda.dataset.data[feat] = 0
+                eda.one_hot_features.append(feat)
+
+        eda.categorical_features += eda.one_hot_features
 
         try:
             with open(self.experiment_path + '/' + self.train_name +
                       '/exploratory/correlated_features.pickle', 'rb') as infile:
-                correlated_features = pickle.load(infile)
+                correlated_features = list(pickle.load(infile))
         except FileNotFoundError:
             correlated_features = list()
 
         # removing extra features
         for feat in eda.dataset.data.columns:
             if feat not in post_processed_vars and feat not in correlated_features:
-                eda.dataset.data.drop(feat, axis=1)
+                eda.drop_ignored_rowcols([feat])
 
         transition_df.loc["E2"] = eda.counts_summary(save=False)
 
         # Removing highly correlated features
-        eda.dataset.clean_data(correlated_features)
+        for feat in correlated_features:
+            if feat in eda.categorical_features:
+                eda.categorical_features.remove(feat)
+            if feat in eda.quantitative_features:
+                eda.quantitative_features.remove(feat)
+        eda.dataset.data.drop(correlated_features, axis=1, inplace=True)
 
         transition_df.loc["C4"] = eda.counts_summary(save=False)
 
+        eda.categorical_features = list(set(post_processed_vars).intersection(set(eda.categorical_features)))
+        eda.quantitative_features = list(set(post_processed_vars).intersection(set(eda.quantitative_features)))
+
+        if len(list(set(post_processed_vars) - set(eda.quantitative_features + eda.quantitative_features))) > 0:
+            Exception("Final Variables in Train are not equal to post processed sum of "
+                      "Categorical and Quantitative in Replication phase, something is wrong")
+
         eda.dataset.data = eda.dataset.data[post_processed_vars]
+
+        transition_df.loc["Final"] = eda.counts_summary(save=False)
 
         transition_df.to_csv(self.full_path + "/applymodel/" + self.apply_name + '/exploratory/'
                              + 'DataProcessSummary.csv', index=True)

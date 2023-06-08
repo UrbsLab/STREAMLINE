@@ -39,6 +39,23 @@ def test_setup():
                                                   'Radiological Hallmark',
                                                   'Sim_Cat_2', 'Sim_Cat_3', 'Sim_Cat_4', 'Sim_Text_Cat_2',
                                                   'Sim_Text_Cat_3', 'Sim_Text_Cat_4'],
+                            quantitative_features=['Sim_Miss_0.6', 'Alkaline phosphatase (U/L)',
+                                                   'Aspartate transaminase (U/L)',
+                                                   'International Normalised Ratio*', 'Performance Status*',
+                                                   'Sim_Cor_-1.0_B',
+                                                   'Alanine transaminase (U/L)', 'Platelets',
+                                                   'Direct Bilirubin (mg/dL)', 'Encephalopathy degree*',
+                                                   'Sim_Cor_0.9_A', 'Albumin (mg/dL)', 'Number of Nodules',
+                                                   'Sim_Cor_1.0_A', 'Haemoglobin (g/dL)',
+                                                   'Major dimension of nodule (cm)', 'Leukocytes(G/L)',
+                                                   'Total Proteins (g/dL)', 'Sim_Miss_0.7',
+                                                   'Ascites degree*', 'Creatinine (mg/dL)', 'Iron', 'Sim_Cor_0.9_B',
+                                                   'Grams of Alcohol per day',
+                                                   'Sim_Cor_-1.0_A', 'Oxygen Saturation (%)',
+                                                   'Gamma glutamyl transferase (U/L)', 'Total Bilirubin(mg/dL)',
+                                                   'Ferritin (ng/mL)', 'Packs of cigarets per year',
+                                                   'Mean Corpuscular Volume', 'Sim_Cor_1.0_B',
+                                                   'Alpha-Fetoprotein (ng/mL)'],
                             correlation_removal_threshold=1)
     eda.run(run_parallel=run_parallel)
     del eda
