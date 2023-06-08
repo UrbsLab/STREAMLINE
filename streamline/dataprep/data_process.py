@@ -206,7 +206,8 @@ class DataProcess(Job):
             self.specified_categorical = [s.strip() for s in self.specified_categorical]
         if self.specified_quantitative is not None:
             self.specified_quantitative = [s.strip() for s in self.specified_quantitative]
-
+        logging.warning("spec cat: "+str(self.specified_categorical))
+        logging.warning("spec quant: "+str(self.specified_quantitative))
         # Quality control of user-specified feature lists: duplicates check and warnings
         if self.specified_quantitative is not None and self.specified_categorical is not None:
             duplicates = list(set(self.specified_categorical) & set(self.specified_quantitative))
@@ -234,7 +235,8 @@ class DataProcess(Job):
             logging.warning("Following features specified as categorical were not in target dataset: "+str(cat_not_in_data))
         if len(quant_not_in_data) > 0:
             logging.warning("Following features specified as quantitative were not in target dataset: "+str(quant_not_in_data))
-
+        logging.warning("cleaned spec cat: "+str(self.specified_categorical))
+        logging.warning("cleaned spec quant: "+str(self.specified_quantitative))
         #Get feature data
         if x_data is None:
             x_data = self.dataset.feature_only_data()
@@ -250,9 +252,8 @@ class DataProcess(Job):
                     self.specified_quantitative.remove(each) #update user specified list
                 if self.specified_categorical is not None and each not in self.specified_categorical:
                     unassigned_to_cat.append(each)
-                    self.specified_categorical.remove(each) #update user specified list
+                    self.specified_categorical.remove(each) #update user specified list  (NOT WORKING)
         logging.warning("binary cat: "+str(self.categorical_features)) #TESTING
-
         #Since some datasets might be very large, report this warning as a summary
         if len(quant_to_cat) > 0:
             logging.warning("Following binary feature(s) specified as quantitative, but will be treated it as categorical: "+str(quant_to_cat))
