@@ -14,7 +14,8 @@ Within this folder you should find the following:
 * `algInfo.pickle` [File]: A binary 'pickle' file including a dictionary indicating which ML algorithms were used, along with abbreviations of names for figures/filenames, and colors to use for each algorithm in figures. (For more experienced users)
 * `DatasetComparisons` [Folder]: Containing figures and statistical significance comparisons between the two datasets that were analyzed with STREAMLINE. (This folder only appears if more than one dataset was included in the user specified data folder, i.e. `data_path`, and phase 7 of STREAMLINE was run). Within the PDF summary, each dataset is assigned an abbreviated designation of 'D#' (e.g. D1, D2, etc) based on the alphabetical order of each dataset name. These designations are used in some of the files included within this folder.
 * [Folders] - A folder for each of the two datasets analyzed (in this demo there were two: `demodata` and `hcc-data_example_no_covariates`). These folders include all results and models respective to each dataset. We summarize the contents of each folder below (feel free to skip this for now and revisit it as needed)...
-    * `exploratory` [Folder]: Includes all exploratory analysis summaries and figures.
+    * `exploratory` [Folder]: Includes all exploratory analysis summaries and figures after basic transformation.
+      * `initial` [Folder]: Includes all exploratory analysis before data transformation.
     * `CVDatasets` [Folder]: Includes all individual training and testing datasets (as .csv files) generated.
         * Note: These are the datasets passed to modeling so if imputation and scaling was conducted, these datasets will have been partitioned, imputed, and scaled.
     * `scale_impute` [Folder]: Includes all pickled files preserving how scaling and/or imputation was conducted based on respective training datasets.

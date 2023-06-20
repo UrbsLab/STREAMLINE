@@ -8,7 +8,6 @@ Just have a Google Account and open this Colab Link:
 
 ## Local Installation
 To install the STREAMLINE locally:
-(bleeding edge development/to be updated on merge to main)
 
 ### Prerequisites
 #### Git

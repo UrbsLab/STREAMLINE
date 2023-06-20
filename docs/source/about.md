@@ -44,13 +44,13 @@ Currently, STREAMLINE automates the following aspects of analysis (see schematic
       * Publication-ready plots/figures & model visualizations
       * Trained models (stored as pickled objects for re-use)
       * Training and testing CV datasets (for external reproducibility)
-   6. Non-parametric statistical comparisons across ML algorithms and analyzed datasets
-   7. Summary report generation (as pre-formatted PDF) including:
+   7. Non-parametric statistical comparisons across ML algorithms and analyzed datasets
+   8. Summary report generation (as pre-formatted PDF) including:
       * STREAMLINE run settings used
       * Dataset characteristics summary
       * Key figures and model evaluation results averaged over CV runs
       * Runtime summary
-   8. Applying and evaluating all STREAMLINE-trained models on further/future
+   9. Applying and evaluating all STREAMLINE-trained models on further/future
       hold out replication data
 
 The following 16 scikit-learn compatible ML modeling algorithms are currently included as options:
@@ -67,7 +67,7 @@ The following 16 scikit-learn compatible ML modeling algorithms are currently in
 11. Artificial Neural Network (ANN)
 12. K-Nearest Neighbors (k-NN)
 13. Genetic Programming (GP)
-14. Eductional Learning Classifier System (eLCS)
+14. Educational Learning Classifier System (eLCS)
 15. 'X' Classifier System (XCS)
 16. Extended Supervised Tracking and Classifying System (ExSTraCS).
 
@@ -93,11 +93,8 @@ with the pipeline output. Examples include:
    all ML algorithms
 
 Notably, STREAMLINE does NOT automate the following elements, as they are still best
-completed by human experts: (1) feature engineering, or feature construction,
-(2) feature encoding (e.g. apply one-hot-encoding to categorical features, or
-numerically encode text-based feature values), (3) account for bias in data
-collection, or (4) anything beyond simple data cleaning (i.e. the pipeline
-only removes instances with no class label, or where all feature values are missing).
+completed by human experts: (1) account for bias in data
+collection, (2) anything beyond simple feature engineering and data cleaning.
 We recommend users consider conducting these items, as needed, prior to applying STREAMLINE.
 
 ***
@@ -120,7 +117,7 @@ and have a Google Drive account (to run STREAMLINE serially on Google Colab).
 Those with a very basic knowledge of python and computer environments can apply
 STREAMLINE locally and serially using the included jupyter notebook.
 
-Those comfortable with command lines can run STREAMLINE locally (serially) or in parallel on a computing cluster.
+Those comfortable with command lines can run STREAMLINE locally or on a computing cluster.
 
 ***
 ## Which STREAMLINE run mode should I use?
@@ -189,10 +186,10 @@ within a reasonable time frame.
  * Easily conduct an exploratory analysis including: (1) basic dataset characteristics: data dimensions, feature stats, missing value counts, and class balance, (2) detection of categorical vs. quantiative features, (3) feature correlation (with heatmap), and (4) univariate analyses with Chi-Square (categorical features), or Mann-Whitney U-Test (quantitative features).
 
 * Preprocessing
- * Option to manually specify which features to treat as categorical vs. quantitative.
+ * Option to manually specify which features to treat as categorical and quantitative.
  * Option to manually specify features in loaded dataset to ignore in analysis.
  * Option to utilize 'group' cross validation partitioning: Case/control pairs or groups that have been matched based on one or more covariates will be kept together within CV data partitions.
- * Imputation is completed using mode imputation for categorical variables first, followed by MICE-based iterative imputation for quantitaive features. There is an option to use mean imputation for quantitative features when imputation computing cost is prohibitive in large datasets.
+ * Imputation is completed using mode imputation for categorical variables first, followed by MICE-based iterative imputation for quantitative features. There is an option to use mean imputation for quantitative features when imputation computing cost is prohibitive in large datasets.
 
 * Feature Importance and Selection
  * Data scaling, imputation, and feature selection are all conducted within respective CV partitions to prevent data leakage (i.e. testing data is not seen for any aspect of learning until final model evaluation).
