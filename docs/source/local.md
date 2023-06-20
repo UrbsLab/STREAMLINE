@@ -69,7 +69,7 @@ file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/run.cfg)
 
 The user can simply run the following command to run the whole pipeline:
 ```
-python run.py -c local.cfg
+python run.py -c ./run_configs/local.cfg
 ```
 
 Specifically the `run_cluster` parameter in the `multiprocessing` section has to been defined as

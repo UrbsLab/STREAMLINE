@@ -73,8 +73,9 @@ the parameter names given below are slightly different from the argument identif
 from the command-line (a guide for commandline parameters is given [here](parameters.md)).
 
 1. Open the same notebook as the above section for DemoData
-2. Uncomment cell of code which says "Uncomment to load custom dataset"
-3. Upload files as and input `class_label`, `instance_label` and `match_label` asked with these requirements:
+2. Follow the directions as written and set flag values `demo_run=False`
+3. You can either use a data prompt with `use_data_prompt=True`, or set your own parameters manually, we recommend using `use_data_prompt=True`.
+4. Upload files as and input `class_label`, `instance_label` and `match_label` when asked with these requirements:
     * Files are in comma-separated format with extension '.txt' or '.csv' format.
     * Missing data values should be empty or indicated with an 'NA'.
     * Dataset(s) include a header giving column labels.
@@ -83,17 +84,17 @@ from the command-line (a guide for commandline parameters is given [here](parame
     * All feature values (both categorical and quantitative) are numerically encoded (i.e. no letters or words). Scikit-learn does not accept text-based values.
         * However, both `instance_label` and `match_label` values may be either numeric or text.
     * If multiple datasets are being analyzed they must each have the same `class_label` (e.g. 'Class'), and (if present), the same `instance_label` (e.g. 'ID') and `match_label` (e.g. 'Match_ID').
-4. Update the first 6 pipeline run parameters as such:
+5. (Optional/Manual Mode) Update the first 6 pipeline run parameters as such:
     * `demo_run`: Change from True to False (Note, this parameter is only used by the notebooks for the demonstration analysis, and is one of the few parameters that use a Boolean rather than string value).
     * `data_path`: Change the end of the path from DemoData to the name of your new dataset folder (e.g. "/content/drive/MyDrive/STREAMLINE-main/my_data").
     * `output_path`: This can be left 'as-is' or modified to some other folder on your google drive within which to store all STREAMLINE experiments.
     * `experiment_name`: Change this to some new unique experiment name (do this each time you want to run a new experiment, either on the same or different dataset(s)), e.g. 'my_first_experiment'.
     * `class_label`: Change to the column header indicating the class label in each dataset, e.g. 'Class'.
     * `instance_label`: Change to the column header indicating unique instance ID's for each row in the dataset(s), or change to the string 'None' if your dataset does not include instance IDs.
-5. Specifying replication data run parameters:
+6. (Optional/Manual Mode) Specifying replication data run parameters:
     * Scroll down to the code block with the text 'Run Parameters for Phase 10'.
     * If you don't have a replication dataset simply change `applyToReplication` to False (boolean value) and ignore the other two run parameters in this code block.
-6. [Optional] Update other STREAMLINE run parameters to suit your analysis needs within code blocks 6-14. We will cover some common run parameters to consider here:
+7. [Optional] Update other STREAMLINE run parameters to suit your analysis needs within code blocks 6-14. We will cover some common run parameters to consider here:
     * `cv_partitions`: The number of CV training/testing partitions created, and consequently the number of models trained for each ML algorithm. We recommend setting this between 3-10. A larger value will take longer to run but produce more accurate results.
     * `categorical_cutoff`: STREAMLINE uses this parameter to automatically determine which features to treat as categorical vs. numeric. If a feature has more than this many unique values, it is considered to be numeric.
         * Note: Currently, STREAMLINE does NOT automatically apply one-hot-encoding to categorical features meaning that all features will still be treated as numerical during ML modeling. Its currently up to the users decide whether to pre-encode features.  However STREAMLINE does take feature type into account during both the exploratory analysis, data preprocessing, and feature importance phases.

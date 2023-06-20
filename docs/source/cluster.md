@@ -79,11 +79,11 @@ similar to the legacy version of STREAMLINE.
 
 As example config setup to run all steps till report generations using SLURM dask-jobqueue on Cedars HPC Cluster Setup.
 is given in the config 
-file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/cedars.cfg)
+file [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg)
 
 We specifically focus on the multiprocessing section of the 
 config file 
-[here](https://github.com/UrbsLab/STREAMLINE/blob/39b8acdf52607582599eb32a83b2fcd877b22466/upenn.cfg#L9-L12).
+[here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg#L8-L12).
 
 
 Now you can run the pipeline using the following command (considering the config file is `upenn.cfg`): 
