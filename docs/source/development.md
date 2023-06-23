@@ -4,11 +4,12 @@ Contact harsh.bandhey@cshs.org if you have any feedback or encounter bugs.
 
 ## Change Log
 The current version of STREAMLINE has the following additional features that are unique and noteworthy:
-1. The ability to add new models by making a python file in `streamine/models/` based on the base model template.
-2. The ability to run 7 different types of HPC clusters using `dask_jobqueue`
+1. Added data cleaning and engineering based on data missingness and correlation.
+2. The ability to add new models by making a python file in `streamine/models/` based on the base model template.
+3. The ability to run 7 different types of HPC clusters using `dask_jobqueue`
    as documented in its [documentation](https://jobqueue.dask.org/en/latest/api.html)
-3. Ability to run the whole pipeline as a single command, which is now the primary method of operation.
-4. Support for running using a configuration file instead of commandline parameters.
+4. Ability to run the whole pipeline as a single command, which is now the primary method of operation.
+5. Support for running using a configuration file instead of commandline parameters.
 
 ## History
 The current version of STREAMLINE is based on our initial STREAMLINE project release Beta 0.2.5, and has since undergone major refactoring
@@ -25,7 +26,7 @@ This STREAMLINE repository will be developed further in the future while the old
 
 ### Logistical extensions
 * Set up code to be run easily on cloud computing options such as AWS, Azure, or Google Cloud
-* Set up option to use STREAMLINE within Docker - In Progress/TODO
+* Set up option to use STREAMLINE within Docker
 
 ### Capabilities extensions
 * Support multiclass and quantitative endpoints
