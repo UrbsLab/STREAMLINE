@@ -110,7 +110,7 @@ on the example DemoData on the Cedars SLURM HPC.
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --data-path DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 A user can also run phases of STREAMLINE individually, 
@@ -124,7 +124,7 @@ python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster SLURM 
 
 To just run Data Preparation Phase (Phase 2):
 ```
-python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 
