@@ -92,7 +92,7 @@ from the included [Jupyter Notebook](https://github.com/UrbsLab/STREAMLINE/blob/
 Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of
 pipeline efficacy. New users can easily test/run STREAMLINE in all run modes set up to run automatically on these datasets.
 
-Detailed info about advanced features and command line implementation can be found in  [./info/demo.md](info/demo.md)
+Detailed info about advanced features and command line implementation can be found in  [./docs/source/demo.md](docs/source/demo.md)
 
 ***
 ## Disclaimer
