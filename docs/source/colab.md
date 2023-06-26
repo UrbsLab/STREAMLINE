@@ -59,7 +59,6 @@ in addition to the complete experiment folder.
 
 The user open the zip on their local system, or alternatively you can explore the files on Google Colab
 by opening the file-explorer pane on the left. How to analyze this output can be found in the [Analyzing Outputs](analysis.md) section.
-by opening the file-explorer pane on the left. How to analyze this output can be found in the [Analyzing Outputs](analysis.md) section.
 
 ## Running on your own datasets
 This section explains how to update the Google Colaboratory Notebook to run on one or more user specified
