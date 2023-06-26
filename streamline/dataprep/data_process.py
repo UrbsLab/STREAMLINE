@@ -73,20 +73,24 @@ class DataProcess(Job):
         # quantitative features using the categorical_cutoff parameter.
         if categorical_features is None:
             self.specified_categorical = None  # List of feature names specified by user to be treated as categorical
-        elif type(categorical_features) == str:
+        elif type(categorical_features) == str and not categorical_features == '':
             categorical_features = pd.read_csv(categorical_features, sep=',')
             self.specified_categorical = list(categorical_features)
         elif type(categorical_features) == list:
             self.specified_categorical = list(categorical_features)
+        elif categorical_features == '':
+            self.specified_categorical = None
         else:
             raise Exception
         if quantitative_features is None:
             self.specified_quantitative = None  # List of feature names specified by user to be treated as quantitative
-        elif type(quantitative_features) == str:
+        elif type(quantitative_features) == str and not quantitative_features == '':
             quantitative_features = pd.read_csv(quantitative_features, sep=',')
             self.specified_quantitative = list(quantitative_features)
         elif type(quantitative_features) == list:
             self.specified_quantitative = list(quantitative_features)
+        elif quantitative_features == '':
+            self.specified_quantitative = None
         else:
             raise Exception
 
