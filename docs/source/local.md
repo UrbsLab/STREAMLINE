@@ -91,7 +91,7 @@ python run.py <other commands> --run-cluster False --run-parallel True<or Flase,
 As example case to all phases till report generation is given below:
 
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster False --run-parallel True
+python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster False --run-parallel True
 ```
 
 A user can also run phases of STREAMLINE individually, 
@@ -100,7 +100,7 @@ pipeline sequentially in the given order.
 
 To just run Exploratory Phase (Phase 1):
 ```
-python run.py --data-path DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster False --run-parallel True
+python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --algorithms NB,LR,DT --run-cluster False --run-parallel True
 ```
 
 To just run Data Preparation Phase (Phase 2):
@@ -142,12 +142,12 @@ python run.py --out-path demo --exp-name demo --class-label Class --inst-label I
 
 To just run Replication Phase (Phase 9):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-replicate --run-cluster False --run-parallel True
+python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-replicate --run-cluster False --run-parallel True
 ```
 
 To just run Replication Report Phase (Phase 10):
 ```
-python run.py --rep-path DemoRepData --dataset DemoData/hcc-data_example.csv --out-path demo --exp-name demo --do-rep-report --run-cluster False --run-parallel True
+python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-rep-report --run-cluster False --run-parallel True
 ```
 
 To just run Cleaning Phase (Phase 11):
