@@ -33,7 +33,8 @@ The overall development of this pipeline focused on:
    7. Run mode flexibility
    8. More advanced users can easily add their own scikit-learn compatible modeling algorithms to STREAMLINE
 
-We recommend reviewing [./info/about.md](info/about.md) to gain a deeper understanding
+We recommend reviewing the [about section](https://urbslab.github.io/STREAMLINE/about.html) in the documentation 
+to gain a deeper understanding
 of STREAMLINE with respect to it's overall design, what it includes, what it
 can be used for, and implementation highlights that differentiate it from other
 AutoML tools.
@@ -52,7 +53,7 @@ simulated benchmark data can be found [here](https://link.springer.com/chapter/1
 
 This paper is also available as a preprint on arxiv, [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
-See [./info/citations.md](info/citations.md) for how to cite STREAMLINE.
+See [citations](https://urbslab.github.io/STREAMLINE/citation.html) section in the documentation for tips on how to cite STREAMLINE.
 
 ***
 # Installation and Use
@@ -92,7 +93,9 @@ from the included [Jupyter Notebook](https://github.com/UrbsLab/STREAMLINE/blob/
 Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of
 pipeline efficacy. New users can easily test/run STREAMLINE in all run modes set up to run automatically on these datasets.
 
-Detailed info about advanced features and command line implementation can be found in  [./docs/source/demo.md](docs/source/demo.md)
+## List of parameters
+[//]: # (Consolidated info on how to run it on different systems can be found in [./docs/source/demo.md]&#40;docs/source/demo.md)
+A complete list of STREAMLINE Parameters can be found [here](https://urbslab.github.io/STREAMLINE/parameters.html).
 
 ***
 ## Disclaimer
