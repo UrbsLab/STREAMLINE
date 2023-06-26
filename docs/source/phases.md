@@ -3,13 +3,13 @@ The base code for STREAMLINE (located in the `streamline` folder) is organized i
 These loosely correspond with the pipeline schematic above. These phases are designed to be run in order. 
 Phases 1-6 make up the core automated pipeline, with Phase 7 and beyond being run optionally based on user needs.
 
-* Phase 1: Exploratory Analysis
-  * Conducts an initial exploratory analysis of all target datasets to be analyzed and compared
-  * Conducts basic data cleaning
+* Phase 1: Data Cleaning and Exploratory Data Analysis
+  * Conducts initial exploratory analysis, basic data cleaning and intermediary data analysis of all target datasets to be analyzed and compared
+  * Data Cleaning includes data removal and feature generation based on data missingness and correlation.
   * Conducts k-fold cross validation (CV) partitioning to generate k training and k testing datasets
-  * \[Runtime]: Typically fast, with the exception of generating feature correlation heatmaps in datasets with a large number of features
+  * \[Runtime]: Typically fast, except generating feature correlation heatmaps in datasets with a large number of features
 
-* Phase 2: Data Preprocessing
+* Phase 2: Scaling and Imputation
   * Conducts feature transformations (i.e. data scaling) on all CV training datasets individually
   * Conducts imputation of missing data values (missing data is not allowed by most scikit-learn modeling packages) on all CV training datasets individually
   * Generates updated training and testing CV datasets
