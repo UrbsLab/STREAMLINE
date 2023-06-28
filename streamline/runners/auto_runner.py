@@ -18,10 +18,10 @@ from streamline.runners.stats_runner import StatsRunner
 
 class AutoRunner: 
 
-    def __init__(self, data_path: str = "./data/DemoData", output_path="./DemoOutput",
-                experiment_name='demo_experiment', exploration_list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
-                plot_list=["Describe", "Univariate Analysis", "Feature Correlation"],
-                class_label="Class", instance_label='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
+    def __init__(self, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
+                experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
+                plot_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
+                class_label:str="Class", instance_label:str='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
                 ignore_features=None, categorical_feature_headers=None, quantitative_feature_headers=None, top_features=20,
                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                 correlation_removal_threshold=1.0,
@@ -55,8 +55,6 @@ class AutoRunner:
         self.n_splits = n_splits# (int, > 1) Number of training/testing data partitions to create - and resulting number of models generated using each ML algorithm 'Optuna'
         self.partition_method = partition_method ## (str) for Stratified, Random, or Group, respectively 'Optuna'
     
-        
-
         #ImputationRunner
         self.scale_data = scale_data
         self.impute_data = impute_data
@@ -153,4 +151,13 @@ class AutoRunner:
         self.plot_fi_box = plot_fi_box
         self.metric_weight = metric_weight
         
-    #def run(self):
+    def run(self, run_parallel=False):
+        dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
+                experiment_name=self.experiment_name, exploration_list=self.exploration_list,
+                plot_list=self.plot_list, class_label=self.class_label, instance_label=self.instance_label, match_label=self.match_label, n_splits=self.n_splits, partition_method=self.partition_method,
+                ignore_features=self.ignore_features, categorical_feature_headers=self.categorical_features, quantitative_feature_headers=self.quantitative_features, top_features=self.top_features,
+                categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff, featureeng_missingness=self.featureeng_missingness, cleaning_missingness=self.cleaning_missingness,
+                correlation_removal_threshold=self.correlation_removal_threshold,
+                random_state=self.random_state, run_cluster=self.run_cluster, queue=self.queue, reserved_memory=self.reserved_memory, show_plots=self.show_plots)
+        dpr.run(run_parallel)
+        
