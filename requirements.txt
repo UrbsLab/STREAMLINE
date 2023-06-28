@@ -26,3 +26,7 @@ kaleido
 dask-jobqueue
 dask
 joblib
+#digen dependencies 
+importlib-resources
+deap
+requests
