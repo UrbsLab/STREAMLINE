@@ -16,33 +16,46 @@ from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
 from streamline.runners.stats_runner import StatsRunner
 
-class AutoCleanRunner: 
+class AutoRunner: 
 
-    def __init__(self):
+    def __init__(self, data_path: str = "./data/DemoData", output_path="./DemoOutput",
+                experiment_name='demo_experiment', exploration_list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
+                plot_list=["Describe", "Univariate Analysis", "Feature Correlation"],
+                class_label="Class", instance_label='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
+                ignore_features=None, categorical_feature_headers=None, quantitative_feature_headers=None, top_features=20,
+                categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
+                correlation_removal_threshold=1.0,
+                random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
+        
+        #must input: 
 
         #Dataprocess_runner 
-        self.data_path = data_path
-        self.output_path = output_path
-        self.experiment_name = experiment_name
-        self.class_label = class_label
-        self.instance_label = instance_label
-        self.match_label = match_label
-        self.ignore_features = ignore_features
-        self.categorical_cutoff = 'Optuna'
-        self.categorical_features = categorical_features
-        self.quantitative_features = quantitative_features
-        self.featureeng_missingness = 'Optuna'
-        self.cleaning_missingness = 'Optuna'
-        self.correlation_removal_threshold = 'Optuna'
-        self.top_features = top_features
-        self.exploration_list = 'Optuna'
+        self.data_path = data_path #(str) Data Folder Path
+        self.output_path = output_path # (str) Ouput Folder Path (folder will be created by STREAMLINE automatically)
+        self.experiment_name = experiment_name # (str) Experiment Name (change to save a new STREAMLINE run output folder instead of overwriting previous run)
+        self.class_label = class_label  # (str) i.e. class outcome column label
+        self.instance_label = instance_label # (str) If data includes instance labels, given respective column name here, otherwise put 'None'
+        self.match_label = match_label # (str or None) Only applies when M selected for partition-method; indicates column label with matched instance ids'
+        self.ignore_features = ignore_features # list of column names (given as string values) to exclude from the analysis (only insert column names if needed, otherwise leave empty)
+        self.categorical_features = categorical_feature_headers # empty list for 'auto-detect' otherwise list feature names (given as string values) to be treated as categorical. Only impacts algorithms that can take variable type into account.
+        self.quantitative_features = quantitative_feature_headers
         self.plot_list = plot_list
-        self.n_splits = 'Optuna'
-        self.partition_method = 'Optuna'
+        self.top_features = top_features #(int) Number of top features to report in notebook for univariate analysis
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
         self.show_plots = show_plots
+        #auto_cleaning optuna_targets
+        self.categorical_cutoff = categorical_cutoff  # (int) Bumber of unique values after which a variable is considered to be quantitative vs categorical 'Optuna'
+        self.sig_cutoff = sig_cutoff # (float, 0-1) Significance cutoff used throughout pipeline
+        self.featureeng_missingness = featureeng_missingness# (float, 0-1) Percentage of missing after which categorical featrure identifier is generated.'Optuna'
+        self.cleaning_missingness = cleaning_missingness# (float, 0-1) Percentage of missing after instance and feature removal is performed. 'Optuna'
+        self.correlation_removal_threshold = correlation_removal_threshold # (float, 0-1) 'Optuna'
+        self.exploration_list = exploration_list  # (list of strings) Options:["Describe", "Differentiate", "Univariate Analysis"] 'Optuna'
+        self.n_splits = n_splits# (int, > 1) Number of training/testing data partitions to create - and resulting number of models generated using each ML algorithm 'Optuna'
+        self.partition_method = partition_method ## (str) for Stratified, Random, or Group, respectively 'Optuna'
+    
+        
 
         #ImputationRunner
         self.scale_data = scale_data
@@ -140,5 +153,4 @@ class AutoCleanRunner:
         self.plot_fi_box = plot_fi_box
         self.metric_weight = metric_weight
         
-    
     #def run(self):
