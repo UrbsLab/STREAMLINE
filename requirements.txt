@@ -30,4 +30,4 @@ joblib
 importlib-resources
 deap
 requests
-pickle
+pickle-mixin
