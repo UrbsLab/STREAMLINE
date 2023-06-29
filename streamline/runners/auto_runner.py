@@ -1,14 +1,6 @@
 import logging
 import os
 import shutil
-import glob
-import pickle
-import time
-import dask
-from tqdm import tqdm
-from pathlib import Path
-from joblib import Parallel, delayed
-import optuna
 from streamline.runners.dataprocess_runner import DataProcessRunner
 from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
@@ -19,7 +11,7 @@ from streamline.runners.report_runner import ReportRunner
 
 class AutoRunner: 
 
-    def __init__(self, dataset_names, gen_report=False, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
+    def __init__(self, dataset_names, gen_report=True, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
                 experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
                 plot_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
                 class_label:str="Class", instance_label:str='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
