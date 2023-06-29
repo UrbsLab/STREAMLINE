@@ -1,6 +1,7 @@
 import os
 import glob
 import pickle
+from pathlib import Path
 
 
 def check_phase_1(output_path, experiment_name, datasets):
@@ -8,6 +9,7 @@ def check_phase_1(output_path, experiment_name, datasets):
     for dataset in datasets:
         phase1_jobs.append('job_exploratory_' + dataset + '.txt')
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_exploratory*'):
+        filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1]
         phase1_jobs.remove(ref)
     return phase1_jobs
@@ -24,6 +26,7 @@ def check_phase_2(output_path, experiment_name, datasets):
             phase2_jobs.append('job_preprocessing_' + dataset + '_' + str(cv) + '.txt')
 
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_preprocessing*'):
+        filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1]
         phase2_jobs.remove(ref)
     return phase2_jobs
@@ -46,6 +49,7 @@ def check_phase_3(output_path, experiment_name, datasets):
                 phase3_jobs.append('job_mutual_information_' + dataset + '_' + str(cv) + '.txt')
 
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_mu*'):
+        filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1]
         phase3_jobs.remove(ref)
     return phase3_jobs
@@ -57,6 +61,7 @@ def check_phase_4(output_path, experiment_name, datasets):
         phase4_jobs.append('job_featureselection_' + dataset + '.txt')
 
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_featureselection*'):
+        filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1]
         phase4_jobs.remove(ref)
     return phase4_jobs
@@ -84,6 +89,7 @@ def check_phase_5(output_path, experiment_name, datasets):
                     phase5_jobs.append('job_model_' + dataset + '_' + str(cv) + '_' + ABBREVIATION[algorithm] + '.txt')
 
         for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_model*'):
+            filename = str(Path(filename).as_posix())
             ref = filename.split('/')[-1]
             phase5_jobs.remove(ref)
         return phase5_jobs
@@ -97,6 +103,7 @@ def check_phase_6(output_path, experiment_name, datasets):
         phase6_jobs.append('job_stats_' + dataset + '.txt')
 
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_stats*'):
+        filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1]
         phase6_jobs.remove(ref)
     return phase6_jobs
@@ -104,6 +111,7 @@ def check_phase_6(output_path, experiment_name, datasets):
 
 def check_phase_7(output_path, experiment_name, datasets=None):
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_data_compare*'):
+        filename = str(Path(filename).as_posix())
         if filename.split('/')[-1] == 'job_data_compare.txt':
             return []
         else:
@@ -115,6 +123,7 @@ def check_phase_8(output_path, experiment_name, datasets=None):
     # Make pdf summary for training analysis
     for filename in glob.glob(output_path + "/" + experiment_name
                               + '/jobsCompleted/job_data_pdf_training*'):
+        filename = str(Path(filename).as_posix())
         if filename.split('/')[-1] == 'job_data_pdf_training.txt':
             return []
         else:
@@ -125,9 +134,11 @@ def check_phase_8(output_path, experiment_name, datasets=None):
 def check_phase_9(output_path, experiment_name, rep_data_path):
     phase9_jobs = []
     for dataset_filename in glob.glob(rep_data_path + '/*'):
+        dataset_filename = str(Path(dataset_filename).as_posix())
         apply_name = dataset_filename.split('/')[-1].split('.')[0]
         phase9_jobs.append('job_apply_' + str(apply_name))
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_apply*'):
+        filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1].split('.')[0]
         phase9_jobs.remove(ref)
     return phase9_jobs
@@ -138,6 +149,7 @@ def check_phase_10(output_path, experiment_name, dataset_for_rep):
     train_name = dataset_for_rep.split('/')[-1].split('.')[0]
     for filename in glob.glob(output_path + "/" + experiment_name
                               + '/jobsCompleted/job_data_pdf_apply_' + str(train_name) + '*'):
+        filename = str(Path(filename).as_posix())
         if filename.split('/')[-1] == 'job_data_pdf_apply_' + str(train_name) + '.txt':
             return []
         else:
@@ -149,6 +161,7 @@ def check_phase_11(output_path, experiment_name):
     # Check if clean job is done
     not_deleted = list(glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/*')) + \
                     list(glob.glob(output_path + "/" + experiment_name + '/jobs/*'))
+    not_deleted = [str(Path(path)) for path in not_deleted]
     return not_deleted
 
 

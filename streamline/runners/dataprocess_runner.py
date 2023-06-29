@@ -124,6 +124,7 @@ class DataProcessRunner:
         unique_datanames = []
         job_obj_list = []
         for dataset_path in glob.glob(self.data_path + '/*'):
+            dataset_path = str(Path(dataset_path).as_posix())
             # Save unique dataset names so that analysis is run only once if there
             # is both a .txt and .csv version of dataset with same name.
             file_extension = dataset_path.split('/')[-1].split('.')[-1]

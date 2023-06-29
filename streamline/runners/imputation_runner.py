@@ -68,6 +68,7 @@ class ImputationRunner:
                 os.makedirs(full_path + '/scale_impute/')
 
             for cv_train_path in glob.glob(full_path + "/CVDatasets/*Train.csv"):
+                cv_train_path = str(Path(cv_train_path).as_posix())
                 job_counter += 1
                 cv_test_path = cv_train_path.replace("Train.csv", "Test.csv")
 

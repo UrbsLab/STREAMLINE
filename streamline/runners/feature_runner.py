@@ -93,6 +93,7 @@ class FeatureImportanceRunner:
                 if not os.path.exists(full_path + "/feature_selection/mutual_information/pickledForPhase4"):
                     os.mkdir(full_path + "/feature_selection/mutual_information/pickledForPhase4")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
+                    cv_train_path = str(Path(cv_train_path).as_posix())
 
                     if self.run_cluster == "SLURMOld":
                         self.submit_slurm_cluster_job(cv_train_path, experiment_path, "MI")
@@ -117,6 +118,7 @@ class FeatureImportanceRunner:
                 if not os.path.exists(full_path + "/feature_selection/multisurf/pickledForPhase4"):
                     os.mkdir(full_path + "/feature_selection/multisurf/pickledForPhase4")
                 for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
+                    cv_train_path = str(Path(cv_train_path).as_posix())
 
                     if self.run_cluster == "SLURMOld":
                         self.submit_slurm_cluster_job(cv_train_path, experiment_path, "MS")
@@ -283,6 +285,7 @@ class FeatureSelectionRunner:
             experiment_path = self.output_path + '/' + self.experiment_name
 
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
+            cv_dataset_paths = [str(Path(cv_dataset_path)) for cv_dataset_path in cv_dataset_paths]
 
             if self.run_cluster == "SLURMOld":
                 self.submit_slurm_cluster_job(full_path, len(cv_dataset_paths))

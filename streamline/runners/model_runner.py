@@ -135,6 +135,7 @@ class ModelExperimentRunner:
         if self.resubmit:
             phase5completed = []
             for filename in glob.glob(self.output_path + "/" + self.experiment_name + '/jobsCompleted/job_model*'):
+                filename = str(Path(filename).as_posix())
                 ref = filename.split('/')[-1]
                 phase5completed.append(ref)
         else:
@@ -151,6 +152,7 @@ class ModelExperimentRunner:
             if not os.path.exists(full_path + '/model_evaluation/pickled_metrics'):
                 os.mkdir(full_path + '/model_evaluation/pickled_metrics')
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
+            cv_dataset_paths = [str(Path(cv_dataset_path)) for cv_dataset_path in cv_dataset_paths]
             cv_partitions = len(cv_dataset_paths)
             for cv_count in range(cv_partitions):
                 for algorithm in self.algorithms:

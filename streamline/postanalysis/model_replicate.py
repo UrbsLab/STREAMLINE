@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import pickle
+from pathlib import Path
 
 import pandas as pd
 
@@ -320,6 +321,7 @@ class ReplicateJob(Job):
         master_list = []  # Will hold all evalDict's, one for each cv dataset.
 
         cv_dataset_paths = list(glob.glob(self.full_path + "/CVDatasets/*_CV_*Train.csv"))
+        cv_dataset_paths = [str(Path(cv_dataset_path)) for cv_dataset_path in cv_dataset_paths]
         cv_partitions = len(cv_dataset_paths)
         for cv_count in range(0, cv_partitions):
             # Get corresponding training CV dataset
