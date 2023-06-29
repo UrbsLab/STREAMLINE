@@ -22,12 +22,16 @@ class AutoRunner:
                 experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
                 plot_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
                 class_label:str="Class", instance_label:str='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
-                ignore_features=None, categorical_feature_headers=None, quantitative_feature_headers=None, top_features=20,
+                ignore_features=None, categorical_feature_headers=None, quantitative_feature_headers=None, top_features=40,
                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                 correlation_removal_threshold=1.0,
                 random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False,
                 impute_scale_data=True, impute_data=True,
-                impute_multi_impute=True, impute_overwrite_cv=True,):
+                impute_multi_impute=True, impute_overwrite_cv=True,
+                do_mutual_info=True, do_multisurf=True,
+                instance_subset=2000, algorithms=("MI", "MS"), use_turf=False, turf_pct=0.5,
+                n_jobs=-1, max_features_to_keep=2000, filter_poor_features=True, export_scores=True
+                ):
         
         #must input: 
 
@@ -65,20 +69,23 @@ class AutoRunner:
         self.random_state = random_state
         
         #FeatureImportanceRunner
-        self.cv_count = None
-        self.dataset = None
-        self.instance_subset = instance_subset
-        self.algorithms = list(algorithms)
-        self.use_turf = use_turf
-        self.turf_pct = turf_pct
-        self.n_jobs = n_jobs
+        self.do_mutual_info = do_mutual_info
+        self.do_multisurf = do_multisurf
+        self.featureimp_cv_count = None
+        self.featureimp_dataset = None
+        self.featureimp_instance_subset = instance_subset # (int) Sample subset size to use with MultiSURF (since MultiSURF's compute time scales quadratically with instance count)
+        self.featureimp_algorithms = list(algorithms)
+        self.featureimp_use_turf = use_turf
+        self.featureimp_turf_pct = turf_pct #future optuna
+        self.featureimp_n_jobs = n_jobs # (int) Number of cores dedicated to running algorithm; setting to -1 will use all available cores when run locally
+
 
         #FeatureSelectionRunner
         self.cv_count = None
         self.dataset = None
-        self.max_features_to_keep = max_features_to_keep
-        self.filter_poor_features = filter_poor_features
-        self.export_scores = export_scores
+        self.featuresel_max_features_to_keep = max_features_to_keep
+        self.featuresel_filter_poor_features = filter_poor_features
+        self.featuresel_export_scores = export_scores
 
         #ModelExperimentRunner
         """
@@ -154,13 +161,13 @@ class AutoRunner:
         self.metric_weight = metric_weight
         
     def run(self, run_para=False):
-        FORMAT = '%(levelname)s: %(message)s'
+        self.FORMAT = '%(levelname)s: %(message)s'
         logging.basicConfig(format=FORMAT)
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
         if os.path.exists(self.output_path+'/'+self.experiment_name):
             shutil.rmtree(self.output_path+'/'+self.experiment_name)
-        dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
+        self.dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
                 experiment_name=self.experiment_name, exploration_list=self.exploration_list,
                 plot_list=self.plot_list, class_label=self.class_label,
                 instance_label=self.instance_label, match_label=self.match_label,
@@ -172,23 +179,34 @@ class AutoRunner:
                 correlation_removal_threshold=self.correlation_removal_threshold,
                 random_state=self.random_state, run_cluster=self.run_cluster, queue=self.queue,
                 reserved_memory=self.reserved_memory, show_plots=self.show_plots)
-        dpr.run(run_parallel=run_para)
-        ir = ImputationRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+        self.dpr.run(run_parallel=run_para)
+        self.ir = ImputationRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
                         scale_data=self.impute_scale_data, impute_data=self.impute_data,
                         multi_impute=self.impute_multi_impute, overwrite_cv=self.impute_overwrite_cv, 
                         class_label=self.class_label, instance_label=self.instance_label, 
                         random_state=self.random_state)
-        ir.run(run_parallel=run_para)
-        feat_algorithms = []
-        if do_mutual_info:
-            feat_algorithms.append("MI")
-        if do_multisurf:
-            feat_algorithms.append("MS")
-        f_imp = FeatureImportanceRunner(output_path, experiment_name, 
-                                class_label=class_label, 
-                                instance_label=instance_label,
-                                instance_subset=instance_subset, 
-                                algorithms=feat_algorithms, 
-                                use_turf=use_TURF, turf_pct=TURF_pct, 
-                                random_state=random_state)
-        f_imp.run(run_parallel=run_para)
+        self.ir.run(run_parallel=run_para)
+        self.featimp_algorithms = []
+        if self.do_mutual_info:
+            self.featimp_algorithms.append("MI")
+        if self.do_multisurf:
+            self.featimp_algorithms.append("MS")
+        self.f_imp = FeatureImportanceRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+                                class_label=self.class_label, 
+                                instance_label=self.instance_label,
+                                instance_subset=self.featureimp_instance_subsetinstance_subset, 
+                                algorithms=self.featureimp_algorithms, 
+                                use_turf=self.featureimp_use_turf, turf_pct=self.featureimp_turf_pct, 
+                                random_state=self.random_state)
+        self.f_imp.run(run_parallel=run_para)
+        self.f_sel = FeatureSelectionRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+                               feat_algorithms=self.featimp_algorithms, class_label=self.class_label, 
+                               instance_label=self.instance_label,
+                               max_features_to_keep=self.featuresel_max_features_to_keep, 
+                               filter_poor_features=self.featuresel_filter_poor_features, 
+                               top_features=self.top_features, 
+                               export_scores=self.featuresel_export_scores,
+                               overwrite_cv=self.overwrite_cv, 
+                               random_state=self.random_state,
+                               show_plots=self.show_plots)
+        self.f_sel.run(run_parallel=run_para)
