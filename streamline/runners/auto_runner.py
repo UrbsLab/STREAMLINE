@@ -25,7 +25,9 @@ class AutoRunner:
                 ignore_features=None, categorical_feature_headers=None, quantitative_feature_headers=None, top_features=20,
                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                 correlation_removal_threshold=1.0,
-                random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
+                random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False,
+                impute_scale_data=True, impute_data=True, random_state=None,
+                impute_multi_impute=True, impute_overwrite_cv=True,):
         
         #must input: 
 
@@ -56,10 +58,10 @@ class AutoRunner:
         self.partition_method = partition_method ## (str) for Stratified, Random, or Group, respectively 'Optuna'
     
         #ImputationRunner
-        self.scale_data = scale_data
+        self.impute_scale_data = impute_scale_data
         self.impute_data = impute_data
-        self.multi_impute = multi_impute
-        self.overwrite_cv = overwrite_cv
+        self.impute_multi_impute = impute_multi_impute
+        self.impute_overwrite_cv = impute_overwrite_cv
         self.random_state = random_state
         
         #FeatureImportanceRunner
@@ -151,13 +153,42 @@ class AutoRunner:
         self.plot_fi_box = plot_fi_box
         self.metric_weight = metric_weight
         
-    def run(self, run_parallel=False):
+    def run(self, run_para=False):
+        FORMAT = '%(levelname)s: %(message)s'
+        logging.basicConfig(format=FORMAT)
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        if os.path.exists(self.output_path+'/'+self.experiment_name):
+            shutil.rmtree(self.output_path+'/'+self.experiment_name)
         dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
                 experiment_name=self.experiment_name, exploration_list=self.exploration_list,
-                plot_list=self.plot_list, class_label=self.class_label, instance_label=self.instance_label, match_label=self.match_label, n_splits=self.n_splits, partition_method=self.partition_method,
-                ignore_features=self.ignore_features, categorical_feature_headers=self.categorical_features, quantitative_feature_headers=self.quantitative_features, top_features=self.top_features,
-                categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff, featureeng_missingness=self.featureeng_missingness, cleaning_missingness=self.cleaning_missingness,
+                plot_list=self.plot_list, class_label=self.class_label,
+                instance_label=self.instance_label, match_label=self.match_label,
+                n_splits=self.n_splits, partition_method=self.partition_method,
+                ignore_features=self.ignore_features, categorical_feature_headers=self.categorical_features,
+                quantitative_feature_headers=self.quantitative_features, top_features=self.top_features,
+                categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
+                featureeng_missingness=self.featureeng_missingness, cleaning_missingness=self.cleaning_missingness,
                 correlation_removal_threshold=self.correlation_removal_threshold,
-                random_state=self.random_state, run_cluster=self.run_cluster, queue=self.queue, reserved_memory=self.reserved_memory, show_plots=self.show_plots)
-        dpr.run(run_parallel)
-        
+                random_state=self.random_state, run_cluster=self.run_cluster, queue=self.queue,
+                reserved_memory=self.reserved_memory, show_plots=self.show_plots)
+        dpr.run(run_parallel=run_para)
+        ir = ImputationRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+                        scale_data=self.impute_scale_data, impute_data=self.impute_data,
+                        multi_impute=self.impute_multi_impute, overwrite_cv=self.impute_overwrite_cv, 
+                        class_label=self.class_label, instance_label=self.instance_label, 
+                        random_state=self.random_state)
+        ir.run(run_parallel=run_para)
+        feat_algorithms = []
+        if do_mutual_info:
+            feat_algorithms.append("MI")
+        if do_multisurf:
+            feat_algorithms.append("MS")
+        f_imp = FeatureImportanceRunner(output_path, experiment_name, 
+                                class_label=class_label, 
+                                instance_label=instance_label,
+                                instance_subset=instance_subset, 
+                                algorithms=feat_algorithms, 
+                                use_turf=use_TURF, turf_pct=TURF_pct, 
+                                random_state=random_state)
+        f_imp.run(run_parallel=run_para)
