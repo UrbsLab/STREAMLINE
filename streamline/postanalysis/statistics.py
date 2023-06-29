@@ -4,6 +4,8 @@ import os
 import pickle
 import time
 import logging
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -1064,6 +1066,7 @@ class StatsJob(Job):
         dict_obj = dict()
         dict_obj['preprocessing'] = 0
         for file_path in glob.glob(self.full_path + '/runtime/*.txt'):
+            file_path = str(Path(file_path).as_posix())
             f = open(file_path, 'r')
             val = float(f.readline())
             ref = file_path.split('/')[-1].split('_')[1].split('.')[0]

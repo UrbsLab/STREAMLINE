@@ -3,6 +3,7 @@ import os
 import shutil
 import glob
 import argparse
+from pathlib import Path
 
 
 class Cleaner:
@@ -75,10 +76,12 @@ class Cleaner:
             if self.del_old_cv:
                 # Delete CV files generated after preprocessing but before feature selection
                 files = glob.glob(self.experiment_path + '/' + dataset + '/CVDatasets/*CVOnly*')
+                files = [str(Path(path)) for path in files]
                 for f in files:
                     self.rm_tree(f, False)
                 # Delete CV files generated after CV partitioning but before preprocessing
                 files = glob.glob(self.experiment_path + '/' + dataset + '/CVDatasets/*CVPre*')
+                files = [str(Path(path)) for path in files]
                 for f in files:
                     self.rm_tree(f, False)
 

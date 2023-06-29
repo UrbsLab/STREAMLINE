@@ -5,6 +5,8 @@ import os
 import pickle
 import csv
 from datetime import datetime
+from pathlib import Path
+
 from streamline import __version__ as version
 import pandas as pd
 from fpdf import FPDF
@@ -54,7 +56,8 @@ class ReportJob(Job):
             self.train_name = data_path.split('/')[-1].split('.')[0]
             self.datasets = []
             for dataset_filename in glob.glob(rep_data_path + '/*'):
-                dataset_filename = str(dataset_filename).replace('\\', '/')
+                dataset_filename = str(Path(dataset_filename).as_posix())
+                # dataset_filename = str(dataset_filename).replace('\\', '/')
                 # Save unique dataset names so that analysis is run only once if there is both a
                 # .txt and .csv version of dataset with same name.
                 apply_name = dataset_filename.split('/')[-1].split('.')[0]

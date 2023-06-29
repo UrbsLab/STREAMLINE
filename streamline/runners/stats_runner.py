@@ -111,6 +111,7 @@ class StatsRunner:
                 os.mkdir(full_path + '/model_evaluation/GP_Viz')
 
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
+            cv_dataset_paths = [str(Path(cv_dataset_path)) for cv_dataset_path in cv_dataset_paths]
             cv_partitions = len(cv_dataset_paths)
 
             if self.run_cluster == "SLURMOld":

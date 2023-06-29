@@ -132,6 +132,7 @@ class ReplicationRunner:
         unique_datanames = list()
         job_list = list()
         for dataset_filename in glob.glob(self.rep_data_path + '/*'):
+            dataset_filename = str(Path(dataset_filename).as_posix())
             # Save unique dataset names so that analysis is run only once if
             # there is both a .txt and .csv version of dataset with same name.
             file_extension = dataset_filename.split('/')[-1].split('.')[-1]

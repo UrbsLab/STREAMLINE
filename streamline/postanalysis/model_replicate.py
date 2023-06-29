@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import pickle
+from pathlib import Path
 
 import pandas as pd
 
@@ -159,20 +160,23 @@ class ReplicateJob(Job):
                         eda.dataset.data[feat] = temp_y
                     elif len(ord_labels.loc[feat]['Category']) == 2:
                         new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
+                        labels = ord_labels.loc[feat]['Category']
                         rename_dict = dict(enumerate(labels))
                         for lab in new_labels:
                             rename_dict[None] = lab
                         rename_dict = {v: k for k, v in rename_dict.items()}
                         eda.dataset.data.replace({feat: rename_dict}, inplace=True)
-                        ord_labels.loc[feat] = [list(labels) + new_labels,
-                                                list(range(len(list(labels)))) + [None, ] * len(new_labels)]
+                        ord_labels.loc[feat]['Category'] = list(labels) + new_labels
+                        ord_labels.loc[feat]['Encoding'] = list(range(len(list(labels)))) + [None, ] * len(new_labels)
                         logging.warning("New Value found in Binary Categorical Variable, filling with null value")
                     else:
                         new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
+                        labels = ord_labels.loc[feat]['Category']
                         rename_dict = dict(enumerate(list(labels) + new_labels))
                         rename_dict = {v: k for k, v in rename_dict.items()}
                         eda.dataset.data.replace({feat: rename_dict}, inplace=True)
-                        ord_labels.loc[feat] = [list(labels) + new_labels, list(range(len(list(labels) + new_labels)))]
+                        ord_labels.loc[feat]['Category'] = list(labels) + new_labels
+                        ord_labels.loc[feat]['Encoding'] = list(range(len(list(labels) + new_labels)))
             with open(self.full_path + "/applymodel/" + self.apply_name +
                       '/exploratory/apply_ordinal_encoding.pickle', 'wb') as outfile:
                 pickle.dump(ord_labels, outfile)
@@ -320,6 +324,7 @@ class ReplicateJob(Job):
         master_list = []  # Will hold all evalDict's, one for each cv dataset.
 
         cv_dataset_paths = list(glob.glob(self.full_path + "/CVDatasets/*_CV_*Train.csv"))
+        cv_dataset_paths = [str(Path(cv_dataset_path)) for cv_dataset_path in cv_dataset_paths]
         cv_partitions = len(cv_dataset_paths)
         for cv_count in range(0, cv_partitions):
             # Get corresponding training CV dataset
