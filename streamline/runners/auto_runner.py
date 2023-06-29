@@ -30,8 +30,11 @@ class AutoRunner:
                 impute_multi_impute=True, impute_overwrite_cv=True,
                 do_mutual_info=True, do_multisurf=True,
                 instance_subset=2000, algorithms=("MI", "MS"), use_turf=False, turf_pct=0.5,
-                n_jobs=-1, max_features_to_keep=2000, filter_poor_features=True, export_scores=True
-                ):
+                n_jobs=-1, max_features_to_keep=2000, filter_poor_features=True, export_scores=True,
+                ml_algorithms=["NB", "LR", "DT"], exclude=['eLCS', 'XCS'], scoring_metric='balanced_accuracy', metric_direction='maximize',
+                training_subsample=0, use_uniform_fi=True, n_trials=200,
+                timeout=900, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
+                lcs_timeout=1200, resubmit=False):
         
         #must input: 
 
@@ -114,6 +117,8 @@ class AutoRunner:
             lcs_timeout: seconds until hyperparameter sweep stops for LCS algorithms, default=1200
 
         """
+        self.ml_algorithms = ml_algorithms
+        self.exclude = exclude
         self.scoring_metric = scoring_metric
         self.metric_direction = metric_direction
         self.training_subsample = training_subsample
@@ -210,3 +215,15 @@ class AutoRunner:
                                random_state=self.random_state,
                                show_plots=self.show_plots)
         self.f_sel.run(run_parallel=run_para)
+        self.model_exp = ModelExperimentRunner(
+                                output_path=self.output_path, experiment_name=self.experiment_name, algorithms=self.ml_algorithms, 
+                                exclude=self.exclude, class_label=self.class_label,
+                                instance_label=self.instance_label, scoring_metric=self.scoring_metric, 
+                                metric_direction=self.metric_direction,
+                                training_subsample=self.training_subsample, 
+                                use_uniform_fi=self.use_uniform_FI, n_trials=self.n_trials,
+                                timeout=self.timeout, save_plots=self.save_plots, 
+                                do_lcs_sweep=self.do_lcs_sweep, lcs_nu=self.lcs_nu, lcs_n=self.lcs_N, 
+                                lcs_iterations=self.lcs_iterations,
+                                lcs_timeout=self.lcs_timeout, resubmit=self.resubmit)
+        self.model_exp.run(run_parallel=run_para)
