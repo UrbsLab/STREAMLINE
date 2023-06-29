@@ -36,7 +36,7 @@ class AutoRunner:
 
         #Dataprocess_runner 
         self.gen_report = gen_report
-        self.clean
+        self.clean = clean
         self.del_time = del_time
         self.del_old_cv = del_old_cv
         self.dataset_names = dataset_names
