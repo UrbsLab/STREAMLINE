@@ -8,6 +8,7 @@ from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
 from streamline.runners.stats_runner import StatsRunner
 from streamline.runners.report_runner import ReportRunner
+from streamline.runners.clean_runner import CleanRunner
 
 class AutoRunner: 
 
@@ -29,7 +30,7 @@ class AutoRunner:
                 timeout=900, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                 lcs_timeout=1200, resubmit=False,
                 stats_scale_data=True, metric_weight='balanced_accuracy',
-                plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, del_time=True, del_old_cv=True):
+                plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, del_time=True, del_old_cv=True, save_plots=False):
         
         #must input: 
 
