@@ -11,7 +11,7 @@ from streamline.runners.report_runner import ReportRunner
 
 class AutoRunner: 
 
-    def __init__(self, dataset_names, gen_report=True, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
+    def __init__(self, dataset_names, gen_report=True, clean=True, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
                 experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
                 plot_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
                 class_label:str="Class", instance_label:str='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
@@ -29,12 +29,15 @@ class AutoRunner:
                 timeout=900, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                 lcs_timeout=1200, resubmit=False,
                 stats_scale_data=True, metric_weight='balanced_accuracy',
-                plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True):
+                plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, del_time=True, del_old_cv=True):
         
         #must input: 
 
         #Dataprocess_runner 
         self.gen_report = gen_report
+        self.clean
+        self.del_time = del_time
+        self.del_old_cv = del_old_cv
         self.dataset_names = dataset_names
         self.data_path = data_path #(str) Data Folder Path
         self.output_path = output_path # (str) Ouput Folder Path (folder will be created by STREAMLINE automatically)
@@ -238,6 +241,18 @@ class AutoRunner:
             rep = ReportRunner(self.output_path, self.experiment_name, 
                    algorithms=self.ml_algorithms, exclude=self.exclude)
             rep.run(run_parallel=run_para)
+        if self.clean:
+            dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
+            #only working with one dataset at a time as of now.
+            for dataset_directory_path in dataset_paths:
+                full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
+                for i in self.dataset_names:
+                    if full_path == self.output_path + "/" + self.experiment_name + "/" + i:
+                        return full_path + '/model_evaluation/Summary_performance_mean.csv'
+            clean = CleanRunner(self.output_path, self.experiment_name, del_time=self.del_time, del_old_cv=self.del_old_cv)
+            # run_parallel is not used in clean
+            clean.run()
+            return 'Performance Not Found'
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
         #only working with one dataset at a time as of now.
         for dataset_directory_path in dataset_paths:
