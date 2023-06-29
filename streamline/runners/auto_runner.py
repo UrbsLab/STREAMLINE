@@ -26,7 +26,7 @@ class AutoRunner:
                 categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                 correlation_removal_threshold=1.0,
                 random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False,
-                impute_scale_data=True, impute_data=True, random_state=None,
+                impute_scale_data=True, impute_data=True,
                 impute_multi_impute=True, impute_overwrite_cv=True,):
         
         #must input: 
