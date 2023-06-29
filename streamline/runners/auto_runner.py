@@ -18,7 +18,7 @@ from streamline.runners.stats_runner import StatsRunner
 
 class AutoRunner: 
 
-    def __init__(self, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
+    def __init__(self, dataset_names, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
                 experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
                 plot_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
                 class_label:str="Class", instance_label:str='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
@@ -34,11 +34,14 @@ class AutoRunner:
                 ml_algorithms=["NB", "LR", "DT"], exclude=['eLCS', 'XCS'], scoring_metric='balanced_accuracy', metric_direction='maximize',
                 training_subsample=0, use_uniform_fi=True, n_trials=200,
                 timeout=900, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
-                lcs_timeout=1200, resubmit=False):
+                lcs_timeout=1200, resubmit=False,
+                stats_scale_data=True, metric_weight='balanced_accuracy',
+                plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True):
         
         #must input: 
 
         #Dataprocess_runner 
+        self.dataset_names = dataset_names
         self.data_path = data_path #(str) Data Folder Path
         self.output_path = output_path # (str) Ouput Folder Path (folder will be created by STREAMLINE automatically)
         self.experiment_name = experiment_name # (str) Experiment Name (change to save a new STREAMLINE run output folder instead of overwriting previous run)
@@ -157,8 +160,7 @@ class AutoRunner:
             show_plots: flag to show plots
 
         """
-        self.scale_data = scale_data
-        self.stats_scoring_metric = stats_scoring_metric
+        self.scale_data = stats_scale_data
         self.plot_roc = plot_roc
         self.plot_prc = plot_prc
         self.plot_metric_boxplots = plot_metric_boxplots
@@ -166,13 +168,13 @@ class AutoRunner:
         self.metric_weight = metric_weight
         
     def run(self, run_para=False):
-        self.FORMAT = '%(levelname)s: %(message)s'
+        FORMAT = '%(levelname)s: %(message)s'
         logging.basicConfig(format=FORMAT)
-        self.logger = logging.getLogger()
-        self.logger.setLevel(logging.INFO)
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
         if os.path.exists(self.output_path+'/'+self.experiment_name):
             shutil.rmtree(self.output_path+'/'+self.experiment_name)
-        self.dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
+        dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
                 experiment_name=self.experiment_name, exploration_list=self.exploration_list,
                 plot_list=self.plot_list, class_label=self.class_label,
                 instance_label=self.instance_label, match_label=self.match_label,
@@ -184,27 +186,27 @@ class AutoRunner:
                 correlation_removal_threshold=self.correlation_removal_threshold,
                 random_state=self.random_state, run_cluster=self.run_cluster, queue=self.queue,
                 reserved_memory=self.reserved_memory, show_plots=self.show_plots)
-        self.dpr.run(run_parallel=run_para)
-        self.ir = ImputationRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+        dpr.run(run_parallel=run_para)
+        ir = ImputationRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
                         scale_data=self.impute_scale_data, impute_data=self.impute_data,
                         multi_impute=self.impute_multi_impute, overwrite_cv=self.impute_overwrite_cv, 
                         class_label=self.class_label, instance_label=self.instance_label, 
                         random_state=self.random_state)
-        self.ir.run(run_parallel=run_para)
-        self.featimp_algorithms = []
+        ir.run(run_parallel=run_para)
+        featimp_algorithms = []
         if self.do_mutual_info:
             self.featimp_algorithms.append("MI")
         if self.do_multisurf:
             self.featimp_algorithms.append("MS")
-        self.f_imp = FeatureImportanceRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+        f_imp = FeatureImportanceRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
                                 class_label=self.class_label, 
                                 instance_label=self.instance_label,
                                 instance_subset=self.featureimp_instance_subsetinstance_subset, 
                                 algorithms=self.featureimp_algorithms, 
                                 use_turf=self.featureimp_use_turf, turf_pct=self.featureimp_turf_pct, 
                                 random_state=self.random_state)
-        self.f_imp.run(run_parallel=run_para)
-        self.f_sel = FeatureSelectionRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+        f_imp.run(run_parallel=run_para)
+        f_sel = FeatureSelectionRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
                                feat_algorithms=self.featimp_algorithms, class_label=self.class_label, 
                                instance_label=self.instance_label,
                                max_features_to_keep=self.featuresel_max_features_to_keep, 
@@ -214,8 +216,8 @@ class AutoRunner:
                                overwrite_cv=self.overwrite_cv, 
                                random_state=self.random_state,
                                show_plots=self.show_plots)
-        self.f_sel.run(run_parallel=run_para)
-        self.model_exp = ModelExperimentRunner(
+        f_sel.run(run_parallel=run_para)
+        model_exp = ModelExperimentRunner(
                                 output_path=self.output_path, experiment_name=self.experiment_name, algorithms=self.ml_algorithms, 
                                 exclude=self.exclude, class_label=self.class_label,
                                 instance_label=self.instance_label, scoring_metric=self.scoring_metric, 
@@ -226,4 +228,23 @@ class AutoRunner:
                                 do_lcs_sweep=self.do_lcs_sweep, lcs_nu=self.lcs_nu, lcs_n=self.lcs_N, 
                                 lcs_iterations=self.lcs_iterations,
                                 lcs_timeout=self.lcs_timeout, resubmit=self.resubmit)
-        self.model_exp.run(run_parallel=run_para)
+        model_exp.run(run_parallel=run_para)
+        stats = StatsRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
+                    algorithms=self.ml_algorithms, exclude=self.exclude, 
+                    class_label=self.class_label, instance_label=self.instance_label, 
+                    scoring_metric=self.scoring_metric,
+                    top_features=self.top_features, sig_cutoff=self.sig_cutoff, 
+                    metric_weight=self.metric_weight, scale_data=self.scale_data,
+                    plot_roc=self.plot_roc, plot_prc=self.plot_prcC, 
+                    plot_fi_box=self.plot_fi_box, 
+                    plot_metric_boxplots=self.plot_metric_boxplots, 
+                    show_plots=self.show_plots)
+        stats.run(run_parallel=run_para)       
+        dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
+        #only working with one dataset at a time as of now.
+        for dataset_directory_path in dataset_paths:
+            full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
+            for i in self.dataset_names:
+                if full_path == self.output_path + "/" + self.experiment_name + "/" + i:
+                    return full_path + '/model_evaluation/Summary_performance_mean.csv'
+        return 'Performance Not Found'
