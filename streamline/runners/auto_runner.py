@@ -13,7 +13,7 @@ from streamline.runners.clean_runner import CleanRunner
 class AutoRunner: 
 
     def __init__(self, dataset_names, gen_report=True, clean=True, data_path: str = "./data/DemoData", output_path: str="./DemoOutput",
-                experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis","Differentiate", "Feature Correlation"],
+                experiment_name: str='demo_experiment', exploration_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
                 plot_list: list=["Describe", "Univariate Analysis", "Feature Correlation"],
                 class_label:str="Class", instance_label:str='InstanceID', match_label=None, n_splits=3, partition_method="Stratified",
                 ignore_features=None, categorical_feature_headers=None, quantitative_feature_headers=None, top_features=40,
@@ -123,7 +123,7 @@ class AutoRunner:
         self.scoring_metric = scoring_metric
         self.metric_direction = metric_direction
         self.training_subsample = training_subsample
-        self.uniform_fi = use_uniform_fi
+        self.use_uniform_fi = use_uniform_fi
         self.n_trials = n_trials
         self.timeout = timeout
         self.save_plots = save_plots
@@ -177,8 +177,8 @@ class AutoRunner:
                 plot_list=self.plot_list, class_label=self.class_label,
                 instance_label=self.instance_label, match_label=self.match_label,
                 n_splits=self.n_splits, partition_method=self.partition_method,
-                ignore_features=self.ignore_features, categorical_feature_headers=self.categorical_features,
-                quantitative_feature_headers=self.quantitative_features, top_features=self.top_features,
+                ignore_features=self.ignore_features, categorical_features=self.categorical_features,
+                quantitative_features=self.quantitative_features, top_features=self.top_features,
                 categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
                 featureeng_missingness=self.featureeng_missingness, cleaning_missingness=self.cleaning_missingness,
                 correlation_removal_threshold=self.correlation_removal_threshold,
@@ -191,7 +191,7 @@ class AutoRunner:
                         class_label=self.class_label, instance_label=self.instance_label, 
                         random_state=self.random_state)
         ir.run(run_parallel=run_para)
-        featimp_algorithms = []
+        self.featimp_algorithms = []
         if self.do_mutual_info:
             self.featimp_algorithms.append("MI")
         if self.do_multisurf:
@@ -199,19 +199,19 @@ class AutoRunner:
         f_imp = FeatureImportanceRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
                                 class_label=self.class_label, 
                                 instance_label=self.instance_label,
-                                instance_subset=self.featureimp_instance_subsetinstance_subset, 
-                                algorithms=self.featureimp_algorithms, 
+                                instance_subset=self.featureimp_instance_subset, 
+                                algorithms=self.featimp_algorithms, 
                                 use_turf=self.featureimp_use_turf, turf_pct=self.featureimp_turf_pct, 
                                 random_state=self.random_state)
         f_imp.run(run_parallel=run_para)
         f_sel = FeatureSelectionRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
-                               feat_algorithms=self.featimp_algorithms, class_label=self.class_label, 
+                               algorithms=self.featimp_algorithms, class_label=self.class_label, 
                                instance_label=self.instance_label,
                                max_features_to_keep=self.featuresel_max_features_to_keep, 
                                filter_poor_features=self.featuresel_filter_poor_features, 
                                top_features=self.top_features, 
                                export_scores=self.featuresel_export_scores,
-                               overwrite_cv=self.overwrite_cv, 
+                               overwrite_cv=self.impute_overwrite_cv, 
                                random_state=self.random_state,
                                show_plots=self.show_plots)
         f_sel.run(run_parallel=run_para)
@@ -221,9 +221,9 @@ class AutoRunner:
                                 instance_label=self.instance_label, scoring_metric=self.scoring_metric, 
                                 metric_direction=self.metric_direction,
                                 training_subsample=self.training_subsample, 
-                                use_uniform_fi=self.use_uniform_FI, n_trials=self.n_trials,
+                                use_uniform_fi=self.use_uniform_fi, n_trials=self.n_trials,
                                 timeout=self.timeout, save_plots=self.save_plots, 
-                                do_lcs_sweep=self.do_lcs_sweep, lcs_nu=self.lcs_nu, lcs_n=self.lcs_N, 
+                                do_lcs_sweep=self.do_lcs_sweep, lcs_nu=self.lcs_nu, lcs_n=self.lcs_n, 
                                 lcs_iterations=self.lcs_iterations,
                                 lcs_timeout=self.lcs_timeout, resubmit=self.resubmit)
         model_exp.run(run_parallel=run_para)
@@ -233,7 +233,7 @@ class AutoRunner:
                     scoring_metric=self.scoring_metric,
                     top_features=self.top_features, sig_cutoff=self.sig_cutoff, 
                     metric_weight=self.metric_weight, scale_data=self.scale_data,
-                    plot_roc=self.plot_roc, plot_prc=self.plot_prcC, 
+                    plot_roc=self.plot_roc, plot_prc=self.plot_prc, 
                     plot_fi_box=self.plot_fi_box, 
                     plot_metric_boxplots=self.plot_metric_boxplots, 
                     show_plots=self.show_plots)
