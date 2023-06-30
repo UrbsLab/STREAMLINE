@@ -12,7 +12,7 @@ from streamline.runners.clean_runner import CleanRunner
 class OptimizeClean:
 
 
-    def __init__(self, dataset_name: str, optimize_for: str = 'ROC AUC', cv_folds: int = 1, opt_direction: str = 'maximize',
+    def __init__(self, dataset_name: str, class_label: str ='y', instance_label: str ='InstanceId', optimize_for: str = 'ROC AUC', cv_folds: int = 1, opt_direction: str = 'maximize',
                 data_path: str = "./data/DemoData", output_path: str="./DemoOutput", experiment_name: str='demo_experiment', sampler_type='TPE_sampler'):
 
         self.dataset = list(dataset_name)
@@ -23,6 +23,8 @@ class OptimizeClean:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.sampler_type = sampler_type
+        self.class_label = class_label
+        self.instance_label=instance_label
 
     def run(self, run_para=False):
 
@@ -48,7 +50,7 @@ class OptimizeClean:
             self.most_recent_run = AutoRunner(dataset_names=self.dataset, gen_report=False, clean=False,
                                             categorical_cutoff=categorical_cutoff, sig_cutoff=sig_cutoff, featureeng_missingness=featureeng_missingness,
                                             cleaning_missingness=cleaning_missingness, correlation_removal_threshold=correlation_removal_threshold,
-                                            exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits)
+                                            exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits, class_label=self.class_label, instance_label=self.instance_label)
             output_csv = self.most_recent_run.run(run_para=False)
             performance = pd.read_csv(output_csv)
             self.summary_chart = performance
