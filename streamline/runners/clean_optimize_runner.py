@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from streamline.runners.auto_runner import AutoRunner
 from streamline.runners.clean_runner import CleanRunner
 
+
 class OptimizeClean:
 
 
@@ -59,7 +60,7 @@ class OptimizeClean:
             clean.run()
             return self.goal
         
-        study = optuna.create_study(direction=self.opt_direction)
+        study = optuna.create_study(sampler=TPEsampler(), direction=self.opt_direction)
         study.optimize(objective, n_trials=1)
 
         
