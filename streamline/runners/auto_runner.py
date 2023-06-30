@@ -253,12 +253,14 @@ class AutoRunner:
             clean = CleanRunner(self.output_path, self.experiment_name, del_time=self.del_time, del_old_cv=self.del_old_cv)
             # run_parallel is not used in clean
             clean.run()
-            return 'Performance Not Found'
+            raise Exception('Performance Not Found')
+        
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
         #only working with one dataset at a time as of now.
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
             for i in self.dataset_names:
+                print(dataset_directory_path, i)
                 if full_path == self.output_path + "/" + self.experiment_name + "/" + i:
                     return full_path + '/model_evaluation/Summary_performance_mean.csv'
-        return 'Performance Not Found'
+        raise Exception('Performance Not Found')
