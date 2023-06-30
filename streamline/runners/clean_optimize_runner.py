@@ -2,9 +2,11 @@ import logging
 import os
 import pandas as pd
 import optuna
+from optuna.samplers import TPESampler
 import matplotlib.pyplot as plt
 from streamline.runners.auto_runner import AutoRunner
 from streamline.runners.clean_runner import CleanRunner
+
 
 
 class OptimizeClean:
@@ -23,7 +25,7 @@ class OptimizeClean:
         self.sampler_type = sampler_type
 
     def run(self, run_para=False):
-        
+
         def objective(trial):
             categorical_cutoff = trial.suggest_int('categorical_cutoff',2,10)
             sig_cutoff = trial.suggest_float('sig_cutoff',0.005, 0.05, log=True)
@@ -33,7 +35,7 @@ class OptimizeClean:
             exploration_list = trial.suggest_categorical('exploration_list', [["Describe", "Univariate Analysis", "Feature Correlation"]])
             partition_method = trial.suggest_categorical('partition_method',['Stratified', 'Random']) #Group not included
             n_splits = trial.suggest_int('n_splits', 2, 10)
-            self.params = {
+            param = {
                 'categorical_cutoff': categorical_cutoff,
                 'sig_cutoff': sig_cutoff,
                 'featureeng_missingness': featureeng_missingness,
@@ -47,7 +49,7 @@ class OptimizeClean:
                                             categorical_cutoff=categorical_cutoff, sig_cutoff=sig_cutoff, featureeng_missingness=featureeng_missingness,
                                             cleaning_missingness=cleaning_missingness, correlation_removal_threshold=correlation_removal_threshold,
                                             exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits)
-            output_csv = self.most_recent_run.run(run_para=run_para)
+            output_csv = self.most_recent_run.run(run_para=False)
             performance = pd.read_csv(output_csv)
             self.summary_chart = performance
             self.goal = performance[self.optimize_for].max()
@@ -60,24 +62,6 @@ class OptimizeClean:
             clean.run()
             return self.goal
         
-        study = optuna.create_study(sampler=TPEsampler(), direction=self.opt_direction)
-        study.optimize(objective, n_trials=1)
-
-        
-
-
-
-
-
-        
-        '''
-        self.categorical_cutoff = categorical_cutoff  # (int) Bumber of unique values after which a variable is considered to be quantitative vs categorical 'Optuna'
-        self.sig_cutoff = sig_cutoff # (float, 0-1) Significance cutoff used throughout pipeline
-        self.featureeng_missingness = featureeng_missingness# (float, 0-1) Percentage of missing after which categorical featrure identifier is generated.'Optuna'
-        self.cleaning_missingness = cleaning_missingness# (float, 0-1) Percentage of missing after instance and feature removal is performed. 'Optuna'
-        self.correlation_removal_threshold = correlation_removal_threshold # (float, 0-1) 'Optuna'
-        self.exploration_list = exploration_list  # (list of strings) Options:["Describe", "Differentiate", "Univariate Analysis"] 'Optuna'
-        self.n_splits = n_splits# (int, > 1) Number of training/testing data partitions to create - and resulting number of models generated using each ML algorithm 'Optuna'
-        self.partition_method = partition_method ## (str) for Stratified, Random, or Group, respectively 'Optuna'
-        '''
+        study = optuna.create_study(sampler=TPESampler(), direction=self.opt_direction)
+        study.optimize(objective, n_trials=1, show_progress_bar=True)
         
