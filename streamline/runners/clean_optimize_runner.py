@@ -49,24 +49,24 @@ class OptimizeClean:
                 'n_splits': n_splits
             }
         
-            #try:
-            self.most_recent_run = AutoRunner(dataset_names=self.dataset,output_path=self.output_path, experiment_name=self.experiment_name, gen_report=False, clean=False, categorical_cutoff=categorical_cutoff, sig_cutoff=sig_cutoff, featureeng_missingness=featureeng_missingness, cleaning_missingness=cleaning_missingness, correlation_removal_threshold=correlation_removal_threshold, exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits, class_label=self.class_label, instance_label=self.instance_label)
-            output_csv = self.most_recent_run.run(run_para=False)
-            performance = pd.read_csv(output_csv)
-            self.summary_chart = performance
-            self.goal = performance[self.optimize_for].max()
-            self.best_model = performance.loc[performance[self.optimize_for].idxmax()][0]
-            png_out = output_csv.removesuffix('Summary_performance_mean.csv')
-            png_out = png_out + 'Summary_ROC.png'
-            self.final_model_comparison = plt.savefig(png_out)
-            clean = CleanRunner(self.output_path, self.experiment_name, del_time=True, del_old_cv=True)
-                # run_parallel is not used in clean
-            clean.run()
-            return self.goal
-            #except:
-            #    print('EXCEPTION')
-            #    self.goal = float(0.0)
-            #    return self.goal
+            try:
+                self.most_recent_run = AutoRunner(dataset_names=self.dataset,output_path=self.output_path, experiment_name=self.experiment_name, gen_report=False, clean=False, categorical_cutoff=categorical_cutoff, sig_cutoff=sig_cutoff, featureeng_missingness=featureeng_missingness, cleaning_missingness=cleaning_missingness, correlation_removal_threshold=correlation_removal_threshold, exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits, class_label=self.class_label, instance_label=self.instance_label)
+                output_csv = self.most_recent_run.run(run_para=False)
+                performance = pd.read_csv(output_csv)
+                self.summary_chart = performance
+                self.goal = performance[self.optimize_for].max()
+                self.best_model = performance.loc[performance[self.optimize_for].idxmax()][0]
+                png_out = output_csv.removesuffix('Summary_performance_mean.csv')
+                png_out = png_out + 'Summary_ROC.png'
+                self.final_model_comparison = plt.savefig(png_out)
+                clean = CleanRunner(self.output_path, self.experiment_name, del_time=True, del_old_cv=True)
+                    # run_parallel is not used in clean
+                clean.run()
+                return self.goal
+            except:
+                print('EXCEPTION')
+                self.goal = float(0.0)
+                return self.goal
         
         study = optuna.create_study(sampler=TPESampler(), direction=self.opt_direction)
         study.optimize(objective, n_trials=self.n_trials, show_progress_bar=True)
