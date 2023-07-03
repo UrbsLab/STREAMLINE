@@ -69,7 +69,7 @@ class ReplicationRunner:
         # Load variables specified earlier in the pipeline from metadata
         self.outcome_label = outcome_label
         if not outcome_label:
-            self.outcome_label = metadata['Class Label']
+            self.outcome_label = metadata['Outcome Label']
         self.instance_label = instance_label
         if not instance_label:
             self.instance_label = metadata['Instance Label']

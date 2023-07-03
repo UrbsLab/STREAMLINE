@@ -1,7 +1,7 @@
 import csv
 import logging
 import os
-
+import scipy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,7 +11,8 @@ sns.set_theme()
 
 
 class Dataset:
-    def __init__(self, dataset_path, outcome_label, match_label=None, instance_label=None):
+    def __init__(self, dataset_path, outcome_label, match_label=None, instance_label=None,
+                 outcome_type=None, categorical_cutoff=10):
         """
         Creates dataset with path of tabular file
 
@@ -36,6 +37,8 @@ class Dataset:
         self.instance_label = instance_label
         self.categorical_variables = None
         self.quantitative_variables = None
+        self.outcome_type = outcome_type
+        self.categorical_cutoff = categorical_cutoff
         self.load_data()
 
     def load_data(self):
@@ -62,6 +65,13 @@ class Dataset:
             raise Exception("Match label not found in file")
         if self.instance_label and not (self.instance_label in self.data.columns):
             raise Exception("Instance label not found in file")
+
+        if self.outcome_type is None:
+            if self.data[self.outcome_label].nunique() <= self.categorical_cutoff:
+                self.outcome_type = "Categorical"
+            else:
+                self.outcome_type = "Continuous"
+        logging.info("Loaded " + self.outcome_type + "Outcome Type Dataset")
 
     def feature_only_data(self):
         """
@@ -251,20 +261,39 @@ class Dataset:
         logging.info('    Quantitative = ' + str(len(self.quantitative_variables)))
         logging.info('Missing Count = ' + str(total_missing))
         logging.info('    Missing Percent = ' + str(percent_missing))
-        logging.info('Class Counts: ----------------')
-        logging.info('Class Count Information')
-        df_value_counts = pd.DataFrame(class_counts)
-        df_value_counts = df_value_counts.reset_index()
-        df_value_counts.columns = ['Class', 'Instances']
-        logging.info("\n" + df_value_counts.to_string())
+        if self.outcome_type == "Categorical":
+            logging.info('Class Counts: ----------------')
+            logging.info('Class Count Information')
+            df_value_counts = pd.DataFrame(class_counts)
+            df_value_counts = df_value_counts.reset_index()
+            df_value_counts.columns = ['Class', 'Instances']
+            logging.info("\n" + df_value_counts.to_string())
+        elif self.outcome_type == "Continuous":
+            logging.info('Label Counts: ----------------')
+            logging.info('Label Count Information')
+            df_value_counts = pd.DataFrame(class_counts)
+            df_value_counts = df_value_counts.reset_index()
+            df_value_counts.columns = ['Top Occurring Values', 'Counts']
+            logging.info("\n" + df_value_counts.sort_values('Counts').head(10).to_string())
+            logging.info("The Skewness value of the labels is: ", scipy.stats.skew(self.data[self.outcome_label]))
+            logging.info("The Kurtosis value of the labels is: ", scipy.stats.kurtosis(self.data[self.outcome_label]))
 
         # Generate and export class count bar graph
         if plot:
-            class_counts.plot(kind='bar')
-            plt.ylabel('Count')
-            plt.title('Class Counts')
-            plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'ClassCountsBarPlot.png',
-                        bbox_inches='tight')
+            if self.outcome_type == "Categorical":
+                class_counts.plot(kind='bar')
+                plt.ylabel('Count')
+                plt.title('Class Counts')
+                plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'ClassCountsBarPlot.png',
+                            bbox_inches='tight')
+            elif self.outcome_type == "Continuous":
+                plt.figure()
+                plt.hist(self.data[self.outcome_label], bins=100)
+                plt.ylabel('Count')
+                plt.xlabel('Label')
+                plt.title('Label Counts')
+                plt.savefig(experiment_path + '/' + self.name + '/exploratory/' + initial + 'ClassCountsBarPlot.png',
+                            bbox_inches='tight')
             if show_plots:
                 plt.show()
             else:

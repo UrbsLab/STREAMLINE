@@ -206,7 +206,7 @@ class DataProcessRunner:
         metadata['Data Path'] = self.data_path
         metadata['Output Path'] = self.output_path
         metadata['Experiment Name'] = self.experiment_name
-        metadata['Class Label'] = self.outcome_label
+        metadata['Outcome Label'] = self.outcome_label
         metadata['Instance Label'] = self.instance_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features

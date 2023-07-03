@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
-from scipy.stats import chi2_contingency, mannwhitneyu
+from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis
 import seaborn as sns
 
 sns.set_theme()
@@ -46,6 +46,7 @@ class DataProcess(Job):
         if type(dataset) != Dataset:
             raise (Exception("dataset input is not of type Dataset"))
         self.dataset = dataset
+        self.outcome_type = dataset.outcome_type
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
         self.random_state = random_state
@@ -438,19 +439,24 @@ class DataProcess(Job):
                                 '/exploratory/' + 'ClassCounts.csv', header=['Count'],
                                 index_label='Class')
 
-            logging.info('Processed Data Counts: ----------------')
-            logging.info('Instance Count = ' + str(self.dataset.data.shape[0]))
-            logging.info('Feature Count = ' + str(f_count))
-            logging.info('    Categorical  = ' + str(len(self.categorical_features)))
-            logging.info('    Quantitative = ' + str(len(self.quantitative_features)))
-            logging.info('Missing Count = ' + str(total_missing))
-            logging.info('    Missing Percent = ' + str(percent_missing))
-            logging.info('Class Counts: ----------------')
-            logging.info('Class Count Information')
-            df_value_counts = pd.DataFrame(class_counts)
-            df_value_counts = df_value_counts.reset_index()
-            df_value_counts.columns = ['Class', 'Instances']
-            logging.info("\n" + df_value_counts.to_string())
+            if self.dataset.outcome_type == "Categorical":
+                logging.info('Class Counts: ----------------')
+                logging.info('Class Count Information')
+                df_value_counts = pd.DataFrame(class_counts)
+                df_value_counts = df_value_counts.reset_index()
+                df_value_counts.columns = ['Class', 'Instances']
+                logging.info("\n" + df_value_counts.to_string())
+            elif self.dataset.outcome_type == "Continuous":
+                logging.info('Label Counts: ----------------')
+                logging.info('Label Count Information')
+                df_value_counts = pd.DataFrame(class_counts)
+                df_value_counts = df_value_counts.reset_index()
+                df_value_counts.columns = ['Top Occurring Values', 'Counts']
+                logging.info("\n" + df_value_counts.sort_values('Counts').head(10).to_string())
+                logging.info("The Skewness value of the labels is: ",
+                             skew(self.dataset.data[self.dataset.outcome_label]))
+                logging.info("The Kurtosis value of the labels is: ",
+                             kurtosis(self.dataset.data[self.dataset.outcome_label]))
 
             if not replicate:
                 logging.info("Categorical Features: " + str(self.categorical_features))
@@ -465,11 +471,22 @@ class DataProcess(Job):
 
             # Generate and export class count bar graph
             if plot:
-                class_counts.plot(kind='bar')
-                plt.ylabel('Count')
-                plt.title('Class Counts')
-                plt.savefig(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'ClassCountsBarPlot.png',
-                            bbox_inches='tight')
+                if self.dataset.outcome_type == "Categorical":
+                    class_counts.plot(kind='bar')
+                    plt.ylabel('Count')
+                    plt.title('Class Counts')
+                    plt.savefig(
+                        self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'ClassCountsBarPlot.png',
+                        bbox_inches='tight')
+                elif self.dataset.outcome_type == "Continuous":
+                    plt.figure()
+                    plt.hist(self.dataset.data[self.dataset.outcome_label], bins=100)
+                    plt.ylabel('Count')
+                    plt.xlabel('Label')
+                    plt.title('Label Counts')
+                    plt.savefig(self.experiment_path + '/' + self.dataset.name
+                                + '/exploratory/' + 'ClassCountsBarPlot.png',
+                                bbox_inches='tight')
                 if self.show_plots:
                     plt.show()
                 else:
