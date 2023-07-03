@@ -22,7 +22,7 @@ class CompareJob(Job):
     """
     def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
                  exclude=("XCS", "eLCS"),
-                 class_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False):
+                 outcome_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False):
         super().__init__()
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)
         if output_path is not None and experiment_name is not None:
@@ -52,7 +52,7 @@ class CompareJob(Job):
 
         self.dataset_directory_paths = dataset_directory_paths
 
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.sig_cutoff = sig_cutoff
 

@@ -16,7 +16,7 @@ class ImputationRunner:
     """
 
     def __init__(self, output_path, experiment_name, scale_data=True, impute_data=True,
-                 multi_impute=True, overwrite_cv=True, class_label="Class", instance_label=None, random_state=None,
+                 multi_impute=True, overwrite_cv=True, outcome_label="Class", instance_label=None, random_state=None,
                  run_cluster=False, queue='defq', reserved_memory=4):
         """
 
@@ -34,7 +34,7 @@ class ImputationRunner:
         self.impute_data = impute_data
         self.multi_impute = multi_impute
         self.overwrite_cv = overwrite_cv
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.random_state = random_state
 
@@ -84,14 +84,14 @@ class ImputationRunner:
                     job_obj = ScaleAndImpute(cv_train_path, cv_test_path,
                                              self.output_path + "/" + self.experiment_name,
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
-                                             self.class_label, self.instance_label, self.random_state)
+                                             self.outcome_label, self.instance_label, self.random_state)
                     # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                     job_list.append(job_obj)
                 else:
                     job_obj = ScaleAndImpute(cv_train_path, cv_test_path,
                                              self.output_path + "/" + self.experiment_name,
                                              self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
-                                             self.class_label, self.instance_label, self.random_state)
+                                             self.outcome_label, self.instance_label, self.random_state)
                     job_obj.run()
         if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
@@ -116,7 +116,7 @@ class ImputationRunner:
         cluster_params = [cv_train_path, cv_test_path,
                           self.output_path + "/" + self.experiment_name,
                           self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
-                          self.class_label, self.instance_label, self.random_state]
+                          self.outcome_label, self.instance_label, self.random_state]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 

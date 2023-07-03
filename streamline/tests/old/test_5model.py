@@ -23,7 +23,7 @@ def test_setup():
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = DataProcessRunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                            class_label="Class", n_splits=5)
+                            outcome_label="Class", n_splits=5)
     eda.run(run_parallel=False)
     del eda
 

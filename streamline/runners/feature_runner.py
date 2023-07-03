@@ -17,7 +17,7 @@ class FeatureImportanceRunner:
     cross-validation splits.
     """
 
-    def __init__(self, output_path, experiment_name, class_label="Class", instance_label=None,
+    def __init__(self, output_path, experiment_name, outcome_label="Class", instance_label=None,
                  instance_subset=None, algorithms=("MI", "MS"), use_turf=True, turf_pct=True,
                  random_state=None, n_jobs=None,
                  run_cluster=False, queue='defq', reserved_memory=4):
@@ -26,7 +26,7 @@ class FeatureImportanceRunner:
         Args:
             output_path:
             experiment_name:
-            class_label:
+            outcome_label:
             instance_label:
             instance_subset:
             algorithms:
@@ -42,7 +42,7 @@ class FeatureImportanceRunner:
         self.dataset = None
         self.output_path = output_path
         self.experiment_name = experiment_name
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.instance_subset = instance_subset
         self.algorithms = list(algorithms)
@@ -103,7 +103,7 @@ class FeatureImportanceRunner:
                         self.submit_lsf_cluster_job(cv_train_path, experiment_path, "MI")
                         continue
 
-                    job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
+                    job_obj = FeatureImportance(cv_train_path, experiment_path, self.outcome_label,
                                                 self.instance_label, self.instance_subset, "MI",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
@@ -128,7 +128,7 @@ class FeatureImportanceRunner:
                         self.submit_lsf_cluster_job(cv_train_path, experiment_path, "MS")
                         continue
 
-                    job_obj = FeatureImportance(cv_train_path, experiment_path, self.class_label,
+                    job_obj = FeatureImportance(cv_train_path, experiment_path, self.outcome_label,
                                                 self.instance_label, self.instance_subset, "MS",
                                                 self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
                     if run_parallel:
@@ -157,7 +157,7 @@ class FeatureImportanceRunner:
         pickle_out.close()
 
     def get_cluster_params(self, cv_train_path, experiment_path, algorithm):
-        cluster_params = [cv_train_path, experiment_path, self.class_label,
+        cluster_params = [cv_train_path, experiment_path, self.outcome_label,
                           self.instance_label, self.instance_subset, algorithm,
                           self.use_turf, self.turf_pct, self.random_state, self.n_jobs]
         cluster_params = [str(i) for i in cluster_params]
@@ -216,7 +216,7 @@ class FeatureSelectionRunner:
     cross-validation splits.
     """
 
-    def __init__(self, output_path, experiment_name, algorithms, class_label="Class", instance_label=None,
+    def __init__(self, output_path, experiment_name, algorithms, outcome_label="Class", instance_label=None,
                  max_features_to_keep=2000, filter_poor_features=True, top_features=40, export_scores=True,
                  overwrite_cv=True, random_state=None, n_jobs=None,
                  run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
@@ -241,7 +241,7 @@ class FeatureSelectionRunner:
         self.dataset = None
         self.output_path = output_path
         self.experiment_name = experiment_name
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
 
         self.max_features_to_keep = max_features_to_keep
@@ -296,7 +296,7 @@ class FeatureSelectionRunner:
                 continue
 
             job_obj = FeatureSelection(full_path, len(cv_dataset_paths), self.algorithms,
-                                       self.class_label, self.instance_label, self.export_scores,
+                                       self.outcome_label, self.instance_label, self.export_scores,
                                        self.top_features, self.max_features_to_keep,
                                        self.filter_poor_features, self.overwrite_cv, self.show_plots)
             if run_parallel and run_parallel != "False":
@@ -327,7 +327,7 @@ class FeatureSelectionRunner:
     def get_cluster_params(self, full_path, n_datasets):
         algorithms = "'['" + "','".join(self.algorithms) + "']'"
         cluster_params = [full_path, n_datasets, algorithms,
-                          self.class_label, self.instance_label, self.export_scores,
+                          self.outcome_label, self.instance_label, self.export_scores,
                           self.top_features, self.max_features_to_keep,
                           self.filter_poor_features, self.overwrite_cv]
         cluster_params = [str(i) for i in cluster_params]

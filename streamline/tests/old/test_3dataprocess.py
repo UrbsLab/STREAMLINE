@@ -25,7 +25,7 @@ def test_valid_datap():
     if not os.path.exists('./tests3/'):
         os.mkdir('./tests3/')
     eda = DataProcessRunner("./DemoData/", "./tests3/", 'demo', exploration_list=None, plot_list=None,
-                            class_label="Class")
+                            outcome_label="Class")
     eda.run(run_parallel=False)
 
     start = time.time()
@@ -38,7 +38,7 @@ def test_valid_datap():
     if not os.path.exists('./tests3/'):
         os.mkdir('./tests3/')
     eda = DataProcessRunner("./DemoData/", "./tests3/", 'demo', exploration_list=None, plot_list=None,
-                            class_label="Class")
+                            outcome_label="Class")
     eda.run(run_parallel=True)
 
     start = time.time()

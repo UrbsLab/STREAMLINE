@@ -74,7 +74,7 @@ def parse_eda(argv, params_dict=None):
     parser.add_argument('--data-path', dest='dataset_path', type=str, help='path to directory containing datasets')
     parser.add_argument('--inst-label', dest='instance_label', type=str,
                         help='instance label of all datasets (if present)', default="")
-    parser.add_argument('--class-label', dest='class_label', type=str, help='outcome label of all datasets',
+    parser.add_argument('--class-label', dest='outcome_label', type=str, help='outcome label of all datasets',
                         default="Class")
     parser.add_argument('--match-label', dest='match_label', type=str,
                         help='only applies when M selected for partition-method; '

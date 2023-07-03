@@ -54,7 +54,7 @@ def test_valid_feature_imp(algorithms, run_parallel, use_turf, turf_pct, output_
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = DataProcessRunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                            class_label="Class")
+                            outcome_label="Class")
     eda.run(run_parallel=False)
 
     dpr = ImputationRunner(output_path, experiment_name)
@@ -87,7 +87,7 @@ def test_valid_feature_sel(algorithms, run_parallel, output_path):
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = DataProcessRunner(dataset_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                            class_label="Class")
+                            outcome_label="Class")
     eda.run(run_parallel=False)
     del eda
 

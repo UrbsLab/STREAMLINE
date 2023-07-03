@@ -70,7 +70,7 @@ from the command-line (a guide for commandline parameters is given [here](parame
 1. Open the same notebook as the above section for DemoData
 2. Follow the directions as written and set flag values `demo_run=False`
 3. You can either use a data prompt with `use_data_prompt=True`, or set your own parameters manually, we recommend using `use_data_prompt=True`.
-4. Upload files as and input `class_label`, `instance_label` and `match_label` when asked with these requirements:
+4. Upload files as and input `outcome_label`, `instance_label` and `match_label` when asked with these requirements:
     * Files are in comma-separated format with extension '.txt' or '.csv' format.
     * Missing data values should be empty or indicated with an 'NA'.
     * Dataset(s) include a header giving column labels.
@@ -78,13 +78,13 @@ from the command-line (a guide for commandline parameters is given [here](parame
     * Binary class values are encoded as 0 (e.g. negative), and 1 (positive) with respect to true positive, true negative, false positive, false negative metrics. PRC plots focus on classification of 'positives'.
     * All feature values (both categorical and quantitative) are numerically encoded (i.e. no letters or words). Scikit-learn does not accept text-based values.
         * However, both `instance_label` and `match_label` values may be either numeric or text.
-    * If multiple datasets are being analyzed they must each have the same `class_label` (e.g. 'Class'), and (if present), the same `instance_label` (e.g. 'ID') and `match_label` (e.g. 'Match_ID').
+    * If multiple datasets are being analyzed they must each have the same `outcome_label` (e.g. 'Class'), and (if present), the same `instance_label` (e.g. 'ID') and `match_label` (e.g. 'Match_ID').
 5. (Optional/Manual Mode) Update the first 6 pipeline run parameters as such:
     * `demo_run`: Change from True to False (Note, this parameter is only used by the notebooks for the demonstration analysis, and is one of the few parameters that use a Boolean rather than string value).
     * `data_path`: Change the end of the path from DemoData to the name of your new dataset folder (e.g. "/content/drive/MyDrive/STREAMLINE-main/my_data").
     * `output_path`: This can be left 'as-is' or modified to some other folder on your google drive within which to store all STREAMLINE experiments.
     * `experiment_name`: Change this to some new unique experiment name (do this each time you want to run a new experiment, either on the same or different dataset(s)), e.g. 'my_first_experiment'.
-    * `class_label`: Change to the column header indicating the class label in each dataset, e.g. 'Class'.
+    * `outcome_label`: Change to the column header indicating the class label in each dataset, e.g. 'Class'.
     * `instance_label`: Change to the column header indicating unique instance ID's for each row in the dataset(s), or change to the string 'None' if your dataset does not include instance IDs.
 6. (Optional/Manual Mode) Specifying replication data run parameters:
     * Scroll down to the code block with the text 'Run Parameters for Phase 10'.

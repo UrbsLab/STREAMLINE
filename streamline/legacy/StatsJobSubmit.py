@@ -22,7 +22,7 @@ def run_cluster(argv):
             temp_algo.append(key)
     algorithms = temp_algo
 
-    class_label = argv[3]
+    outcome_label = argv[3]
     instance_label = argv[4] if argv[4] != "None" else None
     scoring_metric = argv[5]
     len_cv = int(argv[6])
@@ -36,7 +36,7 @@ def run_cluster(argv):
     plot_metric_boxplots = eval(argv[14])
     show_plots = eval(argv[15])
 
-    job_obj = StatsJob(full_path, algorithms, class_label, instance_label, scoring_metric,
+    job_obj = StatsJob(full_path, algorithms, outcome_label, instance_label, scoring_metric,
                        len_cv, top_features, sig_cutoff, metric_weight, scale_data,
                        plot_roc, plot_prc, plot_fi_box, plot_metric_boxplots,
                        show_plots)

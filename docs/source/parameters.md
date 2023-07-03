@@ -36,7 +36,7 @@ names when using STREAMLINE from the command-line (for brevity).
 |------------------------|-------------------------------|------------------------------------------------------------------------------------------------|-----------------|
 | --data-path            | dataset_path                  | path to directory containing datasets                                                          | no default      |
 | --inst-label           | instance_label                | instance label of all datasets (if present)                                                    | None            |
-| --class-label          | class_label                   | outcome label of all datasets                                                                  | default="Class" |
+| --class-label          | outcome_label                   | outcome label of all datasets                                                                  | default="Class" |
 | --match-label          | match_label                   | only applies when M selected for partition-method; indicates column with matched instance ids  | None            |
 | --fi                   | ignore_features_path          | path to .csv file with feature labels to be ignored in analysis (e.g. ./droppedFeatures.csv))  | ""              |
 | --cf                   | categorical_feature_path      | path to .csv file with feature labels specified to be treated as categorical where possible    | ""              |

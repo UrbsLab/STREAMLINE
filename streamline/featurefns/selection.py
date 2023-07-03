@@ -16,7 +16,7 @@ class FeatureSelection(Job):
     """
     Feature Selection Job for CV Data Splits
     """
-    def __init__(self, full_path, n_splits, algorithms, class_label, instance_label, export_scores=True,
+    def __init__(self, full_path, n_splits, algorithms, outcome_label, instance_label, export_scores=True,
                  top_features=20, max_features_to_keep=2000, filter_poor_features=True, overwrite_cv=False,
                  show_plots=False):
         """
@@ -34,7 +34,7 @@ class FeatureSelection(Job):
         self.full_path = full_path
         self.algorithms = algorithms
         self.n_splits = n_splits
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.export_scores = export_scores
         self.top_features = top_features
@@ -49,7 +49,7 @@ class FeatureSelection(Job):
         CV sets and applies collective feature selection to generate new feature selected datasets
         """
         # def job(full_path,do_mutual_info,do_multisurf,max_features_to_keep,
-        #         filter_poor_features,top_features,export_scores,class_label,
+        #         filter_poor_features,top_features,export_scores,outcome_label,
         #         instance_label,cv_partitions,overwrite_cv,jupyterRun):
 
         self.job_start_time = time.time()
@@ -310,7 +310,7 @@ class FeatureSelection(Job):
                                    + "_Test.csv", na_values='NA', sep=",")
             test_list.append(test_set)
             # Training datasets
-            label_list = [self.class_label]
+            label_list = [self.outcome_label]
             if not (self.instance_label is None):
                 label_list.append(self.instance_label)
             label_list = label_list + cv_selected_list[i]

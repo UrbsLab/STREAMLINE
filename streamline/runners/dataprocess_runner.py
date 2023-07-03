@@ -40,12 +40,12 @@ class DataProcessRunner:
             folder is a critical pipeline run parameter. No spaces are allowed in filenames (this will lead to
             'invalid literal' by export_exploratory_analysis.) \
             If multiple datasets are being analyzed they must have the \
-            same class_label, and (if present) the same instance_label and match_label.
+            same outcome_label, and (if present) the same instance_label and match_label.
 
     """
 
     def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                 class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
+                 outcome_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
                  ignore_features=None, categorical_features=None, quantitative_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                  correlation_removal_threshold=1.0,
@@ -61,7 +61,7 @@ class DataProcessRunner:
                                 ["Describe", "Univariate Analysis", "Feature Correlation"])
             plot_list: list of analysis plots to save in experiment directory (must be in set \
                                 ["Describe", "Univariate Analysis", "Feature Correlation"])
-            class_label: outcome label of all datasets
+            outcome_label: outcome label of all datasets
             instance_label: instance label of all datasets (if present)
             match_label: only applies when M selected for partition-method; indicates column with \
                             matched instance ids
@@ -86,7 +86,7 @@ class DataProcessRunner:
         self.data_path = data_path
         self.output_path = output_path
         self.experiment_name = experiment_name
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.match_label = match_label
         self.ignore_features = ignore_features
@@ -145,7 +145,7 @@ class DataProcessRunner:
                     if self.run_cluster == "LSFOld":
                         self.submit_lsf_cluster_job(dataset_path)
                         continue
-                    dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
+                    dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label)
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,
@@ -206,7 +206,7 @@ class DataProcessRunner:
         metadata['Data Path'] = self.data_path
         metadata['Output Path'] = self.output_path
         metadata['Experiment Name'] = self.experiment_name
-        metadata['Class Label'] = self.class_label
+        metadata['Class Label'] = self.outcome_label
         metadata['Instance Label'] = self.instance_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features
@@ -229,7 +229,7 @@ class DataProcessRunner:
 
     def get_cluster_params(self, dataset_path):
         cluster_params = [dataset_path, self.output_path, self.experiment_name, None, None,
-                          self.class_label, self.instance_label, self.match_label, self.n_splits,
+                          self.outcome_label, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method, self.ignore_features, self.categorical_features,
                           self.quantitative_features, self.top_features,
                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,

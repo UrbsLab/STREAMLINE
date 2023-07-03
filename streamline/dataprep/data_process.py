@@ -428,7 +428,7 @@ class DataProcess(Job):
                    ['missing_percent', round(percent_missing, 5)]]
 
         summary_df = pd.DataFrame(summary, columns=['Variable', 'Count'])
-        class_counts = self.dataset.data[self.dataset.class_label].value_counts()
+        class_counts = self.dataset.data[self.dataset.outcome_label].value_counts()
 
         if save:
             summary_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'DataCounts.csv',
@@ -502,13 +502,13 @@ class DataProcess(Job):
             logging.info("Ordinal encoding the following features:")
             for feat in string_type_columns:
                 if feat in self.quantitative_features \
-                        and not (feat == self.dataset.class_label or
+                        and not (feat == self.dataset.outcome_label or
                                  (self.dataset.match_label and feat == self.dataset.match_label)):
                     raise Exception("Text values specified as quantitative, any text value features that need to be "
                                     "treated as quantitative need to be numerically encoded by the user before "
                                     "running STREAMLINE")
                 if feat not in self.categorical_features \
-                        and not (feat == self.dataset.class_label or
+                        and not (feat == self.dataset.outcome_label or
                                  (self.dataset.match_label and feat == self.dataset.match_label)):
                     self.categorical_features.append(feat)
                     logging.warning("Textual Unknown Feature Added as Categorical")
@@ -516,7 +516,7 @@ class DataProcess(Job):
                 # Not encoding anything except class labels and binary text categorical variable
                 # to preserve label in figures
 
-                if feat == self.dataset.class_label:
+                if feat == self.dataset.outcome_label:
                     logging.info('\t' + feat)
                     self.dataset.data[feat], labels = pd.factorize(self.dataset.data[feat])
                     ord_label.loc[feat] = [list(labels), list(range(len(labels)))]
@@ -648,7 +648,7 @@ class DataProcess(Job):
         not used/implemented
         """
         # enc = OneHotEncoder(handle_unknown='ignore', drop='if_binary', sparse_output=False)
-        # enc.fit(self.dataset.feature_only_data(), self.dataset.data[self.dataset.class_label])
+        # enc.fit(self.dataset.feature_only_data(), self.dataset.data[self.dataset.outcome_label])
         # logging.warning(enc.categories_)
         # feature_only_data = pd.DataFrame(enc.transform(self.dataset.feature_only_data()),
         #                                  columns=enc.categories_)
@@ -810,7 +810,7 @@ class DataProcess(Job):
             # Generate dictionary of p-values for each feature using appropriate test (via test_selector)
             p_value_dict = {}
             for column in self.dataset.data:
-                if column != self.dataset.class_label and column != self.dataset.instance_label:
+                if column != self.dataset.outcome_label and column != self.dataset.instance_label:
                     p_value_dict[column] = self.test_selector(column)
 
             dict_items = list(p_value_dict.items())
@@ -845,7 +845,7 @@ class DataProcess(Job):
                             'To fix, we recommend updating scipy to version 1.8.0 or greater '
                             'using: pip install --upgrade scipy')
             for column in self.dataset.data:
-                if column != self.dataset.class_label and column != self.dataset.instance_label:
+                if column != self.dataset.outcome_label and column != self.dataset.instance_label:
                     sorted_p_list.append([column, 'None'])
 
         return sorted_p_list
@@ -858,11 +858,11 @@ class DataProcess(Job):
             feature_name: name of feature column operation is running on
         """
         # test_name, test_stat = None, None
-        class_label = self.dataset.class_label
+        outcome_label = self.dataset.outcome_label
         # Feature and Outcome are discrete/categorical/binary
         if feature_name in self.dataset.categorical_variables:
             # Calculate Contingency Table - Counts
-            table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[class_label])
+            table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[outcome_label])
             # Univariate association test (Chi Square Test of Independence - Non-parametric)
             c, p, dof, expected = chi2_contingency(table_temp)
             p_val = p
@@ -873,8 +873,8 @@ class DataProcess(Job):
             # Univariate association test (Mann-Whitney Test - Non-parametric)
             try:  # works in scipy 1.5.0
                 c, p = mannwhitneyu(
-                    x=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 0],
-                    y=self.dataset.data[feature_name].loc[self.dataset.data[class_label] == 1], nan_policy='omit')
+                    x=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 0],
+                    y=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 1], nan_policy='omit')
             except Exception as e:  # for scipy 1.8.0
                 logging.error(e)
                 raise Exception("Exception in scipy, must have scipy version>=1.8.0")
@@ -918,14 +918,14 @@ class DataProcess(Job):
         if feature_name in self.dataset.categorical_variables:
             # Generate contingency table count bar plot.
             # Calculate Contingency Table - Counts
-            table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[self.dataset.class_label])
+            table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[self.dataset.outcome_label])
             geom_bar_data = pd.DataFrame(table)
             geom_bar_data.plot(kind='bar')
             plt.ylabel('Count')
         else:
             # Feature is continuous and Outcome is discrete/categorical/binary
             # Generate boxplot
-            self.dataset.data.boxplot(column=feature_name, by=self.dataset.class_label)
+            self.dataset.data.boxplot(column=feature_name, by=self.dataset.outcome_label)
             plt.ylabel(feature_name)
             plt.title('')
 

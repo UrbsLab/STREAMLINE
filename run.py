@@ -86,7 +86,7 @@ def run(params):
         eda = DataProcessRunner(params['dataset_path'], params['output_path'], params['experiment_name'],
                                 exploration_list=None,
                                 plot_list=None,
-                                class_label=params['class_label'], instance_label=params['instance_label'],
+                                outcome_label=params['outcome_label'], instance_label=params['instance_label'],
                                 match_label=params['match_label'],
                                 n_splits=params['cv_partitions'],
                                 partition_method=params['partition_method'],
@@ -111,7 +111,7 @@ def run(params):
         dpr = ImputationRunner(params['output_path'], params['experiment_name'], scale_data=params['scale_data'],
                                impute_data=params['impute_data'],
                                multi_impute=params['multi_impute'], overwrite_cv=params['overwrite_cv'],
-                               class_label=params['class_label'],
+                               outcome_label=params['outcome_label'],
                                instance_label=params['instance_label'], random_state=params['random_state'],
                                run_cluster=params['run_cluster'],
                                queue=params['queue'],
@@ -121,7 +121,7 @@ def run(params):
     if params['do_feat_imp']:
         from streamline.runners.feature_runner import FeatureImportanceRunner
         f_imp = FeatureImportanceRunner(params['output_path'], params['experiment_name'],
-                                        class_label=params['class_label'],
+                                        outcome_label=params['outcome_label'],
                                         instance_label=params['instance_label'],
                                         instance_subset=params['instance_subset'], algorithms=params['feat_algorithms'],
                                         use_turf=params['use_turf'],
@@ -136,7 +136,7 @@ def run(params):
         from streamline.runners.feature_runner import FeatureSelectionRunner
         f_sel = FeatureSelectionRunner(params['output_path'], params['experiment_name'],
                                        algorithms=params['feat_algorithms'],
-                                       class_label=params['class_label'],
+                                       outcome_label=params['outcome_label'],
                                        instance_label=params['instance_label'],
                                        max_features_to_keep=params['max_features_to_keep'],
                                        filter_poor_features=params['filter_poor_features'],
@@ -152,7 +152,7 @@ def run(params):
         from streamline.runners.model_runner import ModelExperimentRunner
         model = ModelExperimentRunner(params['output_path'], params['experiment_name'],
                                       algorithms=params['algorithms'], exclude=params['exclude'],
-                                      class_label=params['class_label'],
+                                      outcome_label=params['outcome_label'],
                                       instance_label=params['instance_label'], scoring_metric=params['primary_metric'],
                                       metric_direction=params['metric_direction'],
                                       training_subsample=params['training_subsample'],
@@ -174,7 +174,7 @@ def run(params):
         from streamline.runners.stats_runner import StatsRunner
         stats = StatsRunner(params['output_path'], params['experiment_name'], algorithms=params['algorithms'],
                             exclude=params['exclude'],
-                            class_label=params['class_label'], instance_label=params['instance_label'],
+                            outcome_label=params['outcome_label'], instance_label=params['instance_label'],
                             scoring_metric=params['primary_metric'],
                             top_features=params['top_model_features'], sig_cutoff=params['sig_cutoff'],
                             metric_weight=params['metric_weight'],
@@ -192,7 +192,7 @@ def run(params):
             compare = CompareRunner(params['output_path'], params['experiment_name'], experiment_path=None,
                                     algorithms=params['algorithms'],
                                     exclude=params['exclude'],
-                                    class_label=params['class_label'], instance_label=params['instance_label'],
+                                    outcome_label=params['outcome_label'], instance_label=params['instance_label'],
                                     sig_cutoff=params['sig_cutoff'],
                                     show_plots=False,
                                     run_cluster=params['run_cluster'],
@@ -214,7 +214,7 @@ def run(params):
         from streamline.runners.replicate_runner import ReplicationRunner
         replicate = ReplicationRunner(params['rep_data_path'], params['dataset_for_rep'], params['output_path'],
                                       params['experiment_name'],
-                                      class_label=params['class_label'], instance_label=params['instance_label'],
+                                      outcome_label=params['outcome_label'], instance_label=params['instance_label'],
                                       match_label=params['match_label'],
                                       algorithms=params['algorithms'], load_algo=True,
                                       exclude=params['exclude'],

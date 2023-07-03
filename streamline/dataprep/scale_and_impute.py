@@ -16,7 +16,7 @@ class ScaleAndImpute(Job):
     Data Processing Job Class for Scaling and Imputation of CV Datasets
     """
     def __init__(self, cv_train_path, cv_test_path, experiment_path, scale_data=True, impute_data=True,
-                 multi_impute=True, overwrite_cv=True, class_label="Class", instance_label=None, random_state=None):
+                 multi_impute=True, overwrite_cv=True, outcome_label="Class", instance_label=None, random_state=None):
         """
 
         Args:
@@ -27,7 +27,7 @@ class ScaleAndImpute(Job):
             impute_data:
             multi_impute:
             overwrite_cv:
-            class_label:
+            outcome_label:
             instance_label:
             random_state:
         """
@@ -39,7 +39,7 @@ class ScaleAndImpute(Job):
         self.impute_data = impute_data
         self.multi_impute = multi_impute
         self.overwrite_cv = overwrite_cv
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.categorical_variables = None
         self.dataset_name = None
@@ -59,24 +59,24 @@ class ScaleAndImpute(Job):
         data_train, data_test = self.load_data()
         # Grab header labels for features only
         header = data_train.columns.values.tolist()
-        header.remove(self.class_label)
+        header.remove(self.outcome_label)
         if not (self.instance_label is None):
             header.remove(self.instance_label)
         logging.info('Preparing Train and Test for: ' + str(self.dataset_name) + "_CV_" + str(self.cv_count))
         # Temporarily separate class column to be merged back into training and testing datasets later
-        y_train = data_train[self.class_label]
-        y_test = data_test[self.class_label]
+        y_train = data_train[self.outcome_label]
+        y_test = data_test[self.outcome_label]
         # If present, temporarily separate instance label to be merged back into training and testing datasets later
         if not (self.instance_label is None):
             i_train = data_train[self.instance_label]
             i_test = data_test[self.instance_label]
         # Create features-only version of training and testing datasets for scaling and imputation
         if self.instance_label is None:
-            x_train = data_train.drop([self.class_label], axis=1)  # exclude class column
-            x_test = data_test.drop([self.class_label], axis=1)  # exclude class column
+            x_train = data_train.drop([self.outcome_label], axis=1)  # exclude class column
+            x_test = data_test.drop([self.outcome_label], axis=1)  # exclude class column
         else:
-            x_train = data_train.drop([self.class_label, self.instance_label], axis=1)  # exclude class column
-            x_test = data_test.drop([self.class_label, self.instance_label], axis=1)  # exclude class column
+            x_train = data_train.drop([self.outcome_label, self.instance_label], axis=1)  # exclude class column
+            x_test = data_test.drop([self.outcome_label, self.instance_label], axis=1)  # exclude class column
         del data_train  # memory cleanup
         del data_test  # memory cleanup
         # Load previously identified list of categorical variables
@@ -103,24 +103,24 @@ class ScaleAndImpute(Job):
         # Remerge features with class and instance label in training and testing data
         if self.instance_label is None:
             data_train = pd.concat([
-                pd.DataFrame(y_train, columns=[self.class_label]),
+                pd.DataFrame(y_train, columns=[self.outcome_label]),
                 pd.DataFrame(x_train, columns=header)
             ],
                 axis=1, sort=False)
             data_test = pd.concat([
-                pd.DataFrame(y_test, columns=[self.class_label]),
+                pd.DataFrame(y_test, columns=[self.outcome_label]),
                 pd.DataFrame(x_test, columns=header)
             ],
                 axis=1, sort=False)
         else:
             data_train = pd.concat([
-                pd.DataFrame(y_train, columns=[self.class_label]),
+                pd.DataFrame(y_train, columns=[self.outcome_label]),
                 pd.DataFrame(i_train, columns=[self.instance_label]),
                 pd.DataFrame(x_train, columns=header)
             ],
                 axis=1, sort=False)
             data_test = pd.concat([
-                pd.DataFrame(y_test, columns=[self.class_label]),
+                pd.DataFrame(y_test, columns=[self.outcome_label]),
                 pd.DataFrame(i_test, columns=[self.instance_label]),
                 pd.DataFrame(x_test, columns=header)
             ],

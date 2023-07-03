@@ -13,7 +13,7 @@ from streamline.utils.job import Job
 
 
 class ModelJob(Job):
-    def __init__(self, full_path, output_path, experiment_name, cv_count, class_label="Class",
+    def __init__(self, full_path, output_path, experiment_name, cv_count, outcome_label="Class",
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trials=200,
                  timeout=900, training_subsample=0, uniform_fi=False, save_plot=False, random_state=None):
         """
@@ -23,7 +23,7 @@ class ModelJob(Job):
             output_path:
             experiment_name:
             cv_count:
-            class_label:
+            outcome_label:
             instance_label:
             scoring_metric:
             metric_direction:
@@ -37,7 +37,7 @@ class ModelJob(Job):
         self.algorithm = ""
         self.output_path = output_path
         self.experiment_name = experiment_name
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.scoring_metric = scoring_metric
         self.metric_direction = metric_direction
@@ -52,7 +52,7 @@ class ModelJob(Job):
         feature_names = pd.read_csv(self.train_file_path).columns.values.tolist()
         if self.instance_label is not None:
             feature_names.remove(self.instance_label)
-        feature_names.remove(self.class_label)
+        feature_names.remove(self.outcome_label)
         self.feature_names = feature_names
 
         # Argument checks
@@ -179,10 +179,10 @@ class ModelJob(Job):
         if self.instance_label is not None:
             train = train.drop(self.instance_label, axis=1)
             test = test.drop(self.instance_label, axis=1)
-        x_train = train.drop(self.class_label, axis=1).values
-        y_train = train[self.class_label].values
-        x_test = test.drop(self.class_label, axis=1).values
-        y_test = test[self.class_label].values
+        x_train = train.drop(self.outcome_label, axis=1).values
+        y_train = train[self.outcome_label].values
+        x_test = test.drop(self.outcome_label, axis=1).values
+        y_test = test[self.outcome_label].values
         del train  # memory cleanup
         del test  # memory cleanup
         return x_train, y_train, x_test, y_test

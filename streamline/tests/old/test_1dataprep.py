@@ -7,7 +7,7 @@ pytest.skip("Tested Already", allow_module_level=True)
 
 
 @pytest.mark.parametrize(
-    ("dataset_path", "class_label", "match_label", "instance_label", "exception"),
+    ("dataset_path", "outcome_label", "match_label", "instance_label", "exception"),
     [
         ("", None, None, None, Exception),
         ("./hcc-data_example.csv", "something", None, None, FileNotFoundError),
@@ -16,27 +16,27 @@ pytest.skip("Tested Already", allow_module_level=True)
         ("./hcc-data_example.csv", "something", None, "otherthing", Exception),
     ],
 )
-def test_invalid_datapath(dataset_path, class_label, match_label, instance_label, exception):
+def test_invalid_datapath(dataset_path, outcome_label, match_label, instance_label, exception):
     with pytest.raises(exception):
-        Dataset(dataset_path, class_label, match_label, instance_label)
+        Dataset(dataset_path, outcome_label, match_label, instance_label)
 
 
 @pytest.mark.parametrize(
-    ("dataset_path", "class_label", "match_label", "instance_label"),
+    ("dataset_path", "outcome_label", "match_label", "instance_label"),
     [
         ("./DemoData/hcc-data_example.csv", "Class", None, None),
     ],
 )
-def test_valid_dataset(dataset_path, class_label, match_label, instance_label):
-    dataset = Dataset(dataset_path, class_label, match_label, instance_label)
-    drop_list = [class_label, ]
+def test_valid_dataset(dataset_path, outcome_label, match_label, instance_label):
+    dataset = Dataset(dataset_path, outcome_label, match_label, instance_label)
+    drop_list = [outcome_label, ]
     if match_label:
         drop_list.append(match_label)
     if instance_label:
         drop_list.append(instance_label)
-    assert (class_label in dataset.data.columns)
+    assert (outcome_label in dataset.data.columns)
     assert (dataset.feature_only_data().equals(dataset.data.drop(drop_list, axis=1)))
-    assert (dataset.get_outcome().equals(dataset.data[dataset.class_label]))
+    assert (dataset.get_outcome().equals(dataset.data[dataset.outcome_label]))
     dataset.clean_data(None)
     dataset.set_headers('./tests/')
     shutil.rmtree('./tests/')

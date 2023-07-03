@@ -28,7 +28,7 @@ class ReplicateJob(Job):
     This script is run once for each replication dataset in rep_data_path.
     """
 
-    def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
+    def __init__(self, dataset_filename, dataset_for_rep, full_path, outcome_label, instance_label, match_label,
                  ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
@@ -38,7 +38,7 @@ class ReplicateJob(Job):
         self.dataset_for_rep = dataset_for_rep
 
         self.full_path = full_path
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.match_label = match_label
 
@@ -79,9 +79,9 @@ class ReplicateJob(Job):
     def run(self):
 
         # Load Replication Dataset
-        rep_data = Dataset(self.dataset_filename, self.class_label, self.match_label, self.instance_label)
+        rep_data = Dataset(self.dataset_filename, self.outcome_label, self.match_label, self.instance_label)
         rep_feature_list = list(rep_data.data.columns.values)
-        rep_feature_list.remove(self.class_label)
+        rep_feature_list.remove(self.outcome_label)
         if self.match_label is not None:
             rep_feature_list.remove(self.match_label)
         if self.instance_label is not None:
@@ -89,11 +89,11 @@ class ReplicateJob(Job):
 
         # Load original training dataset (could include 'match label')
         # replication dataset file extension
-        train_data = Dataset(self.dataset_for_rep, self.class_label, self.match_label, self.instance_label)
+        train_data = Dataset(self.dataset_for_rep, self.outcome_label, self.match_label, self.instance_label)
         # train_data.clean_data(ignore_features=self.ignore_features)
 
         all_train_feature_list = list(train_data.data.columns.values)
-        all_train_feature_list.remove(self.class_label)
+        all_train_feature_list.remove(self.outcome_label)
         if self.match_label is not None:
             all_train_feature_list.remove(self.match_label)
         if self.instance_label is not None:
@@ -333,7 +333,7 @@ class ReplicateJob(Job):
             # Get List of features in cv dataset
             # (if feature selection took place this may only include a subset of original training data features)
             train_feature_list = list(cv_train_data.columns.values)
-            train_feature_list.remove(self.class_label)
+            train_feature_list.remove(self.outcome_label)
             if self.instance_label is not None:
                 if self.instance_label in train_feature_list:
                     train_feature_list.remove(self.instance_label)
@@ -366,7 +366,7 @@ class ReplicateJob(Job):
             # feature_name_list = all_train_feature_list + engineered_features + one_hot_list
 
             feature_name_list = list(post_processed_vars)
-            feature_name_list.remove(eda.dataset.class_label)
+            feature_name_list.remove(eda.dataset.outcome_label)
             if eda.dataset.instance_label:
                 feature_name_list.remove(eda.dataset.instance_label)
             if eda.dataset.match_label:
@@ -410,8 +410,8 @@ class ReplicateJob(Job):
             # Prep data for evaluation
             if self.instance_label is not None:
                 cv_rep_data = cv_rep_data.drop(self.instance_label, axis=1)
-            x_test = cv_rep_data.drop(self.class_label, axis=1).values
-            y_test = cv_rep_data[self.class_label].values
+            x_test = cv_rep_data.drop(self.outcome_label, axis=1).values
+            y_test = cv_rep_data[self.outcome_label].values
             # Unpickle algorithm info from training phases of pipeline
 
             eval_dict = dict()
@@ -426,7 +426,7 @@ class ReplicateJob(Job):
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
 
         stats = StatsJob(self.full_path + '/applymodel/' + self.apply_name,
-                         self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
+                         self.algorithms, self.outcome_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
                          metric_weight='balanced_accuracy', scale_data=self.scale_data,
                          plot_roc=self.plot_roc, plot_prc=self.plot_prc, plot_fi_box=False,
@@ -478,20 +478,20 @@ class ReplicateJob(Job):
             inst_rep = None
             # Prepare data for scikit imputation
             if self.instance_label is None or self.instance_label == 'None':
-                x_rep = cv_rep_data.drop([self.class_label], axis=1).values
+                x_rep = cv_rep_data.drop([self.outcome_label], axis=1).values
             else:
-                x_rep = cv_rep_data.drop([self.class_label, self.instance_label], axis=1).values
+                x_rep = cv_rep_data.drop([self.outcome_label, self.instance_label], axis=1).values
                 inst_rep = cv_rep_data[self.instance_label].values  # pull out instance labels in case they include text
-            y_rep = cv_rep_data[self.class_label].values
+            y_rep = cv_rep_data[self.outcome_label].values
             x_rep_impute = imputer.transform(x_rep)
             # Recombine x and y
             if self.instance_label is None or self.instance_label == 'None':
-                impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.class_label]),
+                impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.outcome_label]),
                                            pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1,
                                           sort=False)
             else:
                 impute_rep_df = pd.concat(
-                    [pd.DataFrame(y_rep, columns=[self.class_label]),
+                    [pd.DataFrame(y_rep, columns=[self.outcome_label]),
                      pd.DataFrame(inst_rep, columns=[self.instance_label]),
                      pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1, sort=False)
         else:  # simple (median) imputation of quantitative features
@@ -514,20 +514,20 @@ class ReplicateJob(Job):
         inst_rep = None
         # Scale target replication data
         if self.instance_label is None or self.instance_label == 'None':
-            x_rep = cv_rep_data.drop([self.class_label], axis=1)
+            x_rep = cv_rep_data.drop([self.outcome_label], axis=1)
         else:
-            x_rep = cv_rep_data.drop([self.class_label, self.instance_label], axis=1)
+            x_rep = cv_rep_data.drop([self.outcome_label, self.instance_label], axis=1)
             inst_rep = cv_rep_data[self.instance_label]  # pull out instance labels in case they include text
-        y_rep = cv_rep_data[self.class_label]
+        y_rep = cv_rep_data[self.outcome_label]
         # Scale features (x)
         x_rep_scaled = pd.DataFrame(scaler.transform(x_rep).round(decimal_places), columns=x_rep.columns)
         # Recombine x and y
         if self.instance_label is None or self.instance_label == 'None':
-            scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.class_label]),
+            scale_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.outcome_label]),
                                       pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)], axis=1, sort=False)
         else:
             scale_rep_df = pd.concat(
-                [pd.DataFrame(y_rep, columns=[self.class_label]), pd.DataFrame(inst_rep, columns=[self.instance_label]),
+                [pd.DataFrame(y_rep, columns=[self.outcome_label]), pd.DataFrame(inst_rep, columns=[self.instance_label]),
                  pd.DataFrame(x_rep_scaled, columns=all_train_feature_list)], axis=1, sort=False)
         return scale_rep_df
 

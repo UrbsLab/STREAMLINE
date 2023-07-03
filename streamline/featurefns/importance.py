@@ -17,14 +17,14 @@ class FeatureImportance(Job):
     Initializer for Feature Importance Job
     """
 
-    def __init__(self, cv_train_path, experiment_path, class_label, instance_label=None, instance_subset=2000,
+    def __init__(self, cv_train_path, experiment_path, outcome_label, instance_label=None, instance_subset=2000,
                  algorithm="MS", use_turf=True, turf_pct=True, random_state=None, n_jobs=None):
         """
 
         Args:
             cv_train_path: path for the cross-validation dataset created
             experiment_path:
-            class_label:
+            outcome_label:
             instance_label:
             instance_subset:
             algorithm:
@@ -39,7 +39,7 @@ class FeatureImportance(Job):
         self.dataset = None
         self.cv_train_path = cv_train_path
         self.experiment_path = experiment_path
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.instance_subset = instance_subset
         self.algorithm = algorithm
@@ -76,7 +76,7 @@ class FeatureImportance(Job):
 
         logging.info('Sort and pickle feature importance scores...')
         header = self.dataset.data.columns.values.tolist()
-        header.remove(self.class_label)
+        header.remove(self.outcome_label)
         if self.instance_label is not None:
             header.remove(self.instance_label)
         # Save sorted feature importance scores:
@@ -98,10 +98,10 @@ class FeatureImportance(Job):
         """
         Loads target cv training dataset, separates class from features and removes instance labels.
         """
-        self.dataset = Dataset(self.cv_train_path, self.class_label, instance_label=self.instance_label)
+        self.dataset = Dataset(self.cv_train_path, self.outcome_label, instance_label=self.instance_label)
         self.dataset.name = self.cv_train_path.split('/')[-3]
         self.dataset.instance_label = self.instance_label
-        self.dataset.class_label = self.class_label
+        self.dataset.outcome_label = self.outcome_label
         self.cv_count = self.cv_train_path.split('/')[-1].split("_")[-2]
 
     def run_mutual_information(self):
@@ -147,14 +147,14 @@ class FeatureImportance(Job):
         headers = list(self.dataset.data.columns)
         if self.instance_label:
             headers.remove(self.instance_label)
-        headers.remove(self.class_label)
-        data_features = self.dataset.data[headers + [self.class_label, ]]
+        headers.remove(self.outcome_label)
+        data_features = self.dataset.data[headers + [self.outcome_label, ]]
         n = data_features.shape[0]
         if self.instance_subset is not None:
             n = min(data_features.shape[0], self.instance_subset)
         data_features = data_features.sample(n)
-        data_phenotypes = data_features[self.class_label]
-        data_features = data_features.drop(self.class_label, axis=1)
+        data_phenotypes = data_features[self.outcome_label]
+        data_features = data_features.drop(self.outcome_label, axis=1)
 
         # Run MultiSURF
         alg_name = "multisurf"

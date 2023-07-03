@@ -80,13 +80,13 @@ class KFoldPartitioner(Job):
                 if self.dataset.match_label is None:
                     raise Exception("No Match Label in dataset")
                 for train_index, test_index in cv.split(self.dataset.feature_only_data(),
-                                                        self.dataset.data[self.dataset.class_label],
+                                                        self.dataset.data[self.dataset.outcome_label],
                                                         self.dataset.data[self.dataset.match_label]):
                     train_dfs.append(self.dataset.data.iloc[train_index, :])
                     test_dfs.append(self.dataset.data.iloc[test_index, :])
             else:
                 for train_index, test_index in cv.split(self.dataset.feature_only_data(),
-                                                        self.dataset.data[self.dataset.class_label]):
+                                                        self.dataset.data[self.dataset.outcome_label]):
                     train_dfs.append(self.dataset.data.iloc[train_index, :])
                     test_dfs.append(self.dataset.data.iloc[test_index, :])
             self.train_dfs = train_dfs
@@ -111,13 +111,13 @@ class KFoldPartitioner(Job):
                 train_dfs, test_dfs = list(), list()
                 if self.partition_method == "Group":
                     for train_index, test_index in self.cv.split(self.dataset.feature_only_data(),
-                                                                 self.dataset.data[self.dataset.class_label],
+                                                                 self.dataset.data[self.dataset.outcome_label],
                                                                  self.dataset.data[self.dataset.match_label]):
                         train_dfs.append(self.dataset.data.iloc[train_index, :])
                         test_dfs.append(self.dataset.data.iloc[test_index, :])
                 else:
                     for train_index, test_index in self.cv.split(self.dataset.feature_only_data(),
-                                                                 self.dataset.data[self.dataset.class_label]):
+                                                                 self.dataset.data[self.dataset.outcome_label]):
                         train_dfs.append(self.dataset.data.iloc[train_index, :])
                         test_dfs.append(self.dataset.data.iloc[test_index, :])
             else:

@@ -21,7 +21,7 @@ class ModelExperimentRunner:
     cross-validation splits.
     """
 
-    def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"), class_label="Class",
+    def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"), outcome_label="Class",
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
@@ -60,7 +60,7 @@ class ModelExperimentRunner:
         self.dataset = None
         self.output_path = output_path
         self.experiment_name = experiment_name
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
 
         if algorithms == "All":
@@ -187,7 +187,7 @@ class ModelExperimentRunner:
                                                             iterations=self.lcs_iterations,
                                                             N=self.lcs_n, nu=self.lcs_nu)
 
-                    job_obj = ModelJob(full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
+                    job_obj = ModelJob(full_path, self.output_path, self.experiment_name, cv_count, self.outcome_label,
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
                                        self.timeout, self.training_subsample, self.uniform_fi,
                                        self.save_plots, self.random_state)
@@ -261,7 +261,7 @@ class ModelExperimentRunner:
         pickle_out.close()
 
     def get_cluster_params(self, full_path, algorithm, cv_count):
-        cluster_params = [full_path, self.output_path, self.experiment_name, cv_count, self.class_label,
+        cluster_params = [full_path, self.output_path, self.experiment_name, cv_count, self.outcome_label,
                           self.instance_label, self.scoring_metric, self.metric_direction,
                           self.n_trials, self.timeout, self.training_subsample,
                           self.uniform_fi, self.save_plots, self.random_state]

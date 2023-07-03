@@ -27,7 +27,7 @@ def test_pipeline():
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
                             exploration_list=None,
                             plot_list=None,
-                            class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
+                            outcome_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
                             categorical_features=['Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
                                                   'Hepatitis B e Antigen', 'Hepatitis B Core Antibody',
                                                   'Hepatitis C Virus Antibody', 'Cirrhosis',
@@ -61,18 +61,18 @@ def test_pipeline():
     del eda
 
     dpr = ImputationRunner(output_path, experiment_name,
-                           class_label="Class", instance_label="InstanceID")
+                           outcome_label="Class", instance_label="InstanceID")
     dpr.run(run_parallel=run_parallel)
     del dpr
 
     f_imp = FeatureImportanceRunner(output_path, experiment_name,
-                                    class_label="Class", instance_label="InstanceID",
+                                    outcome_label="Class", instance_label="InstanceID",
                                     algorithms=algorithms)
     f_imp.run(run_parallel=run_parallel)
     del f_imp
 
     f_sel = FeatureSelectionRunner(output_path, experiment_name,
-                                   class_label="Class", instance_label="InstanceID",
+                                   outcome_label="Class", instance_label="InstanceID",
                                    algorithms=algorithms)
     f_sel.run(run_parallel=run_parallel)
     del f_sel
@@ -80,17 +80,17 @@ def test_pipeline():
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms,
-                                   class_label="Class", instance_label="InstanceID")
+                                   outcome_label="Class", instance_label="InstanceID")
     runner.run(run_parallel=run_parallel)
     del runner
 
     stats = StatsRunner(output_path, experiment_name, model_algorithms,
-                        class_label="Class", instance_label="InstanceID")
+                        outcome_label="Class", instance_label="InstanceID")
     stats.run(run_parallel=run_parallel)
     del stats
 
     compare = CompareRunner(output_path, experiment_name, algorithms=model_algorithms,
-                            class_label="Class", instance_label="InstanceID")
+                            outcome_label="Class", instance_label="InstanceID")
     compare.run(run_parallel=run_parallel)
     del compare
 

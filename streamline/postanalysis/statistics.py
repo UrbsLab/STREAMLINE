@@ -33,7 +33,7 @@ class StatsJob(Job):
     dataset folder (data_path) in Phase 1 (i.e. stats summary completed for all cv datasets).
     """
 
-    def __init__(self, full_path, algorithms, class_label, instance_label, scoring_metric='balanced_accuracy',
+    def __init__(self, full_path, algorithms, outcome_label, instance_label, scoring_metric='balanced_accuracy',
                  cv_partitions=5, top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False):
         """
@@ -41,7 +41,7 @@ class StatsJob(Job):
         Args:
             full_path:
             algorithms:
-            class_label:
+            outcome_label:
             instance_label:
             scoring_metric:
             cv_partitions:
@@ -58,7 +58,7 @@ class StatsJob(Job):
         super().__init__()
         self.full_path = full_path
         self.algorithms = algorithms
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.data_name = self.full_path.split('/')[-1]
         self.experiment_path = '/'.join(self.full_path.split('/')[:-1])
@@ -319,7 +319,7 @@ class StatsJob(Job):
                     if self.instance_label is not None:
                         if self.instance_label in headers:
                             headers.remove(self.instance_label)
-                    headers.remove(self.class_label)
+                    headers.remove(self.outcome_label)
                     for each in self.original_headers:
                         # Check if current feature from original dataset was in the partition
                         if each in headers:
@@ -458,9 +458,9 @@ class StatsJob(Job):
                 test = pd.read_csv(
                     self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
 
-                test_y = test[self.class_label].values
+                test_y = test[self.outcome_label].values
             else:
-                test_y = rep_data[self.class_label].values
+                test_y = rep_data[self.outcome_label].values
 
             no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
             # Plot no-skill line
@@ -540,9 +540,9 @@ class StatsJob(Job):
             test = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
             if self.instance_label is not None:
                 test = test.drop(self.instance_label, axis=1)
-            test_y = test[self.class_label].values
+            test_y = test[self.outcome_label].values
         else:
-            test_y = rep_data[self.class_label].values
+            test_y = rep_data[self.outcome_label].values
 
         no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
 

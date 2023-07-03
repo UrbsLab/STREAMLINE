@@ -16,14 +16,14 @@ def run_cluster(argv):
     impute_data = eval(argv[5])
     multi_impute = eval(argv[6])
     overwrite_cv = eval(argv[7])
-    class_label = argv[8] if argv[8] != "None" else None
+    outcome_label = argv[8] if argv[8] != "None" else None
     instance_label = argv[9] if argv[9] != "None" else None
     random_state = int(argv[10]) if argv[10] != "None" else None
 
     job_obj = ScaleAndImpute(cv_train_path, cv_test_path,
                              full_path,
                              scale_data, impute_data, multi_impute, overwrite_cv,
-                             class_label, instance_label, random_state)
+                             outcome_label, instance_label, random_state)
     job_obj.run()
 
 

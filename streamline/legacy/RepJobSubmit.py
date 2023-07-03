@@ -13,7 +13,7 @@ def run_cluster(argv):
     dataset_filename = argv[1]
     dataset_for_rep = argv[2]
     full_path = argv[3]
-    class_label = argv[4]
+    outcome_label = argv[4]
     instance_label = argv[5] if argv[5] != "None" else None
     match_label = argv[6] if argv[6] != "None" else None
     experiment_path = '/'.join(full_path.split('/')[:-1])
@@ -44,7 +44,7 @@ def run_cluster(argv):
     scoring_metric = argv[20]
     random_state = eval(argv[21])
 
-    job_obj = ReplicateJob(dataset_filename, dataset_for_rep, full_path, class_label, instance_label,
+    job_obj = ReplicateJob(dataset_filename, dataset_for_rep, full_path, outcome_label, instance_label,
                            match_label, ignore_features, algorithms, exclude, len_cv,
                            export_feature_correlations,
                            plot_roc, plot_prc, plot_metric_boxplots,

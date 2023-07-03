@@ -26,7 +26,7 @@ def test_valid_eda():
 
     start = time.time()
     eda = DataProcessRunner("./DemoData/", "./tests1/", 'demo', exploration_list=None, plot_list=None,
-                            class_label="Class", instance_label="InstanceID", ignore_features=["Alcohol"])
+                            outcome_label="Class", instance_label="InstanceID", ignore_features=["Alcohol"])
     eda.run(run_parallel=False)
     logging.warning("Exploratory Data Analysis, Time running serially: " + str(time.time() - start))
 
@@ -37,7 +37,7 @@ def test_valid_eda():
 
     start = time.time()
     eda = DataProcessRunner("./DemoData/", "./tests2/", 'demo', exploration_list=None, plot_list=None,
-                            class_label="Class", instance_label="InstanceID", ignore_features=["Alcohol"])
+                            outcome_label="Class", instance_label="InstanceID", ignore_features=["Alcohol"])
     eda.run(run_parallel=True)
     logging.warning("Exploratory Data Analysis, Time running parallely: " + str(time.time() - start))
     shutil.rmtree('./tests2/')

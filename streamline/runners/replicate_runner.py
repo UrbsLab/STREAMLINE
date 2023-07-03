@@ -20,7 +20,7 @@ class ReplicationRunner:
     """
 
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
-                 class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
+                 outcome_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
                  exclude=("XCS", "eLCS"),
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
                  run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
@@ -67,9 +67,9 @@ class ReplicationRunner:
         metadata = pickle.load(file)
         file.close()
         # Load variables specified earlier in the pipeline from metadata
-        self.class_label = class_label
-        if not class_label:
-            self.class_label = metadata['Class Label']
+        self.outcome_label = outcome_label
+        if not outcome_label:
+            self.outcome_label = metadata['Class Label']
         self.instance_label = instance_label
         if not instance_label:
             self.instance_label = metadata['Instance Label']
@@ -155,7 +155,7 @@ class ReplicationRunner:
                         continue
 
                     job_obj = ReplicateJob(dataset_filename,
-                                           self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
+                                           self.dataset_for_rep, self.full_path, self.outcome_label, self.instance_label,
                                            self.match_label, ignore_features=self.ignore_features,
                                            algorithms=self.algorithms, exclude=None,
                                            cv_partitions=self.cv_partitions,
@@ -210,7 +210,7 @@ class ReplicationRunner:
         pickle_in.close()
 
     def get_cluster_params(self, dataset_filename):
-        cluster_params = [dataset_filename, self.dataset_for_rep, self.full_path, self.class_label, self.instance_label,
+        cluster_params = [dataset_filename, self.dataset_for_rep, self.full_path, self.outcome_label, self.instance_label,
                           self.match_label, None, None, self.cv_partitions, self.export_feature_correlations,
                           self.plot_roc, self.plot_prc, self.plot_metric_boxplots,
                           self.categorical_cutoff, self.sig_cutoff,

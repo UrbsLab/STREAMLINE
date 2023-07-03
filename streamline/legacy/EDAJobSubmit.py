@@ -16,7 +16,7 @@ def run_cluster(argv):
     experiment_name = argv[3]
     exploration_list = eval(argv[4])
     plot_list = eval(argv[5])
-    class_label = argv[6]
+    outcome_label = argv[6]
     instance_label = argv[7] if argv[7] != "None" else None
     match_label = argv[8] if argv[8] != "None" else None
     n_splits = int(argv[9])
@@ -31,7 +31,7 @@ def run_cluster(argv):
     correlation_removal_threshold = float(argv[18])
     random_state = None if argv[19] == "None" else int(argv[19])
 
-    dataset = Dataset(dataset_path, class_label, match_label, instance_label)
+    dataset = Dataset(dataset_path, outcome_label, match_label, instance_label)
     eda_obj = DataProcess(dataset, output_path + '/' + experiment_name,
                           ignore_features,
                           categorical_features, exploration_list, plot_list,

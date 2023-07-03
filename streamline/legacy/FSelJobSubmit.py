@@ -14,7 +14,7 @@ def run_cluster(argv):
     MI, MS = "MI", "MS"
     algorithms = None if argv[3] == "None" else eval(argv[3])
     print(algorithms)
-    class_label = argv[4]
+    outcome_label = argv[4]
     instance_label = argv[5] if argv[5] != "None" else None
     export_scores = eval(argv[6])
     top_features = int(argv[7])
@@ -23,7 +23,7 @@ def run_cluster(argv):
     overwrite_cv = eval(argv[10])
 
     job_obj = FeatureSelection(full_path, n_datasets, algorithms,
-                               class_label, instance_label, export_scores,
+                               outcome_label, instance_label, export_scores,
                                top_features, max_features_to_keep,
                                filter_poor_features, overwrite_cv)
     job_obj.run()

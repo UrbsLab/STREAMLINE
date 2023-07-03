@@ -11,7 +11,7 @@ from streamline.featurefns.importance import FeatureImportance
 def run_cluster(argv):
     cv_train_path = argv[1]
     experiment_path = argv[2]
-    class_label = argv[3]
+    outcome_label = argv[3]
     instance_label = argv[4] if argv[4] != "None" else None
     instance_subset = None if argv[5] == "None" else eval(argv[5])
     algorithm = argv[6]
@@ -20,7 +20,7 @@ def run_cluster(argv):
     random_state = None if argv[9] == "None" else int(argv[9])
     n_jobs = None if argv[10] == "None" else int(argv[10])
 
-    job_obj = FeatureImportance(cv_train_path, experiment_path, class_label,
+    job_obj = FeatureImportance(cv_train_path, experiment_path, outcome_label,
                                 instance_label, instance_subset, algorithm,
                                 use_turf, turf_pct, random_state, n_jobs)
     job_obj.run()

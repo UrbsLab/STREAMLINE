@@ -14,7 +14,7 @@ def run_cluster(argv):
     output_path = argv[2]
     experiment_name = argv[3]
     cv_count = int(argv[4])
-    class_label = argv[5]
+    outcome_label = argv[5]
     instance_label = argv[6] if argv[6] != "None" else None
     scoring_metric = argv[7]
     metric_direction = argv[8]
@@ -31,7 +31,7 @@ def run_cluster(argv):
     lcs_n = int(argv[19])
     lcs_nu = int(argv[20])
 
-    job_obj = ModelJob(full_path, output_path, experiment_name, cv_count, class_label,
+    job_obj = ModelJob(full_path, output_path, experiment_name, cv_count, outcome_label,
                        instance_label, scoring_metric, metric_direction, n_trials,
                        timeout, training_subsample, uniform_fi, save_plot, random_state)
 

@@ -11,13 +11,13 @@ sns.set_theme()
 
 
 class Dataset:
-    def __init__(self, dataset_path, class_label, match_label=None, instance_label=None):
+    def __init__(self, dataset_path, outcome_label, match_label=None, instance_label=None):
         """
         Creates dataset with path of tabular file
 
         Args:
             dataset_path: path of tabular file (as csv, tsv, or txt)
-            class_label: column label for the outcome to be predicted in the dataset
+            outcome_label: column label for the outcome to be predicted in the dataset
             match_label: column to identify unique groups of instances in the dataset \
             that have been 'matched' as part of preparing the dataset with cases and controls \
             that have been matched for some co-variates \
@@ -31,7 +31,7 @@ class Dataset:
         self.path = dataset_path
         self.name = self.path.split('/')[-1].split('.')[0]
         self.format = self.path.split('/')[-1].split('.')[-1]
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.match_label = match_label
         self.instance_label = instance_label
         self.categorical_variables = None
@@ -56,7 +56,7 @@ class Dataset:
         # Remove any whitespace from ends of individual data cells
         self.data.columns = self.data.columns.str.strip()
 
-        if not (self.class_label in self.data.columns):
+        if not (self.outcome_label in self.data.columns):
             raise Exception("Class label not found in file")
         if self.match_label and not (self.match_label in self.data.columns):
             raise Exception("Match label not found in file")
@@ -71,13 +71,13 @@ class Dataset:
         """
 
         if self.instance_label is None and self.match_label is None:
-            x_data = self.data.drop([self.class_label], axis=1)  # exclude class column
+            x_data = self.data.drop([self.outcome_label], axis=1)  # exclude class column
         elif self.instance_label is not None and self.match_label is None:
-            x_data = self.data.drop([self.class_label, self.instance_label], axis=1)  # exclude class column
+            x_data = self.data.drop([self.outcome_label, self.instance_label], axis=1)  # exclude class column
         elif self.instance_label is None and self.match_label is not None:
-            x_data = self.data.drop([self.class_label, self.match_label], axis=1)  # exclude class column
+            x_data = self.data.drop([self.outcome_label, self.match_label], axis=1)  # exclude class column
         else:
-            x_data = self.data.drop([self.class_label, self.instance_label, self.match_label],
+            x_data = self.data.drop([self.outcome_label, self.instance_label, self.match_label],
                                     axis=1)  # exclude class column
         return x_data
 
@@ -88,13 +88,13 @@ class Dataset:
 
         """
         if self.instance_label is None and self.match_label is None:
-            y_data = self.data[[self.class_label]]
+            y_data = self.data[[self.outcome_label]]
         elif self.instance_label is not None and self.match_label is None:
-            y_data = self.data[[self.class_label, self.instance_label]]
+            y_data = self.data[[self.outcome_label, self.instance_label]]
         elif self.instance_label is None and self.match_label is not None:
-            y_data = self.data[[self.class_label, self.match_label]]
+            y_data = self.data[[self.outcome_label, self.match_label]]
         else:
-            y_data = self.data[[self.class_label, self.instance_label, self.match_label]]
+            y_data = self.data[[self.outcome_label, self.instance_label, self.match_label]]
         return y_data
 
     def get_outcome(self):
@@ -103,7 +103,7 @@ class Dataset:
         Returns: outcome column
 
         """
-        return self.data[self.class_label]
+        return self.data[self.outcome_label]
 
     def clean_data(self, ignore_features):
         """
@@ -111,9 +111,9 @@ class Dataset:
         value as well as any features (ignore_features) specified by user
         """
         # Remove instances with missing outcome values
-        self.data = self.data.dropna(axis=0, how='any', subset=[self.class_label])
+        self.data = self.data.dropna(axis=0, how='any', subset=[self.outcome_label])
         self.data = self.data.reset_index(drop=True)
-        self.data[self.class_label] = self.data[self.class_label].astype(dtype='int8')
+        self.data[self.outcome_label] = self.data[self.outcome_label].astype(dtype='int8')
         # Remove columns to be ignored in analysis
         if ignore_features:
             self.data = self.data.drop(ignore_features, axis=1, errors='ignore')
@@ -126,7 +126,7 @@ class Dataset:
 
         """
         headers = list(self.data.columns.values)
-        headers.remove(self.class_label)
+        headers.remove(self.outcome_label)
         if not (self.match_label is None):
             headers.remove(self.match_label)
         if not (self.instance_label is None):
@@ -239,7 +239,7 @@ class Dataset:
         summary_df.to_csv(experiment_path + '/' + self.name + '/exploratory/' + initial + 'DataCounts.csv',
                           index=False)
         # Calculate, print, and export class counts
-        class_counts = self.data[self.class_label].value_counts()
+        class_counts = self.data[self.outcome_label].value_counts()
         class_counts.to_csv(experiment_path + '/' + self.name +
                             '/exploratory/' + initial + 'ClassCounts.csv', header=['Count'],
                             index_label='Class')
