@@ -16,11 +16,11 @@ from streamline.runners.replicate_runner import ReplicationRunner
 # pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
-dataset_path, experiment_name = "./data/DemoData/", "demo",
+dataset_path, rep_data_path, experiment_name = "./data/DemoData/", "./data/DemoRepData/", "demo",
 model_algorithms = ["LR", "NB", "DT"]
 
 
-def test_setup():
+def test_pipeline():
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
@@ -103,30 +103,9 @@ def test_setup():
                              load_algo=True)
     repl.run(run_parallel=run_parallel)
 
-    logging.warning("Ran Setup in " + str(time.time() - start))
-
-
-@pytest.mark.parametrize(
-    ("rep_data_path", "run_parallel"),
-    [
-        ("./data/DemoRepData/", run_parallel),
-    ]
-)
-def test_valid_report2(rep_data_path, run_parallel):
-    start = time.time()
-
-    logging.warning("Running Replication Report Phase")
-
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms,
                           training=False, rep_data_path=rep_data_path,
                           dataset_for_rep=dataset_path + 'hcc-data_example_custom.csv')
     report.run(run_parallel)
 
-    if run_parallel:
-        how = "parallely"
-    else:
-        how = "serially"
-    logging.warning("Statistics Step with " + str(algorithms) +
-                    ", Time running " + how + ": " + str(time.time() - start))
-
-    # shutil.rmtree(output_path)
+    logging.warning("Ran Pipeline in " + str(time.time() - start))

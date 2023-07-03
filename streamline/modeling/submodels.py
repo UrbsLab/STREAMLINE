@@ -1,8 +1,10 @@
 from abc import ABC
 
 import optuna
+from scipy.stats import pearsonr
 from sklearn import metrics
-from sklearn.metrics import auc
+from sklearn.metrics import auc, max_error, mean_absolute_error, mean_squared_error, median_absolute_error, \
+    explained_variance_score
 from streamline.modeling.basemodel import BaseModel
 from streamline.utils.evaluation import class_eval
 from sklearn.exceptions import ConvergenceWarning
@@ -58,7 +60,8 @@ class BinaryClassificationModel(BaseModel, ABC):
         ave_prec = metrics.average_precision_score(y_test, probas_[:, 1])
         return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
 
-class MulticlassClassificationModel(BaseModel, ABC):
+
+class RegressionModel(BaseModel, ABC):
     def __init__(self, model, model_name, cv_folds=3,
                  scoring_metric='balanced_accuracy', metric_direction='maximize',
                  random_state=None, cv=None, sampler=None, n_jobs=None):
@@ -80,10 +83,27 @@ class MulticlassClassificationModel(BaseModel, ABC):
                          metric_direction, random_state, cv, sampler,
                          n_jobs)
         optuna.logging.set_verbosity(optuna.logging.WARNING)
-        self.model_type = "MulticlassClassification"
+        self.model_type = "Regression"
 
     def model_evaluation(self, x_test, y_test):
         """
         Runs commands to gather all evaluations for later summaries and plots.
         """
-        pass
+        y_pred = self.predict(x_test)
+        # y_pred = np.maximum(0.01, y_pred)
+        # y_true = np.maximum(0.01, y_true)
+        y_true = y_test
+        # Calculate max error.
+        me = max_error(y_true, y_pred)
+        # Calculate mean absolute error.
+        mae = mean_absolute_error(y_true, y_pred)
+        # Calculate mean squared error.
+        mse = mean_squared_error(y_true, y_pred)
+        # Calculate median absolute error
+        mdae = median_absolute_error(y_true, y_pred)
+        # Calculate explained variance score
+        evs = explained_variance_score(y_true, y_pred)
+        # Calculate pearson correlation
+        p_corr = pearsonr(y_true, y_pred)[0]
+
+        return [me, mae, mse, mdae, evs, p_corr]

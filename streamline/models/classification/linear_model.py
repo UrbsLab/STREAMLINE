@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.basemodel import BaseModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.linear_model import LogisticRegression as LogR
 
 
-class LogisticRegression(BaseModel, ABC):
+class LogisticRegression(BinaryClassificationModel, ABC):
     model_name = "Logistic Regression"
     small_name = "LR"
     color = "dimgrey"

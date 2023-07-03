@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from streamline.dataprep.data_process import DataProcess
-from streamline.modeling.basemodel import BaseModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.utils import ABBREVIATION, SUPPORTED_MODELS, is_supported_model
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.dataset import Dataset
@@ -539,7 +539,7 @@ class ReplicateJob(Job):
         model = pickle.load(infile)
         infile.close()
         # Prediction evaluation
-        m = BaseModel(None, algorithm, scoring_metric=self.scoring_metric)
+        m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
         m.model = model
         m.model_name = algorithm
         m.small_name = ABBREVIATION[algorithm]

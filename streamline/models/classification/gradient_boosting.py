@@ -1,5 +1,5 @@
 from abc import ABC
-from streamline.modeling.basemodel import BaseModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.ensemble import GradientBoostingClassifier as GB
 from xgboost import XGBClassifier as XGB
@@ -7,7 +7,7 @@ from lightgbm import LGBMClassifier as LGB
 from catboost import CatBoostClassifier as CGB
 
 
-class GBClassifier(BaseModel, ABC):
+class GBClassifier(BinaryClassificationModel, ABC):
     model_name = "Gradient Boosting"
     small_name = "GB"
     color = "cornflowerblue"
@@ -40,7 +40,7 @@ class GBClassifier(BaseModel, ABC):
         return mean_cv_score
 
 
-class XGBClassifier(BaseModel, ABC):
+class XGBClassifier(BinaryClassificationModel, ABC):
     model_name = "Extreme Gradient Boosting"
     small_name = "XGB"
     color = "cyan"
@@ -89,7 +89,7 @@ class XGBClassifier(BaseModel, ABC):
         return mean_cv_score
 
 
-class LGBClassifier(BaseModel, ABC):
+class LGBClassifier(BinaryClassificationModel, ABC):
     model_name = "Light Gradient Boosting"
     small_name = "LGB"
     color = "pink"
@@ -136,7 +136,7 @@ class LGBClassifier(BaseModel, ABC):
         return mean_cv_score
 
 
-class CGBClassifier(BaseModel, ABC):
+class CGBClassifier(BinaryClassificationModel, ABC):
     model_name = "Category Gradient Boosting"
     small_name = "CGB"
     color = "magenta"

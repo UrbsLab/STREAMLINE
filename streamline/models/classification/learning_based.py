@@ -1,12 +1,12 @@
 from abc import ABC
-from streamline.modeling.basemodel import BaseModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.parameters import get_parameters
 from skeLCS import eLCS
 from skXCS import XCS
 from skExSTraCS import ExSTraCS
 
 
-class eLCSClassifier(BaseModel, ABC):
+class eLCSClassifier(BinaryClassificationModel, ABC):
     model_name = "eLCS"
     small_name = "eLCS"
     color = "green"
@@ -32,7 +32,7 @@ class eLCSClassifier(BaseModel, ABC):
         return mean_cv_score
 
 
-class XCSClassifier(BaseModel, ABC):
+class XCSClassifier(BinaryClassificationModel, ABC):
     model_name = "XCS"
     small_name = "XCS"
     color = "olive"
@@ -58,7 +58,7 @@ class XCSClassifier(BaseModel, ABC):
         return mean_cv_score
 
 
-class ExSTraCSClassifier(BaseModel, ABC):
+class ExSTraCSClassifier(BinaryClassificationModel, ABC):
     model_name = "ExSTraCS"
     small_name = "ExSTraCS"
     color = "lawngreen"

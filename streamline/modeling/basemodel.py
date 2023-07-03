@@ -1,9 +1,6 @@
 import copy
 import logging
 import optuna
-from sklearn import metrics
-from sklearn.metrics import auc
-from streamline.utils.evaluation import class_eval
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import StratifiedKFold, cross_val_score
@@ -146,26 +143,6 @@ class BaseModel:
                                             cv=self.cv, n_jobs=self.n_jobs).mean()
         logging.debug("Trail Completed")
         return mean_cv_score
-
-    def model_evaluation(self, x_test, y_test):
-        """
-        Runs commands to gather all evaluations for later summaries and plots.
-        """
-        # Prediction evaluation
-        y_pred = self.model.predict(x_test)
-        metric_list = class_eval(y_test, y_pred)
-        # Determine probabilities of class predictions for each test instance
-        # (this will be used much later in calculating an ROC curve)
-        probas_ = self.model.predict_proba(x_test)
-        # Compute ROC curve and area the curve
-        fpr, tpr, thresholds = metrics.roc_curve(y_test, probas_[:, 1])
-        roc_auc = auc(fpr, tpr)
-        # Compute Precision/Recall curve and AUC
-        prec, recall, thresholds = metrics.precision_recall_curve(y_test, probas_[:, 1])
-        prec, recall, thresholds = prec[::-1], recall[::-1], thresholds[::-1]
-        prec_rec_auc = auc(recall, prec)
-        ave_prec = metrics.average_precision_score(y_test, probas_[:, 1])
-        return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
 
     def fit(self, x_train, y_train, n_trails, timeout, feature_names=None):
         """
