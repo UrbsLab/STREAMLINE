@@ -6,13 +6,14 @@ import dask
 from tqdm import tqdm
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import ABBREVIATION, COLORS
 from streamline.modeling.modeljob import ModelJob
-from streamline.modeling.utils import model_str_to_obj
-from streamline.modeling.utils import SUPPORTED_MODELS
-from streamline.modeling.utils import is_supported_model
 from streamline.utils.runners import model_runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
+from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
+from streamline.modeling.utils import is_supported_model, model_str_to_obj
+from streamline.modeling.utils import REGRESSION_ABBREVIATION as ABBREVIATION
+from streamline.modeling.utils import REGRESSION_COLORS as COLORS
+
 
 
 class ModelExperimentRunner:
