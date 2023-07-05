@@ -25,7 +25,7 @@ class AutoRunner:
                 do_mutual_info=True, do_multisurf=True,
                 instance_subset=2000, algorithms=("MI", "MS"), use_turf=False, turf_pct=0.5,
                 n_jobs=-1, max_features_to_keep=2000, filter_poor_features=True, export_scores=True,
-                ml_algorithms=["NB", "LR", "DT"], exclude=['eLCS', 'XCS'], scoring_metric='balanced_accuracy', metric_direction='maximize',
+                ml_algorithms=["NB", "LR", "DT", "XGB", "LGB", "CGB", "SVM","GB", "RF"], exclude=['eLCS', 'XCS'], scoring_metric='balanced_accuracy', metric_direction='maximize',
                 training_subsample=0, use_uniform_fi=True, n_trials=200,
                 timeout=900, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                 lcs_timeout=1200, resubmit=False,

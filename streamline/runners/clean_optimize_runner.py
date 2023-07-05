@@ -50,7 +50,7 @@ class OptimizeClean:
             }
         
             try:
-                self.most_recent_run = AutoRunner(dataset_names=self.dataset,data_path=self.data_path, output_path=self.output_path, experiment_name=self.experiment_name, gen_report=False, clean=False, categorical_cutoff=categorical_cutoff, sig_cutoff=sig_cutoff, featureeng_missingness=featureeng_missingness, cleaning_missingness=cleaning_missingness, correlation_removal_threshold=correlation_removal_threshold, exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits, class_label=self.class_label, instance_label=self.instance_label, ml_algorithms=["NB", "LR", "DT", "EN"], exclude=["GB", "RF","ANN","KNN","GP", 'eLCS', 'XCS', "ExSTraCS"]) # "XGB", "LGB", "CGB", "SVM","GB", "RF"
+                self.most_recent_run = AutoRunner(dataset_names=self.dataset,data_path=self.data_path, output_path=self.output_path, experiment_name=self.experiment_name, gen_report=False, clean=False, categorical_cutoff=categorical_cutoff, sig_cutoff=sig_cutoff, featureeng_missingness=featureeng_missingness, cleaning_missingness=cleaning_missingness, correlation_removal_threshold=correlation_removal_threshold, exploration_list=exploration_list, partition_method=partition_method, n_splits=n_splits, class_label=self.class_label, instance_label=self.instance_label, ml_algorithms=["NB", "LR", "DT", "EN", "RF", "GB", "XGB", "LGB", "CGB", "SVM"], exclude=["ANN","KNN","GP", 'eLCS', 'XCS', "ExSTraCS"]) # "XGB", "LGB", "CGB", "SVM","GB", "RF"
                 output_csv = self.most_recent_run.run(run_para=False)
                 performance = pd.read_csv(output_csv)
                 self.summary_chart = performance
