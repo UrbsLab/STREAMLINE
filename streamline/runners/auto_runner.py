@@ -169,7 +169,7 @@ class AutoRunner:
         FORMAT = '%(levelname)s: %(message)s'
         logging.basicConfig(format=FORMAT)
         logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.CRITICAL)
         if os.path.exists(self.output_path+'/'+self.experiment_name):
             shutil.rmtree(self.output_path+'/'+self.experiment_name)
         dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
@@ -256,6 +256,7 @@ class AutoRunner:
             raise Exception('Performance Not Found')
         
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
+    
         #only working with one dataset at a time as of now.
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
