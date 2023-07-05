@@ -25,7 +25,7 @@ class AutoRunner:
                 do_mutual_info=True, do_multisurf=True,
                 instance_subset=2000, algorithms=("MI", "MS"), use_turf=False, turf_pct=0.5,
                 n_jobs=-1, max_features_to_keep=2000, filter_poor_features=True, export_scores=True,
-                ml_algorithms=["NB", "LR", "DT", "XGB", "LGB", "CGB", "SVM","GB", "RF"], exclude=['eLCS', 'XCS'], scoring_metric='balanced_accuracy', metric_direction='maximize',
+                ml_algorithms=["NB", "LR", "DT", "EN"], exclude=['eLCS', 'XCS'], scoring_metric='balanced_accuracy', metric_direction='maximize',
                 training_subsample=0, use_uniform_fi=True, n_trials=200,
                 timeout=900, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                 lcs_timeout=1200, resubmit=False,
@@ -169,7 +169,7 @@ class AutoRunner:
         FORMAT = '%(levelname)s: %(message)s'
         logging.basicConfig(format=FORMAT)
         logger = logging.getLogger()
-        logger.setLevel(logging.CRITICAL)
+        logger.setLevel(logging.INFO)
         if os.path.exists(self.output_path+'/'+self.experiment_name):
             shutil.rmtree(self.output_path+'/'+self.experiment_name)
         dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
@@ -261,7 +261,7 @@ class AutoRunner:
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
             for i in self.dataset_names:
-                print(dataset_directory_path, i)
+                #print(dataset_directory_path, i)
                 if full_path == self.output_path + "/" + self.experiment_name + "/" + i:
                     return full_path + '/model_evaluation/Summary_performance_mean.csv'
         raise Exception('Performance Not Found')
