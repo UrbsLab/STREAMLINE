@@ -73,6 +73,7 @@ class OptimizeClean:
                 if not hasattr(self, "best_goal"):
                     self.best_goal = self.goal
                     self.best_param = self.param
+                    self.best_model = performance.loc[performance[self.optimize_for].idxmax()][0]
                 if self.best_goal >= self.goal:
                     self.low = self.goal 
                     self.goal = self.best_goal
