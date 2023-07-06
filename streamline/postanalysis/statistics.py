@@ -13,7 +13,7 @@ from matplotlib import rc
 from statistics import mean, median, stdev
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 from streamline.utils.job import Job
-from streamline.modeling.utils import ABBREVIATION, COLORS
+from streamline.modeling.utils import REGRESSION_ABBREVIATION, REGRESSION_COLORS
 import seaborn as sns
 
 sns.set_theme()
@@ -84,8 +84,8 @@ class StatsJob(Job):
                                                     sep=',').columns.values.tolist()  # Get Original Headers
             except Exception:
                 self.original_headers = None
-        self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
-        self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
+        self.abbrev = dict((k, REGRESSION_ABBREVIATION[k]) for k in self.algorithms if k in REGRESSION_ABBREVIATION)
+        self.colors = dict((k, REGRESSION_COLORS[k]) for k in self.algorithms if k in REGRESSION_COLORS)
 
     def run(self):
         self.job_start_time = time.time()  # for tracking phase runtime
