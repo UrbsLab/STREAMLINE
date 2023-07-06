@@ -11,7 +11,8 @@ from streamline import __version__ as version
 import pandas as pd
 from fpdf import FPDF
 
-from streamline.modeling.utils import ABBREVIATION, COLORS, is_supported_model, SUPPORTED_MODELS
+from streamline.modeling.utils import is_supported_model
+from streamline.modeling.utils import REGRESSION_ABBREVIATION, REGRESSION_COLORS, SUPPORTED_REGRESSION_MODELS
 from streamline.utils.job import Job
 
 
@@ -72,7 +73,7 @@ class ReportJob(Job):
         self.dataset_directory_paths = dataset_directory_paths
 
         if algorithms is None:
-            self.algorithms = SUPPORTED_MODELS
+            self.algorithms = SUPPORTED_REGRESSION_MODELS
             if exclude is not None:
                 for algorithm in exclude:
                     try:
@@ -101,8 +102,8 @@ class ReportJob(Job):
                     temp_algo.append(key)
             self.algorithms = temp_algo
 
-        self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
-        self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
+        self.abbrev = dict((k, REGRESSION_ABBREVIATION[k]) for k in self.algorithms if k in REGRESSION_ABBREVIATION)
+        self.colors = dict((k, REGRESSION_COLORS[k]) for k in self.algorithms if k in REGRESSION_COLORS)
         self.metrics = None
 
         self.analysis_report = FPDF('P', 'mm', 'A4')

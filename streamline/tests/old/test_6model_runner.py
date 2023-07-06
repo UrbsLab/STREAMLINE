@@ -10,7 +10,7 @@ from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
-from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
+from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS_SMALL
 
 pytest.skip("Tested Already", allow_module_level=True)
 
@@ -43,7 +43,7 @@ def test_setup():
 
 
 test_algorithms = list()
-for algorithm in SUPPORTED_MODELS_SMALL[:2]:
+for algorithm in SUPPORTED_REGRESSION_MODELS_SMALL[:2]:
     test_algorithms.append(([algorithm, ],))
 
 

@@ -5,7 +5,7 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_MODELS, is_supported_model
+from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS, is_supported_model
 from streamline.postanalysis.model_replicate import ReplicateJob
 from streamline.utils.runners import num_cores, runner_fn
 from streamline.utils.cluster import get_cluster
@@ -110,7 +110,7 @@ class ReplicationRunner:
 
         if not load_algo:
             if algorithms is None:
-                self.algorithms = SUPPORTED_MODELS
+                self.algorithms = SUPPORTED_REGRESSION_MODELS
                 if exclude is not None:
                     for algorithm in exclude:
                         try:

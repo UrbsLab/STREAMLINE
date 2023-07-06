@@ -3,7 +3,7 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_MODELS
+from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS
 from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.gererate_report import ReportJob
 from streamline.utils.runners import runner_fn
@@ -51,7 +51,7 @@ class ReportRunner:
         self.reserved_memory = reserved_memory
 
         if algorithms is None:
-            self.algorithms = SUPPORTED_MODELS
+            self.algorithms = SUPPORTED_REGRESSION_MODELS
             if exclude is not None:
                 for algorithm in exclude:
                     try:
