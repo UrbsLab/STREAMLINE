@@ -50,6 +50,10 @@ class OptimizeClean:
             }
         
             try:
+                if hasattr(self, "goal"):
+                    self.best_goal = self.goal
+                    self.best_param = self.param
+                    self.best_model = self.model
                 self.most_recent_run = AutoRunner(dataset_names=self.dataset,
                                                 data_path=self.data_path, 
                                                 output_path=self.output_path,
@@ -71,14 +75,22 @@ class OptimizeClean:
                 performance = pd.read_csv(output_csv)
                 self.summary_chart = performance
                 self.goal = performance[self.optimize_for].max()
-                self.best_model = performance.loc[performance[self.optimize_for].idxmax()][0]
-                png_out = output_csv.removesuffix('Summary_performance_mean.csv')
-                png_out = png_out + 'Summary_ROC.png'
-                self.final_model_comparison = plt.savefig(png_out)
-                clean = CleanRunner(self.output_path, self.experiment_name, del_time=True, del_old_cv=True)
-                    # run_parallel is not used in clean
-                clean.run()
-                return self.goal
+                if self.best_goal > self.goal:
+                    self.low = self.goal 
+                    self.goal = self.best_goal
+                    clean = CleanRunner(self.output_path, self.experiment_name, del_time=True, del_old_cv=True)
+                        # run_parallel is not used in clean
+                    clean.run()
+                    return self.low
+                else:
+                    self.model = performance.loc[performance[self.optimize_for].idxmax()][0]
+                    png_out = output_csv.removesuffix('Summary_performance_mean.csv')
+                    png_out = png_out + 'Summary_ROC.png'
+                    self.final_model_comparison = plt.savefig(png_out)
+                    clean = CleanRunner(self.output_path, self.experiment_name, del_time=True, del_old_cv=True)
+                        # run_parallel is not used in clean
+                    clean.run()
+                    return self.goal
             except:
                 print('EXCEPTION')
                 self.goal = float(0.0)
