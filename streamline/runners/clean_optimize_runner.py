@@ -30,8 +30,8 @@ class OptimizeClean:
     def run(self, run_para=False):
 
         def objective(trial):
-            categorical_cutoff = trial.suggest_int('categorical_cutoff',2,10)
-            sig_cutoff = trial.suggest_float('sig_cutoff',0.005, 0.05, log=True)
+            categorical_cutoff = trial.suggest_int('categorical_cutoff',5,15)
+            #sig_cutoff = trial.suggest_float('sig_cutoff',0.005, 0.05, log=True)
             featureeng_missingness = trial.suggest_float('featureeng_missingness', 0.05, 1, step=0.05)
             cleaning_missingness = trial.suggest_float('cleaning_missingness', 0.05, 1, step=0.05)
             correlation_removal_threshold = trial.suggest_float('correlation_removal_threshold', 0.5, 1, step=0.05)
@@ -40,7 +40,7 @@ class OptimizeClean:
             n_splits = trial.suggest_int('n_splits', 2, 10)
             self.param = {
                 'categorical_cutoff': categorical_cutoff,
-                'sig_cutoff': sig_cutoff,
+                #'sig_cutoff': sig_cutoff,
                 'featureeng_missingness': featureeng_missingness,
                 'cleaning_missingness': cleaning_missingness,
                 'correlation_removal_threshold': correlation_removal_threshold,
