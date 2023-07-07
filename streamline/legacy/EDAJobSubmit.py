@@ -17,21 +17,22 @@ def run_cluster(argv):
     exploration_list = eval(argv[4])
     plot_list = eval(argv[5])
     outcome_label = argv[6]
-    instance_label = argv[7] if argv[7] != "None" else None
-    match_label = argv[8] if argv[8] != "None" else None
-    n_splits = int(argv[9])
-    partition_method = argv[10]
-    ignore_features = None if argv[11] == "None" else eval(argv[11])
-    categorical_features = None if argv[12] == "None" else eval(argv[12])
-    top_features = int(argv[13])
-    categorical_cutoff = int(argv[14])
-    sig_cutoff = float(argv[15])
-    featureeng_missingness = float(argv[16])
-    cleaning_missingness = float(argv[17])
-    correlation_removal_threshold = float(argv[18])
-    random_state = None if argv[19] == "None" else int(argv[19])
+    outcome_type = argv[7]
+    instance_label = argv[8] if argv[8] != "None" else None
+    match_label = argv[9] if argv[9] != "None" else None
+    n_splits = int(argv[10])
+    partition_method = argv[11]
+    ignore_features = None if argv[12] == "None" else eval(argv[12])
+    categorical_features = None if argv[13] == "None" else eval(argv[13])
+    top_features = int(argv[14])
+    categorical_cutoff = int(argv[15])
+    sig_cutoff = float(argv[16])
+    featureeng_missingness = float(argv[17])
+    cleaning_missingness = float(argv[18])
+    correlation_removal_threshold = float(argv[19])
+    random_state = None if argv[20] == "None" else int(argv[20])
 
-    dataset = Dataset(dataset_path, outcome_label, match_label, instance_label)
+    dataset = Dataset(dataset_path, outcome_label, match_label, instance_label, outcome_type)
     eda_obj = DataProcess(dataset, output_path + '/' + experiment_name,
                           ignore_features,
                           categorical_features, exploration_list, plot_list,

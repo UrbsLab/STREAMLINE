@@ -45,7 +45,8 @@ class DataProcessRunner:
     """
 
     def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                 outcome_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
+                 outcome_label="Class", outcome_type=None, instance_label=None, match_label=None, n_splits=10,
+                 partition_method="Stratified",
                  ignore_features=None, categorical_features=None, quantitative_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                  correlation_removal_threshold=1.0,
@@ -87,7 +88,7 @@ class DataProcessRunner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
-        self.outcome_type = None
+        self.outcome_type = outcome_type
         self.instance_label = instance_label
         self.match_label = match_label
         self.ignore_features = ignore_features
@@ -146,7 +147,8 @@ class DataProcessRunner:
                     if self.run_cluster == "LSFOld":
                         self.submit_lsf_cluster_job(dataset_path)
                         continue
-                    dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label)
+                    dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label,
+                                      self.outcome_type)
                     self.outcome_type = dataset.outcome_type
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
@@ -232,7 +234,7 @@ class DataProcessRunner:
 
     def get_cluster_params(self, dataset_path):
         cluster_params = [dataset_path, self.output_path, self.experiment_name, None, None,
-                          self.outcome_label, self.instance_label, self.match_label, self.n_splits,
+                          self.outcome_label, self.outcome_type, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method, self.ignore_features, self.categorical_features,
                           self.quantitative_features, self.top_features,
                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
