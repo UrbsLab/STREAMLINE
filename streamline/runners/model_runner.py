@@ -15,7 +15,6 @@ from streamline.modeling.utils import REGRESSION_ABBREVIATION as ABBREVIATION
 from streamline.modeling.utils import REGRESSION_COLORS as COLORS
 
 
-
 class ModelExperimentRunner:
     """
     Runner Class for running all the model jobs for
