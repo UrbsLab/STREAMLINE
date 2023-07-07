@@ -139,20 +139,20 @@ class ReportJob(Job):
         # FRONT PAGE - Summary of Pipeline settings
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
-
-        targetdata = ars_dic[0:21]  # Data-path to  instance label
-        cv = ars_dic[21:27]  # cv partitions to partition Method
-        match = ars_dic[27:30]  # match label
-        cat_cut = ars_dic[30:33]  # categorical cutoff
-        stat_cut = ars_dic[33:36]  # statistical significance cutoff
-        process = ars_dic[36:51]  # feature missingness cutoff to list of exploratory plots saved
-        general = ars_dic[51:57]  # random seed to run from notebooks
-        process2 = ars_dic[57:66]  # use data scaling to use multivariate imputation
-        featsel = ars_dic[66:93]  # use mutual info to export feature importance plots
-        overwrite = ars_dic[93:96]  # overwrite cv
-        modeling = ars_dic[96:114]  # primary metric to export hyperparameter sweep plots
-        lcs = ars_dic[114:129]
-        stats = ars_dic[129:150]
+        inc = 1
+        targetdata = ars_dic[0:21+inc]  # Data-path to  instance label
+        cv = ars_dic[21+inc:27+inc]  # cv partitions to partition Method
+        match = ars_dic[27+inc:30+inc]  # match label
+        cat_cut = ars_dic[30+inc:33+inc]  # categorical cutoff
+        stat_cut = ars_dic[33+inc:36+inc]  # statistical significance cutoff
+        process = ars_dic[36+inc:51+inc]  # feature missingness cutoff to list of exploratory plots saved
+        general = ars_dic[51+inc:57+inc]  # random seed to run from notebooks
+        process2 = ars_dic[57+inc:66+inc]  # use data scaling to use multivariate imputation
+        featsel = ars_dic[66+inc:93+inc]  # use mutual info to export feature importance plots
+        overwrite = ars_dic[93+inc:96+inc]  # overwrite cv
+        modeling = ars_dic[96+inc:114+inc]  # primary metric to export hyperparameter sweep plots
+        lcs = ars_dic[114+inc:129+inc]
+        stats = ars_dic[129+inc:150+inc]
 
         ls2 = ars_dic_2
 

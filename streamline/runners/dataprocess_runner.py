@@ -87,6 +87,7 @@ class DataProcessRunner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
+        self.outcome_type = None
         self.instance_label = instance_label
         self.match_label = match_label
         self.ignore_features = ignore_features
@@ -146,6 +147,7 @@ class DataProcessRunner:
                         self.submit_lsf_cluster_job(dataset_path)
                         continue
                     dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label)
+                    self.outcome_type = dataset.outcome_type
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,
@@ -207,6 +209,7 @@ class DataProcessRunner:
         metadata['Output Path'] = self.output_path
         metadata['Experiment Name'] = self.experiment_name
         metadata['Outcome Label'] = self.outcome_label
+        metadata['Outcome Type'] = self.outcome_label
         metadata['Instance Label'] = self.instance_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features
