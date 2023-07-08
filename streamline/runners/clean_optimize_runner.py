@@ -2,6 +2,7 @@ import logging
 import os
 import pandas as pd
 import optuna
+import func_timeout 
 from optuna.samplers import TPESampler
 import matplotlib.pyplot as plt
 from streamline.runners.auto_runner import AutoRunner
@@ -37,7 +38,7 @@ class OptimizeClean:
             correlation_removal_threshold = trial.suggest_float('correlation_removal_threshold', 0.5, 1, step=0.05)
             exploration_list = trial.suggest_categorical('exploration_list', [["Describe", "Univariate Analysis", "Feature Correlation"]])
             partition_method = trial.suggest_categorical('partition_method',['Stratified', 'Random']) #Group not included
-            n_splits = trial.suggest_int('n_splits', 2, 10)
+            n_splits = trial.suggest_int('n_splits', 2, 5)
             self.param = {
                 'categorical_cutoff': categorical_cutoff,
                 #'sig_cutoff': sig_cutoff,
@@ -55,7 +56,7 @@ class OptimizeClean:
                                                 experiment_name=self.experiment_name, 
                                                 gen_report=False, clean=False, 
                                                 categorical_cutoff=categorical_cutoff, 
-                                                sig_cutoff=sig_cutoff, 
+                                                #sig_cutoff=sig_cutoff, 
                                                 featureeng_missingness=featureeng_missingness, 
                                                 cleaning_missingness=cleaning_missingness, 
                                                 correlation_removal_threshold=correlation_removal_threshold, 
@@ -63,10 +64,11 @@ class OptimizeClean:
                                                 partition_method=partition_method, 
                                                 n_splits=n_splits, class_label=self.class_label, 
                                                 instance_label=self.instance_label,
-                                                timeout= 15,
+                                                timeout= 900,
                                                 ml_algorithms=["NB", "LR", "DT", "EN", "RF", "GB", "XGB", "LGB", "CGB", "SVM"], 
                                                 exclude=["ANN","KNN","GP", 'eLCS', 'XCS', "ExSTraCS"]) # "XGB", "LGB", "CGB", "SVM","GB", "RF"
-                output_csv = self.most_recent_run.run(run_para=False)
+                output_csv = self.most_recent_run.run(run_para=run_para)
+                
                 performance = pd.read_csv(output_csv)
                 self.summary_chart = performance
                 self.goal = performance[self.optimize_for].max()
@@ -92,11 +94,19 @@ class OptimizeClean:
                         # run_parallel is not used in clean
                     clean.run()
                     return self.goal
-            except:
+            
+            except: 
                 print('EXCEPTION')
                 self.goal = float(0.0)
                 return self.goal
+            
+
         
         study = optuna.create_study(sampler=TPESampler(), direction=self.opt_direction)
         study.optimize(objective, n_trials=self.n_trials, show_progress_bar=True)
+        #self.fig = optuna.visualization.plot_pareto_front(study)
+        #fig.show()  
+
+        
+
         
