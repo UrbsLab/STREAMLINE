@@ -80,7 +80,7 @@ def test_pipeline():
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms,
-                                   outcome_label="Class", outcome_type="Categorical", instance_label="InstanceID")
+                                   outcome_label="Class", instance_label="InstanceID")
     runner.run(run_parallel=run_parallel)
     del runner
 

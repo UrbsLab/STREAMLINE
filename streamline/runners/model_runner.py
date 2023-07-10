@@ -75,6 +75,12 @@ class ModelExperimentRunner:
         self.outcome_type = outcome_type
         self.instance_label = instance_label
 
+        if outcome_type is None:
+            file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+            metadata = pickle.load(file)
+            self.outcome_type = metadata['Outcome Type']
+            file.close()
+
         is_supported_model, model_str_to_obj = None, None
 
         if self.outcome_type == "Categorical":
@@ -93,11 +99,7 @@ class ModelExperimentRunner:
                 from streamline.modeling.regression_utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
                 gi()
         else:
-            raise Exception("Unknown Outcome Type")
-
-        logging.warning(ABBREVIATION)
-        logging.warning(COLORS)
-        logging.warning(SUPPORTED_MODELS)
+            raise Exception("Unknown Outcome Type:" + str(self.outcome_type))
 
         if algorithms == "All":
             algorithms = None
