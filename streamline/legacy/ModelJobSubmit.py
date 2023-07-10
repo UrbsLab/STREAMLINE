@@ -15,21 +15,22 @@ def run_cluster(argv):
     experiment_name = argv[3]
     cv_count = int(argv[4])
     outcome_label = argv[5]
-    instance_label = argv[6] if argv[6] != "None" else None
-    scoring_metric = argv[7]
-    metric_direction = argv[8]
-    n_trials = int(argv[9])
-    timeout = int(argv[10])
-    training_subsample = int(argv[11])
-    uniform_fi = eval(argv[12])
-    save_plot = eval(argv[13])
-    random_state = None if argv[14] == "None" else int(argv[14])
-    algorithm = argv[15]
-    n_jobs = None if argv[16] == "None" else int(argv[16])
-    do_lcs_sweep = eval(argv[17])
-    lcs_iterations = int(argv[18])
-    lcs_n = int(argv[19])
-    lcs_nu = int(argv[20])
+    outcome_type = argv[6]
+    instance_label = argv[7] if argv[7] != "None" else None
+    scoring_metric = argv[8]
+    metric_direction = argv[9]
+    n_trials = int(argv[10])
+    timeout = int(argv[11])
+    training_subsample = int(argv[12])
+    uniform_fi = eval(argv[13])
+    save_plot = eval(argv[14])
+    random_state = None if argv[15] == "None" else int(argv[15])
+    algorithm = argv[16]
+    n_jobs = None if argv[17] == "None" else int(argv[17])
+    do_lcs_sweep = eval(argv[18])
+    lcs_iterations = int(argv[19])
+    lcs_n = int(argv[20])
+    lcs_nu = int(argv[21])
 
     job_obj = ModelJob(full_path, output_path, experiment_name, cv_count, outcome_label,
                        instance_label, scoring_metric, metric_direction, n_trials,

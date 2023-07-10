@@ -3,8 +3,8 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS
-from streamline.modeling.utils import is_supported_model
+from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
+from streamline.modeling.classification_utils import is_supported_model
 from streamline.postanalysis.dataset_compare import CompareJob
 from streamline.utils.runners import runner_fn
 from streamline.utils.cluster import get_cluster
@@ -33,7 +33,7 @@ class CompareRunner:
         self.experiment_path = experiment_path
 
         if algorithms is None:
-            self.algorithms = SUPPORTED_REGRESSION_MODELS
+            self.algorithms = SUPPORTED_MODELS
             if exclude is not None:
                 for algorithm in exclude:
                     try:

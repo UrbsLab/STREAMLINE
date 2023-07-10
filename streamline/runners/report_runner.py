@@ -3,8 +3,10 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS
-from streamline.modeling.utils import is_supported_model
+from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
+from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
+from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
+from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
 from streamline.postanalysis.gererate_report import ReportJob
 from streamline.utils.runners import runner_fn
 from streamline.utils.cluster import get_cluster

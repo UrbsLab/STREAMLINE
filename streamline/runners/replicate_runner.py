@@ -5,10 +5,23 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS, is_supported_model
 from streamline.postanalysis.model_replicate import ReplicateJob
 from streamline.utils.runners import num_cores, runner_fn
 from streamline.utils.cluster import get_cluster
+from streamline.modeling.utils import is_supported_model, model_str_to_obj
+
+
+class GlobalImport:
+
+    def __enter__(self):
+        return self
+
+    def __call__(self):
+        import inspect
+        self.collector = inspect.getargvalues(inspect.getouterframes(inspect.currentframe())[1].frame).locals
+
+    def __exit__(self, *args):
+        globals().update(self.collector)
 
 
 class ReplicationRunner:
@@ -70,6 +83,7 @@ class ReplicationRunner:
         self.outcome_label = outcome_label
         if not outcome_label:
             self.outcome_label = metadata['Outcome Label']
+        self.outcome_type = metadata['Outcome Type']
         self.instance_label = instance_label
         if not instance_label:
             self.instance_label = metadata['Instance Label']
@@ -85,6 +99,20 @@ class ReplicationRunner:
         self.show_plots = show_plots
         self.scoring_metric = metadata['Primary Metric']
         self.random_state = metadata['Random Seed']
+
+        if self.outcome_type == "Categorical":
+            with GlobalImport() as gi:
+                from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as ABBREVIATION
+                from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
+                from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
+                gi()
+
+        elif self.outcome_type == "Continuous":
+            with GlobalImport() as gi:
+                from streamline.modeling.regression_utils import REGRESSION_ABBREVIATION as ABBREVIATION
+                from streamline.modeling.regression_utils import REGRESSION_COLORS as COLORS
+                from streamline.modeling.regression_utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
+                gi()
 
         self.run_cluster = run_cluster
         self.queue = queue
@@ -110,7 +138,7 @@ class ReplicationRunner:
 
         if not load_algo:
             if algorithms is None:
-                self.algorithms = SUPPORTED_REGRESSION_MODELS
+                self.algorithms = SUPPORTED_MODELS
                 if exclude is not None:
                     for algorithm in exclude:
                         try:
