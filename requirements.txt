@@ -26,3 +26,4 @@ kaleido
 dask-jobqueue
 dask
 joblib
+group-lasso

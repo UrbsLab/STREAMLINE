@@ -1,3 +1,4 @@
+import copy
 import csv
 import os
 import time
@@ -7,6 +8,12 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
+from sklearn.covariance import EllipticEnvelope
+from sklearn.ensemble import IsolationForest
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from sklearn.neighbors import LocalOutlierFactor
 
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
@@ -144,6 +151,58 @@ class DataProcess(Job):
         self.cv_partitioner.run()
         self.save_runtime()
 
+    def anomaly_detection(self):
+        # Make a copy of the original data
+        logging.warning('load')
+        imputed_data = copy.deepcopy(self.dataset.data)
+        logging.warning('copy')
+
+        # Perform iterative imputation
+        imputer = IterativeImputer(random_state=self.random_state)
+        imputed_data[self.quantitative_features] = imputer.fit_transform(imputed_data[self.quantitative_features])
+        logging.warning('Impute')
+        # Normalize the imputed data
+        normalized_imputed_data = (imputed_data[self.quantitative_features] - imputed_data[
+            self.quantitative_features].mean()) / imputed_data[self.quantitative_features].std()
+        logging.warning('Normal')
+
+        # # Isolation Forest on imputed data
+        imputed_isolation_forest = IsolationForest(contamination='auto', random_state=self.random_state)
+        imputed_isolation_forest.fit(normalized_imputed_data)
+        imputed_isolation_scores = imputed_isolation_forest.decision_function(normalized_imputed_data)
+        logging.warning('iso')
+
+        # Local Outlier Factor on imputed data
+        imputed_local_outlier_factor = LocalOutlierFactor(n_neighbors=20, contamination='auto')
+        imputed_local_outlier_scores = imputed_local_outlier_factor.fit_predict(normalized_imputed_data)
+        logging.warning('outlier')
+
+        # DBSCAN on imputed data
+        imputed_dbscan = DBSCAN(eps=0.5, min_samples=5)
+        imputed_dbscan_labels = imputed_dbscan.fit_predict(normalized_imputed_data)
+        logging.warning('dbscan')
+
+        # Elliptic Envelope on imputed data
+        imputed_elliptic_envelope = EllipticEnvelope()
+        imputed_elliptic_envelope.fit(normalized_imputed_data)
+        imputed_elliptic_scores = imputed_elliptic_envelope.decision_function(normalized_imputed_data)
+        logging.warning('elliptic')
+
+        # Combine the imputed anomaly scores
+        imputed_anomaly_scores = {
+            'Isolation Forest': imputed_isolation_scores,
+            'Local Outlier Factor': imputed_local_outlier_scores,
+            'DBSCAN': imputed_dbscan_labels,
+            'Elliptic Envelope': imputed_elliptic_scores
+        }
+        logging.warning(imputed_anomaly_scores)
+        # Save the imputed anomaly scores to a file
+        imputed_anomaly_scores_file = os.path.join(self.experiment_path,
+                                                   self.dataset.name, 'imputed_anomaly_scores.csv')
+        pd.DataFrame(imputed_anomaly_scores).to_csv(imputed_anomaly_scores_file, index=False)
+
+        logging.warning("Imputed anomaly detection completed.")
+
     def run_process(self, top_features=20):
         """
         Run Exploratory Data Process accordingly on the EDA Object
@@ -181,6 +240,8 @@ class DataProcess(Job):
 
         # Running all data manipulation steps: cleaning and feature engineering
         self.data_manipulation()
+
+        self.anomaly_detection()
 
         # Running EDA after all data manipulation
         self.second_eda(top_features)
@@ -474,7 +535,6 @@ class DataProcess(Job):
                 logging.info(list(self.dataset.get_headers()))
 
             # Generate and export class count bar graph
-
 
             if plot:
                 if self.dataset.outcome_type == "Categorical":
