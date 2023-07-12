@@ -19,20 +19,9 @@ class SVR(RegressionModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        self.params = params = {'n_estimators': trial.suggest_int('n_estimators', self.param_grid['n_estimators'][0],
-                                                                  self.param_grid['n_estimators'][1]),
-                                'max_depth': trial.suggest_int('max_depth', self.param_grid['max_depth'][0],
-                                                               self.param_grid['max_depth'][1]),
-                                'min_samples_split': trial.suggest_int('min_samples_split',
-                                                                       self.param_grid['min_samples_split'][0],
-                                                                       self.param_grid['min_samples_split'][1]),
-                                'min_samples_leaf': trial.suggest_int('min_samples_leaf',
-                                                                      self.param_grid['min_samples_leaf'][0],
-                                                                      self.param_grid['min_samples_leaf'][1]),
-                                'max_features': trial.suggest_categorical('max_features', self.param_grid['max_features']),
-                                'bootstrap': trial.suggest_categorical('bootstrap', self.param_grid['bootstrap']),
-                                'oob_score': trial.suggest_categorical('oob_score', self.param_grid['oob_score']),
-                                'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
+        self.params = {'n_estimators': [10, 1000], 'max_depth': [1, 30], 'min_samples_split': [2, 50],
+                       'min_samples_leaf': [1, 50], 'max_features': [None, 'auto', 'log2'],
+                       'bootstrap': [True], 'oob_score': [False, True]}
 
         mean_cv_score = self.hyper_eval()
         return mean_cv_score

@@ -19,11 +19,9 @@ class SVR(RegressionModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        self.params = {'kernel': trial.suggest_categorical('kernel', self.param_grid['kernel']),
-                       'C': trial.suggest_float('C', self.param_grid['C'][0], self.param_grid['C'][1]),
-                       'gamma': trial.suggest_categorical('gamma', self.param_grid['gamma']),
-                       'degree': trial.suggest_int('degree', self.param_grid['degree'][0],
-                                                   self.param_grid['degree'][1])}
+        self.params = {'group_reg': [1e-3, 1],  # 'l1_reg':[0,1],
+                       'n_iter': [10, 2500],
+                       'scale_reg': ['group_size', 'none', 'inverse_group_size'], }
 
         mean_cv_score = self.hyper_eval()
         return mean_cv_score
