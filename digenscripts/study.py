@@ -21,7 +21,7 @@ args = parser.parse_args()
 # Print "Hello" + the user input argument
 
 f = open(args.filename + ".txt", "a")
-f.write('Hello,', args.filename)
+f.write('Hello,' + args.filename)
 f.close()
 
 
