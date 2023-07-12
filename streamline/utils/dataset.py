@@ -71,7 +71,7 @@ class Dataset:
                 self.outcome_type = "Categorical"
             else:
                 self.outcome_type = "Continuous"
-        logging.info("Loaded " + self.outcome_type + "Outcome Type Dataset")
+        logging.info("Loaded " + self.outcome_type + " Outcome Type Dataset")
 
     def feature_only_data(self):
         """
@@ -275,8 +275,10 @@ class Dataset:
             df_value_counts = df_value_counts.reset_index()
             df_value_counts.columns = ['Top Occurring Values', 'Counts']
             logging.info("\n" + df_value_counts.sort_values('Counts').head(10).to_string())
-            logging.info("The Skewness value of the labels is: ", scipy.stats.skew(self.data[self.outcome_label]))
-            logging.info("The Kurtosis value of the labels is: ", scipy.stats.kurtosis(self.data[self.outcome_label]))
+            logging.info("The Skewness value of the labels is: "
+                         + str(scipy.stats.skew(self.data[self.outcome_label])))
+            logging.info("The Kurtosis value of the labels is: "
+                         + str(scipy.stats.kurtosis(self.data[self.outcome_label])))
 
         # Generate and export class count bar graph
         if plot:

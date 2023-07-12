@@ -150,6 +150,9 @@ class DataProcessRunner:
                     dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label,
                                       self.outcome_type)
                     self.outcome_type = dataset.outcome_type
+                    logging.warning(self.outcome_type)
+                    self.save_metadata()
+                    logging.warning(self.outcome_type)
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,
@@ -211,7 +214,7 @@ class DataProcessRunner:
         metadata['Output Path'] = self.output_path
         metadata['Experiment Name'] = self.experiment_name
         metadata['Outcome Label'] = self.outcome_label
-        metadata['Outcome Type'] = self.outcome_label
+        metadata['Outcome Type'] = self.outcome_type
         metadata['Instance Label'] = self.instance_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features

@@ -9,7 +9,10 @@ import pandas as pd
 
 from streamline.dataprep.data_process import DataProcess
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.utils import REGRESSION_ABBREVIATION, SUPPORTED_REGRESSION_MODELS, is_supported_model
+from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
+from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
+from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
+from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.dataset import Dataset
 from streamline.utils.job import Job
@@ -43,7 +46,7 @@ class ReplicateJob(Job):
         self.match_label = match_label
 
         if algorithms is None:
-            self.algorithms = SUPPORTED_REGRESSION_MODELS
+            self.algorithms = SUPPORTED_MODELS
             if exclude is not None:
                 for algorithm in exclude:
                     try:
@@ -420,7 +423,7 @@ class ReplicateJob(Job):
                 eval_dict[algorithm] = ret
                 pickle.dump(ret, open(self.full_path + "/applymodel/"
                                       + self.apply_name + '/model_evaluation/pickled_metrics/'
-                                      + REGRESSION_ABBREVIATION[algorithm] + '_CV_'
+                                      + ABBREVIATION[algorithm] + '_CV_'
                                       + str(cv_count) + "_metrics.pickle", 'wb'))
                 # includes everything from training except feature importance values
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
@@ -532,7 +535,7 @@ class ReplicateJob(Job):
         return scale_rep_df
 
     def eval_model(self, algorithm, cv_count, x_test, y_test):
-        model_info = self.full_path + '/models/pickledModels/' + REGRESSION_ABBREVIATION[algorithm] + '_' \
+        model_info = self.full_path + '/models/pickledModels/' + ABBREVIATION[algorithm] + '_' \
                      + str(cv_count) + '.pickle'
         # Corresponding pickle file name with scalingInfo
         infile = open(model_info, 'rb')
@@ -542,7 +545,7 @@ class ReplicateJob(Job):
         m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
         m.model = model
         m.model_name = algorithm
-        m.small_name = REGRESSION_ABBREVIATION[algorithm]
+        m.small_name = ABBREVIATION[algorithm]
 
         metric_list, fpr, tpr, roc_auc, prec, recall, \
             prec_rec_auc, ave_prec, probas_ = m.model_evaluation(x_test, y_test)

@@ -431,13 +431,11 @@ class DataProcess(Job):
         summary_df = pd.DataFrame(summary, columns=['Variable', 'Count'])
         class_counts = self.dataset.data[self.dataset.outcome_label].value_counts()
 
+        return_list = None
         if save:
             summary_df.to_csv(self.experiment_path + '/' + self.dataset.name + '/exploratory/' + 'DataCounts.csv',
                               index=False)
             # Calculate, print, and export class counts
-            class_counts.to_csv(self.experiment_path + '/' + self.dataset.name +
-                                '/exploratory/' + 'ClassCounts.csv', header=['Count'],
-                                index_label='Class')
 
             if self.dataset.outcome_type == "Categorical":
                 logging.info('Class Counts: ----------------')
@@ -446,17 +444,23 @@ class DataProcess(Job):
                 df_value_counts = df_value_counts.reset_index()
                 df_value_counts.columns = ['Class', 'Instances']
                 logging.info("\n" + df_value_counts.to_string())
+                class_counts.to_csv(self.experiment_path + '/' + self.dataset.name +
+                                    '/exploratory/' + 'ClassCounts.csv', header=['Count'],
+                                    index_label='Class')
             elif self.dataset.outcome_type == "Continuous":
                 logging.info('Label Counts: ----------------')
                 logging.info('Label Count Information')
                 df_value_counts = pd.DataFrame(class_counts)
                 df_value_counts = df_value_counts.reset_index()
                 df_value_counts.columns = ['Top Occurring Values', 'Counts']
+                class_counts.to_csv(self.experiment_path + '/' + self.dataset.name +
+                                    '/exploratory/' + 'ClassCounts.csv', header=['Count'],
+                                    index_label='Label')
                 logging.info("\n" + df_value_counts.sort_values('Counts').head(10).to_string())
-                logging.info("The Skewness value of the labels is: ",
-                             skew(self.dataset.data[self.dataset.outcome_label]))
-                logging.info("The Kurtosis value of the labels is: ",
-                             kurtosis(self.dataset.data[self.dataset.outcome_label]))
+                logging.info("The Skewness value of the labels is: " +
+                             str(skew(self.dataset.data[self.dataset.outcome_label])))
+                logging.info("The Kurtosis value of the labels is: " +
+                             str(kurtosis(self.dataset.data[self.dataset.outcome_label])))
 
             if not replicate:
                 logging.info("Categorical Features: " + str(self.categorical_features))
@@ -470,6 +474,8 @@ class DataProcess(Job):
                 logging.info(list(self.dataset.get_headers()))
 
             # Generate and export class count bar graph
+
+
             if plot:
                 if self.dataset.outcome_type == "Categorical":
                     class_counts.plot(kind='bar')
@@ -492,7 +498,11 @@ class DataProcess(Job):
                 else:
                     plt.close('all')
                     # plt.cla() # not required
-        return list(summary_df['Count']) + [class_counts[0], class_counts[1]]
+        if self.dataset.outcome_type == "Categorical":
+            return_list = list(summary_df['Count']) + [class_counts[0], class_counts[1]]
+        elif self.dataset.outcome_type == "Continuous":
+            return_list = list(summary_df['Count']) + [np.nan, np.nan]
+        return return_list
 
     def label_encoder(self):
         """

@@ -5,16 +5,16 @@ from sklearn.svm import SVR as SVRModel
 
 
 class SVR(RegressionModel, ABC):
-    model_name = "Linear Regression"
-    small_name = "LR"
+    model_name = "Support Vector Regression"
+    small_name = "SVR"
     color = "dimgrey"
 
-    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
+    def __init__(self, cv_folds=3, scoring_metric='explained_variance',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
-        super().__init__(SVRModel, "Logistic Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
+        super().__init__(SVRModel, "Support Vector Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = get_parameters(self.model_name, model_type="Regression")
         self.param_grid['random_state'] = [random_state, ]
-        self.small_name = "LR"
+        self.small_name = "SVR"
         self.color = "dimgrey"
         self.n_jobs = n_jobs
 

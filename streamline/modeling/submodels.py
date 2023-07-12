@@ -3,8 +3,10 @@ from abc import ABC
 import optuna
 from scipy.stats import pearsonr
 from sklearn import metrics
-from sklearn.metrics import auc, max_error, mean_absolute_error, mean_squared_error, median_absolute_error, \
-    explained_variance_score
+from sklearn.metrics import auc, max_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, median_absolute_error, explained_variance_score
+from sklearn.model_selection import KFold
+
 from streamline.modeling.basemodel import BaseModel
 from streamline.utils.evaluation import class_eval
 from sklearn.exceptions import ConvergenceWarning
@@ -63,7 +65,7 @@ class BinaryClassificationModel(BaseModel, ABC):
 
 class RegressionModel(BaseModel, ABC):
     def __init__(self, model, model_name, cv_folds=3,
-                 scoring_metric='balanced_accuracy', metric_direction='maximize',
+                 scoring_metric='explained_variance', metric_direction='maximize',
                  random_state=None, cv=None, sampler=None, n_jobs=None):
         """
         Base Model Class for all ML Models
@@ -84,6 +86,7 @@ class RegressionModel(BaseModel, ABC):
                          n_jobs)
         optuna.logging.set_verbosity(optuna.logging.WARNING)
         self.model_type = "Regression"
+        self.cv = KFold(n_splits=cv_folds, shuffle=True, random_state=self.random_state)
 
     def model_evaluation(self, x_test, y_test):
         """

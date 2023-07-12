@@ -128,7 +128,8 @@ class BaseModel:
         Hyper eval for objective function
         Returns: Returns hyper eval for objective function
         """
-        logging.debug("Trial Parameters" + str(self.params))
+        logging.debug("Trial Parameters: " + str(self.params))
+        logging.debug("Trial Metric: " + str(self.scoring_metric))
         try:
             model = copy.deepcopy(self.model).set_params(**self.params)
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
@@ -142,6 +143,7 @@ class BaseModel:
                                             scoring=self.scoring_metric,
                                             cv=self.cv, n_jobs=self.n_jobs).mean()
         logging.debug("Trail Completed")
+        logging.debug("Mean CV Score:" + str(mean_cv_score))
         return mean_cv_score
 
     def fit(self, x_train, y_train, n_trails, timeout, feature_names=None):

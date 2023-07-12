@@ -164,11 +164,21 @@ class ModelJob(Job):
                   '_' + str(self.cv_count) + '.pickle', 'wb') as file:
             pickle.dump(model.model, file)
 
-        metric_list, fpr, tpr, roc_auc, prec, recall, \
-            prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
         fi = self.feature_importance
 
-        return [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
+        if model.model_type == "Regression":
+            metric_list = model.model_evaluation(x_test, y_test)
+            y_train_pred = model.predict(x_train)
+            y_pred = model.predict(x_test)
+            residual_train = y_train - y_train_pred
+            residual_test = y_test - y_pred
+            return_list = ([metric_list, fi], [residual_train, residual_test, y_train_pred, y_pred])
+        else:
+            metric_list, fpr, tpr, roc_auc, prec, recall, \
+                prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
+            return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
+
+        return return_list
 
     def data_prep(self):
         """

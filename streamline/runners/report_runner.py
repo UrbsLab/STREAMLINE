@@ -1,10 +1,9 @@
 import os
+import pickle
 import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS
-from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.gererate_report import ReportJob
 from streamline.utils.runners import runner_fn
 from streamline.utils.cluster import get_cluster
@@ -15,15 +14,13 @@ class ReportRunner:
     Runner Class for collating dataset compare job
     """
 
-    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
-                 exclude=("XCS", "eLCS"),
+    def __init__(self, output_path=None, experiment_name=None, experiment_path=None,
                  training=True, rep_data_path=None, dataset_for_rep=None,
                  run_cluster=False, queue='defq', reserved_memory=4):
         """
         Args:
             output_path: path to output directory
             experiment_name: name of experiment (no spaces)
-            algorithms: list of str of ML models to run
             training: Indicate True or False for whether to generate pdf summary for pipeline \
                       training or followup application analysis to new dataset,default=True
             rep_data_path: path to directory containing replication or hold-out testing datasets \
@@ -49,21 +46,8 @@ class ReportRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
-
-        if algorithms is None:
-            self.algorithms = SUPPORTED_REGRESSION_MODELS
-            if exclude is not None:
-                for algorithm in exclude:
-                    try:
-                        self.algorithms.remove(algorithm)
-                    except Exception:
-                        Exception("Unknown algorithm in exclude: " + str(algorithm))
-            self.exclude = None
-        else:
-            self.algorithms = list()
-            for algorithm in algorithms:
-                self.algorithms.append(is_supported_model(algorithm))
-            self.exclude = exclude
+        self.algorithms = None
+        self.get_algorithms()
 
         # Argument checks
         if not os.path.exists(self.output_path):
@@ -99,6 +83,16 @@ class ReportRunner:
 
             else:
                 job_obj.run()
+
+    def get_algorithms(self):
+        pickle_in = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        for algorithm in alg_info.keys():
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+        self.algorithms = algorithms
+        pickle_in.close()
 
     def get_cluster_params(self):
         cluster_params = [self.output_path, self.experiment_name, None, None, None,

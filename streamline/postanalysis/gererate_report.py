@@ -12,7 +12,7 @@ import pandas as pd
 from fpdf import FPDF
 
 from streamline.modeling.utils import is_supported_model
-from streamline.modeling.utils import REGRESSION_ABBREVIATION, REGRESSION_COLORS, SUPPORTED_REGRESSION_MODELS
+from streamline.modeling.regression_utils import REGRESSION_ABBREVIATION, REGRESSION_COLORS, SUPPORTED_REGRESSION_MODELS
 from streamline.utils.job import Job
 
 

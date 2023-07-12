@@ -5,7 +5,6 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS, is_supported_model
 from streamline.postanalysis.model_replicate import ReplicateJob
 from streamline.utils.runners import num_cores, runner_fn
 from streamline.utils.cluster import get_cluster
@@ -20,8 +19,7 @@ class ReplicationRunner:
     """
 
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
-                 outcome_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
-                 exclude=("XCS", "eLCS"),
+                 outcome_label=None, instance_label=None, match_label=None,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
                  run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
@@ -70,6 +68,7 @@ class ReplicationRunner:
         self.outcome_label = outcome_label
         if not outcome_label:
             self.outcome_label = metadata['Outcome Label']
+        self.outcome_type = metadata['Outcome Type']
         self.instance_label = instance_label
         if not instance_label:
             self.instance_label = metadata['Instance Label']
@@ -85,6 +84,12 @@ class ReplicationRunner:
         self.show_plots = show_plots
         self.scoring_metric = metadata['Primary Metric']
         self.random_state = metadata['Random Seed']
+
+        if self.outcome_type == "Categorical":
+            from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
+
+        elif self.outcome_type == "Continuous":
+            from streamline.modeling.regression_utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
 
         self.run_cluster = run_cluster
         self.queue = queue
@@ -108,22 +113,21 @@ class ReplicationRunner:
             if not os.path.exists(self.output_path + "/" + self.experiment_name + '/logs'):
                 os.mkdir(self.output_path + "/" + self.experiment_name + '/logs')
 
-        if not load_algo:
-            if algorithms is None:
-                self.algorithms = SUPPORTED_REGRESSION_MODELS
-                if exclude is not None:
-                    for algorithm in exclude:
-                        try:
-                            self.algorithms.remove(algorithm)
-                        except Exception:
-                            Exception("Unknown algorithm in exclude: " + str(algorithm))
-            else:
-                self.algorithms = list()
-                for algorithm in algorithms:
-                    self.algorithms.append(is_supported_model(algorithm))
-        else:
-            self.get_algorithms()
-
+        # if not load_algo:
+        #     if algorithms is None:
+        #         self.algorithms = SUPPORTED_MODELS
+        #         if exclude is not None:
+        #             for algorithm in exclude:
+        #                 try:
+        #                     self.algorithms.remove(algorithm)
+        #                 except Exception:
+        #                     Exception("Unknown algorithm in exclude: " + str(algorithm))
+        #     else:
+        #         self.algorithms = list()
+        #         for algorithm in algorithms:
+        #             self.algorithms.append(is_supported_model(algorithm))
+        # else:
+        self.get_algorithms()
         self.save_metadata()
 
     def run(self, run_parallel=False):

@@ -5,8 +5,6 @@ import dask
 import pickle
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS
-from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.runners import runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
@@ -17,7 +15,7 @@ class StatsRunner:
     Runner Class for collating statistics of all the models
     """
 
-    def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"),
+    def __init__(self, output_path, experiment_name,
                  outcome_label="Class", instance_label=None, scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False,
@@ -26,7 +24,6 @@ class StatsRunner:
         Args:
             output_path: path to output directory
             experiment_name: name of experiment (no spaces)
-            algorithms: list of str of ML models to run
             scoring_metric='balanced_accuracy'
             sig_cutoff: significance cutoff, default=0.05
             metric_weight='balanced_accuracy'
@@ -50,19 +47,8 @@ class StatsRunner:
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
         self.instance_label = instance_label
-
-        if algorithms is None:
-            self.algorithms = SUPPORTED_REGRESSION_MODELS
-            if exclude is not None:
-                for algorithm in exclude:
-                    try:
-                        self.algorithms.remove(algorithm)
-                    except Exception:
-                        Exception("Unknown algorithm in exclude: " + str(algorithm))
-        else:
-            self.algorithms = list()
-            for algorithm in algorithms:
-                self.algorithms.append(is_supported_model(algorithm))
+        self.algorithms = None
+        self.get_algorithms()
 
         self.scale_data = scale_data
         self.sig_cutoff = sig_cutoff
@@ -152,6 +138,16 @@ class StatsRunner:
         pickle_out = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'wb')
         pickle.dump(metadata, pickle_out)
         pickle_out.close()
+
+    def get_algorithms(self):
+        pickle_in = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        for algorithm in alg_info.keys():
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+        self.algorithms = algorithms
+        pickle_in.close()
 
     def get_cluster_params(self, full_path, len_cv):
         cluster_params = [full_path, None, self.outcome_label, self.instance_label, self.scoring_metric,

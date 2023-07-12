@@ -10,7 +10,7 @@ from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.runners.model_runner import ModelExperimentRunner
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS_SMALL
+from streamline.modeling.regression_utils import SUPPORTED_REGRESSION_MODELS_SMALL
 
 pytest.skip("Tested Already", allow_module_level=True)
 

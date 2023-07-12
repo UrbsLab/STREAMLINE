@@ -129,13 +129,13 @@ regressor_parameters = {
 
     # GradientBoosting Regressor
     # https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html
-    'GradientBoost': {'learning_rate': [.0001, 0.3], 'n_estimators': [10, 1000],
-                      'min_samples_leaf': [1, 50], 'min_samples_split': [2, 50], 'max_depth': [1, 30]},
+    'Gradient Boost': {'learning_rate': [.0001, 0.3], 'n_estimators': [10, 1000],
+                       'min_samples_leaf': [1, 50], 'min_samples_split': [2, 50], 'max_depth': [1, 30]},
 
     # Epsilon-Support Vector Regression
     # https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html
-    'SVR': {'kernel': ['linear', 'poly', 'rbf'], 'C': [0.1, 1000], 'gamma': ['scale'],
-            'degree': [1, 6]},
+    'Support Vector Regression': {'kernel': ['poly', 'rbf'], 'C': [0.1, 1000], 'gamma': ['scale'],
+                                  'degree': [1, 6]},
 
     # Group Lasso Regressor
     # https://group-lasso.readthedocs.io/en/latest/api_reference.html#

@@ -1,10 +1,9 @@
 import os
+import pickle
 import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS
-from streamline.modeling.utils import is_supported_model
 from streamline.postanalysis.dataset_compare import CompareJob
 from streamline.utils.runners import runner_fn
 from streamline.utils.cluster import get_cluster
@@ -15,7 +14,7 @@ class CompareRunner:
     Runner Class for collating dataset compare job
     """
 
-    def __init__(self, output_path, experiment_name, experiment_path=None, algorithms=None, exclude=("XCS", "eLCS"),
+    def __init__(self, output_path, experiment_name, experiment_path=None,
                  outcome_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False,
                  run_cluster=False, queue='defq', reserved_memory=4):
         """
@@ -32,18 +31,20 @@ class CompareRunner:
         self.instance_label = instance_label
         self.experiment_path = experiment_path
 
-        if algorithms is None:
-            self.algorithms = SUPPORTED_REGRESSION_MODELS
-            if exclude is not None:
-                for algorithm in exclude:
-                    try:
-                        self.algorithms.remove(algorithm)
-                    except Exception:
-                        Exception("Unknown algorithm in exclude: " + str(algorithm))
-        else:
-            self.algorithms = list()
-            for algorithm in algorithms:
-                self.algorithms.append(is_supported_model(algorithm))
+        # if algorithms is None:
+        #     self.algorithms = SUPPORTED_MODELS
+        #     if exclude is not None:
+        #         for algorithm in exclude:
+        #             try:
+        #                 self.algorithms.remove(algorithm)
+        #             except Exception:
+        #                 Exception("Unknown algorithm in exclude: " + str(algorithm))
+        # else:
+        #     self.algorithms = list()
+        #     for algorithm in algorithms:
+        #         self.algorithms.append(is_supported_model(algorithm))
+        self.algorithms = None
+        self.get_algorithms()
 
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
@@ -79,6 +80,16 @@ class CompareRunner:
                 dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]])
             else:
                 job_obj.run()
+
+    def get_algorithms(self):
+        pickle_in = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        for algorithm in alg_info.keys():
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+        self.algorithms = algorithms
+        pickle_in.close()
 
     def get_cluster_params(self):
         cluster_params = [self.output_path, self.experiment_name, None, False, None,

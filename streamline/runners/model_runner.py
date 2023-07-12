@@ -1,3 +1,4 @@
+import logging
 import os
 import glob
 import pickle
@@ -9,10 +10,19 @@ from joblib import Parallel, delayed
 from streamline.modeling.modeljob import ModelJob
 from streamline.utils.runners import model_runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
-from streamline.modeling.utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
-from streamline.modeling.utils import is_supported_model, model_str_to_obj
-from streamline.modeling.utils import REGRESSION_ABBREVIATION as ABBREVIATION
-from streamline.modeling.utils import REGRESSION_COLORS as COLORS
+
+
+class GlobalImport:
+
+    def __enter__(self):
+        return self
+
+    def __call__(self):
+        import inspect
+        self.collector = inspect.getargvalues(inspect.getouterframes(inspect.currentframe())[1].frame).locals
+
+    def __exit__(self, *args):
+        globals().update(self.collector)
 
 
 class ModelExperimentRunner:
@@ -22,6 +32,7 @@ class ModelExperimentRunner:
     """
 
     def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"), outcome_label="Class",
+                 outcome_type=None,
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
@@ -61,7 +72,37 @@ class ModelExperimentRunner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
+        self.outcome_type = outcome_type
         self.instance_label = instance_label
+
+        if outcome_type is None:
+            file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+            metadata = pickle.load(file)
+            self.outcome_type = metadata['Outcome Type']
+            file.close()
+
+        is_supported_model, model_str_to_obj = None, None
+
+        if self.outcome_type == "Categorical":
+            with GlobalImport() as gi:
+                from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
+                from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
+                from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
+                from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
+                gi()
+
+        elif self.outcome_type == "Continuous":
+            if scoring_metric == 'balanced_accuracy':
+                logging.warning("Can't have balanced_accuracy as regression scoring metric, using explained_variance")
+                scoring_metric = 'explained_variance'
+            with GlobalImport() as gi:
+                from streamline.modeling.regression_utils import is_supported_model, model_str_to_obj
+                from streamline.modeling.regression_utils import REGRESSION_ABBREVIATION as ABBREVIATION
+                from streamline.modeling.regression_utils import REGRESSION_COLORS as COLORS
+                from streamline.modeling.regression_utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
+                gi()
+        else:
+            raise Exception("Unknown Outcome Type:" + str(self.outcome_type))
 
         if algorithms == "All":
             algorithms = None
