@@ -21,7 +21,6 @@ class CompareRunner:
         Args:
             output_path: path to output directory
             experiment_name: name of experiment (no spaces)
-            algorithms: list of str of ML models to run
             sig_cutoff: significance cutoff, default=0.05
             show_plots: flag to show plots
         """

@@ -127,6 +127,7 @@ class ReplicationRunner:
         #         for algorithm in algorithms:
         #             self.algorithms.append(is_supported_model(algorithm))
         # else:
+        #     self.get_algorithms()
         self.get_algorithms()
         self.save_metadata()
 
