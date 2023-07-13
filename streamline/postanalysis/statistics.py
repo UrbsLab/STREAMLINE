@@ -11,10 +11,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
 from statistics import mean, median, stdev
+
+from scipy import stats
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 from streamline.utils.job import Job
-from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
-from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
 import seaborn as sns
 
 sns.set_theme()
@@ -60,6 +60,7 @@ class StatsJob(Job):
         self.full_path = full_path
         self.algorithms = algorithms
         self.outcome_label = outcome_label
+        self.outcome_type = "Continuous"
         self.instance_label = instance_label
         self.data_name = self.full_path.split('/')[-1]
         self.experiment_path = '/'.join(self.full_path.split('/')[:-1])
@@ -74,6 +75,12 @@ class StatsJob(Job):
         self.top_features = top_features
         self.sig_cutoff = sig_cutoff
         self.metric_weight = metric_weight
+
+        if self.outcome_type == "Continuous" and (self.scoring_metric == 'balanced_accuracy'
+                                                  or self.metric_weight == 'balanced_accuracy'):
+            self.metric_weight = 'explained_variance'
+            self.scoring_metric = 'explained_variance'
+
         self.show_plots = show_plots
         if self.plot_fi_box:
             self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
@@ -85,8 +92,25 @@ class StatsJob(Job):
                                                     sep=',').columns.values.tolist()  # Get Original Headers
             except Exception:
                 self.original_headers = None
-        self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
-        self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
+
+        partial_path = '/'.join(full_path.split('/')[:-1])
+        logging.warning(partial_path)
+        pickle_in = open(partial_path + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        abbrev = dict()
+        colors = dict()
+        for algorithm in alg_info.keys():
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+                abbrev[algorithm] = alg_info[algorithm][1]
+                colors[algorithm] = alg_info[algorithm][2]
+        self.algorithms = algorithms
+        self.abbrev = abbrev
+        self.colors = colors
+        pickle_in.close()
+        logging.warning(self.colors)
+        logging.warning(self.abbrev)
 
     def run(self):
         self.job_start_time = time.time()  # for tracking phase runtime
@@ -94,8 +118,15 @@ class StatsJob(Job):
 
         # Translate metric name from scikit-learn standard
         # (currently balanced accuracy is hardcoded for use in generating FI plots due to no-skill normalization)
-        metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1_Score',
-                            'recall': 'Sensitivity (Recall)', 'precision': 'Precision (PPV)', 'roc_auc': 'ROC AUC'}
+        if self.outcome_type != "Continuous":
+            metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1_Score',
+                                'recall': 'Sensitivity (Recall)', 'precision': 'Precision (PPV)', 'roc_auc': 'ROC AUC'}
+        else:
+            metric_term_dict = {'max_error': 'Max Error', 'mean_absolute_error': 'Mean Absolute Error',
+                                'mean_squared_error': 'Mean Squared Error',
+                                'median_absolute_error': 'Median Absolute Error',
+                                'explained_variance': 'Explained Variance',
+                                'pearson_correlation': 'Pearson Correlation', 'f1': 'F1 Score'}
 
         self.metric_weight = metric_term_dict[self.metric_weight]
 
@@ -103,16 +134,18 @@ class StatsJob(Job):
         # algorithms in plots, and original ordered feature name list
         self.preparation()
 
-        # Gather and summarize all evaluation metrics for each algorithm across all CVs.
-        # Returns result_table used to plot average ROC and PRC plots and metric_dict
-        # organizing all metrics over all algorithms and CVs.
-        result_table, metric_dict = self.primary_stats()
-
-        # Plot ROC and PRC curves comparing average ML algorithm performance (averaged over all CVs)
-        logging.info('Generating ROC and PRC plots...')
-
-        self.do_plot_roc(result_table)
-        self.do_plot_prc(result_table)
+        if self.outcome_type != "Continuous":
+            # Gather and summarize all evaluation metrics for each algorithm across all CVs.
+            # Returns result_table used to plot average ROC and PRC plots and metric_dict
+            # organizing all metrics over all algorithms and CVs.
+            result_table, metric_dict = self.primary_stats_classification()
+            # Plot ROC and PRC curves comparing average ML algorithm performance (averaged over all CVs)
+            logging.info('Generating ROC and PRC plots...')
+            self.do_plot_roc(result_table)
+            self.do_plot_prc(result_table)
+        else:
+            result_table, metric_dict = self.primary_stats_regression()
+            self.residuals_regression()
 
         # Make list of metric names
         logging.info('Saving Metric Summaries...')
@@ -149,6 +182,175 @@ class StatsJob(Job):
         job_file = open(self.experiment_path + '/jobsCompleted/job_stats_' + self.data_name + '.txt', 'w')
         job_file.write('complete')
         job_file.close()
+
+    def residuals_regression(self):
+        s_res_trains = []  # training residual
+        s_res_tests = []  # testing residual
+        s_y_train_preds = []  # training prediction
+        s_y_test_preds = []  # testing prediction
+        s_y_trains = []  # training label
+        s_y_tests = []  # testing label
+
+        m_trains = []  # slope of training plot
+        b_trains = []  # intercept of training plot
+        m_tests = []  # slope of testing plot
+        b_tests = []  # intercept of testing plot
+        for algorithm in self.algorithms:
+            s_res_train = []
+            s_res_test = []
+            s_y_train_pred = []
+            s_y_test_pred = []
+            s_y_train = []
+            s_y_test = []
+            for cv_count in range(0, self.cv_partitions):
+                result_file = self.full_path + '/model_evaluation/pickled_metrics/' + self.abbrev[algorithm] \
+                              + "_CV_" + str(cv_count) + "_residuals.pickle"
+                file = open(result_file, 'rb')
+                results = pickle.load(file)
+                file.close()
+                logging.warning(len(results))
+                res_train = results[0]
+                res_test = results[1]
+                y_train_pred = results[2]
+                y_test_pred = results[3]
+                y_train = results[4]
+                y_test = results[5]
+
+                s_res_train = np.stack([res_train], axis=0)
+                s_res_test = np.stack([res_test], axis=0)
+                s_y_train_pred = np.stack([y_train_pred], axis=0)
+                s_y_test_pred = np.stack([y_test_pred], axis=0)
+                s_y_train = np.stack([y_train], axis=0)
+                s_y_test = np.stack([y_test], axis=0)
+
+            s_res_train = s_res_train[0]
+            s_res_test = s_res_test[0]
+            s_y_train_pred = s_y_train_pred[0]
+            s_y_test_pred = s_y_test_pred[0]
+            s_y_train = s_y_train[0]
+            s_y_test = s_y_test[0]
+
+            s_res_trains.append(s_res_train)
+            s_res_tests.append(s_res_test)
+            s_y_train_preds.append(y_train_pred)
+            s_y_test_preds.append(y_test_pred)
+            s_y_trains.append(y_train)
+            s_y_tests.append(s_y_test)
+
+            plt.figure()
+            plt.rcdefaults()
+            if not os.path.exists(self.full_path + '/model_evaluation/evalPlots'):
+                os.mkdir(self.full_path + '/model_evaluation/evalPlots')
+
+            m_1, b_1 = np.polyfit(s_y_train_pred, s_y_train, 1)
+            m_2, b_2 = np.polyfit(s_y_test_pred, s_y_test, 1)
+            m_trains.append(m_1)
+            m_tests.append(m_2)
+            b_trains.append(b_1)
+            b_tests.append(b_2)
+
+        train_df = []
+        test_df = []
+        for i in range(len(self.algorithms)):
+            df = pd.DataFrame([s_res_trains[i], [self.algorithms[i]] * len(s_res_trains[i]),
+                               ["Training"] * len(s_res_trains[i])]).transpose()
+            df.columns = ["Residual", "Algorithm", "Type"]
+            train_df.append(df)
+        train_df = pd.concat(train_df).reset_index(drop=True)
+        for i in range(len(self.algorithms)):
+            df = pd.DataFrame(
+                [s_res_tests[i], [self.algorithms[i]] * len(s_res_tests[i]),
+                 ["Testing"] * len(s_res_tests[i])]).transpose()
+            df.columns = ["Residual", "Algorithm", "Type"]
+            test_df.append(df)
+        test_df = pd.concat(test_df).reset_index(drop=True)
+
+        train_df.to_csv(self.full_path + '/model_evaluation/residual_train.csv')
+        train_df = pd.read_csv(self.full_path + '/model_evaluation/residual_train.csv')
+        test_df.to_csv(self.full_path + '/model_evaluation/residual_test.csv')
+        test_df = pd.read_csv(self.full_path + '/model_evaluation/residual_test.csv')
+
+        fig_2, axes_2 = plt.subplots(2, 2, sharey='all', figsize=[20, 15])
+        for i in range(len(self.algorithms)):
+            axes_2[0, 0].scatter(s_y_train_preds[i], s_res_trains[i], alpha=0.4, c=self.colors[self.algorithms[i]],
+                                 label=self.algorithms[i])
+            axes_2[1, 0].scatter(s_y_test_preds[i], s_res_tests[i], alpha=0.4, c=self.colors[self.algorithms[i]])
+
+        axes_2[0, 0].axhline(y=0, color='black', linestyle='-')
+        axes_2[0, 1].axhline(y=0, color='black', linestyle='-')
+        axes_2[1, 0].axhline(y=0, color='black', linestyle='-')
+        sns.violinplot(x='Algorithm', y='Residual', data=train_df, color='b', ax=axes_2[0, 1])
+        sns.violinplot(x='Algorithm', y='Residual', data=test_df, color='r', ax=axes_2[1, 1])
+        axes_2[1, 1].axhline(y=0, color='black', linestyle='-')
+        axes_2[0, 0].title.set_text("Residual vs Predicted Outcome (Training)")
+        axes_2[1, 0].title.set_text("Residual vs Predicted Outcome (Testing)")
+        axes_2[0, 1].title.set_text("Residual Distribution (Training)")
+        axes_2[1, 1].title.set_text("Residual Distribution (Testing)")
+        axes_2[0, 0].set_ylabel('Residual')
+        axes_2[1, 0].set_ylabel('Residual')
+        axes_2[1, 0].set_xlabel('Predicted Outcome')
+        fig_2.legend(loc='upper right')
+        fig_2.savefig(self.full_path + '/model_evaluation/evalPlots/residual_distrib_all_algorithms.png')
+        if self.show_plots:
+            plt.show()
+        else:
+            plt.close('all')
+
+        fig_3, axes_3 = plt.subplots(1, 2, sharey='all', figsize=[20, 10])
+        for i in range(len(self.algorithms)):
+            axes_3[0].scatter(s_y_train_preds[i], s_y_trains[i], alpha=0.3, c=self.colors[self.algorithms[i]])
+            axes_3[1].scatter(s_y_test_preds[i], s_y_tests[i], alpha=0.3, c=self.colors[self.algorithms[i]])
+            axes_3[0].plot(s_y_train_preds[i], m_trains[i] * s_y_train_preds[i] + b_trains[i],
+                           color=self.colors[self.algorithms[i]], label=self.algorithms[i])
+            axes_3[1].plot(s_y_test_preds[i], m_tests[i] * s_y_test_preds[i] + b_tests[i],
+                           color=self.colors[self.algorithms[i]])
+        axes_3[0].title.set_text('Actual Outcome vs. Predicted Outcome (Train)')
+        axes_3[1].title.set_text('Actual Outcome vs. Predicted Outcome (Test)')
+        axes_3[0].set_ylabel('Actual Outcome')
+        axes_3[0].set_xlabel('Predicted Outcome')
+        axes_3[1].set_xlabel('Predicted Outcome')
+        fig_3.legend(loc='upper right')
+        fig_3.savefig(self.full_path + '/model_evaluation/evalPlots/actual_vs_predict_all_algorithms.png')
+        if self.show_plots:
+            plt.show()
+        else:
+            plt.close('all')
+
+        fig_4, axes_4 = plt.subplots(1, 1, figsize=(10, 10))
+        for i in range(len(self.algorithms)):
+            stats.probplot(s_res_trains[i], dist=stats.norm, sparams=(2, 3), plot=plt, fit=False)
+        for i in range(len(self.algorithms)):
+            axes_4.get_lines()[i].set_markerfacecolor(self.colors[self.algorithms[i]])
+            axes_4.get_lines()[i].set_alpha(0.5)
+            axes_4.get_lines()[i].set_color(self.colors[self.algorithms[i]])
+            axes_4.get_lines()[i].set_label(self.algorithms[i])
+        axes_4.title.set_text("Probability Plot of Training Residual")
+        axes_4.set_xlabel("Theoretical Quantiles")
+        axes_4.set_ylabel("Ordered Residual")
+        axes_4.legend(loc='upper right')
+        fig_4.savefig(self.full_path + '/model_evaluation/evalPlots/probability_train_residual_all_algorithms.png')
+        if self.show_plots:
+            plt.show()
+        else:
+            plt.close('all')
+
+        fig_5, axes_5 = plt.subplots(1, 1, figsize=(10, 10))
+        for i in range(len(self.algorithms)):
+            stats.probplot(s_res_tests[i], dist=stats.norm, sparams=(2, 3), plot=plt, fit=False)
+        for i in range(len(self.algorithms)):
+            axes_5.get_lines()[i].set_markerfacecolor(self.colors[self.algorithms[i]])
+            axes_5.get_lines()[i].set_alpha(0.5)
+            axes_5.get_lines()[i].set_color(self.colors[self.algorithms[i]])
+            axes_5.get_lines()[i].set_label(self.algorithms[i])
+        axes_5.title.set_text("Probability Plot of Testing Residual")
+        axes_5.set_xlabel("Theoretical Quantiles")
+        axes_5.set_ylabel("Ordered Residual")
+        axes_5.legend(loc='upper right')
+        fig_5.savefig(self.full_path + '/model_evaluation/evalPlots/probability_test_residual_all_algorithms.png')
+        if self.show_plots:
+            plt.show()
+        else:
+            plt.close('all')
 
     def fi_stats(self, metric_dict):
         # Prepare for feature importance visualizations
@@ -215,7 +417,96 @@ class StatsJob(Job):
         if not os.path.exists(self.full_path + '/model_evaluation/feature_importance/'):
             os.mkdir(self.full_path + '/model_evaluation/feature_importance/')
 
-    def primary_stats(self, master_list=None, rep_data=None):
+    def primary_stats_regression(self):
+        """
+        Combine regression metrics and model feature importance scores across all CV datasets.
+        """
+        result_table = []
+        metric_dict = {}
+        for algorithm in self.algorithms:  # completed for each individual ML modeling algorithm
+            # Define feature importance lists
+            # used to save model feature importance individually for each cv within single summary file
+            # (all original features in dataset prior to feature selection included)
+            fi_all = []
+            # Define evaluation stats variable lists
+            mes = []  # store max error
+            maes = []  # store mean absolute error
+            mses = []  # store mean squared error
+            mdaes = []  # store median absolute error
+            evss = []  # store explained variance (r2)
+            corrs = []  # store Pearson correlation
+            # Gather statistics over all CV partitions
+            for cv_count in range(0, self.cv_partitions):
+                # Unpickle saved metrics from previous phase
+                result_file = self.full_path + '/model_evaluation/pickled_metrics/' \
+                              + self.abbrev[algorithm] + "_CV_" + str(cv_count) + "_metrics.pickle"
+                file = open(result_file, 'rb')
+                results = pickle.load(file)
+                file.close()
+                # Separate pickled results
+                me = results[0][0]
+                mae = results[0][1]
+                mse = results[0][2]
+                mdae = results[0][3]
+                evs = results[0][4]
+                corr = results[0][5]
+                fi = results[1]
+
+                mes.append(me)
+                maes.append(mae)
+                mses.append(mse)
+                mdaes.append(mdae)
+                evss.append(evs)
+                corrs.append(corr)
+                # Format feature importance scores as list
+                # (takes into account that all features are not in each CV partition)
+                temp_list = []
+                j = 0
+                headers = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_' + str(
+                    cv_count) + '_Test.csv').columns.values.tolist()
+                if self.instance_label is not None:
+                    headers.remove(self.instance_label)
+                headers.remove(self.outcome_label)
+                for each in self.original_headers:
+                    if each in headers:  # Check if current feature from original dataset was in the partition
+                        # Deal with features not being in original order (find index of current feature list.index()
+                        f_index = headers.index(each)
+                        temp_list.append(fi[f_index])
+                    else:
+                        temp_list.append(0)
+                    j += 1
+                fi_all.append(temp_list)
+
+            logging.info("Running stats for " + algorithm)
+
+            mean_me = np.mean(mes, axis=0)
+            mean_mae = np.mean(maes, axis=0)
+            mean_mse = np.mean(mses, axis=0)
+            mean_mdae = np.mean(mdaes, axis=0)
+            mean_evs = np.mean(evss, axis=0)
+            mean_corr = np.mean(corrs, axis=0)
+
+            # Export and save all CV metric stats for each individual algorithm
+            results = {'Max Error': mes, 'Mean Absolute Error': maes, 'Mean Squared Error': mses,
+                       'Median Absolute Error': mdaes, 'Explained Variance': evss, 'Pearson Correlation': corrs}
+            dr = pd.DataFrame(results)
+            filepath = self.full_path + '/model_evaluation/' + self.abbrev[algorithm] + "_performance.csv"
+            dr.to_csv(filepath, header=True, index=False)
+            metric_dict[algorithm] = results
+
+            # Save Average FI Stats
+            self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
+
+            result_dict = {'algorithm': algorithm, 'max_error': mean_me, 'mean_absolute_error': mean_mae,
+                           'mean_squared_error': mean_mse, 'median_absolute_error': mean_mdae,
+                           'explained_variance': mean_evs, 'pearson_correlation': mean_corr}
+            result_table.append(result_dict)
+        # Result table comparing average ML algorithm performance.
+        result_table = pd.DataFrame.from_dict(result_table)
+        result_table.set_index('algorithm', inplace=True)
+        return result_table, metric_dict
+
+    def primary_stats_classification(self, master_list=None, rep_data=None):
         """
         Combine classification metrics and model feature importance scores
         as well as ROC and PRC plot data across all CV datasets.

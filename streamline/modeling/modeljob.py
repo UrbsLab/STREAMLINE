@@ -80,12 +80,22 @@ class ModelJob(Job):
         self.job_start_time = time.time()  # for tracking phase runtime
         self.algorithm = model.small_name
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
-        ret = self.run_model(model)
 
-        # Pickle all evaluation metrics for ML model training and evaluation
-        pickle.dump(ret, open(self.full_path
-                              + '/model_evaluation/pickled_metrics/'
-                              + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
+        if model.model_type != "Regression":
+            ret = self.run_model(model)
+
+            # Pickle all evaluation metrics for ML model training and evaluation
+            pickle.dump(ret, open(self.full_path
+                                  + '/model_evaluation/pickled_metrics/'
+                                  + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
+        else:
+            ret, residuals = self.run_model(model)
+            pickle.dump(ret, open(self.full_path
+                                  + '/model_evaluation/pickled_metrics/'
+                                  + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
+            pickle.dump(residuals, open(self.full_path
+                                        + '/model_evaluation/pickled_metrics/'
+                                        + self.algorithm + '_CV_' + str(self.cv_count) + "_residuals.pickle", 'wb'))
 
         # Save runtime of ml algorithm training and evaluation
         self.save_runtime()
@@ -172,7 +182,7 @@ class ModelJob(Job):
             y_pred = model.predict(x_test)
             residual_train = y_train - y_train_pred
             residual_test = y_test - y_pred
-            return_list = ([metric_list, fi], [residual_train, residual_test, y_train_pred, y_pred])
+            return_list = ([metric_list, fi], [residual_train, residual_test, y_train_pred, y_pred, y_train, y_test])
         else:
             metric_list, fpr, tpr, roc_auc, prec, recall, \
                 prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)

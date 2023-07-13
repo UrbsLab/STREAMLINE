@@ -13,14 +13,14 @@ from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, rep_data_path = "./data/DemoDataRegression/", "./data/DemoRepDataRegression/"
 experiment_name = "regression"
 outcome_label = "Cognition_Score"
 instance_label = "Class"
-model_algorithms = ["SVR"]
+model_algorithms = ["LR"]
 
 
 def test_regression():
@@ -58,10 +58,10 @@ def test_regression():
     runner.run(run_parallel=run_parallel)
     del runner
 
-    # stats = StatsRunner(output_path, experiment_name,
-    #                     outcome_label="Cognition_Score", instance_label="Class")
-    # stats.run(run_parallel=run_parallel)
-    # del stats
+    stats = StatsRunner(output_path, experiment_name,
+                        outcome_label="Cognition_Score", instance_label="Class")
+    stats.run(run_parallel=run_parallel)
+    del stats
     #
     # compare = CompareRunner(output_path, experiment_name,
     #                         outcome_label="Cognition_Score", instance_label="Class")

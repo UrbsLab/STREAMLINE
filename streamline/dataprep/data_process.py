@@ -153,40 +153,40 @@ class DataProcess(Job):
 
     def anomaly_detection(self):
         # Make a copy of the original data
-        logging.warning('load')
+        # logging.warning('load')
         imputed_data = copy.deepcopy(self.dataset.data)
-        logging.warning('copy')
+        # logging.warning('copy')
 
         # Perform iterative imputation
         imputer = IterativeImputer(random_state=self.random_state)
         imputed_data[self.quantitative_features] = imputer.fit_transform(imputed_data[self.quantitative_features])
-        logging.warning('Impute')
+        # logging.warning('Impute')
         # Normalize the imputed data
         normalized_imputed_data = (imputed_data[self.quantitative_features] - imputed_data[
             self.quantitative_features].mean()) / imputed_data[self.quantitative_features].std()
-        logging.warning('Normal')
+        # logging.warning('Normal')
 
         # # Isolation Forest on imputed data
         imputed_isolation_forest = IsolationForest(contamination='auto', random_state=self.random_state)
         imputed_isolation_forest.fit(normalized_imputed_data)
         imputed_isolation_scores = imputed_isolation_forest.decision_function(normalized_imputed_data)
-        logging.warning('iso')
+        # logging.warning('iso')
 
         # Local Outlier Factor on imputed data
         imputed_local_outlier_factor = LocalOutlierFactor(n_neighbors=20, contamination='auto')
         imputed_local_outlier_scores = imputed_local_outlier_factor.fit_predict(normalized_imputed_data)
-        logging.warning('outlier')
+        # logging.warning('outlier')
 
         # DBSCAN on imputed data
         imputed_dbscan = DBSCAN(eps=0.5, min_samples=5)
         imputed_dbscan_labels = imputed_dbscan.fit_predict(normalized_imputed_data)
-        logging.warning('dbscan')
+        # logging.warning('dbscan')
 
         # Elliptic Envelope on imputed data
         imputed_elliptic_envelope = EllipticEnvelope()
         imputed_elliptic_envelope.fit(normalized_imputed_data)
         imputed_elliptic_scores = imputed_elliptic_envelope.decision_function(normalized_imputed_data)
-        logging.warning('elliptic')
+        # logging.warning('elliptic')
 
         # Combine the imputed anomaly scores
         imputed_anomaly_scores = {
@@ -195,7 +195,7 @@ class DataProcess(Job):
             'DBSCAN': imputed_dbscan_labels,
             'Elliptic Envelope': imputed_elliptic_scores
         }
-        logging.warning(imputed_anomaly_scores)
+        # logging.debug(imputed_anomaly_scores)
         # Save the imputed anomaly scores to a file
         imputed_anomaly_scores_file = os.path.join(self.experiment_path,
                                                    self.dataset.name, 'imputed_anomaly_scores.csv')
