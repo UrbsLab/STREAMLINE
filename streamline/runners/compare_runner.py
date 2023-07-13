@@ -15,7 +15,8 @@ class CompareRunner:
     """
 
     def __init__(self, output_path, experiment_name, experiment_path=None,
-                 outcome_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False,
+                 outcome_label="Class", outcome_type="Categorical", instance_label=None, sig_cutoff=0.05,
+                 show_plots=False,
                  run_cluster=False, queue='defq', reserved_memory=4):
         """
         Args:
@@ -29,6 +30,7 @@ class CompareRunner:
         self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.experiment_path = experiment_path
+        self.outcome_type = outcome_type
 
         # if algorithms is None:
         #     self.algorithms = SUPPORTED_MODELS
@@ -66,8 +68,9 @@ class CompareRunner:
             if self.run_cluster == "LSFOld":
                 self.submit_lsf_cluster_job()
         else:
-            job_obj = CompareJob(self.output_path, self.experiment_name, None, self.algorithms, None,
-                                 self.outcome_label, self.instance_label, self.sig_cutoff, self.show_plots)
+            job_obj = CompareJob(self.output_path, self.experiment_name, None,
+                                 self.outcome_label, self.outcome_type, self.instance_label, self.sig_cutoff,
+                                 self.show_plots)
             if run_parallel in ["multiprocessing", "True", True]:
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                 # p.start()
@@ -91,8 +94,8 @@ class CompareRunner:
         pickle_in.close()
 
     def get_cluster_params(self):
-        cluster_params = [self.output_path, self.experiment_name, None, False, None,
-                          self.outcome_label, self.instance_label, self.sig_cutoff, self.show_plots]
+        cluster_params = [self.output_path, self.experiment_name, None,
+                          self.outcome_label, self.outcome_type, self.instance_label, self.sig_cutoff, self.show_plots]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 

@@ -16,7 +16,7 @@ class StatsRunner:
     """
 
     def __init__(self, output_path, experiment_name,
-                 outcome_label="Class", instance_label=None, scoring_metric='balanced_accuracy',
+                 outcome_label="Class", outcome_type="Categorical", instance_label=None, scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False,
                  run_cluster=False, queue='defq', reserved_memory=4):
@@ -46,6 +46,7 @@ class StatsRunner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
+        self.outcome_type = outcome_type
         self.instance_label = instance_label
         self.algorithms = None
         self.get_algorithms()
@@ -108,7 +109,8 @@ class StatsRunner:
                 self.submit_lsf_cluster_job(full_path, cv_partitions)
                 continue
 
-            job_obj = StatsJob(full_path, self.algorithms, self.outcome_label, self.instance_label, self.scoring_metric,
+            job_obj = StatsJob(full_path, self.algorithms, self.outcome_label, self.outcome_type, self.instance_label,
+                               self.scoring_metric,
                                cv_partitions, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                                self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
                                self.show_plots)
@@ -150,7 +152,8 @@ class StatsRunner:
         pickle_in.close()
 
     def get_cluster_params(self, full_path, len_cv):
-        cluster_params = [full_path, None, self.outcome_label, self.instance_label, self.scoring_metric,
+        cluster_params = [full_path, None, self.outcome_label, self.outcome_type, self.instance_label,
+                          self.scoring_metric,
                           len_cv, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                           self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
                           self.show_plots]

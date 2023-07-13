@@ -1,4 +1,5 @@
 import os
+import pickle
 import time
 import logging
 import numpy as np
@@ -6,11 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 from streamline.utils.job import Job
-from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
-from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
-from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
-from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
 import seaborn as sns
+
 sns.set_theme()
 
 
@@ -22,9 +20,10 @@ class CompareJob(Job):
     Also compares the best overall model for each target dataset, for each evaluation metric.
     This runs once for the entire pipeline analysis.
     """
-    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
-                 exclude=("XCS", "eLCS"),
-                 outcome_label="Class", instance_label=None, sig_cutoff=0.05, show_plots=False):
+
+    def __init__(self, output_path=None, experiment_name=None, experiment_path=None,
+                 outcome_label="Class", outcome_type="Categorical", instance_label=None, sig_cutoff=0.05,
+                 show_plots=False):
         super().__init__()
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)
         if output_path is not None and experiment_name is not None:
@@ -35,6 +34,7 @@ class CompareJob(Job):
             self.experiment_path = experiment_path
             self.experiment_name = self.experiment_path.split('/')[-1]
             self.output_path = self.experiment_path.split('/')[-2]
+        self.outcome_type = outcome_type
 
         datasets = os.listdir(self.experiment_path)
         remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
@@ -58,22 +58,22 @@ class CompareJob(Job):
         self.instance_label = instance_label
         self.sig_cutoff = sig_cutoff
 
-        if algorithms is None:
-            self.algorithms = SUPPORTED_MODELS
-            if exclude is not None:
-                for algorithm in exclude:
-                    try:
-                        self.algorithms.remove(algorithm)
-                    except Exception:
-                        Exception("Unknown algorithm in exclude: " + str(algorithm))
-        else:
-            self.algorithms = list()
-            for algorithm in algorithms:
-                self.algorithms.append(is_supported_model(algorithm))
+        pickle_in = open(self.output_path + self.experiment_name + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        abbrev = dict()
+        colors = dict()
+        for algorithm in alg_info.keys():
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+                abbrev[algorithm] = alg_info[algorithm][1]
+                colors[algorithm] = alg_info[algorithm][2]
+        self.algorithms = algorithms
+        self.abbrev = abbrev
+        self.colors = colors
+        pickle_in.close()
 
         self.show_plots = show_plots
-        self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
-        self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
         self.metrics = None
 
     def run(self):
@@ -125,17 +125,22 @@ class CompareJob(Job):
         label = ['Statistic', 'P-Value', 'Sig(*)']
         for i in range(1, len(self.datasets) + 1):
             label.append('Median_D' + str(i))
+            label.append('Mean_D' + str(i))
+            label.append('Std_D' + str(i))
 
         for algorithm in self.algorithms:
             kruskal_summary = pd.DataFrame(index=self.metrics, columns=label)
             for metric in self.metrics:
                 temp_array = []
                 med_list = []
+                mean_list = []
+                std_list = []
                 for dataset_path in self.dataset_directory_paths:
                     filename = dataset_path + '/model_evaluation/' + self.abbrev[algorithm] + '_performance.csv'
                     td = pd.read_csv(filename)
                     temp_array.append(td[metric])
-                    med_list.append(td[metric].median())
+                    mean_list.append(td[metric].mean())
+                    std_list.append(td[metric].std())
                 try:  # Run kruskal Wallis
                     result = kruskal(*temp_array)
                 except Exception:
@@ -151,6 +156,10 @@ class CompareJob(Job):
                     kruskal_summary.at[metric, 'Sig(*)'] = str('')
                 for j in range(len(med_list)):
                     kruskal_summary.at[metric, 'Median_D' + str(j + 1)] = str(round(med_list[j], 6))
+                for j in range(len(mean_list)):
+                    kruskal_summary.at[metric, 'Mean_D' + str(j + 1)] = str(round(mean_list[j], 6))
+                for j in range(len(std_list)):
+                    kruskal_summary.at[metric, 'Std_D' + str(j + 1)] = str(round(std_list[j], 6))
             # Export analysis summary to .csv file
             kruskal_summary.to_csv(self.experiment_path + '/DatasetComparisons/KruskalWallis_' + algorithm + '.csv')
 
@@ -166,6 +175,8 @@ class CompareJob(Job):
         label = ['Metric', 'Data1', 'Data2', 'Statistic', 'P-Value', 'Sig(*)']
         for i in range(1, 3):
             label.append('Median_Data' + str(i))
+            label.append('Mean_Data' + str(i))
+            label.append('Std_Data' + str(i))
 
         for algorithm in self.algorithms:
             master_list = self.inter_set_fn(wilcoxon, algorithm)
@@ -186,6 +197,8 @@ class CompareJob(Job):
         label = ['Metric', 'Data1', 'Data2', 'Statistic', 'P-Value', 'Sig(*)']
         for i in range(1, 3):
             label.append('Median_Data' + str(i))
+            label.append('Mean_Data' + str(i))
+            label.append('Std_Data' + str(i))
         for algorithm in self.algorithms:
             # Export test results
             master_list = self.inter_set_fn(mannwhitneyu, algorithm)
@@ -206,6 +219,8 @@ class CompareJob(Job):
         for i in range(1, len(self.datasets) + 1):
             label.append('Best_Alg_D' + str(i))
             label.append('Median_D' + str(i))
+            label.append('Mean_D' + str(i))
+            label.append('Std_D' + str(i))
 
         kruskal_summary = pd.DataFrame(index=self.metrics, columns=label)
         global_data = []
@@ -215,18 +230,27 @@ class CompareJob(Job):
             best_data = []
             for dataset_path in self.dataset_directory_paths:
                 alg_med = []
+                alg_mean = []
+                alg_std = []
                 alg_data = []
                 for algorithm in self.algorithms:
                     filename = dataset_path + '/model_evaluation/' + self.abbrev[algorithm] + '_performance.csv'
                     td = pd.read_csv(filename)
                     alg_med.append(td[metric].median())
+                    alg_mean.append(td[metric].mean())
+                    alg_std.append(td[metric].std())
                     alg_data.append(td[metric])
                 # Find the best algorithm for given metric based on average
                 best_med = max(alg_med)
                 best_index = alg_med.index(best_med)
                 best_alg = self.algorithms[best_index]
+                # best_data.append(alg_data[best_index])
+                best_mean = max(alg_mean)
+                best_index = alg_mean.index(best_mean)
+                best_std = alg_std[best_index]
+                best_alg = self.algorithms[best_index]
                 best_data.append(alg_data[best_index])
-                best_list.append([best_alg, best_med])
+                best_list.append([best_alg, best_med, best_mean, best_std])
             global_data.append([best_data, best_list])
             try:
                 result = kruskal(*best_data)
@@ -243,6 +267,8 @@ class CompareJob(Job):
             for j in range(len(best_list)):
                 kruskal_summary.at[metric, 'Best_Alg_D' + str(j + 1)] = str(best_list[j][0])
                 kruskal_summary.at[metric, 'Median_D' + str(j + 1)] = str(round(best_list[j][1], 6))
+                kruskal_summary.at[metric, 'Mean_D' + str(j + 1)] = str(round(best_list[j][2], 6))
+                kruskal_summary.at[metric, 'Std_D' + str(j + 1)] = str(round(best_list[j][3], 6))
         # Export analysis summary to .csv file
         kruskal_summary.to_csv(self.experiment_path + '/DatasetComparisons/BestCompare_KruskalWallis.csv')
         return global_data
@@ -329,7 +355,11 @@ class CompareJob(Job):
         Generate a boxplot comparing average algorithm performance (for a given target metric)
         across all target datasets to be compared.
         """
-        metric_list = ['ROC AUC', 'PRC AUC']  # Hard coded
+        if self.outcome_type == "Categorical":
+            metric_list = ['ROC AUC', 'PRC AUC']  # Hard coded
+        else:
+            metric_list = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error',
+                           'Explained Variance', 'Pearson Correlation']  # Hard coded
         if not os.path.exists(self.experiment_path + '/DatasetComparisons/dataCompBoxplots'):
             os.mkdir(self.experiment_path + '/DatasetComparisons/dataCompBoxplots')
         for algorithm in self.algorithms:
@@ -377,17 +407,25 @@ class CompareJob(Job):
                     td1 = pd.read_csv(file1)
                     set1 = td1[metric]
                     med1 = td1[metric].median()
+                    mean1 = td1[metric].mean()
+                    std1 = td1[metric].std()
                     # Grab info on second dataset
                     file2 = self.dataset_directory_paths[y] + '/model_evaluation/' + self.abbrev[
                         algorithm] + '_performance.csv'
                     td2 = pd.read_csv(file2)
                     set2 = td2[metric]
                     med2 = td2[metric].median()
+                    mean2 = td1[metric].mean()
+                    std2 = td1[metric].std()
 
                     temp_list = self.temp_summary(set1, set2, x, y, metric, fn)
 
                     temp_list.append(str(round(med1, 6)))
                     temp_list.append(str(round(med2, 6)))
+                    temp_list.append(str(round(mean1, 6)))
+                    temp_list.append(str(round(mean2, 6)))
+                    temp_list.append(str(round(std1, 6)))
+                    temp_list.append(str(round(std2, 6)))
                     master_list.append(temp_list)
         return master_list
 
@@ -396,6 +434,8 @@ class CompareJob(Job):
         for i in range(1, 3):
             label.append('Best_Alg_Data' + str(i))
             label.append('Median_Data' + str(i))
+            label.append('Mean_Data' + str(i))
+            label.append('Std_Data' + str(i))
 
         master_list = list()
         for j in range(len(self.metrics)):
@@ -404,15 +444,23 @@ class CompareJob(Job):
                 for y in range(x + 1, len(self.datasets)):
                     set1 = global_data[j][0][x]
                     med1 = global_data[j][1][x][1]
+                    mean1 = global_data[j][1][x][2]
+                    std1 = global_data[j][1][x][3]
                     set2 = global_data[j][0][y]
                     med2 = global_data[j][1][y][1]
+                    mean2 = global_data[j][1][y][2]
+                    std2 = global_data[j][1][y][3]
 
                     temp_list = self.temp_summary(set1, set2, x, y, metric, fn)
 
                     temp_list.append(global_data[j][1][x][0])
                     temp_list.append(str(round(med1, 6)))
+                    temp_list.append(str(round(mean1, 6)))
+                    temp_list.append(str(round(std1, 6)))
                     temp_list.append(global_data[j][1][y][0])
                     temp_list.append(str(round(med2, 6)))
+                    temp_list.append(str(round(mean2, 6)))
+                    temp_list.append(str(round(std2, 6)))
                     master_list.append(temp_list)
 
         # Export analysis summary to .csv file

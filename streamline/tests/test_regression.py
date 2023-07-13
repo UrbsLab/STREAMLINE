@@ -54,19 +54,19 @@ def test_regression():
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms,
-                                   outcome_label="Cognition_Score", instance_label="Class")
+                                   outcome_label="Cognition_Score", outcome_type="Continuous", instance_label="Class")
     runner.run(run_parallel=run_parallel)
     del runner
 
-    stats = StatsRunner(output_path, experiment_name,
+    stats = StatsRunner(output_path, experiment_name, outcome_type="Continuous",
                         outcome_label="Cognition_Score", instance_label="Class")
     stats.run(run_parallel=run_parallel)
     del stats
-    #
-    # compare = CompareRunner(output_path, experiment_name,
-    #                         outcome_label="Cognition_Score", instance_label="Class")
-    # compare.run(run_parallel=run_parallel)
-    # del compare
+
+    compare = CompareRunner(output_path, experiment_name, outcome_type="Continuous",
+                            outcome_label="Cognition_Score", instance_label="Class")
+    compare.run(run_parallel=run_parallel)
+    del compare
     #
     # report = ReportRunner(output_path, experiment_name)
     # report.run(run_parallel=run_parallel)
