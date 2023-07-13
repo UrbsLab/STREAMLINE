@@ -160,9 +160,9 @@ class ReplicationRunner:
                         continue
 
                     job_obj = ReplicateJob(dataset_filename,
-                                           self.dataset_for_rep, self.full_path, self.outcome_label, self.instance_label,
+                                           self.dataset_for_rep, self.full_path, self.outcome_label,
+                                           self.outcome_type, self.instance_label,
                                            self.match_label, ignore_features=self.ignore_features,
-                                           algorithms=self.algorithms, exclude=None,
                                            cv_partitions=self.cv_partitions,
                                            export_feature_correlations=self.export_feature_correlations,
                                            plot_roc=self.plot_roc, plot_prc=self.plot_prc,

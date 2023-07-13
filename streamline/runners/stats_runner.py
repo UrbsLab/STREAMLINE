@@ -109,7 +109,7 @@ class StatsRunner:
                 self.submit_lsf_cluster_job(full_path, cv_partitions)
                 continue
 
-            job_obj = StatsJob(full_path, self.algorithms, self.outcome_label, self.outcome_type, self.instance_label,
+            job_obj = StatsJob(full_path, self.outcome_label, self.outcome_type, self.instance_label,
                                self.scoring_metric,
                                cv_partitions, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                                self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
@@ -152,7 +152,7 @@ class StatsRunner:
         pickle_in.close()
 
     def get_cluster_params(self, full_path, len_cv):
-        cluster_params = [full_path, None, self.outcome_label, self.outcome_type, self.instance_label,
+        cluster_params = [full_path, self.outcome_label, self.outcome_type, self.instance_label,
                           self.scoring_metric,
                           len_cv, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
                           self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,

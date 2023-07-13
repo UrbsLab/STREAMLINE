@@ -31,8 +31,8 @@ class ReplicateJob(Job):
     This script is run once for each replication dataset in rep_data_path.
     """
 
-    def __init__(self, dataset_filename, dataset_for_rep, full_path, outcome_label, instance_label, match_label,
-                 ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
+    def __init__(self, dataset_filename, dataset_for_rep, full_path, outcome_label, outcome_type, instance_label,
+                 match_label, ignore_features=None, cv_partitions=3,
                  export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
@@ -42,21 +42,25 @@ class ReplicateJob(Job):
 
         self.full_path = full_path
         self.outcome_label = outcome_label
+        self.outcome_type = outcome_type
         self.instance_label = instance_label
         self.match_label = match_label
 
-        if algorithms is None:
-            self.algorithms = SUPPORTED_MODELS
-            if exclude is not None:
-                for algorithm in exclude:
-                    try:
-                        self.algorithms.remove(algorithm)
-                    except Exception:
-                        Exception("Unknown algorithm in exclude: " + str(algorithm))
-        else:
-            self.algorithms = list()
-            for algorithm in algorithms:
-                self.algorithms.append(is_supported_model(algorithm))
+        partial_path = '/'.join(full_path.split('/')[:-1])
+        pickle_in = open(partial_path + '/' + "algInfo.pickle", 'rb')
+        alg_info = pickle.load(pickle_in)
+        algorithms = list()
+        abbrev = dict()
+        colors = dict()
+        for algorithm in alg_info.keys():
+            if alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+                abbrev[algorithm] = alg_info[algorithm][1]
+                colors[algorithm] = alg_info[algorithm][2]
+        self.algorithms = algorithms
+        self.abbrev = abbrev
+        self.colors = colors
+        pickle_in.close()
 
         self.plot_roc = plot_roc
         self.plot_prc = plot_prc
@@ -429,16 +433,20 @@ class ReplicateJob(Job):
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
 
         stats = StatsJob(self.full_path + '/applymodel/' + self.apply_name,
-                         self.algorithms, self.outcome_label, self.instance_label, self.scoring_metric,
+                         self.outcome_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
                          metric_weight='balanced_accuracy', scale_data=self.scale_data,
                          plot_roc=self.plot_roc, plot_prc=self.plot_prc, plot_fi_box=False,
                          plot_metric_boxplots=self.plot_metric_boxplots, show_plots=self.show_plots)
 
-        result_table, metric_dict = stats.primary_stats(master_list, rep_data.data)
+        if self.outcome_type == "Categorical":
+            result_table, metric_dict = stats.primary_stats_classification(master_list, rep_data.data)
+            stats.do_plot_roc(result_table)
+            stats.do_plot_prc(result_table, rep_data.data, True)
+        elif self.outcome_type == "Continuous":
+            result_table, metric_dict = stats.primary_stats_classification(master_list, rep_data.data)
+            # stats.residuals_regression()
 
-        stats.do_plot_roc(result_table)
-        stats.do_plot_prc(result_table, rep_data.data, True)
 
         metrics = list(metric_dict[self.algorithms[0]].keys())
 

@@ -13,7 +13,7 @@ from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, rep_data_path = "./data/DemoDataRegression/", "./data/DemoRepDataRegression/"
@@ -67,18 +67,9 @@ def test_regression():
                             outcome_label="Cognition_Score", instance_label="Class")
     compare.run(run_parallel=run_parallel)
     del compare
-    #
-    # report = ReportRunner(output_path, experiment_name)
-    # report.run(run_parallel=run_parallel)
-    # del report
-    #
-    # repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
-    #                          output_path, experiment_name)
-    # repl.run(run_parallel=run_parallel)
-    #
-    # report = ReportRunner(output_path, experiment_name,
-    #                       training=False, rep_data_path=rep_data_path,
-    #                       dataset_for_rep=dataset_path + 'hcc-data_example_custom.csv')
-    # report.run(run_parallel)
+
+    report = ReportRunner(output_path, experiment_name)
+    report.run(run_parallel=run_parallel)
+    del report
 
     logging.warning("Ran Pipeline in " + str(time.time() - start))

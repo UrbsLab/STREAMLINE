@@ -198,10 +198,11 @@ class DataProcess(Job):
         # logging.debug(imputed_anomaly_scores)
         # Save the imputed anomaly scores to a file
         imputed_anomaly_scores_file = os.path.join(self.experiment_path,
-                                                   self.dataset.name, 'imputed_anomaly_scores.csv')
+                                                   self.dataset.name, 'exploratory/anomaly_detection',
+                                                   'imputed_anomaly_scores.csv')
         pd.DataFrame(imputed_anomaly_scores).to_csv(imputed_anomaly_scores_file, index=False)
 
-        logging.warning("Imputed anomaly detection completed.")
+        logging.info("Imputed anomaly detection completed.")
 
     def run_process(self, top_features=20):
         """
@@ -254,6 +255,8 @@ class DataProcess(Job):
             os.makedirs(self.experiment_path + '/' + self.dataset.name)
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory'):
             os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory')
+        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory/anomaly_detection'):
+            os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory/anomaly_detection')
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name + '/exploratory/initial'):
             os.makedirs(self.experiment_path + '/' + self.dataset.name + '/exploratory/initial')
 

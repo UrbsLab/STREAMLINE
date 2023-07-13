@@ -64,7 +64,7 @@ class ReportRunner:
             if self.run_cluster == "LSFOld":
                 self.submit_lsf_cluster_job()
         else:
-            job_obj = ReportJob(self.output_path, self.experiment_name, None, self.algorithms, None,
+            job_obj = ReportJob(self.output_path, self.experiment_name, None,
                                 self.training, self.train_data_path, self.rep_data_path)
             # running direct because it's faster
             HACK = not run_parallel
@@ -95,7 +95,7 @@ class ReportRunner:
         pickle_in.close()
 
     def get_cluster_params(self):
-        cluster_params = [self.output_path, self.experiment_name, None, None, None,
+        cluster_params = [self.output_path, self.experiment_name, None,
                           self.training, self.train_data_path, self.rep_data_path]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params

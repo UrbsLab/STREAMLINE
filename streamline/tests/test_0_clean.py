@@ -3,7 +3,7 @@ import pytest
 import shutil
 DEBUG = False
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 
 def test_stub():

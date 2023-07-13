@@ -34,7 +34,7 @@ class StatsJob(Job):
     dataset folder (data_path) in Phase 1 (i.e. stats summary completed for all cv datasets).
     """
 
-    def __init__(self, full_path, algorithms, outcome_label, outcome_type, instance_label,
+    def __init__(self, full_path, outcome_label, outcome_type, instance_label,
                  scoring_metric='balanced_accuracy',
                  cv_partitions=5, top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False):
@@ -42,7 +42,6 @@ class StatsJob(Job):
 
         Args:
             full_path:
-            algorithms:
             outcome_label:
             instance_label:
             scoring_metric:
@@ -59,7 +58,6 @@ class StatsJob(Job):
         """
         super().__init__()
         self.full_path = full_path
-        self.algorithms = algorithms
         self.outcome_label = outcome_label
         self.outcome_type = outcome_type
         self.instance_label = instance_label
@@ -93,8 +91,10 @@ class StatsJob(Job):
                                                     sep=',').columns.values.tolist()  # Get Original Headers
             except Exception:
                 self.original_headers = None
-
-        partial_path = '/'.join(full_path.split('/')[:-1])
+        if 'applymodel' not in full_path:
+            partial_path = '/'.join(full_path.split('/')[:-1])
+        else:
+            partial_path = '/'.join(full_path.split('/')[:-3])
         pickle_in = open(partial_path + '/' + "algInfo.pickle", 'rb')
         alg_info = pickle.load(pickle_in)
         algorithms = list()
@@ -117,7 +117,7 @@ class StatsJob(Job):
         # Translate metric name from scikit-learn standard
         # (currently balanced accuracy is hardcoded for use in generating FI plots due to no-skill normalization)
         if self.outcome_type != "Continuous":
-            metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1_Score',
+            metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1 Score',
                                 'recall': 'Sensitivity (Recall)', 'precision': 'Precision (PPV)', 'roc_auc': 'ROC AUC'}
         else:
             metric_term_dict = {'max_error': 'Max Error', 'mean_absolute_error': 'Mean Absolute Error',
@@ -166,7 +166,7 @@ class StatsJob(Job):
             self.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
-        if self.outcome_type == "Categroical":
+        if self.outcome_type == "Categorical":
             ave_or_median = 'Median'
         else:
             ave_or_median = 'Mean'
@@ -186,7 +186,7 @@ class StatsJob(Job):
         job_file.write('complete')
         job_file.close()
 
-    def residuals_regression(self):
+    def residuals_regression(self, result_file=None):
         s_res_trains = []  # training residual
         s_res_tests = []  # testing residual
         s_y_train_preds = []  # training prediction
@@ -206,12 +206,13 @@ class StatsJob(Job):
             s_y_train = []
             s_y_test = []
             for cv_count in range(0, self.cv_partitions):
-                result_file = self.full_path + '/model_evaluation/pickled_metrics/' + self.abbrev[algorithm] \
-                              + "_CV_" + str(cv_count) + "_residuals.pickle"
+                if result_file is None:
+                    result_file = self.full_path + '/model_evaluation/pickled_metrics/' + self.abbrev[algorithm] \
+                                  + "_CV_" + str(cv_count) + "_residuals.pickle"
                 file = open(result_file, 'rb')
                 results = pickle.load(file)
                 file.close()
-                logging.warning(len(results))
+                # logging.warning(len(results))
                 res_train = results[0]
                 res_test = results[1]
                 y_train_pred = results[2]

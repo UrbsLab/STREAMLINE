@@ -12,7 +12,6 @@ import pandas as pd
 from fpdf import FPDF
 
 from streamline.modeling.utils import is_supported_model
-from streamline.modeling.regression_utils import REGRESSION_ABBREVIATION, REGRESSION_COLORS, SUPPORTED_REGRESSION_MODELS
 from streamline.utils.job import Job
 
 
@@ -22,9 +21,8 @@ class ReportJob(Job):
     pipeline results It is run once for the whole pipeline analysis.
     """
 
-    def __init__(self, output_path=None, experiment_name=None, experiment_path=None, algorithms=None,
-                 exclude=("XCS", "eLCS"),
-                 training=True, data_path=None, rep_data_path=None, load_algo=True):
+    def __init__(self, output_path=None, experiment_name=None, experiment_path=None,
+                 training=True, data_path=None, rep_data_path=None):
         super().__init__()
         self.time = None
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)
@@ -72,19 +70,6 @@ class ReportJob(Job):
 
         self.dataset_directory_paths = dataset_directory_paths
 
-        if algorithms is None:
-            self.algorithms = SUPPORTED_REGRESSION_MODELS
-            if exclude is not None:
-                for algorithm in exclude:
-                    try:
-                        self.algorithms.remove(algorithm)
-                    except Exception:
-                        Exception("Unknown algorithm in exclude: " + str(algorithm))
-        else:
-            self.algorithms = list()
-            for algorithm in algorithms:
-                self.algorithms.append(is_supported_model(algorithm))
-
         # Unpickle metadata from previous phase
         file = open(self.experiment_path + '/' + "metadata.pickle", 'rb')
         self.metadata = pickle.load(file)
@@ -95,16 +80,18 @@ class ReportJob(Job):
         file.close()
         # self.metadata = {}
 
-        if load_algo:
-            temp_algo = []
-            for key in self.alg_info:
-                if self.alg_info[key][0]:
-                    temp_algo.append(key)
-            self.algorithms = temp_algo
-
-        self.abbrev = dict((k, REGRESSION_ABBREVIATION[k]) for k in self.algorithms if k in REGRESSION_ABBREVIATION)
-        self.colors = dict((k, REGRESSION_COLORS[k]) for k in self.algorithms if k in REGRESSION_COLORS)
-        self.metrics = None
+        algorithms = list()
+        abbrev = dict()
+        colors = dict()
+        for algorithm in self.alg_info.keys():
+            if self.alg_info[algorithm][0]:
+                algorithms.append(algorithm)
+                abbrev[algorithm] = self.alg_info[algorithm][1]
+                colors[algorithm] = self.alg_info[algorithm][2]
+        self.algorithms = algorithms
+        self.abbrev = abbrev
+        self.colors = colors
+        self.outcome_type = self.metadata['Outcome Type']
 
         self.analysis_report = FPDF('P', 'mm', 'A4')
 
@@ -140,28 +127,30 @@ class ReportJob(Job):
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
         inc = 1
-        targetdata = ars_dic[0:21+inc]  # Data-path to  instance label
-        cv = ars_dic[21+inc:27+inc]  # cv partitions to partition Method
-        match = ars_dic[27+inc:30+inc]  # match label
-        cat_cut = ars_dic[30+inc:33+inc]  # categorical cutoff
-        stat_cut = ars_dic[33+inc:36+inc]  # statistical significance cutoff
-        process = ars_dic[36+inc:51+inc]  # feature missingness cutoff to list of exploratory plots saved
-        general = ars_dic[51+inc:57+inc]  # random seed to run from notebooks
-        process2 = ars_dic[57+inc:66+inc]  # use data scaling to use multivariate imputation
-        featsel = ars_dic[66+inc:93+inc]  # use mutual info to export feature importance plots
-        overwrite = ars_dic[93+inc:96+inc]  # overwrite cv
-        modeling = ars_dic[96+inc:114+inc]  # primary metric to export hyperparameter sweep plots
-        lcs = ars_dic[114+inc:129+inc]
-        stats = ars_dic[129+inc:150+inc]
+        targetdata = ars_dic[0:21 + inc]  # Data-path to  instance label
+        cv = ars_dic[21 + inc:27 + inc]  # cv partitions to partition Method
+        match = ars_dic[27 + inc:30 + inc]  # match label
+        cat_cut = ars_dic[30 + inc:33 + inc]  # categorical cutoff
+        stat_cut = ars_dic[33 + inc:36 + inc]  # statistical significance cutoff
+        process = ars_dic[36 + inc:51 + inc]  # feature missingness cutoff to list of exploratory plots saved
+        general = ars_dic[51 + inc:57 + inc]  # random seed to run from notebooks
+        process2 = ars_dic[57 + inc:66 + inc]  # use data scaling to use multivariate imputation
+        featsel = ars_dic[66 + inc:93 + inc]  # use mutual info to export feature importance plots
+        overwrite = ars_dic[93 + inc:96 + inc]  # overwrite cv
+        modeling = ars_dic[96 + inc:114 + inc]  # primary metric to export hyperparameter sweep plots
+        lcs = ars_dic[114 + inc:129 + inc]
+        stats = ars_dic[129 + inc:150 + inc]
 
         ls2 = ars_dic_2
 
         self.analysis_report.set_font('Times', 'B', 12)
         if self.training:
-            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Data Evaluation Report: ' + str(self.time), ln=2,
+            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Data Evaluation Report: ' + str(self.time),
+                                      ln=2,
                                       border=1, align='L')
         else:
-            self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Replication Data Evaluation Report: ' + str(self.time),
+            self.analysis_report.cell(w=180, h=8,
+                                      txt='STREAMLINE Replication Data Evaluation Report: ' + str(self.time),
                                       ln=2, border=1, align='L')
 
         self.analysis_report.y += 2  # Margin below page header
@@ -191,12 +180,14 @@ class ReportJob(Job):
             for each in self.datasets:
                 list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
                 i += 1
-            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ', border=1, align='L')
+            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ', border=1,
+                                            align='L')
             self.analysis_report.y += 1  # Space below section header
 
             self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.multi_cell(w=180, h=4, txt= list_datasets, border=1, align='L')
-            #self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
+            self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
+            # self.analysis_report.multi_cell(w=180, h=4,
+            # txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
 
         self.analysis_report.y += 2  # Margin below Datasets
 
@@ -240,8 +231,8 @@ class ReportJob(Job):
                                         txt=' ' + list_to_string(targetdata),
                                         border=1, align='L')
 
-        #bottom_of_list = self.analysis_report.y
-        #self.analysis_report.y = bottom_of_list + 2
+        # bottom_of_list = self.analysis_report.y
+        # self.analysis_report.y = bottom_of_list + 2
 
         self.analysis_report.x += 90
         self.analysis_report.y = top_of_list  # 96
@@ -279,8 +270,6 @@ class ReportJob(Job):
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
 
-
-
         """
         try_again = True
         try:
@@ -290,13 +279,12 @@ class ReportJob(Job):
             pass
         if try_again:
             try:  # Running on Google Colab
-                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/info/Pictures/STREAMLINE_LOGO.png', 102, 150,
+                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/info/Pictures/STREAMLINE_LOGO.png', 
+                                           102, 150,
                                            90)
             except Exception:
                 pass
         """
-
-
 
         """
         ls1 = ars_dic[0:87]  # DataPath to OverwriteCVDatasets - filter poor [0:87]
@@ -351,7 +339,8 @@ class ReportJob(Job):
             pass
         if try_again:
             try:  # Running on Google Colab
-                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/info/Pictures/STREAMLINE_LOGO.png', 102, 150,
+                self.analysis_report.image('/content/drive/MyDrive/STREAMLINE/info/Pictures/STREAMLINE_LOGO.png', 
+                                           102, 150,
                                            90)
             except Exception:
                 pass
@@ -446,7 +435,10 @@ class ReportJob(Job):
             # Format
             # data_summary = data_summary.round(3)
             th = self.analysis_report.font_size
-            col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13]  # 91 x space total
+            if self.outcome_type == "Categorical":
+                col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13]  # 91 x space total
+            elif self.outcome_type == "Continuous":
+                col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13]  # 91 x space total
 
             # Print table header first
             row_count = 0
@@ -456,10 +448,16 @@ class ReportJob(Job):
             for row in table1:  # each row
                 # Make header
                 if row_count == 0:
-                    for datum in row:  # Print first row
-                        entry_list = str(datum).split(' ')
-                        self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
-                        col_count += 1
+                    if self.outcome_type == "Categorical":
+                        for datum in row:  # Print first row
+                            entry_list = str(datum).split(' ')
+                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
+                            col_count += 1
+                    elif self.outcome_type == "Continuous" and not (col_count == 7 or col_count == 8):
+                        for datum in row:  # Print first row
+                            entry_list = str(datum).split(' ')
+                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
+                            col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
                     for datum in row:  # Print second row
@@ -475,14 +473,18 @@ class ReportJob(Job):
                 elif row_count == 1:
                     previous_row = row
                     for datum in row:
+                        # logging.warning(row)
+                        # logging.warning(datum)
                         if col_count == 0:
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L",
                                                       fill=True)
                         elif col_count == 6:  # missing percent column
-                            self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)),
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                       border=1, align="L", fill=True)
+                        elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                            pass
                         else:
-                            self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1,
+                            self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
                                                       align="L", fill=True)
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
@@ -493,17 +495,21 @@ class ReportJob(Job):
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1, align="L")
                         elif str(previous_row[col_count]) == str(row[col_count]):  # Value unchanged
                             if col_count == 6:  # missing percent column
-                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)),
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                           border=1, align="L")
+                            elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                                pass
                             else:
-                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))),
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                           border=1, align="L")
                         else:
                             if col_count == 6:  # missing percent column
-                                self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)),
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                           border=1, align="L", fill=True)
+                            elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                                pass
                             else:
-                                self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))),
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                           border=1, align="L", fill=True)
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
@@ -517,10 +523,10 @@ class ReportJob(Job):
                                               fill=True)
                 else:
                     if col_count == 6:  # missing percent column
-                        self.analysis_report.cell(col_width_list[col_count], th, str(round(float(datum), 4)), border=1,
+                        self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
                                                   align="L", fill=True)
                     else:
-                        self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1,
+                        self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
                                                   align="L", fill=True)
                 col_count += 1
 
@@ -530,7 +536,8 @@ class ReportJob(Job):
             self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
             self.analysis_report.set_font('Times', '', 7)
             self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0, align="L")
+            self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0,
+                                      align="L")
             self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * E1 - Add missingness features', 0, align="L")
             self.analysis_report.ln(th)  # critical
@@ -608,6 +615,11 @@ class ReportJob(Job):
             self.analysis_report.set_font('Times', '', 8)
             self.analysis_report.multi_cell(w=60, h=4, txt=' ' + list_to_string(info_ls), border=1, align='L')
             """
+            if self.outcome_type == "Continuous":
+                if self.training:
+                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
+                                               + '/model_evaluation/evalPlots/'
+                                               + 'residual_distrib_all_algorithms.png', 1, 120, 200, 170)
 
             # Report Best Algorithms by metric
             if self.training:
@@ -617,88 +629,179 @@ class ReportJob(Job):
                 summary_performance = pd.read_csv(
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         m] + "/model_evaluation/Summary_performance_mean.csv")
-            summary_performance['ROC AUC'] = summary_performance['ROC AUC'].astype(float)
-            highest_roc = summary_performance['ROC AUC'].max()
-            algorithm = summary_performance[summary_performance['ROC AUC'] == highest_roc].index.values
-            best_alg_roc = summary_performance.iloc[algorithm, 0]
 
-            summary_performance['Balanced Accuracy'] = summary_performance['Balanced Accuracy'].astype(float)
-            highest_ba = summary_performance['Balanced Accuracy'].max()
-            algorithm = summary_performance[summary_performance['Balanced Accuracy'] == highest_ba].index.values
-            best_alg_ba = summary_performance.iloc[algorithm, 0]
+            if self.outcome_type == "Categorical":
+                summary_performance['ROC AUC'] = summary_performance['ROC AUC'].astype(float)
+                highest_roc = summary_performance['ROC AUC'].max()
+                algorithm = summary_performance[summary_performance['ROC AUC'] == highest_roc].index.values
+                best_alg_roc = summary_performance.iloc[algorithm, 0]
 
-            summary_performance['F1 Score'] = summary_performance['F1 Score'].astype(float)
-            highest_f1 = summary_performance['F1 Score'].max()
-            algorithm = summary_performance[summary_performance['F1 Score'] == highest_f1].index.values
-            best_alg_f1 = summary_performance.iloc[algorithm, 0]
+                summary_performance['Balanced Accuracy'] = summary_performance['Balanced Accuracy'].astype(float)
+                highest_ba = summary_performance['Balanced Accuracy'].max()
+                algorithm = summary_performance[summary_performance['Balanced Accuracy'] == highest_ba].index.values
+                best_alg_ba = summary_performance.iloc[algorithm, 0]
 
-            summary_performance['PRC AUC'] = summary_performance['PRC AUC'].astype(float)
-            highest_prc = summary_performance['PRC AUC'].max()
-            algorithm = summary_performance[summary_performance['PRC AUC'] == highest_prc].index.values
-            best_alg_prc = summary_performance.iloc[algorithm, 0]
+                summary_performance['F1 Score'] = summary_performance['F1 Score'].astype(float)
+                highest_f1 = summary_performance['F1 Score'].max()
+                algorithm = summary_performance[summary_performance['F1 Score'] == highest_f1].index.values
+                best_alg_f1 = summary_performance.iloc[algorithm, 0]
 
-            summary_performance['PRC APS'] = summary_performance['PRC APS'].astype(float)
-            highest_aps = summary_performance['PRC APS'].max()
-            algorithm = summary_performance[summary_performance['PRC APS'] == highest_aps].index.values
-            best_alg_aps = summary_performance.iloc[algorithm, 0]
+                summary_performance['PRC AUC'] = summary_performance['PRC AUC'].astype(float)
+                highest_prc = summary_performance['PRC AUC'].max()
+                algorithm = summary_performance[summary_performance['PRC AUC'] == highest_prc].index.values
+                best_alg_prc = summary_performance.iloc[algorithm, 0]
 
-            self.analysis_report.x = 1
-            self.analysis_report.y = 85
-            self.analysis_report.set_font('Times', 'B', 8)
-            self.analysis_report.multi_cell(w=80, h=4, txt='Top ML Algorithm Results (Averaged Over CV Runs):',
-                                            border=1,
-                                            align='L')
-            self.analysis_report.set_font('Times', '', 8)
+                summary_performance['PRC APS'] = summary_performance['PRC APS'].astype(float)
+                highest_aps = summary_performance['PRC APS'].max()
+                algorithm = summary_performance[summary_performance['PRC APS'] == highest_aps].index.values
+                best_alg_aps = summary_performance.iloc[algorithm, 0]
 
-            if len(best_alg_roc.values) > 1:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (ROC_AUC): " + str(
-                                                    best_alg_roc.values[0]) + ' (TIE) = ' + str(
-                                                    "{:.3f}".format(highest_roc)), border=1, align='L')
-            else:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (ROC_AUC): " + str(best_alg_roc.values[0]) + ' = ' + str(
-                                                    "{:.3f}".format(highest_roc)), border=1, align='L')
+                self.analysis_report.x = 1
+                self.analysis_report.y = 85
+                self.analysis_report.set_font('Times', 'B', 8)
+                self.analysis_report.multi_cell(w=80, h=4, txt='Top ML Algorithm Results (Averaged Over CV Runs):',
+                                                border=1,
+                                                align='L')
+                self.analysis_report.set_font('Times', '', 8)
 
-            if len(best_alg_ba.values) > 1:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (Balanced Acc.): " + str(
-                                                    best_alg_ba.values[0]) + ' (TIE) = ' + str(
-                                                    "{:.3f}".format(highest_ba)), border=1, align='L')
-            else:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (Balanced Acc.): " + str(best_alg_ba.values[0]) + ' = ' + str(
-                                                    "{:.3f}".format(highest_ba)), border=1, align='L')
+                if len(best_alg_roc.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (ROC_AUC): " + str(
+                                                        best_alg_roc.values[0]) + ' (TIE) = ' + str(
+                                                        "{:.3f}".format(highest_roc)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (ROC_AUC): " + str(best_alg_roc.values[0]) + ' = ' + str(
+                                                        "{:.3f}".format(highest_roc)), border=1, align='L')
 
-            if len(best_alg_f1.values) > 1:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (F1 Score): " + str(
-                                                    best_alg_f1.values[0]) + ' (TIE) = ' + str(
-                                                    "{:.3f}".format(highest_f1)), border=1, align='L')
-            else:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (F1 Score): " + str(best_alg_f1.values[0]) + ' = ' + str(
-                                                    "{:.3f}".format(highest_f1)), border=1, align='L')
+                if len(best_alg_ba.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (Balanced Acc.): " + str(
+                                                        best_alg_ba.values[0]) + ' (TIE) = ' + str(
+                                                        "{:.3f}".format(highest_ba)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (Balanced Acc.): " + str(
+                                                        best_alg_ba.values[0]) + ' = ' + str(
+                                                        "{:.3f}".format(highest_ba)), border=1, align='L')
 
-            if len(best_alg_prc.values) > 1:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (PRC AUC): " + str(
-                                                    best_alg_prc.values[0]) + ' (TIE) = ' + str(
-                                                    "{:.3f}".format(highest_prc)), border=1, align='L')
-            else:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (PRC AUC): " + str(best_alg_prc.values[0]) + ' = ' + str(
-                                                    "{:.3f}".format(highest_prc)), border=1, align='L')
+                if len(best_alg_f1.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (F1 Score): " + str(
+                                                        best_alg_f1.values[0]) + ' (TIE) = ' + str(
+                                                        "{:.3f}".format(highest_f1)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (F1 Score): " + str(best_alg_f1.values[0]) + ' = ' + str(
+                                                        "{:.3f}".format(highest_f1)), border=1, align='L')
 
-            if len(best_alg_aps.values) > 1:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (PRC APS): " + str(
-                                                    best_alg_aps.values[0]) + ' (TIE) = ' + str(
-                                                    "{:.3f}".format(highest_aps)), border=1, align='L')
-            else:
-                self.analysis_report.multi_cell(w=80, h=4,
-                                                txt="Best (PRC APS): " + str(best_alg_aps.values[0]) + ' = ' + str(
-                                                    "{:.3f}".format(highest_aps)), border=1, align='L')
+                if len(best_alg_prc.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (PRC AUC): " + str(
+                                                        best_alg_prc.values[0]) + ' (TIE) = ' + str(
+                                                        "{:.3f}".format(highest_prc)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (PRC AUC): " + str(best_alg_prc.values[0]) + ' = ' + str(
+                                                        "{:.3f}".format(highest_prc)), border=1, align='L')
+
+                if len(best_alg_aps.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (PRC APS): " + str(
+                                                        best_alg_aps.values[0]) + ' (TIE) = ' + str(
+                                                        "{:.3f}".format(highest_aps)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (PRC APS): " + str(best_alg_aps.values[0]) + ' = ' + str(
+                                                        "{:.3f}".format(highest_aps)), border=1, align='L')
+            elif self.outcome_type == "Continuous":
+                summary_performance['Max Error'] = summary_performance['Max Error'].astype(float)
+                highest_ME = summary_performance['Max Error'].min()
+                algorithm = summary_performance[summary_performance['Max Error'] == highest_ME].index.values
+                best_alg_ME = summary_performance.iloc[algorithm, 0]
+
+                summary_performance['Mean Absolute Error'] = summary_performance['Mean Absolute Error'].astype(float)
+                highest_MAE = summary_performance['Mean Absolute Error'].min()
+                algorithm = summary_performance[summary_performance['Mean Absolute Error'] == highest_MAE].index.values
+                best_alg_MAE = summary_performance.iloc[algorithm, 0]
+
+                summary_performance['Mean Squared Error'] = summary_performance['Mean Squared Error'].astype(float)
+                highest_MSE = summary_performance['Mean Squared Error'].min()
+                algorithm = summary_performance[summary_performance['Mean Squared Error'] == highest_MSE].index.values
+                best_alg_MSE = summary_performance.iloc[algorithm, 0]
+
+                summary_performance['Explained Variance'] = summary_performance['Explained Variance'].astype(float)
+                highest_R2 = summary_performance['Explained Variance'].max()
+                algorithm = summary_performance[summary_performance['Explained Variance'] == highest_R2].index.values
+                best_alg_R2 = summary_performance.iloc[algorithm, 0]
+
+                summary_performance['Median Absolute Error'] = summary_performance['Median Absolute Error'].astype(
+                    float)
+                highest_MDAE = summary_performance['Median Absolute Error'].min()
+                algorithm = summary_performance[
+                    summary_performance['Median Absolute Error'] == highest_MDAE].index.values
+                best_alg_MDAE = summary_performance.iloc[algorithm, 0]
+
+                summary_performance['Pearson Correlation'] = summary_performance['Pearson Correlation'].astype(float)
+                highest_PC = summary_performance['Pearson Correlation'].min()
+                algorithm = summary_performance[summary_performance['Pearson Correlation'] == highest_PC].index.values
+                best_alg_PC = summary_performance.iloc[algorithm, 0]
+
+                self.analysis_report.x = 1
+                self.analysis_report.y = 85
+                self.analysis_report.set_font('Times', 'B', 8)
+                self.analysis_report.multi_cell(w=80, h=4, txt='Top ML Algorithm Results (Averaged Over CV Runs):',
+                                                border=1,
+                                                align='L')
+                self.analysis_report.set_font('Times', '', 8)
+
+                if len(best_alg_ME.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (Max Error): " + str(
+                                                        best_alg_ME.values[0]) + ' (TIE) = ' + str(
+                                                        "{:.3f}".format(highest_ME)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4,
+                                                    txt="Best (Max Error): " + str(best_alg_ME.values[0]) + ' = ' + str(
+                                                        "{:.3f}".format(highest_ME)), border=1, align='L')
+
+                if len(best_alg_MAE.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Mean Absolute Error): " + str(
+                        best_alg_MAE.values[0]) + ' (TIE) = ' + str("{:.3f}".format(highest_MAE)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Mean Absolute Error): " + str(
+                        best_alg_MAE.values[0]) + ' = ' + str("{:.3f}".format(highest_MAE)), border=1, align='L')
+
+                if len(best_alg_MSE.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Mean Squared Error): " + str(
+                        best_alg_MSE.values[0]) + ' (TIE) = ' + str("{:.3f}".format(highest_MSE)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Mean Squared Error): " + str(
+                        best_alg_MSE.values[0]) + ' = ' + str("{:.3f}".format(highest_MSE)), border=1, align='L')
+
+                if len(best_alg_R2.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Explained Variance): " + str(
+                        best_alg_R2.values[0]) + ' (TIE) = ' + str("{:.3f}".format(highest_R2)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Explained Variance): " + str(
+                        best_alg_R2.values[0]) + ' = ' + str("{:.3f}".format(highest_R2)), border=1, align='L')
+
+                if len(best_alg_MDAE.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Median Absolute Error): " + str(
+                        best_alg_MDAE.values[0]) + ' (TIE) = ' + str("{:.3f}".format(highest_MDAE)), border=1,
+                                                    align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Median Absolute Error): " + str(
+                        best_alg_MDAE.values[0]) + ' = ' + str("{:.3f}".format(highest_MDAE)), border=1, align='L')
+
+                if len(best_alg_PC.values) > 1:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Pearson Correlation): " + str(
+                        best_alg_PC.values[0]) + ' (TIE) = ' + str("{:.3f}".format(highest_PC)), border=1, align='L')
+                else:
+                    self.analysis_report.multi_cell(w=80, h=4, txt="Best (Pearson Correlation): " + str(
+                        best_alg_PC.values[0]) + ' = ' + str("{:.3f}".format(highest_PC)), border=1, align='L')
+                self.analysis_report.set_font('Times', 'B', 10)
+                self.footer()
 
             # self.analysis_report.multi_cell(
             #     w=80, h=4,
@@ -718,52 +821,79 @@ class ReportJob(Job):
             #         + str(best_alg_aps.values) + ' = '
             #         + str("{:.3f}".format(highest_aps)), border=1, align='L')
 
-            self.analysis_report.set_font('Times', 'B', 10)
-            # ROC
-            # -------------------------------
-            self.analysis_report.x = 1
-            self.analysis_report.y = 112
-            self.analysis_report.cell(10, 4, 'ROC', 1, align="L")
-            if self.training:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_ROC.png', 4, 118,
-                    120)
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124,
-                    118,
-                    82, 85)
-            else:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/model_evaluation/Summary_ROC.png',
-                    4, 118, 120)
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
+            if self.outcome_type == "Categorical":
 
-            # PRC-------------------------------
-            self.analysis_report.x = 1
-            self.analysis_report.y = 200
-            self.analysis_report.cell(10, 4, 'PRC', 1, align="L")
-            if self.training:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_PRC.png', 4, 206,
-                    133)  # wider to account for more text
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138,
-                    205,
-                    68, 80)
-            else:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/model_evaluation/Summary_PRC.png',
-                    4, 206, 133)  # wider to account for more text
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
-            self.footer()
+                self.analysis_report.set_font('Times', 'B', 10)
+                # ROC
+                # -------------------------------
+                self.analysis_report.x = 1
+                self.analysis_report.y = 112
+                self.analysis_report.cell(10, 4, 'ROC', 1, align="L")
+                if self.training:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_ROC.png', 4, 118,
+                        120)
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124,
+                        118,
+                        82, 85)
+                else:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                            m] + '/model_evaluation/Summary_ROC.png',
+                        4, 118, 120)
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
+
+                # PRC-------------------------------
+                self.analysis_report.x = 1
+                self.analysis_report.y = 200
+                self.analysis_report.cell(10, 4, 'PRC', 1, align="L")
+                if self.training:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_PRC.png', 4, 206,
+                        133)  # wider to account for more text
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138,
+                        205,
+                        68, 80)
+                else:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                            m] + '/model_evaluation/Summary_PRC.png',
+                        4, 206, 133)  # wider to account for more text
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
+                self.footer()
+            elif self.outcome_type == "Continuous":
+                self.analysis_report.set_margins(left=1, top=1, right=1, )
+                self.analysis_report.add_page()
+                self.analysis_report.set_font('Times', 'B', 12)
+                self.analysis_report.cell(w=0, h=8,
+                                          txt="Dataset and Model Prediction Summary:  D"
+                                              + str(m + 1) + " = " + self.datasets[m],
+                                          border=1, align="L", ln=2)
+
+                if self.training:
+                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
+                                               + '/model_evaluation/evalPlots/'
+                                               + 'actual_vs_predict_all_algorithms.png', 1, 10, 200, 110)
+                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
+                                               + '/model_evaluation/evalPlots/'
+                                               + 'probability_train_residual_all_algorithms.png', 1, 130,
+                                               100, 90)
+                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
+                                               + '/model_evaluation/evalPlots/'
+                                               + 'probability_test_residual_all_algorithms.png',
+                                               110, 130,
+                                               100, 90)
+                    # self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
+                    #                            + '/model_evaluation/residualPlot/'
+                    #                            + 'actual_vs_predict_all_algorithms.png', 1, 1, 110, 60)
 
         # NEXT PAGE(S) - Average Model Prediction Statistics
         # --------------------------------------------------------------------------------------
@@ -823,6 +953,7 @@ class ReportJob(Job):
 
         # NEXT PAGE - Create Dataset Boxplot Comparison Page
         # ---------------------------------------
+
         if self.training:
             logging.info("Publishing Dataset Comparison Boxplots")
             self.analysis_report.add_page()
@@ -831,16 +962,41 @@ class ReportJob(Job):
                                       ln=2)
             self.analysis_report.set_font(family='times', size=9)
             if len(self.datasets) > 1:
-                self.analysis_report.image(
-                    self.experiment_path + '/DatasetComparisons/dataCompBoxplots/' + 'DataCompareAllModels_ROC AUC.png',
-                    1,
-                    12,
-                    208, 130)  # Images adjusted to fit a width of 100 and length of 135
-                self.analysis_report.image(
-                    self.experiment_path + '/DatasetComparisons/dataCompBoxplots/' + 'DataCompareAllModels_PRC AUC.png',
-                    1,
-                    150,
-                    208, 130)  # Images adjusted to fit a width of 100 and length of 135
+                if self.outcome_type == "Categorical":
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_ROC AUC.png',
+                        1, 12, 208, 130)  # Images adjusted to fit a width of 100 and length of 135
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_PRC AUC.png',
+                        1, 150, 208, 130)  # Images adjusted to fit a width of 100 and length of 135
+                elif self.outcome_type == "Continuous":
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_Max Error.png',
+                        15, 12, 90, 80)  # Images adjusted to fit a width of 100 and length of 135
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_Mean Absolute Error.png',
+                        115, 12, 90, 80)  # Images adjusted to fit a width of 100 and length of 135
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_Mean Squared Error.png',
+                        15, 102, 90, 80)  # Images adjusted to fit a width of 100 and length of 135
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_Median Absolute Error.png',
+                        115, 102, 90, 80)  # Images adjusted to fit a width of 100 and length of 135
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_Explained Variance.png',
+                        15, 192, 90, 80)  # Images adjusted to fit a width of 100 and length of 135
+                    self.analysis_report.image(
+                        self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
+                        + 'DataCompareAllModels_Pearson Correlation.png',
+                        115, 192, 90, 80)  # Images adjusted to fit a width of 100 and length of 135
+
             self.footer()
 
         # NEXT PAGE(S) -Create Best Kruskall Wallis Dataset Comparison Page
@@ -886,8 +1042,12 @@ class ReportJob(Job):
 
             if success:
                 # Process
-                # for i in range(len(self.datasets)):
-                #    kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Std_D'+str(i+1),1)
+                for i in range(len(self.datasets)):
+                    kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Std_D' + str(i + 1), axis=1)
+                    if self.outcome_type == "Categorical":
+                        kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Mean_D' + str(i + 1), axis=1)
+                    elif self.outcome_type == "Continuous":
+                        kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Median_D' + str(i + 1), axis=1)
                 kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Statistic', axis=1)
                 kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Sig(*)', axis=1)
 
@@ -1102,7 +1262,7 @@ class ReportJob(Job):
             self.analysis_report.cell(180, 4,
                                       # 'WARNING: Univariate analysis failed from scipy package error. To fix: pip '
                                       # 'install --upgrade scipy',
-                                      str(e),
+                                      str("Univariate Analysis wasn't able to run"),
                                       1, align="L")
         self.footer()
 
@@ -1142,9 +1302,14 @@ class ReportJob(Job):
                 stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_mean.csv', sep=',', index_col=0)
             # Make list of top values for each metric
-            metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
-                                'Precision (PPV)', 'TP', 'TN', 'FP', 'FN', 'NPV', 'LR+', 'LR-', 'ROC AUC', 'PRC AUC',
-                                'PRC APS']
+            if self.outcome_type == "Categorical":
+                metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
+                                    'Precision (PPV)', 'TP', 'TN', 'FP', 'FN', 'NPV', 'LR+', 'LR-', 'ROC AUC', 'PRC AUC',
+                                    'PRC APS']
+            elif self.outcome_type == "Continuous":
+                metric_name_list = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error',
+                                    'Explained Variance', 'Pearson Correlation']
+
             best_metric_list = []
             if self.training:
                 ds2 = pd.read_csv(
@@ -1193,9 +1358,15 @@ class ReportJob(Job):
                 stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_median.csv', sep=',', index_col=0)
             # Make list of top values for each metric
-            metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
-                                'Precision (PPV)', 'TP', 'TN', 'FP', 'FN', 'NPV', 'LR+', 'LR-', 'ROC AUC', 'PRC AUC',
-                                'PRC APS']
+            if self.outcome_type == "Categorical":
+                metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
+                                    'Precision (PPV)', 'TP', 'TN', 'FP', 'FN', 'NPV', 'LR+', 'LR-', 'ROC AUC',
+                                    'PRC AUC',
+                                    'PRC APS']
+            elif self.outcome_type == "Continuous":
+                metric_name_list = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error',
+                                    'Explained Variance', 'Pearson Correlation']
+
             best_metric_list = []
             if self.training:
                 ds2 = pd.read_csv(
@@ -1260,7 +1431,12 @@ class ReportJob(Job):
         self.footer()
 
     def format_fn(self, stats_ds, best_metric_list, metric_name_list, ds2):
-        low_val_better = ['FP', 'FN', 'LR-']
+        if self.outcome_type == "Categorical":
+            low_val_better = ['FP', 'FN', 'LR-']
+            col_width_list = [32, 11, 11, 8, 12, 12, 10, 15, 15, 15, 15, 8, 9, 9, 8, 8, 8]
+        elif self.outcome_type == "Continuous":
+            low_val_better = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error']
+            col_width_list = [32, 29, 29, 29, 29, 29, 29]
         for metric in metric_name_list:
             if metric in low_val_better:
                 ds2[metric] = ds2[metric].astype(float).round(3)
@@ -1276,7 +1452,6 @@ class ReportJob(Job):
         stats_ds = pd.concat([stats_ds.columns.to_frame().T, stats_ds])
         stats_ds.columns = range(len(stats_ds.columns))
         th = self.analysis_report.font_size
-        col_width_list = [32, 11, 11, 8, 12, 12, 10, 15, 15, 15, 15, 8, 9, 9, 8, 8, 8]
         table1 = stats_ds.iloc[:, :18]
         table1 = table1.to_numpy()
 
