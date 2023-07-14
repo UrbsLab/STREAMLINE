@@ -20,6 +20,9 @@ from streamline.utils.dataset import Dataset
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis, f_oneway, spearmanr
 import seaborn as sns
+import warnings
+warnings.filterwarnings(action='ignore', category=UserWarning)
+warnings.filterwarnings(action='ignore', category=RuntimeWarning)
 
 sns.set_theme()
 

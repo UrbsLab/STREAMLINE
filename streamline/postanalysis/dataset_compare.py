@@ -58,7 +58,7 @@ class CompareJob(Job):
         self.instance_label = instance_label
         self.sig_cutoff = sig_cutoff
 
-        pickle_in = open(self.output_path + self.experiment_name + '/' + "algInfo.pickle", 'rb')
+        pickle_in = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'rb')
         alg_info = pickle.load(pickle_in)
         algorithms = list()
         abbrev = dict()

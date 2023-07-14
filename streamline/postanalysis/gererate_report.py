@@ -486,7 +486,7 @@ class ReportJob(Job):
                         elif col_count == 6:  # missing percent column
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                       border=1, align="L", fill=True)
-                        elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                        elif self.outcome_type == "Continuous" and (col_count == 7 or col_count == 8):
                             pass
                         else:
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,

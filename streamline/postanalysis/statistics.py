@@ -116,10 +116,10 @@ class StatsJob(Job):
 
         # Translate metric name from scikit-learn standard
         # (currently balanced accuracy is hardcoded for use in generating FI plots due to no-skill normalization)
-        if self.outcome_type != "Continuous":
+        if self.outcome_type == "Categorical":
             metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1 Score',
                                 'recall': 'Sensitivity (Recall)', 'precision': 'Precision (PPV)', 'roc_auc': 'ROC AUC'}
-        else:
+        elif self.outcome_type == "Continuous":
             metric_term_dict = {'max_error': 'Max Error', 'mean_absolute_error': 'Mean Absolute Error',
                                 'mean_squared_error': 'Mean Squared Error',
                                 'median_absolute_error': 'Median Absolute Error',
