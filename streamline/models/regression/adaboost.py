@@ -19,9 +19,11 @@ class SVR(RegressionModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        self.params = {'n_estimators': [10, 1000], 'learning_rate': [.0001, 0.3],
-                       'loss': ['linear', 'square', 'exponential']}
-
+        self.params = {'n_estimators': trial.suggest_int('n_estimators', self.param_grid['n_estimators'][0],
+                                                         self.param_grid['n_estimators'][1]),
+                       'learning_rate': trial.suggest_float('learning_rate', self.param_grid['learning_rate'][0],
+                                                            self.param_grid['learning_rate'][1]),
+                       'loss': trial.suggest_categorical('loss', self.param_grid['loss'])}
 
         mean_cv_score = self.hyper_eval()
         return mean_cv_score

@@ -20,8 +20,16 @@ class SVR(RegressionModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        self.params = {'learning_rate': [.0001, 0.3], 'n_estimators': [10, 1000],
-                       'min_samples_leaf': [1, 50], 'min_samples_split': [2, 50], 'max_depth': [1, 30], }
+        self.params = {'learning_rate': trial.suggest_float('learning_rate', self.param_grid['learning_rate'][0],
+                                                            self.param_grid['learning_rate'][1]),
+                       'n_estimators': trial.suggest_int('n_estimators', self.param_grid['n_estimators'][0],
+                                                         self.param_grid['n_estimators'][1]),
+                       'min_samples_leaf': trial.suggest_int('min_samples_leaf', self.param_grid['min_samples_leaf'][0],
+                                                             self.param_grid['min_samples_leaf'][1]),
+                       'min_samples_split': trial.suggest_int('min_samples_split', self.param_grid['min_samples_split'][0],
+                                                              self.param_grid['min_samples_split'][1]),
+                       'max_depth': trial.suggest_int('max_depth', self.param_grid['max_depth'][0],
+                                                      self.param_grid['max_depth'][1])}
 
         mean_cv_score = self.hyper_eval()
         return mean_cv_score

@@ -15,12 +15,12 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 # pytest.skip("Tested Already", allow_module_level=True)
 
-algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
+algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
 dataset_path, rep_data_path = "./data/DemoDataRegression/", "./data/DemoRepDataRegression/"
 experiment_name = "regression"
 outcome_label = "Cognition_Score"
 instance_label = "Class"
-model_algorithms = ["LR"]
+model_algorithms = ["LR", "RF", "EN"]
 
 
 def test_regression():

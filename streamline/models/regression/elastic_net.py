@@ -19,8 +19,11 @@ class SVR(RegressionModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        self.params = {'alpha': [1e-3, 1], 'l1_ratio': [0, 1],
-                       'max_iter': [10, 2500]}
+        self.params = {'alpha': trial.suggest_float('alpha', self.param_grid['alpha'][0], self.param_grid['alpha'][1]),
+                       'l1_ratio': trial.suggest_float('l1_ratio', self.param_grid['l1_ratio'][0],
+                                                       self.param_grid['l1_ratio'][1]),
+                       'max_iter': trial.suggest_int('max_iter', self.param_grid['max_iter'][0],
+                                                     self.param_grid['max_iter'][1])}
 
         mean_cv_score = self.hyper_eval()
         return mean_cv_score
