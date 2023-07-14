@@ -18,7 +18,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
-from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis
+from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis, f_oneway, spearmanr
 import seaborn as sns
 
 sns.set_theme()
@@ -845,7 +845,7 @@ class DataProcess(Job):
                     if len(corr_feat) != 0:
                         writer.writerow([feat, ] + corr_feat)
         else:
-            logging.info("No Features with correlation higher that parameter")
+            logging.info("No Features with correlation higher than parameter")
 
     def second_eda(self, top_features=20):
         # Running EDA after all the new data processing/manipulation
@@ -947,30 +947,62 @@ class DataProcess(Job):
         Args:
             feature_name: name of feature column operation is running on
         """
-        # test_name, test_stat = None, None
         outcome_label = self.dataset.outcome_label
-        # Feature and Outcome are discrete/categorical/binary
-        if feature_name in self.dataset.categorical_variables:
-            # Calculate Contingency Table - Counts
-            table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[outcome_label])
-            # Univariate association test (Chi Square Test of Independence - Non-parametric)
-            c, p, dof, expected = chi2_contingency(table_temp)
-            p_val = p
-            test_stat = c
-            test_name = "Chi Square Test"
-        # Feature is continuous and Outcome is discrete/categorical/binary
-        else:
-            # Univariate association test (Mann-Whitney Test - Non-parametric)
-            try:  # works in scipy 1.5.0
-                c, p = mannwhitneyu(
-                    x=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 0],
-                    y=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 1], nan_policy='omit')
-            except Exception as e:  # for scipy 1.8.0
-                logging.error(e)
-                raise Exception("Exception in scipy, must have scipy version>=1.8.0")
-            p_val = p
-            test_stat = c
-            test_name = "Mann-Whitney U Test"
+        p_val, test_stat, test_name = None, None, None
+        try:
+            if self.outcome_type == "Categorical":
+                # test_name, test_stat = None, None
+                # Feature and outcome both are discrete/categorical/binary
+                if feature_name in self.dataset.categorical_variables:
+                    # Calculate Contingency Table - Counts
+                    table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[outcome_label])
+                    # Univariate association test (Chi Square Test of Independence - Non-parametric)
+                    c, p, dof, expected = chi2_contingency(table_temp)
+                    p_val = p
+                    test_stat = c
+                    test_name = "Chi Square Test"
+                # Feature is continuous and Outcome is discrete/categorical/binary
+                else:
+                    if len(self.dataset.data[outcome_label].unique()) == 2:
+                        # Univariate association test (Mann-Whitney Test - Non-parametric)
+                        c, p = mannwhitneyu(
+                            x=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 0],
+                            y=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 1],
+                            nan_policy='omit')
+                        p_val = p
+                        test_stat = c
+                        test_name = "Mann-Whitney U Test"
+                    else:
+                        categories = list(self.dataset.data[outcome_label].unique())
+                        samples = [self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == cat]
+                                   for cat in categories]
+                        c, p = f_oneway(*samples)
+                        p_val = p
+                        test_stat = c
+                        test_name = "Analysis of Variance"
+            elif self.outcome_type == "Continuous":
+                # Feature is discrete/categorical/binary and Outcome is continuous
+                if feature_name in self.dataset.categorical_variables:
+                    categories = list(self.dataset.data[feature_name].unique())
+                    samples = [self.dataset.data[outcome_label].loc[self.dataset.data[feature_name] == cat]
+                               for cat in categories]
+                    c, p = f_oneway(*samples)
+                    p_val = p
+                    test_stat = c
+                    test_name = "Analysis of Variance"
+                # Feature is continuous and Outcome is continuous
+                else:
+                    # Univariate association test (Mann-Whitney Test - Non-parametric)
+                    res = spearmanr(
+                        a=self.dataset.data[feature_name],
+                        b=self.dataset.data[outcome_label], nan_policy='omit')
+                    c, p = res.statistic, res.pvalue
+                    p_val = p
+                    test_stat = c
+                    test_name = "Spearman Correlation"
+        except Exception as e:
+            logging.error(e)
+            raise Exception("scipy error, check if you've install correct version of scipy")
         return p_val, test_stat, test_name
 
     def univariate_plots(self, sorted_p_list=None, top_features=20):
@@ -1005,19 +1037,28 @@ class DataProcess(Job):
 
         """
         # Feature and Outcome are discrete/categorical/binary
-        if feature_name in self.dataset.categorical_variables:
-            # Generate contingency table count bar plot.
-            # Calculate Contingency Table - Counts
-            table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[self.dataset.outcome_label])
-            geom_bar_data = pd.DataFrame(table)
-            geom_bar_data.plot(kind='bar')
-            plt.ylabel('Count')
-        else:
-            # Feature is continuous and Outcome is discrete/categorical/binary
-            # Generate boxplot
-            self.dataset.data.boxplot(column=feature_name, by=self.dataset.outcome_label)
-            plt.ylabel(feature_name)
-            plt.title('')
+        if self.outcome_type == "Categorical":
+            if feature_name in self.dataset.categorical_variables:
+                # Generate contingency table count bar plot.
+                # Calculate Contingency Table - Counts
+                table = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[self.dataset.outcome_label])
+                geom_bar_data = pd.DataFrame(table)
+                geom_bar_data.plot(kind='bar')
+                plt.ylabel('Contingency Table Count')
+            else:
+                # Feature is continuous and Outcome is discrete/categorical/binary
+                # Generate boxplot
+                self.dataset.data.boxplot(column=feature_name, by=self.dataset.outcome_label)
+                plt.ylabel(feature_name)
+                plt.title('')
+        elif self.outcome_type == "Continuous":
+            if feature_name in self.dataset.categorical_variables:
+                # Outcome is continuous and Feature is discrete/categorical/binary
+                self.dataset.data.boxplot(column=self.dataset.outcome_label, by=feature_name)
+                plt.ylabel(self.dataset.outcome_label)
+                plt.title('')
+            else:
+                self.dataset.data.plot(x=feature_name, y=self.dataset.outcome_label, kind='scatter')
 
         # Deal with the dataset specific characters causing problems in this dataset.
         if not os.path.exists(self.experiment_path + '/' + self.dataset.name
@@ -1029,7 +1070,7 @@ class DataProcess(Job):
         new_feature_name = new_feature_name.replace("*", "")
         new_feature_name = new_feature_name.replace("/", "")
         plt.savefig(self.experiment_path + '/' + self.dataset.name
-                    + '/exploratory/univariate_analyses/' + 'Barplot_' +
+                    + '/exploratory/univariate_analyses/' + 'Plot_' +
                     str(new_feature_name) + ".png", bbox_inches="tight", format='png')
         plt.close('all')
         # plt.cla() # not required

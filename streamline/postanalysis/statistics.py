@@ -92,10 +92,10 @@ class StatsJob(Job):
             except Exception:
                 self.original_headers = None
         if 'applymodel' not in full_path:
-            partial_path = '/'.join(full_path.split('/')[:-1])
+            self.partial_path = '/'.join(full_path.split('/')[:-1])
         else:
-            partial_path = '/'.join(full_path.split('/')[:-3])
-        pickle_in = open(partial_path + '/' + "algInfo.pickle", 'rb')
+            self.partial_path = '/'.join(full_path.split('/')[:-3])
+        pickle_in = open(self.partial_path + '/' + "algInfo.pickle", 'rb')
         alg_info = pickle.load(pickle_in)
         algorithms = list()
         abbrev = dict()
@@ -132,7 +132,7 @@ class StatsJob(Job):
         # algorithms in plots, and original ordered feature name list
         self.preparation()
 
-        if self.outcome_type != "Continuous":
+        if self.outcome_type == "Categorical":
             # Gather and summarize all evaluation metrics for each algorithm across all CVs.
             # Returns result_table used to plot average ROC and PRC plots and metric_dict
             # organizing all metrics over all algorithms and CVs.
@@ -141,7 +141,7 @@ class StatsJob(Job):
             logging.info('Generating ROC and PRC plots...')
             self.do_plot_roc(result_table)
             self.do_plot_prc(result_table)
-        else:
+        elif self.outcome_type == "Continuous":
             result_table, metric_dict = self.primary_stats_regression()
             self.residuals_regression()
 
@@ -422,7 +422,7 @@ class StatsJob(Job):
         if not os.path.exists(self.full_path + '/model_evaluation/feature_importance/'):
             os.mkdir(self.full_path + '/model_evaluation/feature_importance/')
 
-    def primary_stats_regression(self):
+    def primary_stats_regression(self, master_list=None):
         """
         Combine regression metrics and model feature importance scores across all CV datasets.
         """
@@ -443,11 +443,15 @@ class StatsJob(Job):
             # Gather statistics over all CV partitions
             for cv_count in range(0, self.cv_partitions):
                 # Unpickle saved metrics from previous phase
-                result_file = self.full_path + '/model_evaluation/pickled_metrics/' \
-                              + self.abbrev[algorithm] + "_CV_" + str(cv_count) + "_metrics.pickle"
-                file = open(result_file, 'rb')
-                results = pickle.load(file)
-                file.close()
+                if master_list is None:
+                    result_file = self.full_path + '/model_evaluation/pickled_metrics/' \
+                                  + self.abbrev[algorithm] + "_CV_" + str(cv_count) + "_metrics.pickle"
+                    file = open(result_file, 'rb')
+                    results = pickle.load(file)
+                    file.close()
+                else:
+                    results = master_list[cv_count][algorithm]
+
                 # Separate pickled results
                 me = results[0][0]
                 mae = results[0][1]
@@ -465,22 +469,23 @@ class StatsJob(Job):
                 corrs.append(corr)
                 # Format feature importance scores as list
                 # (takes into account that all features are not in each CV partition)
-                temp_list = []
-                j = 0
-                headers = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_' + str(
-                    cv_count) + '_Test.csv').columns.values.tolist()
-                if self.instance_label is not None:
-                    headers.remove(self.instance_label)
-                headers.remove(self.outcome_label)
-                for each in self.original_headers:
-                    if each in headers:  # Check if current feature from original dataset was in the partition
-                        # Deal with features not being in original order (find index of current feature list.index()
-                        f_index = headers.index(each)
-                        temp_list.append(fi[f_index])
-                    else:
-                        temp_list.append(0)
-                    j += 1
-                fi_all.append(temp_list)
+                if master_list is None:
+                    temp_list = []
+                    j = 0
+                    headers = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name
+                                          + '_CV_' + str(cv_count) + '_Test.csv').columns.values.tolist()
+                    if self.instance_label is not None:
+                        headers.remove(self.instance_label)
+                    headers.remove(self.outcome_label)
+                    for each in self.original_headers:
+                        if each in headers:  # Check if current feature from original dataset was in the partition
+                            # Deal with features not being in original order (find index of current feature list.index()
+                            f_index = headers.index(each)
+                            temp_list.append(fi[f_index])
+                        else:
+                            temp_list.append(0)
+                        j += 1
+                    fi_all.append(temp_list)
 
             logging.info("Running stats for " + algorithm)
 
@@ -500,7 +505,8 @@ class StatsJob(Job):
             metric_dict[algorithm] = results
 
             # Save Average FI Stats
-            self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
+            if master_list is None:
+                self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
 
             result_dict = {'algorithm': algorithm, 'max_error': mean_me, 'mean_absolute_error': mean_mae,
                            'mean_squared_error': mean_mse, 'median_absolute_error': mean_mdae,

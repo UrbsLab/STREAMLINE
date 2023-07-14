@@ -126,7 +126,7 @@ class ReportJob(Job):
         # FRONT PAGE - Summary of Pipeline settings
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
-        inc = 1
+        inc = 2
         targetdata = ars_dic[0:21 + inc]  # Data-path to  instance label
         cv = ars_dic[21 + inc:27 + inc]  # cv partitions to partition Method
         match = ars_dic[27 + inc:30 + inc]  # match label
@@ -253,14 +253,15 @@ class ReportJob(Job):
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
         self.analysis_report.y += 1
 
-        self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
-        self.analysis_report.y += 1
+        if self.outcome_type == "Categorical":
+            self.analysis_report.x += 90
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.x += 90
+            self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
+            self.analysis_report.y += 1
 
         self.analysis_report.x += 90
         self.analysis_report.set_font('Times', 'B', 10)
@@ -453,19 +454,23 @@ class ReportJob(Job):
                             entry_list = str(datum).split(' ')
                             self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
                             col_count += 1
-                    elif self.outcome_type == "Continuous" and not (col_count == 7 or col_count == 8):
+                    elif self.outcome_type == "Continuous":
                         for datum in row:  # Print first row
-                            entry_list = str(datum).split(' ')
-                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
+                            if not (col_count == 7 or col_count == 8):
+                                entry_list = str(datum).split(' ')
+                                self.analysis_report.cell(col_width_list[col_count],
+                                                          th, entry_list[0], border=0, align="C")
                             col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
                     for datum in row:  # Print second row
                         entry_list = str(datum).split(' ')
-                        try:
-                            self.analysis_report.cell(col_width_list[col_count], th, entry_list[1], border=0, align="C")
-                        except Exception:
-                            self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
+                        if not (self.outcome_type == "Continuous" and (col_count == 7 or col_count == 8)):
+                            try:
+                                self.analysis_report.cell(col_width_list[col_count], th, entry_list[1],
+                                                          border=0, align="C")
+                            except Exception:
+                                self.analysis_report.cell(col_width_list[col_count], th, ' ', border=0, align="C")
                         col_count += 1
                     self.analysis_report.ln(th)  # critical
                     col_count = 0
@@ -525,6 +530,8 @@ class ReportJob(Job):
                     if col_count == 6:  # missing percent column
                         self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
                                                   align="L", fill=True)
+                    elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                        pass
                     else:
                         self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
                                                   align="L", fill=True)

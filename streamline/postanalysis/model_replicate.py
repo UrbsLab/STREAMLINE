@@ -8,11 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from streamline.dataprep.data_process import DataProcess
-from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
-from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
-from streamline.modeling.classification_utils import CLASSIFICATION_COLORS as COLORS
-from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
+from streamline.modeling.submodels import BinaryClassificationModel, RegressionModel
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.dataset import Dataset
 from streamline.utils.job import Job
@@ -392,7 +388,6 @@ class ReplicateJob(Job):
                     logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
-                    raise e
 
             # Scale dataframe based on training scaling
             if self.scale_data:
@@ -408,7 +403,6 @@ class ReplicateJob(Job):
                     logging.warning("Notice: Scaling was not conducted for the following target dataset, "
                                     "so scaling was not conducted for replication data: "
                                     + str(self.apply_name))
-                    raise e
 
             # Conduct feature selection based on training selection
             # (Filters out any features not in the final cv training dataset)
@@ -423,11 +417,14 @@ class ReplicateJob(Job):
 
             eval_dict = dict()
             for algorithm in self.algorithms:
-                ret = self.eval_model(algorithm, cv_count, x_test, y_test)
+                if self.outcome_type == "Categorical":
+                    ret = self.eval_model(algorithm, cv_count, x_test, y_test)
+                elif self.outcome_type == "Continuous":
+                    ret, residuals = self.eval_model(algorithm, cv_count, x_test, y_test)
                 eval_dict[algorithm] = ret
                 pickle.dump(ret, open(self.full_path + "/applymodel/"
                                       + self.apply_name + '/model_evaluation/pickled_metrics/'
-                                      + ABBREVIATION[algorithm] + '_CV_'
+                                      + self.abbrev[algorithm] + '_CV_'
                                       + str(cv_count) + "_metrics.pickle", 'wb'))
                 # includes everything from training except feature importance values
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
@@ -435,7 +432,7 @@ class ReplicateJob(Job):
         stats = StatsJob(self.full_path + '/applymodel/' + self.apply_name,
                          self.outcome_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
-                         metric_weight='balanced_accuracy', scale_data=self.scale_data,
+                         metric_weight=self.scoring_metric, scale_data=self.scale_data,
                          plot_roc=self.plot_roc, plot_prc=self.plot_prc, plot_fi_box=False,
                          plot_metric_boxplots=self.plot_metric_boxplots, show_plots=self.show_plots)
 
@@ -444,7 +441,7 @@ class ReplicateJob(Job):
             stats.do_plot_roc(result_table)
             stats.do_plot_prc(result_table, rep_data.data, True)
         elif self.outcome_type == "Continuous":
-            result_table, metric_dict = stats.primary_stats_classification(master_list, rep_data.data)
+            result_table, metric_dict = stats.primary_stats_regression(master_list)
             # stats.residuals_regression()
 
 
@@ -543,19 +540,31 @@ class ReplicateJob(Job):
         return scale_rep_df
 
     def eval_model(self, algorithm, cv_count, x_test, y_test):
-        model_info = self.full_path + '/models/pickledModels/' + ABBREVIATION[algorithm] + '_' \
+        model_info = self.full_path + '/models/pickledModels/' + self.abbrev[algorithm] + '_' \
                      + str(cv_count) + '.pickle'
         # Corresponding pickle file name with scalingInfo
         infile = open(model_info, 'rb')
         model = pickle.load(infile)
         infile.close()
         # Prediction evaluation
-        m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
+        m = None
+        if self.outcome_type == "Categorical":
+            m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
+        elif self.outcome_type == "Continuous":
+            m = RegressionModel(None, algorithm, scoring_metric=self.scoring_metric)
         m.model = model
         m.model_name = algorithm
-        m.small_name = ABBREVIATION[algorithm]
+        m.small_name = self.abbrev[algorithm]
 
-        metric_list, fpr, tpr, roc_auc, prec, recall, \
-            prec_rec_auc, ave_prec, probas_ = m.model_evaluation(x_test, y_test)
+        return_list =[]
+        if self.outcome_type == "Continuous":
+            metric_list = m.model_evaluation(x_test, y_test)
+            y_pred = m.predict(x_test)
+            residual_test = y_test - y_pred
+            return_list = ([metric_list, None], [residual_test, y_pred, y_test])
+        elif self.outcome_type == "Categorical":
+            metric_list, fpr, tpr, roc_auc, prec, recall, \
+                prec_rec_auc, ave_prec, probas_ = m.model_evaluation(x_test, y_test)
+            return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, None, probas_]
 
-        return [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, None, probas_]
+        return return_list
