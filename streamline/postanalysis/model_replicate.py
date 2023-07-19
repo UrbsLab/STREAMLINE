@@ -385,7 +385,7 @@ class ReplicateJob(Job):
                     logging.warning("Notice: Imputation was not conducted for the following target dataset, "
                                     "so imputation was not conducted for replication data: "
                                     + str(self.apply_name))
-                    raise e
+                    # raise e
 
             # Scale dataframe based on training scaling
             if self.scale_data:
@@ -401,7 +401,7 @@ class ReplicateJob(Job):
                     logging.warning("Notice: Scaling was not conducted for the following target dataset, "
                                     "so scaling was not conducted for replication data: "
                                     + str(self.apply_name))
-                    raise e
+                    # raise e
 
             # Conduct feature selection based on training selection
             # (Filters out any features not in the final cv training dataset)
