@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.modeling.submodels import ClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.neural_network import MLPClassifier as MLP
 
 
-class MLPClassifier(BinaryClassificationModel, ABC):
+class MLPClassifier(ClassificationModel, ABC):
     model_name = "Artificial Neural Network"
     small_name = "ANN"
     color = "red"

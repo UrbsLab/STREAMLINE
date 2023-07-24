@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.modeling.submodels import ClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.tree import DecisionTreeClassifier as DT
 
 
-class DecisionTreeClassifier(BinaryClassificationModel, ABC):
+class DecisionTreeClassifier(ClassificationModel, ABC):
     model_name = "Decision Tree"
     small_name = "DT"
     color = "yellow"

@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.modeling.submodels import ClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.ensemble import RandomForestClassifier as RF
 
 
-class RandomForestClassifier(BinaryClassificationModel, ABC):
+class RandomForestClassifier(ClassificationModel, ABC):
     model_name = "Random Forest"
     small_name = "RF"
     color = "blue"

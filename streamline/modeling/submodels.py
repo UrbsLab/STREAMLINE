@@ -18,7 +18,7 @@ warnings.filterwarnings(action='ignore', module='optuna')
 warnings.filterwarnings(action="ignore", category=ConvergenceWarning, module="sklearn")
 
 
-class BinaryClassificationModel(BaseModel, ABC):
+class ClassificationModel(BaseModel, ABC):
     def __init__(self, model, model_name, cv_folds=3,
                  scoring_metric='balanced_accuracy', metric_direction='maximize',
                  random_state=None, cv=None, sampler=None, n_jobs=None):

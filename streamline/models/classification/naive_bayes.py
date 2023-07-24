@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.modeling.submodels import ClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.naive_bayes import GaussianNB as NB
 
 
-class NaiveBayesClassifier(BinaryClassificationModel, ABC):
+class NaiveBayesClassifier(ClassificationModel, ABC):
     model_name = "Naive Bayes"
     small_name = "NB"
     color = "silver"

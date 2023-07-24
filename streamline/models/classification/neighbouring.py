@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.modeling.submodels import ClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.neighbors import KNeighborsClassifier as KNN
 
 
-class KNNClassifier(BinaryClassificationModel, ABC):
+class KNNClassifier(ClassificationModel, ABC):
     model_name = "K-Nearest Neighbors"
     small_name = "KNN"
     color = "chocolate"
