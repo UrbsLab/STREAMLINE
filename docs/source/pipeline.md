@@ -13,12 +13,10 @@ Characterizes the orignal dataset as loaded by the user, including: data dimensi
 
 For precision, we strongly suggest users identify which features in their data should be treated as categorical vs. quanatiative using the `categorical_feature_path` and/or `quantitative_feature_path` run parameters. However, if not specified by the user, STREAMLINE will attempt to automatically determine feature types relying on the `categorical_cutoff` run parameter. Any features with fewer unique values than `categorical_cutoff` will be treated as categorical, and all others will be treated as quantitative. 
 
-* Output: (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap
+* **Output:** (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap
 
 ### Numerical Encoding of Text-based Features
 Detects any features in the data with non-numeric values and applies [LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html) to make them numeric as required by scikit-learn machine learning packages.
-
-* Output: None
 
 ### Basic Data Cleaning and Feature Engineering
 Applies the following steps to the target data, keeping track of changes to all data counts along the way:
@@ -29,19 +27,19 @@ Applies the following steps to the target data, keeping track of changes to all 
 5. Engineer/add [one-hot-encoding](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html) for any categorical features in the data. This ensures that all categorical features are treated as such throughout all aspects of the pipeline. For example, a single categorical feature with 3 possible states will be encoded as 3 separate binary-valued features indicating whether an instance has that feature's state or not. Feature names are automatically updated by STREAMLINE to reflect this change.
 6. Remove highly correlated features based on the `correlation_removal_threshold` run parameter. Randomly removes one feature of a highly correlated feature pair. While perfectly correlated features can be safely cleaned in this way, there is a chance of information loss when removing less correlated features.
 
-* Output: CSV file summarizing changes to data counts during these cleaning and engineering steps.
+* **Output:** CSV file summarizing changes to data counts during these cleaning and engineering steps.
 
 ### Processed Data EDA
 Completes a more comprehensive EDA of the processed dataset including: everything examined in the initial EDA, as well as a univariate association analysis of all features using Chi-Square (for categorical features), or Mann-Whitney U-Test (for quantitative features). 
 
-* Output: (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap, (5) a CSV file summarizing the univariate analyses including the test applied, test statistic, and p-value for each feature, (6) for any feature with a univariate analysis p-value less than the `sig_cutoff` run parameter (i.e. significant association with outcome), a bar-plot will be generated if it is categorical, and a box-plot will be generated if it is quanatiative.
+* **Output:** (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap, (5) a CSV file summarizing the univariate analyses including the test applied, test statistic, and p-value for each feature, (6) for any feature with a univariate analysis p-value less than the `sig_cutoff` run parameter (i.e. significant association with outcome), a bar-plot will be generated if it is categorical, and a box-plot will be generated if it is quanatiative.
 
 ### k-fold Cross Validation (CV) Partitioning
 For k-fold CV, STREAMLINE uses 'Stratified' partitioning by default, which aims to maintain the same/similar class balance within the 'k' training and testing datasets. However using the `partition_method` run parameter, users can also select 'Random' or 'Group' partitioning. 
 
 Of note, 'Group' partitioning requires the dataset to include a column identified by the `match_label` run parameter. This column includes a group membership identifier for each instance which indicates that any instance with the same group ID should be kept within the same partition during cross validation. This was originally intended for running STREAMLINE on epidemiological data that had been matched for one or more covariates (e.g. age, sex, race) in order to adjust for their effects during modeling.
 
-* Output: CSV files for each training and testing dataset generated following partitioning. Note, by default STREAMLINE will overwrite these files as the working datasets undergo imputation, scaling and feature selection in subsequent phases. However, the user can keep copies of these intermediary CV datasets for review using the run parameter `overwrite_cv`.
+* **Output:** CSV files for each training and testing dataset generated following partitioning. Note, by default STREAMLINE will overwrite these files as the working datasets undergo imputation, scaling and feature selection in subsequent phases. However, the user can keep copies of these intermediary CV datasets for review using the run parameter `overwrite_cv`.
 
 ## Phase 2: Imputation and Scaling
 This phase conducts additional data preparation elements of the pipeline that occur after CV partitioning, i.e. missing value imputation and feature scaling. Both elements 
@@ -59,7 +57,7 @@ run parameter, and STREAMLINE will use median imputaion for quantitative feature
 ### Scaling
 Second, this phase conducts feature scaling with [StandardScalar](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) to transform features to have a mean at zero with unit variance. This is only necessary for certain modeling algorithms, but it should not hinder the performance of other algorithms. The primary drawback to scaling prior to modeling is that any future data applied to the model will need to be scaled in the same way prior to making predictions. Furthermore, for algorithms that have directly interpretable models (e.g. decision tree), the values specified by these models need to be un-scaled in order to understand the model in the context of the original data values. STREAMLINE includes a [Useful Notebook](more.md) that can generate direct model visualizations for decision tree and genetic programming models. This code automatically un-scales the values specified in these models so they retain their interpretability.
 
-* Output: (1) Learned imputation and scaling strategies for each training dataset are saved as pickled objects allowing any replication or other future data to be identically processed prior to running it through the model. (2) If `overwrite_cv` is False, new imputed and scaled copies of the training and testing datasets are saved as CSV output files, otherwise the old dataset files are overwritten with these new ones to save space.
+* **Output:** (1) Learned imputation and scaling strategies for each training dataset are saved as pickled objects allowing any replication or other future data to be identically processed prior to running it through the model. (2) If `overwrite_cv` is False, new imputed and scaled copies of the training and testing datasets are saved as CSV output files, otherwise the old dataset files are overwritten with these new ones to save space.
 
 ## Phase 3: Feature Importance Estimation
 This phase applies feature importance estimation algorithms (i.e. [Mutual information (MI)](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html) and [MultiSURF](https://github.com/UrbsLab/scikit-rebate), found in the ReBATE software package) often used as filter-based feature selection algorithms. Both algorithms are run by default, however the user can deactivate either using the `do_mutual_info` and `do_multisurf` run parameters, respectively. MI scores features based on their univariate association with outcome, while MultiSURF scores features in a manner that is sensitive to both univariate and epistatic (i.e. multivariate feature interaction) associations.
@@ -71,7 +69,7 @@ Overall, this phase is important not only for subsequent feature selection, but 
 * Parallizability: Runs 'k' times for each algorithm (MI and MultiSURF) and each target dataset being analyzed (where k is number of CV partitions)
 * Run Time: Typically reasonably fast, but takes more time to run MultiSURF, in particular as the number of training instances approaches the default `instance_subset` run parameter of 2000 instances, or if this parameter set higher in larger datasets. This is because MultiSURF scales quadratically with the number of training instances.
 
-* Output: CSV files of feature importance scores for both algorithms and each CV partition ranked from largest to smallest scores.
+* **Output:** CSV files of feature importance scores for both algorithms and each CV partition ranked from largest to smallest scores.
 
 ## Phase 4: Feature Selection
 This phase uses the feature importance estimates learned in the prior phase to conduct feature selection using a 'collective' feature selection approach. By default, STREAMLINE will remove any features from the training data that scored 0 or less by both feature importance algorithms (i.e. features deamed uninformative). Users can optionally ensure retention of all features prior to modeling by setting the `filter_poor_features` run parameter to False. Users can also specify a maximum number of features to retain in each training dataset using the `max_features_to_keep` run parameter (which can help reduce overall pipeline runtime and make learning easier for modeling algorithms). If after removing 'uninformative features' there are still more features present than the user specified maximum, STREAMLINE will pick the unique top scoring features from one algorithm then the next until the maximum is reached and all other features are removed. Any features identified for removal from the training data are similarly removed from the testing data.
@@ -79,7 +77,7 @@ This phase uses the feature importance estimates learned in the prior phase to c
 * Parallizability: Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
 * Run Time: Fast
 
-* Output: (1) CSV files summarizing feature selection for a target dataset (i.e. how many features were identified as informative or uninformative within each CV partition) and (2) a barplot of average feature importance scores (across CV partitions). The user can specify the maximum number of top scoring features to be plotted using the `top_features` run parameter.
+* **Output:** (1) CSV files summarizing feature selection for a target dataset (i.e. how many features were identified as informative or uninformative within each CV partition) and (2) a barplot of average feature importance scores (across CV partitions). The user can specify the maximum number of top scoring features to be plotted using the `top_features` run parameter.
 
 ## Phase 5: Machine Learning (ML) Modeling
 At the heart of STREAMLINE, this phase conducts machine learning modeling using the training data, model feature importance estimation (also with the training data), and model evaluation on testing data. 
@@ -101,22 +99,22 @@ Users can also configure how Optuna operates in STREAMLINE with the `n_trials` a
 
 Notable exceptions to most algorithms; Naive Bayes has no run parameters to optimize, and rule-based (i.e. LCS) ML algorithms including ExSTraCS, eLCS, and XCS can be computationally expensive thus STREAMLINE is set to use their default hyperparameter settings without a sweep unless the user updates the `do_lcs_sweep` and `lcs_timeout` run parameters.  While these LCS algorithms have many possible hyperparameters to manipulate they have largely stable performance when leaving most of their run parameters to default values. Exeptions to this include the key LCS hyperparameters (1) number of learning iterations, (2) maximum rule-population size, and (3) accuracy pressure (nu), which can be manually controled without a hyperparmater sweep by the run parameters `lcs_iterations`, `lcs_N`, and `lcs_nu`, respectively.
 
-* Output: CSV files specifying the optimized hyperparameter settings found by Optuna for each partition and algorithm combination.
+* **Output:** CSV files specifying the optimized hyperparameter settings found by Optuna for each partition and algorithm combination.
 
 ### Train 'Optimized' Model
 Having selected the best hyperparameter combination identified for a given training dataset and algorithm, STREAMLINE now retrains each model on the entire training dataset using those respective hyperparameter settings. This yields a total of 'k' potentially 'optimized' models for each algorithm. 
 
-* Output: All trained models are pickled as python objects that can be loaded and applied later.
+* **Output:** All trained models are pickled as python objects that can be loaded and applied later.
 
 ### Model Feature Importance Estimation
 Next, STREAMINE estimates and summarizes model feature importance scores for every algorithm run. This is distinct from the initial feature importance estimation phase, in that these estimates are specific to a given model as a useful part of model interpretation/explanation. By default, STREAMLINE employes [permutation feature importance](https://scikit-learn.org/stable/modules/permutation_importance.html) for estimating feature importances scores in the same uniform manner across all algorithms. However, the user can deactive this by setting the `use_uniform_fi` run parameter to 'False'. This will direct STREAMLINE to report any available internal feature importance estimate for a given algorithm, while still utilizing permutation feature importance for algorithms with no such internal estimator. 
 
-* Output: See below.
+* **Output:** See below.
 
 ### Evaluate Performance
 The last step in this phase is to evaluate all trained models using their respective testing datasets.  A total of 16 standard classification metrics calculated for each model including: balanced accuracy, standard accuracy, F1 Score, sensitivity (recall), specificity, precision (positive predictive value), true positives, true negatives, false postitives, false negatives, negative predictive value, likeliehood ratio positive, likeliehood ratio negative, area under the ROC, area under the PRC, and average precision of PRC. 
 
-* Output: All feature importance scores and evaluation metrics are pickled as python objects for use in the next phase of the pipeline.
+* **Output:** All feature importance scores and evaluation metrics are pickled as python objects for use in the next phase of the pipeline.
 
 ## Phase 6: Post-Analysis
 This phase combines all modeling results to generate summary statistics files, generate results plots, and conduct non-parametric statistical significance analysis comparing ML performance across CV runs.
