@@ -15,24 +15,19 @@ The schematic below summarizes the automated STREAMLINE analysis pipeline with i
 
 .. image:: pictures/STREAMLINE_paper_lightcolor.png
 
-* We recommend reviewing this documentation to gain a deeper understanding
-of STREAMLINE with respect to it's overall design, what it includes, how it works, what it
-can be used for, and implementation highlights that differentiate it from other
-AutoML tools.
+* We recommend reviewing this documentation to gain a deeper understanding of STREAMLINE with respect to it's overall design, what it includes, how it works, what it
+can be used for, and implementation highlights that differentiate it from other AutoML tools.
 
-* Start with a simple demonstration of STREAMLINE on example biomedical data in our ready-to-run in a 
-Google Colab Notebook `here <https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing>`_.
+* Start with a simple demonstration of STREAMLINE on example biomedical data in our ready-to-run in a Google Colab Notebook `here <https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing>`_.
 
 Current Limitations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-* At present, STREAMLINE is limited to supervised learning on tabular,
-binary classification data. We are currently expanding STREAMLINE to multi-class
+* At present, STREAMLINE is limited to supervised learning on tabular, binary classification data. We are currently expanding STREAMLINE to multi-class
 and regression outcome data. 
 
 * STREAMLINE also does not automate feature extraction from unstructured data (e.g. text, images, video, time-series data), or handle more advanced aspects of data cleaning or feature engineering that would likely require domain expertise for a given dataset. 
 
-* As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the
-most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
+* As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
 
 Disclaimer
 --------------------------------------
@@ -61,17 +56,12 @@ Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and 
    self
    about
    pipeline
-   install
    demo
-   data
-   colab
-   local
-   cluster
+   install
+   running
    parameters
-   tips
    output
    more
-   models
    development
    contributing
    citation

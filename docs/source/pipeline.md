@@ -126,16 +126,14 @@ This phase combines all modeling results to generate summary statistics files, g
 * Parallizability: Runs once for each target dataset being analyzed.
 * Run Time: Moderately fast
 
+## Phase 7: Compare Datasets
+[under construction]
+## Phase 8: Replication
+[under construction]
+## Phase 9: Replication
+[under construction]
 
 
-
-### STREAMLINE Phases Described
-The base code for STREAMLINE (located in the `streamline` folder) is organized into a series of script phases designed to best optimize the parallelization of a given analysis. 
-
-
-* Phase 6: Statistics Summary
-  * Combines all results to generate summary statistics files, generate results plots, and conduct non-parametric statistical significance analyses comparing ML model performance across CV runs
-  * \[Runtime]: Moderately fast
 
 * Phase 7: [Optional] Compare Datasets
   * NOTE: Only can be run if the STREAMLINE was run on more than dataset

@@ -1,4 +1,4 @@
-# Installation
+# Installation and Data Requirements
 
 ## Google Colaboratory
 There is no local installation or additional steps required to run
@@ -85,3 +85,14 @@ a quick guide on using it can be found [here](https://www.hostinger.com/tutorial
    get a version error output, please run `pip install --upgrade scipy`
 2. The lightgbm package on pypi doesn't work out of the box using pip on MacOS. The following command should solve the problem:
    ```conda install -c conda-forge lightgbm```
+
+
+
+
+
+
+## Input Data Requirements
+
+[Under Construction]
+
+numerical encoding no longer required
