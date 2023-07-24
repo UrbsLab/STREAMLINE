@@ -5,8 +5,8 @@ This section is for users who want a more detailed understanding of (1) what STR
 ## Phase 1: Data Exploration & Processing
 This phase (1) provides the user with key information about the dataset(s) they wish to analyze, via an initial exploratory data analysis (EDA) (2) numerically encodes any text-based feature values in the data, (3) applies basic data cleaning and feature engineering to process the data, (4) informs the user how the data has been changed by the data processing, via a secondary, more in-depth EDA, and then (5) partitions the data using k-fold cross validation. 
 
-* Parallizability: Runs once for each target dataset to be analyzed
-* Run Time: Typically fast, except when evaluating and visualizing feature correlation in datasets with a large number of features
+* **Parallizability:** Runs once for each target dataset to be analyzed
+* **Run Time:** Typically fast, except when evaluating and visualizing feature correlation in datasets with a large number of features
 
 ### Initial EDA
 Characterizes the orignal dataset as loaded by the user, including: data dimensions, feature type counts, missing value counts, class balance, other standard pandas data summaries (i.e. describe(), dtypes(), nunique()) and feature correlations (pearson). 
@@ -41,12 +41,13 @@ Of note, 'Group' partitioning requires the dataset to include a column identifie
 
 * **Output:** CSV files for each training and testing dataset generated following partitioning. Note, by default STREAMLINE will overwrite these files as the working datasets undergo imputation, scaling and feature selection in subsequent phases. However, the user can keep copies of these intermediary CV datasets for review using the run parameter `overwrite_cv`.
 
+***
 ## Phase 2: Imputation and Scaling
 This phase conducts additional data preparation elements of the pipeline that occur after CV partitioning, i.e. missing value imputation and feature scaling. Both elements 
 are 'trained' and applied separately to each individual training dataset. The respective testing datasets are not looked at when running imputation or feature scaling learning to avoid potential data leakage. However the learned imputation and scaling patterns are applied in the same way to the testing data as they were in the training data. Both imputation and scaling can optionally be turned off using the run parameters `impute_data` and `scale_data`, respectively for some specific use cases, however imputation must be on when missing data is present in order to run most scikit-learn modeling algorithms, and scaling should be on for certain modeling algorithms learn effectively (e.g. artificial neural networks), and for if the user wishes to infer feature importances directly from certain algorithm's internal estimators (e.g. logistic regression).
 
-* Parallizability: Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
-* Run Time: Typically fast, with the exception of imputing larger datasets with many missing values
+* **Parallizability:** Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
+* **Run Time:** Typically fast, with the exception of imputing larger datasets with many missing values
 
 ### Imputation
 This phase first conducts imputation to replace any remaining missing values in the dataset with a 'value guess'. While missing value imputation could be resonably viewed as data manufacturing, it is a common practice and viewed here as a necessary 'evil' in order to run scikit-learn modeling algorithms downstream (which mostly require complete datasets). Imputation is completed prior to scaling so that 
@@ -59,6 +60,7 @@ Second, this phase conducts feature scaling with [StandardScalar](https://scikit
 
 * **Output:** (1) Learned imputation and scaling strategies for each training dataset are saved as pickled objects allowing any replication or other future data to be identically processed prior to running it through the model. (2) If `overwrite_cv` is False, new imputed and scaled copies of the training and testing datasets are saved as CSV output files, otherwise the old dataset files are overwritten with these new ones to save space.
 
+***
 ## Phase 3: Feature Importance Estimation
 This phase applies feature importance estimation algorithms (i.e. [Mutual information (MI)](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html) and [MultiSURF](https://github.com/UrbsLab/scikit-rebate), found in the ReBATE software package) often used as filter-based feature selection algorithms. Both algorithms are run by default, however the user can deactivate either using the `do_mutual_info` and `do_multisurf` run parameters, respectively. MI scores features based on their univariate association with outcome, while MultiSURF scores features in a manner that is sensitive to both univariate and epistatic (i.e. multivariate feature interaction) associations.
 
@@ -66,24 +68,26 @@ For datasets with a larger number of features (i.e. > 10,000) we recommend turni
 
 Overall, this phase is important not only for subsequent feature selection, but as an opportunity to evaluate feature importance estimates prior to modeling outside of the initial univariate analyses (conducted on the entire dataset). Further, comparing feature rankings between MI, and MultiSURF can highlight features that may have little or no univariate effects, but that are involved in epistatic interactions that are predictive of outcome.
 
-* Parallizability: Runs 'k' times for each algorithm (MI and MultiSURF) and each target dataset being analyzed (where k is number of CV partitions)
-* Run Time: Typically reasonably fast, but takes more time to run MultiSURF, in particular as the number of training instances approaches the default `instance_subset` run parameter of 2000 instances, or if this parameter set higher in larger datasets. This is because MultiSURF scales quadratically with the number of training instances.
+* **Parallizability:** Runs 'k' times for each algorithm (MI and MultiSURF) and each target dataset being analyzed (where k is number of CV partitions)
+* **Run Time:** Typically reasonably fast, but takes more time to run MultiSURF, in particular as the number of training instances approaches the default `instance_subset` run parameter of 2000 instances, or if this parameter set higher in larger datasets. This is because MultiSURF scales quadratically with the number of training instances.
 
 * **Output:** CSV files of feature importance scores for both algorithms and each CV partition ranked from largest to smallest scores.
 
+***
 ## Phase 4: Feature Selection
 This phase uses the feature importance estimates learned in the prior phase to conduct feature selection using a 'collective' feature selection approach. By default, STREAMLINE will remove any features from the training data that scored 0 or less by both feature importance algorithms (i.e. features deamed uninformative). Users can optionally ensure retention of all features prior to modeling by setting the `filter_poor_features` run parameter to False. Users can also specify a maximum number of features to retain in each training dataset using the `max_features_to_keep` run parameter (which can help reduce overall pipeline runtime and make learning easier for modeling algorithms). If after removing 'uninformative features' there are still more features present than the user specified maximum, STREAMLINE will pick the unique top scoring features from one algorithm then the next until the maximum is reached and all other features are removed. Any features identified for removal from the training data are similarly removed from the testing data.
 
-* Parallizability: Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
-* Run Time: Fast
+* **Parallizability:** Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
+* **Run Time:** Fast
 
 * **Output:** (1) CSV files summarizing feature selection for a target dataset (i.e. how many features were identified as informative or uninformative within each CV partition) and (2) a barplot of average feature importance scores (across CV partitions). The user can specify the maximum number of top scoring features to be plotted using the `top_features` run parameter.
 
+***
 ## Phase 5: Machine Learning (ML) Modeling
 At the heart of STREAMLINE, this phase conducts machine learning modeling using the training data, model feature importance estimation (also with the training data), and model evaluation on testing data. 
 
-* Parallizability: Runs 'k' times for each algorithm and each target dataset being analyzed (where k is number of CV partitions)
-* Run Time: Slowest phase, but can be sped up by reducing the set of ML methods selected to run, or deactivating ML methods that run slowly on large datasets
+* **Parallizability:** Runs 'k' times for each algorithm and each target dataset being analyzed (where k is number of CV partitions)
+* **Run Time:** Slowest phase, but can be sped up by reducing the set of ML methods selected to run, or deactivating ML methods that run slowly on large datasets
 
 ### Model Selection
 The first step is to decide which modeling algorithms to run. By default, STREAMLINE applies 14 of the 16 algorithms (excluding eLCS and XCS) it currently has built in. Users can specify a specific subset of algorithms to run using the `algorithms` run parameter, or alternatively indicate a list of algorithms to exclude from all available algorithms using the `exclude` run parameter. STREAMLINE is also set up so that more advanced users can add other scikit-learn compatible modeling algorithms to run within the pipeline (as explained in [Adding New Modeling Algorithms](models.md)). This allows STREAMLINE to be used as a rigourous framework to easily benchmark new modeling algorithms in comparison to other established algorithms.
@@ -116,18 +120,24 @@ The last step in this phase is to evaluate all trained models using their respec
 
 * **Output:** All feature importance scores and evaluation metrics are pickled as python objects for use in the next phase of the pipeline.
 
+***
 ## Phase 6: Post-Analysis
 This phase combines all modeling results to generate summary statistics files, generate results plots, and conduct non-parametric statistical significance analysis comparing ML performance across CV runs.
 
 
 
-* Parallizability: Runs once for each target dataset being analyzed.
-* Run Time: Moderately fast
+* **Parallizability:** Runs once for each target dataset being analyzed.
+* **Run Time:** Moderately fast
 
+***
 ## Phase 7: Compare Datasets
 [under construction]
+
+***
 ## Phase 8: Replication
 [under construction]
+
+***
 ## Phase 9: Replication
 [under construction]
 
