@@ -3,7 +3,7 @@
 
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
 that empowers anyone to easily train, interpret, and apply a variety of predictive models as
-part of a rigorous and optionally optionally customizable data mining analysis. It is programmed in
+part of a rigorous and optionally customizable data mining analysis. It is programmed in
 Python 3 using many common libraries including [Pandas](https://pandas.pydata.org/)
 and [scikit-learn](https://scikit-learn.org/stable/).
 
@@ -11,11 +11,11 @@ The schematic below summarizes the automated STREAMLINE analysis pipeline with i
 
 ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_paper_lightcolor.png?raw=true)
 
-* We recommend reviewing the documentation of STREAMLINE [here](https://urbslab.github.io/STREAMLINE/index.html).
+* Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
 
-* Try a simple demonstration of STREAMLINE on example biomedical data in our ready-to-run [Google Colab Notebook](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
+* A simple demonstration of STREAMLINE on example biomedical data in our ready-to-run in a Google Colab Notebook [here](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
 
-### Pipeline Design Goals
+### Pipeline Design
 The goal of STREAMLINE is to provide an easy and transparent framework
 to reliably learn predictive associations from tabular data with a particular focus on the needs of biomedical data applications. 
 The design of this pipeline is meant to not only pick a best performing algorithm/model for a given dataset,
@@ -39,8 +39,7 @@ See the [About (FAQs)](https://urbslab.github.io/STREAMLINE/about.html) to gain 
 binary classification data. We are currently expanding STREAMLINE to multi-class
 and regression outcome data. 
 
-* STREAMLINE also does not automate feature extraction from unstructured data (e.g. text, images, video, time-series data), or handle more advanced aspects of data cleaning or feature engineering that would likely require
-domain expertise for a given dataset. 
+* STREAMLINE also does not automate feature extraction from unstructured data (e.g. text, images, video, time-series data), or handle more advanced aspects of data cleaning or feature engineering that would likely require domain expertise for a given dataset. 
 
 * As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the
 most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
@@ -99,11 +98,11 @@ A complete list of STREAMLINE Parameters can be found [here](https://urbslab.git
 ## Disclaimer
 We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given
 classification problem, nor that the included ML modeling algorithms will yield the best performance possible.
-We intend many expansions/improvements to this pipeline in the future to make it easier to use and hopefully more effective in application.  We welcome feedback, suggestions, and contributions for improvement.
+We intend many expansions/improvements to this pipeline in the future.  We welcome feedback, suggestions, and contributions for improvement.
 
 ***
 # Acknowledgements
-STREAMLINE is the result of 3 years of on-and-off development gaining feedback from multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
+The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
 The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang and Harsh Bandhey. Special thanks to
 Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang,
 and Pedro Ribeiro for their code contributions and feedback.  

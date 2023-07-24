@@ -1,8 +1,35 @@
 #  About (FAQs)
 
+## Can I run STREAMLINE as is?
+Yes, as an automated machine learning pipeline, users can easily run the pipeline in it's entirety or one phase at a time. We have set up STREAMLINE to include
+reasonably reliable default pipeline run parameters that users can optionally change to suite their needs. However the overall pipeline has been designed to operated 
+in a specific order utilizing a fixed set of data science elements/steps to ensure consistency and adherence to best practices.
 
+
+## What can STREAMLINE be used for?
+STREAMLINE can be used as:
+1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the included modeling algorithms
+2. A framework to compare established scikit-learn compatible ML modeling algorithms to each other or to new algorithms
+3. A baseline standard of comparison (i.e. positive control) with which to evaluate other AutoML tools that seek to optimize ML pipeline assembly as part of their methodology
+4. A framework to quickly run exploratory analysis, data processing, and/or feature importance estimation/feature selection prior to using some other methodology for ML modeling
+5. An educational example of how to integrate some of the many amazing Python-based data science tools currently available (in particular pandas, scipy, optuna, and scikit-learn).
+6. A framework from which to create a new, expanded, adapted, or modified ML analysis pipeline
+7. A framework to add and evaluate new modeling algorithms (see 'Adding New Modeling Algorithms')
+
+***
+## What level of computing skill is required for use?
+STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI),
+the most naive user needs only know how to navigate their PC file system, specify folder/file paths,
+and have a Google Drive account (to run STREAMLINE serially on Google Colab).
+
+Those with a very basic knowledge of python and computer environments can apply
+STREAMLINE locally and serially using the included jupyter notebook.
+
+Those comfortable with command lines can run STREAMLINE locally or on a computing cluster via the command line.
+
+***
 ## How is STREAMLINE different from other AutoML tools?
-Unlike most other AutoML tools, STREAMLINE was designed as a framework to rigorously apply
+Unlike most other AutoML tools, STREAMLINE was designed as an end-to-end framework to rigorously apply
 and compare a variety of ML modeling algorithms and collectively learn from them as opposed
 to only identifying a best performing model and/or attempting to optimize the analysis pipeline
 configuration itself. STREAMLINE adopts a fixed series of purposefully selected steps/phases
@@ -12,33 +39,20 @@ This tool can be run or utilized in a number of ways to suite a variety experien
 levels of problem/data complexity.
 
 ***
-## What were our goals in developing STREAMLINE?
-The goal of STREAMLINE is to provide an easy and transparent framework
-to learn predictive associations from tabular data. The design of this pipeline
-is meant to not only pick a best performing algorithm/model for a given dataset,
-but to leverage the different algorithm perspectives (i.e. biases, strengths,
-and weaknesses) to gain a broader understanding of the associations in that data.
-
-The overall development of this pipeline focused on:
-   1. Automation and ease of use
-   2. Avoiding and detecting common sources of bias
-   3. Optimizing modeling performance
-   4. Ensuring reproducibility (see STREAMLINE parameter settings)
-   5. Capturing complex associations in data (e.g. feature interactions)
-   6. Enhancing interpretability of output
-   7. Run mode flexibility
-   8. More advanced users can easily add their own scikit-learn compatible modeling algorithms to STREAMLINE
-
-***
 ## What does STREAMLINE automate?
-Currently, STREAMLINE automates the following aspects of analysis (see schematic below):
-   1. Exploratory analysis
-   2. Data processing (basic cleaning, CV partitioning, scaling, imputation)
-   3. Feature processing
+Currently, STREAMLINE automates the following aspects of a machine learning analysis pipeline (see [schematic](index.rst)):
+   1. Exploratory analysis (on the initial and processed dataset)
+   2. Data processing 
+      * Basic data cleaning: instances with no outcome, features users want to ignore, features and instances with high missingness (i.e. # of missing values), and one of each pair of highly correlated features.
+      * Basic feature engineering: add/encode missingness features and apply one-hot encoding to categorical features.
+      * CV partitioning
+      * Missing value imputation
+      * Scaling of features (using standard scalar)
+   4. Feature processing
       * Filter-based feature importance estimation (Mutual information & MultiSURF)
       * Feature selection (using a 'collective', i.e. multi-algorithm approach)
-   4. Modeling with 'Optuna' hyperparameter optimization using up to 15 implemented ML algorithms (see below)
-   5. Testing data evaluations using 15 classification metrics and model feature importance estimation
+   4. Modeling with 'Optuna' hyperparameter optimization using the 16 implemented ML algorithms (see below)
+   5. Evaluation of all modeles on respective testing datasets using 16 classification metrics and model feature importance estimation
    6. Generates and organizes all results and other outputs including:
       * Tables (Model evaluations, runtimes, selected hyperparameters, etc.)
       * Publication-ready plots/figures & model visualizations
@@ -73,99 +87,44 @@ The following 16 scikit-learn compatible ML modeling algorithms are currently in
 
 Classification-relevant hyperparameter values and ranges have been carefully
 selected for each algorithm and have been pre-specified for the automated (Optuna-driven)
-automated hyperparameter sweep.
+automated hyperparameter sweep. Thus, the user does not need to specify any algorithm hyperparameters or value options.
 
 The automatically formatted PDF reports generated by STREAMLINE are intended
 to give a brief summary of pipeline settings and key results.
-A folder containing all results, statistical analyses publication-ready plots/figures,
-models, and other outputs is saved allowing users to carefully examine all aspects of
-analysis performance.  
-
-We have also included a variety of useful Jupyter Notebooks
-designed to operate on this output folder giving users quick paths to do even more
-with the pipeline output. Examples include:
-1. Accessing prediction probabilities
-2. Regenerating figures to user-specifications
-3. Trying out the effect of different prediction thresholds on selected
-   models with an interactive slider
-4. Re-evaluating models when applying a new prediction threshold
-5. Generating an interactive model feature importance ranking visualization across
-   all ML algorithms
+An 'experiment folder' is also output containing all results, statistical analyses publication-ready plots/figures,
+models, and other outputs is also saved allowing users to carefully examine all aspects of
+analysis performance in a transparent manner.  
 
 Notably, STREAMLINE does NOT automate the following elements, as they are still best
-completed by human experts: (1) account for bias in data
-collection, (2) anything beyond simple feature engineering and data cleaning.
+completed by human experts: (1) accounting for bias or fairness in data
+collection, (2) feature engineering and data cleaning that requires domain knowledge.
 We recommend users consider conducting these items, as needed, prior to applying STREAMLINE.
 
 ***
-## What can STREAMLINE be used for?
-STREAMLINE can be used as:
-1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the included modeling algorithms
-2. A framework to compare established scikit-learn compatible ML modeling algorithms to each other or to new algorithms
-3. A baseline standard of comparison (i.e. positive control) with which to evaluate other AutoML tools that seek to optimize ML pipeline assembly as part of their methodology
-4. A framework to quickly run an exploratory analysis and/or feature importance estimation/feature selection prior to using some other methodology for ML modeling
-5. An educational example of how to integrate some of the many amazing Python-based data science tools currently available (in particular pandas, scipy, optuna, and scikit-learn).
-6. A framework from which to create a new, expanded, adapted, or modified ML analysis pipeline
-7. A framework to add and evaluate new modeling algorithms (see 'Adding New Modeling Algorithms')
+## Can I do more with the STREAMLINE output after it completes?
+Yes, we have assempled a variety of 'useful' Jupyter Notebooks
+designed to operate on an experiment folder allowing users to do even more
+with the pipeline output. Examples include:
+1. Accessing prediction probabilities.
+2. Regenerating figures to user-specifications.
+3. Trying out the effect of different prediction thresholds on selected
+   models with an interactive slider.
+4. Re-evaluating models when applying a new prediction threshold.
+5. Generating an interactive model feature importance ranking visualization across
+   all ML algorithms.
+6. Generating an interpretable model vizualization for either decision tree or genetic programming models.
 
 ***
-## What level of computing skill is required for use?
-STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI),
-the most naive user needs only know how to navigate their PC file system, specify folder/file paths,
-and have a Google Drive account (to run STREAMLINE serially on Google Colab).
+## How does STREAMLINE avoid data leakage?
+Assembling a machine learning pipeline unfortunately affords a user many opportunities to incorrectly allow data leakage. 
+Data leakage is when information that wouldn't normally be available or that comes from outside the training dataset is used to create the model. 
 
-Those with a very basic knowledge of python and computer environments can apply
-STREAMLINE locally and serially using the included jupyter notebook.
+First, STREAMLINE makes it easy for a user to exclude features from a dataset that may contribute to data leakage (e.g. a feature that would not 
+be available when applying the model to make predictions). A user can specify features to be excluded from modeling using the `ignore_features_path` parameter.
 
-Those comfortable with command lines can run STREAMLINE locally or on a computing cluster.
+Second, STREAMLINE's pipeline is set up to specifically avoid learning any information that might eventually be a part of a testing data partition. Following CV partitioning, all  learning required to conduct imputation, scaling, feature importance evaluation, feature selection, and modeling is done using the respective training partition alone. For imputation, the same trained imputation strategy is applied to the respective testing data. For scaling, the same trained scalar is applied to the respective testing data. For feature selection, the same features removed from the training data are removed from the testing data. And for modeling, the testing data is only used for model evaluation.
 
-***
-## Which STREAMLINE run mode should I use?
-This multi-phase pipeline has been set up to run in one of four ways:
-
-1. A 'Notebook' within Google Colab [Almost Anyone]:
-    * Advantages
-      * No coding or PC environment experience needed
-      * Computing can be performed directly on Google Cloud
-      * One-click run of whole pipeline
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Slowest of the run options
-      * Limited by google cloud computing allowances (may only work for smaller datasets)
-    * Notes: Requires a Google Drive account (free)
-
-2. Locally with Jupyter Notebook (included) [Basic Experience]:
-    * Advantages:
-      * Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience,
-      * Offers in-notebook viewing of results
-      * Offers in-notebook documentation of the run phases
-      * One-click run of whole pipeline
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Slower runtime than from command-line
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-
-3. Locally from the command line [Command-line Users]:
-    * Advantages:
-      * Typically runs faster than within Jupyter Notebook
-      * An easier more versatile option for those with command-line experience
-      * One-command run of whole pipeline available when using a configuration file to run
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Command-line experience recommended
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-
-4. On HPC Clusters from command line [Computing Cluster Users]:
-Cluster runs of STREAMLINE were set up using `dask-jobqueue` and thus should support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html). Currently we have only directly tested STREAMLINE on SLURM and LSF clusters.
-Further codebase adaptation may be needed for clusters types not on the above link.
-    * Advantages:
-      * By far the fastest, most efficient way to run STREAMLINE
-      * Offers ability to run STREAMLINE over 7 types of HPC systems
-      * Multiple HPC run strategies available for flexibility
-    * Disadvantages:
-      * Experience with command-line and dask-compatible clusters recommended
-      * Access to a computing cluster required
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations.
+This same strategy is applied to replication data later in the pipeline. When evaluating a given trained model on replication data, that dataset is imputed and scaled in the same way as the original training dataset for that model. And further, the same features that were removed during feature selection on the training data are removed for that replication dataset evaluation.
 
 ***
 ## Is STREAMLINE reproducible?
@@ -176,46 +135,60 @@ pipeline settings, and random seed are used.
 When `timeout` is not set to `None`, STREAMLINE output can sometimes vary slightly (particularly when parallelized)
 since Optuna (for hyperparameter optimization) may not complete the same
 number of optimization trials within the user specified time limit on different
-computing resources. However, having a `timeout` value specified helps ensure STREAMLINE run completion
+computing resources. 
+
+However, having a `timeout` value specified helps ensure STREAMLINE run completion
 within a reasonable time frame.
 
-## STREAMLINE Implementation Highlights
-* Overview
- * Pipeline includes reliable default run parameters that can be adjusted for further customization.
- * Easily compare ML performance between multiple target datasets (e.g. with different feature subsets)
- * Easily conduct an exploratory analysis including: (1) basic dataset characteristics: data dimensions, feature stats, missing value counts, and class balance, (2) detection of categorical vs. quantiative features, (3) feature correlation (with heatmap), and (4) univariate analyses with Chi-Square (categorical features), or Mann-Whitney U-Test (quantitative features).
+***
+## Which STREAMLINE run mode should I use?
+This multi-phase pipeline has been set up to run in one of four ways:
 
-* Preprocessing
- * Option to manually specify which features to treat as categorical and quantitative.
- * Option to manually specify features in loaded dataset to ignore in analysis.
- * Option to utilize 'group' cross validation partitioning: Case/control pairs or groups that have been matched based on one or more covariates will be kept together within CV data partitions.
- * Imputation is completed using mode imputation for categorical variables first, followed by MICE-based iterative imputation for quantitative features. There is an option to use mean imputation for quantitative features when imputation computing cost is prohibitive in large datasets.
+1. On Google Cloud as a Google Colab Notebook [Anyone can run]:
+    * Advantages
+      * No coding or PC environment experience needed
+      * Automatically installs and uses the most recent version of STREAMLINE
+      * Computing can performed directly on Google Cloud from anywhere
+      * One-click run of whole pipeline (all phases)
+      * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
+      * Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience
+    * Disadvantages:
+      * Can only run pipeline serially
+      * Slowest of the run options
+      * Limited by google cloud computing allowances (may only work for smaller datasets)
+    * Notes: Requires a Google account (free)
 
-* Feature Importance and Selection
- * Data scaling, imputation, and feature selection are all conducted within respective CV partitions to prevent data leakage (i.e. testing data is not seen for any aspect of learning until final model evaluation).
- * The scaling, imputation, and feature selection data transformations (based only on the training data) are saved (i.e. 'pickled') so that they can be applied in the same way to testing partitions, and in the future to any replication data.
- * Collective feature selection is used: Both mutual information (proficient at detecting univariate associations) and MultiSURF (a Relief-based algorithm proficient at detecting both univariate and epistatic interactions) are run, and features are only removed from consideration if both algorithms fail to detect an informative signal (i.e. score > 0). This ensures that interacting features that may have no univariate association with class are not removed from the data prior to modeling.
- * Automatically outputs average feature importance bar-plots from feature importance/feature selection phase.
- * Since MultiSURF scales linearly with # of features and quadratically with # of instances, there is an option to select a random instance subset for MultiSURF scoring to reduce computational burden.
+2. Locally as a Jupyter Notebook [Basic experience]:
+    * Advantages:
+      * Does not rely on free computing limitations of Google Cloud (but rather your own computer's limitations)
+      * One-click run of whole pipeline (all phases)
+      * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
+      * Allows easy customizability of all aspects of the pipeline with minimal coding/environment experience (including hyperparameter value ranges)
+    * Disadvantages:
+      * Can only run pipeline serially
+      * Slower runtime than from command-line
+      * Beginners have to set up their computing environment
+    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
-* Modeling
- * Includes 3 rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS (to run optionally). These 'learning classifier systems' have been demonstrated to be able to detect complex associations while providing human interpretable models in the form of IF:THEN rule-sets. The ExSTraCS algorithm was developed by our research group to specifically handle the challenges of scalability, noise, and detection of epistasis and genetic heterogeneity in biomedical data mining.  
- * Utilizes the 'optuna' package to conduct automated Bayesian hyperparameter optimization during modeling (and optionally outputs plots summarizing the sweep).
- * We have sought to specify a comprehensive range of relevant hyperparameter options for all included ML algorithms.
- * Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS) These can be used in place of permutation feature importance estimates by setting the parameter `use_uniform_fi` to 'False'.
- * All other algorithms rely on estimating feature importance using permutation feature importance.
- * All models are evaluated, reporting 16 classification metrics: Accuracy, Balanced Accuracy, F1 Score, Sensitivity(Recall), Specificity, Precision (PPV), True Positives (TP), True Negatives (TN), False Positives (FP), False Negatives (FN), Negative Predictive Value (NPV), Likeliehood Ratio + (LR+), Likeliehood Ratio - (LR-), ROC AUC, PRC AUC, and PRC APS.
- * All models are saved as 'pickle' files so that they can be loaded and reapplied in the future.
+3. Locally from the command line [Command-line Users]:
+    * Advantages:
+      * Typically runs faster than within Jupyter Notebook
+      * A more versatile option for those with command-line experience
+      * One-command run of whole pipeline available when using a configuration file to run
+      * Can optionally run the pipeline one phase at a time
+    * Disadvantages:
+      * Can only run pipeline serially
+      * Command-line experience recommended
+    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
-* Post-Analysis
- * Outputs ROC and PRC plots for each ML modeling algorithm displaying individual n-fold CV runs and average the average curve.
- * Outputs boxplots for each classification metric comparing ML modeling performance (across n-fold CV).
- * Outputs boxplots of feature importance estimation for each ML modeling algorithm (across n-fold CV).
- * Outputs our proposed 'composite feature importance plots' to examine feature importance estimate consistency (or lack of consistency) across all ML models (i.e. all algorithms)
- * Outputs summary ROC and PRC plots comparing average curves across all ML algorithms.
- * Collects run-time information on each phase of the pipeline and for the training of each ML algorithm model.
- * For each dataset, Kruskall-Wallis and subsequent pairwise Mann-Whitney U-Tests evaluates statistical significance of ML algorithm modeling performance differences for all metrics.
- * The same statistical tests (Kruskall-Wallis and Mann-Whitney U-Test) are conducted comparing datasets using the best performing modeling algorithm (for a given metric and dataset).
- * Outputs boxplots comparing performance of multiple datasets analyzed either across CV runs of a single algorithm and metric, or across average for each algorithm for a single metric.
- * A formatted PDF report is automatically generated giving a snapshot of all key pipeline results.
- * A script is included to apply all trained (and 'pickled') models to an external replication dataset to further evaluate model generalizability. This script (1) conducts an exploratory analysis of the new dataset, (2) uses the same scaling, imputation, and feature subsets determined from n-fold cv training, yielding 'n' versions of the replication dataset to be applied to the respective models, (3) applies and evaluates all models with these respective versions of the replication data, (4) outputs the same set of aforementioned boxplots, ROC, and PRC plots, and (5) automatically generates a new, formatted PDF report summarizing these applied results.
+4. On HPC Clusters from command line [Computing Cluster Users]:
+    * Advantages:
+      * By far the fastest, most efficient way to run STREAMLINE
+      * Offers ability to run STREAMLINE over 7 types of HPC systems
+      * One-command run of whole pipeline available when using a configuration file to run
+      * Can optionally run the pipeline one phase at a time
+    * Disadvantages:
+      * Experience with command-line and dask-compatible clusters recommended
+      * Access to a computing cluster required
+    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations. Cluster runs of STREAMLINE were set up using `dask-jobqueue` and thus should support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html). Currently we have only directly tested STREAMLINE on SLURM and LSF clusters. Further codebase adaptation may be needed for clusters types not on the above link.
+

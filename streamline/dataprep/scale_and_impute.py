@@ -194,7 +194,7 @@ class ScaleAndImpute(Job):
                 '/scale_impute/ordinal_imputer_cv' + str(self.cv_count) + '.pickle', 'wb')
             pickle.dump(imputer, outfile)
             outfile.close()
-        else:  # Impute quantitative features (x) with simple mean imputation
+        else:  # Impute quantitative features (x) with simple median imputation
             median_dict = {}
             for c in x_train.columns:
                 if not (c in self.categorical_variables):
