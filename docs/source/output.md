@@ -1,4 +1,4 @@
-# Explaining STREAMLINE Output
+# Navigating STREAMLINE Output
 This section describes the files in the experiment directory with reference to a 
 sample run on the [demonstration dataset](sample.md#demonstration-data)
 

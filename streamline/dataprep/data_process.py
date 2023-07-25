@@ -1072,10 +1072,16 @@ class DataProcess(Job):
         new_feature_name = feature_name.replace(" ", "")
         new_feature_name = new_feature_name.replace("*", "")
         new_feature_name = new_feature_name.replace("/", "")
-        plt.savefig(self.experiment_path + '/' + self.dataset.name
-                    + '/exploratory/univariate_analyses/' + 'Plot_' +
-                    str(new_feature_name) + ".png", bbox_inches="tight", format='png')
-        plt.close('all')
+        if feature_name in self.dataset.categorical_variables:
+            plt.savefig(self.experiment_path + '/' + self.dataset.name
+                        + '/exploratory/univariate_analyses/' + 'Barplot_' +
+                        str(new_feature_name) + ".png", bbox_inches="tight", format='png')
+            plt.close('all')
+        else:
+            plt.savefig(self.experiment_path + '/' + self.dataset.name
+                        + '/exploratory/univariate_analyses/' + 'Boxplot_' +
+                        str(new_feature_name) + ".png", bbox_inches="tight", format='png')
+            plt.close('all')
         # plt.cla() # not required
 
     def save_runtime(self):
