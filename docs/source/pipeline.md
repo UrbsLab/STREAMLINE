@@ -194,7 +194,7 @@ This final phase generates a pre-formatted PDF report summarizing (1) STREAMLINE
 
 Separate reports are generated representing the findings from running Phases 1-7, i.e. 'Testing Data Evaluation Report', as well as for Phase 8 if run on replication data, i.e. 'Replication Data Evaluation Report'. 
 
-* **Parallizability:** Runs once.
+* **Parallizability:** Runs once - not parallizable
 * **Run Time:** Moderately fast
 
 * **Output:** One or more PDF reports
