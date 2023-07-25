@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from streamline.dataprep.data_process import DataProcess
-from streamline.modeling.submodels import ClassificationModel, RegressionModel
+from streamline.modeling.submodels import BinaryClassificationModel, RegressionModel
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.dataset import Dataset
 from streamline.utils.job import Job
@@ -549,7 +549,7 @@ class ReplicateJob(Job):
         # Prediction evaluation
         m = None
         if self.outcome_type == "Categorical":
-            m = ClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
+            m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
         elif self.outcome_type == "Continuous":
             m = RegressionModel(None, algorithm, scoring_metric=self.scoring_metric)
         m.model = model

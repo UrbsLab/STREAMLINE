@@ -1,9 +1,9 @@
 from abc import ABC
-from streamline.modeling.submodels import MulticlassClassificationModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from sklearn.linear_model import SGDClassifier as SGD
 
 
-class ElasticNetClassifier(MulticlassClassificationModel, ABC):
+class ElasticNetClassifier(BinaryClassificationModel, ABC):
     model_name = "Elastic Net"
     small_name = "EN"
     color = "aquamarine"

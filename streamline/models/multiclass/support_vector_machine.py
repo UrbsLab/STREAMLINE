@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import MulticlassClassificationModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.parameters import get_parameters
 from sklearn.svm import SVC as SVC
 
 
-class SupportVectorClassifier(MulticlassClassificationModel, ABC):
+class SupportVectorClassifier(BinaryClassificationModel, ABC):
     model_name = "Support Vector Machine"
     small_name = "SVM"
     color = "orange"

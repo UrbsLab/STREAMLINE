@@ -1,10 +1,10 @@
 from abc import ABC
-from streamline.modeling.submodels import MulticlassClassificationModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.parameters import get_parameters
 from gplearn.genetic import SymbolicClassifier as GP
 
 
-class GPClassifier(MulticlassClassificationModel, ABC):
+class GPClassifier(BinaryClassificationModel, ABC):
     model_name = "Genetic Programming"
     small_name = "GP"
     color = "purple"

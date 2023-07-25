@@ -1,12 +1,12 @@
 from abc import ABC
-from streamline.modeling.submodels import MulticlassClassificationModel
+from streamline.modeling.submodels import BinaryClassificationModel
 from streamline.modeling.parameters import get_parameters
 from skeLCS import eLCS
 from skXCS import XCS
 from skExSTraCS import ExSTraCS
 
 
-class eLCSClassifier(MulticlassClassificationModel, ABC):
+class eLCSClassifier(BinaryClassificationModel, ABC):
     model_name = "eLCS"
     small_name = "eLCS"
     color = "green"
