@@ -32,7 +32,7 @@ class eLCSClassifier(MulticlassClassificationModel, ABC):
         return mean_cv_score
 
 
-class XCSClassifier(BinaryClassificationModel, ABC):
+class XCSClassifier(MulticlassClassificationModel, ABC):
     model_name = "XCS"
     small_name = "XCS"
     color = "olive"
@@ -58,7 +58,7 @@ class XCSClassifier(BinaryClassificationModel, ABC):
         return mean_cv_score
 
 
-class ExSTraCSClassifier(BinaryClassificationModel, ABC):
+class ExSTraCSClassifier(MulticlassClassificationModel, ABC):
     model_name = "ExSTraCS"
     small_name = "ExSTraCS"
     color = "lawngreen"

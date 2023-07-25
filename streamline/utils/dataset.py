@@ -70,7 +70,7 @@ class Dataset:
             if self.data[self.outcome_label].nunique() == 2:
                 self.outcome_type = "Binary"
             elif 2 < self.data[self.outcome_label].nunique() <= self.categorical_cutoff:
-                self.outcome_type = "Categorical"
+                self.outcome_type = "Multiclass"
             else:
                 self.outcome_type = "Continuous"
         logging.info("Loaded " + self.outcome_type + " Outcome Type Dataset")

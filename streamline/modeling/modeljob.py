@@ -183,10 +183,13 @@ class ModelJob(Job):
             residual_train = y_train - y_train_pred
             residual_test = y_test - y_pred
             return_list = ([metric_list, fi], [residual_train, residual_test, y_train_pred, y_pred, y_train, y_test])
-        else:
+        elif model.model_type == "BinaryClassification":
             metric_list, fpr, tpr, roc_auc, prec, recall, \
                 prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
             return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
+        elif model.model_type == "MulticlassClassification":
+            metric_list = model.model_evaluation(x_test, y_test)
+            return_list = [metric_list]
 
         return return_list
 

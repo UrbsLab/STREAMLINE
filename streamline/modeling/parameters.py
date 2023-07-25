@@ -148,7 +148,7 @@ regressor_parameters = {
 }
 
 
-def get_parameters(algorithm_name, model_type="Classification"):
+def get_parameters(algorithm_name, model_type="BinaryClassification"):
     """
     Get default model parameter range by model name
     Args:
@@ -158,7 +158,9 @@ def get_parameters(algorithm_name, model_type="Classification"):
     Returns: default parameter grid as dict
 
     """
-    if model_type == "Classification":
+    if model_type == "BinaryClassification":
         return classifier_parameters[algorithm_name]
     elif model_type == "Regression":
         return regressor_parameters[algorithm_name]
+    else:
+        raise Exception("Not Defined")

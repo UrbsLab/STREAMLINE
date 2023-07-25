@@ -9,8 +9,8 @@ from streamline.runners.imputation_runner import ImputationRunner
 from streamline.runners.feature_runner import FeatureImportanceRunner
 from streamline.runners.feature_runner import FeatureSelectionRunner
 from streamline.modeling.modeljob import ModelJob
-from streamline.models.classification.linear_model import LogisticRegression
-from streamline.models.classification.naive_bayes import NaiveBayesClassifier
+from streamline.models.binary_classification.linear_model import LogisticRegression
+from streamline.models.binary_classification.naive_bayes import NaiveBayesClassifier
 
 pytest.skip("Tested Already", allow_module_level=True)
 

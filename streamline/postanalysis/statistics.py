@@ -141,6 +141,12 @@ class StatsJob(Job):
             logging.info('Generating ROC and PRC plots...')
             self.do_plot_roc(result_table)
             self.do_plot_prc(result_table)
+        elif self.outcome_type == "Multiclass":
+            result_table, metric_dict = self.primary_stats_multiclass()
+            # Plot ROC and PRC curves comparing average ML algorithm performance (averaged over all CVs)
+            # logging.info('Generating ROC and PRC plots...')
+            # self.do_plot_roc(result_table)
+            # self.do_plot_prc(result_table)
         elif self.outcome_type == "Continuous":
             result_table, metric_dict = self.primary_stats_regression()
             self.residuals_regression()
@@ -166,7 +172,7 @@ class StatsJob(Job):
             self.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
-        if self.outcome_type == "Binary":
+        if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
             ave_or_median = 'Median'
         else:
             ave_or_median = 'Mean'
@@ -516,6 +522,14 @@ class StatsJob(Job):
         result_table = pd.DataFrame.from_dict(result_table)
         result_table.set_index('algorithm', inplace=True)
         return result_table, metric_dict
+
+    def primary_stats_multiclass(self, master_list=None, rep_data=None):
+        """
+        Combine classification metrics and model feature importance scores
+        as well as ROC and PRC plot data across all CV datasets.
+        Generate ROC and PRC plots comparing separate CV models for each individual modeling algorithm.
+        """
+        pass
 
     def primary_stats_classification(self, master_list=None, rep_data=None):
         """

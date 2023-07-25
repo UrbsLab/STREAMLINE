@@ -2,11 +2,14 @@ import os
 from pathlib import Path
 
 
-def load_class_from_folder(model_type="Classification"):
+def load_class_from_folder(model_type="BinaryClassification"):
     folder_path, package_path = None, None
-    if model_type == "Classification":
-        folder_path = os.path.join(Path(__file__).parent.parent, 'models/classification')
-        package_path = 'streamline.models.classification'
+    if model_type == "BinaryClassification":
+        folder_path = os.path.join(Path(__file__).parent.parent, 'models/binary_classification')
+        package_path = 'streamline.models.binary_classification'
+    elif model_type == "MulticlassClassification":
+        folder_path = os.path.join(Path(__file__).parent.parent, 'models/multiclass_classification')
+        package_path = 'streamline.models.multiclass_classification'
     elif model_type == "Regression":
         folder_path = os.path.join(Path(__file__).parent.parent, 'models/regression')
         package_path = 'streamline.models.regression'

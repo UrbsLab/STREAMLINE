@@ -84,6 +84,7 @@ class ModelExperimentRunner:
         is_supported_model, model_str_to_obj = None, None
 
         if self.outcome_type == "Binary":
+            logging.info("Binary Multiclass Classification Models")
             with GlobalImport() as gi:
                 from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
                 from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
@@ -92,6 +93,7 @@ class ModelExperimentRunner:
                 gi()
 
         elif self.outcome_type == "Continuous":
+            logging.info("Using Regression Models")
             if scoring_metric == 'balanced_accuracy':
                 logging.warning("Can't have balanced_accuracy as regression scoring metric, using explained_variance")
                 scoring_metric = 'explained_variance'
@@ -100,6 +102,14 @@ class ModelExperimentRunner:
                 from streamline.modeling.regression_utils import REGRESSION_ABBREVIATION as ABBREVIATION
                 from streamline.modeling.regression_utils import REGRESSION_COLORS as COLORS
                 from streamline.modeling.regression_utils import SUPPORTED_REGRESSION_MODELS as SUPPORTED_MODELS
+                gi()
+        elif self.outcome_type == "Multiclass":
+            logging.info("Using Multiclass Classification Models")
+            with GlobalImport() as gi:
+                from streamline.modeling.multiclass_utils import is_supported_model, model_str_to_obj
+                from streamline.modeling.multiclass_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION
+                from streamline.modeling.multiclass_utils import CLASSIFICATION_COLORS as COLORS
+                from streamline.modeling.multiclass_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
                 gi()
         else:
             raise Exception("Unknown Outcome Type:" + str(self.outcome_type))
@@ -219,6 +229,7 @@ class ModelExperimentRunner:
                                                             metric_direction=self.metric_direction,
                                                             random_state=self.random_state,
                                                             cv=None, n_jobs=self.n_jobs)
+                        # logging.warning(model.__class__)
                     else:
                         model = model_str_to_obj(algorithm)(cv_folds=3,
                                                             scoring_metric=self.scoring_metric,
