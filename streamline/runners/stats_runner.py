@@ -16,7 +16,7 @@ class StatsRunner:
     """
 
     def __init__(self, output_path, experiment_name,
-                 outcome_label="Class", outcome_type="Categorical", instance_label=None,
+                 outcome_label="Class", outcome_type="Binary", instance_label=None,
                  scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False,

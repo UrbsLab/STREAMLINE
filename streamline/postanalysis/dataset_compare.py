@@ -22,7 +22,7 @@ class CompareJob(Job):
     """
 
     def __init__(self, output_path=None, experiment_name=None, experiment_path=None,
-                 outcome_label="Class", outcome_type="Categorical", instance_label=None, sig_cutoff=0.05,
+                 outcome_label="Class", outcome_type="Binary", instance_label=None, sig_cutoff=0.05,
                  show_plots=False):
         super().__init__()
         assert (output_path is not None and experiment_name is not None) or (experiment_path is not None)
@@ -355,7 +355,7 @@ class CompareJob(Job):
         Generate a boxplot comparing average algorithm performance (for a given target metric)
         across all target datasets to be compared.
         """
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             metric_list = ['ROC AUC', 'PRC AUC']  # Hard coded
         else:
             metric_list = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error',

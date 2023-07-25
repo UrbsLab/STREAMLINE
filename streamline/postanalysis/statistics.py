@@ -116,7 +116,7 @@ class StatsJob(Job):
 
         # Translate metric name from scikit-learn standard
         # (currently balanced accuracy is hardcoded for use in generating FI plots due to no-skill normalization)
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1 Score',
                                 'recall': 'Sensitivity (Recall)', 'precision': 'Precision (PPV)', 'roc_auc': 'ROC AUC'}
         elif self.outcome_type == "Continuous":
@@ -132,7 +132,7 @@ class StatsJob(Job):
         # algorithms in plots, and original ordered feature name list
         self.preparation()
 
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             # Gather and summarize all evaluation metrics for each algorithm across all CVs.
             # Returns result_table used to plot average ROC and PRC plots and metric_dict
             # organizing all metrics over all algorithms and CVs.
@@ -166,7 +166,7 @@ class StatsJob(Job):
             self.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             ave_or_median = 'Median'
         else:
             ave_or_median = 'Mean'

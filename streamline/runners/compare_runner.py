@@ -15,7 +15,7 @@ class CompareRunner:
     """
 
     def __init__(self, output_path, experiment_name, experiment_path=None,
-                 outcome_label="Class", outcome_type="Categorical", instance_label=None, sig_cutoff=0.05,
+                 outcome_label="Class", outcome_type="Binary", instance_label=None, sig_cutoff=0.05,
                  show_plots=False,
                  run_cluster=False, queue='defq', reserved_memory=4):
         """

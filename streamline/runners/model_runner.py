@@ -83,7 +83,7 @@ class ModelExperimentRunner:
 
         is_supported_model, model_str_to_obj = None, None
 
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             with GlobalImport() as gi:
                 from streamline.modeling.classification_utils import is_supported_model, model_str_to_obj
                 from streamline.modeling.classification_utils import CLASSIFICATION_ABBREVIATION as ABBREVIATION

@@ -953,7 +953,7 @@ class DataProcess(Job):
         outcome_label = self.dataset.outcome_label
         p_val, test_stat, test_name = None, None, None
         try:
-            if self.outcome_type == "Categorical":
+            if self.outcome_type == "Binary":
                 # test_name, test_stat = None, None
                 # Feature and outcome both are discrete/categorical/binary
                 if feature_name in self.dataset.categorical_variables:
@@ -1040,7 +1040,7 @@ class DataProcess(Job):
 
         """
         # Feature and Outcome are discrete/categorical/binary
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             if feature_name in self.dataset.categorical_variables:
                 # Generate contingency table count bar plot.
                 # Calculate Contingency Table - Counts

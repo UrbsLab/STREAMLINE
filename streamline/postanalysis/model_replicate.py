@@ -417,7 +417,7 @@ class ReplicateJob(Job):
 
             eval_dict = dict()
             for algorithm in self.algorithms:
-                if self.outcome_type == "Categorical":
+                if self.outcome_type == "Binary":
                     ret = self.eval_model(algorithm, cv_count, x_test, y_test)
                 elif self.outcome_type == "Continuous":
                     ret, residuals = self.eval_model(algorithm, cv_count, x_test, y_test)
@@ -436,7 +436,7 @@ class ReplicateJob(Job):
                          plot_roc=self.plot_roc, plot_prc=self.plot_prc, plot_fi_box=False,
                          plot_metric_boxplots=self.plot_metric_boxplots, show_plots=self.show_plots)
 
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             result_table, metric_dict = stats.primary_stats_classification(master_list, rep_data.data)
             stats.do_plot_roc(result_table)
             stats.do_plot_prc(result_table, rep_data.data, True)
@@ -548,7 +548,7 @@ class ReplicateJob(Job):
         infile.close()
         # Prediction evaluation
         m = None
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
         elif self.outcome_type == "Continuous":
             m = RegressionModel(None, algorithm, scoring_metric=self.scoring_metric)
@@ -562,7 +562,7 @@ class ReplicateJob(Job):
             y_pred = m.predict(x_test)
             residual_test = y_test - y_pred
             return_list = ([metric_list, None], [residual_test, y_pred, y_test])
-        elif self.outcome_type == "Categorical":
+        elif self.outcome_type == "Binary":
             metric_list, fpr, tpr, roc_auc, prec, recall, \
                 prec_rec_auc, ave_prec, probas_ = m.model_evaluation(x_test, y_test)
             return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, None, probas_]

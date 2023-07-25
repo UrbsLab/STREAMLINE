@@ -85,7 +85,7 @@ class ReplicationRunner:
         self.scoring_metric = metadata['Primary Metric']
         self.random_state = metadata['Random Seed']
 
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             from streamline.modeling.classification_utils import SUPPORTED_CLASSIFICATION_MODELS as SUPPORTED_MODELS
 
         elif self.outcome_type == "Continuous":

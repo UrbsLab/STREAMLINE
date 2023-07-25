@@ -67,7 +67,9 @@ class Dataset:
             raise Exception("Instance label not found in file")
 
         if self.outcome_type is None:
-            if self.data[self.outcome_label].nunique() <= self.categorical_cutoff:
+            if self.data[self.outcome_label].nunique() == 2:
+                self.outcome_type = "Binary"
+            elif 2 < self.data[self.outcome_label].nunique() <= self.categorical_cutoff:
                 self.outcome_type = "Categorical"
             else:
                 self.outcome_type = "Continuous"
@@ -261,7 +263,7 @@ class Dataset:
         logging.info('    Quantitative = ' + str(len(self.quantitative_variables)))
         logging.info('Missing Count = ' + str(total_missing))
         logging.info('    Missing Percent = ' + str(percent_missing))
-        if self.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             logging.info('Class Counts: ----------------')
             logging.info('Class Count Information')
             df_value_counts = pd.DataFrame(class_counts)
@@ -282,7 +284,7 @@ class Dataset:
 
         # Generate and export class count bar graph
         if plot:
-            if self.outcome_type == "Categorical":
+            if self.outcome_type == "Binary":
                 class_counts.plot(kind='bar')
                 plt.ylabel('Count')
                 plt.title('Class Counts')
