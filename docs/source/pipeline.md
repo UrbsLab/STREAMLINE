@@ -1,4 +1,4 @@
-#  Pipeline Detailed Walkthrough
+#  Detailed Pipeline Walkthrough
 This section is for users who want a more detailed understanding of (1) what STREAMLINE does, (2) what happens in durring each phase, (3) why it's designed the way it has been, (4) what user options are available to customize a run, and (5) what to expect when running a given phase. Phases 1-6 make up the core automated pipeline, with Phase 7 and beyond being run optionally based on user needs. Phases are organized to both encapsulate related pipeline elements, as well as to address practical computational needs. STREAMLINE includes reliable default run parameters so that it can easily be used 'as-is', but these parameters can be adjusted for further customization. We refer to a single run of the entire STREAMLINE pipeline as an 'experiment', with all outputs saved to a single 'experiment folder' for later examination and re-use.
 
 To avoid confusion on 'dataset' terminology we briefly review our definitions here:
