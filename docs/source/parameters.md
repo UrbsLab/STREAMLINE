@@ -1,4 +1,4 @@
-# STREAMLINE Run Parameters
+# Run Parameters
 
 ## Overview
 Here we review the run parameters available for each of the 11 phases and provide some additional run examples. 
