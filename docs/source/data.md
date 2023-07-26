@@ -1,12 +1,13 @@
 # Datasets
 
+***
 ## Input Data Requirements
 Here we specify the formatting requirements for datasets when running STREAMLINE. 
 1. Dataset files are in comma-separated or tab-delimited format with the extension `.txt`, `.csv`, or `.tsv`.
 2. Data columns should represent variables, and rows should represent instances (i.e. samples).
 3. Any missing values in the dataset should be left blank (i.e. NaN) or indicated with the text 'NA'.
     * Do not leave placeholder values for missing values such as 99, -99, or text other than 'NA'.
-4. Dataset files should include a header that gives column lables.
+4. Dataset files should include a header that gives column names.
 5. Data columns should only include the following (column order does not matter):
     * Outcome/Class Label (i.e. the dependant variable) - column indicated by `class_label`
     * Instance Label (i.e. unique identifiers for each instance/row in the dataset) \[Optional] - column indicated by `instance_label`
@@ -51,7 +52,7 @@ To avoid missinterpretation, we recommend users numerically encode class labels 
 
 **Feature Transformation:** While STREAMLINE uses a standard scalar to transform features in this pipeline, many other transformations are possible (for various reasons). Users that wish to apply these alternative transformations should do so before running STREAMLINE and then optionally turn of the standard scaling with `scale_data`.
 
-
+***
 ## Demonstration Data
 For demonstration and quick code-testing purposes, the STREAMLINE repository includes two small 'target datasets' that would be used in Phases 1-7, as well as a small 'replication dataset' that would be used in Phase 8. These datasets can be found in `./data/DemoData` and `./data/DemoRepData`, respectively.
 
@@ -82,3 +83,5 @@ Modifications included adding a simulated instance that includes a new (as-of-ye
 2. The 3-value text-valued categorical feature
 3. The binary numerically encoded categorical feature
 4. The 3-value numerically encoded categorical feature
+
+The code to generate the additional features and instances within the custom `hcc-data_example_custom.csv` and `hcc-data_example_custom_rep.csv` can be found in the notebook at `/data/Generate_Expanded_HCC_dataset.ipynb`.
