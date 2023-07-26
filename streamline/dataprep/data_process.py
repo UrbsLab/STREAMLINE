@@ -408,10 +408,24 @@ class DataProcess(Job):
         Wrapper function for all data cleaning and feature engineering data manipulation
         """
         # Dataframe to record feature statistics
-        transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
-                                              'Categorical Features',
-                                              'Quantitative Features', 'Missing Values',
-                                              'Missing Percent', 'Class 0', 'Class 1'])
+
+        n_class = len(self.counts_summary(save=False)) - 6
+
+        if self.outcome_type == "Binary":
+            transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                                  'Categorical Features',
+                                                  'Quantitative Features', 'Missing Values',
+                                                  'Missing Percent', 'Class 0', 'Class 1'])
+        elif self.outcome_type == "Multiclass":
+            transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                                  'Categorical Features',
+                                                  'Quantitative Features', 'Missing Values',
+                                                  'Missing Percent'] + ['Class ' + str(i) for i in range(n_class)])
+        elif self.outcome_type == "Continuous":
+            transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                                  'Categorical Features',
+                                                  'Quantitative Features', 'Missing Values',
+                                                  'Missing Percent'])
 
         transition_df.loc["Original"] = self.counts_summary(save=False)
 
@@ -504,7 +518,7 @@ class DataProcess(Job):
                               index=False)
             # Calculate, print, and export class counts
 
-            if self.dataset.outcome_type == "Categorical":
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                 logging.info('Class Counts: ----------------')
                 logging.info('Class Count Information')
                 df_value_counts = pd.DataFrame(class_counts)
@@ -543,7 +557,7 @@ class DataProcess(Job):
             # Generate and export class count bar graph
 
             if plot:
-                if self.dataset.outcome_type == "Categorical":
+                if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                     class_counts.plot(kind='bar')
                     plt.ylabel('Count')
                     plt.title('Class Counts')
@@ -564,10 +578,13 @@ class DataProcess(Job):
                 else:
                     plt.close('all')
                     # plt.cla() # not required
-        if self.dataset.outcome_type == "Categorical":
+        if self.outcome_type == "Binary":
             return_list = list(summary_df['Count']) + [class_counts[0], class_counts[1]]
+        elif self.outcome_type == "Multiclass":
+            class_counts_list = [class_counts[i] for i in class_counts.index]
+            return_list = list(summary_df['Count']) + class_counts_list
         elif self.dataset.outcome_type == "Continuous":
-            return_list = list(summary_df['Count']) + [np.nan, np.nan]
+            return_list = list(summary_df['Count'])
         return return_list
 
     def label_encoder(self):

@@ -54,7 +54,7 @@ def class_eval(y_true, y_pred):
             lrm = 0
         else:
             lrm = (1 - re) / float(sp)  # (1-sensitivity) / specificity... a.k.a. FNR/TNR ... or (1-TPR)/TNR
-        logging.warning([bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm])
+        # logging.warning([bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm])
         return [bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm]
     else:
         # Calculate Accuracy metrics
@@ -65,5 +65,5 @@ def class_eval(y_true, y_pred):
         pr = precision_score(y_true, y_pred, average='weighted')
         # Calculate F1 score
         f1 = f1_score(y_true, y_pred, average='weighted')
-        logging.warning([bac, ac, f1, re, None, pr, None, None, None, None, None, None, None])
-        return [bac, ac, f1, re, None, pr, None, None, None, None, None, None, None]
+        # logging.warning([bac, ac, f1, re, None, pr, None, None, None, None, None, None, None])
+        return [bac, ac, f1, re, pr]

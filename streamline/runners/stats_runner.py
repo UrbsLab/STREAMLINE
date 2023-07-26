@@ -16,7 +16,7 @@ class StatsRunner:
     """
 
     def __init__(self, output_path, experiment_name,
-                 outcome_label="Class", outcome_type="Binary", instance_label=None,
+                 outcome_label="Class", outcome_type=None, instance_label=None,
                  scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False,
@@ -47,8 +47,15 @@ class StatsRunner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
-        self.outcome_type = outcome_type
         self.instance_label = instance_label
+
+        self.outcome_type = outcome_type
+        if self.outcome_type is None:
+            file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+            metadata = pickle.load(file)
+            self.outcome_type = metadata['Outcome Type']
+            file.close()
+
         self.algorithms = None
         self.get_algorithms()
 

@@ -253,7 +253,7 @@ class ReportJob(Job):
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
         self.analysis_report.y += 1
 
-        if self.outcome_type == "Binary":
+        if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
             self.analysis_report.x += 90
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
@@ -436,8 +436,8 @@ class ReportJob(Job):
             # Format
             # data_summary = data_summary.round(3)
             th = self.analysis_report.font_size
-            if self.outcome_type == "Binary":
-                col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13]  # 91 x space total
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
+                col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13, 13, 13]  # 91 x space total
             elif self.outcome_type == "Continuous":
                 col_width_list = [13, 13, 13, 14, 14, 13, 13, 13, 13]  # 91 x space total
 
@@ -449,7 +449,7 @@ class ReportJob(Job):
             for row in table1:  # each row
                 # Make header
                 if row_count == 0:
-                    if self.outcome_type == "Binary":
+                    if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                         for datum in row:  # Print first row
                             entry_list = str(datum).split(' ')
                             self.analysis_report.cell(col_width_list[col_count], th, entry_list[0], border=0, align="C")
@@ -465,7 +465,7 @@ class ReportJob(Job):
                     col_count = 0
                     for datum in row:  # Print second row
                         entry_list = str(datum).split(' ')
-                        if not (self.outcome_type == "Continuous" and (col_count == 7 or col_count == 8)):
+                        if not (self.outcome_type == "Continuous" and (col_count >= 7)):
                             try:
                                 self.analysis_report.cell(col_width_list[col_count], th, entry_list[1],
                                                           border=0, align="C")
@@ -486,7 +486,7 @@ class ReportJob(Job):
                         elif col_count == 6:  # missing percent column
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                       border=1, align="L", fill=True)
-                        elif self.outcome_type == "Continuous" and (col_count == 7 or col_count == 8):
+                        elif self.outcome_type == "Continuous" and (col_count >= 7):
                             pass
                         else:
                             self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
@@ -502,7 +502,7 @@ class ReportJob(Job):
                             if col_count == 6:  # missing percent column
                                 self.analysis_report.cell(col_width_list[col_count], th, str(datum),
                                                           border=1, align="L")
-                            elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                            elif self.outcome_type == "Continuous" and col_count >= 7:
                                 pass
                             else:
                                 self.analysis_report.cell(col_width_list[col_count], th, str(datum),
@@ -530,7 +530,7 @@ class ReportJob(Job):
                     if col_count == 6:  # missing percent column
                         self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
                                                   align="L", fill=True)
-                    elif self.outcome_type == "Continuous" and col_count == 7 or col_count == 8:
+                    elif self.outcome_type == "Continuous" and col_count >= 7:
                         pass
                     else:
                         self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1,
@@ -637,7 +637,7 @@ class ReportJob(Job):
                     self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                         m] + "/model_evaluation/Summary_performance_mean.csv")
 
-            if self.outcome_type == "Binary":
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                 summary_performance['ROC AUC'] = summary_performance['ROC AUC'].astype(float)
                 highest_roc = summary_performance['ROC AUC'].max()
                 algorithm = summary_performance[summary_performance['ROC AUC'] == highest_roc].index.values
@@ -828,7 +828,7 @@ class ReportJob(Job):
             #         + str(best_alg_aps.values) + ' = '
             #         + str("{:.3f}".format(highest_aps)), border=1, align='L')
 
-            if self.outcome_type == "Binary":
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
 
                 self.analysis_report.set_font('Times', 'B', 10)
                 # ROC
@@ -969,7 +969,7 @@ class ReportJob(Job):
                                       ln=2)
             self.analysis_report.set_font(family='times', size=9)
             if len(self.datasets) > 1:
-                if self.outcome_type == "Binary":
+                if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                     self.analysis_report.image(
                         self.experiment_path + '/DatasetComparisons/dataCompBoxplots/'
                         + 'DataCompareAllModels_ROC AUC.png',
@@ -1051,7 +1051,7 @@ class ReportJob(Job):
                 # Process
                 for i in range(len(self.datasets)):
                     kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Std_D' + str(i + 1), axis=1)
-                    if self.outcome_type == "Binary":
+                    if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                         kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Mean_D' + str(i + 1), axis=1)
                     elif self.outcome_type == "Continuous":
                         kruskal_wallis_datasets = kruskal_wallis_datasets.drop('Median_D' + str(i + 1), axis=1)
@@ -1313,6 +1313,11 @@ class ReportJob(Job):
                 metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
                                     'Precision (PPV)', 'TP', 'TN', 'FP', 'FN', 'NPV', 'LR+', 'LR-', 'ROC AUC', 'PRC AUC',
                                     'PRC APS']
+            elif self.outcome_type == "Multiclass":
+                # Balanced Accuracy, Accuracy, F1 Score, Sensitivity (Recall),
+                # Precision (PPV), ROC AUC, PRC AUC, PRC APS
+                metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)',
+                                    'Precision (PPV)', 'ROC AUC', 'PRC AUC', 'PRC APS']
             elif self.outcome_type == "Continuous":
                 metric_name_list = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error',
                                     'Explained Variance', 'Pearson Correlation']
@@ -1370,6 +1375,11 @@ class ReportJob(Job):
                                     'Precision (PPV)', 'TP', 'TN', 'FP', 'FN', 'NPV', 'LR+', 'LR-', 'ROC AUC',
                                     'PRC AUC',
                                     'PRC APS']
+            elif self.outcome_type == "Multiclass":
+                # Balanced Accuracy, Accuracy, F1 Score, Sensitivity (Recall),
+                # Precision (PPV), ROC AUC, PRC AUC, PRC APS
+                metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)',
+                                    'Precision (PPV)', 'ROC AUC', 'PRC AUC', 'PRC APS']
             elif self.outcome_type == "Continuous":
                 metric_name_list = ['Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Median Absolute Error',
                                     'Explained Variance', 'Pearson Correlation']
@@ -1438,7 +1448,7 @@ class ReportJob(Job):
         self.footer()
 
     def format_fn(self, stats_ds, best_metric_list, metric_name_list, ds2):
-        if self.outcome_type == "Binary":
+        if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
             low_val_better = ['FP', 'FN', 'LR-']
             col_width_list = [32, 11, 11, 8, 12, 12, 10, 15, 15, 15, 15, 8, 9, 9, 8, 8, 8]
         elif self.outcome_type == "Continuous":

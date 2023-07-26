@@ -176,6 +176,7 @@ class ModelJob(Job):
 
         fi = self.feature_importance
 
+        return_list = None
         if model.model_type == "Regression":
             metric_list = model.model_evaluation(x_test, y_test)
             y_train_pred = model.predict(x_train)
@@ -188,9 +189,9 @@ class ModelJob(Job):
                 prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
             return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
         elif model.model_type == "MulticlassClassification":
-            metric_list = model.model_evaluation(x_test, y_test)
-            return_list = [metric_list]
-
+            metric_list, fpr, tpr, roc_auc, prec, recall, \
+                prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
+            return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
         return return_list
 
     def data_prep(self):

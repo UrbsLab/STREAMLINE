@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from streamline.dataprep.data_process import DataProcess
-from streamline.modeling.submodels import BinaryClassificationModel, RegressionModel
+from streamline.modeling.submodels import BinaryClassificationModel, RegressionModel, MulticlassClassificationModel
 from streamline.postanalysis.statistics import StatsJob
 from streamline.utils.dataset import Dataset
 from streamline.utils.job import Job
@@ -143,10 +143,23 @@ class ReplicateJob(Job):
 
         eda.identify_feature_types()
 
-        transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
-                                              'Categorical Features',
-                                              'Quantitative Features', 'Missing Values',
-                                              'Missing Percent', 'Class 0', 'Class 1'])
+        n_class = len(eda.counts_summary(save=False)) - 6
+
+        if self.outcome_type == "Binary":
+            transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                                  'Categorical Features',
+                                                  'Quantitative Features', 'Missing Values',
+                                                  'Missing Percent', 'Class 0', 'Class 1'])
+        elif self.outcome_type == "Multiclass":
+            transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                                  'Categorical Features',
+                                                  'Quantitative Features', 'Missing Values',
+                                                  'Missing Percent'] + ['Class ' + str(i) for i in range(n_class)])
+        elif self.outcome_type == "Continuous":
+            transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
+                                                  'Categorical Features',
+                                                  'Quantitative Features', 'Missing Values',
+                                                  'Missing Percent'])
 
         transition_df.loc["Original"] = eda.counts_summary(save=False)
 
@@ -417,7 +430,7 @@ class ReplicateJob(Job):
 
             eval_dict = dict()
             for algorithm in self.algorithms:
-                if self.outcome_type == "Binary":
+                if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                     ret = self.eval_model(algorithm, cv_count, x_test, y_test)
                 elif self.outcome_type == "Continuous":
                     ret, residuals = self.eval_model(algorithm, cv_count, x_test, y_test)
@@ -438,6 +451,10 @@ class ReplicateJob(Job):
 
         if self.outcome_type == "Binary":
             result_table, metric_dict = stats.primary_stats_classification(master_list, rep_data.data)
+            stats.do_plot_roc(result_table)
+            stats.do_plot_prc(result_table, rep_data.data, True)
+        elif self.outcome_type == "Multiclass":
+            result_table, metric_dict = stats.primary_stats_multiclass(master_list, rep_data.data)
             stats.do_plot_roc(result_table)
             stats.do_plot_prc(result_table, rep_data.data, True)
         elif self.outcome_type == "Continuous":
@@ -550,6 +567,8 @@ class ReplicateJob(Job):
         m = None
         if self.outcome_type == "Binary":
             m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
+        elif self.outcome_type == "Multiclass":
+            m = MulticlassClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
         elif self.outcome_type == "Continuous":
             m = RegressionModel(None, algorithm, scoring_metric=self.scoring_metric)
         m.model = model
@@ -562,7 +581,7 @@ class ReplicateJob(Job):
             y_pred = m.predict(x_test)
             residual_test = y_test - y_pred
             return_list = ([metric_list, None], [residual_test, y_pred, y_test])
-        elif self.outcome_type == "Binary":
+        elif self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
             metric_list, fpr, tpr, roc_auc, prec, recall, \
                 prec_rec_auc, ave_prec, probas_ = m.model_evaluation(x_test, y_test)
             return_list = [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, None, probas_]

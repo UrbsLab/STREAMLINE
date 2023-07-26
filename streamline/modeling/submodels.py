@@ -1,6 +1,8 @@
 from abc import ABC
 
+import numpy as np
 import optuna
+import pandas as pd
 from scipy.stats import pearsonr
 from sklearn import metrics
 from sklearn.metrics import auc, max_error, mean_absolute_error
@@ -96,17 +98,54 @@ class MulticlassClassificationModel(BaseModel, ABC):
         metric_list = class_eval(y_test, y_pred)
         # Determine probabilities of class predictions for each test instance
         # (this will be used much later in calculating an ROC curve)
-        # probas_ = self.model.predict_proba(x_test)
-        # # Compute ROC curve and area the curve
-        # fpr, tpr, thresholds = metrics.roc_curve(y_test, probas_[:, 1])
-        # roc_auc = auc(fpr, tpr)
-        # # Compute Precision/Recall curve and AUC
-        # prec, recall, thresholds = metrics.precision_recall_curve(y_test, probas_[:, 1])
-        # prec, recall, thresholds = prec[::-1], recall[::-1], thresholds[::-1]
-        # prec_rec_auc = auc(recall, prec)
-        # ave_prec = metrics.average_precision_score(y_test, probas_[:, 1])
-        # return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
-        return metric_list
+        probas_ = self.model.predict_proba(x_test)
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        prec = dict()
+        recall = dict()
+        thresholds = dict()
+        prec_rec_auc = dict()
+        ave_prec = dict()
+
+        # calculate dummies once
+        n_classes = len(np.unique(y_test))
+        y_test_dummies = pd.get_dummies(y_test, drop_first=False).values
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = metrics.roc_curve(y_test_dummies[:, i], probas_[:, i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+            # Compute Precision/Recall curve and AUC
+            prec[i], recall[i], thresholds[i] = metrics.precision_recall_curve(y_test_dummies[:, i], probas_[:, i])
+            prec[i], recall[i], thresholds[i] = prec[i][::-1], recall[i][::-1], thresholds[i][::-1]
+            prec_rec_auc[i] = auc(recall[i], prec[i])
+            ave_prec[i] = metrics.average_precision_score(y_test_dummies[:, i], probas_[:, i])
+
+        fpr["micro"], tpr["micro"], _ = metrics.roc_curve(y_test_dummies.ravel(), probas_.ravel())
+        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+        prec["micro"], recall["micro"], thresholds["micro"] \
+            = metrics.precision_recall_curve(y_test_dummies.ravel(), probas_.ravel())
+        prec["micro"], recall["micro"], thresholds["micro"] \
+            = prec["micro"][::-1], recall["micro"][::-1], thresholds["micro"][::-1]
+        prec_rec_auc["micro"] = auc(recall["micro"], prec["micro"])
+        ave_prec["micro"] = metrics.average_precision_score(y_test_dummies.ravel(), probas_.ravel())
+
+        fpr_grid = np.linspace(0.0, 1.0, 1000)
+
+        # Interpolate all ROC curves at these points
+        mean_tpr = np.zeros_like(fpr_grid)
+
+        for i in range(n_classes):
+            mean_tpr += np.interp(fpr_grid, fpr[i], tpr[i])  # linear interpolation
+
+        # Average it and compute AUC
+        mean_tpr /= n_classes
+
+        fpr["macro"] = fpr_grid
+        tpr["macro"] = mean_tpr
+        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+        return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
 
 
 class RegressionModel(BaseModel, ABC):

@@ -125,12 +125,18 @@ class StatsJob(Job):
                                 'median_absolute_error': 'Median Absolute Error',
                                 'explained_variance': 'Explained Variance',
                                 'pearson_correlation': 'Pearson Correlation', 'f1': 'F1 Score'}
+        elif self.outcome_type == "Multiclass":
+            metric_term_dict = {'balanced_accuracy': 'Balanced Accuracy', 'accuracy': 'Accuracy', 'f1': 'F1 Score',
+                                'recall': 'Sensitivity (Recall)', 'precision': 'Precision (PPV)',
+                                'roc_auc': 'ROC AUC'}
 
         self.metric_weight = metric_term_dict[self.metric_weight]
 
         # Get algorithms run, specify algorithm abbreviations, colors to use for
         # algorithms in plots, and original ordered feature name list
         self.preparation()
+
+        # logging.warning(self.outcome_type)
 
         if self.outcome_type == "Binary":
             # Gather and summarize all evaluation metrics for each algorithm across all CVs.
@@ -144,9 +150,9 @@ class StatsJob(Job):
         elif self.outcome_type == "Multiclass":
             result_table, metric_dict = self.primary_stats_multiclass()
             # Plot ROC and PRC curves comparing average ML algorithm performance (averaged over all CVs)
-            # logging.info('Generating ROC and PRC plots...')
-            # self.do_plot_roc(result_table)
-            # self.do_plot_prc(result_table)
+            logging.info('Generating ROC and PRC plots...')
+            self.do_plot_roc(result_table)
+            self.do_plot_prc(result_table)
         elif self.outcome_type == "Continuous":
             result_table, metric_dict = self.primary_stats_regression()
             self.residuals_regression()
@@ -529,7 +535,157 @@ class StatsJob(Job):
         as well as ROC and PRC plot data across all CV datasets.
         Generate ROC and PRC plots comparing separate CV models for each individual modeling algorithm.
         """
-        pass
+        result_table = []
+        metric_dict = {}
+
+        # completed for each individual ML modeling algorithm
+        for algorithm in self.algorithms:
+
+            # stores values used in ROC and PRC plots
+            alg_result_table = []
+
+            # Define evaluation stats variable lists
+            s_bac, s_ac, s_f1, s_re, s_pr = [[] for _ in range(5)]
+
+            # Define feature importance lists
+            # used to save model feature importance individually for
+            # each cv within single summary file (all original features
+            # in dataset prior to feature selection included)
+            fi_all = []
+
+            # Define ROC plot variable lists
+            tprs = []  # stores interpolated true positive rates for average CV line in ROC
+            aucs = []  # stores individual CV areas under ROC curve to calculate average
+
+            mean_fpr = np.linspace(0, 1, 100)  # used to plot average of CV line in ROC plot
+            mean_recall = np.linspace(0, 1, 100)  # used to plot average of CV line in PRC plot
+
+            # Define PRC plot variable lists
+            precs = []  # stores interpolated precision values for average CV line in PRC
+            praucs = []  # stores individual CV areas under PRC curve to calculate average
+            aveprecs = []  # stores individual CV average precisions for PRC to calculate CV average
+
+            # Gather statistics over all CV partitions
+            for cv_count in range(0, self.cv_partitions):
+
+                if master_list is None:
+
+                    # Unpickle saved metrics from previous phase
+                    result_file = self.full_path + '/model_evaluation/pickled_metrics/' \
+                                  + self.abbrev[algorithm] + "_CV_" + str(cv_count) + "_metrics.pickle"
+                    file = open(result_file, 'rb')
+                    results = pickle.load(file)
+                    # [metricList, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
+                    file.close()
+
+                    # Separate pickled results
+                    metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_ = results
+                    fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec \
+                        = fpr['micro'], tpr['micro'], roc_auc['micro'], prec['micro'], \
+                        recall['micro'], prec_rec_auc['micro'], ave_prec['micro']
+                else:
+                    results = master_list[cv_count][algorithm]
+                    # grabs evalDict for a specific algorithm entry (with data values)
+                    metric_list = results[0]
+                    fpr = results[1]['micro']
+                    tpr = results[2]['micro']
+                    roc_auc = results[3]['micro']
+                    prec = results[4]['micro']
+                    recall = results[5]['micro']
+                    prec_rec_auc = results[6]['micro']
+                    ave_prec = results[7]['micro']
+                    fi = results[8]
+                    probas_ = results[9]
+
+                # Separate metrics from metricList
+                s_bac.append(metric_list[0])
+                s_ac.append(metric_list[1])
+                s_f1.append(metric_list[2])
+                s_re.append(metric_list[3])
+                s_pr.append(metric_list[4])
+
+                # update list that stores values used in ROC and PRC plots
+                alg_result_table.append([fpr, tpr, roc_auc, prec, recall, prec_rec_auc,
+                                         ave_prec])
+
+                # Update ROC plot variable lists needed to plot all CVs in one ROC plot
+                tprs.append(np.interp(mean_fpr, fpr, tpr))
+                tprs[-1][0] = 0.0
+                aucs.append(roc_auc)
+
+                # Update PRC plot variable lists needed to plot all CVs in one PRC plot
+                precs.append(np.interp(mean_recall, recall, prec))
+                praucs.append(prec_rec_auc)
+                aveprecs.append(ave_prec)
+
+                if master_list is None:
+                    # Format feature importance scores as list
+                    # (takes into account that all features are not in each CV partition)
+                    temp_list = []
+                    j = 0
+                    headers = pd.read_csv(
+                        self.full_path + '/CVDatasets/' + self.data_name
+                        + '_CV_' + str(cv_count) + '_Test.csv').columns.values.tolist()
+                    if self.instance_label is not None:
+                        if self.instance_label in headers:
+                            headers.remove(self.instance_label)
+                    headers.remove(self.outcome_label)
+                    for each in self.original_headers:
+                        # Check if current feature from original dataset was in the partition
+                        if each in headers:
+                            # Deal with features not being in original order (find index of current feature list.index()
+                            f_index = headers.index(each)
+                            temp_list.append(fi[f_index])
+                        else:
+                            temp_list.append(0)
+                        j += 1
+                    fi_all.append(temp_list)
+
+            logging.info("Running stats on " + algorithm)
+
+            # Define values for the mean ROC line (mean of individual CVs)
+            mean_tpr = np.mean(tprs, axis=0)
+            mean_tpr[-1] = 1.0
+            mean_auc = np.mean(aucs)
+            if self.plot_roc:
+                self.do_model_roc(algorithm, tprs, aucs, mean_fpr, alg_result_table)
+
+            # Define values for the mean PRC line (mean of individual CVs)
+            mean_prec = np.mean(precs, axis=0)
+            mean_pr_auc = np.mean(praucs)
+            if self.plot_prc:
+                if master_list is None:
+                    self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table)
+                else:
+                    self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table, rep_data, True)
+
+            # Export and save all CV metric stats for each individual algorithm
+            results = {'Balanced Accuracy': s_bac, 'Accuracy': s_ac, 'F1 Score': s_f1, 'Sensitivity (Recall)': s_re,
+                       'Precision (PPV)': s_pr, 'ROC AUC': aucs, 'PRC AUC': praucs,
+                       'PRC APS': aveprecs}
+            dr = pd.DataFrame(results)
+            filepath = self.full_path + '/model_evaluation/' + self.abbrev[algorithm] + "_performance.csv"
+            dr.to_csv(filepath, header=True, index=False)
+            metric_dict[algorithm] = results
+
+            # Save Median FI Stats
+            if master_list is None:
+                self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
+
+            # Store ave metrics for creating global ROC and PRC plots later
+            mean_ave_prec = np.mean(aveprecs)
+            # result_dict = {'algorithm':algorithm,'fpr':mean_fpr, 'tpr':mean_tpr,
+            #                'auc':mean_auc, 'prec':mean_prec, 'pr_auc':mean_pr_auc,
+            #                'ave_prec':mean_ave_prec}
+            result_dict = {'algorithm': algorithm, 'fpr': mean_fpr, 'tpr': mean_tpr,
+                           'auc': mean_auc, 'prec': mean_prec, 'recall': mean_recall,
+                           'pr_auc': mean_pr_auc, 'ave_prec': mean_ave_prec}
+            result_table.append(result_dict)
+
+        # Result table later used to create global ROC an PRC plots comparing average ML algorithm performance.
+        result_table = pd.DataFrame.from_dict(result_table)
+        result_table.set_index('algorithm', inplace=True)
+        return result_table, metric_dict
 
     def primary_stats_classification(self, master_list=None, rep_data=None):
         """
