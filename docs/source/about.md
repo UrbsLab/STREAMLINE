@@ -128,7 +128,7 @@ This same strategy is applied to replication data later in the pipeline. When ev
 
 ***
 ## Is STREAMLINE reproducible?
-STREAMLINE is completely reproducible when the `timeout` parameter is set to `None`,
+Yes, STREAMLINE is completely reproducible when the `timeout` parameter is set to `None`,
 ensuring training of the same models with the same performance whenever the same datasets,
 pipeline settings, and random seed are used.
 
@@ -177,7 +177,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * One-command run of whole pipeline available when using a configuration file to run
       * Can optionally run the pipeline one phase at a time
     * Disadvantages:
-      * Can only run pipeline serially
+      * Can only run pipeline serially or with limited local cpu core parallelization
       * Command-line experience recommended
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 

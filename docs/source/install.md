@@ -1,4 +1,4 @@
-# Installation and Data Requirements
+# Installation
 
 ## Google Colaboratory
 There is no local installation or additional steps required to run
@@ -90,9 +90,3 @@ a quick guide on using it can be found [here](https://www.hostinger.com/tutorial
 
 
 
-
-## Input Data Requirements
-
-[Under Construction]
-
-numerical encoding no longer required
