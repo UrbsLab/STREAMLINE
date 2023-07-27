@@ -54,7 +54,7 @@ Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and 
    self
    about
    pipeline
-   demo
+   data
    install
    running
    parameters

@@ -1,4 +1,4 @@
-# STREAMLINE Run Parameters
+# Run Parameters
 
 ## Overview
 Here we review the run parameters available for each of the 11 phases and provide some additional run examples. 
@@ -45,10 +45,10 @@ names when using STREAMLINE from the command-line (for brevity).
 | --part                 | partition_method              | Stratified, Random, or Group Stratification                                                    | Stratified      |
 | --cat-cutoff           | categorical_cutoff'           | number of unique values after which a variable is considered to be quantitative vs categorical | 10              |
 | --top-features         | top_features'                 | number of top features to illustrate in figures                                                | 40              |
-| --sig                  | sig_cutoff                    | significance cutoff used throughout pipeline'                                                  | 0.05            |
-| --feat_miss            | featureeng_missingness        | feature missingness cutoff used throughout pipeline                                            | 0.5             |
-| --clean_miss           | cleaning_missingness          | cleaning missingness cutoff used throughout pipeline'                                          | 0.5             |
-| --corr_thresh          | correlation_removal_threshold | correlation removal threshold                                                                  | 0.8             |
+| --sig                  | sig_cutoff                    | p-values less than this cutoff are considered to be significant                                | 0.05            |
+| --feat_miss            | featureeng_missingness        | features with a missingness proportion greater than this have a new missingness feature added to the data        | 0.5             |
+| --clean_miss           | cleaning_missingness          | features (then instances) with a missingness count at or above this cutoff are removed         | 0.5             |
+| --corr_thresh          | correlation_removal_threshold | one out of a pair of features is randomly removed if the correlation between this pair is >= this cutoff         | 0.8             |
 | --export-fc            | export_feature_correlations   | run and export feature correlation analysis (yields correlation heatmap)                       | True            |
 | --export-up            | export_univariate_plots       | export univariate analysis plots (note: univariate analysis still output by default)           | True            |
 | --rand-state           | random_state                  | sets a specific random seed for reproducible results                                           | 42              |

@@ -13,7 +13,7 @@ The schematic below summarizes the automated STREAMLINE analysis pipeline with i
 
 * Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
 
-* A simple demonstration of STREAMLINE on example biomedical data in our ready-to-run in a Google Colab Notebook [here](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
+* A simple demonstration of STREAMLINE on example biomedical data in our ready-to-run Google Colab Notebook [here](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
 
 ### Pipeline Design
 The goal of STREAMLINE is to provide an easy and transparent framework
@@ -26,7 +26,7 @@ The overall development of this pipeline focused on:
    1. Automation and ease of use
    2. Optimizing modeling performance
    3. Capturing complex associations in data (e.g. feature interactions)
-   4. Enhancing interpretability of output
+   4. Enhancing interpretability of output throughout the analysis
    5. Avoiding and detecting common sources of bias
    6. Reproducibility (see STREAMLINE parameter settings)
    7. Run mode flexibility (accomodates users with different levels of expertise)
