@@ -14,6 +14,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.neighbors import LocalOutlierFactor
+from sklearn.preprocessing import StandardScaler
 
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
@@ -21,6 +22,7 @@ from streamline.dataprep.kfold_partitioning import KFoldPartitioner
 from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis, f_oneway, spearmanr
 import seaborn as sns
 import warnings
+
 warnings.filterwarnings(action='ignore', category=UserWarning)
 warnings.filterwarnings(action='ignore', category=RuntimeWarning)
 
@@ -154,58 +156,257 @@ class DataProcess(Job):
         self.cv_partitioner.run()
         self.save_runtime()
 
-    def anomaly_detection(self):
+    def anomaly_detection(self, use_normalized_data=True, num_instances_to_show=50):
+
+        # Perform anomaly detection on the dataset using various methods, create visualizations, and save results.
+
+        # Parameters:
+        #     use_normalized_data (bool): If True, normalize the data before performing anomaly detection.
+        #       num_instances_to_show (int or None): Number of instances to show in the ranking heatmap.
+        #                                        If None, show all instances.
+
+        # Returns:
+        #     None
+
         # Make a copy of the original data
-        # logging.warning('load')
+        logging.info('Running anomaly detection.')
         imputed_data = copy.deepcopy(self.dataset.data)
-        # logging.warning('copy')
 
         # Perform iterative imputation
         imputer = IterativeImputer(random_state=self.random_state)
         imputed_data[self.quantitative_features] = imputer.fit_transform(imputed_data[self.quantitative_features])
-        # logging.warning('Impute')
-        # Normalize the imputed data
-        normalized_imputed_data = (imputed_data[self.quantitative_features] - imputed_data[
-            self.quantitative_features].mean()) / imputed_data[self.quantitative_features].std()
-        # logging.warning('Normal')
 
-        # # Isolation Forest on imputed data
+        if use_normalized_data:
+            # Normalize the imputed data
+            scaler = StandardScaler()
+            normalized_imputed_data = scaler.fit_transform(imputed_data[self.quantitative_features])
+            normalized_imputed_data = pd.DataFrame(normalized_imputed_data, columns=self.quantitative_features)
+        else:
+            normalized_imputed_data = imputed_data[self.quantitative_features]
+
+        # Create a directory to save the plots
+        plot_dir = os.path.join(self.experiment_path, self.dataset.name, 'exploratory', 'anomaly_detection')
+        os.makedirs(plot_dir, exist_ok=True)
+
+        logging.info('Running Isolation Forest anomaly detection.')
+        # Isolation Forest on imputed data
         imputed_isolation_forest = IsolationForest(contamination='auto', random_state=self.random_state)
         imputed_isolation_forest.fit(normalized_imputed_data)
         imputed_isolation_scores = imputed_isolation_forest.decision_function(normalized_imputed_data)
-        # logging.warning('iso')
 
+        # Histogram for Isolation Forest
+        plt.figure(figsize=(8, 6))
+        plt.hist(imputed_isolation_scores, bins=30, edgecolor='black', range=(-1, 1))
+        plt.title('Histogram of Isolation Forest Anomaly Scores')
+        plt.xlabel('Anomaly Score')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        iso_hist_path = os.path.join(plot_dir, 'isolation_forest_histogram.png')
+        plt.savefig(iso_hist_path)
+        plt.close()
+
+        logging.warning('Running Local Outlier Factor anomaly detection.')
         # Local Outlier Factor on imputed data
-        imputed_local_outlier_factor = LocalOutlierFactor(n_neighbors=20, contamination='auto')
-        imputed_local_outlier_scores = imputed_local_outlier_factor.fit_predict(normalized_imputed_data)
-        # logging.warning('outlier')
+        imputed_local_outlier_factor = LocalOutlierFactor(n_neighbors=15, novelty=True, contamination='auto')
+        imputed_local_outlier_scores = imputed_local_outlier_factor.fit(
+            normalized_imputed_data).negative_outlier_factor_
 
-        # DBSCAN on imputed data
-        imputed_dbscan = DBSCAN(eps=0.5, min_samples=5)
-        imputed_dbscan_labels = imputed_dbscan.fit_predict(normalized_imputed_data)
-        # logging.warning('dbscan')
+        # Histogram for Local Outlier Factor
+        plt.figure(figsize=(8, 6))
+        plt.hist(imputed_local_outlier_scores, bins=30, edgecolor='black')
+        plt.title('Histogram of Local Outlier Factor Anomaly Scores')  # Update the title
+        plt.xlabel('Anomaly Score')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        lof_hist_path = os.path.join(plot_dir, 'local_outlier_factor_histogram.png')
+        plt.savefig(lof_hist_path)
+        plt.close()
 
+        logging.warning('Running Elliptic Envelope anomaly detection.')
         # Elliptic Envelope on imputed data
-        imputed_elliptic_envelope = EllipticEnvelope()
+        imputed_elliptic_envelope = EllipticEnvelope(contamination=0.05, support_fraction=0.75,
+                                                     random_state=self.random_state)
         imputed_elliptic_envelope.fit(normalized_imputed_data)
         imputed_elliptic_scores = imputed_elliptic_envelope.decision_function(normalized_imputed_data)
-        # logging.warning('elliptic')
+
+        # Histogram for Elliptic Envelope
+        plt.figure(figsize=(8, 6))
+        plt.hist(imputed_elliptic_scores, bins=30, edgecolor='black')
+        plt.title('Histogram of Elliptic Envelope Anomaly Scores')
+        plt.xlabel('Anomaly Score')
+        plt.ylabel('Frequency')
+        plt.tight_layout()
+        elliptic_hist_path = os.path.join(plot_dir, 'elliptic_envelope_histogram.png')
+        plt.savefig(elliptic_hist_path)
+        plt.close()
 
         # Combine the imputed anomaly scores
-        imputed_anomaly_scores = {
+        imputed_anomaly_scores = pd.DataFrame({
             'Isolation Forest': imputed_isolation_scores,
             'Local Outlier Factor': imputed_local_outlier_scores,
-            'DBSCAN': imputed_dbscan_labels,
             'Elliptic Envelope': imputed_elliptic_scores
-        }
-        # logging.debug(imputed_anomaly_scores)
-        # Save the imputed anomaly scores to a file
-        imputed_anomaly_scores_file = os.path.join(self.experiment_path,
-                                                   self.dataset.name, 'exploratory/anomaly_detection',
-                                                   'imputed_anomaly_scores.csv')
-        pd.DataFrame(imputed_anomaly_scores).to_csv(imputed_anomaly_scores_file, index=False)
+        })
 
-        logging.info("Imputed anomaly detection completed.")
+        # Save the imputed anomaly scores to a file
+        imputed_anomaly_scores_file = os.path.join(self.experiment_path, self.dataset.name,
+                                                   'imputed_anomaly_scores.csv')
+        imputed_anomaly_scores.to_csv(imputed_anomaly_scores_file, index=False)
+
+        # Save raw unnormalized scores and instance IDs to a CSV file
+        raw_scores_path = os.path.join(self.experiment_path, self.dataset.name, 'raw_unnormalized_scores.csv')
+        imputed_data.index = range(len(imputed_data))
+        imputed_data.to_csv(raw_scores_path, index=False)
+
+        # Rank the anomaly scores and replace them with rank numbers (1 is most anomalous, lowest number is least
+        # anomalous)
+        ranked_scores = imputed_anomaly_scores.rank(axis=0, ascending=False)
+
+        # Create a DataFrame with the sorted ranks and instance IDs
+        ranks_df = ranked_scores.copy()
+        ranks_df.index = range(len(ranks_df))
+
+        # Add a column for the average rank across all outlier detection algorithms
+        ranks_df['Avg_Rank'] = ranks_df.mean(axis=1)
+
+        # Sort the rankings in each column from most anomalous to least anomalous
+        ranks_df = ranks_df.sort_values(by='Avg_Rank')
+
+        # Save the rankings to a CSV file
+        ranks_file_path = os.path.join(self.experiment_path, self.dataset.name, 'rankings.csv')
+        ranks_df.to_csv(ranks_file_path, index=False)
+
+        # Transpose the DataFrame and set the first row as the column names
+        ranks_df_transposed = ranks_df.T
+        new_header = ranks_df_transposed.iloc[0]
+        ranks_df_transposed = ranks_df_transposed[1:]
+        ranks_df_transposed.columns = new_header
+
+        # Save the transposed and formatted DataFrame back to the CSV file
+        ranks_df_transposed.to_csv(ranks_file_path, index_label='Algorithm')
+
+        # Set 'Instance ID' as the index for the heatmap
+        ranks_df_heatmap = ranks_df
+
+        # Normalize the rankings to 0-1 scale (1 is most anomalous, 0 is least anomalous)
+        max_rank = ranks_df_heatmap.values.max()
+        ranks_df_heatmap = 1 - (ranks_df_heatmap / max_rank)
+
+        # Heatmap plot with larger figure size and increased space between Y-axis labels
+        plt.figure(figsize=(14, 10))
+        cmap = sns.diverging_palette(220, 10, as_cmap=True)  # Use a diverging color map from blue to red
+        sns.heatmap(ranks_df_heatmap, annot=False, cmap=cmap,
+                    cbar_kws={'label': 'Anomaly Score (1.0 - Most Anomalous, 0.0 - Least Anomalous)'}, yticklabels=1,
+                    annot_kws={"size": 8})
+
+        # To prevent the Y-axis labels from skipping values, adjust the y-axis ticks and increase space
+        plt.yticks(rotation=0, fontsize=10)
+        plt.subplots_adjust(left=0.2)  # Increase space between Y-axis labels and heatmap
+
+        plt.title('Anomaly Detection Heatmap')
+        plt.xlabel('Algorithm')
+        plt.ylabel('Instance ID')
+        plt.tight_layout()
+
+        # Save the heatmap as an image file
+        heatmap_path = os.path.join(self.experiment_path, self.dataset.name, 'anomaly_detection_heatmap.png')
+        plt.savefig(heatmap_path)
+
+        # Close the plot to release memory
+        plt.close()
+
+        # Generate the heatmap with user-specified number of instances
+        if num_instances_to_show is not None:
+            if num_instances_to_show > len(ranks_df_heatmap):
+                logging.warning("The number of instances to show exceeds the total number of instances.")
+                return
+            else:
+                # Sort instances based on the highest rank (most anomalous)
+                ranks_df_heatmap_sorted = ranks_df_heatmap.loc[
+                    ranks_df['Avg_Rank'].nsmallest(num_instances_to_show).index]
+
+                # Generate the heatmap with user-specified number of instances (zoomed in version)
+                plt.figure(figsize=(14, 10))
+                sns.heatmap(ranks_df_heatmap_sorted, annot=False, cmap=cmap,
+                            cbar_kws={'label': 'Anomaly Score (1.0 - Most Anomalous, 0.0 - Least Anomalous)'},
+                            yticklabels=num_instances_to_show, annot_kws={"size": 8}, vmin=0, vmax=1)
+
+                # Set the Y-axis labels directly to show all instances
+                plt.yticks(np.arange(num_instances_to_show), ranks_df_heatmap_sorted.index)
+
+                # To prevent the Y-axis labels from skipping values, adjust the y-axis ticks and increase space
+                plt.yticks(rotation=0)
+                plt.subplots_adjust(left=0.2)  # Increase space between Y-axis labels and heatmap
+
+                plt.title(f'Anomaly Detection Heatmap (Top {num_instances_to_show} Instances)')
+                plt.xlabel('Algorithm')
+                plt.ylabel('Instance ID')
+                plt.tight_layout()
+
+                # Save the heatmap with user-specified number of instances as an image file
+                heatmap_selected_path = os.path.join(self.experiment_path, self.dataset.name,
+                                                     f'anomaly_detection_heatmap_selected_{num_instances_to_show}.png')
+                plt.savefig(heatmap_selected_path)
+
+                # Close the plot to release memory
+                plt.close()
+
+        # IQR anomaly detection
+        Q1 = normalized_imputed_data.quantile(0.25)
+        Q3 = normalized_imputed_data.quantile(0.75)
+        IQR = Q3 - Q1
+        iqr_lower_bound = Q1 - 1.5 * IQR
+        iqr_upper_bound = Q3 + 1.5 * IQR
+
+        iqr_outliers_per_feature = (
+                (normalized_imputed_data < iqr_lower_bound) | (normalized_imputed_data > iqr_upper_bound)).sum()
+
+        # Filter features with outliers detected by IQR
+        iqr_outlier_features = iqr_outliers_per_feature[iqr_outliers_per_feature > 0].index
+
+        # Create a box plot for each feature with outliers detected by IQR
+        for feature in iqr_outlier_features:
+            plt.figure(figsize=(6, 4))
+            plt.boxplot(normalized_imputed_data[feature], vert=False)
+            plt.title(f'Box Plot of {feature} (IQR Method)')
+            plt.xlabel('Value')
+            plt.ylabel(feature)
+            plt.tight_layout()
+
+            # Save the box plot as an image file
+            plot_file_path = os.path.join(self.experiment_path, self.dataset.name,
+                                          f'boxplot_{feature.replace("/", "_")}.png')
+            plt.savefig(plot_file_path)
+
+            # Close the plot to release memory
+            plt.close()
+
+        # Create a single plot with all the box plots
+        plt.figure(figsize=(10, 6))
+        plt.boxplot(normalized_imputed_data[iqr_outlier_features].values, vert=False)
+        plt.title('Box Plots of Features with Outliers (IQR Method)')
+        plt.xlabel('Value')
+        plt.yticks(range(1, len(iqr_outlier_features) + 1), iqr_outlier_features)
+        plt.tight_layout()
+
+        # Save the combined box plot as an image file
+        plot_file_path = os.path.join(self.experiment_path, self.dataset.name, 'combined_boxplot.png')
+        plt.savefig(plot_file_path)
+
+        # Close the plot to release memory
+        plt.close()
+
+        # Create DataFrame with feature names and outlier counts per method
+        feature_outlier_counts_df = pd.DataFrame({
+            'Feature': normalized_imputed_data.columns,
+            'IQR': iqr_outliers_per_feature
+        })
+
+        # Save the feature outlier counts to a CSV file
+        feature_outlier_counts_file = os.path.join(self.experiment_path, self.dataset.name,
+                                                   'feature_outlier_counts.csv')
+        feature_outlier_counts_df.to_csv(feature_outlier_counts_file, index=False)
+
+        logging.warning("Anomaly detection completed.")
 
     def run_process(self, top_features=20):
         """
