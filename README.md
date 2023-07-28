@@ -57,8 +57,12 @@ See [citations](https://urbslab.github.io/STREAMLINE/citation.html) for more inf
 STREAMLINE can be run using a variety of modes balancing ease of use and efficiency.
 * Google Colab Notebook: runs serially on Google Cloud (best for beginners)
 * Jupyter Notebook: runs serially/locally
-* Command Line: runs serially/locally
-* CPU Computing Cluster: runs in parallel (best for efficiency)
+* Command Line: runs serially or locally
+   * Locally, serially
+   * Locally, cpu core in parallel
+   * CPU Computing cluster (HPC), in parallel (best for efficiency)
+      * All phases can be run from a single command (with a job monitor/submitter running on the head node until completion)
+      * Each phase can be run separately in sequence
 
 See the [documentation](https://urbslab.github.io/STREAMLINE/index.html) for requirements, installation, and use details for each.
 

@@ -1,31 +1,37 @@
 # Installation
+Installation instructions for different run modes of STREAMLINE.
 
-## Google Colaboratory
-There is no local installation or additional steps required to run
-STREAMLINE on Google Colab.
-Just have a Google Account and open this Colab Link:
-[https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing](https://colab.research.google.com/drive/18uU1KEs7SgFpJyFmot7LBEc85B6vbGU9?usp=sharing)
+***
+## Google Colab Notebook 
+No installation is required to run STREAMLINE in the included Google Colab Notebook. The only other step is to make sure that you have a Google account (free) and click the link below:
 
+[https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing)
+
+***
 ## Local Installation
-To install the STREAMLINE locally:
+The instructions below are for installing STREAMINE locally in order to run it either in the included Jupyter Noteook or from the command line. 
 
 ### Prerequisites
+First, be sure to install or confirm previous installation of the following prerequisites.
+
 #### Git
-Install git (if not already installed). You can test for previous installation by typing `git` on your command-line):\
-Reference for installation: [https://github.com/git-guides/install-git](https://github.com/git-guides/install-git)
+Install git (if not already installed). 
+
+* You can test for an existing installation by typing `git` in your command-line.
+
+* Git installation instructions can be found [here](https://github.com/git-guides/install-git).
 
 #### Anaconda
-While STREAMLINE will run on native Python3 (as other required packages will be installed when following the commands below), we recommend installing the most recent stable version of Anaconda3 appropriate for your operating system (if not already installed). This will automatically install Python3 and a number of other common packages
-used by STREAMLINE (e.g. pandas, scikit-learn, etc.).
+We recommend installing the most recent stable version of Anaconda3 appropriate for your operating system (if not already installed) which automatically includes Python3 and a number of other common packages used by STREAMLINE (e.g. pandas, scikit-learn, etc.). Python3 is the most essential prerequisite here. Additional required Python packages will automatically be installed by the installation commands (below). 
 
-You can test for previous installation by typing `conda` on your command-line:\
-Reference for installation: [https://docs.anaconda.com/anaconda/install/index.html](https://docs.anaconda.com/anaconda/install/index.html)
+* You can test for an existing installation by typing `conda` on your command-line.
+* Anaconda installation instructions can be found [here](https://docs.anaconda.com/anaconda/install/index.html)
 
-### Install STREAMLINE
-STREAMLINE can run on native python, but it is not recommend as issue resolution becomes complex, especially in MacOS based systems.
+While STREAMLINE can run on native Python3, this is not generally recomended, since issue resolution becomes complex, especially in MacOS based systems. 
 
-After confirming that you have the prerequisites above,
-use the following commands on the command-line terminal:
+### Installation Commands
+After confirming that you have the prerequisites above, navigate to the directory where you want to save STREAMLINE, and use the following commands in the command-line terminal:
+
 ```
 git clone --single-branch https://github.com/UrbsLab/STREAMLINE
 cd STREAMLINE
@@ -34,57 +40,54 @@ pip install -r requirements.txt
 
 The above 3 commands do the following:
 1. Download the most recent release repository of STREAMLINE
-2. Go to the root STREAMLINE folder from where the package can run
-3. Install all packages required to run STREAMLINE on the local system
+2. Navigate to the root STREAMLINE directory from where the package can run
+3. Install all other packages required to run STREAMLINE on the local system (see `requirements.txt` for the complete list of these packages)
 
-Now the complete STREAMLINE package can be run
-from the STREAMLINE root directory.
-
-Note: In future releases we plan to develop streamline
-as a pip package and may not need to be run from the specific root directory.
+Now the STREAMLINE package can be run from the STREAMLINE root directory.
 
 ### Jupyter Notebook
-The Jupyter notebook installation is the same as above with two additional steps:
+If you with to run STREAMLINE using the included Jupyter Notebook, additionally do the following:
 
 1. Make sure the jupyter package is installed using the following command:
    ```
    pip install jupyter
    ```
-2. Run jupyter-notebook using the command `jupyter notebook` and open the `STREAMLINE-Notebook.ipynb` in the
-   page that opens up in your web browser.
+2. Run Jupyter Notebook using the command `jupyter notebook`
+3. Within the web page that opens, navigate into the saved STREAMLINE folder and open the `STREAMLINE-Notebook.ipynb` file.
 
+For more information on Jupyter Notebook, click [here](https://jupyter.org/).
+
+***
 ## Cluster Installation
-Cluster installation may carry extra steps as per your HPC setup, but is essentially the same as the Local Setup.
+STREAMLINE installation for a CPU computing cluster (i.e. HPC) is essentially the same as for local installation, but may include extra steps or troubleshooting based on your HPC setup. As for local installation, generally within your cluster home/working directory, you'll want to install Git, Anaconda (with Python3), and use the installation commands to download STREAMLINE and other required Python packages.
 
-Additional tools that may help in running big jobs include terminal emulators like `tmux` and `screen`
-and terminal text editors like `nano` and `vim`.
+### Cluster Compatability
+We have set up STREAMLINE to be able to able to run on 7 different types of HPC clusters using `dask_jobqueue` including [LSF, SLURM, PBS, OAR, Moab, SGE, HTCondor] as documented [here](https://jobqueue.dask.org/en/latest/api.html). To date we have explicitly tested it only on LSF and SLURM clusters.
 
-Terminal emulators programs allow you to create several "pseudo terminals" from a single terminal.
-They decouple your programs from the main terminal,
-protecting them from accidentally disconnecting.
-You can detach tmux or screen from the login terminal,
-and all your programs will continue to run safely in the background.
-Later, we can reattach them to the same or a different terminal to
-monitor the process. These are also very useful for running multiple programs with a single connection,
-such as when you're remotely connecting to a machine using Secure Shell (SSH).
+### Additional Tools
+Here we recommend additional tools that may help in running big jobs across all STREAMLINE phases, from a single command. These tool include terminal emulators like `tmux` and `screen` and terminal text editors like `nano` and `vim`. In most likelihood these would already be installed in your cluster or available as modules in your cluster.
 
-Terminal text editors are simple text editor programs that allow you to edit files through the terminal.
+#### Terminal Emulators
+A terminal emulator is particularly important when you want to run all phases of STREAMLINE automatically from a single command. To achieve this, STREAMLINE runs a script on the head node (i.e. job submission node) that monitors phase completion and submits new jobs for the next phase. Typically, closing your terminal would interupt this process. 
 
-In most likelihood these would be installed in your cluster or available as modules in your cluster.
+Terminal emulator programs allow you to create several "pseudo terminals" from a single terminal. They decouple your programs from the main terminal, protecting them from accidentally disconnecting. You can detach `tmux` or `screen` from the login terminal, and all your programs will continue to run safely in the background. Later, we can reattach them to the same or a different terminal to monitor the process. 
 
-We recommend using `tmux` as a terminal emulator,
-a quick guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux)
+These are also very useful for running multiple programs with a single connection, such as when you're remotely connecting to a machine using Secure Shell (SSH).
 
-We recommend using `nano` as a text editor,
-a quick guide on using it can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
+We recommend using `tmux` as a terminal emulator. A quick guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux).
 
+#### Terminal Text Editors
+Terminal text editors are simple text editor programs that allow you to edit files through the terminal. These are particularly useful here for quickly editing the configuration file that specifies all STREAMLINE run parameters for running all phases from a single command. 
 
-## Known Issues
+We recommend using `nano` as a text editor. A quick guide on using it can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
 
+***
+## Known Installation Issues
 1. Scipy version error, the way the STREAMLINE is set up it needs scipy>=1.8.0. If you find this is not true or
    get a version error output, please run `pip install --upgrade scipy`
 2. The lightgbm package on pypi doesn't work out of the box using pip on MacOS. The following command should solve the problem:
    ```conda install -c conda-forge lightgbm```
+3. The most recent skrebate package (0.7) does not install correctly with the standard `pip install skrebate` command, however it does with `pip install skrebate==0.7`.
 
 
 

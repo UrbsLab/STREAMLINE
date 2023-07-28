@@ -5,7 +5,6 @@ Yes, as an automated machine learning pipeline, users can easily run the pipelin
 reasonably reliable default pipeline run parameters that users can optionally change to suite their needs. However the overall pipeline has been designed to operated 
 in a specific order utilizing a fixed set of data science elements/steps to ensure consistency and adherence to best practices.
 
-
 ## What can STREAMLINE be used for?
 STREAMLINE can be used as:
 1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the included modeling algorithms
@@ -18,14 +17,11 @@ STREAMLINE can be used as:
 
 ***
 ## What level of computing skill is required for use?
-STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI),
-the most naive user needs only know how to navigate their PC file system, specify folder/file paths,
-and have a Google Drive account (to run STREAMLINE serially on Google Colab).
+STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naive user needs only know how to navigate their PC file system, specify folder/file paths, and have a Google Drive account (to run STREAMLINE serially on Google Colab).
 
-Those with a very basic knowledge of python and computer environments can apply
-STREAMLINE locally and serially using the included jupyter notebook.
+Those with a very basic knowledge of python and computer environments can apply STREAMLINE locally/serially using the included jupyter notebook.
 
-Those comfortable with command lines can run STREAMLINE locally or on a computing cluster via the command line.
+Those comfortable with command lines should run STREAMLINE locally (either serially or with CPU core parallellization) or (if available) on a computing cluster (HPC) in parallel.
 
 ***
 ## How is STREAMLINE different from other AutoML tools?
@@ -101,6 +97,14 @@ collection, (2) feature engineering and data cleaning that requires domain knowl
 We recommend users consider conducting these items, as needed, prior to applying STREAMLINE.
 
 ***
+## Does STREAMLINE always run the entire pipeline?
+Not necessarily. By default the entire pipeline will run, with the exception of dataset comparison (Phase 7), or replication analysis (Phase 8) when multiple target datasets, or replication data are not available. However the user can also choose to run STREAMLINE one phase at a time, which can often be advantageous. 
+
+For example a user could just run Phase 1 to conduct an exploratory analysis of new data. Or they could just run Phases 1-4 to generate processed, training and testing datasets to apply to modeling outside of STREAMLINE. 
+
+One caveate is that STREAMLINE Phases are designed to run in sequence (one after the other). 
+
+***
 ## Can I do more with the STREAMLINE output after it completes?
 Yes, we have assempled a variety of 'useful' Jupyter Notebooks
 designed to operate on an experiment folder allowing users to do even more
@@ -144,7 +148,7 @@ within a reasonable time frame.
 ## Which STREAMLINE run mode should I use?
 This multi-phase pipeline has been set up to run in one of four ways:
 
-1. On Google Cloud as a Google Colab Notebook [Anyone can run]:
+1. Google Colab Notebook - on free Google Cloud resources [Anyone can run]:
     * Advantages
       * No coding or PC environment experience needed
       * Automatically installs and uses the most recent version of STREAMLINE
@@ -158,7 +162,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * Limited by google cloud computing allowances (may only work for smaller datasets)
     * Notes: Requires a Google account (free)
 
-2. Locally as a Jupyter Notebook [Basic experience]:
+2. Jupyter Notebook - locally [Basic experience]:
     * Advantages:
       * Does not rely on free computing limitations of Google Cloud (but rather your own computer's limitations)
       * One-click run of whole pipeline (all phases)
@@ -170,7 +174,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * Beginners have to set up their computing environment
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
-3. Locally from the command line [Command-line Users]:
+3. Command line - locally [Command-line Users]:
     * Advantages:
       * Typically runs faster than within Jupyter Notebook
       * A more versatile option for those with command-line experience
@@ -181,7 +185,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * Command-line experience recommended
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
-4. On HPC Clusters from command line [Computing Cluster Users]:
+4. HPC Cluster - from command line [Computing Cluster Users]:
     * Advantages:
       * By far the fastest, most efficient way to run STREAMLINE
       * Offers ability to run STREAMLINE over 7 types of HPC systems

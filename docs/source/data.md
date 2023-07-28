@@ -16,6 +16,7 @@ Here we specify the formatting requirements for datasets when running STREAMLINE
 6. The outcome/class column includes only two possible values (i.e. a binary outcome) [Note: STREAMLINE will soon be expanded to allow for multi-class and quantiative outcomes]
 7. If multiple target datasets are being analyzed they must each have the same `class_label` (e.g. 'Class'), and (if present), the same `instance_label` (e.g. 'ID') and `match_label` (e.g. 'Match_ID'). The same is true for any 'replication datasets' (if present) when using Phase 8. 
 
+***
 ### Additional Considerations
 #### Specifying Feature Types
 Users are strongly encouraged to specify which features should be treated as categorical or quantitative using `quantitative_feature_path` or `categorical_feature_path`, or setting the `categorical_cutoff` to a value that will correctly assign feature types automatically (i.e. if all features in the dataset have 3 possible values and `categorical_cutoff` is set to 4, all features would be treated as categorical). If multiple target datasets are being analyzed, then `quantitative_feature_path` or `categorical_feature_path` should include the names of all features to be treated as categorical vs. quanatative across all datasets. 
@@ -32,9 +33,10 @@ While 'new' unique values observed in the quantitative features of any replicati
 1. More than two categories, one-hot-encoding does not add a new column to the dataset, and the value for each one-hot-encoded feature for that instance is set to 0 (e.g. not black, brown, blond, or grey).
 2. Exactly two categories, one-hot-encoding does not add a new column to the dataset, and the values for each one-hot-encoded feature for that instance is set to 'missing-value', leaving value assignment to mode imputation. 
 
-#### Outcome Labels
+#### Binary Class Labels
 STREAMLINE assumes that instances with class 0 are *negative* and those with class 1 are *positive* with respect to true positive, true negative, false positive, false negative metrics. This also impacts PRC plots, which focus on the classification of *positives*. Often, accurate prediction of the *positive* class is of greater interest than the *negative* class. Additionally, it is common in datasets for there to be a larger number of *negative* instances than *postitive* ones. 
 
+***
 ### Pre-STREAMLINE Data Processing
 STREAMLINE seeks to automate many of the common elements of a machine learning data science pipeline, but every dataset and analysis can have it's own unique needs and challenges. While not required by STREAMLINE to run, we recommmend users consider if any of the following steps apply and should be conducted prior to running as they can impact model interpretation and conclusions. 
 
@@ -68,9 +70,11 @@ For demonstration and quick code-testing purposes, the STREAMLINE repository inc
 
 New users can easily run STREAMLINE on these datasets in whatever run-mode desired. Instructions for running STREAMLINE are given using this demo data as an example for each run-mode (see [here](running.md)). Details on each of the demonstration datasets are given below. 
 
+***
 ### Real-World HCC Dataset
 The first demo dataset (`hcc-data_example.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).
 
+***
 ### Custom Extension of HCC Dataset
 The second demo dataset (`hcc-data_example_custom.csv`) is similar to the first, but we have made a number of modifications to it in order to test the data cleaning and feature engineering functionalities of STREAMLINE. 
 
@@ -85,6 +89,7 @@ Modifcations include the following:
 
 These simulated features and instances have been clearly identified in the feature names and instances IDs of this dataset. 
 
+***
 ### Simulated Replication Dataset
 The last demo dataset (`hcc-data_example_custom_rep.csv`) was simulated as a mock replication dataset for `hcc-data_example_custom.csv`. To generate this dataset we first took `hcc-data_example_custom.csv` and for 30% of instances randomly generated realistic looking new values for each feature and class outcome (effectively adding noise to this data). Furthermore we simulated further instances that test the ability of STREAMLINE's one-hot-encoding to ignore new (as-of-yet unseen) categorical features values during STREAMLINE's replication phase. If this were to happen, the new value would be ignored (i.e. no new feature columns added).
 
