@@ -190,3 +190,17 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 * SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
 * Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise `use_uniform_FI` should be True.
 * While the STREAMLINE includes `impute_data` as an option that can be turned off in `DataPreprocessing`, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while `impute_data` is set to 'False'.
+
+## Modeling Algorithm Hyperparamters
+
+
+7. (Optional/Manual Mode) Update other STREAMLINE run parameters to suit your analysis needs within code blocks 6-14. We will cover some common run parameters to consider here:
+    * `cv_partitions`: The number of CV training/testing partitions created, and consequently the number of models trained for each ML algorithm. We recommend setting this between 3-10. A larger value will take longer to run but produce more accurate results.
+    * `categorical_cutoff`: STREAMLINE uses this parameter to automatically determine which features to treat as categorical vs. numeric. If a feature has more than this many unique values, it is considered to be numeric.
+        * Note: Currently, STREAMLINE does NOT automatically apply one-hot-encoding to categorical features meaning that all features will still be treated as numerical during ML modeling. Its currently up to the users decide whether to pre-encode features.  However STREAMLINE does take feature type into account during both the exploratory analysis, data preprocessing, and feature importance phases.
+        * Note: Users can also manually specify which features to treat as categorical or even to point to features in the dataset that should be ignored in the analysis with the parameters `ignore_features_path` and `categorical_feature_path`, respectively. For either, instead of the default string 'None' setting the user specifies the path to a .csv file including a row of feature names from the dataset that should either be treated as categorical or ignored, respectively.
+    * `algorithms`: A list of modeling algorithms to run, setting it to None will run all the algorithms. Must be from the set of the full or abbreviated name of models found in `streamline/models` folder.
+    * `exlude`: A list of modeling algorithms to exclude from the pipeline. Must be from the set of the full or abbreviated name of models found in `streamline/models` folder.
+    * * `n_trials`: Set to a higher value to give Optuna more attempts to optimize hyperparameter settings.
+    * `timeout`: Set higher to increase the maximum time allowed for Optuna to run the specified `n_trials` (useful for algorithms that take more time to run)
+* Note: There are a number of other run parameter options, and we encourage users to read descriptions of each to see what other options are available.

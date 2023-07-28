@@ -17,7 +17,7 @@ STREAMLINE can be used as:
 
 ***
 ## What level of computing skill is required for use?
-STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naive user needs only know how to navigate their PC file system, specify folder/file paths, and have a Google Drive account (to run STREAMLINE serially on Google Colab).
+STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naive user needs only know how to navigate their computer file system, specify folder/file paths, and have a Google Drive account (to run STREAMLINE serially on Google Colab).
 
 Those with a very basic knowledge of python and computer environments can apply STREAMLINE locally/serially using the included jupyter notebook.
 
@@ -146,53 +146,10 @@ within a reasonable time frame.
 
 ***
 ## Which STREAMLINE run mode should I use?
-This multi-phase pipeline has been set up to run in one of four ways:
+STREAMLINE has been set up with multiple 'run-mode' options to suite different needs, computational resources, and user skill levels.
+1.  **Google Colab Notebook:** Can easily be run by anyone, even those with no coding experience. STREAMLINE output can easily be viewed within the notebook as it runs. However this mode is computationally limited by the free Google Cloud resources it has access to. This mode is best for demonstration, educational purposes, and running STREAMLINE on small datasets, or applying a limited number of machine learning modeling algorithms.
+2. **Jupyter Notebook:** The advantages are mostly the same as the Colab Notebook, however this mode relies on the computing resources of your local computer, which may (or possibly not) have a faster CPU and memory. However, to use this mode you will need to know how to set up your computing environment with Anaconda, etc, which can take some troubleshooting for a beginner. This mode is best for those who want a little more control over STREAMLINE, but still wish to run it within a notebook. 
+3. **Command Line (Local):** As with Jupyter Notebook, this mode relies on the computing resources of your local computer. This mode is best for those who don't care about seeing output within the notebook and who know (or are willing to learn) how to work from a command line, but who may not have access to a computing cluster. 
+4. **Command Line (HPC Cluster):** STREAMLINE is an embarrassingly parallel package, that can parallelize individual phases as HPC jobs at the level of target datasets, CV partitions, and algorithms. This mode is best if you have access to a dask-compatible computing cluster. It is the fastest most efficient way to run STREAMLINE, particularly on larger datasets, or when users want to run all pipeline algorithms and elements. 
 
-1. **Google Colab Notebook** - on free Google Cloud resources [Anyone can run]:
-    * Advantages
-      * No coding or PC environment experience needed
-      * Automatically installs and uses the most recent version of STREAMLINE
-      * Computing can performed directly on Google Cloud from anywhere
-      * One-click run of whole pipeline (all phases)
-      * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
-      * Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Slowest of the run options
-      * Limited by google cloud computing allowances (may only work for smaller datasets)
-    * Notes: Requires a Google account (free)
-
-2. **Jupyter Notebook** - locally [Basic experience]:
-    * Advantages:
-      * Does not rely on free computing limitations of Google Cloud (but rather your own computer's limitations)
-      * One-click run of whole pipeline (all phases)
-      * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
-      * Allows easy customizability of all aspects of the pipeline with minimal coding/environment experience (including hyperparameter value ranges)
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Slower runtime than from command-line
-      * Beginners have to set up their computing environment
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-
-3. **Command Line (Local)** [Command-line Users]:
-    * Advantages:
-      * Typically runs faster than within Jupyter Notebook
-      * A more versatile option for those with command-line experience
-      * One-command run of whole pipeline available when using a configuration file to run
-      * Can optionally run the pipeline one phase at a time
-    * Disadvantages:
-      * Can only run pipeline serially or with limited local cpu core parallelization
-      * Command-line experience recommended
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-
-4. **Command Line (HPC Cluster)** [Computing Cluster Users]:
-    * Advantages:
-      * By far the fastest, most efficient way to run STREAMLINE
-      * Offers ability to run STREAMLINE over 7 types of HPC systems
-      * One-command run of whole pipeline available when using a configuration file to run
-      * Can optionally run the pipeline one phase at a time
-    * Disadvantages:
-      * Experience with command-line and dask-compatible clusters recommended
-      * Access to a computing cluster required
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations. Cluster runs of STREAMLINE were set up using `dask-jobqueue` and thus should support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html). Currently we have only directly tested STREAMLINE on SLURM and LSF clusters. Further codebase adaptation may be needed for clusters types not on the above link.
-
+For more details on the advantages and disadvantages of different run modes, see '[Picking a Run Mode](running.md#picking-a-run-mode)'.
