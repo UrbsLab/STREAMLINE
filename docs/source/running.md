@@ -1,7 +1,20 @@
 # Running STREAMLINE
+This section details how to run STREAMLINE in any of its run modes. These include:
+1. **Google Colab Notebook:** (run remotely on free google cloud resources)
+2. **Jupyter Notebook:** (run locally on your PC)
+3. **Command Line:** (locally or on a 'dask-compatable' CPU Computing Cluster)
 
-## Running on Google Colab
+While the notebooks only allow STREAMLINE to be run serially, it can be '[embarrassingly](https://en.wikipedia.org/wiki/Embarrassingly_parallel)' parallelized when run from the command line in one of two ways:
+1. **Local command line:** basic CPU core parallelization 
+2. **CPU Computing Cluster:** job submission parallelization
 
+Lastly, when run from the command line, STREAMLINE can be run in one of two ways:
+1. **All phases at once:** with a single command pointing to a 'configuration file' that includes all necessary run parameters
+2. **One phase at a time:** using either phase-specific commands with command-line arguments, or again using the 'configuration file'
+
+***
+## Google Colab Notebook
+This section on running STREAMLine
 In this section we cover how to run STREAMLINE within [Google Colab](https://research.google.com/colaboratory/). If you're new to Google Colab you can also check out this [tutorial](https://www.tutorialspoint.com/google_colab/index.htm) on the basics.
 
 Users with coding experience may wish to jump to sections covering how to run STREAMLINE [locally](local.md) (either using our provided Jupyter Notebook or from the command line) or on an [HPC Cluster](cluster.md) if you have access to one.

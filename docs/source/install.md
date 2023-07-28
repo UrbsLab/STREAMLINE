@@ -62,7 +62,7 @@ For more information on Jupyter Notebook, click [here](https://jupyter.org/).
 STREAMLINE installation for a CPU computing cluster (i.e. HPC) is essentially the same as for local installation, but may include extra steps or troubleshooting based on your HPC setup. As for local installation, generally within your cluster home/working directory, you'll want to install Git, Anaconda (with Python3), and use the installation commands to download STREAMLINE and other required Python packages.
 
 ### Cluster Compatability
-We have set up STREAMLINE to be able to able to run on 7 different types of HPC clusters using `dask_jobqueue` including [LSF, SLURM, PBS, OAR, Moab, SGE, HTCondor] as documented [here](https://jobqueue.dask.org/en/latest/api.html). To date we have explicitly tested it only on LSF and SLURM clusters.
+We have set up STREAMLINE to be able to able to run on 7 different types of HPC clusters using `dask_jobqueue` including [LSF, SLURM, PBS, OAR, Moab, SGE, HTCondor] as documented [here](https://jobqueue.dask.org/en/latest/api.html). To date we have explicitly tested STREAMLINE only on LSF and SLURM clusters.
 
 ### Additional Tools
 Here we recommend additional tools that may help in running big jobs across all STREAMLINE phases, from a single command. These tool include terminal emulators like `tmux` and `screen` and terminal text editors like `nano` and `vim`. In most likelihood these would already be installed in your cluster or available as modules in your cluster.
@@ -88,8 +88,3 @@ We recommend using `nano` as a text editor. A quick guide on using it can be fou
 2. The lightgbm package on pypi doesn't work out of the box using pip on MacOS. The following command should solve the problem:
    ```conda install -c conda-forge lightgbm```
 3. The most recent skrebate package (0.7) does not install correctly with the standard `pip install skrebate` command, however it does with `pip install skrebate==0.7`.
-
-
-
-
-

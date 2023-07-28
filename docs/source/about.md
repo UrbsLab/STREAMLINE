@@ -148,7 +148,7 @@ within a reasonable time frame.
 ## Which STREAMLINE run mode should I use?
 This multi-phase pipeline has been set up to run in one of four ways:
 
-1. Google Colab Notebook - on free Google Cloud resources [Anyone can run]:
+1. **Google Colab Notebook** - on free Google Cloud resources [Anyone can run]:
     * Advantages
       * No coding or PC environment experience needed
       * Automatically installs and uses the most recent version of STREAMLINE
@@ -162,7 +162,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * Limited by google cloud computing allowances (may only work for smaller datasets)
     * Notes: Requires a Google account (free)
 
-2. Jupyter Notebook - locally [Basic experience]:
+2. **Jupyter Notebook** - locally [Basic experience]:
     * Advantages:
       * Does not rely on free computing limitations of Google Cloud (but rather your own computer's limitations)
       * One-click run of whole pipeline (all phases)
@@ -174,7 +174,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * Beginners have to set up their computing environment
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
-3. Command line - locally [Command-line Users]:
+3. **Command Line (Local)** [Command-line Users]:
     * Advantages:
       * Typically runs faster than within Jupyter Notebook
       * A more versatile option for those with command-line experience
@@ -185,7 +185,7 @@ This multi-phase pipeline has been set up to run in one of four ways:
       * Command-line experience recommended
     * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
 
-4. HPC Cluster - from command line [Computing Cluster Users]:
+4. **Command Line (HPC Cluster)** [Computing Cluster Users]:
     * Advantages:
       * By far the fastest, most efficient way to run STREAMLINE
       * Offers ability to run STREAMLINE over 7 types of HPC systems

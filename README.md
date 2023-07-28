@@ -60,7 +60,7 @@ STREAMLINE can be run using a variety of modes balancing ease of use and efficie
 * Command Line: runs serially or locally
    * Locally, serially
    * Locally, cpu core in parallel
-   * CPU Computing cluster (HPC), in parallel (best for efficiency)
+   * CPU Computing Cluster (HPC), in parallel (best for efficiency)
       * All phases can be run from a single command (with a job monitor/submitter running on the head node until completion)
       * Each phase can be run separately in sequence
 
