@@ -26,6 +26,11 @@ We recommend installing the most recent stable version of Anaconda3 appropriate 
 
 * You can test for an existing installation by typing `conda` on your command-line.
 * Anaconda installation instructions can be found [here](https://docs.anaconda.com/anaconda/install/index.html)
+* If you already have Anaconda installed, we recommend updating conda and anaconda (as follows) prior to running STREAMLINE to avoid downstream module/environment errors
+```
+conda update conda
+conda update anaconda
+```
 
 While STREAMLINE can run on native Python3, this is not generally recomended, since issue resolution becomes complex, especially in MacOS based systems. 
 
@@ -44,6 +49,9 @@ The above 3 commands do the following:
 3. Install all other packages required to run STREAMLINE on the local system (see `requirements.txt` for the complete list of these packages)
 
 Now the STREAMLINE package can be run from the STREAMLINE root directory.
+
+#### Troubleshooting
+If you see errors or warnings when running the above commands, this may indicate that the required packages might not be installing properly, which may prevent STREAMLINE from running to completion. We recommend always testing the STREAMLINE installation first by [running](running.md) it (in the desired [run mode](running.md#picking-a-run-mode)) on the [demonstration](sample.md#demonstration-data) data with included/example default run parameters. Issues related to installation will be evident if you get 'module' related errors when running STREAMLINE. This is most likely to happen if you are working from a previous installation of Anaconda, and you should update both `conda` and `anaconda` first and then retry the commands above. 
 
 ### Jupyter Notebook
 If you with to run STREAMLINE using the included Jupyter Notebook, additionally do the following:

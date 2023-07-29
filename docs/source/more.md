@@ -3,7 +3,7 @@
 ## Useful Notebooks
 [Under Construction]
 
-
+## Updating Algorithm Hyperparameter Options
 
 ## Adding New Modeling Algorithms
 

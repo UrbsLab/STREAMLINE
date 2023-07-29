@@ -15,8 +15,7 @@ class ReplicationRunner:
     """
     Phase 9 of STREAMLINE (Optional)- This 'Main' script manages Phase 9 run parameters,
     and submits job to run locally (to run serially) or on
-    cluster (parallelized). This script runs ApplyModelJob.py which applies and
-    evaluates all trained models on one or more previously unseen hold-out or replication study dataset(s).
+    cluster (parallelized).
     """
 
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
@@ -99,8 +98,8 @@ class ReplicationRunner:
         # location of folder containing models respective training dataset
         self.full_path = self.output_path + "/" + self.experiment_name + "/" + self.data_name
 
-        if not os.path.exists(self.full_path + "/applymodel"):
-            os.makedirs(self.full_path + "/applymodel")
+        if not os.path.exists(self.full_path + "/replication"):
+            os.makedirs(self.full_path + "/replication")
 
         if not self.show_plots:
             if not os.path.exists(self.output_path + "/" + self.experiment_name + '/jobs'):
@@ -138,8 +137,8 @@ class ReplicationRunner:
             file_extension = dataset_filename.split('/')[-1].split('.')[-1]
             apply_name = dataset_filename.split('/')[-1].split('.')[0]
 
-            if not os.path.exists(self.full_path + "/applymodel/" + apply_name):
-                os.mkdir(self.full_path + "/applymodel/" + apply_name)
+            if not os.path.exists(self.full_path + "/replication/" + apply_name):
+                os.mkdir(self.full_path + "/replication/" + apply_name)
 
             if file_extension == 'txt' or file_extension == 'csv' or file_extension == 'tsv':
                 if apply_name not in unique_datanames:
@@ -185,7 +184,7 @@ class ReplicationRunner:
 
     def save_metadata(self):
         # Update metadata this will alter the relevant
-        # metadata so that it is specific to the 'apply' analysis being run.
+        # metadata so that it is specific to the 'replication' analysis being run.
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
         metadata = pickle.load(file)
         file.close()

@@ -24,7 +24,7 @@ This run mode is best for (1) quickly trying out STREAMLINE on demonstration dat
 Below we first detail how to run the Colab Notebook on the included [demonstration datasets](data.md#demonstration-data), then how to adapt this notebook to run on your own dataset(s) as well as change STREAMLINE run parameters if desired. 
 
 ### Running the Demo
-The STREAMLINE Google Colab Notebook is set up to run a limited analysis applying all 9 phases of the pipeline. This includes 3-fold cross validation, and applying only three of the faster ML modeling algorithms to 2 example 'target datasets', and a 'replication dataset' relevant to only one of the target datasets. These datasets are detailed in [Demonstration Data](data.md#demonstration-data). This demo should take 6-7 minutes to run on Google Cloud, with results viewable in the notebook. The notebook will also automatically download the PDF summary reports, and the zipped 'experiment folder' with all output files, with the user's permission.
+The STREAMLINE Google Colab Notebook is set up to run a limited analysis applying all 9 phases of the pipeline. This includes 3-fold cross validation, and applying only three of the faster ML modeling algorithms to 2 example 'target datasets', and a 'replication dataset' relevant to only one of the target datasets. These datasets are detailed in [Demonstration Data](data.md#demonstration-data). This demo should take 6-7 minutes to run on Google Cloud, with results viewable in the notebook. The notebook will also automatically download the PDF summary reports, and the zipped 'experiment folder' with all output files, with the user's permission. 
 
 To run this demo, do the following:
 1. Set up a Google account (if you don't already have one). Click [here]( https://support.google.com/accounts/answer/27441?hl=en) for help.
@@ -468,7 +468,7 @@ Running STREAMLINE on Google Colab is best for:
       * Does not rely on free computing limitations of Google Cloud (but rather your own computer's limitations)
       * One-click run of whole pipeline (all phases)
       * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
-      * Allows easy customizability of all aspects of the pipeline with minimal coding/environment experience (including hyperparameter value ranges)
+      * Allows easy customizability of all aspects of the pipeline with minimal coding/environment experience
     * Disadvantages:
       * Can only run pipeline serially
       * Slower runtime than from command-line

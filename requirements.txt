@@ -8,7 +8,7 @@ pip
 pycodestyle
 scikit-learn
 scipy>=1.8.0
-seaborn
+seaborn>=0.11.0
 skrebate==0.7
 tqdm
 wheel
