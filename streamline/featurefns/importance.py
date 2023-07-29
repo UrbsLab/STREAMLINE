@@ -148,6 +148,7 @@ class FeatureImportance(Job):
         if self.instance_label:
             headers.remove(self.instance_label)
         headers.remove(self.class_label)
+
         data_features = self.dataset.data[headers + [self.class_label, ]]
         n = data_features.shape[0]
         if self.instance_subset is not None:

@@ -361,8 +361,8 @@ class StatsJob(Job):
 
             # Save Median FI Stats
             if master_list is None:
-                self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers)
-
+                self.save_fi(fi_all, self.abbrev[algorithm], headers)
+                #self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers) #bug
             # Store ave metrics for creating global ROC and PRC plots later
             mean_ave_prec = np.mean(aveprecs)
             # result_dict = {'algorithm':algorithm,'fpr':mean_fpr, 'tpr':mean_tpr,
