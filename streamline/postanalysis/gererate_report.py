@@ -139,19 +139,32 @@ class ReportJob(Job):
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
 
-        targetdata = ars_dic[0:21]  # Data-path to  instance label
-        cv = ars_dic[21:27]  # cv partitions to partition Method
-        match = ars_dic[27:30]  # match label
-        cat_cut = ars_dic[30:33]  # categorical cutoff
-        stat_cut = ars_dic[33:36]  # statistical significance cutoff
-        process = ars_dic[36:51]  # feature missingness cutoff to list of exploratory plots saved
-        general = ars_dic[51:57]  # random seed to run from notebooks
-        process2 = ars_dic[57:66]  # use data scaling to use multivariate imputation
-        featsel = ars_dic[66:93]  # use mutual info to export feature importance plots
-        overwrite = ars_dic[93:96]  # overwrite cv
-        modeling = ars_dic[96:114]  # primary metric to export hyperparameter sweep plots
-        lcs = ars_dic[114:129]
-        stats = ars_dic[129:150]
+        targetdata = ars_dic[0:27]  # Data-path to  Specified Quantitative Features
+        cv = ars_dic[27:33]  # cv partitions to partition Method
+        cat_cut = ars_dic[33:36]  # categorical cutoff
+        stat_cut = ars_dic[36:39]  # statistical significance cutoff
+        process = ars_dic[39:54]  # feature missingness cutoff to list of exploratory plots saved
+        general = ars_dic[54:60]  # random seed to run from notebooks
+        process2 = ars_dic[60:69]  # use data scaling to use multivariate imputation
+        featsel = ars_dic[69:96]  # use mutual info to export feature importance plots
+        overwrite = ars_dic[96:99]  # overwrite cv
+        modeling = ars_dic[99:117]  # primary metric to export hyperparameter sweep plots
+        lcs = ars_dic[117:132]
+        stats = ars_dic[132:153]
+
+        #targetdata = ars_dic[0:21]  # Data-path to  instance label
+        #cv = ars_dic[21:27]  # cv partitions to partition Method
+        #match = ars_dic[27:30]  # match label
+        #cat_cut = ars_dic[30:33]  # categorical cutoff
+        #stat_cut = ars_dic[33:36]  # statistical significance cutoff
+        #process = ars_dic[36:51]  # feature missingness cutoff to list of exploratory plots saved
+        #general = ars_dic[51:57]  # random seed to run from notebooks
+        #process2 = ars_dic[57:66]  # use data scaling to use multivariate imputation
+        #featsel = ars_dic[66:93]  # use mutual info to export feature importance plots
+        #overwrite = ars_dic[93:96]  # overwrite cv
+        #modeling = ars_dic[96:114]  # primary metric to export hyperparameter sweep plots
+        #lcs = ars_dic[114:129]
+        #stats = ars_dic[129:150]
 
         ls2 = ars_dic_2
 

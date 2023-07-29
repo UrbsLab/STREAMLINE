@@ -208,11 +208,12 @@ class DataProcessRunner:
         metadata['Experiment Name'] = self.experiment_name
         metadata['Class Label'] = self.class_label
         metadata['Instance Label'] = self.instance_label
+        metadata['Match Label'] = self.match_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features
+        metadata['Specified Quantitative Features'] = self.quantitative_features 
         metadata['CV Partitions'] = self.n_splits
         metadata['Partition Method'] = self.partition_method
-        metadata['Match Label'] = self.match_label
         metadata['Categorical Cutoff'] = self.categorical_cutoff
         metadata['Statistical Significance Cutoff'] = self.sig_cutoff
         metadata['Feature Missingness Cutoff'] = self.featureeng_missingness
