@@ -433,7 +433,7 @@ class ReportJob(Job):
                 data_process_path = self.experiment_path + '/' + self.datasets[
                     m] + "/exploratory/DataProcessSummary.csv"
             else:
-                data_process_path = self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                data_process_path = self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     m] + "/exploratory/DataProcessSummary.csv"
 
             table1 = []  # Initialize an empty list to store the data
@@ -554,7 +554,7 @@ class ReportJob(Job):
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             else:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + '/exploratory/ClassCountsBarPlot.png', 68, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
 
@@ -575,7 +575,7 @@ class ReportJob(Job):
                     # then image width with hight based on image dimensions (retain original image ratio)
                 else:
                     self.analysis_report.image(
-                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                        self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                             m] + '/exploratory/FeatureCorrelations.png', 120, 47, 89, 70)
                     # self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                     #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
@@ -614,7 +614,7 @@ class ReportJob(Job):
                     self.experiment_path + '/' + self.datasets[m] + "/model_evaluation/Summary_performance_mean.csv")
             else:
                 summary_performance = pd.read_csv(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + "/model_evaluation/Summary_performance_mean.csv")
             summary_performance['ROC AUC'] = summary_performance['ROC AUC'].astype(float)
             highest_roc = summary_performance['ROC AUC'].max()
@@ -734,11 +734,11 @@ class ReportJob(Job):
                     82, 85)
             else:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + '/model_evaluation/Summary_ROC.png',
                     4, 118, 120)
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
 
             # PRC-------------------------------
@@ -756,11 +756,11 @@ class ReportJob(Job):
                     68, 80)
             else:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + '/model_evaluation/Summary_PRC.png',
                     4, 206, 133)  # wider to account for more text
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
             self.footer()
 
@@ -999,9 +999,9 @@ class ReportJob(Job):
                 except Exception:
                     pass
             else:
-                file_name = str(self.experiment_name) + '_ML_Pipeline_Apply_Report.pdf'
+                file_name = str(self.experiment_name) + '_ML_Pipeline_Replication_Report.pdf'
                 self.analysis_report.output(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[M] + '/' + file_name)
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[M] + '/' + file_name)
                 # Print phase completion
                 logging.info("Phase 10 complete")
                 try:
@@ -1138,7 +1138,7 @@ class ReportJob(Job):
                     sep=',',
                     index_col=0)
             else:
-                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_mean.csv', sep=',', index_col=0)
             # Make list of top values for each metric
             metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
@@ -1149,7 +1149,7 @@ class ReportJob(Job):
                 ds2 = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[n] + "/model_evaluation/Summary_performance_mean.csv")
             else:
-                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_mean.csv')
 
             self.format_fn(stats_ds, best_metric_list, metric_name_list, ds2)
@@ -1189,7 +1189,7 @@ class ReportJob(Job):
                     sep=',',
                     index_col=0)
             else:
-                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_median.csv', sep=',', index_col=0)
             # Make list of top values for each metric
             metric_name_list = ['Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)', 'Specificity',
@@ -1200,7 +1200,7 @@ class ReportJob(Job):
                 ds2 = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[n] + "/model_evaluation/Summary_performance_median.csv")
             else:
-                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_median.csv')
             self.format_fn(stats_ds, best_metric_list, metric_name_list, ds2)
         self.footer()
