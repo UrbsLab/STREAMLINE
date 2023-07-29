@@ -75,17 +75,28 @@ class StatsJob(Job):
         self.metric_weight = metric_weight
         self.show_plots = show_plots
         if self.plot_fi_box: 
-            self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
+            self.feature_headers = pd.read_csv(self.full_path + "/exploratory/ProcessedFeatureNames.csv",
                                                 sep=',').columns.values.tolist()  # Get Original Headers
         else:
             try:
-                self.original_headers = pd.read_csv(self.full_path
-                                                    + "/exploratory/OriginalFeatureNames.csv",
+                self.feature_headers = pd.read_csv(self.full_path
+                                                    + "/exploratory/ProcessedFeatureNames.csv",
                                                     sep=',').columns.values.tolist()  # Get Original Headers
+#        if self.plot_fi_box: 
+#            self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
+#                                                sep=',').columns.values.tolist()  # Get Original Headers
+#        else:
+#            try:
+#                self.original_headers = pd.read_csv(self.full_path
+#                                                    + "/exploratory/OriginalFeatureNames.csv",
+#                                                    sep=',').columns.values.tolist()  # Get Original Headers
             except Exception:
                 self.original_headers = None
-        #self.feature_headers = self.original_headers.copy()
-
+#        self.feature_headers = self.original_headers.copy()
+#        if self.instance_label is not None:
+#            if self.instance_label in self.feature_headers:
+#                self.feature_headers.remove(self.instance_label)
+#        self.feature_headers.remove(self.class_label)
 
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
         self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
@@ -153,13 +164,14 @@ class StatsJob(Job):
         job_file.close()
 
     def fi_stats(self, metric_dict):
+        metric_ranking = 'mean' #mean or median #Ryan add a run parameter to STREAMLINE to allow user to decide plot rankings for FI using mean by default
         # Prepare for feature importance visualizations
         logging.info('Preparing for Model Feature Importance Plotting...')
 
         # old - 'Balanced Accuracy'
         fi_df_list, fi_med_list, fi_med_norm_list, med_metric_list, all_feature_list, \
             non_zero_union_features, \
-            non_zero_union_indexes = self.prep_fi(metric_dict)
+            non_zero_union_indexes = self.prep_fi(metric_dict, metric_ranking)
 
         # Select 'top' features for composite visualisation
         features_to_viz = self.select_for_composite_viz(non_zero_union_features, non_zero_union_indexes,
@@ -168,8 +180,8 @@ class StatsJob(Job):
         # Generate FI boxplots for each modeling algorithm if specified by user
         if self.plot_fi_box:
             logging.info('Generating Feature Importance Boxplot and Histograms...')
-            self.do_fi_boxplots(fi_df_list, fi_med_list)
-            self.do_fi_histogram(fi_med_list)
+            self.do_fi_boxplots(fi_df_list, fi_med_list, metric_ranking)
+            self.do_fi_histogram(fi_med_list, metric_ranking)
 
         # Visualize composite FI - Currently set up to only use Balanced Accuracy for composite FI plot visualization
         logging.info('Generating Composite Feature Importance Plots...')
@@ -180,8 +192,16 @@ class StatsJob(Job):
                                                                                   fi_med_norm_list)
 
         # Generate Normalized composite FI plot
-        self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
-                               'Normalized Median Feature Importance')
+
+        if metric_ranking == 'mean':
+            self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
+                                'Normalized Mean Feature Importance', metric_ranking)
+        elif metric_ranking == 'median':
+            self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
+                                'Normalized Median Feature Importance', metric_ranking)
+        else:
+            self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
+                                'Normalized Mean Feature Importance', metric_ranking)
 
         # # Fractionate FI scores for normalized and fractionated composite FI plot
         # frac_lists = self.frac_fi(top_fi_med_norm_list)
@@ -195,8 +215,15 @@ class StatsJob(Job):
         weighted_lists, weights = self.weight_fi(med_metric_list, top_fi_med_norm_list)
 
         # Generate Normalized and Weighted Compound FI plot
-        self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                               'Norm_Weight', 'Normalized and Weighted Median Feature Importance')
+        if metric_ranking == 'mean':
+            self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
+                                'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking)
+        elif metric_ranking == 'median':
+            self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
+                                'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking)
+        else:
+            self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
+                                'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking)
 
         # Weight the Fractionated FI scores for normalized,fractionated, and weighted compound FI plot
         # weighted_frac_lists = self.weight_frac_fi(frac_lists,weights)
@@ -319,11 +346,12 @@ class StatsJob(Job):
                     headers = pd.read_csv(
                         self.full_path + '/CVDatasets/' + self.data_name
                         + '_CV_' + str(cv_count) + '_Test.csv').columns.values.tolist()
-                    if self.instance_label is not None:
+                    if self.instance_label is not None: #Match label will never be in CV datasets
                         if self.instance_label in headers:
                             headers.remove(self.instance_label)
                     headers.remove(self.class_label)
-                    for each in self.original_headers:
+                    #for each in self.original_headers:
+                    for each in self.feature_headers:
                         # Check if current feature from original dataset was in the partition
                         if each in headers:
                             # Deal with features not being in original order (find index of current feature list.index()
@@ -362,10 +390,10 @@ class StatsJob(Job):
             dr.to_csv(filepath, header=True, index=False)
             metric_dict[algorithm] = results
 
-            # Save Median FI Stats
+            # Save FI scores for all CV models
             if master_list is None:
-                #self.save_fi(fi_all, self.abbrev[algorithm], headers)
-                self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers) #bug
+                self.save_fi(fi_all, self.abbrev[algorithm], self.feature_headers)
+                #self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers) #bug
             # Store ave metrics for creating global ROC and PRC plots later
             mean_ave_prec = np.mean(aveprecs)
             # result_dict = {'algorithm':algorithm,'fpr':mean_fpr, 'tpr':mean_tpr,
@@ -757,7 +785,7 @@ class StatsJob(Job):
                                      '/model_evaluation/'
                                      'statistical_comparisons/MannWhitneyU_' + metric + '.csv', index=False)
 
-    def prep_fi(self, metric_dict):
+    def prep_fi(self, metric_dict,metric_ranking):
         """
         Organizes and prepares model feature importance
         data for boxplot and composite feature importance figure generation.
@@ -782,7 +810,14 @@ class StatsJob(Job):
             if algorithm == self.algorithms[0]:
                 all_feature_list = temp_df.columns.tolist()
             fi_df_list.append(temp_df)
-            fi_med_list.append(temp_df.median().tolist())  # Saves median FI scores over CV runs
+            if metric_ranking == 'mean':
+                fi_med_list.append(temp_df.mean().tolist())  # Saves mean FI scores over CV runs
+            elif metric_ranking == 'median':
+                fi_med_list.append(temp_df.median().tolist())  # Saves median FI scores over CV runs
+            else:
+                print('Warning: Feature importance plot ranking metric requested not available - using mean ranking')
+                fi_med_list.append(temp_df.mean().tolist())  # Saves mean FI scores over CV runs
+
             # Get relevant metric info
             med_ba = median(metric_dict[algorithm][self.metric_weight])
             med_metric_list.append(med_ba)
@@ -861,7 +896,7 @@ class StatsJob(Job):
             features_to_viz = score_sum_dict_features
         return features_to_viz  # list of feature names to visualize in composite FI plots.
 
-    def do_fi_boxplots(self, fi_df_list, fi_med_list):
+    def do_fi_boxplots(self, fi_df_list, fi_med_list, metric_ranking):
         """
         Generate individual feature importance boxplot for each algorithm
         """
@@ -871,12 +906,14 @@ class StatsJob(Job):
             score_dict = {}
             counter = 0
             for med_score in fi_med_list[algorithm_counter]:  # each feature
-                score_dict[self.original_headers[counter]] = med_score
+                #score_dict[self.original_headers[counter]] = med_score
+                score_dict[self.feature_headers[counter]] = med_score
                 counter += 1
             # Sort features by decreasing score
             score_dict_features = sorted(score_dict, key=lambda x: score_dict[x], reverse=True)
             # Make list of feature names to visualize
-            if len(self.original_headers) > self.top_features:
+            #if len(self.original_headers) > self.top_features:
+            if len(self.feature_headers) > self.top_features:
                 features_to_viz = score_dict_features[0:self.top_features]
             else:
                 features_to_viz = score_dict_features
@@ -888,12 +925,15 @@ class StatsJob(Job):
             plt.figure(figsize=(15, 4))
             viz_df.boxplot(rot=90)
             plt.title(algorithm)
-            plt.ylabel('Median Feature Importance')
-            plt.xlabel('Features')
+            plt.ylabel('Feature Importance')
+            if metric_ranking == 'mean':
+                plt.xlabel('Features (Mean Ranking)')
+            elif metric_ranking == 'median':
+                plt.xlabel('Features (Median Ranking)')
+            else:
+                plt.xlabel('Features(Mean Ranking)')
             plt.xticks(np.arange(1, len(features_to_viz) + 1), features_to_viz, rotation='vertical')
-            plt.savefig(self.full_path +
-                        '/model_evaluation/'
-                        'feature_importance/' + algorithm + '_boxplot', bbox_inches="tight")
+            plt.savefig(self.full_path +'/model_evaluation/feature_importance/' + algorithm + '_boxplot', bbox_inches="tight")
             if self.show_plots:
                 plt.show()
             else:
@@ -902,7 +942,7 @@ class StatsJob(Job):
             # Identify and sort (decreasing) features with top median FI
             algorithm_counter += 1
 
-    def do_fi_histogram(self, fi_med_list):
+    def do_fi_histogram(self, fi_med_list, metric_ranking):
         """
         Generate histogram showing distribution of median feature importance scores for each algorithm.
         """
@@ -913,7 +953,12 @@ class StatsJob(Job):
             plt.hist(med_scores, bins=100)
             plt.xlabel("Median Feature Importance")
             plt.ylabel("Frequency")
-            plt.title("Histogram of Median Feature Importance for " + str(algorithm))
+            if metric_ranking == 'mean':
+                plt.title("Histogram of Mean Feature Importance for " + str(algorithm))
+            elif metric_ranking == 'median':
+                plt.title("Histogram of Median Feature Importance for " + str(algorithm))
+            else:
+                plt.title("Histogram of Mean Feature Importance for " + str(algorithm))
             plt.xticks(rotation='vertical')
             plt.savefig(self.full_path
                         + '/model_evaluation/'
@@ -925,7 +970,7 @@ class StatsJob(Job):
                 # plt.cla() # not required
 
     def composite_fi_plot(self, fi_list, all_feature_list_to_viz, fig_name,
-                          y_label_text):
+                          y_label_text, metric_ranking):
         """
         Generate composite feature importance plot given list of feature names
         and associated feature importance scores for each algorithm.
@@ -968,7 +1013,12 @@ class StatsJob(Job):
             lines = tuple(ps)
         # Specify axes info and legend
         plt.xticks(np.arange(len(all_feature_list_to_viz)), all_feature_list_to_viz, rotation='vertical')
-        plt.xlabel("Feature", fontsize=20)
+        if metric_ranking == 'mean':
+            plt.xlabel("Features (Sum of Weighted Means Ranking)", fontsize=20)
+        elif metric_ranking =='median':
+            plt.xlabel("Features (Sum of Weighted Medians Ranking)", fontsize=20)
+        else:
+            plt.xlabel("Features (Sum of Weighted Means Ranking)", fontsize=20)
         plt.ylabel(y_label_text, fontsize=20)
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
         plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")

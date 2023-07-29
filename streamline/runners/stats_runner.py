@@ -76,6 +76,23 @@ class StatsRunner:
         self.metric_weight = metric_weight
         self.top_features = top_features
 
+        if self.plot_roc == 'False' or self.plot_roc == False:
+            self.plot_roc == False
+        else:
+            self.plot_roc == True
+        if self.plot_prc == 'False' or self.plot_prc == False:
+            self.plot_prc == False
+        else:
+            self.plot_prc == True
+        if self.plot_metric_boxplots == 'False' or self.plot_metric_boxplots == False:
+            self.plot_metric_boxplots == False
+        else:
+            self.plot_metric_boxplots == True
+        if self.plot_fi_box == 'False' or self.plot_fi_box == False:
+            self.plot_fi_box == False
+        else:
+            self.plot_fi_box == True
+
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory

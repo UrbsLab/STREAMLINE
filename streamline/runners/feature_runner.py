@@ -55,6 +55,11 @@ class FeatureImportanceRunner:
         self.queue = queue
         self.reserved_memory = reserved_memory
 
+        if self.turf_pct == 'False' or self.turf_pct == False:
+            self.turf_pct == False
+        else:
+            self.turf_pct == True
+
         if self.n_jobs is None:
             self.n_jobs = 1
 
@@ -258,6 +263,19 @@ class FeatureSelectionRunner:
         self.queue = queue
         self.reserved_memory = reserved_memory
         self.show_plots = show_plots
+
+        if self.filter_poor_features == 'False' or self.filter_poor_features == False:
+            self.filter_poor_features == False
+        else:
+            self.filter_poor_features == True
+        if self.export_scores == 'False' or self.export_scores == False:
+            self.export_scores == False
+        else:
+            self.export_scores == True
+        if self.overwrite_cv == 'False' or self.overwrite_cv == False:
+            self.overwrite_cv == False
+        else:
+            self.overwrite_cv == True
 
         # Argument checks
         if not os.path.exists(self.output_path):

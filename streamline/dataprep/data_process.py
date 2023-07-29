@@ -316,7 +316,7 @@ class DataProcess(Job):
         self.dataset.categorical_variables = self.categorical_features
         self.dataset.quantitative_variables = self.quantitative_features
 
-        # Pickle feature type lists
+        # Pickle feature type lists  #Ryan - where/how do these get used?
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/initial/initial_categorical_variables.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
@@ -339,6 +339,9 @@ class DataProcess(Job):
         """
         Wrapper function for all data cleaning and feature engineering data manipulation
         """
+        # Create features-only version of original dataset as .csv
+        self.dataset.set_original_headers(self.experiment_path)  # Already Completed
+
         # Dataframe to record feature statistics
         transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
                                               'Categorical Features',
@@ -374,8 +377,8 @@ class DataProcess(Job):
         self.drop_highly_correlated_features()  # Completed
         transition_df.loc["C4"] = self.counts_summary(save=False)
 
-        # Create features-only version of dataset and save picked variables for future operations
-        self.dataset.set_headers(self.experiment_path)  # Already Completed
+        # Create features-only version of processed dataset and save as .csv
+        self.dataset.set_processed_headers(self.experiment_path)  # Already Completed
 
         # Save Transition Summary of the data manipulation process
 
@@ -391,10 +394,10 @@ class DataProcess(Job):
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
             pickle.dump(list(self.dataset.data.columns), outfile)
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
-            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(list(self.dataset.data.columns))
+        #with open(self.experiment_path + '/' + self.dataset.name +
+        #          '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
+        #    writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        #    writer.writerow(list(self.dataset.data.columns))
 
     def counts_summary(self, total_missing=None, plot=False, save=True, replicate=False):
         """
@@ -583,13 +586,13 @@ class DataProcess(Job):
 
         # For each Feature with high missingness creating a categorical feature.
         for feat in high_missingness_features:
-            self.dataset.data['miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
+            self.dataset.data['Missing_' + feat] = self.dataset.data[feat].isnull().astype(int)
             self.categorical_features.append('miss_' + feat)
 
         if high_missingness_features:
             logging.info("Engineering the following Features for missingness:")
             for feat in high_missingness_features:
-                logging.info('\t miss_' + feat)
+                logging.info('\t Missing_' + feat)
 
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/engineered_variables.pickle', 'wb') as outfile:
@@ -664,20 +667,25 @@ class DataProcess(Job):
         """
         Categorical feature encoding using pandas get_dummies function
         """
+        # Identify non-binary categorical features to apply one-hot-encoding to
         non_binary_categorical = list()
         for feat in self.categorical_features:
             if feat in self.dataset.data.columns:
                 if self.dataset.data[feat].nunique() > 2:
                     non_binary_categorical.append(feat)
 
+        # Apply one-hot encoding
         if len(non_binary_categorical) > 0:
             logging.info("One-hot encoding the following features:")
             for feat in non_binary_categorical:
                 logging.info('\t' + feat)
+            # Run one-hot encoding
             one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical],
-                                        columns=non_binary_categorical)
+                                        columns=non_binary_categorical) #Ryan - make it so all new features have same naming convention
             self.one_hot_features = list(one_hot_df.columns)
+            # Remove original feature from dataset
             self.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
+            # Add new one-hot-encoded features to the right columns of the dataset
             self.dataset.data = pd.concat([self.dataset.data, one_hot_df], axis=1)
             for feat in non_binary_categorical:
                 if feat in self.categorical_features:
@@ -690,7 +698,7 @@ class DataProcess(Job):
         else:
             logging.info("No non-binary categorical features, skipping categorical encoding")
 
-    def drop_highly_correlated_features(self):
+    def drop_highly_correlated_features(self): #Ryan - if we are recalculating the correlation matrix this is wasted time since it was already calculated for initial corerlation plot.
         df_corr = self.dataset.feature_only_data().corr()
         df_corr_org = df_corr.copy(deep=True)
 

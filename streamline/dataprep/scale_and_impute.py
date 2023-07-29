@@ -45,6 +45,22 @@ class ScaleAndImpute(Job):
         self.dataset_name = None
         self.cv_count = None
         self.random_state = random_state
+        if self.scale_data == 'False' or self.scale_data == False: #Ryan i think these are needed - or is there a more elegant solution (since depending on where streamline is run values could be text or boolean)
+            self.scale_data == False
+        else:
+            self.scale_data == True
+        if self.impute_data == 'False' or self.impute_data == False:
+            self.impute_data == False
+        else:
+            self.impute_data == True
+        if self.overwrite_cv == 'False' or self.overwrite_cv == False:
+            self.overwrite_cv == False
+        else:
+            self.overwrite_cv == True
+        if self.multi_impute == 'False' or self.multi_impute == False:
+            self.multi_impute == False
+        else:
+            self.multi_impute == True
 
     def run(self):
         """

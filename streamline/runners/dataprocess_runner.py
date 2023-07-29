@@ -145,7 +145,7 @@ class DataProcessRunner:
                     if self.run_cluster == "LSFOld":
                         self.submit_lsf_cluster_job(dataset_path)
                         continue
-                    dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
+                    dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label) #Ryan - dataset loading has to take place on individual compute nodes (bare minimum can be running on head node for cluster parallelization)
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,
