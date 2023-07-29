@@ -74,7 +74,7 @@ class StatsJob(Job):
         self.sig_cutoff = sig_cutoff
         self.metric_weight = metric_weight
         self.show_plots = show_plots
-        if self.plot_fi_box:
+        if self.plot_fi_box: 
             self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
                                                 sep=',').columns.values.tolist()  # Get Original Headers
         else:
@@ -84,6 +84,9 @@ class StatsJob(Job):
                                                     sep=',').columns.values.tolist()  # Get Original Headers
             except Exception:
                 self.original_headers = None
+        #self.feature_headers = self.original_headers.copy()
+
+
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
         self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
 
@@ -361,8 +364,8 @@ class StatsJob(Job):
 
             # Save Median FI Stats
             if master_list is None:
-                self.save_fi(fi_all, self.abbrev[algorithm], headers)
-                #self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers) #bug
+                #self.save_fi(fi_all, self.abbrev[algorithm], headers)
+                self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers) #bug
             # Store ave metrics for creating global ROC and PRC plots later
             mean_ave_prec = np.mean(aveprecs)
             # result_dict = {'algorithm':algorithm,'fpr':mean_fpr, 'tpr':mean_tpr,
