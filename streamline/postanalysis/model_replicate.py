@@ -107,17 +107,17 @@ class ReplicateJob(Job):
         rep_data.data = rep_data.data[train_data.data.columns]
 
         # Create Folder hierarchy
-        if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory')
+        if not os.path.exists(self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory'):
+            os.mkdir(self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory')
         if not os.path.exists(
-                self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial')
-        if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation')
+                self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial'):
+            os.mkdir(self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial')
+        if not os.path.exists(self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation'):
+            os.mkdir(self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation')
         if not os.path.exists(
-                self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics'):
+                self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics'):
             os.mkdir(
-                self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics')
+                self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics')
 
         # Load previously identified list of categorical
         # variables and create an index list to identify respective columns
@@ -136,7 +136,7 @@ class ReplicateJob(Job):
                           random_state=self.random_state, show_plots=self.show_plots)
 
         # Arguments changed to send to correct locations describe_data(self)
-        eda.dataset.name = 'applymodel/' + self.apply_name
+        eda.dataset.name = 'replication/' + self.apply_name
 
         eda.identify_feature_types()
 
@@ -177,10 +177,10 @@ class ReplicateJob(Job):
                         eda.dataset.data.replace({feat: rename_dict}, inplace=True)
                         ord_labels.loc[feat]['Category'] = list(labels) + new_labels
                         ord_labels.loc[feat]['Encoding'] = list(range(len(list(labels) + new_labels)))
-            with open(self.full_path + "/applymodel/" + self.apply_name +
+            with open(self.full_path + "/replication/" + self.apply_name +
                       '/exploratory/apply_ordinal_encoding.pickle', 'wb') as outfile:
                 pickle.dump(ord_labels, outfile)
-            ord_labels.to_csv(self.full_path + "/applymodel/" + self.apply_name +
+            ord_labels.to_csv(self.full_path + "/replication/" + self.apply_name +
                               '/exploratory/Numerical_Encoding_Map.csv')
         except FileNotFoundError:
             pass
@@ -201,7 +201,7 @@ class ReplicateJob(Job):
         except FileNotFoundError:
             eda.engineered_features = list()
 
-        # Recreate missingness features in apply phase
+        # Recreate missingness features in replication phase
         for feat in eda.engineered_features:
             eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
             eda.categorical_features.append('miss_' + feat)
@@ -286,19 +286,19 @@ class ReplicateJob(Job):
 
         transition_df.loc["Final"] = eda.counts_summary(save=False)
 
-        transition_df.to_csv(self.full_path + "/applymodel/" + self.apply_name + '/exploratory/'
+        transition_df.to_csv(self.full_path + "/replication/" + self.apply_name + '/exploratory/'
                              + 'DataProcessSummary.csv', index=True)
 
         # Pickle list of feature names to be treated as categorical variables
-        with open(self.full_path + "/applymodel/" + self.apply_name +
+        with open(self.full_path + "/replication/" + self.apply_name +
                   '/exploratory/categorical_variables.pickle', 'wb') as outfile:
             pickle.dump(eda.categorical_features, outfile)
 
         # Pickle list of processed feature names
-        with open(self.full_path + "/applymodel/" + self.apply_name +
+        with open(self.full_path + "/replication/" + self.apply_name +
                   '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
             pickle.dump(list(eda.dataset.data.columns), outfile)
-        with open(self.full_path + "/applymodel/" + self.apply_name +
+        with open(self.full_path + "/replication/" + self.apply_name +
                   '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(list(eda.dataset.data.columns))
@@ -418,14 +418,14 @@ class ReplicateJob(Job):
             for algorithm in self.algorithms:
                 ret = self.eval_model(algorithm, cv_count, x_test, y_test)
                 eval_dict[algorithm] = ret
-                pickle.dump(ret, open(self.full_path + "/applymodel/"
+                pickle.dump(ret, open(self.full_path + "/replication/"
                                       + self.apply_name + '/model_evaluation/pickled_metrics/'
                                       + ABBREVIATION[algorithm] + '_CV_'
                                       + str(cv_count) + "_metrics.pickle", 'wb'))
                 # includes everything from training except feature importance values
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
 
-        stats = StatsJob(self.full_path + '/applymodel/' + self.apply_name,
+        stats = StatsJob(self.full_path + '/replication/' + self.apply_name,
                          self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
                          metric_weight='balanced_accuracy', scale_data=self.scale_data,
