@@ -8,7 +8,6 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import DBSCAN
 from sklearn.covariance import EllipticEnvelope
 from sklearn.ensemble import IsolationForest
 from sklearn.experimental import enable_iterative_imputer
@@ -249,15 +248,17 @@ class DataProcess(Job):
 
         # Save the imputed anomaly scores to a file
         imputed_anomaly_scores_file = os.path.join(self.experiment_path, self.dataset.name,
+                                                   'exploratory', 'anomaly_detection',
                                                    'imputed_anomaly_scores.csv')
         imputed_anomaly_scores.to_csv(imputed_anomaly_scores_file, index=False)
 
         # Save raw unnormalized scores and instance IDs to a CSV file
-        raw_scores_path = os.path.join(self.experiment_path, self.dataset.name, 'raw_unnormalized_scores.csv')
+        raw_scores_path = os.path.join(self.experiment_path, self.dataset.name, 'exploratory',
+                                       'anomaly_detection', 'raw_unnormalized_scores.csv')
         imputed_data.index = range(len(imputed_data))
         imputed_data.to_csv(raw_scores_path, index=False)
 
-        # Rank the anomaly scores and replace them with rank numbers (1 is most anomalous, lowest number is least
+        # Rank the anomaly scores and replace them with rank numbers (1 is most anomalous, the lowest number is least
         # anomalous)
         ranked_scores = imputed_anomaly_scores.rank(axis=0, ascending=False)
 
@@ -268,11 +269,12 @@ class DataProcess(Job):
         # Add a column for the average rank across all outlier detection algorithms
         ranks_df['Avg_Rank'] = ranks_df.mean(axis=1)
 
-        # Sort the rankings in each column from most anomalous to least anomalous
+        # Sort the rankings in each column from most anomalous to the least anomalous
         ranks_df = ranks_df.sort_values(by='Avg_Rank')
 
         # Save the rankings to a CSV file
-        ranks_file_path = os.path.join(self.experiment_path, self.dataset.name, 'rankings.csv')
+        ranks_file_path = os.path.join(self.experiment_path, self.dataset.name, 'exploratory',
+                                       'anomaly_detection', 'rankings.csv')
         ranks_df.to_csv(ranks_file_path, index=False)
 
         # Transpose the DataFrame and set the first row as the column names
@@ -308,7 +310,8 @@ class DataProcess(Job):
         plt.tight_layout()
 
         # Save the heatmap as an image file
-        heatmap_path = os.path.join(self.experiment_path, self.dataset.name, 'anomaly_detection_heatmap.png')
+        heatmap_path = os.path.join(self.experiment_path, self.dataset.name,
+                                    'exploratory', 'anomaly_detection', 'anomaly_detection_heatmap.png')
         plt.savefig(heatmap_path)
 
         # Close the plot to release memory
@@ -343,7 +346,8 @@ class DataProcess(Job):
                 plt.tight_layout()
 
                 # Save the heatmap with user-specified number of instances as an image file
-                heatmap_selected_path = os.path.join(self.experiment_path, self.dataset.name,
+                heatmap_selected_path = os.path.join(self.experiment_path, self.dataset.name, 'exploratory',
+                                                     'anomaly_detection',
                                                      f'anomaly_detection_heatmap_selected_{num_instances_to_show}.png')
                 plt.savefig(heatmap_selected_path)
 
@@ -373,7 +377,7 @@ class DataProcess(Job):
             plt.tight_layout()
 
             # Save the box plot as an image file
-            plot_file_path = os.path.join(self.experiment_path, self.dataset.name,
+            plot_file_path = os.path.join(self.experiment_path, self.dataset.name, 'exploratory', 'anomaly_detection',
                                           f'boxplot_{feature.replace("/", "_")}.png')
             plt.savefig(plot_file_path)
 
@@ -389,7 +393,8 @@ class DataProcess(Job):
         plt.tight_layout()
 
         # Save the combined box plot as an image file
-        plot_file_path = os.path.join(self.experiment_path, self.dataset.name, 'combined_boxplot.png')
+        plot_file_path = os.path.join(self.experiment_path, self.dataset.name, 'exploratory', 'anomaly_detection',
+                                      'combined_boxplot.png')
         plt.savefig(plot_file_path)
 
         # Close the plot to release memory
@@ -402,7 +407,8 @@ class DataProcess(Job):
         })
 
         # Save the feature outlier counts to a CSV file
-        feature_outlier_counts_file = os.path.join(self.experiment_path, self.dataset.name,
+        feature_outlier_counts_file = os.path.join(self.experiment_path, self.dataset.name, 'exploratory',
+                                                   'anomaly_detection',
                                                    'feature_outlier_counts.csv')
         feature_outlier_counts_df.to_csv(feature_outlier_counts_file, index=False)
 
@@ -611,6 +617,8 @@ class DataProcess(Job):
         # Dataframe to record feature statistics
 
         n_class = len(self.counts_summary(save=False)) - 6
+
+        transition_df = None
 
         if self.outcome_type == "Binary":
             transition_df = pd.DataFrame(columns=['Instances', 'Total Features',
