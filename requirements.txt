@@ -26,3 +26,6 @@ kaleido
 dask-jobqueue
 dask
 joblib
+graphviz
+bokeh
+ipywidgets
