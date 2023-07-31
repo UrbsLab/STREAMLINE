@@ -46,9 +46,9 @@ At this point the notebook will do the following automatically:
 See '[Notebook Output](output.md#notebooks)' for more on examining output within the notebook and '[Output Files](output.md#output-files)'
 
 ### Running Your Own Datasets (Colab)
-Before running STREAMLINE on new data, make sure it adheres to '[Input Data Requirements](data.md#input-data-requirements)'.
+Before running STREAMLINE on new data, make sure it adheres to '[Input Data Requirements](data.md#input-data-requirements)'. To update the STREAMLINE Colab Notebook to run on one or more user specified 'target datasets', users can chose between an 'easy' and 'manual mode. 
 
-To update the STREAMLINE Colab Notebook to run on one or more user specified 'target datasets', users can chose between an 'easy' and 'manual mode. As above, begin by opening the STREAMLINE Google Colab Notebook by clicking the link below:
+As above, begin by opening the STREAMLINE Google Colab Notebook by clicking the link below:
 [https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing)
 
 Before running, update the run parameters within the 'STREAMLINE RUN PARAMETERS' section of the notebook as indicated below.
@@ -103,11 +103,17 @@ Running STREAMLINE in Jupyter Notebook is largely the same as for running it in 
 ### Running the Demo (Jupyter)
 The STREAMLINE Jupyter Notebook is also set up to run a limited analysis applying all 9 phases of the pipeline. This includes 3-fold cross validation, and applying only three of the faster ML modeling algorithms to 2 example 'target datasets', and a 'replication dataset' relevant to only one of the target datasets. These datasets are detailed in [Demonstration Data](data.md#demonstration-data). This demo should take about 2-5 minutes to run (depending on your computer hardware), with results viewable in the notebook. The notebook will automatically save the 'experiment folder' (named `DemoOutput`) with all output files (including PDF reports).
 
-[Under Construction]
+1. From your command line, open Jupyter Notebook by typing `jupyter notebook`.
+2. Within the Jupyter local file browser that opens, navigate into the previously saved/installed `STREAMLINE` directory where you find the file named `STREAMLINE-Notebook.ipypnb`.
+3. Click to open `STREAMLINE-Notebook.ipypnb` as a Jupyter Notebook in a new page open in your web browser. 
+4. Open the `Kernel` menu and select `Restart & Run All`. *This will run all code cells of the notebook, i.e. all phases of STREAMLINE.* 
 
-1. From your command line,
+At this point the notebook will do the following automatically:
+* Run the entirety of STREAMLINE on the [demonstration datasets](sample.md#demonstration-data).
+* Save all output files (including PDF reports) as an 'experiment folder' named `DemoOutput` within the `STREAMLINE` directory.
+* Download the zipped 'experiment folder' with all output files to your local computer.
 
- navigate into the installed 'STREAMLINE' directory
+See '[Notebook Output](output.md#notebooks)' for more on examining output within the notebook and '[Output Files](output.md#output-files)'
 
 
 ### Running Your Own Datasets (Jupyter)

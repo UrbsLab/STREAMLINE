@@ -3,7 +3,7 @@ numpy
 optuna
 sqlalchemy<2.0
 plotly>=4.0.0
-pandas
+pandas>=1.5.2
 pip
 pycodestyle
 scikit-learn
