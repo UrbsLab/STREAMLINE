@@ -59,7 +59,8 @@ class Dataset:
         if not (self.class_label in self.data.columns):
             raise Exception("Class label not found in file")
         if self.match_label and not (self.match_label in self.data.columns):
-            raise Exception("Match label not found in file")
+            logging.warning("Match label not found in file, setting match label to None")
+            self.match_label = None
         if self.instance_label and not (self.instance_label in self.data.columns):
             raise Exception("Instance label not found in file")
 

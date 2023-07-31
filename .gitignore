@@ -25,3 +25,7 @@ UserOutput/
 DemoOutput/
 multiplexer_dataset/
 gametes_dataset/
+run_configs/cedars_amd.cfg
+data/AMD_Final/*
+data/PLCO/*
+run_configs/cedars_plco.cfg

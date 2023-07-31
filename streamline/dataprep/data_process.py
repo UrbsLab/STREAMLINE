@@ -160,9 +160,9 @@ class DataProcess(Job):
         # Account for possibility that only one dataset in folder has a match label.
         # Check for presence of match label (this allows multiple datasets to be analyzed
         # in the pipeline where not all of them have match labels if specified)
-        if not (self.dataset.match_label is None or self.dataset.match_label in self.dataset.data.columns):
+        if self.dataset.match_label is None or (self.dataset.match_label not in self.dataset.data.columns):
             self.dataset.match_label = None
-            self.dataset.partition_method = 'S'
+            self.partition_method = 'Stratified'
             logging.warning("Warning: Specified 'Match label' could not be found in dataset. "
                             "Analysis moving forward assuming there is no 'match label' column using "
                             "stratified (S) CV partitioning.")
