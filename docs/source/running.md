@@ -3,15 +3,15 @@ This section details how to run STREAMLINE in any of its run modes. These includ
 1. **Google Colab Notebook:** (run remotely on free google cloud resources)
     * *Both an 'easy' and 'manual' run mode is available for users run their own data*
 2. **Jupyter Notebook:** (run locally on your PC)
-3. **Command Line:** (locally or on a 'dask-compatable' CPU Computing Cluster)
+3. **Command Line Interface:** (locally or on a 'dask-compatable' CPU Computing Cluster)
 
 While the notebooks only allow STREAMLINE to be run serially, it can be '[embarrassingly](https://en.wikipedia.org/wiki/Embarrassingly_parallel)' parallelized when run from the command line in one of two ways:
 * **Local command line:** basic CPU core parallelization 
 * **CPU Computing Cluster:** job submission parallelization
 
-Lastly, when run from the command line, STREAMLINE can be run in one of two ways:
-* **All phases at once:** with a single command pointing to a 'configuration file' that includes all necessary run parameters
-* **One phase at a time:** using either phase-specific commands with command-line arguments, or again using the 'configuration file'
+When run from the command line, STREAMLINE can be run in one of two ways:
+* **Using a Configuration File:** run all, or any number of phases using a single command that points to a 'configuration file' with all necessary run parameters
+* **Using Command-Line Arguments:** run all, or any number of phases using command line arguments
 
 For more details and guidelines on selecting a run mode, see '[Picking a Run Mode](#picking-a-run-mode)'.
 
@@ -32,7 +32,7 @@ To run this demo, do the following:
 1. Set up a Google account (if you don't already have one). Click [here]( https://support.google.com/accounts/answer/27441?hl=en) for help.
 2. Open the STREAMLINE Google Colab Notebook by clicking the link below:
 [https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing)
-3. [Optional] Open the `Runtime` menu and select `Disconnect and delete runtime`. *This clears the memory of the previous notebook run. This is only necessary when the underlying base code is modified, but it may be useful to troubleshoot if modifications to the notebook do not seem to have an effect.*
+3. \[Optional] Open the `Runtime` menu and select `Disconnect and delete runtime`. *This clears the memory of the previous notebook run. This is only necessary when the underlying base code is modified, but it may be useful to troubleshoot if modifications to the notebook do not seem to have an effect.*
 4. Open the `Runtime` menu and select `Run all`. *This will run all code cells of the notebook, i.e. all phases of STREAMLINE.* 
 
 At this point the notebook will do the following automatically:
@@ -60,7 +60,7 @@ This mode is most convenient if you want to run the notebook on other data, but 
 
 1. In the first code cell, set (`demo_run = False`) and (`use_data_prompt = True`)
     * *This tells the notebook that you don't want to run the demo datasets, and you want to be 'prompted' to enter/select essential run parameters rather than edit the respective code cells*
-2. Update non-essential run parameters (within respective code cells) to the users specifications
+2. \[Optional] Update non-essential run parameters (within respective code cells) to the users specifications
     * *Most commonly, this would include `n_splits`, `categorical_cutoff`, and `algorithms`
     * *We also strongly recommend specifying `categorical_feature_headers` and/or `quantitiative_feature_headers` as lists of feature names in the dataset(s) headers that should be treated as either categorical or quanatiative*
     * *If only one of these lists is specified, all features not specified in that list will be treated as the other feature type by default*
@@ -72,9 +72,9 @@ This mode is most convenient if you want to run the notebook on other data, but 
     * `class_label` - specify the header name for the outcome column in the dataset(s), e.g. 'Class'
     * `instance_label` - specify the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
     * `match_label` - specify the header name for the match/group column in the dataset(s) or specify `None` if not relevant
-    * Indicate `True` or `False` as to whether 'replication data' is available for the replication phase
+    * `applyToReplication` - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
     * `rep_data_path` - use file navigation window to select the folder containing one or more 'replication datasets' to be analyzed
-        * *All datasets in this folder should be replicates for a single 'target dataset', and similarly adhere to formatting requirments*
+        * *All datasets in this folder should be replicates for a single 'target dataset', and similarly adhere to [formatting](data.md#input-data-requirements) requirments*
     * `dataset_for_rep` - specify the filename (with extension) of the original 'target dataset' to indicate which models the replication data will be applied to
 * *After providing valid entries for these prompts, all phases of STREAMLINE will run in sequence within the notebook.*
 * *STREAMLINE outputfiles are automatically saved to the output 'experiment folder' named `UserOutput` within the temporary notebook workspace, as well as optionally downloaded to the users computer after completion* 
@@ -88,7 +88,7 @@ This mode is most convenient if you want to run the notebook on other data, but 
 4. \[Optional] Repeat steps 2-3 for any replication dataset(s) you wish to apply to the models trained for a specific 'target dataset'
     * *If you have no replication data, make sure to update the `applyToReplication` parameter to `False`*
 5. Update (essential and non-essential) run parameter code cells to the dataset and users specifications
-    * *Note: You can leave `output_path` as `/content/UserOutput` if you've named this folder `UserOutput`*
+    * *Note: You can leave `output_path` as `/content/UserOutput` and all output will be saved to this automatically created folder*
     * *If you run more than one STREAMLINE 'experiments' in a single session, make sure to update `experiment_name` each time to avoid overwriting a prior experiment*
 6. Open the `Runtime` menu and select `Run all`
 * *Note: Common errors preventing the notebook from running to completion include issues with file/path names, dataset formatting, or other incorrect changes to other run parameter settings*
@@ -96,7 +96,7 @@ This mode is most convenient if you want to run the notebook on other data, but 
 
 ***
 ## Jupyter Notebook
-This run mode is best for (1) confirming successful STREAMLINE installation for local computer use, (2) running STREAMLINE in a notebook on your own computer's resources (generally faster than Colab Notebook), (2) running analyses on small to moderately sized datasets, or (3) educational purposes. Click [here](https://jupyter.readthedocs.io/en/latest/running.html) to learn the basics of Jupyter Notebook.
+This run mode is best for (1) confirming successful STREAMLINE installation for local computer use, (2) running STREAMLINE in a notebook on your own computer's resources (generally faster than Colab Notebook), (3) running analyses on small to moderately sized datasets, (4) viewing output directly within a notebook, or (5) educational purposes. Click [here](https://jupyter.readthedocs.io/en/latest/running.html) to learn the basics of Jupyter Notebook.
 
 Running STREAMLINE in Jupyter Notebook is largely the same as for running it in Google Colab. Below we specify how to run the Jupyter Notebook on the included [demonstration datasets](data.md#demonstration-data), then how to adapt it to run on your own dataset(s). 
 
@@ -111,76 +111,88 @@ The STREAMLINE Jupyter Notebook is also set up to run a limited analysis applyin
 At this point the notebook will do the following automatically:
 * Run the entirety of STREAMLINE on the [demonstration datasets](sample.md#demonstration-data).
 * Save all output files (including PDF reports) as an 'experiment folder' named `DemoOutput` within the `STREAMLINE` directory.
-* Download the zipped 'experiment folder' with all output files to your local computer.
 
 See '[Notebook Output](output.md#notebooks)' for more on examining output within the notebook and '[Output Files](output.md#output-files)'
 
-
 ### Running Your Own Datasets (Jupyter)
+Begin by opening `STREAMLINE-Notebook.ipypnb` as a Jupyter Notebook (steps 1-3 above). Before running, update the run parameters within the 'STREAMLINE RUN PARAMETERS' section of the notebook as indicated below.
 
+*Note that, for brevity, some parameter names used in the notebook (used below) are slightly different from those used in the command line. Details on STREAMLINE run parameters are given [here](parameters.md).*
 
+1. In the first code cell, set (`demo_run = False`)
+    * *This tells the notebook that you don't want to run the demo datasets, and you want to be 'prompted' to enter/select essential run parameters rather than edit the respective code cells*
+2. Update essential run parameters (within respective code cells) to the user/dataset's specifications
+    * `experiment_name` - a unique name for the ouput folder for the current STREAMLINE 'experiment'
+    * `data_path` -  path to the folder containing one or more 'target datasets' to be analyzed
+        * *These datasets must adhere to the formatting detailed in '[Input Data Requirements](data.md#input-data-requirements)'*
+    * `output_path` - path to the folder (that will be automatically created if it doesn't yet exist) in which the 'experiment folder' including all STREAMLINE output will be saved
+        * *Note: You can leave `output_path` as `./UserOutput` if you've named this folder `UserOutput`*
+    * `class_label` - the header name for the outcome column in the dataset(s), e.g. 'Class'
+    * `instance_label` - the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
+    * `match_label` - the header name for the match/group column in the dataset(s) or specify `None` if not relevant
+    * `ignore_features` - list of text-valued feature names in target datasets that you want STREAMLINE to drop from the analysis, or specify `None` if not relevant
+    * `categorical_feature_headers`  - list of text-valued feature names in the dataset(s) headers that should be treated as categorical or specify `None` if `quantitative_feature_headers` were specified and you want all other features to be treated as categorical, or you want feature types to be automatically decided using `categorical_cutoff`
+    * `quantitiative_feature_headers` - list of text-valued feature names in the dataset(s) headers that should be treated as quantitative or specify `None` if `categorical_feature_headers` were specified and you want all other features to be treated as quantitative, or you want feature types to be automatically decided using `categorical_cutoff`
+    * `applyToReplication` - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
+    * `rep_data_path` - path to folder containing one or more 'replication datasets' to be analyzed
+        * *All datasets in this folder should be replicates for a single 'target dataset', and similarly adhere to [formatting](data.md#input-data-requirements) requirments*
+    * `dataset_for_rep` - path to the file (with extension) of the original 'target dataset' to indicate which models the replication data will be applied to
+3. \[Optional] Update non-essential run parameters (within respective code cells) to the users specifications
+    * *Most commonly, this would include `n_splits`, `categorical_cutoff`, and `algorithms`
+4. Open the `Kernel` menu and select `Restart & Run All`. *This will run all code cells of the notebook, i.e. all phases of STREAMLINE.* 
+* *Note: It can take multiple hours or longer to run this notebook on larger datasets and/or using all machine learning modeling algorithms. We recommend using a computing cluster for such tasks if possible.*
 
-#### Running on Demo Dataset
-Here we detail how to run STREAMLINE within the provided Jupyter Notebook named `STREAMLINE-Notebook.ipypnb`. 
-This included notebook is set up to run on the included [demonstration datasets](sample.md#demonstration-data).
+***
+## Command Line Interface
+This run mode is best for (1) most efficiently running STREAMLINE with parallelization options, (2) users comfortable with command lines, or (3) running moderate to large datasets and/or more exhaustive run parameter configurations. 
 
-1. First, ensure all local installation is done as per the [guide](install.md#jupyter-notebook) in your environment 
-   and dataset assumptions are satisfied.
+Running STREAMLINE from the command line can be done locally (with or without CPU core parallelization), or on a dask-compatable CPU computing cluster. Any of these scenarios can also be run from a single command (i.e. all phases at once) using a 'configuration file', or separately one phase at a time. Below we indicate how to run all of these possible command line run configurations using the [demonstration datasets](data.md#demonstration-data) as an example. As for Google Colab and Jupyter Notebook run modes, to run STREAMLINE on datasets other than the [demonstration datasets](data.md#demonstration-data), essential run parameters should be specified/updated accordingly. STREAMLINE command line run parameters are detailed within the [run parameters section](parameters.md).
 
-2. Open Jupyter Notebook (info about Jupyter Notebooks here, https://jupyter.readthedocs.io/en/latest/running.html) by 
-   going to the STREAMLINE Root folder, typing `jupyter notebook` and then opening the `STREAMLINE-Notebook.ipypnb` that
-   shows up in the new page open on your web browser.
+### Locally
+This section explains running STREAMLINE locally using the command line interface.
 
-3. Scroll down to the second code block of the notebook below the header 'Mandatory Parameters to Update' and update the following run parameters to reflect paths on your PC.
-    * `data_path`: Change the path, so it reflects the location of the `DemoData` folder (within the STREAMLINE folder) on your PC, e.g. `C:/Users/ryanu/Documents/GitHub/STREAMLINE/DemoData`.
-    * `output_path`: Change the path to specify the desired location for the STREAMLINE output experiment folder.
+#### Using a Configuration File
+All phases of STREAMLINE can be run (in sequence) with a single simple command by editing and calling an associated configuration file (`run_configs/local.cfg`) as indicated below.
+* *Note: This approach also allows users to run any subset of sequential STREAMLINE phases (e.g. Phase 1 alone for EDA, or Phases 1-4 for EDA, data processing, and feature selection) using the different 'phases to run' flags within the configuration file.*
 
-4. Click `Kernel` on the Jupyter notebook GUI, and select `Restart & Run All` to run the script.  
+1. Open your command line interface and navigate to the installed `STREAMLINE` directory.
+2. To run the [demonstration datasets](data.md#demonstration-data), skip to step 5. To view the pre-specified configuration file, click [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/local.cfg).
+3. Assuming you want to run your own dataset(s), further navigate into the `run_configs` folder and open `local.cfg` in a text editor to update the essential and non-essential run parameters accordingly (see [run parameters](parameters.md) and [terminal text editors](install.md#terminal-text-editors) for help).
+    * *Under 'phases to run' the `do_till_report` parameter (when set to `True`) will automatically run all phases up until `do_replicate` by default. `do_replicate`, `do_rep_report` and `do_cleanup` must all be specified individually*
+    * *To run a subset of phases (e.g. phases 1-4), set `do_till_report = False`, and `do_eda`, `do_dataprep`, `do_feat_imp`, and `do_feat_sel` each to `True` and the other 'do' phases to `False`*
+    * *Make sure to keep `run_cluster = False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
+    * *Optionally set `run_parallel = False`, which will turn off local multi-core CPU parallelization*
+4. Navigate back to the `STREAMLINE` base directory.
+5. Run the following command within the `STREAMLINE` base directory:
 
-5. Running the included [demonstration datasets](sample.md#demonstration-data) with the pre-specified notebook run parameters, 
-   should only take a 3-5 minutes depending on your PC hardware.
-    * Note: It may take several hours or more to run this notebook in other contexts. Parameters that impact runtimes are discussed in [this section](tips.md#reducing-runtime) above. We recommend users with larger analyses to use a computing cluster if possible.
-
-#### Running on Your Own Datasets
-Move your custom dataset to the STREAMLINE root directory,
-follow the same steps as in the [Colab Notebook](colab.md#running-on-your-own-datasets-tbd)
-
-### Running on command line interface
-
-The most efficient way of running STREAMLINE is through command line.
-There's two ways to run STREAMLINE thorough a CLI interface.
-
-1. Through picking up run parameters through a config file.
-2. Through manually inputting run parameters
-
-There is a runner file called run.py which runs the whole or part of STREAMLINE
-pipeline as defined. A few examples are given below.
-
-#### Using config file
-
-`run.py` can also be used with config parameters 
-as defined in the [parameters section](parameters.md)
-
-Then it can be run with the command defined below.
 ```
-python run.py -c <config_file>
+python run.py -c run_configs/local.cfg
+```
+* *Note: You can save your own `.cfg` files to call with this command. We recommend copying renaming, and editing `local.cfg` and then calling this new configuration file as an argument to `run.py`*
+
+#### Using Command-Line Arguments
+STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. The example commands below are set up to run the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
+* *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
+* *Warning: This run approach should not be used if you need/want to specify a list of ignored, categorical, or quanatiative feature names*
+
+As before, begin by opening your command line interface and navigate to the installed `STREAMLINE` directory. 
+
+The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, however we are not specifying categorical or quanatiative feature names, thus STREAMLINE is automatically attempting to detect feature types based on the `categorical_cutoff` parameter (with a default of 10).
+
+##### All Phases (Replication Data Included)
+This command will run all phases (1-9) 
+* *Note: 
+```
+python run.py --data-path ./data/DemoData --out-path DemoOutputLocal --exp-name demo_experiment --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --do-rep-report --do-clean --run-cluster False --run-parallel True
 ```
 
-For running the Demo Dataset locally a config file is already provided and 
-the user doesn't need to do any edits.
 
-The example config setup to run all steps till report generations locally on the Demo Dataset
-is given in the config 
-file [here](https://github.com/UrbsLab/STREAMLINE/blob/dev/run.cfg)
 
-The user can simply run the following command to run the whole pipeline:
-```
-python run.py -c ./run_configs/local.cfg
-```
+unspecified (non-essential run parameters will use default values)
 
-Specifically the `run_cluster` parameter in the `multiprocessing` section has to been defined as
-`run_cluster = "False"` which runs it locally. This specific parameter in 
-the file is located [here](https://github.com/UrbsLab/STREAMLINE/blob/5c66b3286056bbd9b514c202aa0a22758a76f62c/run.cfg#L11)
+### CPU Computing Cluster
+
+
 
 
 #### Using command-line parameters
