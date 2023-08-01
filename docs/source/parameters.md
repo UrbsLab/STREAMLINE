@@ -10,13 +10,13 @@ The quick guide below distinguishes essential from non-essential run parameters 
 
 | Command-line Parameter    | Config File Parameter         | Notebook Parameter                | Default    |
 |---------------------------|-------------------------------|-----------------------------------|------------|
-| --data-path               | dataset_path                  | data_path                         | no default |
-| --out-path                | output_path                   | output_path                       | no default |
-| --exp-name                | experiment_name               | experiment_name                   | no default |
-| --class-label             | class_label                   | class_label                       | 'Class'    |
-| --inst-label              | instance_label                | instance_label                    | None       |
-| --match-label             | match_label                   | match_label                       | None       |
-| --fi                      | ignore_features_path          | ignore_features                   | None       |
+| --data-path               | [dataset_path](#dataset_path)                  | data_path                         | no default |
+| --out-path                | [output_path](#output_path)                   | output_path                       | no default |
+| --exp-name                | [experiment_name](#experiment_name)               | experiment_name                   | no default |
+| --class-label             | [class_label](#class_label)                   | class_label                       | 'Class'    |
+| --inst-label              | [instance_label](#instance_label)                | instance_label                    | None       |
+| --match-label             | [match_label](#match_label)                   | match_label                       | None       |
+| --fi                      | [ignore_features_path](#ignore_features_path)          | ignore_features                   | None       |
 | --cf                      | categorical_feature_path      | categorical_feature_headers       | None       |
 | --qf                      | quantitative_feature_path     | quantitiative_feature_headers     | None       |
 | --rep-path                | rep_data_path                 | rep_data_path                     | no default |
@@ -132,7 +132,7 @@ There are currently no run parameters to adjust for this phase.
 
 ## Details
 This section will go into greater depth for each run parameter, primarily using the configuration file parameter name to identify each. 
-* *Parameters identified as (str) format should be entered with single quotation marks within notebooks, or when using a configuration file, but without them when using command line arguments.* 
+* *Parameters identified as (str) format should be entered with single quotation marks within notebooks, or when using a configuration file, but without them when using command line arguments (CLA).* 
 
 ### Essential Parameters (Phase 1-9)
 #### dataset_path
@@ -162,22 +162,55 @@ This section will go into greater depth for each run parameter, primarily using 
 * Description: the name of the instance ID column that may (or may not) be included in the dataset
 * Format: (str), e.g. 'InstanceID'
 * Values: `None`, or the case-sensitive name used in the dataset to identify the instance ID column (if present)
-* Tips: Having an instance ID column in the data allows users to later identify model predictions for specific instances in the dataset, as well as reverse-engineer instance subgroups in the dataset downstream using the ExSTraCS modeling algorithm's capability to detect and characterize heterogeneous associations. This may not be necessesary for most users. 
+* Tips: having an instance ID column in the data allows users to later identify model predictions for specific instances in the dataset, as well as reverse-engineer instance subgroups in the dataset downstream using the ExSTraCS modeling algorithm's capability to detect and characterize heterogeneous associations. This may not be necessesary for most users. 
 
 #### match_label
-* Description: 
+* Description: the name of the match/group ID column that can be included in a dataset to keep instances with the same match label together within the same CV partition
+* Format: (str), e.g. 'MatchID'
+* Values: `None`, or the case-sensitive name used in the dataset to identify the match/group ID column (if present)
+* Tips: having a match/group ID column in the data allows users to apply machine learning modeling to datasets where instances with different outcomes have been matched based on other covariates that the user wants to account for (e.g. age, sex, race, etc)
+
+#### ignore_features_path  
+* Description: a list of feature names for STREAMLINE to immediately drop from the target datasets
 * Format: 
+    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. \['IgnoredFeature1','IgnoredFeature2']
+    2. for command line arguments: provide a (str) path to a `.csv` file including a row of feature names that can be found in any of the 'target datasets', e.g. '/content/STREAMLINE/data/MadeUp/ignoreFeat.csv'
+* Values: `None`, or (for either format) should include case-sensitive feature names found in at least one of the 'target datasets'
+* Tips: useful for easily dropping features found in the datasets that users may wish to exclude if those features might lead to data leakage, or for other data quality reasons
+
+#### categorical_feature_path
+* Description: a list of feature names for STREAMLINE to explicitly treat as categorical feature types
+* Format:
+    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. \['Feature1','Feature 7']
+    2. for command line arguments: provide a (str) path to a `.csv` file including a row of feature names that can be found in any of the 'target datasets', e.g. '/content/STREAMLINE/data/DemoFeatureTypes/hcc_cat_feat.csv'
+* Values: `None`, or (for either format) should include case-sensitive feature names found in at least one of the 'target datasets'
+* Tips: 
+    * When specifying `categorical_feature_path` feature names and leaving `quantiative_feature_path = None` all other features will be automatically treated as quanatiative
+    * When specifying `quantiative_feature_path` feature names and leaving `categorical_feature_path = None` all other features will be automatically treated as categorical
+    * When specifying feature names for both `categorical_feature_path` and `quantiative_feature_path`, any features in the data not specified by one of theses lists will have it's feature type determined automatically using [categorical_cutoff](#categorical_cutoff)
+    * Note: any text-valued features in a dataset will automatically be numerically encoded and treated as categorical features (overriding any other user specifications)
+
+#### quantitative_feature_path
+* Description: a list of feature names for STREAMLINE to explicitly treat as quantitative feature types
+    * All other aspects of this parameter are the same as for [categorical_feature_path](#categorical_feature_path)
+
+#### rep_data_path
+* Description: 
+* Format:
 * Values: 
 * Tips: 
 
-
+#### dataset_for_rep
 * Description: 
-* Format: 
+* Format:
 * Values: 
 * Tips: 
 
-
-
+#### 
+* Description: 
+* Format:
+* Values: 
+* Tips: 
 
 | --match-label             | match_label                   | match_label                       | None       |
 | --fi                      | ignore_features_path          | ignore_features                   | None       |
