@@ -1,10 +1,87 @@
 # Run Parameters
+[Under Construction]
 
-## Overview
 Here we review the run parameters available for each of the 11 phases and provide some additional run examples. 
 We remind users that the parameter names described for the above notebooks sometimes different from the argument 
 names when using STREAMLINE from the command-line (for brevity).
 
+## Quick Guide
+- defaults are internal, notebooks specify their own defaults for the demonstration.
+
+### Essential Parameters Key
+
+| Command-line Parameter    | Config File Parameter | Notebook Parameter                                               | Default    |
+|---------------------------|-----------------------|------------------------------------------------------------------|------------|
+| --data-path            | dataset_path                  | data_path                                                          | no default      |
+| --out-path             | output_path                   | output_path | no default
+| --exp-name             | experiment_name               | experiment_name 
+| --class-label          | class_label                   | class_label                                                               | default="Class" |
+| --inst-label           | instance_label                | instance_label                                              | None            |
+| --match-label          | match_label                   | match_label                          | None            |
+| --fi                   | ignore_features_path          | ignore_features  | ""              |
+| --cf                   | categorical_feature_path      | categorical_feature_headers    | ""              |
+| --qf                   | quantitative_feature_path     | quantitiative_feature_headers    | ""              |
+| --rep-path             | rep_data_path                 | rep_data_path
+| --dataset              | dataset_for_rep               | dataset_for_rep
+| --config                  | NA                         | NA | no default |
+| --do-till-report or --dtr | do_till_report        | NA                                           | False      |
+| --do-eda                  | do_eda                | NA                                                      | False      |
+| --do-dataprep             | do_dataprep           | NA                                        | False      |
+| --do-feat-imp             | do_feat_imp           | NA                                        | False      |
+| --do-feat-sel             | do_feat_sel           | NA                                         | False      |
+| --do-model                | do_model              | NA                                               | False      |
+| --do-stats                | do_stats              | NA                                            | False      |
+| --do-compare-dataset      | do_compare_dataset    | NA                              | False      |
+| --do-report               | do_report             | NA                                        | False      |
+| --do-replicate            | do_replicate          | NA                                  | False      |
+| --do-rep-report           | do_rep_report         | NA                                    | False      |
+| --do-cleanup              | do_cleanup            | NA                                              | False      |
+
+### General Parameters Key
+
+| Command-line Parameter    | Config File Parameter | Notebook Parameter                                               | Default    |
+| --cv                   | cv_partitions                 | n_splits                                                                      | 10              |
+| --part                 | partition_method              | partition_method                                                    | Stratified      |
+| --cat-cutoff           | categorical_cutoff'           | categorical_cutoff | 10              |
+| --sig                  | sig_cutoff                    | sig_cutoff                                | 0.05            |
+| --rand-state           | random_state                  | random_state                                           | 42              |
+| --verbose                 | verbose               | NA                                      | False      |
+
+### Data Processing Parameters Key
+| Command-line Parameter    | Config File Parameter | Notebook Parameter                                               | Default    |
+| --feat_miss            | featureeng_missingness        | featureeng_missingness      | 0.5             |
+| --clean_miss           | cleaning_missingness          | cleaning_missingness        | 0.5             |
+| --corr_thresh          | correlation_removal_threshold | correlation_removal_threshold        | 0.8             |
+| --export-fc            | export_feature_correlations   | UPDATE exploration list and plot list                    | True            |
+| --export-up            | export_univariate_plots       | UPDATE           | True            |
+
+### Scaling and Imputation Parameters Key
+| Command-line Parameter | Config File Parameter | Notebook Parameter                                                                                               | Default |
+|------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------|---------|
+| --scale                | scale_data            | scale_data | True    |
+| --impute               | impute_data           | impute_data                 | True    |
+| --multi-impute         | multi_impute'         | multi_impute                          | True    |
+| --over-cv              | overwrite_cv          | overwrite_cv                                                          | True    |
+
+### Scaling and Imputation Parameters Key
+| Command-line Parameter | Config File Parameter | Description                                                                          | Default |
+|------------------------|-----------------------|-------------------------------------------------|---------|
+| --do-mi                | do_mutual_info        | do_mutual_info analysis                                                                                   | True    |
+| --do-ms                | do_multisurf          | do_multisurf                                                                                           | True    |
+| --use-turf             | use_turf'             | use TURF wrapper around MultiSURF to improve feature interaction detection in large feature spaces (only recommended if you have reason to believe at least half of your features are non-informative) | False   |
+| --turf-pct             | turf_pct              | proportion of instances removed in an iteration (also dictates number of iterations                                                                                                                    | 0.5     |
+| --n-jobs               | n_jobs                | number of cores dedicated to running algorithm; setting to -1 will use all available cores                                                                                                             | 1       |
+| --inst-sub             | instance_subset       | sample subset size to use with multiSURF                                                                                                                                                               | 2000    |
+
+
+
+[feature importance estimation]
+do_mutual_info = True
+do_multisurf = True
+use_turf = False
+turf_pct = 0.5
+n_jobs = 1
+instance_subset = 2000 #Ryan - add top_plot_features
 
 ### General Parameters
 
