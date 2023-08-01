@@ -282,57 +282,44 @@ A gist of the application is that you can open a new terminal that will stay ope
 6. Run required commands.
 7. Press `Ctrl + b` and then the `d` key to close the terminal.
 
+#### Cluster Run Parameters
+You should be aware of 3 cluster-specific run parameters:
+* `run-cluster`: flag for type of cluster, discussed in detail below (when not `False`, this over-rides any value specified for `run-parallel`) 
+* `queue`: the partition queue used for job submissions
+* `res-mem`: memory (in GB) reserved per job
+
+##### Run Cluster Parameter
+The `run_cluster` parameter is the most important parameter here. It should be set to `False` when running locally, but to use a cluster, specify as a string value for the cluster-type. Currently, clusters supported by [dask-jobqueue](https://jobqueue.dask.org/en/latest/api.html) are supported with the following settings options for `run_cluster`:
+* `LSF`: LSFCluster
+* `SLURM`: SLURMCluster
+* `HTCondor`: HTCondorCluster
+* `Moab`: MoabCluster
+* `OAR`: OARCluster
+* `PBS`: PBSCluster
+* `SGE`: SGECluster
+* `UGE`: SGECluster variant used at our institution
+* `Local`: LocalCluster
+
+Additionally, the earlier/legacy method of STREAMLINE manual job submission is supported for `SLURM` and `LSF` using the string values below for `run-cluster`. This will generate and submit jobs using shell files as was used in *STREAMLINE release 0.2.5* and earlier. This legacy option ensures that minimal memory/computation is used on the head node (i.e. job-submit node).
+* `SLURMOld`: Legacy job submission for SLURMCluster
+* `LSFOld` Legacy job submission for LSFCluster 
+
+##### Queue and Memory Parameters
+Check with your cluster administrator on how to set these these cluster-specific parameters. We have set defaults for these parameters for use on our own institution's HPC (i.e. `queue = defq`, and `res-mem = 4`). 
+
 #### Using a Configuration File (Cluster)
-This is very similar to running STREAMLINE on the [command line locally](#using-a-configuration-file-locally). You only need to define 4 additional run parameters using a cluster setup.
-1. 
+This is very similar to running STREAMLINE on the [command line locally](#using-a-configuration-file-locally).
 
-
-#### Using Command-Line Arguments (Cluster)
-
-The fastest way to run STREAMLINE is on e.
-The runtime parameters can easily be set up using either the config file 
-of command line parameters. A few tools may be helpful in doings so and are described in
-the [helpful tools](#helpful-tools) section.
-
-You only need to additionally define 4 additional parameters to run the models
-using a cluster setup.
-
-Rest is handled similarly by `run.py` as defined in the local section.
-
-
-### Running using command line interface
-
-#### Using config file
-
-Edit the multiprocessing section of the config file according to your needs.
-
-The multiprocessing section has four parameters that need to be defined.
-1. `run-parallel`: Flag to run parallel processing in local job, overridden if `run-cluster` is defined. 
-2. `res-mem`: memory reserved per job
-3. `run-cluster`: flag for type of cluster, by far the most important parameter discussed in detail below.
-4. `queue`: the partition queue used for job submissions.
-
-The `run_cluster` parameter is the most important parameter here.
-It is set to False when running locally, to use a cluster implementation, specify as a 
-string type of cluster. Currently, clusters supported by `dask-jobqueue` can be supported.
-
-Additionally, the old method of manual submission can be done using the flags
-`"SLURMOld"` and `"LSFOld"` instead. This will generate and submit jobs using shell files 
-similar to the legacy version of STREAMLINE.
-
-As example config setup to run all steps till report generations using SLURM dask-jobqueue on Cedars HPC Cluster Setup.
-is given in the config 
-file [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg)
-
-We specifically focus on the multiprocessing section of the 
-config file 
-[here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg#L8-L12).
-
-
-Now you can run the pipeline using the following command (considering the config file is `upenn.cfg`): 
+1. Open your command line interface within your HPC and navigate to the installed `STREAMLINE` directory.
+2. Edit the multiprocessing section of the configuration file according to your needs (making sure to update `run-cluster`,`queue`, and `res-mem`).
+  * *We have included example configuration files set up to run the [demonstration datasets](data.md#demonstration-data) on three different clusters we utilize (i.e. `cedars.cfg` `cedars_old.cfg` and `upenn.cfg`), using `SLURM`, `UGE`, and `LSF`, respectively. We will focus here on `SLURM` as an example with the respective configuration file (`cedars.cfg`) found [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg)*
+2. Run the following command within the `STREAMLINE` base directory:
 ```
 python run.py -c run_configs/cedars.cfg
 ```
+
+#### Using Command-Line Arguments (Cluster)
+
 
 
 #### Using command-line parameters
