@@ -80,14 +80,14 @@ def single_parse(mode_params, argv, config_dict=None):
                             config_dict)
             if i not in [6, 7, 9]:
                 config_dict = load_config(config_dict['output_path'],
-                                          config_dict['experiment_name'])
+                                          config_dict['experiment_name'], config_dict)
                 config_dict = PARSER_LIST[i](argv, config_dict)
                 save_config(config_dict['output_path'],
                             config_dict['experiment_name'],
                             config_dict)
             else:
                 config_dict = load_config(config_dict['output_path'],
-                                          config_dict['experiment_name'])
+                                          config_dict['experiment_name'], config_dict)
             config_dict = parse_logistic(argv, config_dict)
     return config_dict
 
