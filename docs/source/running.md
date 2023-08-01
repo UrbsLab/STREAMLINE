@@ -172,23 +172,87 @@ python run.py -c run_configs/local.cfg
 
 #### Using Command-Line Arguments
 STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. The example commands below are set up to run the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
+* *Note: Command line run parameters have slightly different identifiers than for the configuration file (see [run parameters](parameters.md))*
 * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
+    * *Make sure to specify `-run-cluster = False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
+    * *Optionally specify `-run-parallel = False`, which will turn off local multi-core CPU parallelization*
 * *Warning: This run approach should not be used if you need/want to specify a list of ignored, categorical, or quanatiative feature names*
 
 As before, begin by opening your command line interface and navigate to the installed `STREAMLINE` directory. 
 
-The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, however we are not specifying categorical or quanatiative feature names, thus STREAMLINE is automatically attempting to detect feature types based on the `categorical_cutoff` parameter (with a default of 10).
+The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, however we are not specifying categorical or quanatiative feature names, thus STREAMLINE is automatically attempting to detect feature types based on the `categorical_cutoff` parameter (with a default of 10). We also set `-run-parallel = True` for each example, but the user can optionally assign `False`.
 
-##### All Phases (Replication Data Included)
-This command will run all phases (1-9) 
-* *Note: 
+##### All Phases at Once (Replication Data Included)
 ```
-python run.py --data-path ./data/DemoData --out-path DemoOutputLocal --exp-name demo_experiment --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --do-rep-report --do-clean --run-cluster False --run-parallel True
+python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
 ```
 
+##### All Main Phases at Once (No Replication Data)
+```
+python run.py --do-till-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cv 3 --algorithms=NB,LR,DT --run-cluster False --run-parallel True
+```
+
+##### One Phase at a Time
+The following commands can be run one after the other (in sequence), once the previous command completes.
+
+###### Phase 1 - Data Exploration & Processing:
+```
+python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cv 3 --algorithms NB,LR,DT --run-cluster False --run-parallel True
+```
+###### Phase 2 - Imputation and Scaling:
+```
+python run.py --do-dataprep --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
+```
+
+###### Phase 3 - Feature Importance Estimation
+```
+python run.py --do-feat-imp --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
+```
+
+###### Phase 4 - Feature Selection
+```
+python run.py --do-feat-sel --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
+```
+
+###### Phase 5 - Machine Learning (ML) Modeling
+```
+python run.py --do-model --out-path DemoOutput --exp-name demo_experiment --algorithms NB,LR,DT --run-cluster False --run-parallel True
+```
+
+###### Phase 6 - Post-Analysis
+```
+python run.py --do-stats --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
+```
+
+###### Phase 7 - Compare Datasets
+If there is only one 'target dataset' in the given analysis, skip this command.
+```
+python run.py --do-compare-dataset --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
+```
+
+###### Phase 8 - Replication
+If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+```
+python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
+```
+
+###### Phase 9 - Summary Report
+Run the following command to generate the main PDF report (summarizing testing data evaluations of the models).
+```
+python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
+```
+
+If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+```
+python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
+```
+
+###### Optional Clean-up
+```
+python run.py --do-clean --out-path DemoOutput --exp-name demo_experiment --del-time --del-old-cv --run-cluster False --run-parallel True
+```
 
 
-unspecified (non-essential run parameters will use default values)
 
 ### CPU Computing Cluster
 
@@ -212,66 +276,7 @@ As example case to all phases till report generation is given below:
 python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster False --run-parallel True
 ```
 
-A user can also run phases of STREAMLINE individually, 
-however the user must have run all the phases before the phase he wants to run, i.e. the user must run this
-pipeline sequentially in the given order.
 
-To just run Exploratory Phase (Phase 1):
-```
-python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --algorithms NB,LR,DT --run-cluster False --run-parallel True
-```
-
-To just run Data Preparation Phase (Phase 2):
-```
-python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster False --run-parallel True
-```
-
-
-To just run Feature Importance Phase (Phase 3):
-```
-python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster False --run-parallel True
-```
-
-To just run Feature Selection Phase (Phase 4):
-```
-python run.py --out-path demo --exp-name demo --do-feat-sel --run-cluster False --run-parallel True
-```
-
-To just run Modeling Phase (Phase 5):
-```
-python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT --run-cluster False --run-parallel True
-```
-
-To just run Statistical Analysis Phase (Phase 6):
-```
-python run.py --out-path demo --exp-name demo --do-stats --run-cluster False --run-parallel True
-```
-
-To just run Dataset Compare Phase (Phase 7):
-```
-python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-compare-dataset True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
-```
-
-To just run (Reporting Phase) Phase 8:
-```
-python run.py --out-path demo --exp-name demo --class-label Class --inst-label InstanceID --do-till-report False --do-report True --algorithms NB,LR,DT --do-all False --run-cluster False --run-parallel True
-```
-
-
-To just run Replication Phase (Phase 9):
-```
-python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-replicate --run-cluster False --run-parallel True
-```
-
-To just run Replication Report Phase (Phase 10):
-```
-python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-rep-report --run-cluster False --run-parallel True
-```
-
-To just run Cleaning Phase (Phase 11):
-```
-python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster False --run-parallel True
-```
 
 
 
