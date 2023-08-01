@@ -146,7 +146,7 @@ Begin by opening `STREAMLINE-Notebook.ipypnb` as a Jupyter Notebook (steps 1-3 a
 ## Command Line Interface
 This run mode is best for (1) most efficiently running STREAMLINE with parallelization options, (2) users comfortable with command lines, or (3) running moderate to large datasets and/or more exhaustive run parameter configurations. 
 
-Running STREAMLINE from the command line can be done locally (with or without CPU core parallelization), or on a dask-compatable CPU computing cluster. Any of these scenarios can also be run from a single command (i.e. all phases at once) using a 'configuration file', or separately one phase at a time. Below we indicate how to run all of these possible command line run configurations using the [demonstration datasets](data.md#demonstration-data) as an example. As for Google Colab and Jupyter Notebook run modes, to run STREAMLINE on datasets other than the [demonstration datasets](data.md#demonstration-data), essential run parameters should be specified/updated accordingly. STREAMLINE command line run parameters are detailed within the [run parameters section](parameters.md).
+Running STREAMLINE from the command line can be done locally (with or without CPU core parallelization), or on a dask-compatable CPU computing cluster. Any of these scenarios can also be run from a single command (i.e. all phases at once) using a 'configuration file', or separately one phase at a time. Below we indicate how to run all of these possible command line run configurations using the [demonstration datasets](data.md#demonstration-data) as an example. As for Google Colab and Jupyter Notebook run modes, to run STREAMLINE on datasets other than the [demonstration datasets](data.md#demonstration-data), essential run parameters should be specified/updated accordingly. STREAMLINE command line run parameters specified in a configuration file, or as command line arguments have slightly different names as detailed within the [run parameters section](parameters.md).
 
 ### Locally
 This section explains running STREAMLINE locally using the command line interface.
@@ -171,24 +171,24 @@ python run.py -c run_configs/local.cfg
 * *Note: You can save your own `.cfg` files to call with this command. We recommend copying renaming, and editing `local.cfg` and then calling this new configuration file as an argument to `run.py`*
 
 #### Using Command-Line Arguments (Locally)
-STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. The example commands below are set up to run the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
+STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
 * *Note: Command line run parameters have slightly different identifiers than for the configuration file (see [run parameters](parameters.md))*
 * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
     * *Make sure to specify `-run-cluster = False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
     * *Optionally specify `-run-parallel = False`, which will turn off local multi-core CPU parallelization*
-* *Warning: This run approach should not be used if you need/want to specify a list of ignored, categorical, or quanatiative feature names*
+* *Note: When specifying `ignore_features_path`, `categorical_feature_path`, or `quantitative_feature_path` using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
 
-1. As before, begin by opening your command line interface and navigate to the installed `STREAMLINE` directory. 
-2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, however we are not specifying categorical or quanatiative feature names, thus STREAMLINE is automatically attempting to detect feature types based on the `categorical_cutoff` parameter (with a default of 10). We also set `-run-parallel = True` for each example, but the user can optionally assign `False`.
+1. Open your command line interface and navigate to the installed `STREAMLINE` directory. 
+2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, but we set `-run-cluster = False` (necessary) and `-run-parallel = True` (optional) for each example.
 
 ##### All Phases at Once (Replication Data Included)
 ```
-python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
+python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
 ```
 
 ##### All Main Phases at Once (No Replication Data)
 ```
-python run.py --do-till-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cv 3 --algorithms=NB,LR,DT --run-cluster False --run-parallel True
+python run.py --do-till-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --run-cluster False --run-parallel True
 ```
 
 ##### One Phase at a Time
@@ -196,7 +196,7 @@ The following commands can be run one after the other (in sequence), waiting for
 
 ###### Phase 1 - Data Exploration & Processing:
 ```
-python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cv 3 --algorithms NB,LR,DT --run-cluster False --run-parallel True
+python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms NB,LR,DT --run-cluster False --run-parallel True
 ```
 ###### Phase 2 - Imputation and Scaling:
 ```
@@ -282,7 +282,7 @@ A gist of the application is that you can open a new terminal that will stay ope
 6. Run required commands.
 7. Press `Ctrl + b` and then the `d` key to close the terminal.
 
-#### Cluster Run Parameters
+#### Cluster-Specific Run Parameters
 You should be aware of 3 cluster-specific run parameters:
 * `run-cluster`: flag for type of cluster, discussed in detail below (when not `False`, this over-rides any value specified for `run-parallel`) 
 * `queue`: the partition queue used for job submissions
@@ -308,102 +308,98 @@ Additionally, the earlier/legacy method of STREAMLINE manual job submission is s
 Check with your cluster administrator on how to set these these cluster-specific parameters. We have set defaults for these parameters for use on our own institution's HPC (i.e. `queue = defq`, and `res-mem = 4`). 
 
 #### Using a Configuration File (Cluster)
-This is very similar to running STREAMLINE on the [command line locally](#using-a-configuration-file-locally).
+This is largely the same as running STREAMLINE from a [configuration file locally](#using-a-configuration-file-locally), with the addition of three cluster-specific parameters ( `run-cluster`,`queue`, and `res-mem`).
 
 1. Open your command line interface within your HPC and navigate to the installed `STREAMLINE` directory.
-2. Edit the multiprocessing section of the configuration file according to your needs (making sure to update `run-cluster`,`queue`, and `res-mem`).
+2. Edit any run parameters within a configuration file according to your needs (making sure to update `run-cluster`,`queue`, and `res-mem` within the multiprocessing section).
   * *We have included example configuration files set up to run the [demonstration datasets](data.md#demonstration-data) on three different clusters we utilize (i.e. `cedars.cfg` `cedars_old.cfg` and `upenn.cfg`), using `SLURM`, `UGE`, and `LSF`, respectively. We will focus here on `SLURM` as an example with the respective configuration file (`cedars.cfg`) found [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg)*
 2. Run the following command within the `STREAMLINE` base directory:
 ```
 python run.py -c run_configs/cedars.cfg
 ```
 
+* *Note: The configuration filename and location can be anything as long as it's a valid configuration file set up to run on your dask-compatable cluster.*
+* *Note: When using this run strategy, it is strongly recommended to use a [terminal emulator](#tmux) and check with your cluster administrator to make sure that your system allows light weight, but longer duration code to be run from the head node that monitors job completion and can submit new jobs. If not, we recommend running STREAMLINE one phase at a time in legacy mode (i.e. `run-cluster` = `SLURMOld` or `LSFOld`) which only uses the head node to submit jobs.* 
+
 #### Using Command-Line Arguments (Cluster)
+This is largely the same as running STREAMLINE using [command-line arguments locally](#using-command-line-arguments) with the addition of three cluster-specific parameters ( `run-cluster`,`queue`, and `res-mem`), and users can ignore `-run-parallel`.
 
+1. Open your command line interface within your HPC and navigate to the installed `STREAMLINE` directory.
+2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Also, here `-run-parallel` is automatically overridden by `-run-cluster = SLURM` (or whatever cluster-name is specified or than `False`).
+  * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
+  * *Note: When specifying `ignore_features_path`, `categorical_feature_path`, or `quantitative_feature_path` using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
 
-
-#### Using command-line parameters
-
-`run.py` can also be used with command line parameters 
-as defined in the [parameters section](parameters.md)
-
-As discussed above you need only specify 3 additional parameters in the 
-CLI parameters way of running STREAMLINE
-
+##### All Phases at Once (Replication Data Included)
+* *Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.*
 ```
-python run.py <other commands> --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-We give examples to run all phases separately and together 
-on the example DemoData on the Cedars SLURM HPC.
-
-As example case to all phases till report generation is given below:
-
+##### All Main Phases at Once (No Replication Data)
+* *Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.*
 ```
-python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-till-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-A user can also run phases of STREAMLINE individually, 
-however the user must have run all the phases before the phase he wants to run, i.e. the user must run this
-pipeline sequentially in the given order.
+##### One Phase at a Time
+The following commands can be run one after the other (in sequence), waiting for all jobs of the previous phase to complete successfully. For minimal head node overhead, we recommend running these jobs using ``--run-cluster` = `SLURMOld` or `LSFOld`` rather than `SLURM` (if available to you).
 
-To just run Exploratory Phase (Phase 1):
+###### Phase 1 - Data Exploration & Processing:
 ```
-python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-eda --class-label Class --inst-label InstanceID --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
 ```
-
-To just run Data Preparation Phase (Phase 2):
+###### Phase 2 - Imputation and Scaling:
 ```
-python run.py --out-path demo --exp-name demo --do-dataprep --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-dataprep --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-
-To just run Feature Importance Phase (Phase 3):
+###### Phase 3 - Feature Importance Estimation
 ```
-python run.py --out-path demo --exp-name demo --do-feat-imp --run-cluster SLURM --res-mem 4 --queue defq
-```
-
-To just run Feature Selection Phase (Phase 4):
-```
-python run.py --out-path demo --exp-name demo --do-feat-sel --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-feat-imp --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-To just run Modeling Phase (Phase 5):
+###### Phase 4 - Feature Selection
 ```
-python run.py --out-path demo --exp-name demo --do-model --algorithms NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
-```
-
-To just run Statistical Analysis Phase (Phase 6):
-```
-python run.py --out-path demo --exp-name demo --do-stats --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-feat-sel --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-To just run Dataset Compare Phase (Phase 7):
+###### Phase 5 - Machine Learning (ML) Modeling
 ```
-python run.py --out-path demo --exp-name demo --do-compare-dataset --run-cluster SLURM --res-mem 4 --queue defq
-```
-
-To just run (Reporting Phase) Phase 8:
-```
-python run.py --out-path demo --exp-name demo --do-report --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-model --out-path DemoOutput --exp-name demo_experiment --algorithms NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-
-To just run Replication Phase (Phase 9):
+###### Phase 6 - Post-Analysis
 ```
-python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-replicate --run-cluster SLURM --res-mem 4 --queue defq
-```
-
-To just run Replication Report Phase (Phase 10):
-```
-python run.py --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --out-path demo --exp-name demo --do-rep-report --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-stats --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-To just run Cleaning Phase (Phase 11):
+###### Phase 7 - Compare Datasets
+If there is only one 'target dataset' in the given analysis, skip this command.
 ```
-python run.py --out-path demo --exp-name demo --do-clean --del-time --del-old-cv --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-compare-dataset --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
+###### Phase 8 - Replication
+If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+```
+python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
+```
+
+###### Phase 9 - Summary Report
+Run the following command to generate the main PDF report (summarizing testing data evaluations of the models).
+```
+python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
+```
+
+If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+```
+python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
+```
+
+###### Optional Clean-up
+```
+python run.py --do-clean --out-path DemoOutput --exp-name demo_experiment --del-time --del-old-cv --run-cluster SLURM --res-mem 4 --queue defq
+```
 
 ## Picking a Run Mode
 
