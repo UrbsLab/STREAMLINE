@@ -235,7 +235,7 @@ If there are no replication datasets, skip this command. If you have multiple 't
 python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
 ```
 
-###### Phase 9 - Summary Report
+###### Phase 9 - Summary Report(s)
 Run the following command to generate the main PDF report (summarizing testing data evaluations of the models).
 ```
 python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
@@ -385,7 +385,7 @@ If there are no replication datasets, skip this command. If you have multiple 't
 python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-###### Phase 9 - Summary Report
+###### Phase 9 - Summary Report(s)
 Run the following command to generate the main PDF report (summarizing testing data evaluations of the models).
 ```
 python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
