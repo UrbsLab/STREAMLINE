@@ -151,7 +151,7 @@ Running STREAMLINE from the command line can be done locally (with or without CP
 ### Locally
 This section explains running STREAMLINE locally using the command line interface.
 
-#### Using a Configuration File
+#### Using a Configuration File (Locally)
 All phases of STREAMLINE can be run (in sequence) with a single simple command by editing and calling an associated configuration file (`run_configs/local.cfg`) as indicated below.
 * *Note: This approach also allows users to run any subset of sequential STREAMLINE phases (e.g. Phase 1 alone for EDA, or Phases 1-4 for EDA, data processing, and feature selection) using the different 'phases to run' flags within the configuration file.*
 
@@ -170,7 +170,7 @@ python run.py -c run_configs/local.cfg
 ```
 * *Note: You can save your own `.cfg` files to call with this command. We recommend copying renaming, and editing `local.cfg` and then calling this new configuration file as an argument to `run.py`*
 
-#### Using Command-Line Arguments
+#### Using Command-Line Arguments (Locally)
 STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. The example commands below are set up to run the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
 * *Note: Command line run parameters have slightly different identifiers than for the configuration file (see [run parameters](parameters.md))*
 * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
@@ -178,9 +178,8 @@ STREAMLINE phases can also be called individually from the command line without 
     * *Optionally specify `-run-parallel = False`, which will turn off local multi-core CPU parallelization*
 * *Warning: This run approach should not be used if you need/want to specify a list of ignored, categorical, or quanatiative feature names*
 
-As before, begin by opening your command line interface and navigate to the installed `STREAMLINE` directory. 
-
-The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, however we are not specifying categorical or quanatiative feature names, thus STREAMLINE is automatically attempting to detect feature types based on the `categorical_cutoff` parameter (with a default of 10). We also set `-run-parallel = True` for each example, but the user can optionally assign `False`.
+1. As before, begin by opening your command line interface and navigate to the installed `STREAMLINE` directory. 
+2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, however we are not specifying categorical or quanatiative feature names, thus STREAMLINE is automatically attempting to detect feature types based on the `categorical_cutoff` parameter (with a default of 10). We also set `-run-parallel = True` for each example, but the user can optionally assign `False`.
 
 ##### All Phases at Once (Replication Data Included)
 ```
@@ -193,7 +192,7 @@ python run.py --do-till-report --do-clean --data-path ./data/DemoData --out-path
 ```
 
 ##### One Phase at a Time
-The following commands can be run one after the other (in sequence), once the previous command completes.
+The following commands can be run one after the other (in sequence), waiting for the previous command to complete.
 
 ###### Phase 1 - Data Exploration & Processing:
 ```
@@ -252,84 +251,29 @@ python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment -
 python run.py --do-clean --out-path DemoOutput --exp-name demo_experiment --del-time --del-old-cv --run-cluster False --run-parallel True
 ```
 
-
-
 ### CPU Computing Cluster
+This section explains running STREAMLINE remotely on a dask-compatible CPU computing cluster (i.e. HPC).
 
+#### Helpful Tools
+First let's discuss the role of a couple helpful tools mentioned in the [installation](install.md#additional-tools) section for running STREAMLINE on a computing cluster.
 
-
-
-#### Using command-line parameters
-
-`run.py` can also be used with command line parameters 
-as defined in the [parameters section](parameters.md)
-
-Similarly, the following additional parameters need to be given
-
-```
-python run.py <other commands> --run-cluster False --run-parallel True<or Flase, accordingly>
-```
-
-As example case to all phases till report generation is given below:
-
-```
-python run.py --data-path ./data/DemoData --out-path demo --exp-name demo --do-till-report --class-label Class --inst-label InstanceID --algorithms=NB,LR,DT --run-cluster False --run-parallel True
-```
-
-
-
-
-
-
-## Running on HPC Clusters
-
-The easiest way to run STREAMLINE on HPC is through the CLI interface.
-The runtime parameters can easily be set up using either the config file 
-of command line parameters. A few tools may be helpful in doings so and are described in
-the [helpful tools](#helpful-tools) section.
-
-You only need to additionally define 4 additional parameters to run the models
-using a cluster setup.
-
-Rest is handled similarly by `run.py` as defined in the local section.
-
-### Helpful Tools
-
-#### nano
-GNU nano is a text editor for Unix-like computing 
-systems or operating environments using a command line interface. 
-
-This would be incredibly handy in changing opening and changing the config file through ssh terminal
-for using STREAMLINE through config file.
+##### nano
+GNU nano is a text editor for Unix-like computing systems or operating environments using a command line interface. This would be incredibly handy for editing the configuration file through a ssh terminal when running STREAMLINE with a configuration file.
 
 A detailed guide can be found [here](https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor)
 
-A gist of the application is that you can edit the `run_configs/cedars.cfg` config file by the following steps
-1. Go to the root streamline folder.
-2. Type `nano run_configs/cedars.cfg` in the terminal to open the file in tmux.
-3. Make the necessary in the changes in the config file.
+A gist of the application is that you can edit a configuration file such as e.g. `run_configs/cedars.cfg` using the following steps:
+1. Go to the root `STREAMLINE` folder.
+2. Type `nano run_configs/cedars.cfg` in the terminal to open the file in nano.
+3. Edit the configuration file as needed.
 4. Press `Ctrl + X` to close the file and `Y` to save the changes.
 
-
-#### tmux
-tmux is a terminal multiplexer/emulator. It lets you switch easily between several programs in one terminal, 
-detach them (they keep running in the background) and reattach them to a different terminal. 
-
-Terminal emulators programs allow you to create several "pseudo terminals" from a single terminal.
-They decouple your programs from the main terminal, 
-protecting them from accidentally disconnecting. 
-You can detach tmux or screen from the login terminal, 
-and all your programs will continue to run safely in the background. 
-Later, we can reattach them to the same or a different terminal to 
-monitor the process. These are also very useful for running multiple programs with a single connection, 
-such as when you're remotely connecting to a machine using Secure Shell (SSH).
+##### tmux
+tmux is a terminal multiplexer/emulator. It lets you switch easily between several programs in one terminal, detach them (they keep running in the background) and reattach them to a different terminal. This is particularly important when you want to run all phases of STREAMLINE automatically from a single command. To achieve this, STREAMLINE runs a script on the head node (i.e. job submission node) that monitors phase completion and submits new jobs for the next phase. A terminal emulator allows you to start a full pipeline run and close the window without killing the job. 
 
 A detailed guide on using it can be found [here](https://www.redhat.com/sysadmin/introduction-tmux-linux)
 
-A gist of the application is that you can open a new terminal 
-that will stay open even if you disconnect and close your terminal.
-
-The steps to take it is as follows:
+A gist of the application is that you can open a new terminal that will stay open even if you disconnect and close your terminal using the following steps:
 1. Go to the root streamline folder.
 2. Type and run `tmux new -s mysession`
 3. Open the required config file using nano (e.g. `run_configs/cedars.cfg`) 
@@ -338,6 +282,22 @@ The steps to take it is as follows:
 6. Run required commands.
 7. Press `Ctrl + b` and then the `d` key to close the terminal.
 
+#### Using a Configuration File (Cluster)
+This is very similar to running STREAMLINE on the [command line locally](#using-a-configuration-file-locally). You only need to define 4 additional run parameters using a cluster setup.
+1. 
+
+
+#### Using Command-Line Arguments (Cluster)
+
+The fastest way to run STREAMLINE is on e.
+The runtime parameters can easily be set up using either the config file 
+of command line parameters. A few tools may be helpful in doings so and are described in
+the [helpful tools](#helpful-tools) section.
+
+You only need to additionally define 4 additional parameters to run the models
+using a cluster setup.
+
+Rest is handled similarly by `run.py` as defined in the local section.
 
 
 ### Running using command line interface
