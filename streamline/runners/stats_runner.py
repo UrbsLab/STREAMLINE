@@ -1,3 +1,4 @@
+import logging
 import os
 import glob
 import time
@@ -20,7 +21,7 @@ class StatsRunner:
     def __init__(self, output_path, experiment_name, algorithms=None, exclude=("XCS", "eLCS"),
                  class_label="Class", instance_label=None, scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
-                 plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False,
+                 exclude_plots=None, show_plots=False,
                  run_cluster=False, queue='defq', reserved_memory=4):
         """
         Args:
@@ -31,12 +32,7 @@ class StatsRunner:
             sig_cutoff: significance cutoff, default=0.05
             metric_weight='balanced_accuracy'
             scale_data=True
-            plot_roc: Plot ROC curves individually for each algorithm including all CV results and averages,
-                                default=True
-            plot_prc: Plot PRC curves individually for each algorithm including all CV results and averages,
-                                default=True
-            plot_metric_boxplots: Plot box plot summaries comparing algorithms for each metric, default=True
-            plot_fi_box: Plot feature importance boxplots and histograms for each algorithm, default=True
+            exclude_plots:
             metric_weight: ML model metric used as weight in composite FI plots \
                            (only supports balanced_accuracy or roc_auc as options). \
                            Recommend setting the same as primary_metric if possible, \
@@ -68,30 +64,22 @@ class StatsRunner:
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
         self.scoring_metric = scoring_metric
+        self.exclude_plots = exclude_plots
 
-        self.plot_roc = plot_roc
-        self.plot_prc = plot_prc
-        self.plot_metric_boxplots = plot_metric_boxplots
-        self.plot_fi_box = plot_fi_box
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_FI_box', 'plot_metric_boxplots']
+        if exclude_plots is not None:
+            for x in exclude_plots:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown exclusion option " + str(x))
+        else:
+            exclude_plots = list()
+
+        self.plot_roc = 'plot_ROC' not in exclude_plots
+        self.plot_prc = 'plot_PRC' not in exclude_plots
+        self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
+        self.plot_fi_box = 'plot_FI_box' not in exclude_plots
         self.metric_weight = metric_weight
         self.top_features = top_features
-
-        if self.plot_roc == 'False' or self.plot_roc == False:
-            self.plot_roc == False
-        else:
-            self.plot_roc == True
-        if self.plot_prc == 'False' or self.plot_prc == False:
-            self.plot_prc == False
-        else:
-            self.plot_prc == True
-        if self.plot_metric_boxplots == 'False' or self.plot_metric_boxplots == False:
-            self.plot_metric_boxplots == False
-        else:
-            self.plot_metric_boxplots == True
-        if self.plot_fi_box == 'False' or self.plot_fi_box == False:
-            self.plot_fi_box == False
-        else:
-            self.plot_fi_box == True
 
         self.run_cluster = run_cluster
         self.queue = queue
@@ -141,7 +129,7 @@ class StatsRunner:
 
             job_obj = StatsJob(full_path, self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
                                cv_partitions, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
-                               self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
+                               self.exclude_plots,
                                self.show_plots)
             if run_parallel and run_parallel != "False":
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
@@ -173,7 +161,7 @@ class StatsRunner:
     def get_cluster_params(self, full_path, len_cv):
         cluster_params = [full_path, None, self.class_label, self.instance_label, self.scoring_metric,
                           len_cv, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
-                          self.plot_roc, self.plot_prc, self.plot_fi_box, self.plot_metric_boxplots,
+                          ','.join(self.exclude_plots),
                           self.show_plots]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
