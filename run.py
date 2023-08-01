@@ -92,8 +92,7 @@ def run(params):
     if params['do_eda']:
         from streamline.runners.dataprocess_runner import DataProcessRunner
         eda = DataProcessRunner(params['dataset_path'], params['output_path'], params['experiment_name'],
-                                exploration_list=None,
-                                plot_list=None,
+                                exclude_eda_output=params['exclude_eda_output'],
                                 class_label=params['class_label'], instance_label=params['instance_label'],
                                 match_label=params['match_label'],
                                 n_splits=params['cv_partitions'],
@@ -101,7 +100,7 @@ def run(params):
                                 ignore_features=params['ignore_features_path'],
                                 categorical_features=params['categorical_feature_path'],
                                 quantitative_features=params['quantitative_feature_path'],
-                                top_features=params['top_features'],
+                                top_features=params['top_uni_features'],
                                 categorical_cutoff=params['categorical_cutoff'],
                                 sig_cutoff=params['sig_cutoff'],
                                 featureeng_missingness=params['featureeng_missingness'],
@@ -148,7 +147,7 @@ def run(params):
                                        instance_label=params['instance_label'],
                                        max_features_to_keep=params['max_features_to_keep'],
                                        filter_poor_features=params['filter_poor_features'],
-                                       top_features=params['top_features'], export_scores=params['export_scores'],
+                                       top_features=params['top_fi_features'], export_scores=params['export_scores'],
                                        overwrite_cv=params['overwrite_cv_feat'], random_state=params['random_state'],
                                        n_jobs=params['n_jobs'],
                                        run_cluster=params['run_cluster'],
@@ -184,11 +183,10 @@ def run(params):
                             exclude=params['exclude'],
                             class_label=params['class_label'], instance_label=params['instance_label'],
                             scoring_metric=params['primary_metric'],
-                            top_features=params['top_model_features'], sig_cutoff=params['sig_cutoff'],
+                            top_features=params['top_model_fi_features'], sig_cutoff=params['sig_cutoff'],
                             metric_weight=params['metric_weight'],
                             scale_data=params['scale_data'],
-                            plot_roc=params['plot_roc'], plot_prc=params['plot_prc'], plot_fi_box=params['plot_fi_box'],
-                            plot_metric_boxplots=params['plot_metric_boxplots'], show_plots=False,
+                            exclude_plots=params['exclude_plots'], show_plots=False,
                             run_cluster=params['run_cluster'],
                             queue=params['queue'],
                             reserved_memory=params['reserved_memory'])
@@ -227,8 +225,7 @@ def run(params):
                                       algorithms=params['algorithms'], load_algo=True,
                                       exclude=params['exclude'],
                                       export_feature_correlations=params['rep_export_feature_correlations'],
-                                      plot_roc=params['rep_plot_roc'], plot_prc=params['rep_plot_prc'],
-                                      plot_metric_boxplots=params['rep_plot_metric_boxplots'],
+                                      exclude_plots=params['exclude_rep_plots'],
                                       run_cluster=params['run_cluster'],
                                       queue=params['queue'],
                                       reserved_memory=params['reserved_memory'])
@@ -260,6 +257,8 @@ if __name__ == '__main__':
 
     # NOTE: All keys must be small
     config_dict = parser_function(sys.argv)
+
+    print(config_dict)
 
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(str(config_dict['output_path']))

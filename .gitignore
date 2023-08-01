@@ -23,6 +23,7 @@ UserData/
 UserRepData/
 UserOutput/
 DemoOutput/
+DemoOutputLocal/
 multiplexer_dataset/
 gametes_dataset/
 run_configs/cedars_amd.cfg

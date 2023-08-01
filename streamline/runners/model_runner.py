@@ -63,7 +63,7 @@ class ModelExperimentRunner:
         self.class_label = class_label
         self.instance_label = instance_label
 
-        if algorithms == "All":
+        if algorithms == "All" or algorithms == ['All']:
             algorithms = None
 
         if algorithms is None:

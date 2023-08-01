@@ -107,7 +107,7 @@ def parse_eda(argv, params_dict=None):
                         help='number of unique values after which a variable is '
                              'considered to be quantitative vs categorical',
                         default=10)
-    parser.add_argument('--top-features', dest='top_features', type=int,
+    parser.add_argument('--top-uni-features', dest='top_uni_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--sig', dest='sig_cutoff', type=float, help='significance cutoff used throughout pipeline',
                         default=0.05)
@@ -190,7 +190,7 @@ def parse_feat_sel(argv, params_dict=None):
                         help='max features to keep (only applies if filter_poor_features is True)', default=2000)
     parser.add_argument('--filter-feat', dest='filter_poor_features', type=str2bool, nargs='?',
                         help='filter out the worst performing features prior to modeling', default=True)
-    parser.add_argument('--top-features', dest='top_features', type=int,
+    parser.add_argument('--top-fi-features', dest='top_fi_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--export-scores', dest='export_scores', type=str2bool, nargs='?',
                         help='export figure summarizing average feature importance scores over cv partitions',
@@ -290,7 +290,7 @@ def parse_stats(argv, params_dict=None):
                         help='ML model metric used as weight in composite FI plots (only supports balanced_accuracy '
                              'or roc_auc as options) Recommend setting the same as primary_metric if possible.',
                         default='balanced_accuracy')
-    parser.add_argument('--top-model-features', dest='top_model_features', type=int,
+    parser.add_argument('--top-model-features', dest='top_model_fi_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     return update_dict_from_parser(argv, parser, params_dict)
 

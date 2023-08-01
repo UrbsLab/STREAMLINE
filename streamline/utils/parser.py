@@ -33,8 +33,6 @@ def process_params(params):
 
     if params['do_model'] or params['do_stats'] or params["do_compare_dataset"] \
             or params['do_report'] or params['do_replicate'] or params['do_rep_report']:
-        if params['do_all']:
-            params['algorithms'] = None
         if params['algorithms'] == 'All':
             params['algorithms'] = None
 
@@ -146,9 +144,11 @@ def parser_function(argv):
         config_dict.update(config)
         config_dict.update(mode_params)
 
-    config = single_parse(mode_params, argv, config_dict)
-    config_dict.update(config)
-    config_dict.update(mode_params)
+    for key in mode_params:
+        if mode_params[key] and key not in ['config', 'do_till_report']:
+            config = single_parse(mode_params, argv, config_dict)
+            config_dict.update(config)
+            config_dict.update(mode_params)
 
     config_dict = process_params(config_dict)
 
