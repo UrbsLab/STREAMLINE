@@ -114,7 +114,7 @@ class ModelJob(Job):
         # Load training and testing datasets separating features from outcome for scikit-learn-based modeling
         x_train, y_train, x_test, y_test = self.data_prep()
         model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
-        if 0 < self.training_subsample < x_train.shape[0]:
+        if 0 < self.training_subsample < x_train.shape[0] and model.small_name in ['XGB', 'SVM', 'ANN', 'KNN']:
             sss = StratifiedShuffleSplit(n_splits=1, train_size=self.training_subsample, random_state=self.random_state)
             for train_index, _ in sss.split(x_train, y_train):
                 x_train = x_train[train_index]
