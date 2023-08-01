@@ -30,7 +30,7 @@ class ReplicateJob(Job):
 
     def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
                  ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
-                 export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
+                 export_feature_correlations=True, exclude_plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
         super().__init__()
@@ -55,9 +55,19 @@ class ReplicateJob(Job):
             for algorithm in algorithms:
                 self.algorithms.append(is_supported_model(algorithm))
 
-        self.plot_roc = plot_roc
-        self.plot_prc = plot_prc
-        self.plot_metric_boxplots = plot_metric_boxplots
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_metric_boxplots']
+        if exclude_plots is not None:
+            for x in exclude_plots:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown exclusion option " + str(x))
+        else:
+            exclude_plots = list()
+
+        self.plot_roc = 'plot_ROC' not in exclude_plots
+        self.plot_prc = 'plot_PRC' not in exclude_plots
+        self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
+        self.exclude_plots = exclude_plots
+
         self.export_feature_correlations = export_feature_correlations
         self.show_plots = show_plots
         self.cv_partitions = cv_partitions
@@ -429,8 +439,7 @@ class ReplicateJob(Job):
                          self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
                          metric_weight='balanced_accuracy', scale_data=self.scale_data,
-                         plot_roc=self.plot_roc, plot_prc=self.plot_prc, plot_fi_box=False,
-                         plot_metric_boxplots=self.plot_metric_boxplots, show_plots=self.show_plots)
+                         exclude_plots=self.exclude_plots, show_plots=self.show_plots)
 
         result_table, metric_dict = stats.primary_stats(master_list, rep_data.data)
 

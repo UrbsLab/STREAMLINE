@@ -35,7 +35,7 @@ class StatsJob(Job):
 
     def __init__(self, full_path, algorithms, class_label, instance_label, scoring_metric='balanced_accuracy',
                  cv_partitions=5, top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
-                 plot_roc=True, plot_prc=True, plot_fi_box=True, plot_metric_boxplots=True, show_plots=False):
+                 exclude_plots=None, show_plots=False):
         """
 
         Args:
@@ -49,10 +49,6 @@ class StatsJob(Job):
             sig_cutoff:
             metric_weight:
             scale_data:
-            plot_roc:
-            plot_prc:
-            plot_fi_box:
-            plot_metric_boxplots:
             show_plots:
         """
         super().__init__()
@@ -63,12 +59,21 @@ class StatsJob(Job):
         self.data_name = self.full_path.split('/')[-1]
         self.experiment_path = '/'.join(self.full_path.split('/')[:-1])
 
-        self.plot_roc = plot_roc
-        self.plot_prc = plot_prc
-        self.plot_fi_box = plot_fi_box
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_FI_box', 'plot_metric_boxplots']
+        if exclude_plots is not None:
+            for x in exclude_plots:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown exclusion option " + str(x))
+        else:
+            exclude_plots = list()
+
+        self.plot_roc = 'plot_ROC' not in exclude_plots
+        self.plot_prc = 'plot_PRC' not in exclude_plots
+        self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
+        self.plot_fi_box = 'plot_FI_box' not in exclude_plots
+
         self.cv_partitions = cv_partitions
         self.scale_data = scale_data
-        self.plot_metric_boxplots = plot_metric_boxplots
         self.scoring_metric = scoring_metric
         self.top_features = top_features
         self.sig_cutoff = sig_cutoff

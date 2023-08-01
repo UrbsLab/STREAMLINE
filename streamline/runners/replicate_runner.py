@@ -1,3 +1,4 @@
+import logging
 import os
 import glob
 import pickle
@@ -21,7 +22,7 @@ class ReplicationRunner:
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
                  class_label=None, instance_label=None, match_label=None, algorithms=None, load_algo=True,
                  exclude=("XCS", "eLCS"),
-                 export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
+                 export_feature_correlations=True, exclude_plots=None,
                  run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
 
@@ -51,9 +52,18 @@ class ReplicationRunner:
         self.match_label = match_label
 
         self.export_feature_correlations = export_feature_correlations
-        self.plot_roc = plot_roc
-        self.plot_prc = plot_prc
-        self.plot_metric_boxplots = plot_metric_boxplots
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_metric_boxplots']
+        if exclude_plots is not None:
+            for x in exclude_plots:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown exclusion option " + str(x))
+        else:
+            exclude_plots = list()
+
+        self.plot_roc = 'plot_ROC' not in exclude_plots
+        self.plot_prc = 'plot_PRC' not in exclude_plots
+        self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
+        self.plot_fi_box = 'plot_FI_box' not in exclude_plots
 
         self.experiment_path = self.output_path + '/' + self.experiment_name
 
@@ -159,8 +169,7 @@ class ReplicationRunner:
                                            algorithms=self.algorithms, exclude=None,
                                            cv_partitions=self.cv_partitions,
                                            export_feature_correlations=self.export_feature_correlations,
-                                           plot_roc=self.plot_roc, plot_prc=self.plot_prc,
-                                           plot_metric_boxplots=self.plot_metric_boxplots,
+                                           exclude_plots=None,
                                            categorical_cutoff=self.categorical_cutoff,
                                            sig_cutoff=self.sig_cutoff, scale_data=self.scale_data,
                                            impute_data=self.impute_data,
