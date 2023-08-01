@@ -16,21 +16,28 @@ logger.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
 
 phase_list = ["", "Exploratory", "Data Process", "Feature Imp.",
-              "Feature Sel.", "Modeling", "Stats", "Dataset Compare",
-              "Reporting", "Replication", "Replicate Report", "Cleaning"]
+              "Feature Sel.", "Modeling", "Post-Analysis", "Dataset Compare",
+              "Testing Evaluation Report", "Replication",
+              "Replication Evaluation Report", "Cleaning"]
+
+phase_number = [' ', 1, 2, 3, 4, 5, 6, 7, 9, 8, 9, ' ']
+for idx in range(len(phase_number)):
+    if type(phase_number[idx]) == int:
+        phase_number[idx] = " (" + str(phase_number[idx]) + ") "
 
 
 def runner(obj, phase, run_parallel=True, params=None):
     start = time.time()
 
     phase_str = phase_list[phase]
+    phase_nu = phase_number[phase]
     print()
     if params['run_cluster'] and phase != 11:
-        print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
+        print("Running " + phase_str + " Phase " + str(phase_nu)
               + " with " + str(params['run_cluster']) + " Setup")
     else:
-        print("Running " + phase_str + " Phase " + "(" + str(phase) + ")"
-              + " with " + "Local" + " Setup")
+        print("Running " + phase_str + " Stage" + str(phase_nu)
+              + "with " + "Local" + " Setup")
     how = "with " + str(params['run_cluster']) + " Manual Jobs"
     if params['run_cluster'] == "SLURMOld" or params['run_cluster'] == "LSFOld":
         obj.run(run_parallel=run_parallel)
@@ -70,7 +77,8 @@ def runner(obj, phase, run_parallel=True, params=None):
 def len_datasets(output_path, experiment_name):
     datasets = os.listdir(output_path + '/' + experiment_name)
     remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
-                   'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons', 'UsefulNotebooks',
+                   'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons',
+                   'UsefulNotebooks', 'dask_logs',
                    experiment_name + '_ML_Pipeline_Report.pdf']
     for text in remove_list:
         if text in datasets:

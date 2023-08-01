@@ -39,10 +39,16 @@ def save_config(output_path, experiment_name, config_dict):
         pickle.dump(config_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def load_config(output_path, experiment_name):
-    with open(output_path + '/' + experiment_name + '_params.pickle', 'rb') as file:
-        config_file = pickle.load(file)
-    return config_file
+def load_config(output_path, experiment_name, config=None):
+    if config is None:
+        config = dict()
+    try:
+        with open(output_path + '/' + experiment_name + '_params.pickle', 'rb') as file:
+            config_file = pickle.load(file)
+            config.update(config_file)
+    except FileNotFoundError:
+        pass
+    return config
 
 
 def update_dict_from_parser(argv, parser, params_dict=None):
@@ -77,9 +83,9 @@ def parse_eda(argv, params_dict=None):
     parser.add_argument('--class-label', dest='class_label', type=str, help='outcome label of all datasets',
                         default="Class")
     parser.add_argument('--match-label', dest='match_label', type=str,
-                        help='only applies when M selected for partition-method; '
+                        help='only applies when Group selected for partition-method; '
                              'indicates column with matched instance ids',
-                        default="")
+                        default='')
     # Arguments with defaults available (but less critical to check)
     parser.add_argument('--fi', dest='ignore_features_path', type=str,
                         help='path to .csv file with feature labels to be ignored in analysis '
