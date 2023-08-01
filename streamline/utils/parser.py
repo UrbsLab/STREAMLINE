@@ -145,9 +145,10 @@ def parser_function(argv):
         config = parser_function_all(argv)
         config_dict.update(config)
         config_dict.update(mode_params)
-    else:
-        config_dict = single_parse(mode_params, argv, config_dict)
-        config_dict.update(mode_params)
+
+    config = single_parse(mode_params, argv, config_dict)
+    config_dict.update(config)
+    config_dict.update(mode_params)
 
     config_dict = process_params(config_dict)
 
