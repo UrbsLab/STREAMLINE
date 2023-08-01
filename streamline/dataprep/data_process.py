@@ -23,7 +23,7 @@ class DataProcess(Job):
     """
 
     def __init__(self, dataset, experiment_path, ignore_features=None,
-                 categorical_features=None, quantitative_features=None, explorations=None, plots=None,
+                 categorical_features=None, quantitative_features=None, exclude_eda_output=None,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5,
                  cleaning_missingness=0.5, correlation_removal_threshold=1.0,
                  partition_method="Stratified", n_splits=10,
@@ -36,7 +36,7 @@ class DataProcess(Job):
             experiment_path: path to experiment the logging directory folder
             ignore_features: list of row names of features to ignore
             categorical_features: list of row names of categorical features
-            explorations: list of names of analysis to do while doing EDA (must be in set X)
+            exclude_eda_output: list of names of analysis to do while doing EDA (must be in set X)
             plots: list of analysis plots to save in experiment directory (must be in set Y)
             categorical_cutoff: categorical cut off to consider a feature categorical by analysis, default=10
             sig_cutoff: significance cutoff for continuous variables, default=0.05
@@ -49,8 +49,23 @@ class DataProcess(Job):
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
         self.random_state = random_state
+
+        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots']
+
         explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+
+        if exclude_eda_output is not None:
+            for x in exclude_eda_output:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown EDA exclusion option " + str(x))
+            if 'describe_csv' in exclude_eda_output:
+                explorations_list.remove("Describe")
+                plot_list.remove("Describe")
+            if 'univariate_plots' in exclude_eda_output:
+                plot_list.remove("Univariate Analysis")
+            if 'correlation_plots' in exclude_eda_output:
+                plot_list.remove("Feature Correlation")
 
         for item in plot_list:
             if item not in explorations_list:
@@ -106,19 +121,8 @@ class DataProcess(Job):
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
 
-        self.explorations = explorations
-        if self.explorations is None:
-            self.explorations = explorations_list
-        self.plots = plots
-        if self.plots is None:
-            self.plots = plot_list
-
-        for x in self.explorations:
-            if x not in explorations_list:
-                raise Exception("Exploration " + str(x) + " is not known/implemented")
-        for x in self.explorations:
-            if x not in explorations_list:
-                raise Exception("Plot " + str(x) + " is not known/implemented")
+        self.explorations = explorations_list
+        self.plots = plot_list
 
         self.cv_partitioner = None
         self.partition_method = partition_method
@@ -394,7 +398,7 @@ class DataProcess(Job):
         with open(self.experiment_path + '/' + self.dataset.name +
                   '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
             pickle.dump(list(self.dataset.data.columns), outfile)
-        #with open(self.experiment_path + '/' + self.dataset.name +
+        # with open(self.experiment_path + '/' + self.dataset.name +
         #          '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
         #    writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         #    writer.writerow(list(self.dataset.data.columns))
@@ -681,7 +685,8 @@ class DataProcess(Job):
                 logging.info('\t' + feat)
             # Run one-hot encoding
             one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical],
-                                        columns=non_binary_categorical) #Ryan - make it so all new features have same naming convention
+                                        columns=non_binary_categorical)
+            # Ryan - make it so all new features have same naming convention
             self.one_hot_features = list(one_hot_df.columns)
             # Remove original feature from dataset
             self.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
@@ -698,7 +703,9 @@ class DataProcess(Job):
         else:
             logging.info("No non-binary categorical features, skipping categorical encoding")
 
-    def drop_highly_correlated_features(self): #Ryan - if we are recalculating the correlation matrix this is wasted time since it was already calculated for initial corerlation plot.
+    def drop_highly_correlated_features(self):
+        # Ryan - if we are recalculating the correlation matrix this is
+        # wasted time since it was already calculated for initial correlation plot.
         df_corr = self.dataset.feature_only_data().corr()
         df_corr_org = df_corr.copy(deep=True)
 

@@ -14,27 +14,27 @@ def run_cluster(argv):
     dataset_path = argv[1]
     output_path = argv[2]
     experiment_name = argv[3]
-    exploration_list = eval(argv[4])
-    plot_list = eval(argv[5])
-    class_label = argv[6]
-    instance_label = argv[7] if argv[7] != "None" else None
-    match_label = argv[8] if argv[8] != "None" else None
-    n_splits = int(argv[9])
-    partition_method = argv[10]
-    ignore_features = None if argv[11] == "None" else eval(argv[11])
-    categorical_features = None if argv[12] == "None" else eval(argv[12])
-    top_features = int(argv[13])
-    categorical_cutoff = int(argv[14])
-    sig_cutoff = float(argv[15])
-    featureeng_missingness = float(argv[16])
-    cleaning_missingness = float(argv[17])
-    correlation_removal_threshold = float(argv[18])
-    random_state = None if argv[19] == "None" else int(argv[19])
+    exclude_eda_output = argv[4].split(',')
+    exclude_eda_output = [x.strip() for x in exclude_eda_output]
+    class_label = argv[5]
+    instance_label = argv[6] if argv[6] != "None" else None
+    match_label = argv[7] if argv[7] != "None" else None
+    n_splits = int(argv[8])
+    partition_method = argv[9]
+    ignore_features = None if argv[10] == "None" else eval(argv[10])
+    categorical_features = None if argv[11] == "None" else eval(argv[11])
+    top_features = int(argv[12])
+    categorical_cutoff = int(argv[13])
+    sig_cutoff = float(argv[14])
+    featureeng_missingness = float(argv[15])
+    cleaning_missingness = float(argv[16])
+    correlation_removal_threshold = float(argv[17])
+    random_state = None if argv[18] == "None" else int(argv[18])
 
     dataset = Dataset(dataset_path, class_label, match_label, instance_label)
     eda_obj = DataProcess(dataset, output_path + '/' + experiment_name,
                           ignore_features,
-                          categorical_features, exploration_list, plot_list,
+                          categorical_features, exclude_eda_output,
                           categorical_cutoff, sig_cutoff, featureeng_missingness,
                           cleaning_missingness, correlation_removal_threshold, partition_method, n_splits,
                           random_state)

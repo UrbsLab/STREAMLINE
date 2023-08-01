@@ -44,7 +44,7 @@ class DataProcessRunner:
 
     """
 
-    def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
+    def __init__(self, data_path, output_path, experiment_name, exclude_eda_output=None,
                  class_label="Class", instance_label=None, match_label=None, n_splits=10, partition_method="Stratified",
                  ignore_features=None, categorical_features=None, quantitative_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
@@ -97,19 +97,34 @@ class DataProcessRunner:
         self.cleaning_missingness = cleaning_missingness
         self.correlation_removal_threshold = correlation_removal_threshold
         self.top_features = top_features
+        self.exclude_eda_output = exclude_eda_output
+
+        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots']
+
+        exploration_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+        plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+
+        if exclude_eda_output is not None:
+            for x in exclude_eda_output:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown EDA exclusion option " + str(x))
+            if 'describe_csv' in exclude_eda_output:
+                exploration_list.remove("Describe")
+                plot_list.remove("Describe")
+            if 'univariate_plots' in exclude_eda_output:
+                plot_list.remove("Univariate Analysis")
+            if 'correlation_plots' in exclude_eda_output:
+                plot_list.remove("Feature Correlation")
+
         self.exploration_list = exploration_list
         self.plot_list = plot_list
+
         self.n_splits = n_splits
         self.partition_method = partition_method
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
         self.show_plots = show_plots
-
-        if self.exploration_list is None or self.exploration_list == []:
-            self.explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
-        if self.plot_list is None or self.plot_list == []:
-            self.plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         self.random_state = random_state
         self.sig_cutoff = sig_cutoff
         try:
@@ -145,11 +160,13 @@ class DataProcessRunner:
                     if self.run_cluster == "LSFOld":
                         self.submit_lsf_cluster_job(dataset_path)
                         continue
-                    dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label) #Ryan - dataset loading has to take place on individual compute nodes (bare minimum can be running on head node for cluster parallelization)
+                    dataset = Dataset(dataset_path, self.class_label, self.match_label, self.instance_label)
+                    # Ryan - dataset loading has to take place on individual compute nodes
+                    # (bare minimum can be running on head node for cluster parallelization)
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,
-                                          self.exploration_list, self.plot_list,
+                                          self.exclude_eda_output,
                                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                                           self.cleaning_missingness, self.correlation_removal_threshold,
                                           self.partition_method, self.n_splits,
@@ -211,7 +228,7 @@ class DataProcessRunner:
         metadata['Match Label'] = self.match_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features
-        metadata['Specified Quantitative Features'] = self.quantitative_features 
+        metadata['Specified Quantitative Features'] = self.quantitative_features
         metadata['CV Partitions'] = self.n_splits
         metadata['Partition Method'] = self.partition_method
         metadata['Categorical Cutoff'] = self.categorical_cutoff
@@ -229,7 +246,7 @@ class DataProcessRunner:
         pickle_out.close()
 
     def get_cluster_params(self, dataset_path):
-        cluster_params = [dataset_path, self.output_path, self.experiment_name, None, None,
+        cluster_params = [dataset_path, self.output_path, self.experiment_name, ''.join(self.exclude_eda_output),
                           self.class_label, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method, self.ignore_features, self.categorical_features,
                           self.quantitative_features, self.top_features,

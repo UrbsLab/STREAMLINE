@@ -131,7 +131,7 @@ class ReplicateJob(Job):
 
         eda = DataProcess(rep_data, self.full_path, ignore_features=self.ignore_features,
                           categorical_features=categorical_variables, quantitative_features=quantitative_variables,
-                          explorations=[], plots=[],
+                          exclude_eda_output=None,
                           categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
                           random_state=self.random_state, show_plots=self.show_plots)
 
