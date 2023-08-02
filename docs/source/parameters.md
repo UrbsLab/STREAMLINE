@@ -8,57 +8,58 @@ The quick guide below distinguishes essential from non-essential run parameters 
 
 ### Essential Parameters (Phase 1-9)
 
-| Command-line Parameter    | Config File Parameter         | Notebook Parameter                | Default    |
-|---------------------------|-------------------------------|-----------------------------------|------------|
-| --data-path               | [dataset_path](#dataset_path)                  | data_path                         | no default |
-| --out-path                | [output_path](#output_path)                   | output_path                       | no default |
-| --exp-name                | [experiment_name](#experiment_name)               | experiment_name                   | no default |
-| --class-label             | [class_label](#class_label)                   | class_label                       | 'Class'    |
-| --inst-label              | [instance_label](#instance_label)                | instance_label                    | None       |
-| --match-label             | [match_label](#match_label)                   | match_label                       | None       |
-| --fi                      | [ignore_features_path](#ignore_features_path)          | ignore_features                   | None       |
-| --cf                      | categorical_feature_path      | categorical_feature_headers       | None       |
-| --qf                      | quantitative_feature_path     | quantitiative_feature_headers     | None       |
-| --rep-path                | rep_data_path                 | rep_data_path                     | no default |
-| --dataset                 | dataset_for_rep               | dataset_for_rep                   | no default |
-| --config                  | NA                            | NA                                | no default |
-| --do-till-report or --dtr | do_till_report                | NA                                | False      |
-| --do-eda                  | do_eda                        | NA                                | False      |
-| --do-dataprep             | do_dataprep                   | NA                                | False      |
-| --do-feat-imp             | do_feat_imp                   | NA                                | False      |
-| --do-feat-sel             | do_feat_sel                   | NA                                | False      |
-| --do-model                | do_model                      | NA                                | False      |
-| --do-stats                | do_stats                      | NA                                | False      |
-| --do-compare-dataset      | do_compare_dataset            | NA                                | False      |
-| --do-report               | do_report                     | NA                                | False      |
-| --do-replicate            | do_replicate                  | NA                                | False      |
-| --do-rep-report           | do_rep_report                 | NA                                | False      |
-| --do-cleanup              | do_cleanup                    | NA                                | False      |
-| NA                        | NA                            | applyToReplication                | True       |
-| NA                        | NA                            | demo_run                          | True       |
-| NA                        | NA                            | use_data_prompt (Colab)           | True       |
+| Command-line Parameter    | Config File Parameter                                   | Notebook Parameter                           | Default    |
+|---------------------------|---------------------------------------------------------|----------------------------------------------|------------|
+| --data-path               | [dataset_path](#dataset_path)                           | data_path                                    | no default |
+| --out-path                | [output_path](#output_path)                             | output_path                                  | no default |
+| --exp-name                | [experiment_name](#experiment_name)                     | experiment_name                              | no default |
+| --class-label             | [class_label](#class_label)                             | class_label                                  | 'Class'    |
+| --inst-label              | [instance_label](#instance_label)                       | instance_label                               | None       |
+| --match-label             | [match_label](#match_label)                             | match_label                                  | None       |
+| --fi                      | [ignore_features_path](#ignore_features_path)           | ignore_features                              | None       |
+| --cf                      | [categorical_feature_path](#categorical_feature_path)   | categorical_feature_headers                  | None       |
+| --qf                      | [quantitative_feature_path](#quantitative_feature_path) | quantitiative_feature_headers                | None       |
+| --rep-path                | [rep_data_path](#rep_data_path)                         | rep_data_path                                | no default |
+| --dataset                 | [dataset_for_rep](#dataset_for_rep)                     | dataset_for_rep                              | no default |
+| [--config](#--config)                  | NA                                         | NA                                           | no default |
+| --do-till-report or --dtr | [do_till_report](#do_till_report)                       | NA                                           | False      |
+| --do-eda                  | [do_eda](#do_eda)                                       | NA                                           | False      |
+| --do-dataprep             | [do_dataprep](#do_dataprep)                             | NA                                           | False      |
+| --do-feat-imp             | [do_feat_imp](#do_feat_imp)                             | NA                                           | False      |
+| --do-feat-sel             | [do_feat_sel](#do_feat_sel)                             | NA                                           | False      |
+| --do-model                | [do_model](#do_model)                                   | NA                                           | False      |
+| --do-stats                | [do_stats](#do_stats)                                   | NA                                           | False      |
+| --do-compare-dataset      | [do_compare_dataset](#do_compare_dataset)               | NA                                           | False      |
+| --do-report               | [do_report](#do_report)                                 | NA                                           | False      |
+| --do-replicate            | [do_replicate](#do_replicate)                           | NA                                           | False      |
+| --do-rep-report           | [do_rep_report](#do_rep_report)                         | NA                                           | False      |
+| --do-cleanup              | [do_cleanup](#do_cleanup)                               | NA                                           | False      |
+| NA                        | NA                                                      | [applyToReplication](#applyToReplication)    | True       |
+| NA                        | NA                                                      | [demo_run](#demo_run)                        | True       |
+| NA                        | NA                                                      | [use_data_prompt](#use_data_prompt) (Colab)  | True       |
 
 ### Non-Essential Parameters 
 #### General Parameters (Phase 1)
 
-| Command-line Parameter    | Config File Parameter         | Notebook Parameter                | Default      |
-|---------------------------|-------------------------------|-----------------------------------|--------------|
-| --cv                      | cv_partitions                 | n_splits                          | 10           |
-| --part                    | partition_method              | partition_method                  | 'Stratified' |
-| --cat-cutoff              | categorical_cutoff            | categorical_cutoff                | 10           |
-| --sig                     | sig_cutoff                    | sig_cutoff                        | 0.05         |
-| --rand-state              | random_state                  | random_state                      | 42           |
-| --verbose                 | verbose                       | NA                                | False        |
+| Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
+|---------------------------|-------------------------------------------|-----------------------------------|--------------|
+| --cv                      | [cv_partitions](#cv_partitions)           | n_splits                          | 10           |
+| --part                    | [partition_method](#partition_method)     | partition_method                  | 'Stratified' |
+| --cat-cutoff              | [categorical_cutoff](#categorical_cutoff) | categorical_cutoff                | 10           |
+| --sig                     | [sig_cutoff](#sig_cutoff)                 | sig_cutoff                        | 0.05         |
+| --rand-state              | [random_state](#random_state)             | random_state                      | 42           |
+| --verbose                 | [verbose](#verbose)                       | NA                                | False        |
 
 #### Data Processing Parameters (Phase 1)
 
-| Command-line Parameter    | Config File Parameter         | Notebook Parameter                | Default    |
-|---------------------------|-------------------------------|-----------------------------------|------------|
-| --feat_miss               | featureeng_missingness        | featureeng_missingness            | 0.5        |
-| --clean_miss              | cleaning_missingness          | cleaning_missingness              | 0.5        |
-| --corr_thresh             | correlation_removal_threshold | correlation_removal_threshold     | 0.8        |
-| --export-fc               | export_feature_correlations   | UPDATE                            | True       |
-| --export-up               | export_univariate_plots       | UPDATE                            | True       |
+| Command-line Parameter    | Config File Parameter                                            | Notebook Parameter                | Default    |
+|---------------------------|------------------------------------------------------------------|-----------------------------------|------------|
+| --exclude-eda-output      | [exclude_eda_output](#exclude_eda_output)                        | exclude_eda_output                | None       |
+| --top-uni-feature         | [top_uni_features](#top_uni_features)                            | top_uni_features                  | 20         |
+| --feat_miss               | [featureeng_missingness](#featureeng_missingness)                | featureeng_missingness            | 0.5        |
+| --clean_miss              | [cleaning_missingness](#cleaning_missingness)                    | cleaning_missingness              | 0.5        |
+| --corr_thresh             | [correlation_removal_threshold](#correlation_removal_threshold)  | correlation_removal_threshold     | 1.0        |
+
 
 #### Scaling and Imputation Parameters (Phase 2)
 
@@ -66,7 +67,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 |------------------------|-----------------------|-----------------------------|---------|
 | --scale                | scale_data            | scale_data                  | True    |
 | --impute               | impute_data           | impute_data                 | True    |
-| --multi-impute         | multi_impute'         | multi_impute                | True    |
+| --multi-impute         | multi_impute          | multi_impute                | True    |
 | --over-cv              | overwrite_cv          | overwrite_cv                | True    |
 
 #### Feature Importance Estimation Parameters (Phase 3)
@@ -75,7 +76,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 |------------------------|-----------------------|-----------------------------------------------|---------|
 | --do-mi                | do_mutual_info        | do_mutual_info                                | True    |
 | --do-ms                | do_multisurf          | do_multisurf                                  | True    |
-| --use-turf             | use_turf'             | use_TURF                                      | False   |
+| --use-turf             | use_turf              | use_TURF                                      | False   |
 | --turf-pct             | turf_pct              | TURF_pct                                      | 0.5     |
 | --inst-sub             | instance_subset       | instance_subset                               | 2000    |
 | --n-jobs               | n_jobs                | cores                                         | 1       |
@@ -274,6 +275,21 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Format:** [Command Line Argument] just use flag (i.e. `--do-cleanup`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 
+#### applyToReplication
+* **Description:** a notebook-specific parameter indicating whether to include running phase 8 (i.e. Replication) 
+* **Format:** (bool) 
+* **Values:** `True` or `False`
+
+#### demo_run
+* **Description:** a notebook-specific parameter indicating whether to automatically run the notebook on the [demonstration datasets](data.md#demonstration-data)
+* **Format:** (bool) 
+* **Values:** `True` or `False`
+
+#### use_data_prompt
+* **Description:** a notebook-specific parameter that activates a notebook prompt to gather essential run parameter information directly from the user rather than have them manually update code cells
+* **Format:** (bool) 
+* **Values:** `True` or `False`
+
 ### Non-Essential Parameters 
 #### General Parameters (Phase 1)
 
@@ -308,58 +324,78 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Tips:** make sure to use the same value for `random_state` in a separate run along with the same datasets and run parameters to obtain reproducible pipeline results
 
 ##### verbose
-* **Description:** boolean flag telling STREAMLINE to run output file cleanup (optional)
-* **Format:**
-* **Values:** 
-* **Tips:** 
-
-
-* **Description:** boolean flag telling STREAMLINE to run output file cleanup (optional)
-* **Format:** [Command Line Argument] just use flag (i.e. `--do-cleanup`), [Configuration File] (bool) 
+* **Description:** boolean flag telling STREAMLINE to send all print output and warnings to the command line output
+* **Format:** [Command Line Argument] just use flag (i.e. `--verbose`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 
-#####
+#### Data Processing Parameters (Phase 1)
+
+##### exclude_eda_output
+* **Description:** allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 1
+* **Format:** 
+    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. `['describe','univariate_plots','correlation_plots']`
+    2. for command line arguments: provide as a list of comma separated values with no spaces, e.g. `describe,univariate_plots,correlation_plots`
+* **Values:** `None`, or [`'describe'`, `'univariate_plots'`, or `'correlation_plots'`] - provided in format above
+    * `describe` - don't run or output the set of standard pandas functions (i.e. `Describe()`, `Dtypes()`, and `nunique()`) as `.csv` files
+    * `univariate_plots` - don't output individual univariate analysis plots illustrating features vs. outcome (by default STREAMLINE outputs these plots for any feature with a significant univariate association based on `sig_cutoff`)
+    * `correlation_plots` - don't output feature correlation heatmaps for the 'initial' or 'processed' data EDA
+
+##### top_uni_features
+* **Description:** number of most significant features to report in the notebook and PDF summary
+* **Format:** (int)
+* **Values:** an integer between 10 and 40 is recommended
+
+##### featureeng_missingness
+* **Description:** the proportion of missing values within a feature (*above which*) a new binary categorical feature is generated that indicates if the value for an instance was missing or not
+* **Format:** (float)
+* **Values:** (0.0-1.0)
+* **Tips:** this parameter controls automated feature engineering of a new 'missingness' feature, generated for another pre-existing feature in the 'target dataset'. It's useful for identifying the potentially predictive value of any feature who's missingness is not completely at random (NCAR)
+
+##### cleaning_missingness
+* **Description:** the proportion of missing values, within a feature or instance, (*at which*) the given feature or instance will be automatically cleaned (i.e. removed) from the processed 'target dataset'
+* **Format:** (float)
+* **Values:** (0.0-1.0)
+* **Tips:** this parameter controls automated data cleaning based on feature or instance 'missingness'. STREAMLINE will first remove features with high missingness, then subsequently remove any instances with missingness over this proportion.
+
+##### correlation_removal_threshold
+* **Description:** the (pearson) feature correlation at which one out of a pair of features is randomly removed from the processed 'target dataset'
+* **Format:** (float)
+* **Values:** (0.0-1.0)
+* **Tips:** this parameter controls automated data cleaning based on feature correlation. The safest setting (to avoid missing predictive information) is the default of 1.0 (i.e. perfect correlation between two features). Note: STREAMLINE interprets this parameter as both a positive and negative correlation threshold.
+
+#### Scaling and Imputation Parameters (Phase 2)
+
+##### scale_data
 * **Description:** 
 * **Format:**
 * **Values:** 
 * **Tips:** 
 
-#####
+##### impute_data
 * **Description:** 
 * **Format:**
 * **Values:** 
 * **Tips:** 
-| Command-line Parameter    | Config File Parameter         | Notebook Parameter                | Default      |
-|---------------------------|-------------------------------|-----------------------------------|--------------|
-| --cv                      | cv_partitions                 | n_splits                          | 10           |
-| --part                    | partition_method              | partition_method                  | 'Stratified' |
-| --cat-cutoff              | categorical_cutoff            | categorical_cutoff                | 10           |
-| --sig                     | sig_cutoff                    | sig_cutoff                        | 0.05         |
-| --rand-state              | random_state                  | random_state                      | 42           |
-| --verbose                 | verbose                       | NA                                | False        |
+
+##### multi_impute
+* **Description:** 
+* **Format:**
+* **Values:** 
+* **Tips:** 
 
 
-### General Parameters------------------------------------------------------------OLD OLD OLD---------------------------
+##### m
+* **Description:** 
+* **Format:**
+* **Values:** 
+* **Tips:** 
 
-| Command-line Parameter    | Config File Parameter | Description                                                      | Default    |
-|---------------------------|-----------------------|------------------------------------------------------------------|------------|
-| --out-path                | output_path           | path to output directory                                         | no default |
-| --exp-name                | experiment_name       | name of experiment output folder (no spaces)                     | no default |
-| --config                  | NA                    | flag to load config file instead of using commandline parameters | no default |
-| --verbose                 | verbose               | give output to command line                                      | False      |
-| --do-till-report or --dtr | do_till_report        | flag to do all phases                                            | False      |
-| --do-eda                  | do_eda                | flag to eda                                                      | False      |
-| --do-dataprep             | do_dataprep           | flag to data preprocessing                                       | False      |
-| --do-feat-imp             | do_feat_imp           | flag to feature importance                                       | False      |
-| --do-feat-sel             | do_feat_sel           | flag to feature selection                                        | False      |
-| --do-model                | do_model              | flag to run models                                               | False      |
-| --do-stats                | do_stats              | flag to run statistics                                           | False      |
-| --do-compare-dataset      | do_compare_dataset    | flag to run compare dataset dataset                              | False      |
-| --do-report               | do_report             | flag to run report dataset                                       | False      |
-| --do-replicate            | do_replicate          | flag to run replication dataset                                  | False      |
-| --do-rep-report           | do_rep_report         | flag to run replication report                                   | False      |
-| --do-cleanup              | do_cleanup            | flag to run cleanup                                              | False      |
-
+| Command-line Parameter | Config File Parameter | Notebook Parameter          | Default |
+|------------------------|-----------------------|-----------------------------|---------|
+| --scale                | scale_data            | scale_data                  | True    |
+| --impute               | impute_data           | impute_data                 | True    |
+| --multi-impute         | multi_impute'         | multi_impute                | True    |
+| --over-cv              | overwrite_cv          | overwrite_cv                | True    |
 
 ### Phase Specific Parameters
 
