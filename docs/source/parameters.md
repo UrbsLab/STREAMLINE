@@ -34,6 +34,9 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --do-replicate            | do_replicate                  | NA                                | False      |
 | --do-rep-report           | do_rep_report                 | NA                                | False      |
 | --do-cleanup              | do_cleanup                    | NA                                | False      |
+| NA                        | NA                            | applyToReplication                | True       |
+| NA                        | NA                            | demo_run                          | True       |
+| NA                        | NA                            | use_data_prompt (Colab)           | True       |
 
 ### Non-Essential Parameters 
 #### General Parameters (Phase 1)
@@ -136,106 +139,204 @@ This section will go into greater depth for each run parameter, primarily using 
 
 ### Essential Parameters (Phase 1-9)
 #### dataset_path
-* Description: path to the folder containing one or more 'target' datasets to be analyzed that meet dataset [formatting requirements](data.md#input-data-requirements)
-* Format: (str), e.g. '/content/STREAMLINE/data/DemoData'
-* Values: must be a valid folder-path
-* Tips: STREAMLINE automatically detects the number of 'target datasets' in this folder and will run a complete analysis on each, comparing dataset performance in phase 7
+* **Description:** path to the folder containing one or more 'target datasets' to be analyzed that meet dataset [formatting requirements](data.md#input-data-requirements)
+* **Format:** (str), e.g. `'/content/STREAMLINE/data/DemoData'`
+* **Values:** must be a valid folder-path
+* **Tips:** STREAMLINE automatically detects the number of 'target datasets' in this folder and will run a complete analysis on each, comparing dataset performance in phase 7
 
 #### output_path  
-* Description: path to an output folder where STREAMLINE will save the experiment folder (containing all output files)
-* Format: (str), e.g. '/content/DemoOutput'
-* Values: must be a valid folder-path, however the lowest level of the folder (e.g. DemoOutput) does not already have to exist, and will be automatically created if it does not
-* Tips: When running multiple STREAMLINE experiments, it's convenient to leave this parameter the same and just update `experiment_name`
+* **Description:** path to an output folder where STREAMLINE will save the experiment folder (containing all output files)
+* **Format:** (str), e.g. `'/content/DemoOutput'`
+* **Values:** must be a valid folder-path, however the lowest level of the folder (e.g. DemoOutput) does not already have to exist, and will be automatically created if it does not
+* **Tips:** When running multiple STREAMLINE experiments, it's convenient to leave this parameter the same and just update `experiment_name`
 
 #### experiment_name
-* Description: a unique name for the current STREAMLINE experiment output folder that will be created within `output_path`
-* Format: (str), e.g. 'demo_experiment'
-* Values: any string value name (avoid spaces)
-* Tips: a short, unique, and descriptive name is encouraged
+* **Description:** a unique name for the current STREAMLINE experiment output folder that will be created within `output_path`
+* **Format:** (str), e.g. `'demo_experiment'`
+* **Values:** any string value name (avoid spaces)
+* **Tips:** a short, unique, and descriptive name is encouraged
 
 #### class_label
-* Description: the name of the class/outcome column found in the dataset header
-* Format: (str), e.g. 'Class'
-* Values: the case-sensitive name used in the dataset to identify the outcome labels column
+* **Description:** the name of the class/outcome column found in the dataset header
+* **Format:** (str), e.g. `'Class'`
+* **Values:** the case-sensitive name used in the dataset to identify the outcome labels column
 
 #### instance_label  
-* Description: the name of the instance ID column that may (or may not) be included in the dataset
-* Format: (str), e.g. 'InstanceID'
-* Values: `None`, or the case-sensitive name used in the dataset to identify the instance ID column (if present)
-* Tips: having an instance ID column in the data allows users to later identify model predictions for specific instances in the dataset, as well as reverse-engineer instance subgroups in the dataset downstream using the ExSTraCS modeling algorithm's capability to detect and characterize heterogeneous associations. This may not be necessesary for most users. 
+* **Description:** the name of the instance ID column that may (or may not) be included in the dataset
+* **Format:** (str), e.g. `'InstanceID'`
+* **Values:** `None`, or the case-sensitive name used in the dataset to identify the instance ID column (if present)
+* **Tips:** having an instance ID column in the data allows users to later identify model predictions for specific instances in the dataset, as well as reverse-engineer instance subgroups in the dataset downstream using the ExSTraCS modeling algorithm's capability to detect and characterize heterogeneous associations. This may not be necessesary for most users. 
 
 #### match_label
-* Description: the name of the match/group ID column that can be included in a dataset to keep instances with the same match label together within the same CV partition
-* Format: (str), e.g. 'MatchID'
-* Values: `None`, or the case-sensitive name used in the dataset to identify the match/group ID column (if present)
-* Tips: having a match/group ID column in the data allows users to apply machine learning modeling to datasets where instances with different outcomes have been matched based on other covariates that the user wants to account for (e.g. age, sex, race, etc)
+* **Description:** the name of the match/group ID column that can be included in a dataset to keep instances with the same match label together within the same CV partition
+* **Format:** (str), e.g. `'MatchID'`
+* **Values:** `None`, or the case-sensitive name used in the dataset to identify the match/group ID column (if present)
+* **Tips:** having a match/group ID column in the data allows users to apply machine learning modeling to datasets where instances with different outcomes have been matched based on other covariates that the user wants to account for (e.g. age, sex, race, etc)
 
 #### ignore_features_path  
-* Description: a list of feature names for STREAMLINE to immediately drop from the target datasets
-* Format: 
-    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. \['IgnoredFeature1','IgnoredFeature2']
-    2. for command line arguments: provide a (str) path to a `.csv` file including a row of feature names that can be found in any of the 'target datasets', e.g. '/content/STREAMLINE/data/MadeUp/ignoreFeat.csv'
-* Values: `None`, or (for either format) should include case-sensitive feature names found in at least one of the 'target datasets'
-* Tips: useful for easily dropping features found in the datasets that users may wish to exclude if those features might lead to data leakage, or for other data quality reasons
+* **Description:** a list of feature names for STREAMLINE to immediately drop from the target datasets
+* **Format:** 
+    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. `['IgnoredFeature1','IgnoredFeature2']`
+    2. for command line arguments: provide a (str) path to a `.csv` file including a row of feature names that can be found in any of the 'target datasets', e.g. `'/content/STREAMLINE/data/MadeUp/ignoreFeat.csv'`
+* **Values:** `None`, or (for either format) should include case-sensitive feature names found in at least one of the 'target datasets'
+* **Tips:** useful for easily dropping features found in the datasets that users may wish to exclude if those features might lead to data leakage, or for other data quality reasons
 
 #### categorical_feature_path
-* Description: a list of feature names for STREAMLINE to explicitly treat as categorical feature types
-* Format:
-    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. \['Feature1','Feature 7']
-    2. for command line arguments: provide a (str) path to a `.csv` file including a row of feature names that can be found in any of the 'target datasets', e.g. '/content/STREAMLINE/data/DemoFeatureTypes/hcc_cat_feat.csv'
-* Values: `None`, or (for either format) should include case-sensitive feature names found in at least one of the 'target datasets'
-* Tips: 
+* **Description:** a list of feature names for STREAMLINE to explicitly treat as categorical feature types
+* **Format:**
+    1. for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the 'target datasets', e.g. `['Feature1','Feature7']`
+    2. for command line arguments: provide a (str) path to a `.csv` file including a row of feature names that can be found in any of the 'target datasets', e.g. `'/content/STREAMLINE/data/DemoFeatureTypes/hcc_cat_feat.csv'`
+* **Values:** `None`, or (for either format) should include case-sensitive feature names found in at least one of the 'target datasets'
+* **Tips:** 
     * When specifying `categorical_feature_path` feature names and leaving `quantiative_feature_path = None` all other features will be automatically treated as quanatiative
     * When specifying `quantiative_feature_path` feature names and leaving `categorical_feature_path = None` all other features will be automatically treated as categorical
     * When specifying feature names for both `categorical_feature_path` and `quantiative_feature_path`, any features in the data not specified by one of theses lists will have it's feature type determined automatically using [categorical_cutoff](#categorical_cutoff)
     * Note: any text-valued features in a dataset will automatically be numerically encoded and treated as categorical features (overriding any other user specifications)
 
 #### quantitative_feature_path
-* Description: a list of feature names for STREAMLINE to explicitly treat as quantitative feature types
+* **Description:** a list of feature names for STREAMLINE to explicitly treat as quantitative feature types
     * All other aspects of this parameter are the same as for [categorical_feature_path](#categorical_feature_path)
 
 #### rep_data_path
-* Description: 
-* Format:
-* Values: 
-* Tips: 
+* **Description:** path to the folder containing one or more 'replication datasets' to be evaluated using previously trained models for a specific 'target dataset' (see [data formatting requirements](data.md#input-data-requirements))
+* **Format:** (str), e.g. `'/content/STREAMLINE/data/DemoRepData'`
+* **Values:** must be a valid folder-path
+* **Tips:** STREAMLINE automatically detects the number of 'replication datasets' in this folder and will run a complete evaluation on each.
 
 #### dataset_for_rep
-* Description: 
-* Format:
-* Values: 
-* Tips: 
+* **Description:** path to the individual 'target dataset' file used to train the models which you want to evaluate with the above 'replication datasets' (see [data formatting requirements](data.md#input-data-requirements))
+* **Format:** (str), e.g. `'/content/STREAMLINE/data/DemoData/hcc-data_example_custom.csv'`
+* **Values:** must be a valid file-path
+* **Tips:** STREAMLINE's replication phase is set up to evaluate all models trained from a single 'target datasets' at once using one or more replication datasets, specific to that 'target dataset'. The replication phase can be run multiple times, each for a new 'target dataset', and it's own respective 'replication dataset(s)'.
 
-#### 
-* Description: 
-* Format:
-* Values: 
-* Tips: 
+#### --config
+* **Description:** path to the configuration file used to run STREAMLINE from the command line using a configuration file [locally](running.md#using-a-configuration-file-locally) or on a [cluster](running.md#using-a-configuration-file-cluster)
+* **Format:** (str), e.g. `run_configs/local.cfg`
+* **Values:** must be a valid file-path to a properly formatted configuration file
 
-| --match-label             | match_label                   | match_label                       | None       |
-| --fi                      | ignore_features_path          | ignore_features                   | None       |
-| --cf                      | categorical_feature_path      | categorical_feature_headers       | None       |
-| --qf                      | quantitative_feature_path     | quantitiative_feature_headers     | None       |
-| --rep-path                | rep_data_path                 | rep_data_path                     | no default |
-| --dataset                 | dataset_for_rep               | dataset_for_rep                   | no default |
-| --config                  | NA                            | NA                                | no default |
-| --do-till-report or --dtr | do_till_report                | NA                                | False      |
-| --do-eda                  | do_eda                        | NA                                | False      |
-| --do-dataprep             | do_dataprep                   | NA                                | False      |
-| --do-feat-imp             | do_feat_imp                   | NA                                | False      |
-| --do-feat-sel             | do_feat_sel                   | NA                                | False      |
-| --do-model                | do_model                      | NA                                | False      |
-| --do-stats                | do_stats                      | NA                                | False      |
-| --do-compare-dataset      | do_compare_dataset            | NA                                | False      |
-| --do-report               | do_report                     | NA                                | False      |
-| --do-replicate            | do_replicate                  | NA                                | False      |
-| --do-rep-report           | do_rep_report                 | NA                                | False      |
-| --do-cleanup              | do_cleanup                    | NA                                | False      |
+#### do_till_report 
+* **Description:** boolean flag telling STREAMLINE to automatically run all phases excluding phase 8 (i.e. replication), and part of phase 9 (i.e. PDF report for replication)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-till-report`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_eda
+* **Description:** boolean flag telling STREAMLINE to run phase 1 (i.e. EDA and Processing)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-eda`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_dataprep 
+* **Description:** boolean flag telling STREAMLINE to run phase 2 (i.e. Imputation and Scaling)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-dataprep`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_feat_imp
+* **Description:** boolean flag telling STREAMLINE to run phase 3 (i.e. Feature Importance Estimation)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-feat-imp`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_feat_sel
+* **Description:** boolean flag telling STREAMLINE to run phase 4 (i.e. Feature Selection)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-feat-sel`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_model
+* **Description:** boolean flag telling STREAMLINE to run phase 5 (i.e. Modeling)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-model`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_stats
+* **Description:** boolean flag telling STREAMLINE to run phase 6 (i.e. Post-Analysis)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-stats`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_compare_dataset
+* **Description:** boolean flag telling STREAMLINE to run phase 7 (i.e. Compare Datasets)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-compare-dataset`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_report
+* **Description:** boolean flag telling STREAMLINE to run phase 9 (i.e. Summary Report) specific to phases 1-7
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_replicate
+* **Description:** boolean flag telling STREAMLINE to run phase 8 (i.e. Replication) specific to phases 1-7
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-replicate`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_rep_report
+* **Description:** boolean flag telling STREAMLINE to run phase 9 (i.e. Summary Report) specific to phase 8
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-rep-report`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### do_cleanup
+* **Description:** boolean flag telling STREAMLINE to run output file cleanup (optional)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-cleanup`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+### Non-Essential Parameters 
+#### General Parameters (Phase 1)
+
+##### cv_partitions
+* **Description:** *k*, the number of *k*-fold cross validation training/testing data partitions to create and apply throughout pipeline
+* **Format:** (int)
+* **Values:** an integer between `3` and `10` is recommended
+* **Tips:** smaller values will yield shorter STREAMLINE run times, but training datasets will have a smaller number of instances
+
+##### partition_method 
+* **Description:** the cross validation strategy used
+* **Format:** (str)
+* **Values:** `'Stratified'`, `'Random'`, or `'Group'`
+* **Tips:** `'Stratified'` is generally recommended in order to keep class balance as similar as possible within respective partitions, however `'Group'` can be selected when `match_label` has been specified to keep instances with the same match/group ID together within a respective partition
+
+##### categorical_cutoff 
+* **Description:** the number of unique values observed for a given feature in a 'target dataset' after which a variable is automatcially considered to be quantitative
+* **Format:** (int)
+* **Values:** an integer between `3` and `10` is generally recommended, but should be set in a dataset-specific manner
+* **Tips:** this parameter will only be used if the user hasn't specifically indicated which features to treat as categorical or quantitative using `categorical_feature_path` and/or `quantiative_feature_path`, respectively. However depending on the specific dataset, users can sometimes conveniently set this parameter to correctly assign variable types, e.g. if all categorical features in the dataset have fewer than 5 unique values, but quantitative ones all have more than 10 unique values, setting `categorical_cutoff = 7` will make correct feature type assignments automatically.
+
+##### sig_cutoff 
+* **Description:** the statistical significance cutoff used throughout the pipeline used in deciding whether to run pair-wise non-parametric statistical comparisons following group comparisons, and for identifying significant results in output files with a '*'
+* **Format:** (float)
+* **Values:** a value <= 0.05 is recommended
+* **Tips:** Note: STREAMLINE does not currently automatically account for multiple testing - users should take this into consideration themselves
+
+##### random_state 
+* **Description:** sets a specific random seed for the STREAMLINE run (important for pipeline reproducibility)
+* **Format:** (int) 
+* **Values:** any positive integer value is fine
+* **Tips:** make sure to use the same value for `random_state` in a separate run along with the same datasets and run parameters to obtain reproducible pipeline results
+
+##### verbose
+* **Description:** boolean flag telling STREAMLINE to run output file cleanup (optional)
+* **Format:**
+* **Values:** 
+* **Tips:** 
 
 
+* **Description:** boolean flag telling STREAMLINE to run output file cleanup (optional)
+* **Format:** [Command Line Argument] just use flag (i.e. `--do-cleanup`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
 
+#####
+* **Description:** 
+* **Format:**
+* **Values:** 
+* **Tips:** 
 
-
+#####
+* **Description:** 
+* **Format:**
+* **Values:** 
+* **Tips:** 
+| Command-line Parameter    | Config File Parameter         | Notebook Parameter                | Default      |
+|---------------------------|-------------------------------|-----------------------------------|--------------|
+| --cv                      | cv_partitions                 | n_splits                          | 10           |
+| --part                    | partition_method              | partition_method                  | 'Stratified' |
+| --cat-cutoff              | categorical_cutoff            | categorical_cutoff                | 10           |
+| --sig                     | sig_cutoff                    | sig_cutoff                        | 0.05         |
+| --rand-state              | random_state                  | random_state                      | 42           |
+| --verbose                 | verbose                       | NA                                | False        |
 
 
 ### General Parameters------------------------------------------------------------OLD OLD OLD---------------------------
