@@ -36,13 +36,13 @@ def process_params(params):
         if params['algorithms'] == 'All':
             params['algorithms'] = None
 
-    if params['ignore_features_path'] == '':
+    if params['ignore_features_path'] == '' or params['ignore_features_path'] == 'None':
         params['ignore_features_path'] = None
-    if params['categorical_feature_path'] == '':
+    if params['categorical_feature_path'] == '' or params['categorical_feature_path'] == 'None':
         params['categorical_feature_path'] = None
-    if params['match_label'] == '':
+    if params['match_label'] == '' or params['match_label'] == 'None':
         params['match_label'] = None
-    if params['instance_label'] == '':
+    if params['instance_label'] == '' or params['instance_label'] == 'None':
         params['instance_label'] = None
     if params['run_cluster'] == "False":
         params['run_cluster'] = False

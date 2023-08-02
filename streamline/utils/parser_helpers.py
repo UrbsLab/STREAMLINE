@@ -10,7 +10,12 @@ def comma_sep_choices(choices):
     """
 
     def splitarg(arg):
-        values = arg.split(',')
+        if arg == 'None':
+            return None
+        elif ',' not in arg:
+            return [arg, ]
+        else:
+            values = arg.split(',')
         for value in values:
             if value not in choices:
                 raise argparse.ArgumentTypeError(
@@ -120,11 +125,16 @@ def parse_eda(argv, params_dict=None):
     parser.add_argument('--corr_thresh', dest='correlation_removal_threshold', type=float,
                         help='correlation removal threshold',
                         default=0.8)
-    parser.add_argument('--export-fc', dest='export_feature_correlations', type=str2bool, nargs='?',
-                        help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
-    parser.add_argument('--export-up', dest='export_univariate_plots', type=str2bool, nargs='?',
-                        help='export univariate analysis plots (note: univariate analysis still output by default)',
-                        default=True)
+    # parser.add_argument('--export-fc', dest='export_feature_correlations', type=str2bool, nargs='?',
+    #                     help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
+    # parser.add_argument('--export-up', dest='export_univariate_plots', type=str2bool, nargs='?',
+    #                     help='export univariate analysis plots (note: univariate analysis still output by default)',
+    #                     default=True)
+    parser.add_argument('--exclude-eda-output', dest='exclude_eda_output',
+                        type=comma_sep_choices(['describe_csv', 'univariate_plots', 'correlation_plots']),
+                        help='comma seperated list of eda outputs to exclude',
+                        default='None')
+
     parser.add_argument('--rand-state', dest='random_state', type=int,
                         help='"Dont Panic" - sets a specific random seed for reproducible results', default=42)
     return update_dict_from_parser(argv, parser, params_dict)
@@ -276,16 +286,21 @@ def parse_stats(argv, params_dict=None):
     parser = argparse.ArgumentParser(description="",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Defaults available - Phase 6
-    parser.add_argument('--plot-ROC', dest='plot_roc', type=str,
-                        help='Plot ROC curves individually for each algorithm including all CV results and averages',
-                        default='True')
-    parser.add_argument('--plot-PRC', dest='plot_prc', type=str,
-                        help='Plot PRC curves individually for each algorithm including all CV results and averages',
-                        default='True')
-    parser.add_argument('--plot-box', dest='plot_metric_boxplots', type=str,
-                        help='Plot box plot summaries comparing algorithms for each metric', default='True')
-    parser.add_argument('--plot-FI_box', dest='plot_fi_box', type=str,
-                        help='Plot feature importance boxplots and histograms for each algorithm', default='True')
+    # parser.add_argument('--plot-ROC', dest='plot_roc', type=str,
+    #                     help='Plot ROC curves individually for each algorithm including all CV results and averages',
+    #                     default='True')
+    # parser.add_argument('--plot-PRC', dest='plot_prc', type=str,
+    #                     help='Plot PRC curves individually for each algorithm including all CV results and averages',
+    #                     default='True')
+    # parser.add_argument('--plot-box', dest='plot_metric_boxplots', type=str,
+    #                     help='Plot box plot summaries comparing algorithms for each metric', default='True')
+    # parser.add_argument('--plot-FI_box', dest='plot_fi_box', type=str,
+    #                     help='Plot feature importance boxplots and histograms for each algorithm', default='True')
+    parser.add_argument('--exclude-plots', dest='exclude_plots',
+                        type=comma_sep_choices(['plot_ROC', 'plot_PRC', 'plot_FI_box', 'plot_metric_boxplots']),
+                        help='comma seperated list of plots to exclude '
+                             'possible options plot_ROC, plot_PRC, plot_FI_box, plot_metric_boxplots',
+                        default='None')
     parser.add_argument('--metric-weight', dest='metric_weight', type=str,
                         help='ML model metric used as weight in composite FI plots (only supports balanced_accuracy '
                              'or roc_auc as options) Recommend setting the same as primary_metric if possible.',
@@ -310,14 +325,19 @@ def parse_replicate(argv, params_dict=None):
     # Defaults available
     parser.add_argument('--rep-export-fc', dest='rep_export_feature_correlations', type=str2bool, nargs='?',
                         help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
-    parser.add_argument('--rep-plot-ROC', dest='rep_plot_roc', type=str2bool, nargs='?',
-                        help='Plot ROC curves individually for each algorithm including all CV results and averages',
-                        default=True)
-    parser.add_argument('--rep-plot-PRC', dest='rep_plot_prc', type=str2bool, nargs='?',
-                        help='Plot PRC curves individually for each algorithm including all CV results and averages',
-                        default=True)
-    parser.add_argument('--rep-plot-box', dest='rep_plot_metric_boxplots', type=str2bool, nargs='?',
-                        help='Plot box plot summaries comparing algorithms for each metric', default=True)
+    # parser.add_argument('--rep-plot-ROC', dest='rep_plot_roc', type=str2bool, nargs='?',
+    #                     help='Plot ROC curves individually for each algorithm including all CV results and averages',
+    #                     default=True)
+    # parser.add_argument('--rep-plot-PRC', dest='rep_plot_prc', type=str2bool, nargs='?',
+    #                     help='Plot PRC curves individually for each algorithm including all CV results and averages',
+    #                     default=True)
+    # parser.add_argument('--rep-plot-box', dest='rep_plot_metric_boxplots', type=str2bool, nargs='?',
+    #                     help='Plot box plot summaries comparing algorithms for each metric', default=True)
+    parser.add_argument('--exclude-rep-plots', dest='exclude_rep_plots',
+                        type=comma_sep_choices(['plot_ROC', 'plot_PRC', 'plot_metric_boxplots']),
+                        help='comma seperated list of plots to exclude '
+                             'possible options plot_ROC, plot_PRC, plot_FI_box, plot_metric_boxplots',
+                        default='None')
     return update_dict_from_parser(argv, parser, params_dict)
 
 
