@@ -246,7 +246,8 @@ class DataProcessRunner:
         pickle_out.close()
 
     def get_cluster_params(self, dataset_path):
-        cluster_params = [dataset_path, self.output_path, self.experiment_name, ''.join(self.exclude_eda_output),
+        exclude_param = ','.join(self.exclude_eda_output) if self.exclude_eda_output else None
+        cluster_params = [dataset_path, self.output_path, self.experiment_name, exclude_param,
                           self.class_label, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method, self.ignore_features, self.categorical_features,
                           self.quantitative_features, self.top_features,

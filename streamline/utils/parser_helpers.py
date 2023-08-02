@@ -334,7 +334,8 @@ def parse_replicate(argv, params_dict=None):
     # parser.add_argument('--rep-plot-box', dest='rep_plot_metric_boxplots', type=str2bool, nargs='?',
     #                     help='Plot box plot summaries comparing algorithms for each metric', default=True)
     parser.add_argument('--exclude-rep-plots', dest='exclude_rep_plots',
-                        type=comma_sep_choices(['plot_ROC', 'plot_PRC', 'plot_metric_boxplots']),
+                        type=comma_sep_choices(['plot_ROC', 'plot_PRC',
+                                                'plot_metric_boxplots', 'feature_correlations']),
                         help='comma seperated list of plots to exclude '
                              'possible options plot_ROC, plot_PRC, plot_FI_box, plot_metric_boxplots',
                         default='None')

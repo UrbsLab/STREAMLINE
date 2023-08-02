@@ -224,7 +224,6 @@ def run(params):
                                       match_label=params['match_label'],
                                       algorithms=params['algorithms'], load_algo=True,
                                       exclude=params['exclude'],
-                                      export_feature_correlations=params['rep_export_feature_correlations'],
                                       exclude_plots=params['exclude_rep_plots'],
                                       run_cluster=params['run_cluster'],
                                       queue=params['queue'],
@@ -257,8 +256,6 @@ if __name__ == '__main__':
 
     # NOTE: All keys must be small
     config_dict = parser_function(sys.argv)
-
-    print(config_dict)
 
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(str(config_dict['output_path']))

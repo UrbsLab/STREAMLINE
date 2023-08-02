@@ -30,8 +30,11 @@ def run_cluster(argv):
     sig_cutoff = float(argv[8]) if argv[8] != "None" else None
     metric_weight = argv[9] if argv[9] != "None" else None
     scale_data = eval(argv[10])
-    exclude_options = argv[11].split(',')
-    exclude_options = [x.strip() for x in exclude_options]
+    if argv[11] != 'None':
+        exclude_options = argv[11].split(',')
+        exclude_options = [x.strip() for x in exclude_options]
+    else:
+        exclude_options = None
     show_plots = eval(argv[15])
 
     job_obj = StatsJob(full_path, algorithms, class_label, instance_label, scoring_metric,

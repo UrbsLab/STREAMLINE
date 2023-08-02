@@ -14,8 +14,11 @@ def run_cluster(argv):
     dataset_path = argv[1]
     output_path = argv[2]
     experiment_name = argv[3]
-    exclude_eda_output = argv[4].split(',')
-    exclude_eda_output = [x.strip() for x in exclude_eda_output]
+    if argv[4] != 'None':
+        exclude_eda_output = argv[4].split(',')
+        exclude_eda_output = [x.strip() for x in exclude_eda_output]
+    else:
+        exclude_eda_output = None
     class_label = argv[5]
     instance_label = argv[6] if argv[6] != "None" else None
     match_label = argv[7] if argv[7] != "None" else None

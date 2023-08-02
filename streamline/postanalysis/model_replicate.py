@@ -29,8 +29,7 @@ class ReplicateJob(Job):
     """
 
     def __init__(self, dataset_filename, dataset_for_rep, full_path, class_label, instance_label, match_label,
-                 ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3,
-                 export_feature_correlations=True, exclude_plots=None,
+                 ignore_features=None, algorithms=None, exclude=("XCS", "eLCS"), cv_partitions=3, exclude_plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
         super().__init__()
@@ -55,7 +54,7 @@ class ReplicateJob(Job):
             for algorithm in algorithms:
                 self.algorithms.append(is_supported_model(algorithm))
 
-        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_metric_boxplots']
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_metric_boxplots', 'feature_correlations']
         if exclude_plots is not None:
             for x in exclude_plots:
                 if x not in known_exclude_options:
@@ -68,7 +67,7 @@ class ReplicateJob(Job):
         self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
         self.exclude_plots = exclude_plots
 
-        self.export_feature_correlations = export_feature_correlations
+        self.export_feature_correlations = 'feature_correlations' not in exclude_plots
         self.show_plots = show_plots
         self.cv_partitions = cv_partitions
 

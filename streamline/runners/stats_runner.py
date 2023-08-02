@@ -159,9 +159,10 @@ class StatsRunner:
         pickle_out.close()
 
     def get_cluster_params(self, full_path, len_cv):
+        exclude_param = ','.join(self.exclude_plots) if self.exclude_plots else None
         cluster_params = [full_path, None, self.class_label, self.instance_label, self.scoring_metric,
                           len_cv, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
-                          ','.join(self.exclude_plots),
+                          exclude_param,
                           self.show_plots]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
