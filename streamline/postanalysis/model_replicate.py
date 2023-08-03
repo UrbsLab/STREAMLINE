@@ -236,7 +236,7 @@ class ReplicateJob(Job):
 
         try:
             with open(self.experiment_path + '/' + self.train_name +
-                      '/exploratory/post_processed_vars.pickle', 'rb') as infile:
+                      '/exploratory/post_processed_features.pickle', 'rb') as infile:
                 post_processed_vars = pickle.load(infile)
         except Exception as e:
             raise e
@@ -305,7 +305,7 @@ class ReplicateJob(Job):
 
         # Pickle list of processed feature names
         with open(self.full_path + "/replication/" + self.apply_name +
-                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+                  '/exploratory/post_processed_features.pickle', 'wb') as outfile:
             pickle.dump(list(eda.dataset.data.columns), outfile)
         with open(self.full_path + "/replication/" + self.apply_name +
                   '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
