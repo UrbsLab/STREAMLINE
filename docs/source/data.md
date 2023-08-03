@@ -9,24 +9,24 @@ Here we specify the formatting requirements for datasets when running STREAMLINE
     * Do not leave placeholder values for missing values such as 99, -99, or text other than 'NA'.
 4. Dataset files should include a header that gives column names.
 5. Data columns should only include the following (column order does not matter):
-    * Outcome/Class Label (i.e. the dependant variable) - column indicated by `class_label`
-    * Instance Label (i.e. unique identifiers for each instance/row in the dataset) \[Optional] - column indicated by `instance_label`
-    * Match Label (i.e. an instance group identifier used to keep instances of the same group together during k-fold CV using the group stratification option) column indicated by `match_label`
-    * Features (i.e. independant variables) - all other columns in dataset are assumed to be features (except those excluded using `ignore_features_path`)
+    * Outcome/Class Label (i.e. the dependant variable) - column indicated by [class_label](parameters.md#class-label)
+    * Instance Label (i.e. unique identifiers for each instance/row in the dataset) \[Optional] - column indicated by [instance_label](parameters.md#instance-label)
+    * Match Label (i.e. an instance group identifier used to keep instances of the same group together during k-fold CV using the group stratification option) column indicated by [match_label](parameters.md#match-label)
+    * Features (i.e. independant variables) - all other columns in dataset are assumed to be features (except those excluded using [ignore_features_path](parameters.md#ignore-features-path))
 6. The outcome/class column includes only two possible values (i.e. a binary outcome) [Note: STREAMLINE will soon be expanded to allow for multi-class and quantiative outcomes]
-7. If multiple target datasets are being analyzed they must each have the same `class_label` (e.g. 'Class'), and (if present), the same `instance_label` (e.g. 'ID') and `match_label` (e.g. 'Match_ID'). The same is true for any 'replication datasets' (if present) when using Phase 8. 
+7. If multiple target datasets are being analyzed they must each have the same [class_label](parameters.md#class-label) (e.g. `Class`), and (if present), the same [instance_label](parameters.md#instance-label) (e.g. 'ID') and [match_label](parameters.md#match-label) (e.g. 'Match_ID'). The same is true for any 'replication datasets' (if present) when using Phase 8. 
 
 ***
 ### Additional Considerations
 #### Specifying Feature Types
-Users are strongly encouraged to specify which features should be treated as categorical or quantitative using `quantitative_feature_path` or `categorical_feature_path`, or setting the `categorical_cutoff` to a value that will correctly assign feature types automatically (i.e. if all features in the dataset have 3 possible values and `categorical_cutoff` is set to 4, all features would be treated as categorical). If multiple target datasets are being analyzed, then `quantitative_feature_path` or `categorical_feature_path` should include the names of all features to be treated as categorical vs. quanatative across all datasets. 
+Users are strongly encouraged to specify which features should be treated as categorical or quantitative using [quantitative_feature_path](parameters.md#quantitative-feature-path) or [categorical_feature_path](parameters.md#categorical-feature-path), or setting the [categorical_cutoff](parameters.md#categorical-cutoff) to a value that will correctly assign feature types automatically (i.e. if all features in the dataset have 3 possible values and [categorical_cutoff](parameters.md#categorical-cutoff) is set to 4, all features would be treated as categorical). If multiple target datasets are being analyzed, then [quantitative_feature_path](parameters.md#quantitative-feature-path) or [categorical_feature_path](parameters.md#categorical-feature-path) should include the names of all features to be treated as categorical vs. quanatative across all datasets. 
 
 #### Text-valued Features
 STREAMLINE allows datasets to be loaded that have text-valued (i.e. non-numeric) entries. However be aware of how the pipeline will treat different columns:
 * Outcome Label - if text, will be numerically encoded (0 or 1) based on alphabetical order 
 * Instance Label - is commonly non-numeric and is not changed by STREAMLINE
 * Match Label - is commonly non-numeric and is not changed by STREAMLINE
-* Features - if text, will be numerically encoded based on alphabetical order and will automatically be treated as categorical features (overriding any user specification with `quantitative_feature_path` or `categorical_feature_path`)
+* Features - if text, will be numerically encoded based on alphabetical order and will automatically be treated as categorical features (overriding any user specification with [quantitative_feature_path](parameters.md#quantitative-feature-path) or [categorical_feature_path](parameters.md#categorical-feature-path))
 
 #### Previously Unseen Categorical Values in Replication Data
 While 'new' unique values observed in the quantitative features of any replication data are not of concern, those in categorical features require some additional decisions, in particular when encoding categorical features with one-hot-encoding. For example, imagine there is a hypothetical feature in the dataset for 'hair color'. In the original target datset, values for this hypothetical categorical features include \[black, brown, blond, grey]. However a given replication dataset, also includes the previously unseen value of 'red' for that same feature. One-hot encoding normally creates a new column/feature for each categorical value, however a column for 'red' would not have existed in processed dataset, or any of the trained models. STREAMLINE addresses this in one of two ways in processing replication data. If the new unique value ocurrs in a categorical feature with...
@@ -62,7 +62,7 @@ STREAMLINE does not currently tackle any feature extraction aspects of data scie
 Traditionally, good feature engineering requires domain knowledge about the target problem or dataset. STREAMLINE automates a couple basic feature engineering elements, however we encourage users to consider other strategies to engineer features (in a manner that does not look at the outcome label). A simple example of this might be taking features representing start and end dates of a drug treatment and engineering a feature that indicates the time duration. 
 
 #### Feature Transformation
-While STREAMLINE uses a standard scalar to transform features in this pipeline, many other transformations are possible (for various reasons). Users that wish to apply these alternative transformations should do so before running STREAMLINE and then optionally turn of the standard scaling with `scale_data`.
+While STREAMLINE uses a standard scalar to transform features in this pipeline, many other transformations are possible (for various reasons). Users that wish to apply these alternative transformations should do so before running STREAMLINE and then optionally turn of the standard scaling with [scale_data](parameters.md#scale-data).
 
 ***
 ## Demonstration Data
