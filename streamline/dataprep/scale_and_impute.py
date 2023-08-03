@@ -82,7 +82,7 @@ class ScaleAndImpute(Job):
         del data_test  # memory cleanup
         # Load previously identified list of categorical variables
         # and create an index list to identify respective columns
-        file = open(self.experiment_path + '/' + self.dataset_name + '/exploratory/categorical_variables.pickle', 'rb')
+        file = open(self.experiment_path + '/' + self.dataset_name + '/exploratory/categorical_features.pickle', 'rb')
         self.categorical_variables = pickle.load(file)
         # Impute Missing Values in training and testing data if specified by user
         if self.impute_data:

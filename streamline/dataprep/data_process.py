@@ -334,18 +334,18 @@ class DataProcess(Job):
 
         # Pickle feature type lists  #Ryan - where/how do these get used?
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_categorical_variables.pickle', 'wb') as outfile:
+                  '/exploratory/initial/initial_categorical_features.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_quantitative_variables.pickle', 'wb') as outfile:
+                  '/exploratory/initial/initial_quantitative_features.pickle', 'wb') as outfile:
             pickle.dump(self.quantitative_features, outfile)
 
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_categorical_variables.csv', 'w') as outfile:
+                  '/exploratory/initial/initial_categorical_features.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(self.categorical_features)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_quantitative_variables.csv', 'w') as outfile:
+                  '/exploratory/initial/initial_quantitative_features.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(self.quantitative_features)
 
@@ -403,12 +403,12 @@ class DataProcess(Job):
 
         # Pickle list of feature names to be treated as categorical variables
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+                  '/exploratory/categorical_features.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
 
         # Pickle list of processed feature names
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+                  '/exploratory/post_processed_features.pickle', 'wb') as outfile:
             pickle.dump(list(self.dataset.data.columns), outfile)
         # with open(self.experiment_path + '/' + self.dataset.name +
         #          '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
@@ -611,7 +611,7 @@ class DataProcess(Job):
                 logging.info('\t Missing_' + feat)
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/engineered_variables.pickle', 'wb') as outfile:
+                      '/exploratory/engineered_features.pickle', 'wb') as outfile:
                 pickle.dump(high_missingness_features, outfile)
 
             with open(self.experiment_path + '/' + self.dataset.name +
@@ -641,7 +641,7 @@ class DataProcess(Job):
             for feat in removed_variables:
                 logging.info('\t' + feat)
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/removed_variables.pickle', 'wb') as outfile:
+                      '/exploratory/removed_features.pickle', 'wb') as outfile:
                 pickle.dump(removed_variables, outfile)
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/Missingness_Feature_Cleaning.csv', 'w') as outfile:
@@ -710,7 +710,7 @@ class DataProcess(Job):
             self.categorical_features += self.one_hot_features
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/one_hot_variables.pickle', 'wb') as outfile:
+                      '/exploratory/one_hot_feature.pickle', 'wb') as outfile:
                 pickle.dump(self.one_hot_features, outfile)
         else:
             logging.info("No non-binary categorical features, skipping categorical encoding")

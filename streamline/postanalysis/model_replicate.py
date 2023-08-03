@@ -130,9 +130,9 @@ class ReplicateJob(Job):
 
         # Load previously identified list of categorical
         # variables and create an index list to identify respective columns
-        file = open(self.full_path + '/exploratory/initial/initial_categorical_variables.pickle', 'rb')
+        file = open(self.full_path + '/exploratory/initial/initial_categorical_features.pickle', 'rb')
         categorical_variables = pickle.load(file)
-        file = open(self.full_path + '/exploratory/initial/initial_quantitative_variables.pickle', 'rb')
+        file = open(self.full_path + '/exploratory/initial/initial_quantitative_features.pickle', 'rb')
         quantitative_variables = pickle.load(file)
 
         rep_data.categorical_variables = categorical_variables
@@ -205,7 +205,7 @@ class ReplicateJob(Job):
         # Read all engineered feature names
         try:
             with open(self.experiment_path + '/' + self.train_name +
-                      '/exploratory/engineered_variables.pickle', 'rb') as infile:
+                      '/exploratory/engineered_features.pickle', 'rb') as infile:
                 eda.engineered_features = pickle.load(infile)
         except FileNotFoundError:
             eda.engineered_features = list()
@@ -221,7 +221,7 @@ class ReplicateJob(Job):
         try:
             # Removing dropped features
             with open(self.experiment_path + '/' + self.train_name +
-                      '/exploratory/removed_variables.pickle', 'rb') as infile:
+                      '/exploratory/removed_features.pickle', 'rb') as infile:
                 removed_features = list(pickle.load(infile))
             for feat in removed_features:
                 if feat in eda.categorical_features:
@@ -300,7 +300,7 @@ class ReplicateJob(Job):
 
         # Pickle list of feature names to be treated as categorical variables
         with open(self.full_path + "/replication/" + self.apply_name +
-                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+                  '/exploratory/categorical_features.pickle', 'wb') as outfile:
             pickle.dump(eda.categorical_features, outfile)
 
         # Pickle list of processed feature names

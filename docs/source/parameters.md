@@ -89,6 +89,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --max-feat             | [max_features_to_keep](#max-features-to-keep)  | max_features_to_keep                          | 2000    |
 | --export-scores        | [export_scores](#export-scores)                | export_scores                                 | True    |
 | --top-fi-features      | [top_fi_features](#top-fi-features)            | top_fi_features                               | 40      |
+| --over-cv-feat         | [overwrite_cv_feat](#overwrite-cv-feat)        | overwrite_cv_feat                             | True    |
 
 ### Modeling Parameters (Phase 5)
  Command-line Parameter  | Config File Parameter                                 | Notebook Parameter                 | Default                   |
@@ -400,10 +401,10 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Tips:** leaving to the default value of `True` is recommended but not always neccessary depending on what algorithms a user wishes to run (see [Imputation and Scaling](pipeline.md#Phase-2-imputation-and-scaling))
 
 #### overwrite_cv
-* **Description:** indicates whether or not to overwrite earlier versions of CV (training and testing) datasets with newly imputed and scaled CV datasets. This parameter is also applied after phase 4 (feature selection)
+* **Description:** indicates whether or not to overwrite the phase 1 version of CV (training and testing) datasets with newly imputed and scaled CV datasets
 * **Format:** (bool)
 * **Values:** `True` or `False`
-* **Tips:** `True` will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however `False` allows users to view intermediary CV datasets following phase one data processing and CV partitioning, as wel as intermediary CV datasets after additional feature selection
+* **Tips:** `True` will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however `False` allows users to view intermediary CV datasets following phase one data processing and CV partitioning
 
 ***
 ### Feature Importance Estimation Parameters (Phase 3)
@@ -468,6 +469,12 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** number of top scoring features (mean over CV runs) to illustrate in the above feature importance estimation bar plots generated when `export_scores = True` 
 * **Format:** (int)
 * **Values:** an integer between `10` and `40` is recommended
+
+#### overwrite_cv_feat
+* **Description:** indicates whether or not to overwrite the phase 2 version of CV (training and testing) datasets with newly feature selected CV datasets
+* **Format:** (bool)
+* **Values:** `True` or `False`
+* **Tips:** `True` will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however `False` allows users to view intermediary CV datasets following phase two imputation and scaling
 
 ***
 ### Modeling Parameters (Phase 5)

@@ -114,6 +114,8 @@ We will begin by explaining the files you see when first opening this folder. Al
 * `Numerical_Encoding_Map` - documents the numerical encoding mapping for any binary text-valued features in the dataset
 * `NumUniqueDataset` - output from standard pandas `nunique()` function
 * `OriginalFeatureNames` - documents all original feature names from the 'target dataset' prior to any processing
+* `processed_categorical_features` - 
+* `processed_quantitative_features` - 
 * `ProcessedFeatureNames` - documents all feature names for the processed 'target dataset'
 
 ##### exploratory (pickle)
