@@ -673,7 +673,7 @@ computing resources.
 
 However, having a [timeout](#timeout) value specified helps ensure STREAMLINE run completion within a reasonable time frame.
 
-### Reducing runtime
+### Reducing Runtime
 Conducting a more effective ML analysis typically demands a much larger amount of computing power and runtime. However, we provide general guidelines here for limiting overall runtime of a STREAMLINE experiment.
 1. Run on a fewer number of [datasets](#dataset_path) at once.
 2. Run using fewer ML [algorithms](#algorithms) at once:
