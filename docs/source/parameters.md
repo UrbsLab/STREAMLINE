@@ -114,7 +114,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --metric-weight          | [metric_weight](#metric-weight)                  | metric_weight           | 'balanced_accuracy' |
 | --top-model-fi-features  | [top_model_fi_features](#top-model-fi-features)  | top_model_fi_features   | 40                  |
 
-### Compare Datasets Parameters (Phase 7)
+### Compare Data Parameters (Phase 7)
 There are currently no run parameters to adjust for this phase.
 
 ### Replication Parameters (Phase 8)
@@ -126,7 +126,7 @@ There are currently no run parameters to adjust for this phase.
 ### Summary Report Parameters (Phase 9)
 There are currently no run parameters to adjust for this phase.
 
-### Cleanup
+### Cleanup Parameters
 
 | Command-line Parameter | Config File Parameter      | Notebook Parameter | Default |
 |------------------------|----------------------------|--------------------|---------|
@@ -607,7 +607,7 @@ This section will go into greater depth for each run parameter, primarily using 
     * `plot_PRC` - don't output PRC plots individually for each algorithm including all CV results and averages
     * `plot_metric_boxplots` - don't output evaluation metric boxplots for each metric comparing algorithm performance
 
-### Cleanup
+### Cleanup Parameters
 
 #### del_time
 * **Description:** boolean flag telling STREAMLINE to delete individual runtime files from the output experiment folder
