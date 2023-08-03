@@ -32,7 +32,7 @@ configuration itself. STREAMLINE adopts a fixed series of purposefully selected 
 in line with data science best practices. It seeks to automate all domain generalizable
 elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges.
 This tool can be run or utilized in a number of ways to suite a variety experience levels and
-levels of problem/data complexity.
+levels of problem/data complexity. Furthermore, STREAMLINE is currently the only autoML pipeline tool that includes [learning classifier system (LCS)](https://www.youtube.com/watch?v=CRge_cZ2cJc) rule-based ML modeling algorithms for interpretable modeling in data with complex associations. This includes an LCS algorithm developed by our lab ([ExSTraCS](https://github.com/UrbsLab/scikit-ExSTraCS)), that has been specifically implemented to address the challenges of biomedical data analysis.
 
 ***
 ## What does STREAMLINE automate?

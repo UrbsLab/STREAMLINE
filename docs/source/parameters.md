@@ -6,7 +6,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 * Run parameters without default values are incidated with 'no default'. 
 * Run parameters that are not used in one of the run modes are indicated with 'NA'.
 
-### Essential Parameters (Phase 1-9)
+### Essential Parameters (Phases 1-9)
 
 | Command-line Parameter    | Config File Parameter                                   | Notebook Parameter                           | Default    |
 |---------------------------|---------------------------------------------------------|----------------------------------------------|------------|
@@ -38,8 +38,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | NA                        | NA                                                      | [demo_run](#demo-run)                        | True       |
 | NA                        | NA                                                      | [use_data_prompt](#use-data-prompt) (Colab)  | True       |
 
-### Non-Essential Parameters 
-#### General Parameters (Phase 1)
+### General Parameters (Phase 1)
 
 | Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
 |---------------------------|-------------------------------------------|-----------------------------------|--------------|
@@ -48,10 +47,8 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --cat-cutoff              | [categorical_cutoff](#categorical-cutoff) | categorical_cutoff                | 10           |
 | --sig                     | [sig_cutoff](#sig-cutoff)                 | sig_cutoff                        | 0.05         |
 | --rand-state              | [random_state](#random-state)             | random_state                      | 42           |
-| --verbose                 | [verbose](#verbose)                       | NA                                | False        |
-| --logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
 
-#### Data Processing Parameters (Phase 1)
+### Data Processing Parameters (Phase 1)
 
 | Command-line Parameter    | Config File Parameter                                            | Notebook Parameter                | Default    |
 |---------------------------|------------------------------------------------------------------|-----------------------------------|------------|
@@ -62,7 +59,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --corr_thresh             | [correlation_removal_threshold](#correlation-removal-threshold)  | correlation_removal_threshold     | 1.0        |
 
 
-#### Imputation and Scaling Parameters (Phase 2)
+### Imputation & Scaling Parameters (Phase 2)
 
 | Command-line Parameter | Config File Parameter          | Notebook Parameter          | Default |
 |------------------------|--------------------------------|-----------------------------|---------|
@@ -71,7 +68,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --scale                | [scale_data](#scale-data)      | scale_data                  | True    |
 | --over-cv              | [overwrite_cv](#overwrite-cv)  | overwrite_cv                | True    |
 
-#### Feature Importance Estimation Parameters (Phase 3)
+### Feature Importance Estimation Parameters (Phase 3)
 
 | Command-line Parameter | Config File Parameter                | Notebook Parameter                            | Default |
 |------------------------|--------------------------------------|-----------------------------------------------|---------|
@@ -82,7 +79,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --inst-sub             | [instance_subset](#instance-subset)  | instance_subset                               | 2000    |
 | --n-jobs               | [n_jobs](#n-jobs)                    | cores                                         | 1       |
 
-#### Feature Selection Parameters (Phase 4)
+### Feature Selection Parameters (Phase 4)
 
 | Command-line Parameter | Config File Parameter                          | Notebook Parameter                            | Default |
 |------------------------|------------------------------------------------|-----------------------------------------------|---------|
@@ -91,7 +88,7 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --export-scores        | [export_scores](#export-scores)                | export_scores                                 | True    |
 | --top-fi-features      | [top_fi_features](#top-fi-features)            | top_fi_features                               | 40      |
 
-#### Modeling Parameters (Phase 5)
+### Modeling Parameters (Phase 5)
  Command-line Parameter  | Config File Parameter                                 | Notebook Parameter                 | Default                   |
 |------------------------|-------------------------------------------------------|------------------------------------|---------------------------|
 | --algorithms           | [algorithms](#algorithms)                             | algorithms                         | None                      |
@@ -110,33 +107,33 @@ The quick guide below distinguishes essential from non-essential run parameters 
 | --lcs-timeout          | [lcs_timeout](#lcs-timeout)                           | lcs_timeout                        | 1200                      |
 | --model-resubmit       | [model_resubmit](#model-resubmit)                     | NA                                 | False                     |
 
-#### Post-Analysis Parameters (Phase 6)
+### Post-Analysis Parameters (Phase 6)
 | Command-line Parameter   | Config File Parameter                            | Notebook Parameter      | Default             |
 |--------------------------|--------------------------------------------------|-------------------------|---------------------|
 | --exclude-plots          | [exclude_plots](#exclude-plots)                  | exclude_plots           | None                |
 | --metric-weight          | [metric_weight](#metric-weight)                  | metric_weight           | 'balanced_accuracy' |
 | --top-model-fi-features  | [top_model_fi_features](#top-model-fi-features)  | top_model_fi_features   | 40                  |
 
-#### Compare Datasets Parameters (Phase 7)
+### Compare Datasets Parameters (Phase 7)
 There are currently no run parameters to adjust for this phase.
 
-#### Replication Parameters (Phase 8)
+### Replication Parameters (Phase 8)
 
 | Command-line Parameter | Config File Parameter                    | Notebook Parameter  | Default |
 |------------------------|------------------------------------------|---------------------|---------|
 | --exclude-rep-plots    | [exclude_rep_plots](#exclude-rep-plots)  | exclude_rep_plots   | None    |
 
-#### Summary Report (Phase 9)
+### Summary Report Parameters (Phase 9)
 There are currently no run parameters to adjust for this phase.
 
-#### Cleanup
+### Cleanup
 
 | Command-line Parameter | Config File Parameter      | Notebook Parameter | Default |
 |------------------------|----------------------------|--------------------|---------|
 | --del-time             | [del_time](#del-time)      | del_time           | True    |
 | --del-old-cv           | [del_old_cv](#del-old-cv)  | del_old_cv         | True    |
 
-#### Multiprocessing Commands
+### Multiprocessing Parameters
 
 | Command-line Parameter | Config File Parameter                | Notebook Parameter  | Default |
 |------------------------|--------------------------------------|---------------------|---------|
@@ -145,11 +142,18 @@ There are currently no run parameters to adjust for this phase.
 | --res-mem              | [reserved_memory](#reserved-memory)  | NA                  | 4       |
 | --queue                | [queue](#queue)                      | NA                  | "defq"  |
 
-## Details
+### Logging Parameters
+| Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
+|---------------------------|-------------------------------------------|-----------------------------------|--------------|
+| --verbose                 | [verbose](#verbose)                       | NA                                | False        |
+| --logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
+
+## Parameter Details
 This section will go into greater depth for each run parameter, primarily using the configuration file parameter name to identify each. 
 * *Parameters identified as (str) format should be entered with single quotation marks within notebooks, or when using a configuration file, but without them when using command line arguments (CLA).* 
 
 ### Essential Parameters (Phase 1-9)
+
 #### dataset_path
 * **Description:** path to the folder containing one or more 'target datasets' to be analyzed that meet dataset [formatting requirements](data.md#input-data-requirements)
 * **Format:** (str), e.g. `'/content/STREAMLINE/data/DemoData'`
@@ -301,52 +305,41 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Format:** (bool) 
 * **Values:** `True` or `False`
 
-### Non-Essential Parameters 
-#### General Parameters (Phase 1)
+### General Parameters (Phase 1)
 
-##### cv_partitions
+#### cv_partitions
 * **Description:** *k*, the number of *k*-fold cross validation training/testing data partitions to create and apply throughout pipeline
 * **Format:** (int)
 * **Values:** an integer between `3` and `10` is recommended
 * **Tips:** smaller values will yield shorter STREAMLINE run times, but training datasets will have a smaller number of instances
 
-##### partition_method 
+#### partition_method 
 * **Description:** the cross validation strategy used
 * **Format:** (str)
 * **Values:** `'Stratified'`, `'Random'`, or `'Group'`
 * **Tips:** `'Stratified'` is generally recommended in order to keep class balance as similar as possible within respective partitions, however `'Group'` can be selected when `match_label` has been specified to keep instances with the same match/group ID together within a respective partition
 
-##### categorical_cutoff 
+#### categorical_cutoff 
 * **Description:** the number of unique values observed for a given feature in a 'target dataset' after which a variable is automatcially considered to be quantitative
 * **Format:** (int)
 * **Values:** an integer between `3` and `10` is generally recommended, but should be set in a dataset-specific manner
 * **Tips:** this parameter will only be used if the user hasn't specifically indicated which features to treat as categorical or quantitative using `categorical_feature_path` and/or `quantiative_feature_path`, respectively. However depending on the specific dataset, users can sometimes conveniently set this parameter to correctly assign variable types, e.g. if all categorical features in the dataset have fewer than 5 unique values, but quantitative ones all have more than 10 unique values, setting `categorical_cutoff = 7` will make correct feature type assignments automatically.
 
-##### sig_cutoff 
+#### sig_cutoff 
 * **Description:** the statistical significance cutoff used throughout the pipeline used in deciding whether to run pair-wise non-parametric statistical comparisons following group comparisons, and for identifying significant results in output files with a '*'
 * **Format:** (float)
 * **Values:** a value <= `0.05` is recommended
 * **Tips:** Note: STREAMLINE does not currently automatically account for multiple testing - users should take this into consideration themselves
 
-##### random_state 
+#### random_state 
 * **Description:** sets a specific random seed for the STREAMLINE run (important for pipeline reproducibility)
 * **Format:** (int) 
 * **Values:** any positive integer value is fine
 * **Tips:** make sure to use the same value for `random_state` in a separate run along with the same datasets and run parameters to obtain reproducible pipeline results
 
-##### verbose
-* **Description:** boolean flag telling STREAMLINE to send all print output and warnings to the command line output
-* **Format:** [Command Line Argument] just use flag (i.e. `--verbose`), [Configuration File] (bool) 
-* **Values:** `True` or `False`
+### Data Processing Parameters (Phase 1)
 
-##### logging_level
-* **Description:** boolean flag telling STREAMLINE what loggin level to use in the command line output
-* **Format:** [Command Line Argument] just use flag (i.e. `--logging-level`), [Configuration File] (bool) 
-* **Values:** `True` or `False`
-
-#### Data Processing Parameters (Phase 1)
-
-##### exclude_eda_output
+#### exclude_eda_output
 * **Description:** allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 1
 * **Format:** 
     1. for notebook or config file modes: provide a (list) of valid options (str) , e.g. `['describe','univariate_plots','correlation_plots']`
@@ -356,119 +349,119 @@ This section will go into greater depth for each run parameter, primarily using 
     * `univariate_plots` - don't output individual univariate analysis plots illustrating features vs. outcome (by default STREAMLINE outputs these plots for any feature with a significant univariate association based on `sig_cutoff`)
     * `correlation_plots` - don't output feature correlation heatmaps for the 'initial' or 'processed' data EDA
 
-##### top_uni_features
+#### top_uni_features
 * **Description:** number of most significant features to report in the notebook and PDF summary
 * **Format:** (int)
 * **Values:** an integer between `10` and `40` is recommended
 
-##### featureeng_missingness
+#### featureeng_missingness
 * **Description:** the proportion of missing values within a feature (*above which*) a new binary categorical feature is generated that indicates if the value for an instance was missing or not
 * **Format:** (float)
 * **Values:** (`0.0` - `1.0`)
 * **Tips:** this parameter controls automated feature engineering of a new 'missingness' feature, generated for another pre-existing feature in the 'target dataset'. It's useful for identifying the potentially predictive value of any feature who's missingness is not completely at random (NCAR)
 
-##### cleaning_missingness
+#### cleaning_missingness
 * **Description:** the proportion of missing values, within a feature or instance, (*at which*) the given feature or instance will be automatically cleaned (i.e. removed) from the processed 'target dataset'
 * **Format:** (float)
 * **Values:** (`0.0` - `1.0`)
 * **Tips:** this parameter controls automated data cleaning based on feature or instance 'missingness'. STREAMLINE will first remove features with high missingness, then subsequently remove any instances with missingness over this proportion.
 
-##### correlation_removal_threshold
+#### correlation_removal_threshold
 * **Description:** the (pearson) feature correlation at which one out of a pair of features is randomly removed from the processed 'target dataset'
 * **Format:** (float)
 * **Values:** (`0.0` - `1.0`)
 * **Tips:** this parameter controls automated data cleaning based on feature correlation. The safest setting (to avoid missing predictive information) is the default of 1.0 (i.e. perfect correlation between two features). Note: STREAMLINE interprets this parameter as both a positive and negative correlation threshold.
 
-#### Imputation and Scaling Parameters (Phase 2)
+### Imputation & Scaling Parameters (Phase 2)
 
-##### impute_data
+#### impute_data
 * **Description:** indicates whether or not to apply missing data imputation to features in the data or not
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** leaving to the default value of `True` is recommended but not always neccessary depending on whether missing data is present in the original datasets or what algorithms a user wishes to run (e.g. ExSTraCS can handle missing values in data)
 
-##### multi_impute
+#### multi_impute
 * **Description:** indicates whether or not to apply multiple imputation using scikit-learn's [IterativeImputer](https://scikit-learn.org/stable/modules/generated/sklearn.impute.IterativeImputer.html) for imputing missing values in quantiative features. Mode imputation is always applied for categorical features.
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** for larger datasets, multiple imputation can run very slowly, and take up alot of disk space in the pickled imputation files that are automatically stored for downstream imputation of replication data or further external application of the models. When `False`, median imputation is instead used for quantiative features.
 
-##### scale_data
+#### scale_data
 * **Description:** indicates whether or not to apply standard scaling to features in the data or not
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** leaving to the default value of `True` is recommended but not always neccessary depending on what algorithms a user wishes to run (see [Imputation and Scaling](pipeline.md#Phase-2-imputation-and-scaling))
 
-##### overwrite_cv
+#### overwrite_cv
 * **Description:** indicates whether or not to overwrite earlier versions of CV (training and testing) datasets with newly imputed and scaled CV datasets. This parameter is also applied after phase 4 (feature selection)
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** `True` will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however `False` allows users to view intermediary CV datasets following phase one data processing and CV partitioning, as wel as intermediary CV datasets after additional feature selection
 
-#### Feature Importance Estimation Parameters (Phase 3)
-##### do_mutual_info
+### Feature Importance Estimation Parameters (Phase 3)
+#### do_mutual_info
 * **Description:** indicates whether or not to run mutual information as a feature importance estimation algorithm (prior to modeling)
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** mutual information is good at detecting univariate association between a given feature and outcome. While we recommend running both feature importance algorithms, users should specify `True` for at least one algorithm.
 
-##### do_multisurf   
+#### do_multisurf   
 * **Description:** indicates whether or not to run MultiSURF as a feature importance estimation algorithm (prior to modeling)
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** MultiSURF is good at detecting both features involved in an interaction and univariate association with outcome. While we recommend running both feature importance algorithms, users should specify `True` for at least one algorithm.
 
-##### use_turf
+#### use_turf
 * **Description:** indicates whether or not to run TuRF, a wrapper algorithm that operates around MultiSURF, improving it's ability to detect feature interactions in data with larger numbers of features
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** using TuRF is strongly recommended in datasets with >10,000 features, but can improve feature importance rankings in datasets with fewer features as well
 
-##### turf_pct
+#### turf_pct
 * **Description:** this parameter currently serves two functions: (1) it determines the propotion of instances removed from consideration during a TuRF iteration, and (2) it dictates the number of TuRF iteractions (where the nubmer of iterations is 1/`turf_pct`)
 * **Format:** (float)
 * **Values:** (`0.01`- `0.5`)
 * **Tips:** setting `turf_pct` to 0.5 will run MultiSURF twice, removing the lowest scoring half of features in the first iteration (and giving them a very low feature importance score), then running MultiSURF again on the remaining features to rescore them. A setting of 0.2 would remove 20% of features each iteration, over 5 iterations. Thus lower values for this parameter will increase run time.
 
-##### instance_subset
+#### instance_subset
 * **Description:** the number of randomly chosen instances in the training data used to use for running MultiSURF
 * **Format:** (int)
 * **Values:** any integer above `500` is recommended, but the default of `2000` seems to be a reasonable trade-off in many cases between run time and performance
 * **Tips:** the MultiSURF algorithm scales quadratically with the number of features in the data, but linearly with the number of features. Thus a dataset with a large number of training instances can make MultiSURF run very slowly. However, MultiSURF does not necessarily need to see all training instances to reasonably estimate feature imporance. If this parameter is set larger than the number of instances in a given training dataset, it will simply use all available training instances.
 
-##### n_jobs
+#### n_jobs
 * **Description:** the number of CPU cores dedicated to running MultiSURF
 * **Format:** (int)
 * **Values:** `-1`, or a positive integer <= the number of cores available on your machine
 * **Tips:** -1 will run MultiSURF on all available cores when run locally
 
-#### Feature Selection Parameters (Phase 4)
+### Feature Selection Parameters (Phase 4)
 
-##### filter_poor_features
+#### filter_poor_features
 * **Description:** indicates whether or not to apply feature selection to the dataset
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** when set to `False` all features will be preserved in the datasets for phase 5 modeling
 
-##### max_features_to_keep
+#### max_features_to_keep
 * **Description:** indicates the maximum number of top scorign features to retain in the datasets prior to phase 5 modeling (based on the scores of the feature importance estimation algorithms, i.e. Mutual Information and MultiSURF)
 * **Format:** (int or `None`)
 * **Values:** any positive integer > `1` is acceptable
 * **Tips:** we have set the default of this parameter to `2000` primarily to limit the computational burden of modeling. Users should use their own judgment in setting this parameter for the dataset/task in hand. When set to `None` (and `filter_poor_features = True`), STREAMLINE will automatically remove any feature that scored <= 0 for each feature importance estimation algorithm run. When set to an integer such as `2000` (and `filter_poor_features = True`), STREAMLINE will first remove any feature that scored <= `0` for each feature importance estimation algorithm run, then alternate between the sets of feature importance rankings keeping the top scoring (non-redundant) features from each algorithm.
 
-##### export_scores 
+#### export_scores 
 * **Description:** indicates whether or not to export barplots for the feature importance estimation algorithms (Mutual Information and MultiSURF) summarizing average feature importance scores over CV training partitions
 * **Format:** (bool)
 * **Values:** `True` or `False`
 
-##### top_fi_features 
+#### top_fi_features 
 * **Description:** number of top scoring features (mean over CV runs) to illustrate in the above feature importance estimation bar plots generated when `export_scores = True` 
 * **Format:** (int)
 * **Values:** an integer between `10` and `40` is recommended
 
-#### Modeling Parameters (Phase 5)
+### Modeling Parameters (Phase 5)
 
-##### algorithms 
+#### algorithms 
 * **Description:** used to specify which machine learning modeling algorithms will be applied
 * **Format:** (list of 'str' values, or `None`)
     1. for notebook or config file modes: provide a (list) of (str) algorithm identifiers, e.g. `['NB','LR','EN','DT','RF','XGB','SVM','ANN','KNN','GP','ExSTraCS]`
@@ -492,7 +485,7 @@ This section will go into greater depth for each run parameter, primarily using 
     * Extended Supervised Tracking Classifier System (ExSTraCS)
 * **Tips:** setting this parameter to `None` will run all algorithms in STREAMLINE with the exception of any algorithms specified within `exclude`. To run a fairly comprehensive subset of algorithms (without running them all), we recommend `['NB','LR','EN','DT','RF','XGB','SVM','ANN','KNN','GP','ExSTraCS]`. Specifying algorithms using this parameter is most convenient when you want to run a small subset of algorithms, e.g. `['NB','LR','DT']`
 
-##### exclude  
+#### exclude  
 * **Description:** used to specify which machine learning modeling algorithms to exclude from analysis 
 * **Format:** (list of 'str' values, or `None`)
     1. for notebook or config file modes: provide a (list) of (str) algorithm identifiers, e.g. `['eLCS','XCS']`
@@ -500,85 +493,85 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** same as for `algorithms` above
 * **Tips:** setting this parameter to `None` just tells STREAMLINE not to exclude any additional algorithms not already specified within `algorithms`. Currently, by default STREAMLINE excludes `eLCS` and `XCS` from an analysis. Specifying algorithms using this parameter is most convenient when you want to exclude a small subset of algorithms, e.g. `['SVM','eLCS','XCS']`.
 
-##### training_subsample 
+#### training_subsample 
 * **Description:**  the number of randomly chosen instances in the training data used to use for training certain longer running algorithms (i.e. XGB,SVM,KN,ANN,LR,eLCS,XCS,ExStraCS)
 * **Format:** (`0`, or another int)
 * **Values:** the default of `0` will use all training data. Otherwise, any positive integer is acceptable.
 * **Tips:** In general, we recommend leaving this parameter to `0`, however some algorithms may take a very long time to run. If you're worried about this recommend setting this parameter to `2000` as a reasonable trade-off in many cases between run time and performance.
 
-##### use_uniform_fi
+#### use_uniform_fi
 * **Description:** indicates whether or not to override any available (modeling-algorithm-specific) model-feature-importance estimation methods, instead using scikit-learn's [permutation importance](https://scikit-learn.org/stable/modules/permutation_importance.html) estimator uniformly for all algorithms
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** when `True`, model feature importance will be estimated in the same way for all models/algorithms. However, when `False` the following algorithms have their own unique strategies of estimating model feature importance, that will be used instead: (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS). Any algorithms without an internal strategy for estimating model feature importance will rely on permuation importance by default.
 
-##### primary_metric
+#### primary_metric
 * **Description:** the evaluation metric used to optimize hyperparameters
 * **Format:** (str)
 * **Values:** We recommend `'balanced_accuracy'`, `'roc_auc'`, or `'f1'` (based on the users needs/priorities), however it can be any available metric identifier from (https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter)
 
-##### metric_direction
+#### metric_direction
 * **Description:** indicates whether the `primary_metric` should be maximized or minimized during hyperparameter optimization
 * **Format:** (str)
 * **Values:** `maximize` or `minimize`
 * **Tips:** For almost all metrics (including `'balanced_accuracy'`, `'roc_auc'`, or `'f1'`), this should be `maximize`
 
-##### n_trials
+#### n_trials
 * **Description:** an [Optuna](https://optuna.org/) parameter controlling the number of hyperparameter optimization trials to be conducted
 * **Format:** (int)
 * **Values:** any positive integer > `1`, (`200` by default)
 * **Tips:** When this parameter is set to a larger value, hyperparameter optimization will take longer to complete, but a broader range of hyperparameter configurations will be considered which can improve algorithm modeling performance
 
-##### timeout
+#### timeout
 * **Description:** an [Optuna](https://optuna.org/) parameter controlling the total number of *seconds* until a given hyperparameter sweep stops running new trials
 * **Format:** (int, or `None`)
 * **Values:** any positive integer > `1`, (`900` by default, i.e. 15 minutes), or `None`
 * **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None`, however this will force all algorithms to fully complete the number of trials specified by `n_trials`. When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
 
-##### export_hyper_sweep_plots
+#### export_hyper_sweep_plots
 * **Description:** indicates whether or not to generate an [Optuna](https://optuna.org/)-plot visualizing the hyperparameter sweep of an algorithm on a given dataset
 * **Format:** (bool)
 * **Values:** `True` or `False`
 
-##### do_lcs_sweep 
+#### do_lcs_sweep 
 * **Description:** indicates whether or not to apply an [Optuna](https://optuna.org/) hyperparameter sweep to one of the rule-based ML algorithms, i.e. (eLCS, XCS, ExSTraCS)
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** Learning classifier system (LCS), i.e. rule-based ML modeling algorithms can be computationally expensive, but have fairly reliable default run parameter settings. This parameter allow users to avoid a hyperparameter sweep, and train each LCS algorithm only once on manually specified run parameters. To save run time, in general we recommend leaving this parameter to `False` and specifying the LCS run parameters described below. Watch this [video](https://www.youtube.com/watch?v=CRge_cZ2cJc) to learn LCS basics.
 
-##### lcs_nu 
+#### lcs_nu 
 * **Description:** specifies the *nu* parameter used by LCS algorithms (i.e. eLCS,XCS,ExSTraCS)
 * **Format:** (int)
 * **Values:** (`1` - `10`)
 * **Tips:** higher values place more pressure for these algorithms to generate perfectly accurate rules, which easily leads to overfitting in noisy problems. Unless you know that your models should be able to achieve 100% testing accuracy on the target data, we recommend leaving this parameter to the default of `1`. Watch this [video](https://www.youtube.com/watch?v=CRge_cZ2cJc) to learn LCS basics.
 
-##### lcs_iterations  
+#### lcs_iterations  
 * **Description:** specifies the number of learning iterations an LCS algorithm will run (i.e. eLCS,XCS,ExSTraCS)
 * **Format:** (int)
 * **Values:** a positive integer at least two times larger than the number of training instances in the target data
 * **Tips:** each iteration, an LCS algorithm focuses on one instance in the training dataset, thus this parameter should always be larger (ideally much larger) than the number of training instances in the data. For most users we recommend the default value of `200000` as a starting point, however, as a key run parameter, more learning iterations is typically expected to improve LCS algorithm performance. Watch this [video](https://www.youtube.com/watch?v=CRge_cZ2cJc) to learn LCS basics.
 
-##### lcs_N 
+#### lcs_N 
 * **Description:** specifies the maximum rule-population size for an LCS algorithm (i.e. eLCS,XCS,ExSTraCS)
 * **Format:** (int)
 * **Values:** a positive integer > `50`
 * **Tips:** LCS algorithms learn a population (i.e set) of rules that collectively constitute the learned model. When this parameter is larger, LCS will take longer to run. However, LCS algorithms require a larger rule-population to solve more complex problems or analyze larger datasets. For most users we recommend the default value of `2000` as a starting point, however, as a key run parameter, a larger rule-population is typically expected to improve LCS algorithm performance. Watch this [video](https://www.youtube.com/watch?v=CRge_cZ2cJc) to learn LCS basics.
 
-##### lcs_timeout 
+#### lcs_timeout 
 * **Description:** similar to `timeout`, this [Optuna](https://optuna.org/) parameter controlling the total number of *seconds* until an LCS algorithm hyperparameter sweep stops running new trials. LCS uses a separate run parameter for this since it can take alot longer to run an LCS hyperparameter sweep.
 * **Format:** (int, or `None`)
 * **Values:** any positive integer > `1`, (`1200` by default, i.e. 20 minutes), or `None`
 * **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None` if `do_lcs_sweep = True`, however this will force LCS algorithms to fully complete the number of trials specified by `n_trials`. When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given LCS algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one LCS algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
 
-##### model_resubmit
+#### model_resubmit
 * **Description:** boolean flag telling STREAMLINE that this is a secondary run attempt of phase 5 (i.e. modeling)
 * **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 * **Tips:** set this parameter to `True` either because (1) one of the previous model training jobs timed-out, or failed and the user wants to re-submit them or (2) the user had previously run phase 5 on a subset of available algorithms, but now they'd like to run additional algorithms
 
-#### Post-Analysis Parameters (Phase 6)
+### Post-Analysis Parameters (Phase 6)
 
-##### exclude_plots
+#### exclude_plots
 * **Description:** allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 6 (post-analysis)
 * **Format:**
     1. for notebook or config file modes: provide a (list) of valid options (str), e.g. `['plot_ROC','plot_PRC']`
@@ -589,21 +582,21 @@ This section will go into greater depth for each run parameter, primarily using 
     * `plot_FI_box` - don't output model feature importance boxplots for each algorithm
     * `plot_metric_boxplots` - don't output evaluation metric boxplots for each metric comparing algorithm performance
 
-##### metric_weight
+#### metric_weight
 * **Description:** the evaluation metric used to weigh model feature importance estimates in the composite feature importance plots
 * **Format:** (str)
 * **Values:** `balanced_accuracy` or `roc_auc`
 * **Tips:** we recommend setting the this parameter the same as `primary_metric` if possible
 
-##### top_model_fi_features
+#### top_model_fi_features
 * **Description:** the number of top scoring features (based on model feature importance estimates) to illustrate in feature importance figures (i.e. feature importance boxplots, and composite feature importance plots)
 * **Format:** (int)
 * **Values:** an integer between `10` and `40` is recommended
 * **Tips:** 
 
-#### Replication Parameters (Phase 8)
+### Replication Parameters (Phase 8)
 
-##### exclude_rep_plots
+#### exclude_rep_plots
 * **Description:** allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 8 (replication)
 * **Format:**
     1. for notebook or config file modes: provide a (list) of valid options (str), e.g. `['plot_ROC', 'plot_PRC']`
@@ -614,28 +607,28 @@ This section will go into greater depth for each run parameter, primarily using 
     * `plot_PRC` - don't output PRC plots individually for each algorithm including all CV results and averages
     * `plot_metric_boxplots` - don't output evaluation metric boxplots for each metric comparing algorithm performance
 
-#### Cleanup
+### Cleanup
 
-##### del_time
+#### del_time
 * **Description:** boolean flag telling STREAMLINE to delete individual runtime files from the output experiment folder
 * **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 
-##### del_old_cv
+#### del_old_cv
 * **Description:** boolean flag telling STREAMLINE to delete intermediary cross validation datasets (i.e. training and testing datasets prior to completed data processing, imputation, scaling, and feature selection) form the output experiment folder
 * **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 * **Tips:** this parameter is only relevant if [overwrite_cv](#overwrite-cv) was set to `False`
 
-#### Multiprocessing Commands
+### Multiprocessing Parameters
 
-##### run_parallel
+#### run_parallel
 * **Description:** indicates whether or not to run STREAMLINE in parallel (locally) with CPU core multiprocessing
 * **Format:** (bool)
 * **Values:** `True` or `False`
 * **Tips:** this parameter is only relevant when `run_cluster = False`
 
-##### run_cluster
+#### run_cluster
 * **Description:** indicates whether or not to run STREAMLINE on an dask-compatible computing cluster (HPC)
 * **Format:**  (bool or str)
 * **Values:** `False`, or a string identifying the cluster type from options below:
@@ -652,16 +645,28 @@ This section will go into greater depth for each run parameter, primarily using 
     * `LSFOld` - Legacy job submission for LSFCluster 
 * **Tips:** The default of `"SLURM"` is specific to our institutions HPC hardware/software, and may not be relevant to many users
 
-##### reserved_memory
+#### reserved_memory
 * **Description:** the memory (in Gigabytes) reserved for STREAMLINE jobs
 * **Format:** (int)
 * **Values:** an integer generally > `1` or < the maximum memory available for an HPC job on your system (consult your cluster documentation or administrator)
 
-##### queue 
+#### queue 
 * **Description:** indiates the queue within your HPC where your STREAMLINE jobs will be scheduled to run
 * **Format:**  (str)
 * **Values:** any viable str name for a queue you have access to at your institution 
 * **Tips:** The default of `"defq"` is specific to our institutions HPC hardware/software, and may not be relevant to many users
+
+### Logging Parameters
+
+#### verbose
+* **Description:** boolean flag telling STREAMLINE to send all print output and warnings to the command line output
+* **Format:** [Command Line Argument] just use flag (i.e. `--verbose`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
+
+#### logging_level
+* **Description:** boolean flag telling STREAMLINE what loggin level to use in the command line output
+* **Format:** [Command Line Argument] just use flag (i.e. `--logging-level`), [Configuration File] (bool) 
+* **Values:** `True` or `False`
 
 ## Guidelines for Setting Parameters
 
