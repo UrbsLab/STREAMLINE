@@ -1,10 +1,12 @@
 #  About (FAQs)
 
+***
 ## Can I run STREAMLINE as is?
 Yes, as an automated machine learning pipeline, users can easily run the pipeline in it's entirety or one phase at a time. We have set up STREAMLINE to include
 reasonably reliable default pipeline run parameters that users can optionally change to suite their needs. However the overall pipeline has been designed to operated 
 in a specific order utilizing a fixed set of data science elements/steps to ensure consistency and adherence to best practices.
 
+***
 ## What can STREAMLINE be used for?
 STREAMLINE can be used as:
 1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the included modeling algorithms

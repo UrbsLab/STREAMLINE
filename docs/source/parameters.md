@@ -1,6 +1,7 @@
 # Run Parameters
 Here we review the run parameters available across the 9 phases of STREAMLINE. We begin with a quick guide/summary of all run parameters according to run mode along with their default values (when applicable). Then we provide further descriptions, formatting, valid values, and guidance (as needed) for each run parameter. Lastly, we provide overall guidance on setting STEAMLINE run parameters. 
 
+***
 ## Quick Guide
 The quick guide below distinguishes essential from non-essential run parameters within streamline, and further breaks down non-essential run paramters by pipeline phase. The name of each parameter is given for the command-line, configuration file, and notebooks (same for both Colab and Jupyter Notebooks), as well as the internal STREAMLINE default value (which ocassionally differ from the default values used in the notebooks for the [demonstration datasets](data.md#demonstration-data)). 
 * Run parameters without default values are incidated with 'no default'. 
@@ -148,10 +149,12 @@ There are currently no run parameters to adjust for this phase.
 | --verbose                 | [verbose](#verbose)                       | NA                                | False        |
 | --logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
 
+***
 ## Parameter Details
 This section will go into greater depth for each run parameter, primarily using the configuration file parameter name to identify each. 
 * *Parameters identified as (str) format should be entered with single quotation marks within notebooks, or when using a configuration file, but without them when using command line arguments (CLA).* 
 
+***
 ### Essential Parameters (Phase 1-9)
 
 #### dataset_path
@@ -305,6 +308,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Format:** (bool) 
 * **Values:** `True` or `False`
 
+***
 ### General Parameters (Phase 1)
 
 #### cv_partitions
@@ -337,6 +341,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** any positive integer value is fine
 * **Tips:** make sure to use the same value for `random_state` in a separate run along with the same datasets and run parameters to obtain reproducible pipeline results
 
+***
 ### Data Processing Parameters (Phase 1)
 
 #### exclude_eda_output
@@ -372,6 +377,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** (`0.0` - `1.0`)
 * **Tips:** this parameter controls automated data cleaning based on feature correlation. The safest setting (to avoid missing predictive information) is the default of 1.0 (i.e. perfect correlation between two features). Note: STREAMLINE interprets this parameter as both a positive and negative correlation threshold.
 
+***
 ### Imputation & Scaling Parameters (Phase 2)
 
 #### impute_data
@@ -398,7 +404,9 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** `True` or `False`
 * **Tips:** `True` will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however `False` allows users to view intermediary CV datasets following phase one data processing and CV partitioning, as wel as intermediary CV datasets after additional feature selection
 
+***
 ### Feature Importance Estimation Parameters (Phase 3)
+
 #### do_mutual_info
 * **Description:** indicates whether or not to run mutual information as a feature importance estimation algorithm (prior to modeling)
 * **Format:** (bool)
@@ -435,6 +443,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** `-1`, or a positive integer <= the number of cores available on your machine
 * **Tips:** -1 will run MultiSURF on all available cores when run locally
 
+***
 ### Feature Selection Parameters (Phase 4)
 
 #### filter_poor_features
@@ -459,6 +468,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Format:** (int)
 * **Values:** an integer between `10` and `40` is recommended
 
+***
 ### Modeling Parameters (Phase 5)
 
 #### algorithms 
@@ -569,6 +579,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** `True` or `False`
 * **Tips:** set this parameter to `True` either because (1) one of the previous model training jobs timed-out, or failed and the user wants to re-submit them or (2) the user had previously run phase 5 on a subset of available algorithms, but now they'd like to run additional algorithms
 
+***
 ### Post-Analysis Parameters (Phase 6)
 
 #### exclude_plots
@@ -594,6 +605,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** an integer between `10` and `40` is recommended
 * **Tips:** 
 
+***
 ### Replication Parameters (Phase 8)
 
 #### exclude_rep_plots
@@ -607,6 +619,7 @@ This section will go into greater depth for each run parameter, primarily using 
     * `plot_PRC` - don't output PRC plots individually for each algorithm including all CV results and averages
     * `plot_metric_boxplots` - don't output evaluation metric boxplots for each metric comparing algorithm performance
 
+***
 ### Cleanup Parameters
 
 #### del_time
@@ -620,6 +633,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** `True` or `False`
 * **Tips:** this parameter is only relevant if [overwrite_cv](#overwrite-cv) was set to `False`
 
+***
 ### Multiprocessing Parameters
 
 #### run_parallel
@@ -656,6 +670,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** any viable str name for a queue you have access to at your institution 
 * **Tips:** The default of `"defq"` is specific to our institutions HPC hardware/software, and may not be relevant to many users
 
+***
 ### Logging Parameters
 
 #### verbose
@@ -668,6 +683,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Format:** [Command Line Argument] just use flag (i.e. `--logging-level`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 
+***
 ## Guidelines for Setting Parameters
 
 ### Ensuring Output Reproducibility
