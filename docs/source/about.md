@@ -132,17 +132,7 @@ This same strategy is applied to replication data later in the pipeline. When ev
 
 ***
 ## Is STREAMLINE reproducible?
-Yes, STREAMLINE is completely reproducible when the `timeout` parameter is set to `None`,
-ensuring training of the same models with the same performance whenever the same datasets,
-pipeline settings, and random seed are used.
-
-When `timeout` is not set to `None`, STREAMLINE output can sometimes vary slightly (particularly when parallelized)
-since Optuna (for hyperparameter optimization) may not complete the same
-number of optimization trials within the user specified time limit on different
-computing resources. 
-
-However, having a `timeout` value specified helps ensure STREAMLINE run completion
-within a reasonable time frame.
+Yes, STREAMLINE is completely reproducible when the `timeout` parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including `random_seed`). However, STREAMLINE is expected to take longer to run when `timeout = None`.
 
 ***
 ## Which STREAMLINE run mode should I use?
