@@ -773,8 +773,8 @@ class DataProcess(Job):
             # logging.warning(df_corr_org.columns)
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/correlation_feature_cleaning.csv', 'w') as file:
-                writer = csv.writer(file)
+                      '/exploratory/correlation_feature_cleaning.csv', 'w', newline='') as file:
+                writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(['Retained Feature', 'Deleted Features', ])
                 for feat in features_kept:
                     corr_feat = list(df_corr_org[abs(df_corr_org[feat]) >= self.correlation_removal_threshold].index)
