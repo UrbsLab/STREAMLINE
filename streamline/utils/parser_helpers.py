@@ -147,18 +147,18 @@ def parse_dataprep(argv, params_dict=None):
     # Defaults available - Phase 2
     parser.add_argument('--scale', dest='scale_data', type=str2bool, nargs='?',
                         help='perform data scaling (required for SVM, and to use '
-                             'Logistic regression with non-uniform feature importance estimation)',
+                             'Logistic regression with non-uniform feature importance estimation)', const=True,
                         default=True)
     parser.add_argument('--impute', dest='impute_data', type=str2bool, nargs='?',
                         help='perform missing value data imputation '
-                             '(required for most ML algorithms if missing data is present)',
+                             '(required for most ML algorithms if missing data is present)', const=True,
                         default=True)
     parser.add_argument('--multi-impute', dest='multi_impute', type=str2bool, nargs='?',
                         help='applies multivariate imputation to '
-                             'quantitative features, otherwise uses median imputation',
+                             'quantitative features, otherwise uses median imputation', const=True,
                         default=True)
-    parser.add_argument('--over-cv', dest='overwrite_cv', type=str2bool, nargs='?',
-                        help='overwrites earlier cv datasets with new scaled/imputed ones', default=True)
+    parser.add_argument('--over-cv', dest='overwrite_cv', type=str2bool, nargs='?', const=False,
+                        help='overwrites earlier cv datasets with new scaled/imputed ones', default=False)
 
     return update_dict_from_parser(argv, parser, params_dict)
 
@@ -198,14 +198,14 @@ def parse_feat_sel(argv, params_dict=None):
     # Defaults available - Phase 4
     parser.add_argument('--max-feat', dest='max_features_to_keep', type=int,
                         help='max features to keep (only applies if filter_poor_features is True)', default=2000)
-    parser.add_argument('--filter-feat', dest='filter_poor_features', type=str2bool, nargs='?',
+    parser.add_argument('--filter-feat', dest='filter_poor_features', type=str2bool, nargs='?', const=True,
                         help='filter out the worst performing features prior to modeling', default=True)
     parser.add_argument('--top-fi-features', dest='top_fi_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--export-scores', dest='export_scores', type=str2bool, nargs='?',
                         help='export figure summarizing average feature importance scores over cv partitions',
                         default=True)
-    parser.add_argument('--over-cv-feat', dest='overwrite_cv_feat', type=str2bool, nargs='?',
+    parser.add_argument('--over-cv-feat', dest='overwrite_cv_feat', type=str2bool, nargs='?', const=True,
                         help='overwrites working cv datasets with new feature subset datasets', default=True)
     return update_dict_from_parser(argv, parser, params_dict)
 

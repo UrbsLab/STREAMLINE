@@ -271,4 +271,6 @@ if __name__ == '__main__':
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
+    print(config_dict)
+
     sys.exit(run(config_dict))
