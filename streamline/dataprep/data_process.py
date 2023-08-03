@@ -34,12 +34,24 @@ class DataProcess(Job):
         Args:
             dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file
             experiment_path: path to experiment the logging directory folder
-            ignore_features: list of row names of features to ignore
-            categorical_features: list of row names of categorical features
+            ignore_features: list of string of column names of features to ignore or \
+                            path to .csv file with feature labels to be ignored in analysis (default=None)
+            categorical_features: list of string of column names of features to ignore or \
+                            path to .csv file with feature labels specified to be treated as categorical where possible\
+                            (default=None)
+            categorical_cutoff: number of unique values for a variable is considered to be quantitative vs categorical\
+                            (default=10)
             exclude_eda_output: list of names of analysis to do while doing EDA (must be in set X)
-            plots: list of analysis plots to save in experiment directory (must be in set Y)
             categorical_cutoff: categorical cut off to consider a feature categorical by analysis, default=10
             sig_cutoff: significance cutoff for continuous variables, default=0.05
+            featureeng_missingness: the proportion of missing values within a feature (above which) a new
+                            binary categorical feature is generated that indicates if the
+                            value for an instance was missing or not
+            cleaning_missingness: the proportion of missing values, within a feature or instance, (at which) the
+                            given feature or instance will be automatically cleaned (i.e. removed)
+                            from the processed ‘target dataset’
+            correlation_removal_threshold: the (pearson) feature correlation at which one out of a pair of
+                            features is randomly removed from the processed ‘target dataset’
             random_state: random state to set seeds for reproducibility of algorithms
         """
         super().__init__()
@@ -803,6 +815,13 @@ class DataProcess(Job):
             if "Univariate Analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
+
+        pd.DataFrame(self.categorical_features, columns=['Feature']).to_csv(
+            self.experiment_path + '/' + self.dataset.name +
+            '/exploratory/processed_categorical_features.csv', index=False)
+        pd.DataFrame(self.quantitative_features, columns=['Feature']).to_csv(
+            self.experiment_path + '/' + self.dataset.name +
+            '/exploratory/processed_quantitative_features.csv', index=False)
 
     def univariate_analysis(self, top_features=20):
         """

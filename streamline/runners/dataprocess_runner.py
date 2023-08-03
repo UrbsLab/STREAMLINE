@@ -57,10 +57,8 @@ class DataProcessRunner:
             data_path: path to directory containing datasets
             output_path: path to output directory
             experiment_name: name of experiment output folder (no spaces)
-            exploration_list: list of names of analysis to do while doing EDA (must be in set \
-                                ["Describe", "Univariate Analysis", "Feature Correlation"])
-            plot_list: list of analysis plots to save in experiment directory (must be in set \
-                                ["Describe", "Univariate Analysis", "Feature Correlation"])
+            exclude_eda_output: list of eda outputs to exclude
+            possible options ['describe_csv', 'univariate_plots', 'correlation_plots']
             class_label: outcome label of all datasets
             instance_label: instance label of all datasets (if present)
             match_label: only applies when M selected for partition-method; indicates column with \
@@ -76,6 +74,14 @@ class DataProcessRunner:
             categorical_cutoff: number of unique values for a variable is considered to be quantitative vs categorical\
                             (default=10)
             sig_cutoff: significance cutoff used throughout pipeline (default=0.05)
+            featureeng_missingness: the proportion of missing values within a feature (above which) a new
+                            binary categorical feature is generated that indicates if the
+                            value for an instance was missing or not
+            cleaning_missingness: the proportion of missing values, within a feature or instance, (at which) the
+                            given feature or instance will be automatically cleaned (i.e. removed)
+                            from the processed ‘target dataset’
+            correlation_removal_threshold: the (pearson) feature correlation at which one out of a pair of
+                            features is randomly removed from the processed ‘target dataset’
             random_state: sets a specific random seed for reproducible results (default=None)
             run_cluster: name of cluster run setting or False (default=False)
             queue: name of queue to be used in cluster run (default="defq")
