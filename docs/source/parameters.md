@@ -6,6 +6,7 @@ Here we review the run parameters available across the 9 phases of STREAMLINE. W
 The quick guide below distinguishes essential from non-essential run parameters within streamline, and further breaks down non-essential run paramters by pipeline phase. The name of each parameter is given for the command-line, configuration file, and notebooks (same for both Colab and Jupyter Notebooks), as well as the internal STREAMLINE default value (which ocassionally differ from the default values used in the notebooks for the [demonstration datasets](data.md#demonstration-data)). 
 * Run parameters without default values are incidated with 'no default'. 
 * Run parameters that are not used in one of the run modes are indicated with 'NA'.
+* All run parameters include quick links to their respective details in [Parameter Details](#parameter-details), including their description, format, values, and other tips.
 
 ### Essential Parameters (Phases 1-9)
 

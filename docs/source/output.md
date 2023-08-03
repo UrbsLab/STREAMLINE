@@ -11,8 +11,9 @@ As mentioned, the Google Colab notebook will automatically download the output f
 
 ***
 ## Experiment Folder (Hierarchy)
-1. After running STREAMLINE you will find the 'experiment folder' (named by the [experiment_name](parameters.md#experiment-name) parameter) saved to folder specified by [output_path](parameters.md#output-path). In the Colab Notebook demo, this would be `/content/DemoOutput/demo_experiment/`. 
-2. Opening the above experiment folder you will find the following folder/file hierarchy:
+After running STREAMLINE you will find the 'experiment folder' (named by the [experiment_name](parameters.md#experiment-name) parameter) saved to folder specified by [output_path](parameters.md#output-path). In the Colab Notebook demo, this would be `/content/DemoOutput/demo_experiment/`. 
+
+Opening the above experiment folder you will find the following folder/file hierarchy:
     * `DatasetComparisons` - all statistical significance results and plots for comparing modeling performance across multiple 'target datasets' run
         * `dataCompBoxplots` - all data comparison boxplots
     * `hcc-data_example` - all output specific to the first 'target dataset' analyzed
@@ -45,8 +46,11 @@ As mentioned, the Google Colab notebook will automatically download the output f
     * `jobsCompleted` - contains cluster checks for job completion *(empty if output 'cleaning' applied)*
     * `logs` - contains cluster job output and error logs *(empty if output 'cleaning' applied)*
 
+Notice that the folders `hcc-data_example` and `hcc-data_example_custom` have similar contents, but represent the analysis for each 'target' dataset run at once with STREAMLINE. If a user were to include 4 datasets in the folder specified by the [dataset_path](parameters.md#dataset-path) parameter (each conforming to the [Input Data Requirements](data.md#input-data-requirements)) they would find 4 respective folders in their experiment fold, each named after a respective dataset.
+
 ***
 ## Output File Details
+This section will take a deeper dive into the individual output files within an experiment folder. 
 
 ### PDF Report(s)
 #### Testing Evaluation Report
@@ -80,7 +84,48 @@ This folder contains two different types of box plots comparing dataset performa
 1. `DataCompare`: (1) one plot for each combination of algorithm + evaluation metric (only ROC-AUC, and PRC-AUC metrics), (2) the 'sample' making up each individual box-and-whisker is the set of *k* trained CV models for that algorithm
 2. `DataCompareAllModels`: (1) one plot for each evaluation metric (all 16 classification metrics), (2) the 'sample' making up each individual box-and-whisker is the set of median algorithm performances, (3) lines are overlaid on the boxplot to illustrate differences in median performance between datasets for all algorithms.
 
+### hcc-data_example_custom
+We will focus on the `hcc-data_example_custom` folder to walk through the remaining files, since (unlike the `hcc-data_example` folder) also includes the results of a replication analyis. However, note that you will find mostly the same set of files within `hcc-data_example` or for any uniquely named dataset in the folder specified by the [dataset_path](parameters.md#dataset-path) parameter.
+
+#### CVDatasets
+This folder contains all training and testing datsets (named as `[DATANAME]_CV_[PARTITION]_[Train or Test].csv`). These cross validation (CV) datasets have undergone processing, imputation, scaling, and feature selection, and are the datasets used for model training and evaluation in phase 5.
+
+Additionally, if [overwrite_cv](parameters.md#overwrite-cv) and [del_old_cv](parameters.md#del-old-cv) were both `False`, you will see two additional sets of CV datasets with either `CVOnly` or `CVPre` in their filenames. These are intermediary versions of the CV datasets (included as a further sanity check), allowing users to examine how these datasets have changed prior to phase 2 (scaling and imputation), and phase 4 (feature selection).`CVOnly` identifies CV datasets that have undergone phase 1 processing (i.e. cleaning, feature engineering, and CV partitioning). `CVPre` identifies CV datasets that have additionally undergone phase 2 (scaling and imputation).
+
+#### exploratory
+We will begin by explaining the files you see when first opening this folder. All of these files represent exploratory data analysis (EDA) of the 'processed data' (i.e. after automated cleaning and feature engineering).
+
+##### exploratory (Plots)
+* `ClassCountsBarPlot` - a simple bar plot illustrating class balance or imbalance
+* `DataMissingnessHistogram` - a histogram illustrating the frequency of data missingness across features
+* `FeatureCorrelations` - a pearson feature correlation heatmap
+
+##### exploratory (.csv)
+* `ClassCounts` - documents the number of instances in the data for each class
+* `correlation_feature_cleaning` - documents feature pairs that met the [correlation_removal_threshold](#correlation-removal-threshold) identifying which feature was retained vs deleted from the dataset
+* `DataCounts` - documents dataset counts for number of instances, features, feature types, and missing values
+* `DataMissingness` - documents missing value counts for all columns in the dataset
+* `DataProcessSummary` - documents incremental changes to instance, feature, feature type, missing value, and class counts during the individual cleaning and feature engineering steps in phase 1
+* `DescribeDataset` - output from standard pandas `describe()` function
+* `DtypesDataset` - output from standard pandas `dtypes()` function
+* `FeatureCorrelations` - documents all pearson feature correlations
+* `Missingness_Engineered_Features` - documents any newly engineered 'missingness' features added to the dataset based on the [featureeng_missingness](#featureeng-missingness) cutoff
+* `Missingness_Feature_Cleaning` - documents any features that have been removed from the data because their missingness was >= [cleaning_missingness](#cleaning-missingness)
+* `Numerical_Encoding_Map` - documents the numerical encoding mapping for any binary text-valued features in the dataset
+* `NumUniqueDataset` - output from standard pandas `nunique()` function
+* `OriginalFeatureNames` - documents all original feature names from the 'target dataset' prior to any processing
+* `ProcessedFeatureNames` - documents all feature names for the processed 'target dataset'
+
+##### exploratory (pickle)
+A variety of other pickle files can be found in this folder, used internally for data processing in the replication phase
+
 [Under Construction Below]
+
+##### initial
+all pre-processed EDA output
+##### univariate analysis
+- all univariate analysis results and plots
+
 
 all statistical significance results and plots for comparing modeling performance across multiple 'target datasets' run
 Within this folder you should find the following:
