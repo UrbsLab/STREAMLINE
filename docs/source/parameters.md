@@ -12,30 +12,30 @@ The quick guide below distinguishes essential from non-essential run parameters 
 
 | Command-line Parameter    | Config File Parameter                                   | Notebook Parameter                           | Default    |
 |---------------------------|---------------------------------------------------------|----------------------------------------------|------------|
-| --data-path               | [dataset_path](#dataset-path)                           | data_path                                    | no default |
-| --out-path                | [output_path](#output-path)                             | output_path                                  | no default |
-| --exp-name                | [experiment_name](#experiment-name)                     | experiment_name                              | no default |
-| --class-label             | [class_label](#class-label)                             | class_label                                  | 'Class'    |
-| --inst-label              | [instance_label](#instance-label)                       | instance_label                               | None       |
-| --match-label             | [match_label](#match-label)                             | match_label                                  | None       |
-| --fi                      | [ignore_features_path](#ignore-features-path)           | ignore_features                              | None       |
-| --cf                      | [categorical_feature_path](#categorical-feature_path)   | categorical_feature_headers                  | None       |
-| --qf                      | [quantitative_feature_path](#quantitative-feature_path) | quantitiative_feature_headers                | None       |
-| --rep-path                | [rep_data_path](#rep-data-path)                         | rep_data_path                                | no default |
-| --dataset                 | [dataset_for_rep](#dataset-for-rep)                     | dataset_for_rep                              | no default |
-| [--config](#config)       | NA                                                      | NA                                           | no default |
-| --do-till-report or --dtr | [do_till_report](#do-till-report)                       | NA                                           | False      |
-| --do-eda                  | [do_eda](#do-eda)                                       | NA                                           | False      |
-| --do-dataprep             | [do_dataprep](#do-dataprep)                             | NA                                           | False      |
-| --do-feat-imp             | [do_feat_imp](#do-feat_imp)                             | NA                                           | False      |
-| --do-feat-sel             | [do_feat_sel](#do-feat_sel)                             | NA                                           | False      |
-| --do-model                | [do_model](#do-model)                                   | NA                                           | False      |
-| --do-stats                | [do_stats](#do-stats)                                   | NA                                           | False      |
-| --do-compare-dataset      | [do_compare_dataset](#do-compare-dataset)               | NA                                           | False      |
-| --do-report               | [do_report](#do-report)                                 | NA                                           | False      |
-| --do-replicate            | [do_replicate](#do-replicate)                           | NA                                           | False      |
-| --do-rep-report           | [do_rep_report](#do-rep-report)                         | NA                                           | False      |
-| --do-cleanup              | [do_cleanup](#do-cleanup)                               | NA                                           | False      |
+| \-\-data-path               | [dataset_path](#dataset-path)                           | data_path                                    | no default |
+| \-\-out-path                | [output_path](#output-path)                             | output_path                                  | no default |
+| \-\-exp-name                | [experiment_name](#experiment-name)                     | experiment_name                              | no default |
+| \-\-class-label             | [class_label](#class-label)                             | class_label                                  | 'Class'    |
+| \-\-inst-label              | [instance_label](#instance-label)                       | instance_label                               | None       |
+| \-\-match-label             | [match_label](#match-label)                             | match_label                                  | None       |
+| \-\-fi                      | [ignore_features_path](#ignore-features-path)           | ignore_features                              | None       |
+| \-\-cf                      | [categorical_feature_path](#categorical-feature_path)   | categorical_feature_headers                  | None       |
+| \-\-qf                      | [quantitative_feature_path](#quantitative-feature_path) | quantitiative_feature_headers                | None       |
+| \-\-rep-path                | [rep_data_path](#rep-data-path)                         | rep_data_path                                | no default |
+| \-\-dataset                 | [dataset_for_rep](#dataset-for-rep)                     | dataset_for_rep                              | no default |
+| [\-\-config](#config) or -c | NA                                                      | NA                                           | no default |
+| \-\-do-till-report or -dtr  | [do_till_report](#do-till-report)                       | NA                                           | False      |
+| \-\-do-eda                  | [do_eda](#do-eda)                                       | NA                                           | False      |
+| \-\-do-dataprep             | [do_dataprep](#do-dataprep)                             | NA                                           | False      |
+| \-\-do-feat-imp             | [do_feat_imp](#do-feat_imp)                             | NA                                           | False      |
+| \-\-do-feat-sel             | [do_feat_sel](#do-feat_sel)                             | NA                                           | False      |
+| \-\-do-model                | [do_model](#do-model)                                   | NA                                           | False      |
+| \-\-do-stats                | [do_stats](#do-stats)                                   | NA                                           | False      |
+| \-\-do-compare-dataset      | [do_compare_dataset](#do-compare-dataset)               | NA                                           | False      |
+| \-\-do-report               | [do_report](#do-report)                                 | NA                                           | False      |
+| \-\-do-replicate            | [do_replicate](#do-replicate)                           | NA                                           | False      |
+| \-\-do-rep-report           | [do_rep_report](#do-rep-report)                         | NA                                           | False      |
+| \-\-do-cleanup              | [do_cleanup](#do-cleanup)                               | NA                                           | False      |
 | NA                        | NA                                                      | [applyToReplication](#applyToReplication)    | True       |
 | NA                        | NA                                                      | [demo_run](#demo-run)                        | True       |
 | NA                        | NA                                                      | [use_data_prompt](#use-data-prompt) (Colab)  | True       |
@@ -44,78 +44,78 @@ The quick guide below distinguishes essential from non-essential run parameters 
 
 | Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
 |---------------------------|-------------------------------------------|-----------------------------------|--------------|
-| --cv                      | [cv_partitions](#cv-partitions)           | n_splits                          | 10           |
-| --part                    | [partition_method](#partition-method)     | partition_method                  | 'Stratified' |
-| --cat-cutoff              | [categorical_cutoff](#categorical-cutoff) | categorical_cutoff                | 10           |
-| --sig                     | [sig_cutoff](#sig-cutoff)                 | sig_cutoff                        | 0.05         |
-| --rand-state              | [random_state](#random-state)             | random_state                      | 42           |
+| \-\-cv                      | [cv_partitions](#cv-partitions)           | n_splits                          | 10           |
+| \-\-part                    | [partition_method](#partition-method)     | partition_method                  | 'Stratified' |
+| \-\-cat-cutoff              | [categorical_cutoff](#categorical-cutoff) | categorical_cutoff                | 10           |
+| \-\-sig                     | [sig_cutoff](#sig-cutoff)                 | sig_cutoff                        | 0.05         |
+| \-\-rand-state              | [random_state](#random-state)             | random_state                      | 42           |
 
 ### Data Processing Parameters (Phase 1)
 
 | Command-line Parameter    | Config File Parameter                                            | Notebook Parameter                | Default    |
 |---------------------------|------------------------------------------------------------------|-----------------------------------|------------|
-| --exclude-eda-output      | [exclude_eda_output](#exclude-eda-output)                        | exclude_eda_output                | None       |
-| --top-uni-feature         | [top_uni_features](#top-uni-features)                            | top_uni_features                  | 20         |
-| --feat_miss               | [featureeng_missingness](#featureeng-missingness)                | featureeng_missingness            | 0.5        |
-| --clean_miss              | [cleaning_missingness](#cleaning-missingness)                    | cleaning_missingness              | 0.5        |
-| --corr_thresh             | [correlation_removal_threshold](#correlation-removal-threshold)  | correlation_removal_threshold     | 1.0        |
+| \-\-exclude-eda-output      | [exclude_eda_output](#exclude-eda-output)                        | exclude_eda_output                | None       |
+| \-\-top-uni-feature         | [top_uni_features](#top-uni-features)                            | top_uni_features                  | 20         |
+| \-\-feat_miss               | [featureeng_missingness](#featureeng-missingness)                | featureeng_missingness            | 0.5        |
+| \-\-clean_miss              | [cleaning_missingness](#cleaning-missingness)                    | cleaning_missingness              | 0.5        |
+| \-\-corr_thresh             | [correlation_removal_threshold](#correlation-removal-threshold)  | correlation_removal_threshold     | 1.0        |
 
 
 ### Imputation & Scaling Parameters (Phase 2)
 
 | Command-line Parameter | Config File Parameter          | Notebook Parameter          | Default |
 |------------------------|--------------------------------|-----------------------------|---------|
-| --impute               | [impute_data](#impute-data)    | impute_data                 | True    |
-| --multi-impute         | [multi_impute](#multi-impute)  | multi_impute                | True    |
-| --scale                | [scale_data](#scale-data)      | scale_data                  | True    |
-| --over-cv              | [overwrite_cv](#overwrite-cv)  | overwrite_cv                | True    |
+| \-\-impute               | [impute_data](#impute-data)    | impute_data                 | True    |
+| \-\-multi-impute         | [multi_impute](#multi-impute)  | multi_impute                | True    |
+| \-\-scale                | [scale_data](#scale-data)      | scale_data                  | True    |
+| \-\-over-cv              | [overwrite_cv](#overwrite-cv)  | overwrite_cv                | True    |
 
 ### Feature Importance Estimation Parameters (Phase 3)
 
 | Command-line Parameter | Config File Parameter                | Notebook Parameter                            | Default |
 |------------------------|--------------------------------------|-----------------------------------------------|---------|
-| --do-mi                | [do_mutual_info](#do-mutual-info)    | do_mutual_info                                | True    |
-| --do-ms                | [do_multisurf](#do-multisurf)        | do_multisurf                                  | True    |
-| --use-turf             | [use_turf](#use-turf)                | use_TURF                                      | False   |
-| --turf-pct             | [turf_pct](#turf-pct)                | TURF_pct                                      | 0.5     |
-| --inst-sub             | [instance_subset](#instance-subset)  | instance_subset                               | 2000    |
-| --n-jobs               | [n_jobs](#n-jobs)                    | cores                                         | 1       |
+| \-\-do-mi                | [do_mutual_info](#do-mutual-info)    | do_mutual_info                                | True    |
+| \-\-do-ms                | [do_multisurf](#do-multisurf)        | do_multisurf                                  | True    |
+| \-\-use-turf             | [use_turf](#use-turf)                | use_TURF                                      | False   |
+| \-\-turf-pct             | [turf_pct](#turf-pct)                | TURF_pct                                      | 0.5     |
+| \-\-inst-sub             | [instance_subset](#instance-subset)  | instance_subset                               | 2000    |
+| \-\-n-jobs               | [n_jobs](#n-jobs)                    | cores                                         | 1       |
 
 ### Feature Selection Parameters (Phase 4)
 
 | Command-line Parameter | Config File Parameter                          | Notebook Parameter                            | Default |
 |------------------------|------------------------------------------------|-----------------------------------------------|---------|
-| --filter-feat          | [filter_poor_features](#filter-poor-features)  | filter_poor_features                          | True    |
-| --max-feat             | [max_features_to_keep](#max-features-to-keep)  | max_features_to_keep                          | 2000    |
-| --export-scores        | [export_scores](#export-scores)                | export_scores                                 | True    |
-| --top-fi-features      | [top_fi_features](#top-fi-features)            | top_fi_features                               | 40      |
-| --over-cv-feat         | [overwrite_cv_feat](#overwrite-cv-feat)        | overwrite_cv_feat                             | True    |
+| \-\-filter-feat          | [filter_poor_features](#filter-poor-features)  | filter_poor_features                          | True    |
+| \-\-max-feat             | [max_features_to_keep](#max-features-to-keep)  | max_features_to_keep                          | 2000    |
+| \-\-export-scores        | [export_scores](#export-scores)                | export_scores                                 | True    |
+| \-\-top-fi-features      | [top_fi_features](#top-fi-features)            | top_fi_features                               | 40      |
+| \-\-over-cv-feat         | [overwrite_cv_feat](#overwrite-cv-feat)        | overwrite_cv_feat                             | True    |
 
 ### Modeling Parameters (Phase 5)
  Command-line Parameter  | Config File Parameter                                 | Notebook Parameter                 | Default                   |
 |------------------------|-------------------------------------------------------|------------------------------------|---------------------------|
-| --algorithms           | [algorithms](#algorithms)                             | algorithms                         | None                      |
-| --exclude              | [exclude](#exclude)                                   | exclude                            | 'eLCS,XCS'                |
-| --subsample            | [training_subsample](#training-subsample)             | training_subsample                 | 0                         |
-| --use-uniformFI        | [use_uniform_fi](#use-uniform-fi)                     | use_uniform_FI                     | True                      |
-| --metric               | [primary_metric](#primary-metric)                     | primary_metric                     | 'balanced_accuracy'       |
-| --metric-direction     | [metric_direction](#metric-direction)                 | metric_direction                   | 'maximize'                |
-| --n-trials             | [n_trials](#n-trials)                                 | n_trials                           | 200                       |
-| --timeout              | [timeout](#timeout)                                   | timeout                            | 900                       |    
-| --export-hyper-sweep   | [export_hyper_sweep_plots](#export-hyper-sweep-plots) | export_hyper_sweep_plots           | False                     |
-| --do-LCS-sweep         | [do_lcs_sweep](#do-lcs-sweep)                         | do_lcs_sweep                       | False                     |
-| --nu                   | [lcs_nu](#lcs-nu)                                     | lcs_nu                             | 1                         |
-| --iter                 | [lcs_iterations](#lcs-iterations)                     | lcs_iterations                     | 200000                    |
-| --N                    | [lcs_n](#lcs-n)                                       | lcs_N                              | 2000                      |
-| --lcs-timeout          | [lcs_timeout](#lcs-timeout)                           | lcs_timeout                        | 1200                      |
-| --model-resubmit       | [model_resubmit](#model-resubmit)                     | NA                                 | False                     |
+| \-\-algorithms           | [algorithms](#algorithms)                             | algorithms                         | None                      |
+| \-\-exclude              | [exclude](#exclude)                                   | exclude                            | 'eLCS,XCS'                |
+| \-\-subsample            | [training_subsample](#training-subsample)             | training_subsample                 | 0                         |
+| \-\-use-uniformFI        | [use_uniform_fi](#use-uniform-fi)                     | use_uniform_FI                     | True                      |
+| \-\-metric               | [primary_metric](#primary-metric)                     | primary_metric                     | 'balanced_accuracy'       |
+| \-\-metric-direction     | [metric_direction](#metric-direction)                 | metric_direction                   | 'maximize'                |
+| \-\-n-trials             | [n_trials](#n-trials)                                 | n_trials                           | 200                       |
+| \-\-timeout              | [timeout](#timeout)                                   | timeout                            | 900                       |    
+| \-\-export-hyper-sweep   | [export_hyper_sweep_plots](#export-hyper-sweep-plots) | export_hyper_sweep_plots           | False                     |
+| \-\-do-LCS-sweep         | [do_lcs_sweep](#do-lcs-sweep)                         | do_lcs_sweep                       | False                     |
+| \-\-nu                   | [lcs_nu](#lcs-nu)                                     | lcs_nu                             | 1                         |
+| \-\-iter                 | [lcs_iterations](#lcs-iterations)                     | lcs_iterations                     | 200000                    |
+| \-\-N                    | [lcs_n](#lcs-n)                                       | lcs_N                              | 2000                      |
+| \-\-lcs-timeout          | [lcs_timeout](#lcs-timeout)                           | lcs_timeout                        | 1200                      |
+| \-\-model-resubmit       | [model_resubmit](#model-resubmit)                     | NA                                 | False                     |
 
 ### Post-Analysis Parameters (Phase 6)
 | Command-line Parameter   | Config File Parameter                            | Notebook Parameter      | Default             |
 |--------------------------|--------------------------------------------------|-------------------------|---------------------|
-| --exclude-plots          | [exclude_plots](#exclude-plots)                  | exclude_plots           | None                |
-| --metric-weight          | [metric_weight](#metric-weight)                  | metric_weight           | 'balanced_accuracy' |
-| --top-model-fi-features  | [top_model_fi_features](#top-model-fi-features)  | top_model_fi_features   | 40                  |
+| \-\-exclude-plots          | [exclude_plots](#exclude-plots)                  | exclude_plots           | None                |
+| \-\-metric-weight          | [metric_weight](#metric-weight)                  | metric_weight           | 'balanced_accuracy' |
+| \-\-top-model-fi-features  | [top_model_fi_features](#top-model-fi-features)  | top_model_fi_features   | 40                  |
 
 ### Compare Data Parameters (Phase 7)
 There are currently no run parameters to adjust for this phase.
@@ -124,7 +124,7 @@ There are currently no run parameters to adjust for this phase.
 
 | Command-line Parameter | Config File Parameter                    | Notebook Parameter  | Default |
 |------------------------|------------------------------------------|---------------------|---------|
-| --exclude-rep-plots    | [exclude_rep_plots](#exclude-rep-plots)  | exclude_rep_plots   | None    |
+| \-\-exclude-rep-plots    | [exclude_rep_plots](#exclude-rep-plots)  | exclude_rep_plots   | None    |
 
 ### Summary Report Parameters (Phase 9)
 There are currently no run parameters to adjust for this phase.
@@ -133,23 +133,23 @@ There are currently no run parameters to adjust for this phase.
 
 | Command-line Parameter | Config File Parameter      | Notebook Parameter | Default |
 |------------------------|----------------------------|--------------------|---------|
-| --del-time             | [del_time](#del-time)      | del_time           | True    |
-| --del-old-cv           | [del_old_cv](#del-old-cv)  | del_old_cv         | True    |
+| \-\-del-time             | [del_time](#del-time)      | del_time           | True    |
+| \-\-del-old-cv           | [del_old_cv](#del-old-cv)  | del_old_cv         | True    |
 
 ### Multiprocessing Parameters
 
 | Command-line Parameter | Config File Parameter                | Notebook Parameter  | Default |
 |------------------------|--------------------------------------|---------------------|---------|
-| --run-parallel         | [run_parallel](#run-parallel)        | NA                  | False   |
-| --run-cluster          | [run_cluster](#run-cluster)          | NA                  | "SLURM" |
-| --res-mem              | [reserved_memory](#reserved-memory)  | NA                  | 4       |
-| --queue                | [queue](#queue)                      | NA                  | "defq"  |
+| \-\-run-parallel         | [run_parallel](#run-parallel)        | NA                  | False   |
+| \-\-run-cluster          | [run_cluster](#run-cluster)          | NA                  | "SLURM" |
+| \-\-res-mem              | [reserved_memory](#reserved-memory)  | NA                  | 4       |
+| \-\-queue                | [queue](#queue)                      | NA                  | "defq"  |
 
 ### Logging Parameters
 | Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
 |---------------------------|-------------------------------------------|-----------------------------------|--------------|
-| --verbose                 | [verbose](#verbose)                       | NA                                | False        |
-| --logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
+| \-\-verbose                 | [verbose](#verbose)                       | NA                                | False        |
+| \-\-logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
 
 ***
 ## Parameter Details
@@ -329,7 +329,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** the number of unique values observed for a given feature in a 'target dataset' after which a variable is automatcially considered to be quantitative
 * **Format:** (int)
 * **Values:** an integer between `3` and `10` is generally recommended, but should be set in a dataset-specific manner
-* **Tips:** this parameter will only be used if the user hasn't specifically indicated which features to treat as categorical or quantitative using `categorical_feature_path` and/or `quantiative_feature_path`, respectively. However depending on the specific dataset, users can sometimes conveniently set this parameter to correctly assign variable types, e.g. if all categorical features in the dataset have fewer than 5 unique values, but quantitative ones all have more than 10 unique values, setting `categorical_cutoff = 7` will make correct feature type assignments automatically.
+* **Tips:** this parameter will only be used if the user hasn't specifically indicated which features to treat as categorical or quantitative using [categorical_feature_path](#categorical_feature_path) and/or [quantitative_feature_path](#quantitative_feature_path), respectively. However depending on the specific dataset, users can sometimes conveniently set this parameter to correctly assign variable types, e.g. if all categorical features in the dataset have fewer than 5 unique values, but quantitative ones all have more than 10 unique values, setting `categorical_cutoff = 7` will make correct feature type assignments automatically.
 
 #### sig_cutoff 
 * **Description:** the statistical significance cutoff used throughout the pipeline used in deciding whether to run pair-wise non-parametric statistical comparisons following group comparisons, and for identifying significant results in output files with a '*'
@@ -353,7 +353,7 @@ This section will go into greater depth for each run parameter, primarily using 
     2. for command line arguments: provide as a list of comma separated values with no spaces, e.g. `describe,univariate_plots,correlation_plots`
 * **Values:** `None`, or [`'describe'`, `'univariate_plots'`, or `'correlation_plots'`] - provided in format above
     * `describe` - don't run or output the set of standard pandas functions (i.e. `Describe()`, `Dtypes()`, and `nunique()`) as `.csv` files
-    * `univariate_plots` - don't output individual univariate analysis plots illustrating features vs. outcome (by default STREAMLINE outputs these plots for any feature with a significant univariate association based on `sig_cutoff`)
+    * `univariate_plots` - don't output individual univariate analysis plots illustrating features vs. outcome (by default STREAMLINE outputs these plots for any feature with a significant univariate association based on [`sig_cutoff`](#sig-cutoff))
     * `correlation_plots` - don't output feature correlation heatmaps for the 'initial' or 'processed' data EDA
 
 #### top_uni_features
@@ -458,7 +458,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** indicates the maximum number of top scorign features to retain in the datasets prior to phase 5 modeling (based on the scores of the feature importance estimation algorithms, i.e. Mutual Information and MultiSURF)
 * **Format:** (int or `None`)
 * **Values:** any positive integer > `1` is acceptable
-* **Tips:** we have set the default of this parameter to `2000` primarily to limit the computational burden of modeling. Users should use their own judgment in setting this parameter for the dataset/task in hand. When set to `None` (and `filter_poor_features = True`), STREAMLINE will automatically remove any feature that scored <= 0 for each feature importance estimation algorithm run. When set to an integer such as `2000` (and `filter_poor_features = True`), STREAMLINE will first remove any feature that scored <= `0` for each feature importance estimation algorithm run, then alternate between the sets of feature importance rankings keeping the top scoring (non-redundant) features from each algorithm.
+* **Tips:** we have set the default of this parameter to `2000` primarily to limit the computational burden of modeling. Users should use their own judgment in setting this parameter for the dataset/task in hand. When set to `None` (and [`filter_poor_features](#filter-poor-features) = `True`), STREAMLINE will automatically remove any feature that scored <= 0 for each feature importance estimation algorithm run. When set to an integer such as `2000` (and [`filter_poor_features](#filter-poor-features) = `True`), STREAMLINE will first remove any feature that scored <= `0` for each feature importance estimation algorithm run, then alternate between the sets of feature importance rankings keeping the top scoring (non-redundant) features from each algorithm.
 
 #### export_scores 
 * **Description:** indicates whether or not to export barplots for the feature importance estimation algorithms (Mutual Information and MultiSURF) summarizing average feature importance scores over CV training partitions
@@ -501,7 +501,7 @@ This section will go into greater depth for each run parameter, primarily using 
     * Educational Learning Classifier System (eLCS)
     * 'X' Classifier System (XCS)
     * Extended Supervised Tracking Classifier System (ExSTraCS)
-* **Tips:** setting this parameter to `None` will run all algorithms in STREAMLINE with the exception of any algorithms specified within `exclude`. To run a fairly comprehensive subset of algorithms (without running them all), we recommend `['NB','LR','EN','DT','RF','XGB','SVM','ANN','KNN','GP','ExSTraCS]`. Specifying algorithms using this parameter is most convenient when you want to run a small subset of algorithms, e.g. `['NB','LR','DT']`
+* **Tips:** setting this parameter to `None` will run all algorithms in STREAMLINE with the exception of any algorithms specified within [`exclude`](#exclude). To run a fairly comprehensive subset of algorithms (without running them all), we recommend `['NB','LR','EN','DT','RF','XGB','SVM','ANN','KNN','GP','ExSTraCS]`. Specifying algorithms using this parameter is most convenient when you want to run a small subset of algorithms, e.g. `['NB','LR','DT']`
 
 #### exclude  
 * **Description:** used to specify which machine learning modeling algorithms to exclude from analysis 
@@ -509,7 +509,7 @@ This section will go into greater depth for each run parameter, primarily using 
     1. for notebook or config file modes: provide a (list) of (str) algorithm identifiers, e.g. `['eLCS','XCS']`
     2. for command line arguments: provide as a list of comma separated values with no spaces, e.g. `eLCS,XCS`
 * **Values:** same as for `algorithms` above
-* **Tips:** setting this parameter to `None` just tells STREAMLINE not to exclude any additional algorithms not already specified within `algorithms`. Currently, by default STREAMLINE excludes `eLCS` and `XCS` from an analysis. Specifying algorithms using this parameter is most convenient when you want to exclude a small subset of algorithms, e.g. `['SVM','eLCS','XCS']`.
+* **Tips:** setting this parameter to `None` just tells STREAMLINE not to exclude any additional algorithms not already specified within [`algorithms`](#algorithms). Currently, by default STREAMLINE excludes `eLCS` and `XCS` from an analysis. Specifying algorithms using this parameter is most convenient when you want to exclude a small subset of algorithms, e.g. `['SVM','eLCS','XCS']`.
 
 #### training_subsample 
 * **Description:**  the number of randomly chosen instances in the training data used to use for training certain longer running algorithms (i.e. XGB,SVM,KN,ANN,LR,eLCS,XCS,ExStraCS)
@@ -529,7 +529,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Values:** We recommend `'balanced_accuracy'`, `'roc_auc'`, or `'f1'` (based on the users needs/priorities), however it can be any available metric identifier from (https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter)
 
 #### metric_direction
-* **Description:** indicates whether the `primary_metric` should be maximized or minimized during hyperparameter optimization
+* **Description:** indicates whether the [`primary_metric`](#primary_metric) should be maximized or minimized during hyperparameter optimization
 * **Format:** (str)
 * **Values:** `maximize` or `minimize`
 * **Tips:** For almost all metrics (including `'balanced_accuracy'`, `'roc_auc'`, or `'f1'`), this should be `maximize`
@@ -544,7 +544,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** an [Optuna](https://optuna.org/) parameter controlling the total number of *seconds* until a given hyperparameter sweep stops running new trials
 * **Format:** (int, or `None`)
 * **Values:** any positive integer > `1`, (`900` by default, i.e. 15 minutes), or `None`
-* **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None`, however this will force all algorithms to fully complete the number of trials specified by `n_trials`. When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
+* **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None`, however this will force all algorithms to fully complete the number of trials specified by [`n_trials`](#n-trials). When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
 
 #### export_hyper_sweep_plots
 * **Description:** indicates whether or not to generate an [Optuna](https://optuna.org/)-plot visualizing the hyperparameter sweep of an algorithm on a given dataset
@@ -576,14 +576,14 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Tips:** LCS algorithms learn a population (i.e set) of rules that collectively constitute the learned model. When this parameter is larger, LCS will take longer to run. However, LCS algorithms require a larger rule-population to solve more complex problems or analyze larger datasets. For most users we recommend the default value of `2000` as a starting point, however, as a key run parameter, a larger rule-population is typically expected to improve LCS algorithm performance. Watch this [video](https://www.youtube.com/watch?v=CRge_cZ2cJc) to learn LCS basics.
 
 #### lcs_timeout 
-* **Description:** similar to `timeout`, this [Optuna](https://optuna.org/) parameter controlling the total number of *seconds* until an LCS algorithm hyperparameter sweep stops running new trials. LCS uses a separate run parameter for this since it can take alot longer to run an LCS hyperparameter sweep.
+* **Description:** similar to [`timeout`](#timeout), this [Optuna](https://optuna.org/) parameter controlling the total number of *seconds* until an LCS algorithm hyperparameter sweep stops running new trials. LCS uses a separate run parameter for this since it can take alot longer to run an LCS hyperparameter sweep.
 * **Format:** (int, or `None`)
 * **Values:** any positive integer > `1`, (`1200` by default, i.e. 20 minutes), or `None`
-* **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None` if `do_lcs_sweep = True`, however this will force LCS algorithms to fully complete the number of trials specified by `n_trials`. When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given LCS algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one LCS algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
+* **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None` if [`do_lcs_sweep](#do-lcs-sweep) = `True`, however this will force LCS algorithms to fully complete the number of trials specified by [`n_trials`](#n-trials). When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given LCS algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one LCS algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
 
 #### model_resubmit
 * **Description:** boolean flag telling STREAMLINE that this is a secondary run attempt of phase 5 (i.e. modeling)
-* **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
+* **Format:** [Command Line Argument] just use flag (i.e. `--model-resubmit`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 * **Tips:** set this parameter to `True` either because (1) one of the previous model training jobs timed-out, or failed and the user wants to re-submit them or (2) the user had previously run phase 5 on a subset of available algorithms, but now they'd like to run additional algorithms
 
@@ -605,7 +605,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** the evaluation metric used to weigh model feature importance estimates in the composite feature importance plots
 * **Format:** (str)
 * **Values:** `balanced_accuracy` or `roc_auc`
-* **Tips:** we recommend setting the this parameter the same as `primary_metric` if possible
+* **Tips:** we recommend setting the this parameter the same as [`primary_metric`](#primary-metric) if possible
 
 #### top_model_fi_features
 * **Description:** the number of top scoring features (based on model feature importance estimates) to illustrate in feature importance figures (i.e. feature importance boxplots, and composite feature importance plots)
@@ -632,12 +632,12 @@ This section will go into greater depth for each run parameter, primarily using 
 
 #### del_time
 * **Description:** boolean flag telling STREAMLINE to delete individual runtime files from the output experiment folder
-* **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
+* **Format:** [Command Line Argument] just use flag (i.e. `--del-time`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 
 #### del_old_cv
 * **Description:** boolean flag telling STREAMLINE to delete intermediary cross validation datasets (i.e. training and testing datasets prior to completed data processing, imputation, scaling, and feature selection) form the output experiment folder
-* **Format:** [Command Line Argument] just use flag (i.e. `--do-report`), [Configuration File] (bool) 
+* **Format:** [Command Line Argument] just use flag (i.e. `--del-old-cv`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
 * **Tips:** this parameter is only relevant if [overwrite_cv](#overwrite-cv) was set to `False`
 
@@ -648,7 +648,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** indicates whether or not to run STREAMLINE in parallel (locally) with CPU core multiprocessing
 * **Format:** (bool)
 * **Values:** `True` or `False`
-* **Tips:** this parameter is only relevant when `run_cluster = False`
+* **Tips:** this parameter is only relevant when [`run_cluster](#run-cluster) = `False`
 
 #### run_cluster
 * **Description:** indicates whether or not to run STREAMLINE on an dask-compatible computing cluster (HPC)
@@ -695,7 +695,7 @@ This section will go into greater depth for each run parameter, primarily using 
 ## Guidelines for Setting Parameters
 
 ### Ensuring Output Reproducibility
-STREAMLINE is completely reproducible when the [timeout](#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including `random_seed`). 
+STREAMLINE is completely reproducible when the [timeout](#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including [`random_state`](#random-state)). 
 
 When [timeout](#timeout) is *not* set to `None`, STREAMLINE output can sometimes vary slightly (particularly when parallelized) since Optuna (for hyperparameter optimization) may not complete the same number of optimization trials within the user specified time limit on different
 computing resources. 
@@ -704,7 +704,7 @@ However, having a [timeout](#timeout) value specified helps ensure STREAMLINE ru
 
 ### Reducing Runtime
 Conducting a more effective ML analysis typically demands a much larger amount of computing power and runtime. However, we provide general guidelines here for limiting overall runtime of a STREAMLINE experiment.
-1. Run on a fewer number of [datasets](#dataset_path) at once.
+1. Run/include a fewer number of datasets in [dataset_path](#dataset_path) at once.
 2. Run using fewer ML [algorithms](#algorithms) at once:
     * Naive Bayes, Logistic Regression, and Decision Trees are typically fastest.
     * Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).

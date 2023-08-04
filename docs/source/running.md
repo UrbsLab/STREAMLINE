@@ -58,38 +58,38 @@ Before running, update the run parameters within the 'STREAMLINE RUN PARAMETERS'
 #### Easy Mode
 This mode is most convenient if you want to run the notebook on other data, but want to be prompted to enter/select essential parameter information instead of adjusting parameters within run parameter code cells. This mode will prompt the user for essential 'experiment' and dataset-specific run parameter values. This mode is also convenient as it allows you to select datasets directly from your local computer rather than creating new folders within the temporary Colab Notebook workspace. All other non-essential run parmameters need to be updated within respective code cells.
 
-1. In the first code cell, set (`demo_run = False`) and (`use_data_prompt = True`)
+1. In the first code cell, set ([`demo_run'](parameters.md#demo-run) = `False`) and ([`use_data_prompt'](parameters.md#use-data-prompt) = `True`)
     * *This tells the notebook that you don't want to run the demo datasets, and you want to be 'prompted' to enter/select essential run parameters rather than edit the respective code cells*
 2. \[Optional] Update non-essential run parameters (within respective code cells) to the users specifications
-    * *Most commonly, this would include `n_splits`, `categorical_cutoff`, and `algorithms`
-    * *We also strongly recommend specifying `categorical_feature_headers` and/or `quantitiative_feature_headers` as lists of feature names in the dataset(s) headers that should be treated as either categorical or quanatiative*
+    * *Most commonly, this would include [`n_splits`](parameters.md#cv-partitions), [`categorical_cutoff`](parameters.md#categorical-cutoff), and [`algorithms`](parameters.md#algorithms)
+    * *We also strongly recommend specifying [`categorical_feature_headers`](parameters.md#categorical-feature-path) and/or [`quantitiative_feature_headers`](parameters.md#quantitative-feature-path) as lists of feature names in the dataset(s) headers that should be treated as either categorical or quanatiative*
     * *If only one of these lists is specified, all features not specified in that list will be treated as the other feature type by default*
 3. Open the `Runtime` menu and select `Run all`.
 4. Reply to the prompts requesting the following essential parameter values: 
-    * `experiment_name` - a unique name for the ouput folder for the current STREAMLINE 'experiment'
-    * `data_path` - use file navigation window to select the folder containing one or more 'target datasets' to be analyzed
+    * [`experiment_name`](parameters.md#experiment-name) - a unique name for the ouput folder for the current STREAMLINE 'experiment'
+    * [`data_path`](parameters.md#dataset-path) - use file navigation window to select the folder containing one or more 'target datasets' to be analyzed
         * *These datasets must adhere to the formatting detailed in '[Input Data Requirements](data.md#input-data-requirements)'*
-    * `class_label` - specify the header name for the outcome column in the dataset(s), e.g. 'Class'
-    * `instance_label` - specify the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
-    * `match_label` - specify the header name for the match/group column in the dataset(s) or specify `None` if not relevant
-    * `applyToReplication` - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
-    * `rep_data_path` - use file navigation window to select the folder containing one or more 'replication datasets' to be analyzed
+    * [`class_label`](parameters.md#class-label) - specify the header name for the outcome column in the dataset(s), e.g. 'Class'
+    * [`instance_label`](parameters.md#instance-label) - specify the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
+    * [`match_label`](parameters.md#match-label) - specify the header name for the match/group column in the dataset(s) or specify `None` if not relevant
+    * [`applyToReplication`](parameters.md#applytoreplication) - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
+    * [`rep_data_path`](parameters.md#rep-data-path) - use file navigation window to select the folder containing one or more 'replication datasets' to be analyzed
         * *All datasets in this folder should be replicates for a single 'target dataset', and similarly adhere to [formatting](data.md#input-data-requirements) requirments*
-    * `dataset_for_rep` - specify the filename (with extension) of the original 'target dataset' to indicate which models the replication data will be applied to
+    * [`dataset_for_rep`](parameters.md#dataset-for-rep) - specify the filename (with extension) of the original 'target dataset' to indicate which models the replication data will be applied to
 * *After providing valid entries for these prompts, all phases of STREAMLINE will run in sequence within the notebook.*
 * *STREAMLINE outputfiles are automatically saved to the output 'experiment folder' named `UserOutput` within the temporary notebook workspace, as well as optionally downloaded to the users computer after completion* 
 
 #### Manual Mode
-1. In the first code cell, set (`demo_run = False`) and (`use_data_prompt = False`)
+1. In the first code cell, set ([`demo_run'](parameters.md#demo-run) = `False`) and ([`use_data_prompt'](parameters.md#use-data-prompt) = `False`)
     * *This tells the notebook that you don't want to run the demo datasets, but you want update all run parameters (essential and non-essential) within respective code cells*
-2. Click on the 'Files' tab on the left side of the notebook (pictured as a blank folder), and right-click on 'content' folder (i.e. the temporary google colab workspace) and create a 'New Folder' to contain your target dataset(s), called `UserData` (or some other name if you also update the `data_path` parameter)
+2. Click on the 'Files' tab on the left side of the notebook (pictured as a blank folder), and right-click on 'content' folder (i.e. the temporary google colab workspace) and create a 'New Folder' to contain your target dataset(s), called `UserData` (or some other name if you also update the [`data_path`](parameters.md#dataset-path) parameter)
 3. Save your [formatted](data.md#input-data-requirements) target dataset(s) within this folder
     * *Note: We recommend making sure datasets run within Google Colab do not contain any sensitive or protected health information (PHI)*
 4. \[Optional] Repeat steps 2-3 for any replication dataset(s) you wish to apply to the models trained for a specific 'target dataset'
-    * *If you have no replication data, make sure to update the `applyToReplication` parameter to `False`*
+    * *If you have no replication data, make sure to update the [`applyToReplication`](parameters.md#applytoreplication) parameter to `False`*
 5. Update (essential and non-essential) run parameter code cells to the dataset and users specifications
-    * *Note: You can leave `output_path` as `/content/UserOutput` and all output will be saved to this automatically created folder*
-    * *If you run more than one STREAMLINE 'experiments' in a single session, make sure to update `experiment_name` each time to avoid overwriting a prior experiment*
+    * *Note: You can leave [`output_path`](parameters.md#output-path) as `/content/UserOutput` and all output will be saved to this automatically created folder*
+    * *If you run more than one STREAMLINE 'experiments' in a single session, make sure to update [`experiment_name`](parameters.md#experiment-name) each time to avoid overwriting a prior experiment*
 6. Open the `Runtime` menu and select `Run all`
 * *Note: Common errors preventing the notebook from running to completion include issues with file/path names, dataset formatting, or other incorrect changes to other run parameter settings*
 * *The notebook includes comments after each run parameter, indicating the format and value options for each*
@@ -119,26 +119,26 @@ Begin by opening `STREAMLINE-Notebook.ipypnb` as a Jupyter Notebook (steps 1-3 a
 
 *Note that, for brevity, some parameter names used in the notebook (used below) are slightly different from those used in the command line. Details on STREAMLINE run parameters are given [here](parameters.md).*
 
-1. In the first code cell, set (`demo_run = False`)
+1. In the first code cell, set ([`demo_run'](parameters.md#demo-run) = `False`)
     * *This tells the notebook that you don't want to run the demo datasets, and you want to be 'prompted' to enter/select essential run parameters rather than edit the respective code cells*
 2. Update essential run parameters (within respective code cells) to the user/dataset's specifications
-    * `experiment_name` - a unique name for the ouput folder for the current STREAMLINE 'experiment'
-    * `data_path` -  path to the folder containing one or more 'target datasets' to be analyzed
+    * [`experiment_name`](parameters.md#experiment-name) - a unique name for the ouput folder for the current STREAMLINE 'experiment'
+    * [`data_path`](parameters.md#dataset-path) -  path to the folder containing one or more 'target datasets' to be analyzed
         * *These datasets must adhere to the formatting detailed in '[Input Data Requirements](data.md#input-data-requirements)'*
-    * `output_path` - path to the folder (that will be automatically created if it doesn't yet exist) in which the 'experiment folder' including all STREAMLINE output will be saved
+    * [`output_path`](parameters.md#output-path) - path to the folder (that will be automatically created if it doesn't yet exist) in which the 'experiment folder' including all STREAMLINE output will be saved
         * *Note: You can leave `output_path` as `./UserOutput` if you've named this folder `UserOutput`*
-    * `class_label` - the header name for the outcome column in the dataset(s), e.g. 'Class'
-    * `instance_label` - the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
-    * `match_label` - the header name for the match/group column in the dataset(s) or specify `None` if not relevant
-    * `ignore_features` - list of text-valued feature names in target datasets that you want STREAMLINE to drop from the analysis, or specify `None` if not relevant
-    * `categorical_feature_headers`  - list of text-valued feature names in the dataset(s) headers that should be treated as categorical or specify `None` if `quantitative_feature_headers` were specified and you want all other features to be treated as categorical, or you want feature types to be automatically decided using `categorical_cutoff`
-    * `quantitiative_feature_headers` - list of text-valued feature names in the dataset(s) headers that should be treated as quantitative or specify `None` if `categorical_feature_headers` were specified and you want all other features to be treated as quantitative, or you want feature types to be automatically decided using `categorical_cutoff`
-    * `applyToReplication` - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
-    * `rep_data_path` - path to folder containing one or more 'replication datasets' to be analyzed
+    * [`class_label`](parameters.md#class-label) - the header name for the outcome column in the dataset(s), e.g. 'Class'
+    * [`instance_label`](parameters.md#instance-label) - the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
+    * [`match_label`](parameters.md#match-label) - the header name for the match/group column in the dataset(s) or specify `None` if not relevant
+    * [`ignore_features`](parameters.md#ignore-features-path) - list of text-valued feature names in target datasets that you want STREAMLINE to drop from the analysis, or specify `None` if not relevant
+    * [`categorical_feature_headers`](parameters.md#categorical-feature-path)  - list of text-valued feature names in the dataset(s) headers that should be treated as categorical or specify `None` if [`quantitiative_feature_headers`](parameters.md#quantitative-feature-path) were specified and you want all other features to be treated as categorical, or you want feature types to be automatically decided using [`categorical_cutoff`](parameters.md#categorical-cutoff)
+    * [`quantitiative_feature_headers`](parameters.md#quantitative-feature-path) - list of text-valued feature names in the dataset(s) headers that should be treated as quantitative or specify `None` if [`categorical_feature_headers`](parameters.md#categorical-feature-path) were specified and you want all other features to be treated as quantitative, or you want feature types to be automatically decided using [`categorical_cutoff`](parameters.md#categorical-cutoff)
+    * [`applyToReplication`](parameters.md#applytoreplication) - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
+    * [`rep_data_path`](parameters.md#rep-data-path) - path to folder containing one or more 'replication datasets' to be analyzed
         * *All datasets in this folder should be replicates for a single 'target dataset', and similarly adhere to [formatting](data.md#input-data-requirements) requirments*
-    * `dataset_for_rep` - path to the file (with extension) of the original 'target dataset' to indicate which models the replication data will be applied to
+    * [`dataset_for_rep`](parameters.md#dataset-for-rep) - path to the file (with extension) of the original 'target dataset' to indicate which models the replication data will be applied to
 3. \[Optional] Update non-essential run parameters (within respective code cells) to the users specifications
-    * *Most commonly, this would include `n_splits`, `categorical_cutoff`, and `algorithms`
+    * *Most commonly, this would include [`n_splits`](parameters.md#cv-partitions), [`categorical_cutoff`](parameters.md#categorical-cutoff), and [`algorithms`](parameters.md#algorithms)
 4. Open the `Kernel` menu and select `Restart & Run All`. *This will run all code cells of the notebook, i.e. all phases of STREAMLINE.* 
 * *Note: It can take multiple hours or longer to run this notebook on larger datasets and/or using all machine learning modeling algorithms. We recommend using a computing cluster for such tasks if possible.*
 
@@ -158,10 +158,10 @@ All phases of STREAMLINE can be run (in sequence) with a single simple command b
 1. Open your command line interface and navigate to the installed `STREAMLINE` directory.
 2. To run the [demonstration datasets](data.md#demonstration-data), skip to step 5. To view the pre-specified configuration file, click [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/local.cfg).
 3. Assuming you want to run your own dataset(s), further navigate into the `run_configs` folder and open `local.cfg` in a text editor to update the essential and non-essential run parameters accordingly (see [run parameters](parameters.md) and [terminal text editors](install.md#terminal-text-editors) for help).
-    * *Under 'phases to run' the `do_till_report` parameter (when set to `True`) will automatically run all phases up until `do_replicate` by default. `do_replicate`, `do_rep_report` and `do_cleanup` must all be specified individually*
-    * *To run a subset of phases (e.g. phases 1-4), set `do_till_report = False`, and `do_eda`, `do_dataprep`, `do_feat_imp`, and `do_feat_sel` each to `True` and the other 'do' phases to `False`*
-    * *Make sure to keep `run_cluster = False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
-    * *Optionally set `run_parallel = False`, which will turn off local multi-core CPU parallelization*
+    * *Under 'phases to run' the [`do_till_report`](parameters.md#do-till-report) parameter (when set to `True`) will automatically run all phases up until [`do_replicate`](parameters.md#do-replicate) by default. [`do_replicate`](parameters.md#do-replicate), [`do_rep_report`](parameters.md#do-rep-report) and [`do_cleanup`](parameters.md#do-cleanup) must all be specified individually*
+    * *To run a subset of phases (e.g. phases 1-4), set [`do_till_report`](parameters.md#do-till-report) = `False`, and [`do_eda`](parameters.md#do-eda), [`do_dataprep`](parameters.md#do-dataprep), [`do_feat_imp`](parameters.md#do-feat-imp), and [`do_feat_sel`](paramters.md#do-feat-sel) each to `True` and the other 'do' phases to `False`*
+    * *Make sure to keep [`run_cluster'](parameters.md#run-cluster) = `False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
+    * *Optionally set [`run_parallel'](parameters.md#run-parallel) = `False`, which will turn off local multi-core CPU parallelization*
 4. Navigate back to the `STREAMLINE` base directory.
 5. Run the following command within the `STREAMLINE` base directory:
 
@@ -174,12 +174,12 @@ python run.py -c run_configs/local.cfg
 STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
 * *Note: Command line run parameters have slightly different identifiers than for the configuration file (see [run parameters](parameters.md))*
 * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
-    * *Make sure to specify `-run-cluster = False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
-    * *Optionally specify `-run-parallel = False`, which will turn off local multi-core CPU parallelization*
-* *Note: When specifying `ignore_features_path`, `categorical_feature_path`, or `quantitative_feature_path` using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
+    * *Make sure to specify [`--run-cluster'](parameters.md#run-cluster) = `False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
+    * *Optionally specify [`--run-parallel'](parameters.md#run-parallel) = `False`, which will turn off local multi-core CPU parallelization*
+* *Note: When specifying [`--fi`](parameters.md#ignore-features-path), [--cf`](parameters.md#categorical_feature_path), or [--qf`](parameters.md#quantitative_feature_path) using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
 
 1. Open your command line interface and navigate to the installed `STREAMLINE` directory. 
-2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, but we set `-run-cluster = False` (necessary) and `-run-parallel = True` (optional) for each example.
+2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, but we set [`--run-cluster'](parameters.md#run-cluster) = `False` (necessary) and optionally [`--run-parallel'](parameters.md#run-parallel) = `True` for each example.
 
 ##### All Phases at Once (Replication Data Included)
 ```
@@ -230,7 +230,7 @@ python run.py --do-compare-dataset --out-path DemoOutput --exp-name demo_experim
 ```
 
 ###### Phase 8 - Replication
-If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating [`--rep-path`](parameters.md#rep-data-path) and [`--dataset`](parameters.md#dataset-for-rep) for each).
 ```
 python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster False --run-parallel True
 ```
@@ -241,7 +241,7 @@ Run the following command to generate the main PDF report (summarizing testing d
 python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run-cluster False --run-parallel True
 ```
 
-If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating [`--rep-path`](parameters.md#rep-data-path) and [`--dataset`](parameters.md#dataset-for-rep) for each).
 ```
 python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster False --run-parallel True
 ```
@@ -284,12 +284,12 @@ A gist of the application is that you can open a new terminal that will stay ope
 
 #### Cluster-Specific Run Parameters
 You should be aware of 3 cluster-specific run parameters:
-* `run-cluster`: flag for type of cluster, discussed in detail below (when not `False`, this over-rides any value specified for `run-parallel`) 
-* `queue`: the partition queue used for job submissions
-* `res-mem`: memory (in GB) reserved per job
+* [`run-cluster`](parameters.md#run-cluster): flag for type of cluster, discussed in detail below (when not `False`, this over-rides any value specified for `run-parallel`) 
+* [`queue`](parameters.md#queue): the partition queue used for job submissions
+* [`reserved_memory`](parameters.md#reserved-memory): memory (in GB) reserved per job
 
 ##### Run Cluster Parameter
-The `run_cluster` parameter is the most important parameter here. It should be set to `False` when running locally, but to use a cluster, specify as a string value for the cluster-type. Currently, clusters supported by [dask-jobqueue](https://jobqueue.dask.org/en/latest/api.html) are supported with the following settings options for `run_cluster`:
+The [`run-cluster`](parameters.md#run-cluster) parameter is the most important parameter here. It should be set to `False` when running locally, but to use a cluster, specify as a string value for the cluster-type. Currently, clusters supported by [dask-jobqueue](https://jobqueue.dask.org/en/latest/api.html) are supported with the following settings options for [`run-cluster`](parameters.md#run-cluster):
 * `LSF`: LSFCluster
 * `SLURM`: SLURMCluster
 * `HTCondor`: HTCondorCluster
@@ -300,18 +300,18 @@ The `run_cluster` parameter is the most important parameter here. It should be s
 * `UGE`: SGECluster variant used at our institution
 * `Local`: LocalCluster
 
-Additionally, the earlier/legacy method of STREAMLINE manual job submission is supported for `SLURM` and `LSF` using the string values below for `run-cluster`. This will generate and submit jobs using shell files as was used in *STREAMLINE release 0.2.5* and earlier. This legacy option ensures that minimal memory/computation is used on the head node (i.e. job-submit node).
+Additionally, the earlier/legacy method of STREAMLINE manual job submission is supported for `SLURM` and `LSF` using the string values below for [`run-cluster`](parameters.md#run-cluster). This will generate and submit jobs using shell files as was used in *STREAMLINE release 0.2.5* and earlier. This legacy option ensures that minimal memory/computation is used on the head node (i.e. job-submit node).
 * `SLURMOld`: Legacy job submission for SLURMCluster
 * `LSFOld` Legacy job submission for LSFCluster 
 
 ##### Queue and Memory Parameters
-Check with your cluster administrator on how to set these these cluster-specific parameters. We have set defaults for these parameters for use on our own institution's HPC (i.e. `queue = defq`, and `res-mem = 4`). 
+Check with your cluster administrator on how to set these these cluster-specific parameters. We have set defaults for these parameters for use on our own institution's HPC (i.e. [`queue`](parameters.md#queue) = `defq`, and [`reserved_memory`](parameters.md#reserved-memory) = `4`). 
 
 #### Using a Configuration File (Cluster)
-This is largely the same as running STREAMLINE from a [configuration file locally](#using-a-configuration-file-locally), with the addition of three cluster-specific parameters ( `run-cluster`,`queue`, and `res-mem`).
+This is largely the same as running STREAMLINE from a [configuration file locally](#using-a-configuration-file-locally), with the addition of three cluster-specific parameters ( [`run-cluster`](parameters.md#run-cluster),[`queue`](parameters.md#queue), and [`reserved_memory`](parameters.md#reserved-memory)).
 
 1. Open your command line interface within your HPC and navigate to the installed `STREAMLINE` directory.
-2. Edit any run parameters within a configuration file according to your needs (making sure to update `run-cluster`,`queue`, and `res-mem` within the multiprocessing section).
+2. Edit any run parameters within a configuration file according to your needs (making sure to update [`run-cluster`](parameters.md#run-cluster),[`queue`](parameters.md#queue), and [`reserved_memory`](parameters.md#reserved-memory) within the multiprocessing section).
   * *We have included example configuration files set up to run the [demonstration datasets](data.md#demonstration-data) on three different clusters we utilize (i.e. `cedars.cfg` `cedars_old.cfg` and `upenn.cfg`), using `SLURM`, `UGE`, and `LSF`, respectively. We will focus here on `SLURM` as an example with the respective configuration file (`cedars.cfg`) found [here](https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg)*
 2. Run the following command within the `STREAMLINE` base directory:
 ```
@@ -322,12 +322,12 @@ python run.py -c run_configs/cedars.cfg
 * *Note: When using this run strategy, it is strongly recommended to use a [terminal emulator](#tmux) and check with your cluster administrator to make sure that your system allows light weight, but longer duration code to be run from the head node that monitors job completion and can submit new jobs. If not, we recommend running STREAMLINE one phase at a time in legacy mode (i.e. `run-cluster` = `SLURMOld` or `LSFOld`) which only uses the head node to submit jobs.* 
 
 #### Using Command-Line Arguments (Cluster)
-This is largely the same as running STREAMLINE using [command-line arguments locally](#using-command-line-arguments) with the addition of three cluster-specific parameters ( `run-cluster`,`queue`, and `res-mem`), and users can ignore `-run-parallel`.
+This is largely the same as running STREAMLINE using [command-line arguments locally](#using-command-line-arguments) with the addition of three cluster-specific parameters ( [`--run-cluster`](parameters.md#run-cluster),[`queue`](parameters.md#queue), and [`--res-mem`](parameters.md#reserved-memory)), and users can ignore [`--run-parallel`](parameters.md#run-parallel).
 
 1. Open your command line interface within your HPC and navigate to the installed `STREAMLINE` directory.
-2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Also, here `-run-parallel` is automatically overridden by `-run-cluster = SLURM` (or whatever cluster-name is specified or than `False`).
+2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Also, here [`--run-parallel`](parameters.md#run-parallel) is automatically overridden by [`--run-cluster`](parameters.md#run-cluster) = `SLURM` (or whatever cluster-name is specified or than `False`).
   * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
-  * *Note: When specifying `ignore_features_path`, `categorical_feature_path`, or `quantitative_feature_path` using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
+  * *Note: When specifying [`--fi`](parameters.md#ignore-features-path), [--cf`](parameters.md#categorical_feature_path), or [--qf`](parameters.md#quantitative_feature_path) using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
 
 ##### All Phases at Once (Replication Data Included)
 * *Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.*
@@ -342,7 +342,7 @@ python run.py --do-till-report --do-clean --data-path ./data/DemoData --out-path
 ```
 
 ##### One Phase at a Time
-The following commands can be run one after the other (in sequence), waiting for all jobs of the previous phase to complete successfully. For minimal head node overhead, we recommend running these jobs using ``--run-cluster` = `SLURMOld` or `LSFOld`` rather than `SLURM` (if available to you).
+The following commands can be run one after the other (in sequence), waiting for all jobs of the previous phase to complete successfully. For minimal head node overhead, we recommend running these jobs using [`--run-cluster`](parameters.md#run-cluster) = `SLURMOld` or `LSFOld`` rather than `SLURM` (if available to you).
 
 ###### Phase 1 - Data Exploration & Processing:
 ```
@@ -380,7 +380,7 @@ python run.py --do-compare-dataset --out-path DemoOutput --exp-name demo_experim
 ```
 
 ###### Phase 8 - Replication
-If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating [`--rep-path`](parameters.md#rep-data-path) and [`--dataset`](parameters.md#rep-data-path) for each).
 ```
 python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```
@@ -391,7 +391,7 @@ Run the following command to generate the main PDF report (summarizing testing d
 python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
-If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
+If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating [`--rep-path`](parameters.md#rep-data-path) and [`--dataset`](parameters.md#rep-data-path) for each).
 ```
 python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```

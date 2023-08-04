@@ -14,37 +14,37 @@ As mentioned, the Google Colab notebook will automatically download the output f
 After running STREAMLINE you will find the 'experiment folder' (named by the [experiment_name](parameters.md#experiment-name) parameter) saved to folder specified by [output_path](parameters.md#output-path). In the Colab Notebook demo, this would be `/content/DemoOutput/demo_experiment/`. 
 
 Opening the above experiment folder you will find the following folder/file hierarchy:
-    * `DatasetComparisons` - all statistical significance results and plots for comparing modeling performance across multiple 'target datasets' run
-        * `dataCompBoxplots` - all data comparison boxplots
-    * `hcc-data_example` - all output specific to the first 'target dataset' analyzed
-        * `CVDatasets` - copies of all training and testing datasets in .csv format (as well as intermediate files if [overwrite_cv](parameters.md#overwrite-cv) = `False`)
-        * `exploratory` - all phase 1 exploratory data analysis (EDA) output, files at this level are post-processed EDA output
-            * `initial` - all pre-processed EDA output
-            * `univariate_analyses` - all univariate analysis results and plots
-        * `feature_selection` - all phase 3 & 4 output (feature importance estimation and feature selection)
-            * `multisurf` - MultiSURF scores and a summary figure
-            * `mutual_information` - mutual information scores and a summary figure
-        * `model_evaluation` - all model evaluation output (phase 6)
-            * `feature_importance` - all model feature importance estimation scores and figures
-            * `metricBoxplots` - all evaluation metric boxplots comparing algorithm performance
-            * `pickled_metrics` - all evaluation metrics pickled separately for each algorithm and CV dataset combo
-            * `statistical_comparisons` - all statistical significance results comparing algorithm performance
-        * `models` - all model output (phase 5), including pickled model objects and selected hyperparameter settings for each algorithm and CV dataset combo
-            * `pickledModels` - all models saved as pickled objects
-        * `scale_impute` - all trained imputation and scaling maps saved as pickled objects
-    * `hcc-data_example_custom` - contains all output specific to the second 'target dataset' analyzed
-        * *Has the same folder hierarchy as `hcc-data_example` above with the addition of a `replication` folder*
-        * `replication` - all phase 8 (i.e. replication) output for the second 'target dataset' analyzed
-            * `hcc-data_example_custom_rep` - all replication output for the this specific 'replication dataset' (in this demo there was only one)
-                * `exploratory` - all exploratory data analysis (EDA) output for this 'replication dataset', files at this level are post-processed EDA output
-                    * `initial` - all pre-processed EDA output for this 'replication dataset'
-                * `model_evaluation` - all model evaluation output for this 'replication dataset'
-                    * `metricBoxplots` - all evaluation metric boxplots comparing algorithm performance for this 'replication dataset'
-                    * `pickled_metrics` - all evaluation metrics pickled separately for each algorithm and CV dataset combo (for this 'replication dataset')
-                    * `statistical_comparisons` - all statistical significance results comparing algorithm performance (for this 'replication dataset')
-    * `jobs` - contains cluster job submission files *(empty if output 'cleaning' applied)*
-    * `jobsCompleted` - contains cluster checks for job completion *(empty if output 'cleaning' applied)*
-    * `logs` - contains cluster job output and error logs *(empty if output 'cleaning' applied)*
+* `DatasetComparisons` - all statistical significance results and plots for comparing modeling performance across multiple 'target datasets' run
+    * `dataCompBoxplots` - all data comparison boxplots
+* `hcc-data_example` - all output specific to the first 'target dataset' analyzed
+    * `CVDatasets` - copies of all training and testing datasets in .csv format (as well as intermediate files if [overwrite_cv](parameters.md#overwrite-cv) = `False`)
+    * `exploratory` - all phase 1 exploratory data analysis (EDA) output, files at this level are post-processed EDA output
+        * `initial` - all pre-processed EDA output
+        * `univariate_analyses` - all univariate analysis results and plots
+    * `feature_selection` - all phase 3 & 4 output (feature importance estimation and feature selection)
+        * `multisurf` - MultiSURF scores and a summary figure
+        * `mutual_information` - mutual information scores and a summary figure
+    * `model_evaluation` - all model evaluation output (phase 6)
+        * `feature_importance` - all model feature importance estimation scores and figures
+        * `metricBoxplots` - all evaluation metric boxplots comparing algorithm performance
+        * `pickled_metrics` - all evaluation metrics pickled separately for each algorithm and CV dataset combo
+        * `statistical_comparisons` - all statistical significance results comparing algorithm performance
+    * `models` - all model output (phase 5), including pickled model objects and selected hyperparameter settings for each algorithm and CV dataset combo
+        * `pickledModels` - all models saved as pickled objects
+    * `scale_impute` - all trained imputation and scaling maps saved as pickled objects
+* `hcc-data_example_custom` - contains all output specific to the second 'target dataset' analyzed
+    * *Has the same folder hierarchy as `hcc-data_example` above with the addition of a `replication` folder*
+    * `replication` - all phase 8 (i.e. replication) output for the second 'target dataset' analyzed
+        * `hcc-data_example_custom_rep` - all replication output for the this specific 'replication dataset' (in this demo there was only one)
+            * `exploratory` - all exploratory data analysis (EDA) output for this 'replication dataset', files at this level are post-processed EDA output
+                * `initial` - all pre-processed EDA output for this 'replication dataset'
+            * `model_evaluation` - all model evaluation output for this 'replication dataset'
+                * `metricBoxplots` - all evaluation metric boxplots comparing algorithm performance for this 'replication dataset'
+                * `pickled_metrics` - all evaluation metrics pickled separately for each algorithm and CV dataset combo (for this 'replication dataset')
+                * `statistical_comparisons` - all statistical significance results comparing algorithm performance (for this 'replication dataset')
+* `jobs` - contains cluster job submission files *(empty if output 'cleaning' applied)*
+* `jobsCompleted` - contains cluster checks for job completion *(empty if output 'cleaning' applied)*
+* `logs` - contains cluster job output and error logs *(empty if output 'cleaning' applied)*
 
 Notice that the folders `hcc-data_example` and `hcc-data_example_custom` have similar contents, but represent the analysis for each 'target' dataset run at once with STREAMLINE. If a user were to include 4 datasets in the folder specified by the [dataset_path](parameters.md#dataset-path) parameter (each conforming to the [Input Data Requirements](data.md#input-data-requirements)) they would find 4 respective folders in their experiment fold, each named after a respective dataset.
 

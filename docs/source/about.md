@@ -126,7 +126,7 @@ Assembling a machine learning pipeline unfortunately affords a user many opportu
 Data leakage is when information that wouldn't normally be available or that comes from outside the training dataset is used to create the model. 
 
 First, STREAMLINE makes it easy for a user to exclude features from a dataset that may contribute to data leakage (e.g. a feature that would not 
-be available when applying the model to make predictions). A user can specify features to be excluded from modeling using the [ignore_features_path](parameters.md#ignore-features-path) parameter.
+be available when applying the model to make predictions). A user can specify features to be excluded from modeling using the [`ignore_features_path`](parameters.md#ignore-features-path) parameter.
 
 Second, STREAMLINE's pipeline is set up to specifically avoid learning any information that might eventually be a part of a testing data partition. Following CV partitioning, all  learning required to conduct imputation, scaling, feature importance evaluation, feature selection, and modeling is done using the respective training partition alone. For imputation, the same trained imputation strategy is applied to the respective testing data. For scaling, the same trained scalar is applied to the respective testing data. For feature selection, the same features removed from the training data are removed from the testing data. And for modeling, the testing data is only used for model evaluation.
 
@@ -134,7 +134,7 @@ This same strategy is applied to replication data later in the pipeline. When ev
 
 ***
 ## Is STREAMLINE reproducible?
-Yes, STREAMLINE is completely reproducible when the [timeout](parameters.md#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including [random_state](parameters.md#random-state)). However, STREAMLINE is expected to take longer to run when [timeout](parameters.md#timeout) = `None`.
+Yes, STREAMLINE is completely reproducible when the [`timeout`](parameters.md#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including [`random_state`](parameters.md#random-state)). However, STREAMLINE is expected to take longer to run when [`timeout`](parameters.md#timeout) = `None`.
 
 ***
 ## Which STREAMLINE run mode should I use?
