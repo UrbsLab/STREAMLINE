@@ -12,30 +12,30 @@ The quick guide below distinguishes essential from non-essential run parameters 
 
 | Command-line Parameter    | Config File Parameter                                   | Notebook Parameter                           | Default    |
 |---------------------------|---------------------------------------------------------|----------------------------------------------|------------|
-| \--data-path               | [dataset_path](#dataset-path)                           | data_path                                    | no default |
-| -\-out-path                | [output_path](#output-path)                             | output_path                                  | no default |
-| \- \-exp-name                | [experiment_name](#experiment-name)                     | experiment_name                              | no default |
-| -\\\-class-label             | [class_label](#class-label)                             | class_label                                  | 'Class'    |
-| -\\\\-inst-label              | [instance_label](#instance-label)                       | instance_label                               | None       |
+| -\\-data-path               | [dataset_path](#dataset-path)                           | data_path                                    | no default |
+| -\\-out-path                | [output_path](#output-path)                             | output_path                                  | no default |
+| -\\-exp-name                | [experiment_name](#experiment-name)                     | experiment_name                              | no default |
+| -\\-class-label             | [class_label](#class-label)                             | class_label                                  | 'Class'    |
+| -\\-inst-label              | [instance_label](#instance-label)                       | instance_label                               | None       |
 | -\\-match-label             | [match_label](#match-label)                             | match_label                                  | None       |
-| \-\-fi                      | [ignore_features_path](#ignore-features-path)           | ignore_features                              | None       |
-| \-\-cf                      | [categorical_feature_path](#categorical-feature_path)   | categorical_feature_headers                  | None       |
-| \-\-qf                      | [quantitative_feature_path](#quantitative-feature_path) | quantitiative_feature_headers                | None       |
-| \-\-rep-path                | [rep_data_path](#rep-data-path)                         | rep_data_path                                | no default |
-| \-\-dataset                 | [dataset_for_rep](#dataset-for-rep)                     | dataset_for_rep                              | no default |
-| [\-\-config](#config) or -c | NA                                                      | NA                                           | no default |
-| \-\-do-till-report or -dtr  | [do_till_report](#do-till-report)                       | NA                                           | False      |
-| \-\-do-eda                  | [do_eda](#do-eda)                                       | NA                                           | False      |
-| \-\-do-dataprep             | [do_dataprep](#do-dataprep)                             | NA                                           | False      |
-| \-\-do-feat-imp             | [do_feat_imp](#do-feat_imp)                             | NA                                           | False      |
-| \-\-do-feat-sel             | [do_feat_sel](#do-feat_sel)                             | NA                                           | False      |
-| \-\-do-model                | [do_model](#do-model)                                   | NA                                           | False      |
-| \-\-do-stats                | [do_stats](#do-stats)                                   | NA                                           | False      |
-| \-\-do-compare-dataset      | [do_compare_dataset](#do-compare-dataset)               | NA                                           | False      |
-| \-\-do-report               | [do_report](#do-report)                                 | NA                                           | False      |
-| \-\-do-replicate            | [do_replicate](#do-replicate)                           | NA                                           | False      |
-| \-\-do-rep-report           | [do_rep_report](#do-rep-report)                         | NA                                           | False      |
-| \-\-do-cleanup              | [do_cleanup](#do-cleanup)                               | NA                                           | False      |
+| -\\-fi                      | [ignore_features_path](#ignore-features-path)           | ignore_features                              | None       |
+| -\\-cf                      | [categorical_feature_path](#categorical-feature_path)   | categorical_feature_headers                  | None       |
+| -\\-qf                      | [quantitative_feature_path](#quantitative-feature_path) | quantitiative_feature_headers                | None       |
+| -\\-rep-path                | [rep_data_path](#rep-data-path)                         | rep_data_path                                | no default |
+| -\\-dataset                 | [dataset_for_rep](#dataset-for-rep)                     | dataset_for_rep                              | no default |
+| [-\\-config](#config) or -c | NA                                                      | NA                                           | no default |
+| -\\-do-till-report or -dtr  | [do_till_report](#do-till-report)                       | NA                                           | False      |
+| -\\-do-eda                  | [do_eda](#do-eda)                                       | NA                                           | False      |
+| -\\-do-dataprep             | [do_dataprep](#do-dataprep)                             | NA                                           | False      |
+| -\\-do-feat-imp             | [do_feat_imp](#do-feat_imp)                             | NA                                           | False      |
+| -\\-do-feat-sel             | [do_feat_sel](#do-feat_sel)                             | NA                                           | False      |
+| -\\-do-model                | [do_model](#do-model)                                   | NA                                           | False      |
+| -\\-do-stats                | [do_stats](#do-stats)                                   | NA                                           | False      |
+| -\\-do-compare-dataset      | [do_compare_dataset](#do-compare-dataset)               | NA                                           | False      |
+| -\\-do-report               | [do_report](#do-report)                                 | NA                                           | False      |
+| -\\-do-replicate            | [do_replicate](#do-replicate)                           | NA                                           | False      |
+| -\\-do-rep-report           | [do_rep_report](#do-rep-report)                         | NA                                           | False      |
+| -\\-do-cleanup              | [do_cleanup](#do-cleanup)                               | NA                                           | False      |
 | NA                        | NA                                                      | [applyToReplication](#applyToReplication)    | True       |
 | NA                        | NA                                                      | [demo_run](#demo-run)                        | True       |
 | NA                        | NA                                                      | [use_data_prompt](#use-data-prompt) (Colab)  | True       |
@@ -44,78 +44,78 @@ The quick guide below distinguishes essential from non-essential run parameters 
 
 | Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
 |---------------------------|-------------------------------------------|-----------------------------------|--------------|
-| \-\-cv                      | [cv_partitions](#cv-partitions)           | n_splits                          | 10           |
-| \-\-part                    | [partition_method](#partition-method)     | partition_method                  | 'Stratified' |
-| \-\-cat-cutoff              | [categorical_cutoff](#categorical-cutoff) | categorical_cutoff                | 10           |
-| \-\-sig                     | [sig_cutoff](#sig-cutoff)                 | sig_cutoff                        | 0.05         |
-| \-\-rand-state              | [random_state](#random-state)             | random_state                      | 42           |
+| -\\-cv                      | [cv_partitions](#cv-partitions)           | n_splits                          | 10           |
+| -\\-part                    | [partition_method](#partition-method)     | partition_method                  | 'Stratified' |
+| -\\-cat-cutoff              | [categorical_cutoff](#categorical-cutoff) | categorical_cutoff                | 10           |
+| -\\-sig                     | [sig_cutoff](#sig-cutoff)                 | sig_cutoff                        | 0.05         |
+| -\\-rand-state              | [random_state](#random-state)             | random_state                      | 42           |
 
 ### Data Processing Parameters (Phase 1)
 
 | Command-line Parameter    | Config File Parameter                                            | Notebook Parameter                | Default    |
 |---------------------------|------------------------------------------------------------------|-----------------------------------|------------|
-| \-\-exclude-eda-output      | [exclude_eda_output](#exclude-eda-output)                        | exclude_eda_output                | None       |
-| \-\-top-uni-feature         | [top_uni_features](#top-uni-features)                            | top_uni_features                  | 20         |
-| \-\-feat_miss               | [featureeng_missingness](#featureeng-missingness)                | featureeng_missingness            | 0.5        |
-| \-\-clean_miss              | [cleaning_missingness](#cleaning-missingness)                    | cleaning_missingness              | 0.5        |
-| \-\-corr_thresh             | [correlation_removal_threshold](#correlation-removal-threshold)  | correlation_removal_threshold     | 1.0        |
+| -\\-exclude-eda-output      | [exclude_eda_output](#exclude-eda-output)                        | exclude_eda_output                | None       |
+| -\\-top-uni-feature         | [top_uni_features](#top-uni-features)                            | top_uni_features                  | 20         |
+| -\\-feat_miss               | [featureeng_missingness](#featureeng-missingness)                | featureeng_missingness            | 0.5        |
+| -\\-clean_miss              | [cleaning_missingness](#cleaning-missingness)                    | cleaning_missingness              | 0.5        |
+| -\\-corr_thresh             | [correlation_removal_threshold](#correlation-removal-threshold)  | correlation_removal_threshold     | 1.0        |
 
 
 ### Imputation & Scaling Parameters (Phase 2)
 
 | Command-line Parameter | Config File Parameter          | Notebook Parameter          | Default |
 |------------------------|--------------------------------|-----------------------------|---------|
-| \-\-impute               | [impute_data](#impute-data)    | impute_data                 | True    |
-| \-\-multi-impute         | [multi_impute](#multi-impute)  | multi_impute                | True    |
-| \-\-scale                | [scale_data](#scale-data)      | scale_data                  | True    |
-| \-\-over-cv              | [overwrite_cv](#overwrite-cv)  | overwrite_cv                | True    |
+| -\\-impute               | [impute_data](#impute-data)    | impute_data                 | True    |
+| -\\-multi-impute         | [multi_impute](#multi-impute)  | multi_impute                | True    |
+| -\\-scale                | [scale_data](#scale-data)      | scale_data                  | True    |
+| -\\-over-cv              | [overwrite_cv](#overwrite-cv)  | overwrite_cv                | True    |
 
 ### Feature Importance Estimation Parameters (Phase 3)
 
 | Command-line Parameter | Config File Parameter                | Notebook Parameter                            | Default |
 |------------------------|--------------------------------------|-----------------------------------------------|---------|
-| \-\-do-mi                | [do_mutual_info](#do-mutual-info)    | do_mutual_info                                | True    |
-| \-\-do-ms                | [do_multisurf](#do-multisurf)        | do_multisurf                                  | True    |
-| \-\-use-turf             | [use_turf](#use-turf)                | use_TURF                                      | False   |
-| \-\-turf-pct             | [turf_pct](#turf-pct)                | TURF_pct                                      | 0.5     |
-| \-\-inst-sub             | [instance_subset](#instance-subset)  | instance_subset                               | 2000    |
-| \-\-n-jobs               | [n_jobs](#n-jobs)                    | cores                                         | 1       |
+| -\\-do-mi                | [do_mutual_info](#do-mutual-info)    | do_mutual_info                                | True    |
+| -\\-do-ms                | [do_multisurf](#do-multisurf)        | do_multisurf                                  | True    |
+| -\\-use-turf             | [use_turf](#use-turf)                | use_TURF                                      | False   |
+| -\\-turf-pct             | [turf_pct](#turf-pct)                | TURF_pct                                      | 0.5     |
+| -\\-inst-sub             | [instance_subset](#instance-subset)  | instance_subset                               | 2000    |
+| -\\-n-jobs               | [n_jobs](#n-jobs)                    | cores                                         | 1       |
 
 ### Feature Selection Parameters (Phase 4)
 
 | Command-line Parameter | Config File Parameter                          | Notebook Parameter                            | Default |
 |------------------------|------------------------------------------------|-----------------------------------------------|---------|
-| \-\-filter-feat          | [filter_poor_features](#filter-poor-features)  | filter_poor_features                          | True    |
-| \-\-max-feat             | [max_features_to_keep](#max-features-to-keep)  | max_features_to_keep                          | 2000    |
-| \-\-export-scores        | [export_scores](#export-scores)                | export_scores                                 | True    |
-| \-\-top-fi-features      | [top_fi_features](#top-fi-features)            | top_fi_features                               | 40      |
-| \-\-over-cv-feat         | [overwrite_cv_feat](#overwrite-cv-feat)        | overwrite_cv_feat                             | True    |
+| -\\-filter-feat          | [filter_poor_features](#filter-poor-features)  | filter_poor_features                          | True    |
+| -\\-max-feat             | [max_features_to_keep](#max-features-to-keep)  | max_features_to_keep                          | 2000    |
+| -\\-export-scores        | [export_scores](#export-scores)                | export_scores                                 | True    |
+| -\\-top-fi-features      | [top_fi_features](#top-fi-features)            | top_fi_features                               | 40      |
+| -\\-over-cv-feat         | [overwrite_cv_feat](#overwrite-cv-feat)        | overwrite_cv_feat                             | True    |
 
 ### Modeling Parameters (Phase 5)
  Command-line Parameter  | Config File Parameter                                 | Notebook Parameter                 | Default                   |
 |------------------------|-------------------------------------------------------|------------------------------------|---------------------------|
-| \-\-algorithms           | [algorithms](#algorithms)                             | algorithms                         | None                      |
-| \-\-exclude              | [exclude](#exclude)                                   | exclude                            | 'eLCS,XCS'                |
-| \-\-subsample            | [training_subsample](#training-subsample)             | training_subsample                 | 0                         |
-| \-\-use-uniformFI        | [use_uniform_fi](#use-uniform-fi)                     | use_uniform_FI                     | True                      |
-| \-\-metric               | [primary_metric](#primary-metric)                     | primary_metric                     | 'balanced_accuracy'       |
-| \-\-metric-direction     | [metric_direction](#metric-direction)                 | metric_direction                   | 'maximize'                |
-| \-\-n-trials             | [n_trials](#n-trials)                                 | n_trials                           | 200                       |
-| \-\-timeout              | [timeout](#timeout)                                   | timeout                            | 900                       |    
-| \-\-export-hyper-sweep   | [export_hyper_sweep_plots](#export-hyper-sweep-plots) | export_hyper_sweep_plots           | False                     |
-| \-\-do-LCS-sweep         | [do_lcs_sweep](#do-lcs-sweep)                         | do_lcs_sweep                       | False                     |
-| \-\-nu                   | [lcs_nu](#lcs-nu)                                     | lcs_nu                             | 1                         |
-| \-\-iter                 | [lcs_iterations](#lcs-iterations)                     | lcs_iterations                     | 200000                    |
-| \-\-N                    | [lcs_n](#lcs-n)                                       | lcs_N                              | 2000                      |
-| \-\-lcs-timeout          | [lcs_timeout](#lcs-timeout)                           | lcs_timeout                        | 1200                      |
-| \-\-model-resubmit       | [model_resubmit](#model-resubmit)                     | NA                                 | False                     |
+| -\\-algorithms           | [algorithms](#algorithms)                             | algorithms                         | None                      |
+| -\\-exclude              | [exclude](#exclude)                                   | exclude                            | 'eLCS,XCS'                |
+| -\\-subsample            | [training_subsample](#training-subsample)             | training_subsample                 | 0                         |
+| -\\-use-uniformFI        | [use_uniform_fi](#use-uniform-fi)                     | use_uniform_FI                     | True                      |
+| -\\-metric               | [primary_metric](#primary-metric)                     | primary_metric                     | 'balanced_accuracy'       |
+| -\\-metric-direction     | [metric_direction](#metric-direction)                 | metric_direction                   | 'maximize'                |
+| -\\-n-trials             | [n_trials](#n-trials)                                 | n_trials                           | 200                       |
+| -\\-timeout              | [timeout](#timeout)                                   | timeout                            | 900                       |    
+| -\\-export-hyper-sweep   | [export_hyper_sweep_plots](#export-hyper-sweep-plots) | export_hyper_sweep_plots           | False                     |
+| -\\-do-LCS-sweep         | [do_lcs_sweep](#do-lcs-sweep)                         | do_lcs_sweep                       | False                     |
+| -\\-nu                   | [lcs_nu](#lcs-nu)                                     | lcs_nu                             | 1                         |
+| -\\-iter                 | [lcs_iterations](#lcs-iterations)                     | lcs_iterations                     | 200000                    |
+| -\\-N                    | [lcs_n](#lcs-n)                                       | lcs_N                              | 2000                      |
+| -\\-lcs-timeout          | [lcs_timeout](#lcs-timeout)                           | lcs_timeout                        | 1200                      |
+| -\\-model-resubmit       | [model_resubmit](#model-resubmit)                     | NA                                 | False                     |
 
 ### Post-Analysis Parameters (Phase 6)
 | Command-line Parameter   | Config File Parameter                            | Notebook Parameter      | Default             |
 |--------------------------|--------------------------------------------------|-------------------------|---------------------|
-| \-\-exclude-plots          | [exclude_plots](#exclude-plots)                  | exclude_plots           | None                |
-| \-\-metric-weight          | [metric_weight](#metric-weight)                  | metric_weight           | 'balanced_accuracy' |
-| \-\-top-model-fi-features  | [top_model_fi_features](#top-model-fi-features)  | top_model_fi_features   | 40                  |
+| -\\-exclude-plots          | [exclude_plots](#exclude-plots)                  | exclude_plots           | None                |
+| -\\-metric-weight          | [metric_weight](#metric-weight)                  | metric_weight           | 'balanced_accuracy' |
+| -\\-top-model-fi-features  | [top_model_fi_features](#top-model-fi-features)  | top_model_fi_features   | 40                  |
 
 ### Compare Data Parameters (Phase 7)
 There are currently no run parameters to adjust for this phase.
@@ -124,7 +124,7 @@ There are currently no run parameters to adjust for this phase.
 
 | Command-line Parameter | Config File Parameter                    | Notebook Parameter  | Default |
 |------------------------|------------------------------------------|---------------------|---------|
-| \-\-exclude-rep-plots    | [exclude_rep_plots](#exclude-rep-plots)  | exclude_rep_plots   | None    |
+| -\\-exclude-rep-plots    | [exclude_rep_plots](#exclude-rep-plots)  | exclude_rep_plots   | None    |
 
 ### Summary Report Parameters (Phase 9)
 There are currently no run parameters to adjust for this phase.
@@ -133,23 +133,23 @@ There are currently no run parameters to adjust for this phase.
 
 | Command-line Parameter | Config File Parameter      | Notebook Parameter | Default |
 |------------------------|----------------------------|--------------------|---------|
-| \-\-del-time             | [del_time](#del-time)      | del_time           | True    |
-| \-\-del-old-cv           | [del_old_cv](#del-old-cv)  | del_old_cv         | True    |
+| -\\-del-time             | [del_time](#del-time)      | del_time           | True    |
+| -\\-del-old-cv           | [del_old_cv](#del-old-cv)  | del_old_cv         | True    |
 
 ### Multiprocessing Parameters
 
 | Command-line Parameter | Config File Parameter                | Notebook Parameter  | Default |
 |------------------------|--------------------------------------|---------------------|---------|
-| \-\-run-parallel         | [run_parallel](#run-parallel)        | NA                  | False   |
-| \-\-run-cluster          | [run_cluster](#run-cluster)          | NA                  | "SLURM" |
-| \-\-res-mem              | [reserved_memory](#reserved-memory)  | NA                  | 4       |
-| \-\-queue                | [queue](#queue)                      | NA                  | "defq"  |
+| -\\-run-parallel         | [run_parallel](#run-parallel)        | NA                  | False   |
+| -\\-run-cluster          | [run_cluster](#run-cluster)          | NA                  | "SLURM" |
+| -\\-res-mem              | [reserved_memory](#reserved-memory)  | NA                  | 4       |
+| -\\-queue                | [queue](#queue)                      | NA                  | "defq"  |
 
 ### Logging Parameters
 | Command-line Parameter    | Config File Parameter                     | Notebook Parameter                | Default      |
 |---------------------------|-------------------------------------------|-----------------------------------|--------------|
-| \-\-verbose                 | [verbose](#verbose)                       | NA                                | False        |
-| \-\-logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
+| -\\-verbose                 | [verbose](#verbose)                       | NA                                | False        |
+| -\\-logging-level           | [logging_level](#logging-level)           | NA                                | 'INFO'       |
 
 ***
 ## Parameter Details
