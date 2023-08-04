@@ -174,12 +174,12 @@ python run.py -c run_configs/local.cfg
 STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. Similar to any other run mode, make sure to specify arguments for all 'essential' run parameters for a given dataset. 
 * *Note: Command line run parameters have slightly different identifiers than for the configuration file (see [run parameters](parameters.md))*
 * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
-    * *Make sure to specify [`-\\-run-cluster'](parameters.md#run-cluster) = `False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
-    * *Optionally specify [`-\\-run-parallel'](parameters.md#run-parallel) = `False`, which will turn off local multi-core CPU parallelization*
-* *Note: When specifying [`-\\-fi`](parameters.md#ignore-features-path), [-\\-cf`](parameters.md#categorical_feature_path), or [-\\-qf`](parameters.md#quantitative_feature_path) using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
+    * *Make sure to specify [`--run-cluster`](parameters.md#run-cluster) = `False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster*
+    * *Optionally specify [`--run-parallel`](parameters.md#run-parallel) = `False`, which will turn off local multi-core CPU parallelization*
+* *Note: When specifying [`--fi`](parameters.md#ignore-features-path), [`--cf`](parameters.md#categorical_feature_path), or [`--qf`](parameters.md#quantitative_feature_path) using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
 
 1. Open your command line interface and navigate to the installed `STREAMLINE` directory. 
-2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, but we set [`--run-cluster'](parameters.md#run-cluster) = `False` (necessary) and optionally [`--run-parallel'](parameters.md#run-parallel) = `True` for each example.
+2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data). These scenarios run STREAMLINE similarly to our other demo run mode examples above, but we set [`--run-cluster`](parameters.md#run-cluster) = `False` (necessary) and optionally [`--run-parallel`](parameters.md#run-parallel) = `True` for each example.
 
 ##### All Phases at Once (Replication Data Included)
 ```
@@ -327,7 +327,7 @@ This is largely the same as running STREAMLINE using [command-line arguments loc
 1. Open your command line interface within your HPC and navigate to the installed `STREAMLINE` directory.
 2. The subsections below provide different example scenarios running `run.py` on the [demonstration datasets](data.md#demonstration-data), however users can adjust these arguments for their own data. Also, here [`--run-parallel`](parameters.md#run-parallel) is automatically overridden by [`--run-cluster`](parameters.md#run-cluster) = `SLURM` (or whatever cluster-name is specified or than `False`).
   * *Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run*
-  * *Note: When specifying [`--fi`](parameters.md#ignore-features-path), [--cf`](parameters.md#categorical_feature_path), or [--qf`](parameters.md#quantitative_feature_path) using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
+  * *Note: When specifying [`--fi`](parameters.md#ignore-features-path), [`--cf`](parameters.md#categorical_feature_path), or [`--qf`](parameters.md#quantitative_feature_path) using this run approach, it is necessary to pass a file-path to a `.csv` file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using `.csv` files found in `STREAMLINE/data/DemoFeatureTypes`.*
 
 ##### All Phases at Once (Replication Data Included)
 * *Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.*
