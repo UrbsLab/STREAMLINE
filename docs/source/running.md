@@ -183,7 +183,7 @@ STREAMLINE phases can also be called individually from the command line without 
 
 ##### All Phases at Once (Replication Data Included)
 ```
-python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
+python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster False --run-parallel True
 ```
 
 ##### All Main Phases at Once (No Replication Data)
@@ -232,7 +232,7 @@ python run.py --do-compare-dataset --out-path DemoOutput --exp-name demo_experim
 ###### Phase 8 - Replication
 If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
 ```
-python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
+python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster False --run-parallel True
 ```
 
 ###### Phase 9 - Summary Report(s)
@@ -243,7 +243,7 @@ python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run
 
 If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
 ```
-python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster False --run-parallel True
+python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster False --run-parallel True
 ```
 
 ###### Optional Clean-up
@@ -332,7 +332,7 @@ This is largely the same as running STREAMLINE using [command-line arguments loc
 ##### All Phases at Once (Replication Data Included)
 * *Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.*
 ```
-python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-till-report --do-rep-report --do-clean --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms=NB,LR,DT --do-replicate --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 ##### All Main Phases at Once (No Replication Data)
@@ -382,7 +382,7 @@ python run.py --do-compare-dataset --out-path DemoOutput --exp-name demo_experim
 ###### Phase 8 - Replication
 If there are no replication datasets, skip this command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
 ```
-python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-replicate --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 ###### Phase 9 - Summary Report(s)
@@ -393,7 +393,7 @@ python run.py --do-report --out-path DemoOutput --exp-name demo_experiment --run
 
 If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple 'target datasets' each with one or more associated replication datasets, run this command once for each original target dataset (updating `--rep-path` and `--dataset` for each).
 ```
-python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc-data_example_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment --rep-path ./data/DemoRepData --dataset ./data/DemoData/hcc_data_custom.csv --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
 ###### Optional Clean-up

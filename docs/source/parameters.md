@@ -226,7 +226,7 @@ This section will go into greater depth for each run parameter, primarily using 
 
 #### dataset_for_rep
 * **Description:** path to the individual 'target dataset' file used to train the models which you want to evaluate with the above 'replication datasets' (see [data formatting requirements](data.md#input-data-requirements))
-* **Format:** (str), e.g. `'/content/STREAMLINE/data/DemoData/hcc-data_example_custom.csv'`
+* **Format:** (str), e.g. `'/content/STREAMLINE/data/DemoData/hcc_data_custom.csv'`
 * **Values:** must be a valid file-path
 * **Tips:** STREAMLINE's replication phase is set up to evaluate all models trained from a single 'target datasets' at once using one or more replication datasets, specific to that 'target dataset'. The replication phase can be run multiple times, each for a new 'target dataset', and it's own respective 'replication dataset(s)'.
 

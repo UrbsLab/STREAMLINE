@@ -72,11 +72,11 @@ New users can easily run STREAMLINE on these datasets in whatever run-mode desir
 
 ***
 ### Real-World HCC Dataset
-The first demo dataset (`hcc-data_example.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).
+The first demo dataset (`hcc_data.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).
 
 ***
 ### Custom Extension of HCC Dataset
-The second demo dataset (`hcc-data_example_custom.csv`) is similar to the first, but we have made a number of modifications to it in order to test the data cleaning and feature engineering functionalities of STREAMLINE. 
+The second demo dataset (`hcc_data_custom.csv`) is similar to the first, but we have made a number of modifications to it in order to test the data cleaning and feature engineering functionalities of STREAMLINE. 
 
 Modifcations include the following:
 1. Removal of covariate features (i.e. 'Gender' and 'Age at diagnosis')
@@ -91,7 +91,7 @@ These simulated features and instances have been clearly identified in the featu
 
 ***
 ### Simulated Replication Dataset
-The last demo dataset (`hcc-data_example_custom_rep.csv`) was simulated as a mock replication dataset for `hcc-data_example_custom.csv`. To generate this dataset we first took `hcc-data_example_custom.csv` and for 30% of instances randomly generated realistic looking new values for each feature and class outcome (effectively adding noise to this data). Furthermore we simulated further instances that test the ability of STREAMLINE's one-hot-encoding to ignore new (as-of-yet unseen) categorical features values during STREAMLINE's replication phase. If this were to happen, the new value would be ignored (i.e. no new feature columns added).
+The last demo dataset (`hcc_data_custom_rep.csv`) was simulated as a mock replication dataset for `hcc_data_custom.csv`. To generate this dataset we first took `hcc_data_custom.csv` and for 30% of instances randomly generated realistic looking new values for each feature and class outcome (effectively adding noise to this data). Furthermore we simulated further instances that test the ability of STREAMLINE's one-hot-encoding to ignore new (as-of-yet unseen) categorical features values during STREAMLINE's replication phase. If this were to happen, the new value would be ignored (i.e. no new feature columns added).
 
 Modifications included adding a simulated instance that includes a new (as-of-yet unseen) value for the following previously simulated features:
 1. The binary text-valued categorical feature
@@ -99,4 +99,4 @@ Modifications included adding a simulated instance that includes a new (as-of-ye
 3. The binary numerically encoded categorical feature
 4. The 3-value numerically encoded categorical feature
 
-The code to generate the additional features and instances within the custom `hcc-data_example_custom.csv` and `hcc-data_example_custom_rep.csv` can be found in the notebook at `/data/Generate_Expanded_HCC_dataset.ipynb`.
+The code to generate the additional features and instances within the custom `hcc_data_custom.csv` and `hcc_data_custom_rep.csv` can be found in the notebook at `/data/Generate_Expanded_HCC_dataset.ipynb`.
