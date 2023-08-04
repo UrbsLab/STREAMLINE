@@ -14,10 +14,10 @@ The quick guide below distinguishes essential from non-essential run parameters 
 |---------------------------|---------------------------------------------------------|----------------------------------------------|------------|
 | \--data-path               | [dataset_path](#dataset-path)                           | data_path                                    | no default |
 | -\-out-path                | [output_path](#output-path)                             | output_path                                  | no default |
-| \-\-exp-name                | [experiment_name](#experiment-name)                     | experiment_name                              | no default |
-| \-\-class-label             | [class_label](#class-label)                             | class_label                                  | 'Class'    |
-| \-\-inst-label              | [instance_label](#instance-label)                       | instance_label                               | None       |
-| \-\-match-label             | [match_label](#match-label)                             | match_label                                  | None       |
+| \- \-exp-name                | [experiment_name](#experiment-name)                     | experiment_name                              | no default |
+| -\\\-class-label             | [class_label](#class-label)                             | class_label                                  | 'Class'    |
+| -\\\\-inst-label              | [instance_label](#instance-label)                       | instance_label                               | None       |
+| -\\-match-label             | [match_label](#match-label)                             | match_label                                  | None       |
 | \-\-fi                      | [ignore_features_path](#ignore-features-path)           | ignore_features                              | None       |
 | \-\-cf                      | [categorical_feature_path](#categorical-feature_path)   | categorical_feature_headers                  | None       |
 | \-\-qf                      | [quantitative_feature_path](#quantitative-feature_path) | quantitiative_feature_headers                | None       |
