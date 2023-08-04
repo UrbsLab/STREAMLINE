@@ -60,7 +60,7 @@ When you first open the experiment folder, you will find the file `demo_experime
 A simpler 'replication report' is generated for each 'replication dataset' applied to the models trained by a single 'target dataset'. You can find the demo replication report at the following path: `/demo_experiment/hcc-data_example_custom/replication/hcc-data_example_custom_rep/demo_experiment_ML_Pipeline_Replication_Report.pdf`. This report differs from the testing evaluation report in that it excludes the following irrelevant elements: (1) univariate analysis summary, (2) feature importance summary, (3) dataset comparison summary, and (4) runtime summary.
 
 ### Experiment Meta Info
-When you first open the experiment folder, you will also find `algInfo.pickle` and `metadata.pickle` which are used internally by STREAMLINE across all phases, as well as by the 'Useful Notebooks', covered in [Doing More with STREAMLINE](more.md#doing-more-with-streamline).
+When you first open the experiment folder, you will also find `algInfo.pickle` and `metadata.pickle` which are used internally by STREAMLINE across most phases, as well as by the 'Useful Notebooks', covered in [Doing More with STREAMLINE](more.md#doing-more-with-streamline).
 
 ### DatasetComparisons
 At the beginning of the [testing evaluation report](#testing-evaluation-report), each dataset is assigned an abbreviated designation of 'D#' (e.g. D1, D2, etc) based on the alphabetical order of each dataset name. These designations are used in some of the files included within this folder.
@@ -114,18 +114,23 @@ We will begin by explaining the files you see when first opening this folder. Al
 * `Numerical_Encoding_Map` - documents the numerical encoding mapping for any binary text-valued features in the dataset
 * `NumUniqueDataset` - output from standard pandas `nunique()` function
 * `OriginalFeatureNames` - documents all original feature names from the 'target dataset' prior to any processing
-* `processed_categorical_features` - 
-* `processed_quantitative_features` - 
+* `processed_categorical_features` - documents all processed feature names that were be treated as categorical
+* `processed_quantitative_features` - documents all processed feature names that were be treated as quantitative
 * `ProcessedFeatureNames` - documents all feature names for the processed 'target dataset'
 
 ##### exploratory (pickle)
-A variety of other pickle files can be found in this folder, used internally for data processing in the replication phase
-
-[Under Construction Below]
+A variety of other pickle files can be found in this folder, used internally for data processing in the replication phase.
 
 ##### initial
-all pre-processed EDA output
+This subfolder includes a subset of the same files found in `exploratory`, however these files represent the 'initial' exploratory data analysis (EDA) prior to cleaning and feature engineering.
+
 ##### univariate analysis
+This subfolder 
+
+When you first open this folder you will find `.csv` files containing all statistical significance results comparing modeling performance across two or more 'target datasets' run at once with STREAMLINE. 
+[Under Construction Below]
+
+
 - all univariate analysis results and plots
 
 
