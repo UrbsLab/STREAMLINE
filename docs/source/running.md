@@ -58,7 +58,7 @@ Before running, update the run parameters within the 'STREAMLINE RUN PARAMETERS'
 #### Easy Mode
 This mode is most convenient if you want to run the notebook on other data, but want to be prompted to enter/select essential parameter information instead of adjusting parameters within run parameter code cells. This mode will prompt the user for essential 'experiment' and dataset-specific run parameter values. This mode is also convenient as it allows you to select datasets directly from your local computer rather than creating new folders within the temporary Colab Notebook workspace. All other non-essential run parmameters need to be updated within respective code cells.
 
-1. In the first code cell, set ([`demo_run'](parameters.md#demo-run) = `False`) and ([`use_data_prompt'](parameters.md#use-data-prompt) = `True`)
+1. In the first code cell, set ([`demo_run`](parameters.md#demo-run) = `False`) and ([`use_data_prompt'](parameters.md#use-data-prompt) = `True`)
     * *This tells the notebook that you don't want to run the demo datasets, and you want to be 'prompted' to enter/select essential run parameters rather than edit the respective code cells*
 2. \[Optional] Update non-essential run parameters (within respective code cells) to the users specifications
     * *Most commonly, this would include [`n_splits`](parameters.md#cv-partitions), [`categorical_cutoff`](parameters.md#categorical-cutoff), and [`algorithms`](parameters.md#algorithms)
@@ -80,7 +80,7 @@ This mode is most convenient if you want to run the notebook on other data, but 
 * *STREAMLINE outputfiles are automatically saved to the output 'experiment folder' named `UserOutput` within the temporary notebook workspace, as well as optionally downloaded to the users computer after completion* 
 
 #### Manual Mode
-1. In the first code cell, set ([`demo_run'](parameters.md#demo-run) = `False`) and ([`use_data_prompt'](parameters.md#use-data-prompt) = `False`)
+1. In the first code cell, set ([`demo_run`](parameters.md#demo-run) = `False`) and ([`use_data_prompt'](parameters.md#use-data-prompt) = `False`)
     * *This tells the notebook that you don't want to run the demo datasets, but you want update all run parameters (essential and non-essential) within respective code cells*
 2. Click on the 'Files' tab on the left side of the notebook (pictured as a blank folder), and right-click on 'content' folder (i.e. the temporary google colab workspace) and create a 'New Folder' to contain your target dataset(s), called `UserData` (or some other name if you also update the [`data_path`](parameters.md#dataset-path) parameter)
 3. Save your [formatted](data.md#input-data-requirements) target dataset(s) within this folder
@@ -126,7 +126,7 @@ Begin by opening `STREAMLINE-Notebook.ipypnb` as a Jupyter Notebook (steps 1-3 a
     * [`data_path`](parameters.md#dataset-path) -  path to the folder containing one or more 'target datasets' to be analyzed
         * *These datasets must adhere to the formatting detailed in '[Input Data Requirements](data.md#input-data-requirements)'*
     * [`output_path`](parameters.md#output-path) - path to the folder (that will be automatically created if it doesn't yet exist) in which the 'experiment folder' including all STREAMLINE output will be saved
-        * *Note: You can leave `output_path` as `./UserOutput` if you've named this folder `UserOutput`*
+        * *Note: You can leave [`output_path`](parameters.md#output-path) as `./UserOutput` if you've named this folder `UserOutput`*
     * [`class_label`](parameters.md#class-label) - the header name for the outcome column in the dataset(s), e.g. 'Class'
     * [`instance_label`](parameters.md#instance-label) - the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
     * [`match_label`](parameters.md#match-label) - the header name for the match/group column in the dataset(s) or specify `None` if not relevant
