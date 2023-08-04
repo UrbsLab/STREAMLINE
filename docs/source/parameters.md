@@ -458,7 +458,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** indicates the maximum number of top scorign features to retain in the datasets prior to phase 5 modeling (based on the scores of the feature importance estimation algorithms, i.e. Mutual Information and MultiSURF)
 * **Format:** (int or `None`)
 * **Values:** any positive integer > `1` is acceptable
-* **Tips:** we have set the default of this parameter to `2000` primarily to limit the computational burden of modeling. Users should use their own judgment in setting this parameter for the dataset/task in hand. When set to `None` and [`filter_poor_features](#filter-poor-features) = `True`, STREAMLINE will automatically remove any feature that scored <= 0 for each feature importance estimation algorithm run. When set to an integer such as `2000` and [`filter_poor_features](#filter-poor-features) = `True`, STREAMLINE will first remove any feature that scored <= `0` for each feature importance estimation algorithm run, then alternate between the sets of feature importance rankings keeping the top scoring (non-redundant) features from each algorithm.
+* **Tips:** we have set the default of this parameter to `2000` primarily to limit the computational burden of modeling. Users should use their own judgment in setting this parameter for the dataset/task in hand. When set to `None` and [`filter_poor_features'](#filter-poor-features) = `True`, STREAMLINE will automatically remove any feature that scored <= 0 for each feature importance estimation algorithm run. When set to an integer such as `2000` and [`filter_poor_features'](#filter-poor-features) = `True`, STREAMLINE will first remove any feature that scored <= `0` for each feature importance estimation algorithm run, then alternate between the sets of feature importance rankings keeping the top scoring (non-redundant) features from each algorithm.
 
 #### export_scores 
 * **Description:** indicates whether or not to export barplots for the feature importance estimation algorithms (Mutual Information and MultiSURF) summarizing average feature importance scores over CV training partitions
@@ -579,7 +579,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** similar to [`timeout`](#timeout), this [Optuna](https://optuna.org/) parameter controlling the total number of *seconds* until an LCS algorithm hyperparameter sweep stops running new trials. LCS uses a separate run parameter for this since it can take alot longer to run an LCS hyperparameter sweep.
 * **Format:** (int, or `None`)
 * **Values:** any positive integer > `1`, (`1200` by default, i.e. 20 minutes), or `None`
-* **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None` if [`do_lcs_sweep](#do-lcs-sweep) = `True`, however this will force LCS algorithms to fully complete the number of trials specified by [`n_trials`](#n-trials). When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given LCS algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one LCS algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
+* **Tips:** To ensure STREAMLINE reproducibility, this parameter must be set to `None` if [`do_lcs_sweep'](#do-lcs-sweep) = `True`, however this will force LCS algorithms to fully complete the number of trials specified by [`n_trials`](#n-trials). When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given LCS algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one LCS algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.
 
 #### model_resubmit
 * **Description:** boolean flag telling STREAMLINE that this is a secondary run attempt of phase 5 (i.e. modeling)
@@ -695,37 +695,37 @@ This section will go into greater depth for each run parameter, primarily using 
 ## Guidelines for Setting Parameters
 
 ### Ensuring Output Reproducibility
-STREAMLINE is completely reproducible when the [timeout](#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including [`random_state`](#random-state)). 
+STREAMLINE is completely reproducible when the ['timeout'](#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including [`random_state`](#random-state)). 
 
-When [timeout](#timeout) is *not* set to `None`, STREAMLINE output can sometimes vary slightly (particularly when parallelized) since Optuna (for hyperparameter optimization) may not complete the same number of optimization trials within the user specified time limit on different
+When ['timeout'](#timeout) is *not* set to `None`, STREAMLINE output can sometimes vary slightly (particularly when parallelized) since Optuna (for hyperparameter optimization) may not complete the same number of optimization trials within the user specified time limit on different
 computing resources. 
 
-However, having a [timeout](#timeout) value specified helps ensure STREAMLINE run completion within a reasonable time frame.
+However, having a ['timeout'](#timeout) value specified helps ensure STREAMLINE run completion within a reasonable time frame.
 
 ### Reducing Runtime
 Conducting a more effective ML analysis typically demands a much larger amount of computing power and runtime. However, we provide general guidelines here for limiting overall runtime of a STREAMLINE experiment.
-1. Run/include a fewer number of datasets in [dataset_path](#dataset_path) at once.
-2. Run using fewer ML [algorithms](#algorithms) at once:
+1. Run/include a fewer number of datasets in ['dataset_path'](#dataset_path) at once.
+2. Run using fewer ML ['algorithms'](#algorithms) at once:
     * Naive Bayes, Logistic Regression, and Decision Trees are typically fastest.
     * Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).
-3. Run using a smaller number of [cv_partitions](#cv-partitions).
-4. Run without generating additional plots (see [exclude_eda_output](#exclude-eda-output), [export_hyper_sweep_plots](#export-hyper-sweep-plots),[exclude_plots](#exclude-plots), [exclude_rep_plots](#exclude-rep-plots)).
-5. In large datasets with missing values, set [multi_impute](#multi-impute) to `False`. This will apply simple mean imputation to numerical features instead.
-6. Set [use_TURF](#use-turf) as `False`. However we strongly recommend setting this to `True` in feature spaces > 10,000 in order to avoid missing feature interactions during feature selection.
-7. Set [TURF_pct](#turf-pct) no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.
-8. Set [instance_subset](#instance-subset) at or below `2000` (speeds up multiSURF feature importance evaluation at potential expense of performance).
-9. Set [max_features_to_keep](#max-features-to-keep) at or below `2000` and [filter_poor_features](#filter-poor-features) = `True` (this limits the maximum number of features that can be passed on to ML modeling).
-10. Set [training_subsample](#training-subsample) at or below `2000` (this limits the number of sample used to train particularly expensive ML modeling algorithms). However avoid setting this too low, or ML algorithms may not have enough training instances to effectively learn.
-11. Set [n_trials](#n-trials) and/or [timeout](#timeout) to lower values (this limits the time spent on hyperparameter optimization).
-12. If using eLCS, XCS, or ExSTraCS, set [do_lcs_sweep](#do-lcs-sweep) to `False`, [lcs_iterations](#lcs_iterations) at or below `200000`, and [lcs_n](#lcs-n) at or below `2000`.
+3. Run using a smaller number of ['cv_partitions'](#cv-partitions).
+4. Run without generating additional plots (see ['exclude_eda_output'](#exclude-eda-output), ['export_hyper_sweep_plots'](#export-hyper-sweep-plots),['exclude_plots'](#exclude-plots), ['exclude_rep_plots'](#exclude-rep-plots)).
+5. In large datasets with missing values, set ['multi_impute'](#multi-impute) to `False`. This will apply simple mean imputation to numerical features instead.
+6. Set ['use_TURF'](#use-turf) as `False`. However we strongly recommend setting this to `True` in feature spaces > 10,000 in order to avoid missing feature interactions during feature selection.
+7. Set ['TURF_pct'](#turf-pct) no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.
+8. Set ['instance_subset'](#instance-subset) at or below `2000` (speeds up multiSURF feature importance evaluation at potential expense of performance).
+9. Set ['max_features_to_keep'](#max-features-to-keep) at or below `2000` and [`filter_poor_features`](#filter-poor-features) = `True` (this limits the maximum number of features that can be passed on to ML modeling).
+10. Set ['training_subsample'](#training-subsample) at or below `2000` (this limits the number of sample used to train particularly expensive ML modeling algorithms). However avoid setting this too low, or ML algorithms may not have enough training instances to effectively learn.
+11. Set ['n_trials'](#n-trials) and/or [`timeout``](#timeout) to lower values (this limits the time spent on hyperparameter optimization).
+12. If using eLCS, XCS, or ExSTraCS, set [`do_lcs_sweep`](#do-lcs-sweep) to `False`, [`lcs_iterations`](#lcs_iterations) at or below `200000`, and [`lcs_n`](#lcs-n) at or below `2000`.
 
 ### Improving Modeling Performance
 * Generally speaking, the more computational time you are willing to spend on ML, the better the results. Doing the opposite of the above tips for reducing runtime, will likely improve performance.
-* In certain situations, setting [filter_poor_features](#filter-poor-features) to `False`, and relying on the ML algorithms alone to identify relevant features can possibly yield better performance. However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).
+* In certain situations, setting [`filter_poor_features`](#filter-poor-features) to `False`, and relying on the ML algorithms alone to identify relevant features can possibly yield better performance. However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).
 * Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These learning classifier system (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).
-* In problems with no noise (i.e. datasets where it is possible to achieve 100% testing accuracy), LCS algorithms (i.e. eLCS, XCS, and ExSTraCS) perform better when [lcs_nu](#lcs-nu) is set larger than `1` (i.e. `5` or `10` recommended).  This applies significantly more pressure for individual rules to achieve perfect accuracy.  In noisy problems this may lead to significant overfitting.
+* In problems with no noise (i.e. datasets where it is possible to achieve 100% testing accuracy), LCS algorithms (i.e. eLCS, XCS, and ExSTraCS) perform better when [`lcs_nu`](#lcs-nu) is set larger than `1` (i.e. `5` or `10` recommended).  This applies significantly more pressure for individual rules to achieve perfect accuracy.  In noisy problems this may lead to significant overfitting.
 
 ### Other Guidelines
 * SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.
-* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline. Otherwise [use_uniform_fi](#use_uniform_fi) should be `True`.
-* While the STREAMLINE includes [impute_data](#impute-data) as an option that can be turned off in phase 2, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while [impute_data](#impute-data) is set to `False`.
+* Logistic Regression' baseline model feature importance estimation is determined by the exponential of the feature's coefficient. This should only be used if data scaling is applied by the pipeline. Otherwise [`use_uniform_fi`](#use_uniform_fi) should be `True`.
+* While the STREAMLINE includes [`impute_data`](#impute-data) as an option that can be turned off in phase 2, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while [`impute_data`](#impute-data) is set to `False`.
