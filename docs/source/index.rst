@@ -33,6 +33,14 @@ We make no claim that this is the best or only viable way to assemble an ML anal
 problem, nor that the included ML modeling algorithms will yield the best performance possible.
 We intend many expansions/improvements to this pipeline in the future.  We welcome feedback, suggestions, and contributions for improvement.
 
+Contact
+--------------------------------------
+We welcome ideas, suggestions on improving the pipeline, `code-contributions <https://https://urbslab.github.io/STREAMLINE/contributing.html>`_, and collaborations!
+
+For general questions, or to discuss potential collaborations (applying, or extending STREAMLINE); contact Ryan Urbanowicz at ryan.urbanowicz@cshs.org.
+
+For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
+
 Acknowledgements
 --------------------------------------
 The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.

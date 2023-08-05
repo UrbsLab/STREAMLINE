@@ -94,8 +94,7 @@ from the included [Jupyter Notebook](https://github.com/UrbsLab/STREAMLINE/blob/
 Included with this pipeline is a folder named `DemoData` including [two small datasets](https://urbslab.github.io/STREAMLINE/data.html#demonstration-data) used as a demonstration of
 pipeline efficacy. New users can easily test/run STREAMLINE in all run modes set up to run automatically on these datasets.
 
-## List of parameters
-[//]: # (Consolidated info on how to run it on different systems can be found in [./docs/source/demo.md]&#40;docs/source/demo.md)
+## List of Run Parameters
 A complete list of STREAMLINE Parameters can be found [here](https://urbslab.github.io/STREAMLINE/parameters.html).
 
 ***
@@ -103,6 +102,14 @@ A complete list of STREAMLINE Parameters can be found [here](https://urbslab.git
 We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given
 classification problem, nor that the included ML modeling algorithms will yield the best performance possible.
 We intend many expansions/improvements to this pipeline in the future. We welcome feedback, suggestions, and contributions for improvement.
+
+***
+# Contact
+We welcome ideas, suggestions on improving the pipeline, [code-contributions](https://https://urbslab.github.io/STREAMLINE/contributing.html), and collaborations!
+
+* For general questions, or to discuss potential collaborations (applying, or extending STREAMLINE); contact Ryan Urbanowicz at ryan.urbanowicz@cshs.org.
+
+* For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
 
 ***
 # Acknowledgements
