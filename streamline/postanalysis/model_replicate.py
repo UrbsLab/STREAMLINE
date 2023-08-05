@@ -313,7 +313,7 @@ class ReplicateJob(Job):
             writer.writerow(list(eda.dataset.data.columns))
 
         # Save a copy of the processed replication dataset (used by useful notebook to allign prediction probabilities to instance IDs)
-        eda.dataset.to_csv(self.full_path + "/replication/" + self.apply_name +"/"+self.apply_name+"_Processed", index=False)
+        eda.dataset.data.to_csv(self.full_path + "/replication/" + self.apply_name +"/"+self.apply_name+"_Processed", index=False)
 
         # Export basic exploratory analysis files
         eda.dataset.describe_data(self.experiment_path + '/' + self.train_name)
