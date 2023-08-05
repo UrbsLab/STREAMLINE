@@ -87,22 +87,21 @@ This latest Beta update addresses key functionality issues for running STREAMLIN
 ### Alpha Release (May 12, 2022)
 * The first stable, bug-tested implementation of STREAMLINE. The bulk of the underlying code is inherited from AutoMLPipe-BC. This version has been demonstrated to operate properly only under the specific version of Anaconda, and the specified versions of other installed packages. It has not yet been tested on any MAC devices, only Windows and Linux.
 
-
 ***
 ## Planned Improvements
 
 ### Known issues
-* Repair probable bugs in eLCS and XCS ML modeling algorithms (outside of STREAMLINE). Currently, we have intentionally set both to 'False' by default, so they will not run unless user explicitly turns them on)
-* Set up STREAMLINE to be able to run (as an option) through all phases even if some CV model training runs have failed (as an option)
+* Repair probable bugs in eLCS and XCS ML modeling algorithms (outside of STREAMLINE). Currently, we have intentionally set both to 'False' by default, so they will not run unless user explicitly turns them on.
+* Set up STREAMLINE to be able to run (as an option) through all phases even if some CV model training runs have failed (as an option).
 * Optuna currently prevents a guarantee of reproducibility of STREAMLINE when run in parallel, unless the user specifies `None` for the `timeout` parameter. This is explained in the Optuna documentation as an inherent result of running Optuna in parallel, since it is possible for a different optimal configuration to be found if a greater number of optimization trials are completed from one run to the next. We will consider alternative strategies for running STREAMLINE hyperparameter optimization as options in the future.
 * Optuna generated visualization of hyper-parameter sweep results fails to operate correctly under certain situations (i.e. for GP most often, and for LR when using a version of Optuna other than 2.0.0)  It looks like Optuna developers intend to fix these issues in the future, and we will update STREAMLINE accordingly when they do.
 
 ### Logistical extensions
-* Set up code to be run easily on cloud computing options such as AWS, Azure, or Google Cloud
-* Set up option to use STREAMLINE within Docker
+* Set up code to be run easily on cloud computing options such as AWS, Azure, or Google Cloud.
+* Set up option to use STREAMLINE within Docker.
 
 ### Capabilities extensions
-* Support multiclass and quantitative endpoints
+* Support multiclass and quantitative endpoints (in [development branch](https://github.com/STREAMLINE/tree/dev)): 
     * Requires significant extensions to most phases of the pipeline including exploratory analysis, CV partitioning, feature importance/selection, modeling, statistics analysis, and visualizations
 * Shapley value calculation and visualizations
 * Create ensemble model from all trained models which can then be evaluated on hold out replication data

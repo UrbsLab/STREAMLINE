@@ -1,15 +1,14 @@
 # Contributing
-
 We welcome you to [check the existing issues](https://github.com/UrbsLab/STREAMLINE/issues/) for bugs or enhancements to work on. 
 If you have an idea for an extension to STREAMLINE, please [file a new issue](https://github.com/UrbsLab/STREAMLINE/issues//new), 
 or email harsh.bandhey@cshs.org to discuss it.
 
+***
 ## Project Layout
-
 The latest release of STREAMLINE is on the [main branch](https://github.com/UrbsLab/STREAMLINE/tree/main), 
-whereas the legacy/old version of STREAMLINE in development is on the [legacy branch](https://github.com/STREAMLINE/tree/legacy).
+whereas the legacy/Beta 0.2.5 version of STREAMLINE is on the [legacy branch](https://github.com/STREAMLINE/tree/legacy).
 
-The in development code is stored in the  [development branch](https://github.com/STREAMLINE/tree/dev)
+The in-development code is stored in the  [development branch](https://github.com/STREAMLINE/tree/dev)
 Make sure you are looking at and working on the correct branch if you're looking to contribute code.
 
 In terms of directory structure:
@@ -20,8 +19,8 @@ In terms of directory structure:
 
 Make sure to familiarize yourself with the project layout before making any major contributions.
 
-## How to contribute
-
+***
+## How to Contribute
 The preferred way to contribute to STREAMLINE is to fork the 
 [main repository](https://github.com/UrbsLab/STREAMLINE/) on
 GitHub:
@@ -64,8 +63,8 @@ Finally, go to the web page of your fork of the STREAMLINE repo, and click 'Pull
 
 (For details on the above look up the [Git documentation](http://git-scm.com/documentation) on the web.)
 
-## Before submitting your pull request
-
+***
+## Before Submitting a Pull Request
 Before you submit a pull request for your contribution, please work through this checklist to make sure that you have done everything necessary so we can efficiently review and accept your changes.
 
 If your contribution changes STREAMLINE in any way:
@@ -85,8 +84,8 @@ If your contribution requires a new library dependency:
 * Double-check that the new dependency is easy to install via `pip`. 
 * Add it to the `requirements.txt` file.
 
-## Updating the documentation
-
+***
+## Updating the Documentation
 We use [sphinx](https://www.sphinx-doc.org/) to manage our [documentation](https://urbslab.github.io/STREAMLINE/). 
 This allows us to write the docs in Markdown and compile them to HTML as needed. 
 Below are a few useful tips/commands to know when updating the documentation.
@@ -102,9 +101,8 @@ Below are a few useful tips/commands to know when updating the documentation.
 
        $ sphinx-build -b html docs/source docs/build/html -E -a
 
-
-## After submitting your pull request
-
+***
+## After Submitting a Pull Request
 After submitting your pull request, GitHub Actions will automatically run unit tests on your changes and make sure that your updated code runs.
 
 Check back shortly after submitting your pull request to make sure that your code passes these checks. 

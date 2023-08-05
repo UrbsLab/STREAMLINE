@@ -1,10 +1,37 @@
 # Doing More with STREAMLINE
+Before, or after running STREAMLINE, there are a number of things a user can do to get even more out of this framework and it's main phases.
 
+***
 ## Useful Notebooks
-[Under Construction]
+Included in the STREAMLINE repository is the folder `UsefulNotebooks` containing a variety of Jupyter Notebooks, each designed to work with an 'experiment' folder containing the output of a STREAMLINE run. As an overview, these notebooks are designed to:
+1. Regenerate key plots based on user specifications
+2. Reporting model prediction probabilities for testing and replication dataset instances
+3. Generate additional figures, including:
+    * A feature imporance rank heatmap
+    * Model vizualizations for decision tree and genetic programming models
+4. Examining the impact of using decision thresholds other than the default 0.5. 
 
+Below we detail what each of these notebooks do:
+
+
+
+We have assempled a variety of 'useful' Jupyter Notebooks
+designed to operate on an experiment folder allowing users to do even more
+with the pipeline output. Examples include:
+1. Accessing prediction probabilities.
+2. Regenerating figures to user-specifications.
+3. Trying out the effect of different prediction thresholds on selected
+   models with an interactive slider.
+4. Re-evaluating models when applying a new prediction threshold.
+5. Generating an interactive model feature importance ranking visualization across
+   all ML algorithms.
+6. Generating an interpretable model vizualization for either decision tree or genetic programming models.
+
+[Under Construction]
+***
 ## Updating Algorithm Hyperparameter Options
 
+***
 ## Adding New Modeling Algorithms
 
 New models can easily be added to STREAMLINE by creating a custom class

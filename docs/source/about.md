@@ -120,6 +120,8 @@ with the pipeline output. Examples include:
    all ML algorithms.
 6. Generating an interpretable model vizualization for either decision tree or genetic programming models.
 
+See [doing more with STREAMLINE](more.md#doing-more-with-streamline) for additional information.
+
 ***
 ## How does STREAMLINE avoid data leakage?
 Assembling a machine learning pipeline unfortunately affords a user many opportunities to incorrectly allow data leakage. 
