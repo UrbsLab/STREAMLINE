@@ -12,8 +12,12 @@ Included in the STREAMLINE repository is the folder `UsefulNotebooks` containing
 4. Examining the impact of using decision thresholds other than the default 0.5. 
 
 Below we detail what each of these notebooks do:
+* `AccessingPickledMetricsAndPredictionProbabilities`
 
 
+* *Note: Users can run these notebooks more or less 'as-is' or they may wish to modify their underlying code further.*
+
+[Under Construction]
 
 We have assempled a variety of 'useful' Jupyter Notebooks
 designed to operate on an experiment folder allowing users to do even more
@@ -27,9 +31,12 @@ with the pipeline output. Examples include:
    all ML algorithms.
 6. Generating an interpretable model vizualization for either decision tree or genetic programming models.
 
-[Under Construction]
+
 ***
-## Updating Algorithm Hyperparameter Options
+## Updating Modeling Algorithm Hyperparameter Options
+The hard-coded range of hyperparameter options and their value options/ranges for each algorithm can be found within `streamline/modeling/parameters.py`. 
+Code-savy users can adjust these value option/ranges for each ML algorithm if desired. However if you do so, and publish results of running STREAMLINE we stongly recommend indicating this or any other code changes for reproducibility. 
+
 
 ***
 ## Adding New Modeling Algorithms
