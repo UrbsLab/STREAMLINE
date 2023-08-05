@@ -960,14 +960,14 @@ class StatsJob(Job):
             med_scores = fi_med_list[algorithm_counter]
             # Plot a histogram of average feature importance
             plt.hist(med_scores, bins=100)
-            plt.xlabel("Median Feature Importance")
-            plt.ylabel("Frequency")
             if metric_ranking == 'mean':
-                plt.title("Histogram of Mean Feature Importance for " + str(algorithm))
+                plt.xlabel("Mean Feature Importance")
             elif metric_ranking == 'median':
-                plt.title("Histogram of Median Feature Importance for " + str(algorithm))
+                plt.xlabel("Median Feature Importance")
             else:
-                plt.title("Histogram of Mean Feature Importance for " + str(algorithm))
+                plt.xlabel("Mean Feature Importance")
+            plt.ylabel("Frequency")
+            plt.title(str(algorithm))
             plt.xticks(rotation='vertical')
             plt.savefig(self.full_path
                         + '/model_evaluation/'

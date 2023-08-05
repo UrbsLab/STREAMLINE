@@ -6,7 +6,7 @@ Conducting a more effective ML analysis typically demands a much larger amount o
 2. Run using fewer ML algorithms at once:
     * Naive Bayes, Logistic Regression, and Decision Trees are typically fastest.
     * Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).
-3. Run using a smaller number of `cv_partitions`.
+3. Run using a smaller number of `cv_partitions` (however keep in mind that this will impact the power of statistical significance testing in comparing algorithm and dataset formance, since it relies on the sample from multiple CV partitions)
 4. Run without generating plots (i.e. `export_feature_correlations`, `export_univariate_plots`, `plot_PRC`, `plot_ROC`, `plot_FI_box`, `plot_metric_boxplots`).
 5. In large datasets with missing values, set `multi_impute` to 'False'. This will apply simple mean imputation to numerical features instead.
 6. Set `use_TURF` as 'False'. However we strongly recommend setting this to 'True' in feature spaces > 10,000 in order to avoid missing feature interactions during feature selection.

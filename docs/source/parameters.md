@@ -639,7 +639,7 @@ This section will go into greater depth for each run parameter, primarily using 
 * **Description:** boolean flag telling STREAMLINE to delete intermediary cross validation datasets (i.e. training and testing datasets prior to completed data processing, imputation, scaling, and feature selection) form the output experiment folder
 * **Format:** [Command Line Argument] just use flag (i.e. `--del-old-cv`), [Configuration File] (bool) 
 * **Values:** `True` or `False`
-* **Tips:** this parameter is only relevant if [overwrite_cv](#overwrite-cv) was set to `False`
+* **Tips:** this parameter is only relevant if [`overwrite_cv`](#overwrite-cv) was set to `False`
 
 ***
 ### Multiprocessing Parameters
