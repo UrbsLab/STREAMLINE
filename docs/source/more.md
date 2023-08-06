@@ -10,8 +10,9 @@ Included in the STREAMLINE repository is the folder `UsefulNotebooks` containing
     * A feature imporance rank heatmap
     * Model vizualizations for decision tree and genetic programming models
 4. Examining the impact of using decision thresholds other than the default 0.5. 
+5. Run a complete training data evaluation of all models.
 
-Below we detail what each of these notebooks do:
+Below we detail what each of these notebooks do (in alphabetical order):
 * `DecisionThreshold_Interactive.ipynb`: allow users to interactively examine different decision thresholds for a target model, and see how this new threshold impacts confusion matrix metrics (i.e. TP, TN, FP, FN).
 * `DecisionThreshold_TestEval.ipynb`: allow users to (1) re-evaluate all trained models on the respective testing datasets using a decision threshold other than the default 0.5, (2) re-generate metric evaluation boxplots comparing algorithm performance using this new decision threshold, and (3) re-run statistical significance analyses comparing algorithm performance using this new decision threshold.
 * `DecisionThreshold_TrainEval.ipynb`: allow users to (1) re-evaluate all trained models on respective training datasets using the standard decision threshold of 0.5 or some other threshold, (2) re-generate metric evaluation boxplots comparing algorithm performance using this new decision threshold, and (3) re-run statistical significance analyses comparing algorithm performance using this new decision threshold.
