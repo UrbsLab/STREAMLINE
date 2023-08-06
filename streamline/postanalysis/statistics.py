@@ -1027,7 +1027,7 @@ class StatsJob(Job):
             lines = tuple(ps)
         # Specify axes info and legend
         plt.xticks(np.arange(len(all_feature_list_to_viz)), all_feature_list_to_viz, rotation='vertical')
-        plt.xlabel("Features (ranked by sum of "+metric_ranking+" feature importance: weighted by "+metric_weighting+" model "+self.metric_weight+")", fontsize=20)
+        plt.xlabel("Features (ranked by sum of "+metric_ranking+" feature importance: weighted by "+metric_weighting+" model "+self.metric_weight.lower()+")", fontsize=20)
         plt.ylabel(y_label_text, fontsize=20)
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
         plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")
