@@ -171,6 +171,8 @@ class StatsJob(Job):
 
     def fi_stats(self, metric_dict):
         metric_ranking = 'mean'
+        metric_weighting = 'mean'
+
         # mean or median #Ryan add a run parameter to STREAMLINE to
         # allow user to decide plot rankings for FI using mean by default
         # Prepare for feature importance visualizations
@@ -179,7 +181,7 @@ class StatsJob(Job):
         # old - 'Balanced Accuracy'
         fi_df_list, fi_med_list, fi_med_norm_list, med_metric_list, all_feature_list, \
             non_zero_union_features, \
-            non_zero_union_indexes = self.prep_fi(metric_dict, metric_ranking)
+            non_zero_union_indexes = self.prep_fi(metric_dict, metric_ranking, metric_weighting)
 
         # Select 'top' features for composite visualisation
         features_to_viz = self.select_for_composite_viz(non_zero_union_features, non_zero_union_indexes,
@@ -208,8 +210,7 @@ class StatsJob(Job):
             self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
                                    'Normalized Median Feature Importance', metric_ranking)
         else:
-            self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
-                                   'Normalized Mean Feature Importance', metric_ranking)
+            print("Error: metric_ranking selection not found (must be mean or median)")
 
         # # Fractionate FI scores for normalized and fractionated composite FI plot
         # frac_lists = self.frac_fi(top_fi_med_norm_list)
@@ -230,8 +231,7 @@ class StatsJob(Job):
             self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
                                    'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking)
         else:
-            self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking)
+            print("Error: metric_ranking selection not found (must be mean or median)")
 
         # Weight the Fractionated FI scores for normalized,fractionated, and weighted compound FI plot
         # weighted_frac_lists = self.weight_frac_fi(frac_lists,weights)
@@ -793,7 +793,7 @@ class StatsJob(Job):
                                      '/model_evaluation/'
                                      'statistical_comparisons/MannWhitneyU_' + metric + '.csv', index=False)
 
-    def prep_fi(self, metric_dict, metric_ranking):
+    def prep_fi(self, metric_dict, metric_ranking, metric_weighting):
         """
         Organizes and prepares model feature importance
         data for boxplot and composite feature importance figure generation.
@@ -823,12 +823,17 @@ class StatsJob(Job):
             elif metric_ranking == 'median':
                 fi_med_list.append(temp_df.median().tolist())  # Saves median FI scores over CV runs
             else:
-                print('Warning: Feature importance plot ranking metric requested not available - using mean ranking')
-                fi_med_list.append(temp_df.mean().tolist())  # Saves mean FI scores over CV runs
+                print("Error: metric_ranking selection not found (must be mean or median)")
 
             # Get relevant metric info
-            med_ba = median(metric_dict[algorithm][self.metric_weight])
+            if metric_weighting == 'mean':
+                med_ba = mean(metric_dict[algorithm][self.metric_weight])
+            elif metric_weighting == 'median':
+                med_ba = median(metric_dict[algorithm][self.metric_weight])
+            else: #use mean as backup
+                print("Error: metric_weighting selection not found (must be mean or median)")
             med_metric_list.append(med_ba)
+
         # Normalize Median Feature importance scores, so they fall between (0 - 1)
         fi_med_norm_list = []
         for each in fi_med_list:  # each algorithm
@@ -939,7 +944,7 @@ class StatsJob(Job):
             elif metric_ranking == 'median':
                 plt.xlabel('Features (Median Ranking)')
             else:
-                plt.xlabel('Features(Mean Ranking)')
+                print("Error: metric_ranking selection not found (must be mean or median)")
             plt.xticks(np.arange(1, len(features_to_viz) + 1), features_to_viz, rotation='vertical')
             plt.savefig(self.full_path + '/model_evaluation/feature_importance/' + algorithm + '_boxplot',
                         bbox_inches="tight")
@@ -965,7 +970,7 @@ class StatsJob(Job):
             elif metric_ranking == 'median':
                 plt.xlabel("Median Feature Importance")
             else:
-                plt.xlabel("Mean Feature Importance")
+                print("Error: metric_ranking selection not found (must be mean or median)")
             plt.ylabel("Frequency")
             plt.title(str(algorithm))
             plt.xticks(rotation='vertical')
@@ -1027,7 +1032,7 @@ class StatsJob(Job):
         elif metric_ranking == 'median':
             plt.xlabel("Features (Sum of Weighted Medians Ranking)", fontsize=20)
         else:
-            plt.xlabel("Features (Sum of Weighted Means Ranking)", fontsize=20)
+            print("Error: metric_ranking selection not found (must be mean or median)")
         plt.ylabel(y_label_text, fontsize=20)
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
         plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")
