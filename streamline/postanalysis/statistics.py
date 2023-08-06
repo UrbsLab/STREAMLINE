@@ -205,10 +205,10 @@ class StatsJob(Job):
 
         if metric_ranking == 'mean':
             self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
-                                   'Normalized Mean Feature Importance', metric_ranking)
+                                   'Normalized Mean Feature Importance', metric_ranking, metric_weighting)
         elif metric_ranking == 'median':
             self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
-                                   'Normalized Median Feature Importance', metric_ranking)
+                                   'Normalized Median Feature Importance', metric_ranking, metric_weighting)
         else:
             print("Error: metric_ranking selection not found (must be mean or median)")
 
@@ -226,10 +226,10 @@ class StatsJob(Job):
         # Generate Normalized and Weighted Compound FI plot
         if metric_ranking == 'mean':
             self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking)
+                                   'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking, metric_weighting)
         elif metric_ranking == 'median':
             self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking)
+                                   'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking, metric_weighting)
         else:
             print("Error: metric_ranking selection not found (must be mean or median)")
 
@@ -984,7 +984,7 @@ class StatsJob(Job):
                 # plt.cla() # not required
 
     def composite_fi_plot(self, fi_list, all_feature_list_to_viz, fig_name,
-                          y_label_text, metric_ranking):
+                          y_label_text, metric_ranking, metric_weighting):
         """
         Generate composite feature importance plot given list of feature names
         and associated feature importance scores for each algorithm.
@@ -1027,12 +1027,7 @@ class StatsJob(Job):
             lines = tuple(ps)
         # Specify axes info and legend
         plt.xticks(np.arange(len(all_feature_list_to_viz)), all_feature_list_to_viz, rotation='vertical')
-        if metric_ranking == 'mean':
-            plt.xlabel("Features (Sum of Weighted Means Ranking)", fontsize=20)
-        elif metric_ranking == 'median':
-            plt.xlabel("Features (Sum of Weighted Medians Ranking)", fontsize=20)
-        else:
-            print("Error: metric_ranking selection not found (must be mean or median)")
+        plt.xlabel("Features (ranked by sum of "+metric_ranking+" feature importance: weighted by "+metric_weighting+" model "+self.metric_weight+")", fontsize=20)
         plt.ylabel(y_label_text, fontsize=20)
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
         plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")
