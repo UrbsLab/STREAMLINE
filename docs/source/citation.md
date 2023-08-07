@@ -69,6 +69,10 @@ This section provides citations to publications applying STREAMLINE in recent re
 }
 ```
 
+*[A Data-Driven Analysis of Ward Capacity Strain Metrics That Predict Clinical Outcomes Among Survivors of Acute Respiratory Failure](https://link.springer.com/article/10.1007/s10916-023-01978-5)
+
+Kohn, R., Harhay, M.O., Weissman, G.E. et al. A Data-Driven Analysis of Ward Capacity Strain Metrics That Predict Clinical Outcomes Among Survivors of Acute Respiratory Failure. J Med Syst 47, 83 (2023).
+
 * [Identifying Barriers to Post-Acute Care Referral and Characterizing Negative Patient Preferences Among Hospitalized Older Adults Using Natural Language Processing](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10148308/)
 ```
 @inproceedings{kennedy2022identifying,
