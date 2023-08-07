@@ -18,12 +18,14 @@ from streamline.runners.replicate_runner import ReplicationRunner
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo",
 model_algorithms = ["LR", "NB", "DT"]
+rep_data_path = "./data/DemoRepData/"
 
 
-def test_setup():
+def test_classification():
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
+
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
                             exclude_eda_output=None,
                             class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
@@ -97,35 +99,15 @@ def test_setup():
     report.run(run_parallel=run_parallel)
     del report
 
-    repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
+    repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc_data_custom.csv',
                              output_path, experiment_name,
                              load_algo=True)
     repl.run(run_parallel=run_parallel)
 
-    logging.warning("Ran Setup in " + str(time.time() - start))
-
-
-@pytest.mark.parametrize(
-    ("rep_data_path", "run_parallel"),
-    [
-        ("./data/DemoRepData/", run_parallel),
-    ]
-)
-def test_valid_report2(rep_data_path, run_parallel):
-    start = time.time()
-
-    logging.warning("Running Replication Report Phase")
-
     report = ReportRunner(output_path, experiment_name, algorithms=model_algorithms,
-                          training=False, rep_data_path=rep_data_path,
-                          dataset_for_rep=dataset_path + 'hcc-data_example_custom.csv')
+                          training=False, rep_data_path="./data/DemoRepData/",
+                          dataset_for_rep=dataset_path + 'hcc_data_custom.csv')
     report.run(run_parallel)
+    del report
 
-    if run_parallel:
-        how = "parallely"
-    else:
-        how = "serially"
-    logging.warning("Statistics Step with " + str(algorithms) +
-                    ", Time running " + how + ": " + str(time.time() - start))
-
-    # shutil.rmtree(output_path)
+    logging.warning("Ran Setup in " + str(time.time() - start))

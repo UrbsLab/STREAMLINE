@@ -226,10 +226,12 @@ class StatsJob(Job):
         # Generate Normalized and Weighted Compound FI plot
         if metric_ranking == 'mean':
             self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking, metric_weighting)
+                                   'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking,
+                                   metric_weighting)
         elif metric_ranking == 'median':
             self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking, metric_weighting)
+                                   'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking,
+                                   metric_weighting)
         else:
             print("Error: metric_ranking selection not found (must be mean or median)")
 
@@ -673,6 +675,7 @@ class StatsJob(Job):
             # Specify plot labels
             plt.ylabel(str(metric))
             plt.xlabel('ML Algorithm')
+            plt.title(algorithm)
             # Export and/or show plot
             plt.savefig(self.full_path +
                         '/model_evaluation/metricBoxplots/Compare_' + metric + '.png', bbox_inches="tight")
@@ -823,15 +826,15 @@ class StatsJob(Job):
             elif metric_ranking == 'median':
                 fi_med_list.append(temp_df.median().tolist())  # Saves median FI scores over CV runs
             else:
-                print("Error: metric_ranking selection not found (must be mean or median)")
+                raise Exception("Error: metric_ranking selection not found (must be mean or median)")
 
             # Get relevant metric info
             if metric_weighting == 'mean':
                 med_ba = mean(metric_dict[algorithm][self.metric_weight])
             elif metric_weighting == 'median':
                 med_ba = median(metric_dict[algorithm][self.metric_weight])
-            else: #use mean as backup
-                print("Error: metric_weighting selection not found (must be mean or median)")
+            else:  # use mean as backup
+                raise Exception("Error: metric_weighting selection not found (must be mean or median)")
             med_metric_list.append(med_ba)
 
         # Normalize Median Feature importance scores, so they fall between (0 - 1)
@@ -1027,10 +1030,12 @@ class StatsJob(Job):
             lines = tuple(ps)
         # Specify axes info and legend
         plt.xticks(np.arange(len(all_feature_list_to_viz)), all_feature_list_to_viz, rotation='vertical')
-        plt.xlabel("Features (ranked by sum of "+metric_ranking+" feature importance: weighted by "+metric_weighting+" model "+self.metric_weight.lower()+")", fontsize=20)
+        plt.xlabel("Features (ranked by sum of " + metric_ranking + " feature importance: weighted by " +
+                   metric_weighting + " model " + self.metric_weight.lower() + ")", fontsize=20)
         plt.ylabel(y_label_text, fontsize=20)
         # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
-        plt.legend(lines[::-1], self.algorithms[::-1], loc="upper right")
+        algorithms_list, lines_list = (list(t) for t in zip(*sorted(zip(self.algorithms, lines))))
+        plt.legend(lines_list, algorithms_list, loc="upper right")
         # Export and/or show plot
         plt.savefig(self.full_path + '/model_evaluation/feature_importance/Compare_FI_' + fig_name + '.png',
                     bbox_inches='tight')
@@ -1142,21 +1147,21 @@ class StatsJob(Job):
                 dict_obj[ref] += val
         with open(self.full_path + '/runtimes.csv', mode='w', newline="") as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(["Pipeline Component", "Time (sec)"])
-            writer.writerow(["Exploratory Analysis", dict_obj['exploratory']])
-            writer.writerow(["Preprocessing", dict_obj['preprocessing']])
+            writer.writerow(["Pipeline Component", "Phase", "Time (sec)"])
+            writer.writerow(["Exploratory Analysis", 1, dict_obj['exploratory']])
+            writer.writerow(["Scale and Impute", 2, dict_obj['preprocessing']])
             try:
-                writer.writerow(["Mutual Information", dict_obj['mutualinformation']])
+                writer.writerow(["Mutual Information (Feature Importance)", 3, dict_obj['mutual']])
             except KeyError:
                 pass
             try:
-                writer.writerow(["MultiSURF", dict_obj['multisurf']])
+                writer.writerow(["MultiSURF (Feature Importance)", 3, dict_obj['multisurf']])
             except KeyError:
                 pass
-            writer.writerow(["Feature Selection", dict_obj['featureselection']])
+            writer.writerow(["Feature Selection", 4, dict_obj['featureselection']])
             for algorithm in self.algorithms:  # Report runtimes for each algorithm
-                writer.writerow(([algorithm, dict_obj[self.abbrev[algorithm]]]))
-            writer.writerow(["Stats Summary", dict_obj['Stats']])
+                writer.writerow(([algorithm + "(Modeling)", 5, dict_obj[self.abbrev[algorithm]]]))
+            writer.writerow(["Stats Summary", 6, dict_obj['Stats']])
 
     def save_runtime(self):
         """
