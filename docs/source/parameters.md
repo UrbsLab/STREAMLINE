@@ -702,7 +702,7 @@ computing resources.
 
 However, having a [`timeout`](#timeout) value specified helps ensure STREAMLINE run completion within a reasonable time frame.
 
-### Reducing Runtime
+### Reducing Runtime and Memory Use
 Conducting a more effective ML analysis typically demands a much larger amount of computing power and runtime. However, we provide general guidelines here for limiting overall runtime of a STREAMLINE experiment.
 1. Run/include a fewer number of datasets in [`dataset_path`](#dataset_path) at once.
 2. Run using fewer ML [`algorithms`](#algorithms) at once:
@@ -710,7 +710,7 @@ Conducting a more effective ML analysis typically demands a much larger amount o
     * Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).
 3. Run using a smaller number of [`cv_partitions`](#cv-partitions).
 4. Run without generating additional plots (see [`exclude_eda_output`](#exclude-eda-output), [`export_hyper_sweep_plots`](#export-hyper-sweep-plots),[`exclude_plots`](#exclude-plots), [`exclude_rep_plots`](#exclude-rep-plots)).
-5. In large datasets with missing values, set [`multi_impute`](#multi-impute) to `False`. This will apply simple mean imputation to numerical features instead.
+5. In large datasets with missing values, set [`multi_impute`](#multi-impute) to `False`. This will apply simple mean imputation to numerical features instead (saving computational time, memory and output file space).
 6. Set [`use_TURF`](#use-turf) as `False`. However we strongly recommend setting this to `True` in feature spaces > 10,000 in order to avoid missing feature interactions during feature selection.
 7. Set [`TURF_pct`](#turf-pct) no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.
 8. Set [`instance_subset`](#instance-subset) at or below `2000` (speeds up multiSURF feature importance evaluation at potential expense of performance).
