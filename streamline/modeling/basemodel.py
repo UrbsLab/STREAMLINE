@@ -137,8 +137,9 @@ class BaseModel:
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
                                             scoring=self.scoring_metric,
                                             cv=self.cv, n_jobs=self.n_jobs).mean()
-        except KeyError:
-            logging.error("KeyError while copying model")
+        except KeyError as e:
+            # logging.error("KeyError while copying model " + self.model_name)
+            # logging.error(str(e))
             model_class = self.model.__class__
             model = model_class(**self.params)
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
