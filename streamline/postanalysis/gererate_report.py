@@ -1223,7 +1223,8 @@ class ReportJob(Job):
         Generates single page of runtime analysis results. Automatically moves to another page when runs out of
         space. Maximum of 4 dataset results to a page.
         """
-        col_width = 40  # maximum column width
+        col_width_1 = 45  # maximum column width
+        col_width_2 = 25
         dataset_count = len(self.datasets)
         data_start = page * result_limit
         count_limit = (page * result_limit) + result_limit
@@ -1251,23 +1252,28 @@ class ReportJob(Job):
             time_df = pd.concat([time_df.columns.to_frame().T, time_df])
             time_df = time_df.to_numpy()
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.cell(col_width * 2, 4, str(self.datasets[n]), 1, align="L")
+            self.analysis_report.cell(col_width_1 + col_width_2 * 2, 4, str(self.datasets[n]), 1, align="L")
             self.analysis_report.y += 5
             self.analysis_report.x = last_x
             self.analysis_report.set_font('Times', '', 7)
             for row in time_df:
+                col = 0
                 for datum in row:
-                    self.analysis_report.cell(col_width, th, str(datum), border=1)
+                    if col == 0:
+                        self.analysis_report.cell(col_width_1, th, str(datum), border=1)
+                    else:
+                        self.analysis_report.cell(col_width_2, th, str(datum), border=1)
+                    col +=1
                 self.analysis_report.ln(th)  # critical
                 self.analysis_report.x = last_x
 
             if left:
-                self.analysis_report.x = (col_width * 2) + 2
+                self.analysis_report.x = (col_width_1 + col_width_2 * 2) + 2
                 self.analysis_report.y = last_y
                 left = False
             else:
                 self.analysis_report.x = 1
-                self.analysis_report.y = last_y + 75
+                self.analysis_report.y = last_y + 100
                 left = True
         self.footer()
 
