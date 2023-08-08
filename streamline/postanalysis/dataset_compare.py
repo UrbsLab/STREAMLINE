@@ -347,6 +347,7 @@ class CompareJob(Job):
                 # Specify plot labels
                 plt.ylabel(str(metric))
                 plt.xlabel('Dataset')
+                plt.title(algorithm)
                 # Export and/or show plot
                 plt.savefig(self.experiment_path + '/DatasetComparisons/dataCompBoxplots/DataCompare_' + self.abbrev[
                     algorithm] + '_' + metric + '.png', bbox_inches="tight")

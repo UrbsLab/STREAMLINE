@@ -466,6 +466,7 @@ class StatsJob(Job):
             plt.ylim([-0.05, 1.05])
             plt.xlabel('False Positive Rate')
             plt.ylabel('True Positive Rate')
+            plt.title(algorithm)
             plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
             # Export and/or show plot
             plt.savefig(self.full_path + '/model_evaluation/' +
@@ -522,6 +523,7 @@ class StatsJob(Job):
             plt.ylim([-0.05, 1.05])
             plt.xlabel('Recall (Sensitivity)')
             plt.ylabel('Precision (PPV)')
+            plt.title(algorithm)
             plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
             # Export and/or show plot
             plt.savefig(self.full_path + '/model_evaluation/' +
@@ -675,7 +677,6 @@ class StatsJob(Job):
             # Specify plot labels
             plt.ylabel(str(metric))
             plt.xlabel('ML Algorithm')
-            plt.title(algorithm)
             # Export and/or show plot
             plt.savefig(self.full_path +
                         '/model_evaluation/metricBoxplots/Compare_' + metric + '.png', bbox_inches="tight")
