@@ -436,7 +436,10 @@ class CompareJob(Job):
         if set1.equals(set2):
             temp_list.append(result[0])
         else:
-            temp_list.append(str(round(result[0], 6)))
+            try:
+                temp_list.append(str(round(result[0], 6)))
+            except Exception:
+                temp_list.append(result[0])
         temp_list.append(str(round(result[1], 6)))
         if result[1] < self.sig_cutoff:
             temp_list.append(str('*'))
