@@ -86,7 +86,7 @@ class ReplicationRunner:
         self.ignore_features = metadata['Ignored Features']
         self.categorical_cutoff = metadata['Categorical Cutoff']
         self.sig_cutoff = metadata['Statistical Significance Cutoff']
-        self.featureeng_missingness = metadata['Feature Missingness Cutoff']
+        self.featureeng_missingness = metadata['Engineering Missingness Cutoff']
         self.cleaning_missingness = metadata['Cleaning Missingness Cutoff']
         self.cv_partitions = metadata['CV Partitions']
         self.scale_data = metadata['Use Data Scaling']

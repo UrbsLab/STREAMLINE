@@ -239,7 +239,7 @@ class DataProcessRunner:
         metadata['Partition Method'] = self.partition_method
         metadata['Categorical Cutoff'] = self.categorical_cutoff
         metadata['Statistical Significance Cutoff'] = self.sig_cutoff
-        metadata['Feature Missingness Cutoff'] = self.featureeng_missingness
+        metadata['Engineering Missingness Cutoff'] = self.featureeng_missingness
         metadata['Cleaning Missingness Cutoff'] = self.cleaning_missingness
         metadata['Correlation Removal Threshold'] = self.correlation_removal_threshold
         metadata['List of Exploratory Analysis Ran'] = self.exploration_list
