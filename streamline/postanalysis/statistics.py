@@ -994,8 +994,8 @@ class StatsJob(Job):
         and associated feature importance scores for each algorithm.
         This is run for different transformations of the normalized feature importance scores.
         """
-        alg_colors = [COLORS[k] for k in self.algorithms if k in COLORS]
-        algorithms, alg_colors = (list(t) for t in zip(*sorted(zip(self.algorithms, alg_colors), reverse=True)))
+        alg_colors = [COLORS[k] for k in self.algorithms]
+        algorithms, alg_colors, fi_list = (list(t) for t in zip(*sorted(zip(self.algorithms, alg_colors, fi_list), reverse=True)))
         # Set basic plot properties
         rc('font', weight='bold', size=16)
         # The position of the bars on the x-axis
