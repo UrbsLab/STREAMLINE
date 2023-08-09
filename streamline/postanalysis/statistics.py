@@ -994,7 +994,8 @@ class StatsJob(Job):
         and associated feature importance scores for each algorithm.
         This is run for different transformations of the normalized feature importance scores.
         """
-        alg_colors = list(self.colors.values())
+        alg_colors = [COLORS[k] for k in self.algorithms if k in COLORS]
+        algorithms, alg_colors = (list(t) for t in zip(*sorted(zip(self.algorithms, alg_colors), reverse=True)))
         # Set basic plot properties
         rc('font', weight='bold', size=16)
         # The position of the bars on the x-axis
@@ -1009,7 +1010,7 @@ class StatsJob(Job):
         bottoms = []  # list of space used by previous
         # algorithms for each feature (so next bar can be placed directly above it)
         bottom = None
-        for i in range(len(self.algorithms) - 1):
+        for i in range(len(algorithms) - 1):
             for j in range(i + 1):
                 if j == 0:
                     bottom = np.array(fi_list[0]).astype('float64')
@@ -1021,7 +1022,7 @@ class StatsJob(Job):
         if len(self.algorithms) > 1:
             # Plot subsequent feature bars for each subsequent algorithm
             ps = [p1[0]]
-            for i in range(len(self.algorithms) - 1):
+            for i in range(len(algorithms) - 1):
                 p = plt.bar(r, fi_list[i + 1], bottom=bottoms[i], color=alg_colors[i + 1], edgecolor='white',
                             width=bar_width)
                 ps.append(p[0])
@@ -1034,9 +1035,9 @@ class StatsJob(Job):
         plt.xlabel("Features (ranked by sum of " + metric_ranking + " feature importance: weighted by " +
                    metric_weighting + " model " + self.metric_weight.lower() + ")", fontsize=20)
         plt.ylabel(y_label_text, fontsize=20)
-        # plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
-        algorithms_list, lines_list = (list(t) for t in zip(*sorted(zip(self.algorithms, lines))))
-        plt.legend(lines_list, algorithms_list, loc="upper right")
+        plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
+        # algorithms_list, lines_list = (list(t) for t in zip(*sorted(zip(algorithms, lines))))
+        # plt.legend(lines_list, algorithms_list, loc="upper right")
         # Export and/or show plot
         plt.savefig(self.full_path + '/model_evaluation/feature_importance/Compare_FI_' + fig_name + '.png',
                     bbox_inches='tight')
