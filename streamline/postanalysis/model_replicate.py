@@ -388,28 +388,12 @@ class ReplicateJob(Job):
             if self.impute_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
-                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, feature_name_list)
+                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, feature_name_list,
+                                                       eda.categorical_features, eda.quantitative_features)
                 except Exception as e:
-                    # If there was no missing data in respective dataset,
-                    # thus no imputation files were created, bypass loading of imputation data.
-                    # Requires new replication data to have no missing values, as there is no
-                    # established internal scheme to conduct imputation.
-                    if np.count_nonzero(np.isnan(eda.dataset.data)) > 0:
-                        logging.warning("Notice: Imputation was not conducted for the following target dataset "
-                                        "so categorical values were imputed using the median "
-                                        "and quantitative values were imputed with the mean: "
-                                        + str(self.apply_name))
-                        for feat in eda.categorical_features:
-                            if eda.dataset.data[feat].isna().sum() > 0:
-                                eda.dataset.data[feat].fillna(eda.dataset.data[feat].median(), inplace=True)
-                        for feat in eda.quantitative_features:
-                            if eda.dataset.data[feat].isna().sum() > 0:
-                                eda.dataset.data[feat].fillna(eda.dataset.data[feat].mean(), inplace=True)
-                    else:
-                        logging.warning("Notice: Imputation was not conducted for the following target dataset "
-                                        "and no nan values were found in replication data: "
-                                        + str(self.apply_name))
-
+                    logging.warning("Unknow Exception in Imputation: "
+                                    + str(self.apply_name))
+                    logging.warning(e)
                     # raise e
 
             # Scale dataframe based on training scaling
@@ -418,7 +402,7 @@ class ReplicateJob(Job):
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
                     cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data, feature_name_list)
                 except Exception as e:
-                    # If there was no missing data in respective dataset,
+                    # If there was no imputation data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
@@ -475,56 +459,80 @@ class ReplicateJob(Job):
             stats.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
 
         # Print phase completion
-        print(self.apply_name + " phase 9 complete")
+        logging.info(self.apply_name + " phase 9 complete")
         job_file = open(self.experiment_path + '/jobsCompleted/job_apply_' + self.apply_name + '.txt', 'w')
         job_file.write('complete')
         job_file.close()
 
-    def impute_rep_data(self, cv_count, cv_rep_data, all_train_feature_list):
+    def impute_rep_data(self, cv_count, cv_rep_data, all_train_feature_list, cat_features, quant_features):
         # Impute categorical features (i.e. those included in the mode_dict)
-        impute_cat_info = self.full_path + '/scale_impute/categorical_imputer_cv' + str(
-            cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
-        infile = open(impute_cat_info, 'rb')
-        mode_dict = pickle.load(infile)
-        infile.close()
-        for c in cv_rep_data.columns:
-            if c in mode_dict:  # was the given feature identified as and treated as categorical during training?
-                cv_rep_data[c].fillna(mode_dict[c], inplace=True)
+        try:
+            impute_cat_info = self.full_path + '/scale_impute/categorical_imputer_cv' + str(
+                cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
+            infile = open(impute_cat_info, 'rb')
+            mode_dict = pickle.load(infile)
+            infile.close()
+            for c in cv_rep_data.columns:
+                if c in mode_dict:  # was the given feature identified as and treated as categorical during training?
+                    cv_rep_data[c].fillna(mode_dict[c], inplace=True)
+        except Exception as e:
+            # If there was no missing data in respective dataset,
+            # thus no imputation files were created, bypass loading of imputation data and do simple imputation
+            if cv_rep_data.isna().sum().sum() > 0: 
+                logging.warning("Notice: Categorical Imputation was not conducted for the following target dataset "
+                                "so categorical values were imputed using the median:"
+                                + str(self.apply_name))
+                for feat in cat_features:
+                    if cv_rep_data[feat].isnull().sum() > 0:
+                        cv_rep_data[feat].fillna(cv_rep_data[feat].median(), inplace=True)
 
         impute_rep_df = None
 
-        impute_oridinal_info = self.full_path + '/scale_impute/ordinal_imputer_cv' + str(
-            cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
-        if self.multi_impute:  # multiple imputation of quantitative features
-            infile = open(impute_oridinal_info, 'rb')
-            imputer = pickle.load(infile)
-            infile.close()
-            inst_rep = None
-            # Prepare data for scikit imputation
-            if self.instance_label is None or self.instance_label == 'None':
-                x_rep = cv_rep_data.drop([self.class_label], axis=1).values
-            else:
-                x_rep = cv_rep_data.drop([self.class_label, self.instance_label], axis=1).values
-                inst_rep = cv_rep_data[self.instance_label].values  # pull out instance labels in case they include text
-            y_rep = cv_rep_data[self.class_label].values
-            x_rep_impute = imputer.transform(x_rep)
-            # Recombine x and y
-            if self.instance_label is None or self.instance_label == 'None':
-                impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.class_label]),
-                                           pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1,
-                                          sort=False)
-            else:
-                impute_rep_df = pd.concat(
-                    [pd.DataFrame(y_rep, columns=[self.class_label]),
-                     pd.DataFrame(inst_rep, columns=[self.instance_label]),
-                     pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1, sort=False)
-        else:  # simple (median) imputation of quantitative features
-            infile = open(impute_oridinal_info, 'rb')
-            median_dict = pickle.load(infile)
-            infile.close()
-            for c in cv_rep_data.columns:
-                if c in median_dict:  # was the given feature identified as and treated as categorical during training?
-                    cv_rep_data[c].fillna(median_dict[c], inplace=True)
+        try:
+            impute_oridinal_info = self.full_path + '/scale_impute/ordinal_imputer_cv' + str(
+                cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
+            if self.multi_impute:  # multiple imputation of quantitative features
+                infile = open(impute_oridinal_info, 'rb')
+                imputer = pickle.load(infile)
+                infile.close()
+                inst_rep = None
+                # Prepare data for scikit imputation
+                if self.instance_label is None or self.instance_label == 'None':
+                    x_rep = cv_rep_data.drop([self.class_label], axis=1).values
+                else:
+                    x_rep = cv_rep_data.drop([self.class_label, self.instance_label], axis=1).values
+                    inst_rep = cv_rep_data[self.instance_label].values  # pull out instance labels in case they include text
+                y_rep = cv_rep_data[self.class_label].values
+                x_rep_impute = imputer.transform(x_rep)
+                # Recombine x and y
+                if self.instance_label is None or self.instance_label == 'None':
+                    impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.class_label]),
+                                            pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1,
+                                            sort=False)
+                else:
+                    impute_rep_df = pd.concat(
+                        [pd.DataFrame(y_rep, columns=[self.class_label]),
+                        pd.DataFrame(inst_rep, columns=[self.instance_label]),
+                        pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1, sort=False)
+            else:  # simple (median) imputation of quantitative features
+                infile = open(impute_oridinal_info, 'rb')
+                median_dict = pickle.load(infile)
+                infile.close()
+                for c in cv_rep_data.columns:
+                    if c in median_dict:  # was the given feature identified as and treated as categorical during training?
+                        cv_rep_data[c].fillna(median_dict[c], inplace=True)
+        except FileNotFoundError:
+            # If there was no missing data in respective dataset,
+            # thus no imputation files were created, bypass loading of imputation data and do simple imputation
+            if cv_rep_data.isna().sum().sum() > 0: 
+                logging.warning("Notice: Quantitative Imputation was not conducted for the following target dataset "
+                                "so quantitative values were imputed with the mean: "
+                                + str(self.apply_name))
+                for feat in quant_features:
+                    if cv_rep_data[feat].isnull().sum() > 0:
+                        cv_rep_data[feat].fillna(cv_rep_data[feat].mean(), inplace=True)
+            impute_rep_df = cv_rep_data
+
         return impute_rep_df
 
     def scale_rep_data(self, cv_count, cv_rep_data, all_train_feature_list):

@@ -24,6 +24,8 @@ UserRepData/
 UserOutput/
 DemoOutput/
 DemoOutputLocal/
+OSAData/
+OSAData.zip
 multiplexer_dataset/
 gametes_dataset/
 run_configs/cedars_amd.cfg
