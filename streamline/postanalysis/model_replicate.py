@@ -6,6 +6,7 @@ import pickle
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
 from streamline.dataprep.data_process import DataProcess
 from streamline.modeling.basemodel import BaseModel
@@ -393,10 +394,22 @@ class ReplicateJob(Job):
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
-                    logging.warning(e)
-                    logging.warning("Notice: Imputation was not conducted for the following target dataset, "
-                                    "so imputation was not conducted for replication data: "
-                                    + str(self.apply_name))
+                    if np.count_nonzero(np.isnan(eda.dataset.data)) > 0:
+                        logging.warning("Notice: Imputation was not conducted for the following target dataset "
+                                        "so categorical values were imputed using the median "
+                                        "and quantitative values were imputed with the mean: "
+                                        + str(self.apply_name))
+                        for feat in eda.categorical_features:
+                            if eda.dataset.data[feat].isna().sum() > 0:
+                                eda.dataset.data[feat].fillna(eda.dataset.data[feat].median(), inplace=True)
+                        for feat in eda.quantitative_features:
+                            if eda.dataset.data[feat].isna().sum() > 0:
+                                eda.dataset.data[feat].fillna(eda.dataset.data[feat].mean(), inplace=True)
+                    else:
+                        logging.warning("Notice: Imputation was not conducted for the following target dataset "
+                                        "and no nan values were found in replication data: "
+                                        + str(self.apply_name))
+
                     # raise e
 
             # Scale dataframe based on training scaling
