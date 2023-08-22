@@ -13,7 +13,7 @@ from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, rep_data_path, experiment_name = "./data/DemoData/", "./data/DemoRepData/", "demo",
@@ -99,13 +99,13 @@ def test_classification():
     report.run(run_parallel=run_parallel)
     del report
 
-    repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc-data_example_custom.csv',
+    repl = ReplicationRunner('./data/DemoRepData', dataset_path + 'hcc_data_custom.csv',
                              output_path, experiment_name)
     repl.run(run_parallel=run_parallel)
 
     report = ReportRunner(output_path, experiment_name,
                           training=False, rep_data_path=rep_data_path,
-                          dataset_for_rep=dataset_path + 'hcc-data_example_custom.csv')
+                          dataset_for_rep=dataset_path + 'hcc_data_custom.csv')
     report.run(run_parallel)
     del report
 

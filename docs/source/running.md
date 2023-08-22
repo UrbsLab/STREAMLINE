@@ -69,7 +69,7 @@ This mode is most convenient if you want to run the notebook on other data, but 
     * [`experiment_name`](parameters.md#experiment-name) - a unique name for the ouput folder for the current STREAMLINE 'experiment'
     * [`data_path`](parameters.md#dataset-path) - use file navigation window to select the folder containing one or more 'target datasets' to be analyzed
         * *These datasets must adhere to the formatting detailed in '[Input Data Requirements](data.md#input-data-requirements)'*
-    * [`class_label`](parameters.md#class-label) - specify the header name for the outcome column in the dataset(s), e.g. 'Class'
+    * [`outcome_label`](parameters.md#class-label) - specify the header name for the outcome column in the dataset(s), e.g. 'Class'
     * [`instance_label`](parameters.md#instance-label) - specify the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
     * [`match_label`](parameters.md#match-label) - specify the header name for the match/group column in the dataset(s) or specify `None` if not relevant
     * [`applyToReplication`](parameters.md#applytoreplication) - indicate `True` or `False` as to whether 'replication data' is available for the replication phase
@@ -127,7 +127,7 @@ Begin by opening `STREAMLINE-Notebook.ipypnb` as a Jupyter Notebook (steps 1-3 a
         * *These datasets must adhere to the formatting detailed in '[Input Data Requirements](data.md#input-data-requirements)'*
     * [`output_path`](parameters.md#output-path) - path to the folder (that will be automatically created if it doesn't yet exist) in which the 'experiment folder' including all STREAMLINE output will be saved
         * *Note: You can leave [`output_path`](parameters.md#output-path) as `./UserOutput` if you've named this folder `UserOutput`*
-    * [`class_label`](parameters.md#class-label) - the header name for the outcome column in the dataset(s), e.g. 'Class'
+    * [`outcome_label`](parameters.md#class-label) - the header name for the outcome column in the dataset(s), e.g. 'Class'
     * [`instance_label`](parameters.md#instance-label) - the header name for the unique instance IDs in the dataset(s) or specify `None` if not relevant
     * [`match_label`](parameters.md#match-label) - the header name for the match/group column in the dataset(s) or specify `None` if not relevant
     * [`ignore_features`](parameters.md#ignore-features-path) - list of text-valued feature names in target datasets that you want STREAMLINE to drop from the analysis, or specify `None` if not relevant

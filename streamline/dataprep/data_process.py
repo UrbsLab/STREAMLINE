@@ -220,7 +220,7 @@ class DataProcess(Job):
         plt.savefig(iso_hist_path)
         plt.close()
 
-        logging.warning('Running Local Outlier Factor anomaly detection.')
+        logging.info('Running Local Outlier Factor anomaly detection.')
         # Local Outlier Factor on imputed data
         imputed_local_outlier_factor = LocalOutlierFactor(n_neighbors=15, novelty=True, contamination='auto')
         imputed_local_outlier_scores = imputed_local_outlier_factor.fit(
@@ -237,7 +237,7 @@ class DataProcess(Job):
         plt.savefig(lof_hist_path)
         plt.close()
 
-        logging.warning('Running Elliptic Envelope anomaly detection.')
+        logging.info('Running Elliptic Envelope anomaly detection.')
         # Elliptic Envelope on imputed data
         imputed_elliptic_envelope = EllipticEnvelope(contamination=0.05, support_fraction=0.75,
                                                      random_state=self.random_state)
@@ -428,7 +428,7 @@ class DataProcess(Job):
                                                    'feature_outlier_counts.csv')
         feature_outlier_counts_df.to_csv(feature_outlier_counts_file, index=False)
 
-        logging.warning("Anomaly detection completed.")
+        logging.info("Anomaly detection completed.")
 
     def run_process(self, top_features=20):
         """

@@ -156,7 +156,7 @@ class Dataset:
         if not os.path.exists(experiment_path + '/' + self.name + '/' + phase):
             os.makedirs(experiment_path + '/' + self.name + '/' + phase)
         headers = self.data.columns.values.tolist()
-        headers.remove(self.class_label)
+        headers.remove(self.outcome_label)
         if not (self.match_label is None):
             headers.remove(self.match_label)
         if not (self.instance_label is None):
@@ -177,7 +177,7 @@ class Dataset:
         if not os.path.exists(experiment_path + '/' + self.name + '/' + phase):
             os.makedirs(experiment_path + '/' + self.name + '/' + phase)
         headers = self.data.columns.values.tolist()
-        headers.remove(self.class_label)
+        headers.remove(self.outcome_label)
         if not (self.match_label is None):
             headers.remove(self.match_label)
         if not (self.instance_label is None):

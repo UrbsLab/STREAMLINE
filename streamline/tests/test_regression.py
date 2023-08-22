@@ -13,7 +13,7 @@ from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], True, "./tests/"
 dataset_path, rep_data_path = "./data/DemoDataRegression/", "./data/DemoRepDataRegression/"
@@ -28,8 +28,6 @@ def test_regression():
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
-                            exploration_list=None,
-                            plot_list=None,
                             outcome_label="Cognition_Score", instance_label="Class", n_splits=3, ignore_features=None)
     eda.run(run_parallel=run_parallel)
     del eda

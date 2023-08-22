@@ -93,7 +93,7 @@ def run(params):
         from streamline.runners.dataprocess_runner import DataProcessRunner
         eda = DataProcessRunner(params['dataset_path'], params['output_path'], params['experiment_name'],
                                 exclude_eda_output=params['exclude_eda_output'],
-                                class_label=params['class_label'], instance_label=params['instance_label'],
+                                outcome_label=params['outcome_label'], instance_label=params['instance_label'],
                                 match_label=params['match_label'],
                                 n_splits=params['cv_partitions'],
                                 partition_method=params['partition_method'],

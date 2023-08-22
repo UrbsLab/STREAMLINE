@@ -89,11 +89,13 @@ class StatsJob(Job):
         if self.plot_fi_box:
             self.feature_headers = pd.read_csv(self.full_path + "/exploratory/ProcessedFeatureNames.csv",
                                                sep=',').columns.values.tolist()  # Get Original Headers
+            self.original_headers = self.feature_headers
         else:
             try:
                 self.feature_headers = pd.read_csv(self.full_path
                                                    + "/exploratory/ProcessedFeatureNames.csv",
                                                    sep=',').columns.values.tolist()  # Get Original Headers
+                self.original_headers = self.feature_headers
             #        if self.plot_fi_box:
             #            self.original_headers = pd.read_csv(self.full_path + "/exploratory/OriginalFeatureNames.csv",
             #                                                sep=',').columns.values.tolist()  # Get Original Headers
@@ -106,7 +108,7 @@ class StatsJob(Job):
             except Exception:
                 self.original_headers = None
 
-        if 'applymodel' not in full_path:
+        if 'replication' not in full_path:
             self.partial_path = '/'.join(full_path.split('/')[:-1])
         else:
             self.partial_path = '/'.join(full_path.split('/')[:-3])
@@ -194,9 +196,9 @@ class StatsJob(Job):
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
         if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
-            ave_or_median = 'Median'
+            ave_or_median = 'median'
         else:
-            ave_or_median = 'Mean'
+            ave_or_median = 'mean'
 
         # Run FI Related stats and plots
         self.fi_stats(metric_dict, ave_or_median)
@@ -970,6 +972,8 @@ class StatsJob(Job):
 
                 test_y = test[self.outcome_label].values
             else:
+                logging.warning(self.outcome_label)
+                logging.warning(rep_data.columns)
                 test_y = rep_data[self.outcome_label].values
 
             no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases

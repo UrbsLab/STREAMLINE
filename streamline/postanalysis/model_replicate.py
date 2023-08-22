@@ -454,7 +454,7 @@ class ReplicateJob(Job):
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
 
         stats = StatsJob(self.full_path + '/replication/' + self.apply_name,
-                         self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
+                         self.outcome_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
                          metric_weight='balanced_accuracy', scale_data=self.scale_data,
                          exclude_plots=self.exclude_plots, show_plots=self.show_plots)
@@ -525,20 +525,20 @@ class ReplicateJob(Job):
                 inst_rep = None
                 # Prepare data for scikit imputation
                 if self.instance_label is None or self.instance_label == 'None':
-                    x_rep = cv_rep_data.drop([self.class_label], axis=1).values
+                    x_rep = cv_rep_data.drop([self.outcome_label], axis=1).values
                 else:
-                    x_rep = cv_rep_data.drop([self.class_label, self.instance_label], axis=1).values
+                    x_rep = cv_rep_data.drop([self.outcome_label, self.instance_label], axis=1).values
                     inst_rep = cv_rep_data[self.instance_label].values  # pull out instance labels in case they include text
-                y_rep = cv_rep_data[self.class_label].values
+                y_rep = cv_rep_data[self.outcome_label].values
                 x_rep_impute = imputer.transform(x_rep)
                 # Recombine x and y
                 if self.instance_label is None or self.instance_label == 'None':
-                    impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.class_label]),
+                    impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.outcome_label]),
                                             pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1,
                                             sort=False)
                 else:
                     impute_rep_df = pd.concat(
-                        [pd.DataFrame(y_rep, columns=[self.class_label]),
+                        [pd.DataFrame(y_rep, columns=[self.outcome_label]),
                         pd.DataFrame(inst_rep, columns=[self.instance_label]),
                         pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1, sort=False)
             else:  # simple (median) imputation of quantitative features

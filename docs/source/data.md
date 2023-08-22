@@ -9,12 +9,12 @@ Here we specify the formatting requirements for datasets when running STREAMLINE
     * Do not leave placeholder values for missing values such as 99, -99, or text other than 'NA'.
 4. Dataset files should include a header that gives column names.
 5. Data columns should only include the following (column order does not matter):
-    * Outcome/Class Label (i.e. the dependant variable) - column indicated by [`class_label`](parameters.md#class-label)
+    * Outcome/Class Label (i.e. the dependant variable) - column indicated by [`outcome_label`](parameters.md#class-label)
     * Instance Label (i.e. unique identifiers for each instance/row in the dataset) \[Optional] - column indicated by [`instance_label`](parameters.md#instance-label)
     * Match Label (i.e. an instance group identifier used to keep instances of the same group together during k-fold CV using the group stratification option) column indicated by [`match_label`](parameters.md#match-label)
     * Features (i.e. independant variables) - all other columns in dataset are assumed to be features (except those excluded using [`ignore_features_path`](parameters.md#ignore-features-path))
 6. The outcome/class column includes only two possible values (i.e. a binary outcome) [Note: STREAMLINE will soon be expanded to allow for multi-class and quantiative outcomes]
-7. If multiple target datasets are being analyzed they must each have the same [`class_label`](parameters.md#class-label) (e.g. `Class`), and (if present), the same [`instance_label`](parameters.md#instance-label) (e.g. 'ID') and [`match_label`](parameters.md#match-label) (e.g. 'Match_ID'). The same is true for any 'replication datasets' (if present) when using Phase 8. 
+7. If multiple target datasets are being analyzed they must each have the same [`outcome_label`](parameters.md#class-label) (e.g. `Class`), and (if present), the same [`instance_label`](parameters.md#instance-label) (e.g. 'ID') and [`match_label`](parameters.md#match-label) (e.g. 'Match_ID'). The same is true for any 'replication datasets' (if present) when using Phase 8. 
 
 ***
 ### Additional Considerations

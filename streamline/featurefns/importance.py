@@ -147,8 +147,8 @@ class FeatureImportance(Job):
         headers = list(self.dataset.data.columns)
         if self.instance_label:
             headers.remove(self.instance_label)
-        headers.remove(self.class_label)
-        data_features = self.dataset.data[headers + [self.class_label, ]]
+        headers.remove(self.outcome_label)
+        data_features = self.dataset.data[headers + [self.outcome_label, ]]
         n = data_features.shape[0]
         if self.instance_subset is not None:
             n = min(data_features.shape[0], self.instance_subset)
