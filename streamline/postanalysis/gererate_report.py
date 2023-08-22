@@ -840,53 +840,53 @@ class ReportJob(Job):
             #         + '\n' + "Best (PRC APS): "
             #         + str(best_alg_aps.values) + ' = '
             #         + str("{:.3f}".format(highest_aps)), border=1, align='L')
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
+                self.analysis_report.set_font('Times', 'B', 10)
+                # ROC
+                # -------------------------------
+                self.analysis_report.x = 1
+                self.analysis_report.y = 112
+                self.analysis_report.cell(10, 4, 'ROC', 1, align="L")
+                if self.training:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_ROC.png', 4, 118,
+                        120)
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124,
+                        118,
+                        82, 85)
+                else:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                            m] + '/model_evaluation/Summary_ROC.png',
+                        4, 118, 120)
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
 
-            self.analysis_report.set_font('Times', 'B', 10)
-            # ROC
-            # -------------------------------
-            self.analysis_report.x = 1
-            self.analysis_report.y = 112
-            self.analysis_report.cell(10, 4, 'ROC', 1, align="L")
-            if self.training:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_ROC.png', 4, 118,
-                    120)
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124,
-                    118,
-                    82, 85)
-            else:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
-                        m] + '/model_evaluation/Summary_ROC.png',
-                    4, 118, 120)
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
-
-            # PRC-------------------------------
-            self.analysis_report.x = 1
-            self.analysis_report.y = 200
-            self.analysis_report.cell(10, 4, 'PRC', 1, align="L")
-            if self.training:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_PRC.png', 4, 206,
-                    133)  # wider to account for more text
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138,
-                    205,
-                    68, 80)
-            else:
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
-                        m] + '/model_evaluation/Summary_PRC.png',
-                    4, 206, 133)  # wider to account for more text
-                self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
-                        m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
-            self.footer()
+                # PRC-------------------------------
+                self.analysis_report.x = 1
+                self.analysis_report.y = 200
+                self.analysis_report.cell(10, 4, 'PRC', 1, align="L")
+                if self.training:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_PRC.png', 4, 206,
+                        133)  # wider to account for more text
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138,
+                        205,
+                        68, 80)
+                else:
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                            m] + '/model_evaluation/Summary_PRC.png',
+                        4, 206, 133)  # wider to account for more text
+                    self.analysis_report.image(
+                        self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                            m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
+                self.footer()
 
         # NEXT PAGE(S) - Average Model Prediction Statistics
         # --------------------------------------------------------------------------------------

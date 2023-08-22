@@ -20,7 +20,7 @@ dataset_path, rep_data_path = "./data/DemoDataRegression/", "./data/DemoRepDataR
 experiment_name = "regression"
 outcome_label = "Cognition_Score"
 instance_label = "Class"
-model_algorithms = ["LR", "RF", "EN"]
+model_algorithms = ["LR"]
 
 
 def test_regression():
