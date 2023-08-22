@@ -21,8 +21,8 @@ class MLPClassifier(BinaryClassificationModel, ABC):
     def objective(self, trial, params=None):
         self.params = {'activation': trial.suggest_categorical('activation', self.param_grid['activation']),
                        'learning_rate': trial.suggest_categorical('learning_rate', self.param_grid['learning_rate']),
-                       'momentum': trial.suggest_uniform('momentum', self.param_grid['momentum'][0],
-                                                         self.param_grid['momentum'][1]),
+                       'momentum': trial.suggest_float('momentum', self.param_grid['momentum'][0],
+                                                       self.param_grid['momentum'][1]),
                        'solver': trial.suggest_categorical('solver', self.param_grid['solver']),
                        'batch_size': trial.suggest_categorical('batch_size', self.param_grid['batch_size']),
                        'alpha': trial.suggest_float('alpha', self.param_grid['alpha'][0],

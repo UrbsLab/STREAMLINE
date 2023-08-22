@@ -30,6 +30,15 @@ class Cleaner:
         self.experiment_path = self.output_path + '/' + self.experiment_name
         self.del_time = del_time
         self.del_old_cv = del_old_cv
+    
+        if self.del_time == 'False' or self.del_time == False:
+            self.del_time == False
+        else:
+            self.del_time == True
+        if self.del_old_cv == 'False' or self.del_old_cv == False:
+            self.del_old_cv == False
+        else:
+            self.del_old_cv == True
 
         if not os.path.exists(self.output_path):
             raise Exception("Provided output_path does not exist")

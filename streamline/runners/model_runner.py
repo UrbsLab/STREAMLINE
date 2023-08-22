@@ -114,7 +114,7 @@ class ModelExperimentRunner:
         else:
             raise Exception("Unknown Outcome Type:" + str(self.outcome_type))
 
-        if algorithms == "All":
+        if algorithms == "All" or algorithms == ['All']:
             algorithms = None
 
         if algorithms is None:

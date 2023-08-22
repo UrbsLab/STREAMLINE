@@ -1,3 +1,4 @@
+import logging
 import os
 import glob
 import pickle
@@ -14,14 +15,12 @@ class ReplicationRunner:
     """
     Phase 9 of STREAMLINE (Optional)- This 'Main' script manages Phase 9 run parameters,
     and submits job to run locally (to run serially) or on
-    cluster (parallelized). This script runs ApplyModelJob.py which applies and
-    evaluates all trained models on one or more previously unseen hold-out or replication study dataset(s).
+    cluster (parallelized).
     """
 
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
                  outcome_label=None, instance_label=None, match_label=None,
-                 export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
-                 run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
+                 exclude_plots=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
         """
 
         Args:
@@ -32,13 +31,14 @@ class ReplicationRunner:
             output_path: path to output directory
             experiment_name: name of experiment (no spaces)
             match_label: applies if original training data included column with matched instance ids, default=None
-            export_feature_correlations: run and export feature correlation analysis (yields correlation heatmap), \
+            exclude_plots: analysis to exclude from outputs, possible options given below. \
+            export_feature_correlations, run and export feature correlation analysis (yields correlation heatmap), \
                                          default=True
-            plot_roc: Plot ROC curves individually for each algorithm including all CV results and averages, \
+            plot_roc, Plot ROC curves individually for each algorithm including all CV results and averages, \
                       default=True
-            plot_prc: Plot PRC curves individually for each algorithm including all CV results and averages, \
+            plot_prc, Plot PRC curves individually for each algorithm including all CV results and averages, \
                       default=True
-            plot_metric_boxplots: Plot box plot summaries comparing algorithms for each metric, default=True
+            plot_metric_boxplots, Plot box plot summaries comparing algorithms for each metric, default=True
         """
 
         self.rep_data_path = rep_data_path
@@ -49,10 +49,20 @@ class ReplicationRunner:
         self.plot_lists = None
         self.match_label = match_label
 
-        self.export_feature_correlations = export_feature_correlations
-        self.plot_roc = plot_roc
-        self.plot_prc = plot_prc
-        self.plot_metric_boxplots = plot_metric_boxplots
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_metric_boxplots', 'feature_correlations']
+        if exclude_plots is not None:
+            for x in exclude_plots:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown exclusion option " + str(x))
+        else:
+            exclude_plots = list()
+
+        self.exclude_plots = exclude_plots
+        self.plot_roc = 'plot_ROC' not in exclude_plots
+        self.plot_prc = 'plot_PRC' not in exclude_plots
+        self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
+        self.plot_fi_box = 'plot_FI_box' not in exclude_plots
+        self.export_feature_correlations = 'feature_correlations' not in exclude_plots
 
         self.experiment_path = self.output_path + '/' + self.experiment_name
 
@@ -75,7 +85,7 @@ class ReplicationRunner:
         self.ignore_features = metadata['Ignored Features']
         self.categorical_cutoff = metadata['Categorical Cutoff']
         self.sig_cutoff = metadata['Statistical Significance Cutoff']
-        self.featureeng_missingness = metadata['Feature Missingness Cutoff']
+        self.featureeng_missingness = metadata['Engineering Missingness Cutoff']
         self.cleaning_missingness = metadata['Cleaning Missingness Cutoff']
         self.cv_partitions = metadata['CV Partitions']
         self.scale_data = metadata['Use Data Scaling']
@@ -104,8 +114,8 @@ class ReplicationRunner:
         # location of folder containing models respective training dataset
         self.full_path = self.output_path + "/" + self.experiment_name + "/" + self.data_name
 
-        if not os.path.exists(self.full_path + "/applymodel"):
-            os.makedirs(self.full_path + "/applymodel")
+        if not os.path.exists(self.full_path + "/replication"):
+            os.makedirs(self.full_path + "/replication")
 
         if not self.show_plots:
             if not os.path.exists(self.output_path + "/" + self.experiment_name + '/jobs'):
@@ -143,8 +153,8 @@ class ReplicationRunner:
             file_extension = dataset_filename.split('/')[-1].split('.')[-1]
             apply_name = dataset_filename.split('/')[-1].split('.')[0]
 
-            if not os.path.exists(self.full_path + "/applymodel/" + apply_name):
-                os.mkdir(self.full_path + "/applymodel/" + apply_name)
+            if not os.path.exists(self.full_path + "/replication/" + apply_name):
+                os.mkdir(self.full_path + "/replication/" + apply_name)
 
             if file_extension == 'txt' or file_extension == 'csv' or file_extension == 'tsv':
                 if apply_name not in unique_datanames:
@@ -164,9 +174,7 @@ class ReplicationRunner:
                                            self.outcome_type, self.instance_label,
                                            self.match_label, ignore_features=self.ignore_features,
                                            cv_partitions=self.cv_partitions,
-                                           export_feature_correlations=self.export_feature_correlations,
-                                           plot_roc=self.plot_roc, plot_prc=self.plot_prc,
-                                           plot_metric_boxplots=self.plot_metric_boxplots,
+                                           exclude_plots=None,
                                            categorical_cutoff=self.categorical_cutoff,
                                            sig_cutoff=self.sig_cutoff, scale_data=self.scale_data,
                                            impute_data=self.impute_data,
@@ -190,7 +198,7 @@ class ReplicationRunner:
 
     def save_metadata(self):
         # Update metadata this will alter the relevant
-        # metadata so that it is specific to the 'apply' analysis being run.
+        # metadata so that it is specific to the 'replication' analysis being run.
         file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
         metadata = pickle.load(file)
         file.close()
@@ -215,9 +223,9 @@ class ReplicationRunner:
         pickle_in.close()
 
     def get_cluster_params(self, dataset_filename):
+        exclude_param = ','.join(self.exclude_plots) if self.exclude_plots else None
         cluster_params = [dataset_filename, self.dataset_for_rep, self.full_path, self.outcome_label, self.instance_label,
-                          self.match_label, None, None, self.cv_partitions, self.export_feature_correlations,
-                          self.plot_roc, self.plot_prc, self.plot_metric_boxplots,
+                          self.match_label, None, None, self.cv_partitions, exclude_param,
                           self.categorical_cutoff, self.sig_cutoff,
                           self.scale_data, self.impute_data,
                           self.multi_impute, self.show_plots, self.scoring_metric, self.random_state]

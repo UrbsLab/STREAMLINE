@@ -33,18 +33,18 @@ def process_params(params):
 
     if params['do_model'] or params['do_stats'] or params["do_compare_dataset"] \
             or params['do_report'] or params['do_replicate'] or params['do_rep_report']:
-        if params['do_all']:
-            params['algorithms'] = None
         if params['algorithms'] == 'All':
             params['algorithms'] = None
+        if type(params['algorithms']) == list:
+            params['algorithms'] = sorted(params['algorithms'])
 
-    if params['ignore_features_path'] == '':
+    if params['ignore_features_path'] == '' or params['ignore_features_path'] == 'None':
         params['ignore_features_path'] = None
-    if params['categorical_feature_path'] == '':
+    if params['categorical_feature_path'] == '' or params['categorical_feature_path'] == 'None':
         params['categorical_feature_path'] = None
-    if params['match_label'] == '':
+    if params['match_label'] == '' or params['match_label'] == 'None':
         params['match_label'] = None
-    if params['instance_label'] == '':
+    if params['instance_label'] == '' or params['instance_label'] == 'None':
         params['instance_label'] = None
     if params['run_cluster'] == "False":
         params['run_cluster'] = False
@@ -80,14 +80,14 @@ def single_parse(mode_params, argv, config_dict=None):
                             config_dict)
             if i not in [6, 7, 9]:
                 config_dict = load_config(config_dict['output_path'],
-                                          config_dict['experiment_name'])
+                                          config_dict['experiment_name'], config_dict)
                 config_dict = PARSER_LIST[i](argv, config_dict)
                 save_config(config_dict['output_path'],
                             config_dict['experiment_name'],
                             config_dict)
             else:
                 config_dict = load_config(config_dict['output_path'],
-                                          config_dict['experiment_name'])
+                                          config_dict['experiment_name'], config_dict)
             config_dict = parse_logistic(argv, config_dict)
     return config_dict
 
@@ -145,9 +145,12 @@ def parser_function(argv):
         config = parser_function_all(argv)
         config_dict.update(config)
         config_dict.update(mode_params)
-    else:
-        config_dict = single_parse(mode_params, argv, config_dict)
-        config_dict.update(mode_params)
+
+    for key in mode_params:
+        if mode_params[key] and key not in ['config', 'do_till_report']:
+            config = single_parse(mode_params, argv, config_dict)
+            config_dict.update(config)
+            config_dict.update(mode_params)
 
     config_dict = process_params(config_dict)
 

@@ -21,23 +21,23 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
             cluster = SLURMCluster(queue=queue,
                                    cores=1,
                                    memory=str(memory) + "G",
-                                   walltime="12:00:00",
+                                   walltime="24:00:00",
                                    log_directory=output_path + "/dask_logs/")
             cluster.adapt(maximum_jobs=400)
         elif cluster_type == "LSF":
             cluster = LSFCluster(queue=queue,
                                  cores=1,
                                  memory=str(memory) + "G",
-                                 walltime="12:00",
+                                 walltime="24:00",
                                  log_directory=output_path + "/dask_logs/")
             cluster.adapt(maximum_jobs=400)
         elif cluster_type == 'UGE':
             cluster = SGECluster(queue=queue,
-                                   cores=1,
-                                   memory=str(memory) + "G",
-                                   resource_spec="mem_free=" + str(memory) + "G",
-                                   walltime="12:00:00",
-                                   log_directory=output_path + "/dask_logs/")
+                                 cores=1,
+                                 memory=str(memory) + "G",
+                                 resource_spec="mem_free=" + str(memory) + "G",
+                                 walltime="24:00:00",
+                                 log_directory=output_path + "/dask_logs/")
             cluster.adapt(maximum_jobs=400)
         elif cluster_type == 'HTCondor':
             cluster = HTCondorCluster(cores=1,
@@ -50,7 +50,7 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
                 cluster = cluster_dict[cluster_type](queue=queue,
                                                      cores=1,
                                                      memory=str(memory) + "G",
-                                                     walltime="12:00:00",
+                                                     walltime="24:00:00",
                                                      log_directory=output_path + "/dask_logs/")
                 cluster.adapt(maximum_jobs=400)
             except KeyError:

@@ -22,4 +22,4 @@ def load_class_from_folder(model_type="BinaryClassification"):
             if ('streamline' in str(cls)) and not ('basemodel' in str(cls) or 'submodels' in str(cls)):
                 classes.append(cls)
     # logging.warning(classes)
-    return classes
+    return sorted(classes, key=lambda x: x.model_name)

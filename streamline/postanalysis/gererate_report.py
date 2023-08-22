@@ -126,20 +126,33 @@ class ReportJob(Job):
         # FRONT PAGE - Summary of Pipeline settings
         # -------------------------------------------------------------------------------------------------------
         logging.info("Starting Report")
-        inc = 2
-        targetdata = ars_dic[0:21 + inc]  # Data-path to  instance label
-        cv = ars_dic[21 + inc:27 + inc]  # cv partitions to partition Method
-        match = ars_dic[27 + inc:30 + inc]  # match label
-        cat_cut = ars_dic[30 + inc:33 + inc]  # categorical cutoff
-        stat_cut = ars_dic[33 + inc:36 + inc]  # statistical significance cutoff
-        process = ars_dic[36 + inc:51 + inc]  # feature missingness cutoff to list of exploratory plots saved
-        general = ars_dic[51 + inc:57 + inc]  # random seed to run from notebooks
-        process2 = ars_dic[57 + inc:66 + inc]  # use data scaling to use multivariate imputation
-        featsel = ars_dic[66 + inc:93 + inc]  # use mutual info to export feature importance plots
-        overwrite = ars_dic[93 + inc:96 + inc]  # overwrite cv
-        modeling = ars_dic[96 + inc:114 + inc]  # primary metric to export hyperparameter sweep plots
-        lcs = ars_dic[114 + inc:129 + inc]
-        stats = ars_dic[129 + inc:150 + inc]
+
+        targetdata = ars_dic[0:27]  # Data-path to  Specified Quantitative Features
+        cv = ars_dic[27:33]  # cv partitions to partition Method
+        cat_cut = ars_dic[33:36]  # categorical cutoff
+        stat_cut = ars_dic[36:39]  # statistical significance cutoff
+        process = ars_dic[39:54]  # feature missingness cutoff to list of exploratory plots saved
+        general = ars_dic[54:60]  # random seed to run from notebooks
+        process2 = ars_dic[60:69]  # use data scaling to use multivariate imputation
+        featsel = ars_dic[69:96]  # use mutual info to export feature importance plots
+        overwrite = ars_dic[96:99]  # overwrite cv
+        modeling = ars_dic[99:117]  # primary metric to export hyperparameter sweep plots
+        lcs = ars_dic[117:132]
+        stats = ars_dic[132:153]
+
+        #targetdata = ars_dic[0:21]  # Data-path to  instance label
+        #cv = ars_dic[21:27]  # cv partitions to partition Method
+        #match = ars_dic[27:30]  # match label
+        #cat_cut = ars_dic[30:33]  # categorical cutoff
+        #stat_cut = ars_dic[33:36]  # statistical significance cutoff
+        #process = ars_dic[36:51]  # feature missingness cutoff to list of exploratory plots saved
+        #general = ars_dic[51:57]  # random seed to run from notebooks
+        #process2 = ars_dic[57:66]  # use data scaling to use multivariate imputation
+        #featsel = ars_dic[66:93]  # use mutual info to export feature importance plots
+        #overwrite = ars_dic[93:96]  # overwrite cv
+        #modeling = ars_dic[96:114]  # primary metric to export hyperparameter sweep plots
+        #lcs = ars_dic[114:129]
+        #stats = ars_dic[129:150]
 
         ls2 = ars_dic_2
 
@@ -424,7 +437,7 @@ class ReportJob(Job):
                 data_process_path = self.experiment_path + '/' + self.datasets[
                     m] + "/exploratory/DataProcessSummary.csv"
             else:
-                data_process_path = self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                data_process_path = self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     m] + "/exploratory/DataProcessSummary.csv"
 
             table1 = []  # Initialize an empty list to store the data
@@ -569,7 +582,7 @@ class ReportJob(Job):
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
             else:
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + '/exploratory/ClassCountsBarPlot.png', 68, 47, 45, 35)
                 # upper left hand coordinates (x,y), then image width then height (image fit to space)
 
@@ -590,7 +603,7 @@ class ReportJob(Job):
                     # then image width with hight based on image dimensions (retain original image ratio)
                 else:
                     self.analysis_report.image(
-                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                        self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                             m] + '/exploratory/FeatureCorrelations.png', 120, 47, 89, 70)
                     # self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
                     #    m] + '/exploratory/FeatureCorrelations.png', 85, 15, 125, 100)
@@ -634,7 +647,7 @@ class ReportJob(Job):
                     self.experiment_path + '/' + self.datasets[m] + "/model_evaluation/Summary_performance_mean.csv")
             else:
                 summary_performance = pd.read_csv(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                         m] + "/model_evaluation/Summary_performance_mean.csv")
 
             if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
@@ -828,79 +841,52 @@ class ReportJob(Job):
             #         + str(best_alg_aps.values) + ' = '
             #         + str("{:.3f}".format(highest_aps)), border=1, align='L')
 
-            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
+            self.analysis_report.set_font('Times', 'B', 10)
+            # ROC
+            # -------------------------------
+            self.analysis_report.x = 1
+            self.analysis_report.y = 112
+            self.analysis_report.cell(10, 4, 'ROC', 1, align="L")
+            if self.training:
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_ROC.png', 4, 118,
+                    120)
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.datasets[
+                        m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124,
+                    118,
+                    82, 85)
+            else:
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                        m] + '/model_evaluation/Summary_ROC.png',
+                    4, 118, 120)
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                        m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
 
-                self.analysis_report.set_font('Times', 'B', 10)
-                # ROC
-                # -------------------------------
-                self.analysis_report.x = 1
-                self.analysis_report.y = 112
-                self.analysis_report.cell(10, 4, 'ROC', 1, align="L")
-                if self.training:
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_ROC.png', 4, 118,
-                        120)
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.datasets[
-                            m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124,
-                        118,
-                        82, 85)
-                else:
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/model_evaluation/Summary_ROC.png',
-                        4, 118, 120)
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/model_evaluation/metricBoxplots/Compare_ROC AUC.png', 124, 118, 82, 85)
-
-                # PRC-------------------------------
-                self.analysis_report.x = 1
-                self.analysis_report.y = 200
-                self.analysis_report.cell(10, 4, 'PRC', 1, align="L")
-                if self.training:
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_PRC.png', 4, 206,
-                        133)  # wider to account for more text
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.datasets[
-                            m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138,
-                        205,
-                        68, 80)
-                else:
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/model_evaluation/Summary_PRC.png',
-                        4, 206, 133)  # wider to account for more text
-                    self.analysis_report.image(
-                        self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
-                            m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
-                self.footer()
-            elif self.outcome_type == "Continuous":
-                self.analysis_report.set_margins(left=1, top=1, right=1, )
-                self.analysis_report.add_page()
-                self.analysis_report.set_font('Times', 'B', 12)
-                self.analysis_report.cell(w=0, h=8,
-                                          txt="Dataset and Model Prediction Summary:  D"
-                                              + str(m + 1) + " = " + self.datasets[m],
-                                          border=1, align="L", ln=2)
-
-                if self.training:
-                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
-                                               + '/model_evaluation/evalPlots/'
-                                               + 'actual_vs_predict_all_algorithms.png', 1, 10, 200, 110)
-                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
-                                               + '/model_evaluation/evalPlots/'
-                                               + 'probability_train_residual_all_algorithms.png', 1, 130,
-                                               100, 90)
-                    self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
-                                               + '/model_evaluation/evalPlots/'
-                                               + 'probability_test_residual_all_algorithms.png',
-                                               110, 130,
-                                               100, 90)
-                    # self.analysis_report.image(self.experiment_path + '/' + self.datasets[m]
-                    #                            + '/model_evaluation/residualPlot/'
-                    #                            + 'actual_vs_predict_all_algorithms.png', 1, 1, 110, 60)
+            # PRC-------------------------------
+            self.analysis_report.x = 1
+            self.analysis_report.y = 200
+            self.analysis_report.cell(10, 4, 'PRC', 1, align="L")
+            if self.training:
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.datasets[m] + '/model_evaluation/Summary_PRC.png', 4, 206,
+                    133)  # wider to account for more text
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.datasets[
+                        m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138,
+                    205,
+                    68, 80)
+            else:
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                        m] + '/model_evaluation/Summary_PRC.png',
+                    4, 206, 133)  # wider to account for more text
+                self.analysis_report.image(
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
+                        m] + '/model_evaluation/metricBoxplots/Compare_PRC AUC.png', 138, 205, 68, 80)
+            self.footer()
 
         # NEXT PAGE(S) - Average Model Prediction Statistics
         # --------------------------------------------------------------------------------------
@@ -1167,9 +1153,9 @@ class ReportJob(Job):
                 except Exception:
                     pass
             else:
-                file_name = str(self.experiment_name) + '_ML_Pipeline_Apply_Report.pdf'
+                file_name = str(self.experiment_name) + '_ML_Pipeline_Replication_Report.pdf'
                 self.analysis_report.output(
-                    self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[M] + '/' + file_name)
+                    self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[M] + '/' + file_name)
                 # Print phase completion
                 logging.info("Phase 10 complete")
                 try:
@@ -1306,7 +1292,7 @@ class ReportJob(Job):
                     sep=',',
                     index_col=0)
             else:
-                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_mean.csv', sep=',', index_col=0)
             # Make list of top values for each metric
             if self.outcome_type == "Binary":
@@ -1327,7 +1313,7 @@ class ReportJob(Job):
                 ds2 = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[n] + "/model_evaluation/Summary_performance_mean.csv")
             else:
-                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_mean.csv')
 
             self.format_fn(stats_ds, best_metric_list, metric_name_list, ds2)
@@ -1367,7 +1353,7 @@ class ReportJob(Job):
                     sep=',',
                     index_col=0)
             else:
-                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                stats_ds = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_median.csv', sep=',', index_col=0)
             # Make list of top values for each metric
             if self.outcome_type == "Binary":
@@ -1389,7 +1375,7 @@ class ReportJob(Job):
                 ds2 = pd.read_csv(
                     self.experiment_path + '/' + self.datasets[n] + "/model_evaluation/Summary_performance_median.csv")
             else:
-                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/applymodel/' + self.datasets[
+                ds2 = pd.read_csv(self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[
                     n] + '/model_evaluation/Summary_performance_median.csv')
             self.format_fn(stats_ds, best_metric_list, metric_name_list, ds2)
         self.footer()
@@ -1399,7 +1385,8 @@ class ReportJob(Job):
         Generates single page of runtime analysis results. Automatically moves to another page when runs out of
         space. Maximum of 4 dataset results to a page.
         """
-        col_width = 40  # maximum column width
+        col_width_1 = 45  # maximum column width
+        col_width_2 = 25
         dataset_count = len(self.datasets)
         data_start = page * result_limit
         count_limit = (page * result_limit) + result_limit
@@ -1427,23 +1414,28 @@ class ReportJob(Job):
             time_df = pd.concat([time_df.columns.to_frame().T, time_df])
             time_df = time_df.to_numpy()
             self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.cell(col_width * 2, 4, str(self.datasets[n]), 1, align="L")
+            self.analysis_report.cell(col_width_1 + col_width_2 * 2, 4, str(self.datasets[n]), 1, align="L")
             self.analysis_report.y += 5
             self.analysis_report.x = last_x
             self.analysis_report.set_font('Times', '', 7)
             for row in time_df:
+                col = 0
                 for datum in row:
-                    self.analysis_report.cell(col_width, th, str(datum), border=1)
+                    if col == 0:
+                        self.analysis_report.cell(col_width_1, th, str(datum), border=1)
+                    else:
+                        self.analysis_report.cell(col_width_2, th, str(datum), border=1)
+                    col +=1
                 self.analysis_report.ln(th)  # critical
                 self.analysis_report.x = last_x
 
             if left:
-                self.analysis_report.x = (col_width * 2) + 2
+                self.analysis_report.x = (col_width_1 + col_width_2 * 2) + 2
                 self.analysis_report.y = last_y
                 left = False
             else:
                 self.analysis_report.x = 1
-                self.analysis_report.y = last_y + 75
+                self.analysis_report.y = last_y + 100
                 left = True
         self.footer()
 

@@ -44,9 +44,9 @@ class DataProcessRunner:
 
     """
 
-    def __init__(self, data_path, output_path, experiment_name, exploration_list=None, plot_list=None,
-                 outcome_label="Class", outcome_type=None, instance_label=None, match_label=None, n_splits=10,
-                 partition_method="Stratified",
+    def __init__(self, data_path, output_path, experiment_name, exclude_eda_output=None,
+                 outcome_label="Class",outcome_type=None, instance_label=None,
+                 match_label=None, n_splits=10, partition_method="Stratified",
                  ignore_features=None, categorical_features=None, quantitative_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                  correlation_removal_threshold=1.0,
@@ -58,10 +58,8 @@ class DataProcessRunner:
             data_path: path to directory containing datasets
             output_path: path to output directory
             experiment_name: name of experiment output folder (no spaces)
-            exploration_list: list of names of analysis to do while doing EDA (must be in set \
-                                ["Describe", "Univariate Analysis", "Feature Correlation"])
-            plot_list: list of analysis plots to save in experiment directory (must be in set \
-                                ["Describe", "Univariate Analysis", "Feature Correlation"])
+            exclude_eda_output: list of eda outputs to exclude
+            possible options ['describe_csv', 'univariate_plots', 'correlation_plots']
             outcome_label: outcome label of all datasets
             instance_label: instance label of all datasets (if present)
             match_label: only applies when M selected for partition-method; indicates column with \
@@ -77,6 +75,14 @@ class DataProcessRunner:
             categorical_cutoff: number of unique values for a variable is considered to be quantitative vs categorical\
                             (default=10)
             sig_cutoff: significance cutoff used throughout pipeline (default=0.05)
+            featureeng_missingness: the proportion of missing values within a feature (above which) a new
+                            binary categorical feature is generated that indicates if the
+                            value for an instance was missing or not
+            cleaning_missingness: the proportion of missing values, within a feature or instance, (at which) the
+                            given feature or instance will be automatically cleaned (i.e. removed)
+                            from the processed ‘target dataset’
+            correlation_removal_threshold: the (pearson) feature correlation at which one out of a pair of
+                            features is randomly removed from the processed ‘target dataset’
             random_state: sets a specific random seed for reproducible results (default=None)
             run_cluster: name of cluster run setting or False (default=False)
             queue: name of queue to be used in cluster run (default="defq")
@@ -99,19 +105,34 @@ class DataProcessRunner:
         self.cleaning_missingness = cleaning_missingness
         self.correlation_removal_threshold = correlation_removal_threshold
         self.top_features = top_features
+        self.exclude_eda_output = exclude_eda_output
+
+        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots']
+
+        exploration_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+        plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+
+        if exclude_eda_output is not None:
+            for x in exclude_eda_output:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown EDA exclusion option " + str(x))
+            if 'describe_csv' in exclude_eda_output:
+                exploration_list.remove("Describe")
+                plot_list.remove("Describe")
+            if 'univariate_plots' in exclude_eda_output:
+                plot_list.remove("Univariate Analysis")
+            if 'correlation_plots' in exclude_eda_output:
+                plot_list.remove("Feature Correlation")
+
         self.exploration_list = exploration_list
         self.plot_list = plot_list
+
         self.n_splits = n_splits
         self.partition_method = partition_method
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
         self.show_plots = show_plots
-
-        if self.exploration_list is None or self.exploration_list == []:
-            self.explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
-        if self.plot_list is None or self.plot_list == []:
-            self.plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         self.random_state = random_state
         self.sig_cutoff = sig_cutoff
         try:
@@ -154,7 +175,7 @@ class DataProcessRunner:
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,
-                                          self.exploration_list, self.plot_list,
+                                          self.exclude_eda_output,
                                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                                           self.cleaning_missingness, self.correlation_removal_threshold,
                                           self.partition_method, self.n_splits,
@@ -214,14 +235,15 @@ class DataProcessRunner:
         metadata['Outcome Label'] = self.outcome_label
         metadata['Outcome Type'] = self.outcome_type
         metadata['Instance Label'] = self.instance_label
+        metadata['Match Label'] = self.match_label
         metadata['Ignored Features'] = self.ignore_features
         metadata['Specified Categorical Features'] = self.categorical_features
+        metadata['Specified Quantitative Features'] = self.quantitative_features
         metadata['CV Partitions'] = self.n_splits
         metadata['Partition Method'] = self.partition_method
-        metadata['Match Label'] = self.match_label
         metadata['Categorical Cutoff'] = self.categorical_cutoff
         metadata['Statistical Significance Cutoff'] = self.sig_cutoff
-        metadata['Feature Missingness Cutoff'] = self.featureeng_missingness
+        metadata['Engineering Missingness Cutoff'] = self.featureeng_missingness
         metadata['Cleaning Missingness Cutoff'] = self.cleaning_missingness
         metadata['Correlation Removal Threshold'] = self.correlation_removal_threshold
         metadata['List of Exploratory Analysis Ran'] = self.exploration_list
@@ -234,7 +256,8 @@ class DataProcessRunner:
         pickle_out.close()
 
     def get_cluster_params(self, dataset_path):
-        cluster_params = [dataset_path, self.output_path, self.experiment_name, None, None,
+        exclude_param = ','.join(self.exclude_eda_output) if self.exclude_eda_output else None
+        cluster_params = [dataset_path, self.output_path, self.experiment_name, exclude_param,
                           self.outcome_label, self.outcome_type, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method, self.ignore_features, self.categorical_features,
                           self.quantitative_features, self.top_features,

@@ -15,6 +15,7 @@ class ScaleAndImpute(Job):
     """
     Data Processing Job Class for Scaling and Imputation of CV Datasets
     """
+
     def __init__(self, cv_train_path, cv_test_path, experiment_path, scale_data=True, impute_data=True,
                  multi_impute=True, overwrite_cv=True, outcome_label="Class", instance_label=None, random_state=None):
         """
@@ -81,7 +82,7 @@ class ScaleAndImpute(Job):
         del data_test  # memory cleanup
         # Load previously identified list of categorical variables
         # and create an index list to identify respective columns
-        file = open(self.experiment_path + '/' + self.dataset_name + '/exploratory/categorical_variables.pickle', 'rb')
+        file = open(self.experiment_path + '/' + self.dataset_name + '/exploratory/categorical_features.pickle', 'rb')
         self.categorical_variables = pickle.load(file)
         # Impute Missing Values in training and testing data if specified by user
         if self.impute_data:

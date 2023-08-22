@@ -18,15 +18,16 @@ from streamline.runners.replicate_runner import ReplicationRunner
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, rep_data_path, experiment_name = "./data/DemoData/", "./data/DemoRepData/", "demo",
 model_algorithms = ["LR", "NB", "DT"]
+rep_data_path = "./data/DemoRepData/"
 
 
 def test_classification():
     start = time.time()
     if not os.path.exists(output_path):
         os.mkdir(output_path)
+
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
-                            exploration_list=None,
-                            plot_list=None,
+                            exclude_eda_output=None,
                             outcome_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
                             categorical_features=['Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
                                                   'Hepatitis B e Antigen', 'Hepatitis B Core Antibody',
@@ -106,5 +107,6 @@ def test_classification():
                           training=False, rep_data_path=rep_data_path,
                           dataset_for_rep=dataset_path + 'hcc-data_example_custom.csv')
     report.run(run_parallel)
+    del report
 
     logging.warning("Ran Pipeline in " + str(time.time() - start))

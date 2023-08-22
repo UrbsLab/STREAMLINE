@@ -6,6 +6,7 @@ import pickle
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
 from streamline.dataprep.data_process import DataProcess
 from streamline.modeling.submodels import BinaryClassificationModel, RegressionModel, MulticlassClassificationModel
@@ -28,8 +29,8 @@ class ReplicateJob(Job):
     """
 
     def __init__(self, dataset_filename, dataset_for_rep, full_path, outcome_label, outcome_type, instance_label,
-                 match_label, ignore_features=None, cv_partitions=3,
-                 export_feature_correlations=True, plot_roc=True, plot_prc=True, plot_metric_boxplots=True,
+                 match_label,
+                 ignore_features=None, cv_partitions=3, exclude_plots=None,
                  categorical_cutoff=10, sig_cutoff=0.05, scale_data=True, impute_data=True,
                  multi_impute=True, show_plots=False, scoring_metric='balanced_accuracy', random_state=None):
         super().__init__()
@@ -58,10 +59,20 @@ class ReplicateJob(Job):
         self.colors = colors
         pickle_in.close()
 
-        self.plot_roc = plot_roc
-        self.plot_prc = plot_prc
-        self.plot_metric_boxplots = plot_metric_boxplots
-        self.export_feature_correlations = export_feature_correlations
+        known_exclude_options = ['plot_ROC', 'plot_PRC', 'plot_metric_boxplots', 'feature_correlations']
+        if exclude_plots is not None:
+            for x in exclude_plots:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown exclusion option " + str(x))
+        else:
+            exclude_plots = list()
+
+        self.plot_roc = 'plot_ROC' not in exclude_plots
+        self.plot_prc = 'plot_PRC' not in exclude_plots
+        self.plot_metric_boxplots = 'plot_metric_boxplots' not in exclude_plots
+        self.exclude_plots = exclude_plots
+
+        self.export_feature_correlations = 'feature_correlations' not in exclude_plots
         self.show_plots = show_plots
         self.cv_partitions = cv_partitions
 
@@ -110,23 +121,23 @@ class ReplicateJob(Job):
         rep_data.data = rep_data.data[train_data.data.columns]
 
         # Create Folder hierarchy
-        if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory')
+        if not os.path.exists(self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory'):
+            os.mkdir(self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory')
         if not os.path.exists(
-                self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial')
-        if not os.path.exists(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation'):
-            os.mkdir(self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation')
+                self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial'):
+            os.mkdir(self.full_path + "/replication/" + self.apply_name + '/' + 'exploratory' + '/' + 'initial')
+        if not os.path.exists(self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation'):
+            os.mkdir(self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation')
         if not os.path.exists(
-                self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics'):
+                self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics'):
             os.mkdir(
-                self.full_path + "/applymodel/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics')
+                self.full_path + "/replication/" + self.apply_name + '/' + 'model_evaluation' + '/' + 'pickled_metrics')
 
         # Load previously identified list of categorical
         # variables and create an index list to identify respective columns
-        file = open(self.full_path + '/exploratory/initial/initial_categorical_variables.pickle', 'rb')
+        file = open(self.full_path + '/exploratory/initial/initial_categorical_features.pickle', 'rb')
         categorical_variables = pickle.load(file)
-        file = open(self.full_path + '/exploratory/initial/initial_quantitative_variables.pickle', 'rb')
+        file = open(self.full_path + '/exploratory/initial/initial_quantitative_features.pickle', 'rb')
         quantitative_variables = pickle.load(file)
 
         rep_data.categorical_variables = categorical_variables
@@ -134,12 +145,12 @@ class ReplicateJob(Job):
 
         eda = DataProcess(rep_data, self.full_path, ignore_features=self.ignore_features,
                           categorical_features=categorical_variables, quantitative_features=quantitative_variables,
-                          explorations=[], plots=[],
+                          exclude_eda_output=None,
                           categorical_cutoff=self.categorical_cutoff, sig_cutoff=self.sig_cutoff,
                           random_state=self.random_state, show_plots=self.show_plots)
 
         # Arguments changed to send to correct locations describe_data(self)
-        eda.dataset.name = 'applymodel/' + self.apply_name
+        eda.dataset.name = 'replication/' + self.apply_name
 
         eda.identify_feature_types()
 
@@ -193,10 +204,10 @@ class ReplicateJob(Job):
                         eda.dataset.data.replace({feat: rename_dict}, inplace=True)
                         ord_labels.loc[feat]['Category'] = list(labels) + new_labels
                         ord_labels.loc[feat]['Encoding'] = list(range(len(list(labels) + new_labels)))
-            with open(self.full_path + "/applymodel/" + self.apply_name +
+            with open(self.full_path + "/replication/" + self.apply_name +
                       '/exploratory/apply_ordinal_encoding.pickle', 'wb') as outfile:
                 pickle.dump(ord_labels, outfile)
-            ord_labels.to_csv(self.full_path + "/applymodel/" + self.apply_name +
+            ord_labels.to_csv(self.full_path + "/replication/" + self.apply_name +
                               '/exploratory/Numerical_Encoding_Map.csv')
         except FileNotFoundError:
             pass
@@ -212,12 +223,12 @@ class ReplicateJob(Job):
         # Read all engineered feature names
         try:
             with open(self.experiment_path + '/' + self.train_name +
-                      '/exploratory/engineered_variables.pickle', 'rb') as infile:
+                      '/exploratory/engineered_features.pickle', 'rb') as infile:
                 eda.engineered_features = pickle.load(infile)
         except FileNotFoundError:
             eda.engineered_features = list()
 
-        # Recreate missingness features in apply phase
+        # Recreate missingness features in replication phase
         for feat in eda.engineered_features:
             eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
             eda.categorical_features.append('miss_' + feat)
@@ -228,7 +239,7 @@ class ReplicateJob(Job):
         try:
             # Removing dropped features
             with open(self.experiment_path + '/' + self.train_name +
-                      '/exploratory/removed_variables.pickle', 'rb') as infile:
+                      '/exploratory/removed_features.pickle', 'rb') as infile:
                 removed_features = list(pickle.load(infile))
             for feat in removed_features:
                 if feat in eda.categorical_features:
@@ -243,7 +254,7 @@ class ReplicateJob(Job):
 
         try:
             with open(self.experiment_path + '/' + self.train_name +
-                      '/exploratory/post_processed_vars.pickle', 'rb') as infile:
+                      '/exploratory/post_processed_features.pickle', 'rb') as infile:
                 post_processed_vars = pickle.load(infile)
         except Exception as e:
             raise e
@@ -302,22 +313,25 @@ class ReplicateJob(Job):
 
         transition_df.loc["Final"] = eda.counts_summary(save=False)
 
-        transition_df.to_csv(self.full_path + "/applymodel/" + self.apply_name + '/exploratory/'
+        transition_df.to_csv(self.full_path + "/replication/" + self.apply_name + '/exploratory/'
                              + 'DataProcessSummary.csv', index=True)
 
         # Pickle list of feature names to be treated as categorical variables
-        with open(self.full_path + "/applymodel/" + self.apply_name +
-                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+        with open(self.full_path + "/replication/" + self.apply_name +
+                  '/exploratory/categorical_features.pickle', 'wb') as outfile:
             pickle.dump(eda.categorical_features, outfile)
 
         # Pickle list of processed feature names
-        with open(self.full_path + "/applymodel/" + self.apply_name +
-                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+        with open(self.full_path + "/replication/" + self.apply_name +
+                  '/exploratory/post_processed_features.pickle', 'wb') as outfile:
             pickle.dump(list(eda.dataset.data.columns), outfile)
-        with open(self.full_path + "/applymodel/" + self.apply_name +
+        with open(self.full_path + "/replication/" + self.apply_name +
                   '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(list(eda.dataset.data.columns))
+
+        # Save a copy of the processed replication dataset (used by useful notebook to allign prediction probabilities to instance IDs)
+        eda.dataset.data.to_csv(self.full_path + "/replication/" + self.apply_name +"/"+self.apply_name+"_Processed.csv", index=False)
 
         # Export basic exploratory analysis files
         eda.dataset.describe_data(self.experiment_path + '/' + self.train_name)
@@ -391,16 +405,13 @@ class ReplicateJob(Job):
             if self.impute_data:
                 try:
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
-                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, feature_name_list)
+                    cv_rep_data = self.impute_rep_data(cv_count, cv_rep_data, feature_name_list,
+                                                       eda.categorical_features, eda.quantitative_features)
                 except Exception as e:
-                    # If there was no missing data in respective dataset,
-                    # thus no imputation files were created, bypass loading of imputation data.
-                    # Requires new replication data to have no missing values, as there is no
-                    # established internal scheme to conduct imputation.
-                    logging.warning(e)
-                    logging.warning("Notice: Imputation was not conducted for the following target dataset, "
-                                    "so imputation was not conducted for replication data: "
+                    logging.warning("Unknow Exception in Imputation: "
                                     + str(self.apply_name))
+                    logging.warning(e)
+                    # raise e
 
             # Scale dataframe based on training scaling
             if self.scale_data:
@@ -408,7 +419,7 @@ class ReplicateJob(Job):
                     # assumes imputation was actually run in training (i.e. user had impute_data setting as 'True')
                     cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data, feature_name_list)
                 except Exception as e:
-                    # If there was no missing data in respective dataset,
+                    # If there was no imputation data in respective dataset,
                     # thus no imputation files were created, bypass loading of imputation data.
                     # Requires new replication data to have no missing values, as there is no
                     # established internal scheme to conduct imputation.
@@ -435,19 +446,18 @@ class ReplicateJob(Job):
                 elif self.outcome_type == "Continuous":
                     ret, residuals = self.eval_model(algorithm, cv_count, x_test, y_test)
                 eval_dict[algorithm] = ret
-                pickle.dump(ret, open(self.full_path + "/applymodel/"
+                pickle.dump(ret, open(self.full_path + "/replication/"
                                       + self.apply_name + '/model_evaluation/pickled_metrics/'
                                       + self.abbrev[algorithm] + '_CV_'
                                       + str(cv_count) + "_metrics.pickle", 'wb'))
                 # includes everything from training except feature importance values
             master_list.append(eval_dict)  # update master list with evalDict for this CV model
 
-        stats = StatsJob(self.full_path + '/applymodel/' + self.apply_name,
-                         self.outcome_label, self.instance_label, self.scoring_metric,
+        stats = StatsJob(self.full_path + '/replication/' + self.apply_name,
+                         self.algorithms, self.class_label, self.instance_label, self.scoring_metric,
                          cv_partitions=self.cv_partitions, top_features=40, sig_cutoff=self.sig_cutoff,
-                         metric_weight=self.scoring_metric, scale_data=self.scale_data,
-                         plot_roc=self.plot_roc, plot_prc=self.plot_prc, plot_fi_box=False,
-                         plot_metric_boxplots=self.plot_metric_boxplots, show_plots=self.show_plots)
+                         metric_weight='balanced_accuracy', scale_data=self.scale_data,
+                         exclude_plots=self.exclude_plots, show_plots=self.show_plots)
 
         if self.outcome_type == "Binary":
             result_table, metric_dict = stats.primary_stats_classification(master_list, rep_data.data)
@@ -476,56 +486,80 @@ class ReplicateJob(Job):
             stats.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
 
         # Print phase completion
-        print(self.apply_name + " phase 9 complete")
+        logging.info(self.apply_name + " phase 9 complete")
         job_file = open(self.experiment_path + '/jobsCompleted/job_apply_' + self.apply_name + '.txt', 'w')
         job_file.write('complete')
         job_file.close()
 
-    def impute_rep_data(self, cv_count, cv_rep_data, all_train_feature_list):
+    def impute_rep_data(self, cv_count, cv_rep_data, all_train_feature_list, cat_features, quant_features):
         # Impute categorical features (i.e. those included in the mode_dict)
-        impute_cat_info = self.full_path + '/scale_impute/categorical_imputer_cv' + str(
-            cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
-        infile = open(impute_cat_info, 'rb')
-        mode_dict = pickle.load(infile)
-        infile.close()
-        for c in cv_rep_data.columns:
-            if c in mode_dict:  # was the given feature identified as and treated as categorical during training?
-                cv_rep_data[c].fillna(mode_dict[c], inplace=True)
+        try:
+            impute_cat_info = self.full_path + '/scale_impute/categorical_imputer_cv' + str(
+                cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
+            infile = open(impute_cat_info, 'rb')
+            mode_dict = pickle.load(infile)
+            infile.close()
+            for c in cv_rep_data.columns:
+                if c in mode_dict:  # was the given feature identified as and treated as categorical during training?
+                    cv_rep_data[c].fillna(mode_dict[c], inplace=True)
+        except Exception as e:
+            # If there was no missing data in respective dataset,
+            # thus no imputation files were created, bypass loading of imputation data and do simple imputation
+            if cv_rep_data.isna().sum().sum() > 0: 
+                logging.warning("Notice: Categorical Imputation was not conducted for the following target dataset "
+                                "so categorical values were imputed using the median:"
+                                + str(self.apply_name))
+                for feat in cat_features:
+                    if cv_rep_data[feat].isnull().sum() > 0:
+                        cv_rep_data[feat].fillna(cv_rep_data[feat].median(), inplace=True)
 
         impute_rep_df = None
 
-        impute_oridinal_info = self.full_path + '/scale_impute/ordinal_imputer_cv' + str(
-            cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
-        if self.multi_impute:  # multiple imputation of quantitative features
-            infile = open(impute_oridinal_info, 'rb')
-            imputer = pickle.load(infile)
-            infile.close()
-            inst_rep = None
-            # Prepare data for scikit imputation
-            if self.instance_label is None or self.instance_label == 'None':
-                x_rep = cv_rep_data.drop([self.outcome_label], axis=1).values
-            else:
-                x_rep = cv_rep_data.drop([self.outcome_label, self.instance_label], axis=1).values
-                inst_rep = cv_rep_data[self.instance_label].values  # pull out instance labels in case they include text
-            y_rep = cv_rep_data[self.outcome_label].values
-            x_rep_impute = imputer.transform(x_rep)
-            # Recombine x and y
-            if self.instance_label is None or self.instance_label == 'None':
-                impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.outcome_label]),
-                                           pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1,
-                                          sort=False)
-            else:
-                impute_rep_df = pd.concat(
-                    [pd.DataFrame(y_rep, columns=[self.outcome_label]),
-                     pd.DataFrame(inst_rep, columns=[self.instance_label]),
-                     pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1, sort=False)
-        else:  # simple (median) imputation of quantitative features
-            infile = open(impute_oridinal_info, 'rb')
-            median_dict = pickle.load(infile)
-            infile.close()
-            for c in cv_rep_data.columns:
-                if c in median_dict:  # was the given feature identified as and treated as categorical during training?
-                    cv_rep_data[c].fillna(median_dict[c], inplace=True)
+        try:
+            impute_oridinal_info = self.full_path + '/scale_impute/ordinal_imputer_cv' + str(
+                cv_count) + '.pickle'  # Corresponding pickle file name with scalingInfo
+            if self.multi_impute:  # multiple imputation of quantitative features
+                infile = open(impute_oridinal_info, 'rb')
+                imputer = pickle.load(infile)
+                infile.close()
+                inst_rep = None
+                # Prepare data for scikit imputation
+                if self.instance_label is None or self.instance_label == 'None':
+                    x_rep = cv_rep_data.drop([self.class_label], axis=1).values
+                else:
+                    x_rep = cv_rep_data.drop([self.class_label, self.instance_label], axis=1).values
+                    inst_rep = cv_rep_data[self.instance_label].values  # pull out instance labels in case they include text
+                y_rep = cv_rep_data[self.class_label].values
+                x_rep_impute = imputer.transform(x_rep)
+                # Recombine x and y
+                if self.instance_label is None or self.instance_label == 'None':
+                    impute_rep_df = pd.concat([pd.DataFrame(y_rep, columns=[self.class_label]),
+                                            pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1,
+                                            sort=False)
+                else:
+                    impute_rep_df = pd.concat(
+                        [pd.DataFrame(y_rep, columns=[self.class_label]),
+                        pd.DataFrame(inst_rep, columns=[self.instance_label]),
+                        pd.DataFrame(x_rep_impute, columns=all_train_feature_list)], axis=1, sort=False)
+            else:  # simple (median) imputation of quantitative features
+                infile = open(impute_oridinal_info, 'rb')
+                median_dict = pickle.load(infile)
+                infile.close()
+                for c in cv_rep_data.columns:
+                    if c in median_dict:  # was the given feature identified as and treated as categorical during training?
+                        cv_rep_data[c].fillna(median_dict[c], inplace=True)
+        except FileNotFoundError:
+            # If there was no missing data in respective dataset,
+            # thus no imputation files were created, bypass loading of imputation data and do simple imputation
+            if cv_rep_data.isna().sum().sum() > 0: 
+                logging.warning("Notice: Quantitative Imputation was not conducted for the following target dataset "
+                                "so quantitative values were imputed with the mean: "
+                                + str(self.apply_name))
+                for feat in quant_features:
+                    if cv_rep_data[feat].isnull().sum() > 0:
+                        cv_rep_data[feat].fillna(cv_rep_data[feat].mean(), inplace=True)
+            impute_rep_df = cv_rep_data
+
         return impute_rep_df
 
     def scale_rep_data(self, cv_count, cv_rep_data, all_train_feature_list):

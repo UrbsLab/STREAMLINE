@@ -34,7 +34,7 @@ class DataProcess(Job):
     """
 
     def __init__(self, dataset, experiment_path, ignore_features=None,
-                 categorical_features=None, quantitative_features=None, explorations=None, plots=None,
+                 categorical_features=None, quantitative_features=None, exclude_eda_output=None,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5,
                  cleaning_missingness=0.5, correlation_removal_threshold=1.0,
                  partition_method="Stratified", n_splits=10,
@@ -45,12 +45,24 @@ class DataProcess(Job):
         Args:
             dataset: a streamline.utils.dataset.Dataset object or a path to dataset text file
             experiment_path: path to experiment the logging directory folder
-            ignore_features: list of row names of features to ignore
-            categorical_features: list of row names of categorical features
-            explorations: list of names of analysis to do while doing EDA (must be in set X)
-            plots: list of analysis plots to save in experiment directory (must be in set Y)
+            ignore_features: list of string of column names of features to ignore or \
+                            path to .csv file with feature labels to be ignored in analysis (default=None)
+            categorical_features: list of string of column names of features to ignore or \
+                            path to .csv file with feature labels specified to be treated as categorical where possible\
+                            (default=None)
+            categorical_cutoff: number of unique values for a variable is considered to be quantitative vs categorical\
+                            (default=10)
+            exclude_eda_output: list of names of analysis to do while doing EDA (must be in set X)
             categorical_cutoff: categorical cut off to consider a feature categorical by analysis, default=10
             sig_cutoff: significance cutoff for continuous variables, default=0.05
+            featureeng_missingness: the proportion of missing values within a feature (above which) a new
+                            binary categorical feature is generated that indicates if the
+                            value for an instance was missing or not
+            cleaning_missingness: the proportion of missing values, within a feature or instance, (at which) the
+                            given feature or instance will be automatically cleaned (i.e. removed)
+                            from the processed ‘target dataset’
+            correlation_removal_threshold: the (pearson) feature correlation at which one out of a pair of
+                            features is randomly removed from the processed ‘target dataset’
             random_state: random state to set seeds for reproducibility of algorithms
         """
         super().__init__()
@@ -61,8 +73,23 @@ class DataProcess(Job):
         self.dataset_path = dataset.path
         self.experiment_path = experiment_path
         self.random_state = random_state
+
+        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots']
+
         explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
+
+        if exclude_eda_output is not None:
+            for x in exclude_eda_output:
+                if x not in known_exclude_options:
+                    logging.warning("Unknown EDA exclusion option " + str(x))
+            if 'describe_csv' in exclude_eda_output:
+                explorations_list.remove("Describe")
+                plot_list.remove("Describe")
+            if 'univariate_plots' in exclude_eda_output:
+                plot_list.remove("Univariate Analysis")
+            if 'correlation_plots' in exclude_eda_output:
+                plot_list.remove("Feature Correlation")
 
         for item in plot_list:
             if item not in explorations_list:
@@ -118,19 +145,8 @@ class DataProcess(Job):
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
 
-        self.explorations = explorations
-        if self.explorations is None:
-            self.explorations = explorations_list
-        self.plots = plots
-        if self.plots is None:
-            self.plots = plot_list
-
-        for x in self.explorations:
-            if x not in explorations_list:
-                raise Exception("Exploration " + str(x) + " is not known/implemented")
-        for x in self.explorations:
-            if x not in explorations_list:
-                raise Exception("Plot " + str(x) + " is not known/implemented")
+        self.explorations = explorations_list
+        self.plots = plot_list
 
         self.cv_partitioner = None
         self.partition_method = partition_method
@@ -431,9 +447,9 @@ class DataProcess(Job):
         # Account for possibility that only one dataset in folder has a match label.
         # Check for presence of match label (this allows multiple datasets to be analyzed
         # in the pipeline where not all of them have match labels if specified)
-        if not (self.dataset.match_label is None or self.dataset.match_label in self.dataset.data.columns):
+        if (self.dataset.match_label is None) or (self.dataset.match_label not in self.dataset.data.columns):
             self.dataset.match_label = None
-            self.dataset.partition_method = 'S'
+            self.partition_method = 'Stratified'
             logging.warning("Warning: Specified 'Match label' could not be found in dataset. "
                             "Analysis moving forward assuming there is no 'match label' column using "
                             "stratified (S) CV partitioning.")
@@ -591,20 +607,20 @@ class DataProcess(Job):
         self.dataset.categorical_variables = self.categorical_features
         self.dataset.quantitative_variables = self.quantitative_features
 
-        # Pickle feature type lists
+        # Pickle feature type lists  #Ryan - where/how do these get used?
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_categorical_variables.pickle', 'wb') as outfile:
+                  '/exploratory/initial/initial_categorical_features.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_quantitative_variables.pickle', 'wb') as outfile:
+                  '/exploratory/initial/initial_quantitative_features.pickle', 'wb') as outfile:
             pickle.dump(self.quantitative_features, outfile)
 
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_categorical_variables.csv', 'w') as outfile:
+                  '/exploratory/initial/initial_categorical_features.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(self.categorical_features)
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/initial/initial_quantitative_variables.csv', 'w') as outfile:
+                  '/exploratory/initial/initial_quantitative_features.csv', 'w') as outfile:
             writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(self.quantitative_features)
 
@@ -614,6 +630,9 @@ class DataProcess(Job):
         """
         Wrapper function for all data cleaning and feature engineering data manipulation
         """
+        # Create features-only version of original dataset as .csv
+        self.dataset.set_original_headers(self.experiment_path)  # Already Completed
+
         # Dataframe to record feature statistics
 
         n_class = len(self.counts_summary(save=False)) - 6
@@ -665,8 +684,8 @@ class DataProcess(Job):
         self.drop_highly_correlated_features()  # Completed
         transition_df.loc["C4"] = self.counts_summary(save=False)
 
-        # Create features-only version of dataset and save picked variables for future operations
-        self.dataset.set_headers(self.experiment_path)  # Already Completed
+        # Create features-only version of processed dataset and save as .csv
+        self.dataset.set_processed_headers(self.experiment_path)  # Already Completed
 
         # Save Transition Summary of the data manipulation process
 
@@ -675,17 +694,17 @@ class DataProcess(Job):
 
         # Pickle list of feature names to be treated as categorical variables
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/categorical_variables.pickle', 'wb') as outfile:
+                  '/exploratory/categorical_features.pickle', 'wb') as outfile:
             pickle.dump(self.categorical_features, outfile)
 
         # Pickle list of processed feature names
         with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/post_processed_vars.pickle', 'wb') as outfile:
+                  '/exploratory/post_processed_features.pickle', 'wb') as outfile:
             pickle.dump(list(self.dataset.data.columns), outfile)
-        with open(self.experiment_path + '/' + self.dataset.name +
-                  '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
-            writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(list(self.dataset.data.columns))
+        # with open(self.experiment_path + '/' + self.dataset.name +
+        #          '/exploratory/ProcessedFeatureNames.csv', 'w') as outfile:
+        #    writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        #    writer.writerow(list(self.dataset.data.columns))
 
     def counts_summary(self, total_missing=None, plot=False, save=True, replicate=False):
         """
@@ -902,16 +921,16 @@ class DataProcess(Job):
 
         # For each Feature with high missingness creating a categorical feature.
         for feat in high_missingness_features:
-            self.dataset.data['miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
+            self.dataset.data['Missing_' + feat] = self.dataset.data[feat].isnull().astype(int)
             self.categorical_features.append('miss_' + feat)
 
         if high_missingness_features:
             logging.info("Engineering the following Features for missingness:")
             for feat in high_missingness_features:
-                logging.info('\t miss_' + feat)
+                logging.info('\t Missing_' + feat)
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/engineered_variables.pickle', 'wb') as outfile:
+                      '/exploratory/engineered_features.pickle', 'wb') as outfile:
                 pickle.dump(high_missingness_features, outfile)
 
             with open(self.experiment_path + '/' + self.dataset.name +
@@ -941,7 +960,7 @@ class DataProcess(Job):
             for feat in removed_variables:
                 logging.info('\t' + feat)
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/removed_variables.pickle', 'wb') as outfile:
+                      '/exploratory/removed_features.pickle', 'wb') as outfile:
                 pickle.dump(removed_variables, outfile)
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/Missingness_Feature_Cleaning.csv', 'w') as outfile:
@@ -983,20 +1002,26 @@ class DataProcess(Job):
         """
         Categorical feature encoding using pandas get_dummies function
         """
+        # Identify non-binary categorical features to apply one-hot-encoding to
         non_binary_categorical = list()
         for feat in self.categorical_features:
             if feat in self.dataset.data.columns:
                 if self.dataset.data[feat].nunique() > 2:
                     non_binary_categorical.append(feat)
 
+        # Apply one-hot encoding
         if len(non_binary_categorical) > 0:
             logging.info("One-hot encoding the following features:")
             for feat in non_binary_categorical:
                 logging.info('\t' + feat)
+            # Run one-hot encoding
             one_hot_df = pd.get_dummies(self.dataset.data[non_binary_categorical],
                                         columns=non_binary_categorical)
+            # Ryan - make it so all new features have same naming convention
             self.one_hot_features = list(one_hot_df.columns)
+            # Remove original feature from dataset
             self.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
+            # Add new one-hot-encoded features to the right columns of the dataset
             self.dataset.data = pd.concat([self.dataset.data, one_hot_df], axis=1)
             for feat in non_binary_categorical:
                 if feat in self.categorical_features:
@@ -1004,12 +1029,14 @@ class DataProcess(Job):
             self.categorical_features += self.one_hot_features
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/one_hot_variables.pickle', 'wb') as outfile:
+                      '/exploratory/one_hot_feature.pickle', 'wb') as outfile:
                 pickle.dump(self.one_hot_features, outfile)
         else:
             logging.info("No non-binary categorical features, skipping categorical encoding")
 
     def drop_highly_correlated_features(self):
+        # Ryan - if we are recalculating the correlation matrix this is
+        # wasted time since it was already calculated for initial correlation plot.
         df_corr = self.dataset.feature_only_data().corr()
         df_corr_org = df_corr.copy(deep=True)
 
@@ -1065,8 +1092,8 @@ class DataProcess(Job):
             # logging.warning(df_corr_org.columns)
 
             with open(self.experiment_path + '/' + self.dataset.name +
-                      '/exploratory/correlation_feature_cleaning.csv', 'w') as file:
-                writer = csv.writer(file)
+                      '/exploratory/correlation_feature_cleaning.csv', 'w', newline='') as file:
+                writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(['Retained Feature', 'Deleted Features', ])
                 for feat in features_kept:
                     corr_feat = list(df_corr_org[abs(df_corr_org[feat]) >= self.correlation_removal_threshold].index)
@@ -1107,6 +1134,13 @@ class DataProcess(Job):
             if "Univariate Analysis" in self.plots:
                 logging.info("Generating Univariate Analysis Plots...")
                 self.univariate_plots(sorted_p_list)
+
+        pd.DataFrame(self.categorical_features, columns=['Feature']).to_csv(
+            self.experiment_path + '/' + self.dataset.name +
+            '/exploratory/processed_categorical_features.csv', index=False)
+        pd.DataFrame(self.quantitative_features, columns=['Feature']).to_csv(
+            self.experiment_path + '/' + self.dataset.name +
+            '/exploratory/processed_quantitative_features.csv', index=False)
 
     def univariate_analysis(self, top_features=20):
         """

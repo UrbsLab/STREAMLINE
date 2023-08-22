@@ -10,7 +10,12 @@ def comma_sep_choices(choices):
     """
 
     def splitarg(arg):
-        values = arg.split(',')
+        if arg == 'None':
+            return None
+        elif ',' not in arg:
+            return [arg, ]
+        else:
+            values = arg.split(',')
         for value in values:
             if value not in choices:
                 raise argparse.ArgumentTypeError(
@@ -39,10 +44,16 @@ def save_config(output_path, experiment_name, config_dict):
         pickle.dump(config_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def load_config(output_path, experiment_name):
-    with open(output_path + '/' + experiment_name + '_params.pickle', 'rb') as file:
-        config_file = pickle.load(file)
-    return config_file
+def load_config(output_path, experiment_name, config=None):
+    if config is None:
+        config = dict()
+    try:
+        with open(output_path + '/' + experiment_name + '_params.pickle', 'rb') as file:
+            config_file = pickle.load(file)
+            config.update(config_file)
+    except FileNotFoundError:
+        pass
+    return config
 
 
 def update_dict_from_parser(argv, parser, params_dict=None):
@@ -77,9 +88,9 @@ def parse_eda(argv, params_dict=None):
     parser.add_argument('--class-label', dest='outcome_label', type=str, help='outcome label of all datasets',
                         default="Class")
     parser.add_argument('--match-label', dest='match_label', type=str,
-                        help='only applies when M selected for partition-method; '
+                        help='only applies when Group selected for partition-method; '
                              'indicates column with matched instance ids',
-                        default="")
+                        default='')
     # Arguments with defaults available (but less critical to check)
     parser.add_argument('--fi', dest='ignore_features_path', type=str,
                         help='path to .csv file with feature labels to be ignored in analysis '
@@ -101,7 +112,7 @@ def parse_eda(argv, params_dict=None):
                         help='number of unique values after which a variable is '
                              'considered to be quantitative vs categorical',
                         default=10)
-    parser.add_argument('--top-features', dest='top_features', type=int,
+    parser.add_argument('--top-uni-features', dest='top_uni_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--sig', dest='sig_cutoff', type=float, help='significance cutoff used throughout pipeline',
                         default=0.05)
@@ -114,11 +125,16 @@ def parse_eda(argv, params_dict=None):
     parser.add_argument('--corr_thresh', dest='correlation_removal_threshold', type=float,
                         help='correlation removal threshold',
                         default=0.8)
-    parser.add_argument('--export-fc', dest='export_feature_correlations', type=str2bool, nargs='?',
-                        help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
-    parser.add_argument('--export-up', dest='export_univariate_plots', type=str2bool, nargs='?',
-                        help='export univariate analysis plots (note: univariate analysis still output by default)',
-                        default=True)
+    # parser.add_argument('--export-fc', dest='export_feature_correlations', type=str2bool, nargs='?',
+    #                     help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
+    # parser.add_argument('--export-up', dest='export_univariate_plots', type=str2bool, nargs='?',
+    #                     help='export univariate analysis plots (note: univariate analysis still output by default)',
+    #                     default=True)
+    parser.add_argument('--exclude-eda-output', dest='exclude_eda_output',
+                        type=comma_sep_choices(['describe_csv', 'univariate_plots', 'correlation_plots']),
+                        help='comma seperated list of eda outputs to exclude',
+                        default='None')
+
     parser.add_argument('--rand-state', dest='random_state', type=int,
                         help='"Dont Panic" - sets a specific random seed for reproducible results', default=42)
     return update_dict_from_parser(argv, parser, params_dict)
@@ -131,18 +147,18 @@ def parse_dataprep(argv, params_dict=None):
     # Defaults available - Phase 2
     parser.add_argument('--scale', dest='scale_data', type=str2bool, nargs='?',
                         help='perform data scaling (required for SVM, and to use '
-                             'Logistic regression with non-uniform feature importance estimation)',
+                             'Logistic regression with non-uniform feature importance estimation)', const=True,
                         default=True)
     parser.add_argument('--impute', dest='impute_data', type=str2bool, nargs='?',
                         help='perform missing value data imputation '
-                             '(required for most ML algorithms if missing data is present)',
+                             '(required for most ML algorithms if missing data is present)', const=True,
                         default=True)
     parser.add_argument('--multi-impute', dest='multi_impute', type=str2bool, nargs='?',
                         help='applies multivariate imputation to '
-                             'quantitative features, otherwise uses median imputation',
+                             'quantitative features, otherwise uses median imputation', const=True,
                         default=True)
-    parser.add_argument('--over-cv', dest='overwrite_cv', type=str2bool, nargs='?',
-                        help='overwrites earlier cv datasets with new scaled/imputed ones', default=True)
+    parser.add_argument('--over-cv', dest='overwrite_cv', type=str2bool, nargs='?', const=False,
+                        help='overwrites earlier cv datasets with new scaled/imputed ones', default=False)
 
     return update_dict_from_parser(argv, parser, params_dict)
 
@@ -182,14 +198,14 @@ def parse_feat_sel(argv, params_dict=None):
     # Defaults available - Phase 4
     parser.add_argument('--max-feat', dest='max_features_to_keep', type=int,
                         help='max features to keep (only applies if filter_poor_features is True)', default=2000)
-    parser.add_argument('--filter-feat', dest='filter_poor_features', type=str2bool, nargs='?',
+    parser.add_argument('--filter-feat', dest='filter_poor_features', type=str2bool, nargs='?', const=True,
                         help='filter out the worst performing features prior to modeling', default=True)
-    parser.add_argument('--top-features', dest='top_features', type=int,
+    parser.add_argument('--top-fi-features', dest='top_fi_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     parser.add_argument('--export-scores', dest='export_scores', type=str2bool, nargs='?',
                         help='export figure summarizing average feature importance scores over cv partitions',
                         default=True)
-    parser.add_argument('--over-cv-feat', dest='overwrite_cv_feat', type=str2bool, nargs='?',
+    parser.add_argument('--over-cv-feat', dest='overwrite_cv_feat', type=str2bool, nargs='?', const=True,
                         help='overwrites working cv datasets with new feature subset datasets', default=True)
     return update_dict_from_parser(argv, parser, params_dict)
 
@@ -270,21 +286,26 @@ def parse_stats(argv, params_dict=None):
     parser = argparse.ArgumentParser(description="",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Defaults available - Phase 6
-    parser.add_argument('--plot-ROC', dest='plot_roc', type=str,
-                        help='Plot ROC curves individually for each algorithm including all CV results and averages',
-                        default='True')
-    parser.add_argument('--plot-PRC', dest='plot_prc', type=str,
-                        help='Plot PRC curves individually for each algorithm including all CV results and averages',
-                        default='True')
-    parser.add_argument('--plot-box', dest='plot_metric_boxplots', type=str,
-                        help='Plot box plot summaries comparing algorithms for each metric', default='True')
-    parser.add_argument('--plot-FI_box', dest='plot_fi_box', type=str,
-                        help='Plot feature importance boxplots and histograms for each algorithm', default='True')
+    # parser.add_argument('--plot-ROC', dest='plot_roc', type=str,
+    #                     help='Plot ROC curves individually for each algorithm including all CV results and averages',
+    #                     default='True')
+    # parser.add_argument('--plot-PRC', dest='plot_prc', type=str,
+    #                     help='Plot PRC curves individually for each algorithm including all CV results and averages',
+    #                     default='True')
+    # parser.add_argument('--plot-box', dest='plot_metric_boxplots', type=str,
+    #                     help='Plot box plot summaries comparing algorithms for each metric', default='True')
+    # parser.add_argument('--plot-FI_box', dest='plot_fi_box', type=str,
+    #                     help='Plot feature importance boxplots and histograms for each algorithm', default='True')
+    parser.add_argument('--exclude-plots', dest='exclude_plots',
+                        type=comma_sep_choices(['plot_ROC', 'plot_PRC', 'plot_FI_box', 'plot_metric_boxplots']),
+                        help='comma seperated list of plots to exclude '
+                             'possible options plot_ROC, plot_PRC, plot_FI_box, plot_metric_boxplots',
+                        default='None')
     parser.add_argument('--metric-weight', dest='metric_weight', type=str,
                         help='ML model metric used as weight in composite FI plots (only supports balanced_accuracy '
                              'or roc_auc as options) Recommend setting the same as primary_metric if possible.',
                         default='balanced_accuracy')
-    parser.add_argument('--top-model-features', dest='top_model_features', type=int,
+    parser.add_argument('--top-model-features', dest='top_model_fi_features', type=int,
                         help='number of top features to illustrate in figures', default=40)
     return update_dict_from_parser(argv, parser, params_dict)
 
@@ -304,14 +325,20 @@ def parse_replicate(argv, params_dict=None):
     # Defaults available
     parser.add_argument('--rep-export-fc', dest='rep_export_feature_correlations', type=str2bool, nargs='?',
                         help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
-    parser.add_argument('--rep-plot-ROC', dest='rep_plot_roc', type=str2bool, nargs='?',
-                        help='Plot ROC curves individually for each algorithm including all CV results and averages',
-                        default=True)
-    parser.add_argument('--rep-plot-PRC', dest='rep_plot_prc', type=str2bool, nargs='?',
-                        help='Plot PRC curves individually for each algorithm including all CV results and averages',
-                        default=True)
-    parser.add_argument('--rep-plot-box', dest='rep_plot_metric_boxplots', type=str2bool, nargs='?',
-                        help='Plot box plot summaries comparing algorithms for each metric', default=True)
+    # parser.add_argument('--rep-plot-ROC', dest='rep_plot_roc', type=str2bool, nargs='?',
+    #                     help='Plot ROC curves individually for each algorithm including all CV results and averages',
+    #                     default=True)
+    # parser.add_argument('--rep-plot-PRC', dest='rep_plot_prc', type=str2bool, nargs='?',
+    #                     help='Plot PRC curves individually for each algorithm including all CV results and averages',
+    #                     default=True)
+    # parser.add_argument('--rep-plot-box', dest='rep_plot_metric_boxplots', type=str2bool, nargs='?',
+    #                     help='Plot box plot summaries comparing algorithms for each metric', default=True)
+    parser.add_argument('--exclude-rep-plots', dest='exclude_rep_plots',
+                        type=comma_sep_choices(['plot_ROC', 'plot_PRC',
+                                                'plot_metric_boxplots', 'feature_correlations']),
+                        help='comma seperated list of plots to exclude '
+                             'possible options plot_ROC, plot_PRC, plot_FI_box, plot_metric_boxplots',
+                        default='None')
     return update_dict_from_parser(argv, parser, params_dict)
 
 

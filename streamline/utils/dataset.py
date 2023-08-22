@@ -62,7 +62,8 @@ class Dataset:
         if not (self.outcome_label in self.data.columns):
             raise Exception("Class label not found in file")
         if self.match_label and not (self.match_label in self.data.columns):
-            raise Exception("Match label not found in file")
+            logging.warning("Match label not found in file, setting match label to None")
+            self.match_label = None
         if self.instance_label and not (self.instance_label in self.data.columns):
             raise Exception("Instance label not found in file")
 
@@ -145,7 +146,7 @@ class Dataset:
             headers.remove(self.instance_label)
         return headers
 
-    def set_headers(self, experiment_path, phase='exploratory'):
+    def set_original_headers(self, experiment_path, phase='exploratory'):
         """
         Exports dataset header labels for use as a reference later in the pipeline.
 
@@ -155,7 +156,33 @@ class Dataset:
         if not os.path.exists(experiment_path + '/' + self.name + '/' + phase):
             os.makedirs(experiment_path + '/' + self.name + '/' + phase)
         headers = self.data.columns.values.tolist()
+        headers.remove(self.class_label)
+        if not (self.match_label is None):
+            headers.remove(self.match_label)
+        if not (self.instance_label is None):
+            headers.remove(self.instance_label)
         with open(experiment_path + '/' + self.name + '/' + phase + '/OriginalFeatureNames.csv', mode='w',
+                  newline="") as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(headers)
+        return headers
+
+    def set_processed_headers(self, experiment_path, phase='exploratory'):
+        """
+        Exports dataset header labels for use as a reference later in the pipeline.
+
+        Returns: list of headers labels
+        """
+        # Get Original Headers
+        if not os.path.exists(experiment_path + '/' + self.name + '/' + phase):
+            os.makedirs(experiment_path + '/' + self.name + '/' + phase)
+        headers = self.data.columns.values.tolist()
+        headers.remove(self.class_label)
+        if not (self.match_label is None):
+            headers.remove(self.match_label)
+        if not (self.instance_label is None):
+            headers.remove(self.instance_label)
+        with open(experiment_path + '/' + self.name + '/' + phase + '/ProcessedFeatureNames.csv', mode='w',
                   newline="") as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(headers)

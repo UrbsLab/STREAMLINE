@@ -1,11 +1,12 @@
 #  About (FAQs)
 
+***
 ## Can I run STREAMLINE as is?
 Yes, as an automated machine learning pipeline, users can easily run the pipeline in it's entirety or one phase at a time. We have set up STREAMLINE to include
 reasonably reliable default pipeline run parameters that users can optionally change to suite their needs. However the overall pipeline has been designed to operated 
 in a specific order utilizing a fixed set of data science elements/steps to ensure consistency and adherence to best practices.
 
-
+***
 ## What can STREAMLINE be used for?
 STREAMLINE can be used as:
 1. A tool to quickly run a rigorous ML data analysis over one or more datasets using one or more of the included modeling algorithms
@@ -18,14 +19,11 @@ STREAMLINE can be used as:
 
 ***
 ## What level of computing skill is required for use?
-STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI),
-the most naive user needs only know how to navigate their PC file system, specify folder/file paths,
-and have a Google Drive account (to run STREAMLINE serially on Google Colab).
+STREAMLINE offers a variety of use options making it accessible to those with little or no coding experience as well as the seasoned programmer/data scientist. While there is currently no graphical user interface (GUI), the most naive user needs only know how to navigate their computer file system, specify folder/file paths, and have a Google Drive account (to run STREAMLINE serially on Google Colab).
 
-Those with a very basic knowledge of python and computer environments can apply
-STREAMLINE locally and serially using the included jupyter notebook.
+Those with a very basic knowledge of python and computer environments can apply STREAMLINE locally/serially using the included jupyter notebook.
 
-Those comfortable with command lines can run STREAMLINE locally or on a computing cluster via the command line.
+Those comfortable with command lines should run STREAMLINE locally (either serially or with CPU core parallellization) or (if available) on a computing cluster (HPC) in parallel.
 
 ***
 ## How is STREAMLINE different from other AutoML tools?
@@ -36,7 +34,7 @@ configuration itself. STREAMLINE adopts a fixed series of purposefully selected 
 in line with data science best practices. It seeks to automate all domain generalizable
 elements of an ML analysis pipeline with a specific focus on biomedical data mining challenges.
 This tool can be run or utilized in a number of ways to suite a variety experience levels and
-levels of problem/data complexity.
+levels of problem/data complexity. Furthermore, STREAMLINE is currently the only autoML pipeline tool that includes [learning classifier system (LCS)](https://www.youtube.com/watch?v=CRge_cZ2cJc) rule-based ML modeling algorithms for interpretable modeling in data with complex associations. This includes an LCS algorithm developed by our lab ([ExSTraCS](https://github.com/UrbsLab/scikit-ExSTraCS)), that has been specifically implemented to address the challenges of biomedical data analysis.
 
 ***
 ## What does STREAMLINE automate?
@@ -101,6 +99,14 @@ collection, (2) feature engineering and data cleaning that requires domain knowl
 We recommend users consider conducting these items, as needed, prior to applying STREAMLINE.
 
 ***
+## Does STREAMLINE always run the entire pipeline?
+No. By default most of the pipeline will run; with the exception of (1) dataset comparison (Phase 7), which only runs when more than one 'target datasets' are run at a time, or (2) replication analysis (Phase 8), when replication data are not available. However the user can also choose to run STREAMLINE one phase at a time, which can often be advantageous. 
+
+For example, a user could just run Phase 1 to conduct an exploratory analysis of new data. Or they could just run Phases 1-4 to generate processed, training and testing datasets to apply to modeling outside of STREAMLINE. 
+
+One caveate is that STREAMLINE Phases are designed to run in sequence (one after the other). 
+
+***
 ## Can I do more with the STREAMLINE output after it completes?
 Yes, we have assempled a variety of 'useful' Jupyter Notebooks
 designed to operate on an experiment folder allowing users to do even more
@@ -114,13 +120,15 @@ with the pipeline output. Examples include:
    all ML algorithms.
 6. Generating an interpretable model vizualization for either decision tree or genetic programming models.
 
+See [doing more with STREAMLINE](more.md#doing-more-with-streamline) for additional information.
+
 ***
 ## How does STREAMLINE avoid data leakage?
 Assembling a machine learning pipeline unfortunately affords a user many opportunities to incorrectly allow data leakage. 
 Data leakage is when information that wouldn't normally be available or that comes from outside the training dataset is used to create the model. 
 
 First, STREAMLINE makes it easy for a user to exclude features from a dataset that may contribute to data leakage (e.g. a feature that would not 
-be available when applying the model to make predictions). A user can specify features to be excluded from modeling using the `ignore_features_path` parameter.
+be available when applying the model to make predictions). A user can specify features to be excluded from modeling using the [`ignore_features_path`](parameters.md#ignore-features-path) parameter.
 
 Second, STREAMLINE's pipeline is set up to specifically avoid learning any information that might eventually be a part of a testing data partition. Following CV partitioning, all  learning required to conduct imputation, scaling, feature importance evaluation, feature selection, and modeling is done using the respective training partition alone. For imputation, the same trained imputation strategy is applied to the respective testing data. For scaling, the same trained scalar is applied to the respective testing data. For feature selection, the same features removed from the training data are removed from the testing data. And for modeling, the testing data is only used for model evaluation.
 
@@ -128,67 +136,14 @@ This same strategy is applied to replication data later in the pipeline. When ev
 
 ***
 ## Is STREAMLINE reproducible?
-Yes, STREAMLINE is completely reproducible when the `timeout` parameter is set to `None`,
-ensuring training of the same models with the same performance whenever the same datasets,
-pipeline settings, and random seed are used.
-
-When `timeout` is not set to `None`, STREAMLINE output can sometimes vary slightly (particularly when parallelized)
-since Optuna (for hyperparameter optimization) may not complete the same
-number of optimization trials within the user specified time limit on different
-computing resources. 
-
-However, having a `timeout` value specified helps ensure STREAMLINE run completion
-within a reasonable time frame.
+Yes, STREAMLINE is completely reproducible when the [`timeout`](parameters.md#timeout) parameter is set to `None`, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including [`random_state`](parameters.md#random-state)). However, STREAMLINE is expected to take longer to run when [`timeout`](parameters.md#timeout) = `None`.
 
 ***
 ## Which STREAMLINE run mode should I use?
-This multi-phase pipeline has been set up to run in one of four ways:
+STREAMLINE has been set up with multiple 'run-mode' options to suite different needs, computational resources, and user skill levels.
+1.  **Google Colab Notebook:** Can easily be run by anyone, even those with no coding experience. STREAMLINE output can easily be viewed within the notebook as it runs. However this mode is computationally limited by the free Google Cloud resources it has access to. This mode is best for demonstration, educational purposes, and running STREAMLINE on small datasets, or applying a limited number of machine learning modeling algorithms.
+2. **Jupyter Notebook:** The advantages are mostly the same as the Colab Notebook, however this mode relies on the computing resources of your local computer, which may (or possibly not) have a faster CPU and memory. However, to use this mode you will need to know how to set up your computing environment with Anaconda, etc, which can take some troubleshooting for a beginner. This mode is best for those who want a little more control over STREAMLINE, but still wish to run it within a notebook. 
+3. **Command Line (Local):** As with Jupyter Notebook, this mode relies on the computing resources of your local computer. This mode is best for those who don't care about seeing output within the notebook and who know (or are willing to learn) how to work from a command line, but who may not have access to a computing cluster. 
+4. **Command Line (HPC Cluster):** STREAMLINE is an embarrassingly parallel package, that can parallelize individual phases as HPC jobs at the level of target datasets, CV partitions, and algorithms. This mode is best if you have access to a dask-compatible computing cluster. It is the fastest most efficient way to run STREAMLINE, particularly on larger datasets, or when users want to run all pipeline algorithms and elements. 
 
-1. On Google Cloud as a Google Colab Notebook [Anyone can run]:
-    * Advantages
-      * No coding or PC environment experience needed
-      * Automatically installs and uses the most recent version of STREAMLINE
-      * Computing can performed directly on Google Cloud from anywhere
-      * One-click run of whole pipeline (all phases)
-      * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
-      * Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Slowest of the run options
-      * Limited by google cloud computing allowances (may only work for smaller datasets)
-    * Notes: Requires a Google account (free)
-
-2. Locally as a Jupyter Notebook [Basic experience]:
-    * Advantages:
-      * Does not rely on free computing limitations of Google Cloud (but rather your own computer's limitations)
-      * One-click run of whole pipeline (all phases)
-      * Offers in-notebook viewing of results and ability to save notebook as documentation of analysis
-      * Allows easy customizability of all aspects of the pipeline with minimal coding/environment experience (including hyperparameter value ranges)
-    * Disadvantages:
-      * Can only run pipeline serially
-      * Slower runtime than from command-line
-      * Beginners have to set up their computing environment
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-
-3. Locally from the command line [Command-line Users]:
-    * Advantages:
-      * Typically runs faster than within Jupyter Notebook
-      * A more versatile option for those with command-line experience
-      * One-command run of whole pipeline available when using a configuration file to run
-      * Can optionally run the pipeline one phase at a time
-    * Disadvantages:
-      * Can only run pipeline serially or with limited local cpu core parallelization
-      * Command-line experience recommended
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations
-
-4. On HPC Clusters from command line [Computing Cluster Users]:
-    * Advantages:
-      * By far the fastest, most efficient way to run STREAMLINE
-      * Offers ability to run STREAMLINE over 7 types of HPC systems
-      * One-command run of whole pipeline available when using a configuration file to run
-      * Can optionally run the pipeline one phase at a time
-    * Disadvantages:
-      * Experience with command-line and dask-compatible clusters recommended
-      * Access to a computing cluster required
-    * Notes: Requires Anaconda3, Python3, and several other minor Python package installations. Cluster runs of STREAMLINE were set up using `dask-jobqueue` and thus should support 7 types of clusters as described in the [dask documentation](https://jobqueue.dask.org/en/latest/api.html). Currently we have only directly tested STREAMLINE on SLURM and LSF clusters. Further codebase adaptation may be needed for clusters types not on the above link.
-
+For more details on the advantages and disadvantages of different run modes, see '[Picking a Run Mode](running.md#picking-a-run-mode)'.

@@ -1,4 +1,4 @@
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_Logo_Full.png?raw=true)
+git ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_Logo_Full.png?raw=true)
 # Overview
 
 STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
@@ -57,8 +57,12 @@ See [citations](https://urbslab.github.io/STREAMLINE/citation.html) for more inf
 STREAMLINE can be run using a variety of modes balancing ease of use and efficiency.
 * Google Colab Notebook: runs serially on Google Cloud (best for beginners)
 * Jupyter Notebook: runs serially/locally
-* Command Line: runs serially/locally
-* CPU Computing Cluster: runs in parallel (best for efficiency)
+* Command Line: runs serially or locally
+   * Locally, serially
+   * Locally, cpu core in parallel
+   * CPU Computing Cluster (HPC), in parallel (best for efficiency)
+      * All phases can be run from a single command (with a job monitor/submitter running on the head node until completion)
+      * Each phase can be run separately in sequence
 
 See the [documentation](https://urbslab.github.io/STREAMLINE/index.html) for requirements, installation, and use details for each.
 
@@ -87,23 +91,31 @@ from the included [Jupyter Notebook](https://github.com/UrbsLab/STREAMLINE/blob/
 ***
 # Other Information
 ## Demonstration Data
-Included with this pipeline is a folder named `DemoData` including two small datasets used as a demonstration of
+Included with this pipeline is a folder named `DemoData` including [two small datasets](https://urbslab.github.io/STREAMLINE/data.html#demonstration-data) used as a demonstration of
 pipeline efficacy. New users can easily test/run STREAMLINE in all run modes set up to run automatically on these datasets.
 
-## List of parameters
-[//]: # (Consolidated info on how to run it on different systems can be found in [./docs/source/demo.md]&#40;docs/source/demo.md)
+## List of Run Parameters
 A complete list of STREAMLINE Parameters can be found [here](https://urbslab.github.io/STREAMLINE/parameters.html).
 
 ***
 ## Disclaimer
 We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given
 classification problem, nor that the included ML modeling algorithms will yield the best performance possible.
-We intend many expansions/improvements to this pipeline in the future.  We welcome feedback, suggestions, and contributions for improvement.
+We intend many expansions/improvements to this pipeline in the future. We welcome feedback, suggestions, and contributions for improvement.
+
+***
+# Contact
+We welcome ideas, suggestions on improving the pipeline, [code-contributions](https://https://urbslab.github.io/STREAMLINE/contributing.html), and collaborations!
+
+* For general questions, or to discuss potential collaborations (applying, or extending STREAMLINE); contact Ryan Urbanowicz at ryan.urbanowicz@cshs.org.
+
+* For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
 
 ***
 # Acknowledgements
 The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
-The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang and Harsh Bandhey. Special thanks to
+
+The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang, and Harsh Bandhey. Special thanks to
 Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang,
 and Pedro Ribeiro for their code contributions and feedback.  
 

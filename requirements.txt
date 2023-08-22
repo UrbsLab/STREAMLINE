@@ -3,12 +3,12 @@ numpy
 optuna
 sqlalchemy<2.0
 plotly>=4.0.0
-pandas
+pandas>=1.5.2
 pip
 pycodestyle
-scikit-learn
+scikit-learn>=1.0.2,<1.3.0
 scipy>=1.8.0
-seaborn
+seaborn>=0.11.0
 skrebate==0.7
 tqdm
 wheel
@@ -27,3 +27,6 @@ dask-jobqueue
 dask
 joblib
 group-lasso
+graphviz
+bokeh
+ipywidgets

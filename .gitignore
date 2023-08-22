@@ -23,6 +23,13 @@ UserData/
 UserRepData/
 UserOutput/
 DemoOutput/
+DemoOutputLocal/
+OSAData/
+OSAData.zip
 multiplexer_dataset/
 gametes_dataset/
-/tests/
+tests/
+run_configs/cedars_amd.cfg
+data/AMD_Final/*
+data/PLCO/*
+run_configs/cedars_plco.cfg
