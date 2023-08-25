@@ -7,7 +7,6 @@ __pycache__
 demo/
 demo_old/
 catboost_info/
-./tests/
 testlogs/
 dask_logs/
 OUTPUT/
@@ -25,6 +24,7 @@ UserOutput/
 DemoOutput/
 DemoOutputLocal/
 OSAData/
+tests/
 OSAData.zip
 multiplexer_dataset/
 gametes_dataset/
