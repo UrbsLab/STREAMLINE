@@ -4,9 +4,13 @@ This section summarizes the past, present, and future development of STREAMLINE.
 ***
 ## Release History
 
-### Current Release - Beta 0.3.0 (August 2023)
-The current version of STREAMLINE is based on our initial STREAMLINE project release Beta 0.2.5, and has since undergone a major refactoring
-STREAMLINE's codebase. Many functionalities have been reorganized and extended. 
+### Current Release - Beta 0.3.1 (August 25, 2023)
+The current version of STREAMLINE is minor update on our previous STREAMLINE project release Beta 0.3.0, 
+minor changes have been added to the replication phase to account for a corner cases, and changes in legend ordering in a few plots.
+
+#### Minor Updates
+* Added a simple imputation is added in the replication where, where if training data was not imputed as mean impute is used for quantitative features and a mode impute is used for categorical features. Both operations are done feature wise using the pandas `mean()` and `median()` function in `model_replicate.py`.
+* The legends in all the plots including the Composite Feature Importance plots are now ordered alphabetically based on the full name of the models.
 
 #### Major Updates
 * Extended to be able to run in parallel on 7 different types of HPC clusters using `dask_jobqueue` as documented [here](https://jobqueue.dask.org/en/latest/api.html)
