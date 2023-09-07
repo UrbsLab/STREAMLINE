@@ -9,7 +9,7 @@ The current version of STREAMLINE is minor update on our previous STREAMLINE pro
 minor changes have been added to the replication phase to account for a corner cases, and changes in legend ordering in a few plots.
 
 #### Minor Updates
-* Updated the replication phase to handle a special case where no missing value data imputation was conducted for a feature in the training data, but one or more missing values were present for that feature in the replication dataset. Now, when this occurs, a relevant simple imputation strategy is applied to estimate the replication data missing values.  Mean imputation is used for quantiative features, and mode imputation is used for categorical features. Imputation operations are using the pandas `mean()` and `median()` function within `model_replicate.py`.
+* Updated the replication phase to handle a special case where no missing value data imputation was conducted for a feature in the training data, but one or more missing values were present for that feature in the replication dataset. Now, when this occurs, a relevant simple imputation strategy is applied to estimate the replication data missing values.  Mean imputation is used for quantitative features, and mode imputation is used for categorical features. Imputation operations are using the pandas `mean()` and `median()` function within `model_replicate.py`.
 * The legends in all the plots including the Composite Feature Importance plots are now ordered alphabetically based on the full name of the models.
 
 
