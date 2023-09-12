@@ -124,7 +124,8 @@ parameters = {'Naive Bayes': {},
               # ExSTraCS
               "ExSTraCS": {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
                            'nu': [1, 10],
-                           'rule_compaction': ['None', 'QRF']}
+                           'rule_compaction': [None, 'QRF'],
+                           'expert_knowledge': [None, ]}
               }
 
 
