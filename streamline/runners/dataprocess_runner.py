@@ -256,7 +256,7 @@ class DataProcessRunner:
         cluster_params = [dataset_path, self.output_path, self.experiment_name, exclude_param,
                           self.class_label, self.instance_label, self.match_label, self.n_splits,
                           self.partition_method, self.ignore_features, self.categorical_features,
-                          self.quantitative_features, self.top_features,
+                          self.quantitative_features, exclude_param, self.top_features,
                           self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
                           self.cleaning_missingness, self.correlation_removal_threshold, self.random_state]
         cluster_params = [str(i) if type(i) != list else '"' + str(i) + '"' for i in cluster_params]
