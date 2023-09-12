@@ -2,13 +2,13 @@ import os
 import pickle
 import sys
 from pathlib import Path
-from streamline.modeling.utils import get_fi_for_ExSTraCS
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(str(Path(SCRIPT_DIR).parent.parent))
 
 from streamline.modeling.modeljob import ModelJob
 from streamline.modeling.utils import model_str_to_obj
+from streamline.modeling.utils import get_fi_for_ExSTraCS
 
 
 def run_cluster(argv):

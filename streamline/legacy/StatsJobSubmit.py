@@ -35,7 +35,7 @@ def run_cluster(argv):
         exclude_options = [x.strip() for x in exclude_options]
     else:
         exclude_options = None
-    show_plots = eval(argv[15])
+    show_plots = eval(argv[12])
 
     job_obj = StatsJob(full_path, algorithms, class_label, instance_label, scoring_metric,
                        len_cv, top_features, sig_cutoff, metric_weight, scale_data,

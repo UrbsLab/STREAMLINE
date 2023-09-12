@@ -5,6 +5,7 @@ import optuna
 import logging
 from streamline.utils.parser import parser_function
 from streamline.utils.checker import check_phase
+from streamline.utils.runners import check_if_single_phase
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -55,6 +56,10 @@ def runner(obj, phase, run_parallel=True, params=None):
                               dataset_for_rep=dataset_for_rep,
                               output=True)) != 0:
             print()
+            if check_if_single_phase(params):
+                print("Only one phase submitted using bash scripts, the runner can submit jobs and exit")
+                print("Exiting")
+                sys.exit()
             print("Waiting for " + phase_str + " Manual Jobs to Finish")
             time.sleep(5)
         print()

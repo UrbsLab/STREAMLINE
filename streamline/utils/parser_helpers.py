@@ -4,6 +4,17 @@ import argparse
 from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
 
 
+def process_cli_param(param):
+    if param == "None":
+        p_praram = None
+    else:
+        try:
+            p_praram = eval(param)
+        except SyntaxError:
+            p_praram = str(param)
+    return p_praram
+    
+
 def comma_sep_choices(choices):
     """
     Return a function that splits and checks comma-separated values.
