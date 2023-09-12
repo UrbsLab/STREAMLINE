@@ -26,7 +26,7 @@ def get_cluster(cluster_type='SLURM', output_path=".", queue='defq', memory=4):
         elif cluster_type == "LSF":
             cluster = LSFCluster(queue=queue,
                                  cores=1,
-                                 mem = memory * 1000000000,
+                                 mem=memory * 1000000000,
                                  memory=str(memory) + "G",
                                  walltime="24:00",
                                  log_directory=output_path + "/dask_logs/")
