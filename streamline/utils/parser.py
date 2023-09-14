@@ -33,7 +33,7 @@ def process_params(params):
 
     if params['do_model'] or params['do_stats'] or params["do_compare_dataset"] \
             or params['do_report'] or params['do_replicate'] or params['do_rep_report']:
-        if params['algorithms'] == 'All':
+        if params['algorithms'] == 'All': 
             params['algorithms'] = None
         if type(params['algorithms']) == list:
             params['algorithms'] = sorted(params['algorithms'])

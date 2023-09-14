@@ -45,7 +45,7 @@ class ReportJob(Job):
             remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                            'DatasetComparisons', 'jobs', 'jobsCompleted', 'logs',
                            'KeyFileCopy', 'dask_logs',
-                           experiment_name + '_ML_Pipeline_Report.pdf']
+                           experiment_name + '_STREAMLINE_Report.pdf']
             for item in remove_list:
                 if item in self.datasets:
                     self.datasets.remove(item)
@@ -1001,7 +1001,7 @@ class ReportJob(Job):
         # Output The PDF Object
         try:
             if self.training:
-                file_name = str(self.experiment_name) + '_ML_Pipeline_Report.pdf'
+                file_name = str(self.experiment_name) + '_STREAMLINE_Report.pdf'
                 self.analysis_report.output(self.experiment_path + '/' + file_name)
                 # Print phase completion
                 logging.info("Phase 8 complete")
@@ -1012,7 +1012,7 @@ class ReportJob(Job):
                 except Exception:
                     pass
             else:
-                file_name = str(self.experiment_name) + '_ML_Pipeline_Replication_Report.pdf'
+                file_name = str(self.experiment_name) + '_STREAMLINE_Replication_Report.pdf'
                 self.analysis_report.output(
                     self.experiment_path + '/' + self.train_name + '/replication/' + self.datasets[M] + '/' + file_name)
                 # Print phase completion

@@ -401,6 +401,29 @@ python run.py --do-rep-report --out-path DemoOutput --exp-name demo_experiment -
 python run.py --do-clean --out-path DemoOutput --exp-name demo_experiment --del-time --del-old-cv --run-cluster SLURM --res-mem 4 --queue defq
 ```
 
+#### Checking STREAMLINE Job Completion
+Whether running STREAMLINE from the configuration file or using command-line arguments, users may wish to check on the job completion status for jobs within a given phase. For example; (1) if running STREAMLINE one phase at a time, users will want to ensure that all jobs of the current phase have completed before inintiating the next, or (2) if the modeling phase is taking a long time to complete, you may wish to know what algorithms are still training. This can be accomplished using the included `checker.py` script.
+
+First, make sure you are in the installed `STREAMLINE` directory. Then you can check the parameter options of `checker.py` with:
+
+```
+python checker.py --help
+```
+
+As an example, let's say the user wants to check the status of modeling jobs on their cluster during phase 5. They could run the following command which assumes we are running the demonstration data, as above.
+
+```
+python checker.py --out-path DemoOutput --exp-name demo_experiment --phase 5 --count-only True
+```
+
+This would return the number of STREAMLINE jobs that have not yet completed (or failed to run) within phase 5.
+
+Alternatively, the command below would output the names of the jobs that have not completed, which (in the case of phase 5) would inform the user which algorithms were still running.
+
+```
+python checker.py --out-path DemoOutput --exp-name demo_experiment --phase 5 
+```
+
 ## Picking a Run Mode
 
 ### Why run STREAMLINE on Google Colab?

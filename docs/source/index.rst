@@ -13,7 +13,7 @@ and `scikit-learn <https://scikit-learn.org/stable/>`_.
 
 The schematic below summarizes the automated STREAMLINE analysis pipeline with individual elements organized into 9 phases.
 
-.. image:: pictures/STREAMLINE_paper_lightcolor.png
+.. image:: pictures/STREAMLINE_paper_new_lightcolor.png
 
 * We recommend reviewing this documentation to gain a deeper understanding of STREAMLINE with respect to it's overall design, what it includes, how it works, what it can be used for, and implementation highlights that differentiate it from other AutoML tools.
 
