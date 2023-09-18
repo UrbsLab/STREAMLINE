@@ -8,6 +8,21 @@ if num_cores == -1:
     num_cores = multiprocessing.cpu_count()
 
 
+def check_if_single_phase(params):
+    phase_list = [params['do_eda'], params['do_dataprep'], params['do_feat_imp'], 
+                    params['do_feat_sel'], params['do_model'], params['do_stats'], 
+                    params['do_compare_dataset'], params['do_report'], params['do_replicate'], 
+                    params['do_rep_report'], params['do_cleanup']]
+    phase_count = 0
+    for phase in phase_list:
+        if phase:
+            phase_count += 1
+    if phase_count == 1:
+        return True
+    else:
+        return False
+        
+
 def parallel_eda_call(eda_job, params):
     """
     Runner function for running eda job objects

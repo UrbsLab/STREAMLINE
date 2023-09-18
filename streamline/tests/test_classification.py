@@ -16,8 +16,8 @@ from streamline.runners.replicate_runner import ReplicationRunner
 pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
-dataset_path, rep_data_path, experiment_name = "./data/DemoData/", "./data/DemoRepData/", "demo",
-model_algorithms = ["LR", "NB", "DT"]
+dataset_path, experiment_name = "./data/DemoData/", "demo"
+model_algorithms = ["LR", "DT", "NB"]
 rep_data_path = "./data/DemoRepData/"
 
 
@@ -81,7 +81,8 @@ def test_classification():
     optuna.logging.set_verbosity(optuna.logging.WARNING)
 
     runner = ModelExperimentRunner(output_path, experiment_name, model_algorithms,
-                                   outcome_label="Class", instance_label="InstanceID")
+                                   outcome_label="Class", instance_label="InstanceID",
+                                   lcs_nu=1, lcs_n=50, lcs_iterations=200)
     runner.run(run_parallel=run_parallel)
     del runner
 

@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import glob
@@ -10,6 +11,7 @@ from joblib import Parallel, delayed
 from streamline.modeling.modeljob import ModelJob
 from streamline.utils.runners import model_runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
+from streamline.modeling.utils import get_fi_for_ExSTraCS
 
 
 class GlobalImport:
@@ -36,7 +38,8 @@ class ModelExperimentRunner:
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
-                 lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None, run_cluster=False,
+                 lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None,
+                 run_cluster=False,
                  queue='defq', reserved_memory=4):
 
         """
@@ -192,6 +195,11 @@ class ModelExperimentRunner:
         else:
             phase5completed = []
 
+        file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
+        metadata = pickle.load(file)
+        filter_poor_features = metadata['Filter Poor Features']
+        file.close()
+
         for dataset_directory_path in dataset_paths:
             full_path = self.output_path + "/" + self.experiment_name + "/" + dataset_directory_path
             if not os.path.exists(full_path + '/models'):
@@ -202,6 +210,7 @@ class ModelExperimentRunner:
                 os.mkdir(full_path + '/models/pickledModels')
             if not os.path.exists(full_path + '/model_evaluation/pickled_metrics'):
                 os.mkdir(full_path + '/model_evaluation/pickled_metrics')
+
             cv_dataset_paths = list(glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"))
             cv_dataset_paths = [str(Path(cv_dataset_path)) for cv_dataset_path in cv_dataset_paths]
             cv_partitions = len(cv_dataset_paths)
@@ -223,7 +232,7 @@ class ModelExperimentRunner:
                         continue
 
                     # logging.info("Running Model "+str(algorithm))
-                    if (not self.do_lcs_sweep) or (algorithm not in ['eLCS', 'XCS', 'ExSTraCS']):
+                    if algorithm not in ['eLCS', 'XCS', 'ExSTraCS']:
                         model = model_str_to_obj(algorithm)(cv_folds=3,
                                                             scoring_metric=self.scoring_metric,
                                                             metric_direction=self.metric_direction,
@@ -231,13 +240,42 @@ class ModelExperimentRunner:
                                                             cv=None, n_jobs=self.n_jobs)
                         # logging.warning(model.__class__)
                     else:
-                        model = model_str_to_obj(algorithm)(cv_folds=3,
-                                                            scoring_metric=self.scoring_metric,
-                                                            metric_direction=self.metric_direction,
-                                                            random_state=self.random_state,
-                                                            cv=None, n_jobs=self.n_jobs,
-                                                            iterations=self.lcs_iterations,
-                                                            N=self.lcs_n, nu=self.lcs_nu)
+                        if algorithm == 'ExSTraCS':
+                            expert_knowledge = get_fi_for_ExSTraCS(self.output_path, self.experiment_name,
+                                                                   dataset_directory_path,
+                                                                   self.class_label, self.instance_label, cv_count,
+                                                                   filter_poor_features)
+                            if self.do_lcs_sweep:
+                                model = model_str_to_obj(algorithm)(cv_folds=3,
+                                                                    scoring_metric=self.scoring_metric,
+                                                                    metric_direction=self.metric_direction,
+                                                                    random_state=self.random_state,
+                                                                    cv=None, n_jobs=self.n_jobs,
+                                                                    expert_knowledge=copy.deepcopy(expert_knowledge))
+                            else:
+                                model = model_str_to_obj(algorithm)(cv_folds=3,
+                                                                    scoring_metric=self.scoring_metric,
+                                                                    metric_direction=self.metric_direction,
+                                                                    random_state=self.random_state,
+                                                                    cv=None, n_jobs=self.n_jobs,
+                                                                    iterations=self.lcs_iterations,
+                                                                    N=self.lcs_n, nu=self.lcs_nu,
+                                                                    expert_knowledge=copy.deepcopy(expert_knowledge))
+                        else:
+                            if self.do_lcs_sweep:
+                                model = model_str_to_obj(algorithm)(cv_folds=3,
+                                                                    scoring_metric=self.scoring_metric,
+                                                                    metric_direction=self.metric_direction,
+                                                                    random_state=self.random_state,
+                                                                    cv=None, n_jobs=self.n_jobs)
+                            else:
+                                model = model_str_to_obj(algorithm)(cv_folds=3,
+                                                                    scoring_metric=self.scoring_metric,
+                                                                    metric_direction=self.metric_direction,
+                                                                    random_state=self.random_state,
+                                                                    cv=None, n_jobs=self.n_jobs,
+                                                                    iterations=self.lcs_iterations,
+                                                                    N=self.lcs_n, nu=self.lcs_nu)
 
                     job_obj = ModelJob(full_path, self.output_path, self.experiment_name, cv_count, self.outcome_label,
                                        self.instance_label, self.scoring_metric, self.metric_direction, self.n_trials,
@@ -246,7 +284,7 @@ class ModelExperimentRunner:
                     if run_parallel and run_parallel != "False":
                         # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
                         # job_list.append(p)
-                        job_list.append((job_obj, model))
+                        job_list.append((job_obj, copy.deepcopy(model)))
                     else:
                         job_obj.run(model)
         if run_parallel and run_parallel != "False" and not self.run_cluster:

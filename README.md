@@ -9,7 +9,7 @@ and [scikit-learn](https://scikit-learn.org/stable/).
 
 The schematic below summarizes the automated STREAMLINE analysis pipeline with individual elements organized into 9 phases.
 
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_paper_lightcolor.png?raw=true)
+![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_paper_new_lightcolor.png?raw=true)
 
 * Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
 

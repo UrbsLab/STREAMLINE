@@ -264,18 +264,18 @@ class FeatureSelectionRunner:
         self.reserved_memory = reserved_memory
         self.show_plots = show_plots
 
-        if self.filter_poor_features == 'False' or self.filter_poor_features == False:
-            self.filter_poor_features == False
+        if self.filter_poor_features == 'False' or self.filter_poor_features is False:
+            self.filter_poor_features = False
         else:
-            self.filter_poor_features == True
-        if self.export_scores == 'False' or self.export_scores == False:
-            self.export_scores == False
+            self.filter_poor_features = True
+        if self.export_scores == 'False' or self.export_scores is False:
+            self.export_scores = False
         else:
-            self.export_scores == True
-        if self.overwrite_cv == 'False' or self.overwrite_cv == False:
-            self.overwrite_cv == False
+            self.export_scores = True
+        if self.overwrite_cv == 'False' or self.overwrite_cv is False:
+            self.overwrite_cv = False
         else:
-            self.overwrite_cv == True
+            self.overwrite_cv = True
 
         # Argument checks
         if not os.path.exists(self.output_path):

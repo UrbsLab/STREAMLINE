@@ -156,14 +156,15 @@ class ModelJob(Job):
                                     model.params)
 
         if self.uniform_fi:
-            results = permutation_importance(model, x_train, y_train, n_repeats=10, random_state=self.random_state,
+            results = permutation_importance(model.model, x_train, y_train, n_repeats=10, random_state=self.random_state,
                                              scoring=self.scoring_metric)
             self.feature_importance = results.importances_mean
         else:
             try:
                 self.feature_importance = model.model.feature_importances_
             except AttributeError:
-                results = permutation_importance(model, x_train, y_train, n_repeats=10, random_state=self.random_state,
+                results = permutation_importance(model.model, x_train, y_train, n_repeats=10,
+                                                 random_state=self.random_state,
                                                  scoring=self.scoring_metric)
                 self.feature_importance = results.importances_mean
 

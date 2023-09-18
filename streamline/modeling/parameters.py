@@ -136,7 +136,6 @@ regressor_parameters = {
     # https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html
     'Support Vector Regression': {'kernel': ['poly', 'rbf'], 'C': [0.1, 1000], 'gamma': ['scale'],
                                   'degree': [1, 6]},
-
     # Group Lasso Regressor
     # https://group-lasso.readthedocs.io/en/latest/api_reference.html#
     'Group Lasso': {'group_reg': [1e-3, 1],  # 'l1_reg':[0,1],
