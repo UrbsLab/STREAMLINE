@@ -371,6 +371,7 @@ class DataProcess(Job):
 
         # Dropping rows with missing target variable and users specified features to ignore
         self.drop_ignored_rowcols()  # Completed
+        self.drop_invariant()
         transition_df.loc["C1"] = self.counts_summary(save=False)
 
         # Generating categorical features for features with missingness greater that featureeng_missingness percentage
@@ -573,6 +574,24 @@ class DataProcess(Job):
                 self.quantitative_features.remove(feat)
         self.dataset.clean_data(self.ignore_features)
 
+    def drop_invariant(self):
+        """
+        Basic data cleaning: Drops any invariant features found by pandas
+        """
+        try:
+            invariant_columns = list(self.dataset.data.columns[self.dataset.data.nunique(dropna=False) <= 1])
+        except Exception:
+            invariant_columns = []
+        if invariant_columns:
+            logging.info("Dropping the following Invariant Columns:")
+            for feat in invariant_columns:
+                logging.info('\t' + feat)
+                if feat in self.categorical_features:
+                    self.categorical_features.remove(feat)
+                if feat in self.quantitative_features:
+                    self.quantitative_features.remove(feat)
+        self.dataset.data.drop(invariant_columns, axis=1, inplace=True)
+
     def feature_engineering(self):
         """
         Feature Engineering - Missingness as a feature (missingness feature engineering phase)
@@ -748,6 +767,7 @@ class DataProcess(Job):
                 features_to_drop.remove(feat)
 
         self.dataset.clean_data(features_to_drop)
+
 
         if len(features_to_drop) > 0:
             logging.info("Removing the following Features due to high correlation:")
