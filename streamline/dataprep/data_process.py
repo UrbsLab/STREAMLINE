@@ -371,11 +371,11 @@ class DataProcess(Job):
 
         # Dropping rows with missing target variable and users specified features to ignore
         self.drop_ignored_rowcols()  # Completed
-        self.drop_invariant()
         transition_df.loc["C1"] = self.counts_summary(save=False)
 
         # Generating categorical features for features with missingness greater that featureeng_missingness percentage
         self.feature_engineering()  # Completed
+        self.drop_invariant()  # Completed
         transition_df.loc["E1"] = self.counts_summary(save=False)
 
         # Remove features with missingness greater than cleaning_missingness percentage
@@ -579,7 +579,7 @@ class DataProcess(Job):
         Basic data cleaning: Drops any invariant features found by pandas
         """
         try:
-            invariant_columns = list(self.dataset.data.columns[self.dataset.data.nunique(dropna=False) <= 1])
+            invariant_columns = list(self.dataset.data.columns[self.dataset.data.nunique(dropna=True) <= 1])
         except Exception:
             invariant_columns = []
         if invariant_columns:
@@ -590,6 +590,10 @@ class DataProcess(Job):
                     self.categorical_features.remove(feat)
                 if feat in self.quantitative_features:
                     self.quantitative_features.remove(feat)
+                if feat in self.engineered_features:
+                    self.engineered_features.remove(feat)
+                if feat in self.one_hot_features:
+                    self.one_hot_features.remove(feat)
         self.dataset.data.drop(invariant_columns, axis=1, inplace=True)
 
     def feature_engineering(self):
