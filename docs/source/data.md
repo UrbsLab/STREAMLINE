@@ -86,6 +86,7 @@ Modifcations include the following:
 5. Addition of three simulated, text-valued categorical features with 2, 3, or 4 unique values, respectively (to test one-hot-encoding of text-based features)
 6. Addition of three simulated quantiative features with high missingness (to test feature missingness data cleaning)
 7. Addition of three pairs of correlated quanatiative features (6 features added in total), with correlations of -1.0, 0.9, and 1.0, respectively (to test high correlation data cleaning)
+8. Addition of three simulated features with (1) invariant feature values, (2) all missing values, and (3) a mix of invariant values and missing values. 
 
 These simulated features and instances have been clearly identified in the feature names and instances IDs of this dataset. 
 
@@ -98,5 +99,7 @@ Modifications included adding a simulated instance that includes a new (as-of-ye
 2. The 3-value text-valued categorical feature
 3. The binary numerically encoded categorical feature
 4. The 3-value numerically encoded categorical feature
+
+We also added a new, previously unseen feature value to each of the invariant feature columns.
 
 The code to generate the additional features and instances within the custom `hcc_data_custom.csv` and `hcc_data_custom_rep.csv` can be found in the notebook at `/data/Generate_Expanded_HCC_dataset.ipynb`.
