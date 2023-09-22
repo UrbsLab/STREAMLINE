@@ -621,17 +621,17 @@ class DataProcess(Job):
         high_missingness_features = missingness[missingness > self.featureeng_missingness]
         high_missingness_features = list(high_missingness_features.index)
         # self.high_missingness_features = high_missingness_features
-        self.engineered_features = ['miss_' + feat for feat in high_missingness_features]
+        self.engineered_features = ['Miss_' + feat for feat in high_missingness_features]
 
         # For each Feature with high missingness creating a categorical feature.
         for feat in high_missingness_features:
-            self.dataset.data['Missing_' + feat] = self.dataset.data[feat].isnull().astype(int)
-            self.categorical_features.append('miss_' + feat)
+            self.dataset.data['Miss_' + feat] = self.dataset.data[feat].isnull().astype(int)
+            self.categorical_features.append('Miss_' + feat)
 
         if high_missingness_features:
             logging.info("Engineering the following Features for missingness:")
             for feat in high_missingness_features:
-                logging.info('\t Missing_' + feat)
+                logging.info('\t Miss_' + feat)
 
             with open(self.experiment_path + '/' + self.dataset.name +
                       '/exploratory/engineered_features.pickle', 'wb') as outfile:
