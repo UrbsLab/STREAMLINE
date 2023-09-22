@@ -235,7 +235,7 @@ class ReplicateJob(Job):
             eda.categorical_features.append('Miss_' + feat)
         eda.engineered_features = ['Miss_' + feat for feat in eda.engineered_features]
 
-        transition_df.loc["E1"] = eda.counts_summary(save=False)
+        #transition_df.loc["E1"] = eda.counts_summary(save=False)
 
         try:
             # Removing dropped features
@@ -251,7 +251,7 @@ class ReplicateJob(Job):
         except FileNotFoundError:
             pass
 
-        transition_df.loc["C2"] = eda.counts_summary(save=False)
+        #transition_df.loc["C2"] = eda.counts_summary(save=False)
 
         try:
             with open(self.experiment_path + '/' + self.train_name +
@@ -291,7 +291,7 @@ class ReplicateJob(Job):
             if feat not in post_processed_vars and feat not in correlated_features:
                 eda.drop_ignored_rowcols([feat])
 
-        transition_df.loc["E2"] = eda.counts_summary(save=False)
+        #transition_df.loc["E2"] = eda.counts_summary(save=False)
 
         # Removing highly correlated features
         for feat in correlated_features:
@@ -312,7 +312,7 @@ class ReplicateJob(Job):
 
         eda.dataset.data = eda.dataset.data[post_processed_vars]
 
-        transition_df.loc["Final"] = eda.counts_summary(save=False)
+        transition_df.loc["R1"] = eda.counts_summary(save=False)
 
         transition_df.to_csv(self.full_path + "/replication/" + self.apply_name + '/exploratory/'
                              + 'DataProcessSummary.csv', index=True)
