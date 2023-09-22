@@ -545,10 +545,10 @@ class ReportJob(Job):
             self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0,
                                       align="L")
             self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * E1 - Add missingness features and then removing all invariant features',
+            self.analysis_report.cell(90, 4, ' * E1 - Add missingness features',
                                       0, align="L")
             self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * C2 - Remove features with high missingness', 0, align="L")
+            self.analysis_report.cell(90, 4, ' * C2 - Remove features with invariance or high missingness', 0, align="L")
             self.analysis_report.ln(th)  # critical
             self.analysis_report.cell(90, 4, ' * C3 - Remove instances with high missingness', 0, align="L")
             self.analysis_report.ln(th)  # critical

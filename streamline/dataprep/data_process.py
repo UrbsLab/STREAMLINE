@@ -375,10 +375,10 @@ class DataProcess(Job):
 
         # Generating categorical features for features with missingness greater that featureeng_missingness percentage
         self.feature_engineering()  # Completed
-        self.drop_invariant()  # Completed
         transition_df.loc["E1"] = self.counts_summary(save=False)
 
         # Remove features with missingness greater than cleaning_missingness percentage
+        self.drop_invariant()  # Completed
         self.feature_removal()  # Completed
         transition_df.loc["C2"] = self.counts_summary(save=False)
 
