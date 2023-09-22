@@ -21,6 +21,7 @@ def run_cluster(argv):
         if alg_info[key][0]:
             temp_algo.append(key)
     algorithms = temp_algo
+    algorithms = sorted(algorithms)
 
     class_label = argv[3]
     instance_label = argv[4] if argv[4] != "None" else None

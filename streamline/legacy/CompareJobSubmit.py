@@ -21,6 +21,7 @@ def run_cluster(argv):
         if alg_info[key][0]:
             temp_algo.append(key)
     algorithms = temp_algo
+    algorithms = sorted(algorithms)
 
     exclude = None
     class_label = argv[6]

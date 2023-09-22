@@ -60,6 +60,8 @@ class StatsRunner:
             for algorithm in algorithms:
                 self.algorithms.append(is_supported_model(algorithm))
 
+        self.algorithms = sorted(self.algorithms)
+
         self.scale_data = scale_data
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
