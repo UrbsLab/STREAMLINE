@@ -157,6 +157,21 @@ class ReplicateJob(Job):
 
         transition_df.loc["Original"] = eda.counts_summary(save=False)
 
+        with open(self.experiment_path + '/' + self.train_name +
+                  '/exploratory/binary_categorical_dict.pickle', 'rb') as infile:
+            binary_categorical_dict = dict(pickle.load(infile))
+
+        for key in binary_categorical_dict:
+            unique_vals = list(eda.dataset.data[key].unique())
+            unique_vals = [x for x in unique_vals if not pd.isnull(x)]
+            if sorted(unique_vals) != sorted(binary_categorical_dict[key]):
+                new_values = list(set(eda.dataset.data[key].unique()) - set(binary_categorical_dict[key]))
+                logging.warning("New Value found in Binary Categorical Variable " + str(key)
+                                + ", replacing with null value")
+                for feat in new_values:
+                    logging.warning('\t' + str(feat))
+                eda.dataset.data[key].replace(new_values, np.nan, inplace=True)
+
         # ordinal decode the variables
         try:
             with open(self.experiment_path + '/' + self.train_name +
@@ -178,7 +193,10 @@ class ReplicateJob(Job):
                         eda.dataset.data.replace({feat: rename_dict}, inplace=True)
                         ord_labels.loc[feat]['Category'] = list(labels) + new_labels
                         ord_labels.loc[feat]['Encoding'] = list(range(len(list(labels)))) + [None, ] * len(new_labels)
-                        logging.warning("New Value found in Binary Categorical Variable, filling with null value")
+                        logging.warning("New Value found in Textual Binary Categorical Variable " + str(feat)
+                                        + ", replacing with null value")
+                        for x in new_labels:
+                            logging.warning('\t' + str(x))
                     else:
                         new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
                         labels = ord_labels.loc[feat]['Category']

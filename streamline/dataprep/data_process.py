@@ -273,8 +273,15 @@ class DataProcess(Job):
         # Assign all binary features categorical list
         quant_to_cat = []
         unassigned_to_cat = []
+
+        binary_categoricals_dict = dict()
+
         for each in x_data:
-            if x_data[each].nunique() == 2:
+            unique_vals = list(x_data[each].unique())
+            unique_vals = [x for x in unique_vals if not pd.isnull(x)]
+            if len(unique_vals) == 2:
+                if str(x_data[each].dtype) != 'object':
+                    binary_categoricals_dict[each] = list(unique_vals)
                 self.categorical_features.append(each)
                 if self.specified_quantitative is not None and each in self.specified_quantitative:
                     quant_to_cat.append(each)
@@ -285,6 +292,11 @@ class DataProcess(Job):
                     self.specified_categorical.remove(each)  # update user specified list
 
         logging.debug("binary cat: " + str(self.categorical_features))  # TESTING
+
+        with open(self.experiment_path + '/' + self.dataset.name +
+                  '/exploratory/binary_categorical_dict.pickle', 'wb') as outfile:
+            pickle.dump(binary_categoricals_dict, outfile)
+
         # Since some datasets might be very large, report this warning as a summary
         if len(quant_to_cat) > 0:
             logging.warning(
@@ -771,7 +783,6 @@ class DataProcess(Job):
                 features_to_drop.remove(feat)
 
         self.dataset.clean_data(features_to_drop)
-
 
         if len(features_to_drop) > 0:
             logging.info("Removing the following Features due to high correlation:")
