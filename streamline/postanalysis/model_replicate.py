@@ -301,7 +301,7 @@ class ReplicateJob(Job):
                 eda.quantitative_features.remove(feat)
         eda.dataset.data.drop(correlated_features, axis=1, inplace=True)
 
-        transition_df.loc["C4"] = eda.counts_summary(save=False)
+        #transition_df.loc["C4"] = eda.counts_summary(save=False)
 
         eda.categorical_features = list(set(post_processed_vars).intersection(set(eda.categorical_features)))
         eda.quantitative_features = list(set(post_processed_vars).intersection(set(eda.quantitative_features)))

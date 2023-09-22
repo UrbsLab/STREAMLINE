@@ -562,7 +562,7 @@ class ReportJob(Job):
                 self.analysis_report.cell(90, 4, 'Cleaning (C) and Replication (R) Elements', 0, align="L")
                 self.analysis_report.set_font('Times', '', 7)
                 self.analysis_report.ln(th)  # critical
-                self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0,
+                self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome', 0,
                                         align="L")
                 self.analysis_report.ln(th)  # critical
                 self.analysis_report.cell(90, 4, ' * R1 - Add/remove same features as Phase 1',
