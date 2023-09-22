@@ -213,9 +213,9 @@ class ReplicateJob(Job):
 
         # Recreate missingness features in replication phase
         for feat in eda.engineered_features:
-            eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
-            eda.categorical_features.append('miss_' + feat)
-        eda.engineered_features = ['miss_' + feat for feat in eda.engineered_features]
+            eda.dataset.data['Miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
+            eda.categorical_features.append('Miss_' + feat)
+        eda.engineered_features = ['Miss_' + feat for feat in eda.engineered_features]
 
         transition_df.loc["E1"] = eda.counts_summary(save=False)
 
