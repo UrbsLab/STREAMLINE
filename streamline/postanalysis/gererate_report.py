@@ -535,26 +535,38 @@ class ReportJob(Job):
                         self.analysis_report.cell(col_width_list[col_count], th, str(int(float(datum))), border=1,
                                                   align="L", fill=True)
                 col_count += 1
-
-            self.analysis_report.set_font('Times', 'B', 8)
-            self.analysis_report.x = 1
-            self.analysis_report.y = 41
-            self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
-            self.analysis_report.set_font('Times', '', 7)
-            self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0,
-                                      align="L")
-            self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * E1 - Add missingness features',
-                                      0, align="L")
-            self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * C2 - Remove features with invariance or high missingness', 0, align="L")
-            self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * C3 - Remove instances with high missingness', 0, align="L")
-            self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * E2 - Add one-hot-encoding of categorical features', 0, align="L")
-            self.analysis_report.ln(th)  # critical
-            self.analysis_report.cell(90, 4, ' * C4 - Remove highly correlated features', 0, align="L")
+            if self.training:
+                self.analysis_report.set_font('Times', 'B', 8)
+                self.analysis_report.x = 1
+                self.analysis_report.y = 41
+                self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
+                self.analysis_report.set_font('Times', '', 7)
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0,
+                                        align="L")
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * E1 - Add missingness features',
+                                        0, align="L")
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * C2 - Remove features with invariance or high missingness', 0, align="L")
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * C3 - Remove instances with high missingness', 0, align="L")
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * E2 - Add one-hot-encoding of categorical features', 0, align="L")
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * C4 - Remove highly correlated features', 0, align="L")
+            else:
+                self.analysis_report.set_font('Times', 'B', 8)
+                self.analysis_report.x = 1
+                self.analysis_report.y = 41
+                self.analysis_report.cell(90, 4, 'Cleaning (C) and Engineering (E) Elements', 0, align="L")
+                self.analysis_report.set_font('Times', '', 7)
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * C1 - Remove instances with no outcome and features to ignore', 0,
+                                        align="L")
+                self.analysis_report.ln(th)  # critical
+                self.analysis_report.cell(90, 4, ' * R1 - Add/remove same features as Phase 1',
+                                        0, align="L")
 
             # Insert Class Imbalance barplot
             self.analysis_report.set_font('Times', 'B', 10)
