@@ -135,7 +135,7 @@ def parse_eda(argv, params_dict=None):
                         default=0.5)
     parser.add_argument('--corr_thresh', dest='correlation_removal_threshold', type=float,
                         help='correlation removal threshold',
-                        default=0.8)
+                        default=1.0)
     # parser.add_argument('--export-fc', dest='export_feature_correlations', type=str2bool, nargs='?',
     #                     help='run and export feature correlation analysis (yields correlation heatmap)', default=True)
     # parser.add_argument('--export-up', dest='export_univariate_plots', type=str2bool, nargs='?',
@@ -231,12 +231,12 @@ def parse_model(argv, params_dict=None):
     parser.add_argument('--do-all', dest='do_all', type=str2bool, nargs='?',
                         help='run all modeling algorithms by default (when set False, individual algorithms are '
                              'activated individually)',
-                        default=False)
+                        default=False) #LIKELY REMOVE
 
     parser.add_argument('--algorithms', dest='algorithms',
                         type=comma_sep_choices(SUPPORTED_MODELS_SMALL),
                         help='comma seperated list of algorithms to exclude',
-                        default='LR,DT,NB')
+                        default=None)
 
     parser.add_argument('--model-resubmit', dest='model_resubmit',
                         type=str2bool, nargs='?',
