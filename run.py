@@ -84,7 +84,7 @@ def len_datasets(output_path, experiment_name):
     remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                    'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons',
                    'UsefulNotebooks', 'dask_logs',
-                   experiment_name + '_ML_Pipeline_Report.pdf']
+                   experiment_name + '_STREAMLINE_Report.pdf']
     for text in remove_list:
         if text in datasets:
             datasets.remove(text)

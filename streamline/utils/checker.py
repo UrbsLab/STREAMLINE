@@ -176,7 +176,7 @@ def check_phase(output_path, experiment_name, phase=5, len_only=True,
     remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
                    'jobsCompleted', 'dask_logs', 'logs', 'jobs',
                    'DatasetComparisons', 'UsefulNotebooks',
-                   experiment_name + '_ML_Pipeline_Report.pdf']
+                   experiment_name + '_STREAMLINE_Report.pdf']
     for text in remove_list:
         if text in datasets:
             datasets.remove(text)
