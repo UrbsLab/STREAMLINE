@@ -106,15 +106,15 @@ def parse_eda(argv, params_dict=None):
     parser.add_argument('--fi', dest='ignore_features_path', type=str,
                         help='path to .csv file with feature labels to be ignored in analysis '
                              '(e.g. ./droppedFeatures.csv))',
-                        default="")
+                        default=None)
     parser.add_argument('--cf', dest='categorical_feature_path', type=str,
                         help='path to .csv file with feature labels specified to '
                              'be treated as categorical where possible',
-                        default="")
+                        default=None)
     parser.add_argument('--qf', dest='quantitative_feature_path', type=str,
                         help='path to .csv file with feature labels specified to '
                              'be treated as categorical where possible',
-                        default="")
+                        default=None)
 
     parser.add_argument('--cv', dest='cv_partitions', type=int, help='number of CV partitions', default=10)
     parser.add_argument('--part', dest='partition_method', type=str,
