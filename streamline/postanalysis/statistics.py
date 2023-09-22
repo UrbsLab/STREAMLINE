@@ -53,7 +53,7 @@ class StatsJob(Job):
         """
         super().__init__()
         self.full_path = full_path
-        self.algorithms = algorithms
+        self.algorithms = sorted(algorithms)
         self.class_label = class_label
         self.instance_label = instance_label
         self.data_name = self.full_path.split('/')[-1]

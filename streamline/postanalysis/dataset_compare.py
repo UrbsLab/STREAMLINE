@@ -69,6 +69,8 @@ class CompareJob(Job):
             for algorithm in algorithms:
                 self.algorithms.append(is_supported_model(algorithm))
 
+        self.algorithms = sorted(algorithms)
+
         self.show_plots = show_plots
         self.abbrev = dict((k, ABBREVIATION[k]) for k in self.algorithms if k in ABBREVIATION)
         self.colors = dict((k, COLORS[k]) for k in self.algorithms if k in COLORS)
