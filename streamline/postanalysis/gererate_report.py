@@ -217,37 +217,37 @@ class ReportJob(Job):
 
         self.analysis_report.y += 1  # Margin below page header
         top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='General Pipeline Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(cv) + ' ' + list_to_string(
                                             cat_cut) + ' ' + list_to_string(stat_cut) + ' ' + list_to_string(
                                             general),
                                         border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='EDA and Processing Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(process) + ' ' + list_to_string(
                                             process2) + ' ' + list_to_string(overwrite),
                                         border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='Feature Importance/Selection Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(featsel),
                                         border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='Target Data Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.multi_cell(w=90, h=4,
                                         txt=' ' + list_to_string(targetdata),
                                         border=1, align='L')
@@ -257,37 +257,37 @@ class ReportJob(Job):
 
         self.analysis_report.x += 90
         self.analysis_report.y = top_of_list  # 96
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='ML Modeling Algorithms:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(ls2), border=1, align='L')
         self.analysis_report.y += 1
 
         self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='Modeling Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
         self.analysis_report.y += 1
 
         self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
         self.analysis_report.y += 1
 
         self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 10)
+        self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=90, h=4, txt='Stats and Figure Settings:', border=1, align='L')
         self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
+        self.analysis_report.set_font('Times', '', 7)
         self.analysis_report.x += 90
         self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
 
