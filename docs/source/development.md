@@ -12,6 +12,8 @@ This section summarizes the past, present, and future development of STREAMLINE.
 * Updated replication phase PDF report to simplify the data processing report
 * Fixed handling of (as of yet) unseen values in binary categorical variables during replication phase. Now these are converted to Nans, since we can't introduce a new feature at this point (since it was not included in modeling)
 * Fixed issue with naming of engineered missingness features
+* Fixed issue with running STREAMLINE on cluster in legacy mode without specifying files for categorical or quanatiative features. 
+* Updated text size on first page of PDF report
 
 ### Beta 0.3.2 (September 13, 2023)
 #### Minor Updates
