@@ -6,7 +6,7 @@ This section summarizes the past, present, and future development of STREAMLINE.
 
 ### Current Release - Beta 0.3.3 (September 22, 2023)
 #### Major Updates
-* Added a new data cleaning element - removal of invariant features. Durring C2 cleaning phase of data processing, features with only one value, only Nans or a mix of one value and Nan are removed from the dataset. This has been similarly updated for the replication phase, removing the same features that were removed during the original Phase 1 data cleaning. 
+* Added a new data cleaning element - removal of invariant features. During C2 cleaning phase of data processing, features with only one value, only Nans or a mix of one value and Nan are removed from the dataset. This has been similarly updated for the replication phase, removing the same features that were removed during the original Phase 1 data cleaning. 
 #### Minor Updates
 * Fix to algorithm ordering in figures within Jupyter notebook and Google Colab notebook run modes.
 * Updated replication phase PDF report to simplify the data processing report
