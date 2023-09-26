@@ -72,13 +72,13 @@ New users can easily run STREAMLINE on these datasets in whatever run-mode desir
 
 ***
 ### Real-World HCC Dataset
-The first demo dataset (`hcc_data.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).
+The first demo dataset (`hcc_data.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 survived (class 0).
 
 ***
 ### Custom Extension of HCC Dataset
 The second demo dataset (`hcc_data_custom.csv`) is similar to the first, but we have made a number of modifications to it in order to test the data cleaning and feature engineering functionalities of STREAMLINE. 
 
-Modifcations include the following:
+Modifications include the following:
 1. Removal of covariate features (i.e. 'Gender' and 'Age at diagnosis')
 2. Addition of two simulated instances with a missing class label (to test basic data cleaning)
 3. Addition of two simulated instances with a high proportion of missing values (to test instance missingness data cleaning)

@@ -167,7 +167,7 @@ class ReportJob(Job):
         #stats = ars_dic[129:150]
 
         ls2 = ars_dic_2
-
+        # Report Title
         self.analysis_report.set_font('Times', 'B', 12)
         if self.training:
             self.analysis_report.cell(w=180, h=8, txt='STREAMLINE Testing Data Evaluation Report: ' + str(self.time), ln=2,
@@ -178,6 +178,66 @@ class ReportJob(Job):
 
         self.analysis_report.y += 2  # Margin below page header
 
+        #Begin Settings
+        top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=69, h=4, txt='General Pipeline Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=69, h=4,
+                                        txt=' ' + list_to_string(cv) + ' ' + list_to_string(
+                                            cat_cut) + ' ' + list_to_string(stat_cut) + ' ' + list_to_string(
+                                            general),
+                                        border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=69, h=4, txt='Feature Importance/Selection Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=69, h=4,
+                                        txt=' ' + list_to_string(featsel),
+                                        border=1, align='L')
+
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=69, h=4, txt='ML Modeling Algorithms:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(ls2), border=1, align='L')
+        self.analysis_report.y += 1
+
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=69, h=4, txt='Modeling Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
+        self.analysis_report.y += 1
+
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=69, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
+        self.analysis_report.y += 1
+
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=69, h=4, txt='Stats and Figure Settings:', border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
+
+        self.analysis_report.x += 70
+        self.analysis_report.y = top_of_list  # 96
+        self.analysis_report.set_font('Times', 'B', 9)
+        self.analysis_report.multi_cell(w=110, h=4, txt='EDA and Processing Settings:', border=1, align='L')
+        self.analysis_report.x += 70
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.set_font('Times', '', 7)
+        self.analysis_report.multi_cell(w=110, h=4,
+                                        txt=' ' + list_to_string(process) + ' ' + list_to_string(
+                                            process2) + ' ' + list_to_string(overwrite),
+                                        border=1, align='L')
+        self.analysis_report.y += 1  # Space below section header
+        self.analysis_report.x += 70
         if self.training:
             # Get names of self.datasets run in analysis
             list_datasets = ''
@@ -186,113 +246,61 @@ class ReportJob(Job):
                 list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
                 i += 1
             # Report self.datasets
-            self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.multi_cell(w=180, h=4, txt='Target Dataset(s)', border=1, align='L')
+            self.analysis_report.set_font('Times', 'B', 9)
+            self.analysis_report.multi_cell(w=110, h=4, txt='Target Dataset(s):', border=1, align='L')
+            self.analysis_report.x += 70
             self.analysis_report.y += 1  # Space below section header
-            self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.multi_cell(w=110, h=4, txt=list_datasets, border=1, align='L')
         else:
-            self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.cell(w=180, h=4, txt='Target Training Dataset: ' + self.train_name, border=1,
-                                      align='L')
-            self.analysis_report.y += 5
-            self.analysis_report.x = 10
-
             list_datasets = ''
             i = 1
             for each in self.datasets:
                 list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
                 i += 1
-            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ', border=1, align='L')
+            self.analysis_report.set_font('Times', 'B', 9)
+            self.analysis_report.multi_cell(w=110, h=4, txt='Target Training Dataset:', border=1, align='L')
+            self.analysis_report.x += 70
             self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.multi_cell(w=110, h=4, txt=self.train_name, border=1, align='L')
+            
+            #self.analysis_report.y += 5
+            #self.analysis_report.x = 70 #10
+            self.analysis_report.x += 70
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', 'B', 9)
 
-            self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.multi_cell(w=180, h=4, txt= list_datasets, border=1, align='L')
+            self.analysis_report.multi_cell(w=110, h=4, txt='Applied to Following Replication Dataset(s):', border=1, align='L')
+            self.analysis_report.x += 70
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.multi_cell(w=110, h=4, txt= list_datasets, border=1, align='L')
             #self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
 
-        self.analysis_report.y += 2  # Margin below Datasets
-
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
-
-        self.analysis_report.y += 1  # Margin below page header
-        top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='General Pipeline Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.multi_cell(w=90, h=4,
-                                        txt=' ' + list_to_string(cv) + ' ' + list_to_string(
-                                            cat_cut) + ' ' + list_to_string(stat_cut) + ' ' + list_to_string(
-                                            general),
-                                        border=1, align='L')
+        self.analysis_report.x += 70
         self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='EDA and Processing Settings:', border=1, align='L')
+        self.analysis_report.multi_cell(w=110, h=4, txt='Target Data Settings:', border=1, align='L')
+        self.analysis_report.x += 70
         self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.multi_cell(w=90, h=4,
-                                        txt=' ' + list_to_string(process) + ' ' + list_to_string(
-                                            process2) + ' ' + list_to_string(overwrite),
-                                        border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='Feature Importance/Selection Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.multi_cell(w=90, h=4,
-                                        txt=' ' + list_to_string(featsel),
-                                        border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='Target Data Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.multi_cell(w=90, h=4,
+        self.analysis_report.multi_cell(w=110, h=4,
                                         txt=' ' + list_to_string(targetdata),
                                         border=1, align='L')
+
+
+        #self.analysis_report.y += 2  # Margin below Datasets
+        #self.analysis_report.y += 2  # Margin below Datasets
+
+        #self.analysis_report.set_font('Times', 'B', 10)
+        #self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
+
 
         #bottom_of_list = self.analysis_report.y
         #self.analysis_report.y = bottom_of_list + 2
 
-        self.analysis_report.x += 90
-        self.analysis_report.y = top_of_list  # 96
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='ML Modeling Algorithms:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(ls2), border=1, align='L')
-        self.analysis_report.y += 1
-
-        self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='Modeling Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
-        self.analysis_report.y += 1
-
-        self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
-        self.analysis_report.y += 1
-
-        self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=90, h=4, txt='Stats and Figure Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
-
-
-
+    
         """
         try_again = True
         try:
@@ -882,21 +890,26 @@ class ReportJob(Job):
                 d.append('\n')
 
             self.analysis_report.set_font('Times', 'B', 12)
-            self.analysis_report.cell(w=0, h=8,
-                                      txt='Using Best Performing Algorithms (Kruskall Wallis Compare Datasets)',
-                                      border=1, align="L", ln=2)
+            if len(self.datasets) < 19:
+                self.analysis_report.cell(w=0, h=8,
+                                        txt='Using Best Performing Algorithms (Kruskall Wallis Compare Datasets)',
+                                        border=1, align="L", ln=2)
+            else:
+                self.analysis_report.cell(w=0, h=8,
+                                        txt='Using Best Performing Algorithms (Kruskall Wallis Compare Datasets): Page 1',
+                                        border=1, align="L", ln=2)
             self.analysis_report.set_font(family='times', size=7)
 
             # Dataset list Key
-            list_datasets = ''
-            i = 1
-            for each in self.datasets:
-                list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
-                i += 1
-            self.analysis_report.x = 5
-            self.analysis_report.y = 14
-            self.analysis_report.multi_cell(w=0, h=4, txt='Datasets: ' + '\n' + list_datasets, border=1, align='L')
-            self.analysis_report.y += 5
+            #list_datasets = ''
+            #i = 1
+            #for each in self.datasets:
+            #    list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
+            #    i += 1
+            #self.analysis_report.x = 5
+            #self.analysis_report.y = 14
+            #self.analysis_report.multi_cell(w=0, h=4, txt='Datasets: ' + '\n' + list_datasets, border=1, align='L')
+            self.analysis_report.y += 2
 
             success = False
             kruskal_wallis_datasets = None
@@ -926,7 +939,7 @@ class ReportJob(Job):
                 # epw = 208  # Amount of Space (width) Available
                 th = self.analysis_report.font_size
                 # col_width = epw/float(10) #maximum column width
-                col_width_list = [23, 14, 30, 14, 30, 14, 30, 14]
+                col_width_list = [23, 12, 30, 16, 30, 16, 30, 16]
 
                 if len(self.datasets) <= 3:  # 4
                     col_count = 0
@@ -948,7 +961,7 @@ class ReportJob(Job):
                             col_count += 1
                         col_count = 0
                         self.analysis_report.ln(th)  # critical
-                    self.analysis_report.y += 5
+                    self.analysis_report.y += 2
 
                     col_count = 0
                     table1 = kruskal_wallis_datasets.iloc[:, 8:14]  # 10:18
@@ -962,7 +975,7 @@ class ReportJob(Job):
                             col_count += 1
                         col_count = 0
                         self.analysis_report.ln(th)  # critical
-                    self.analysis_report.y += 5
+                    self.analysis_report.y += 2
 
                     if len(self.datasets) > 6:  # 8
                         col_count = 0
@@ -977,7 +990,7 @@ class ReportJob(Job):
                                 col_count += 1
                             col_count = 0
                             self.analysis_report.ln(th)  # critical
-                        self.analysis_report.y += 5
+                        self.analysis_report.y += 2
 
                     if len(self.datasets) > 9:
                         table1 = kruskal_wallis_datasets.iloc[:, 20:26]
@@ -991,15 +1004,139 @@ class ReportJob(Job):
                                 col_count += 1
                             col_count = 0
                             self.analysis_report.ln(th)  # critical
-                        self.analysis_report.y += 5
+                        self.analysis_report.y += 2
 
                     if len(self.datasets) > 12:
-                        self.analysis_report.x = 0
-                        self.analysis_report.y = 260
-                        self.analysis_report.cell(0, 4, 'Warning: Additional dataset results could not be displayed', 1,
-                                                  align="C")
+                        table1 = kruskal_wallis_datasets.iloc[:, 26:32]
+                        met = kruskal_wallis_datasets.iloc[:, 0]
+                        met2 = kruskal_wallis_datasets.iloc[:, 1]
+                        table1 = pd.concat([met, met2, table1], axis=1)
+                        table1 = table1.to_numpy()
+                        for row in table1:
+                            for datum in row:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                col_count += 1
+                            col_count = 0
+                            self.analysis_report.ln(th)  # critical
+                        self.analysis_report.y += 2
 
-            self.footer()
+                    if len(self.datasets) > 15:
+                        table1 = kruskal_wallis_datasets.iloc[:, 32:38]
+                        met = kruskal_wallis_datasets.iloc[:, 0]
+                        met2 = kruskal_wallis_datasets.iloc[:, 1]
+                        table1 = pd.concat([met, met2, table1], axis=1)
+                        table1 = table1.to_numpy()
+                        for row in table1:
+                            for datum in row:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                col_count += 1
+                            col_count = 0
+                            self.analysis_report.ln(th)  # critical
+                        self.analysis_report.y += 2
+
+                    if len(self.datasets) > 18:
+                        self.footer()
+                        self.analysis_report.add_page(orientation='P')
+                        self.analysis_report.set_margins(left=1, top=10, right=1, )
+
+                        self.analysis_report.set_font('Times', 'B', 12)
+                        self.analysis_report.cell(w=0, h=8,
+                                                txt='Using Best Performing Algorithms (Kruskall Wallis Compare Datasets): Page 2',
+                                                border=1, align="L", ln=2)
+                        self.analysis_report.set_font(family='times', size=7)
+                        self.analysis_report.y += 2
+
+                        col_count = 0
+                        table1 = kruskal_wallis_datasets.iloc[:, 38:44]  # 18:26
+                        met = kruskal_wallis_datasets.iloc[:, 0]
+                        met2 = kruskal_wallis_datasets.iloc[:, 1]
+                        table1 = pd.concat([met, met2, table1], axis=1)
+                        table1 = table1.to_numpy()
+                        for row in table1:
+                            for datum in row:
+                                self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                col_count += 1
+                            col_count = 0
+                            self.analysis_report.ln(th)  # critical
+                        self.analysis_report.y += 2
+
+                        if len(self.datasets) > 21:
+                            table1 = kruskal_wallis_datasets.iloc[:, 44:50]
+                            met = kruskal_wallis_datasets.iloc[:, 0]
+                            met2 = kruskal_wallis_datasets.iloc[:, 1]
+                            table1 = pd.concat([met, met2, table1], axis=1)
+                            table1 = table1.to_numpy()
+                            for row in table1:
+                                for datum in row:
+                                    self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                    col_count += 1
+                                col_count = 0
+                                self.analysis_report.ln(th)  # critical
+                            self.analysis_report.y += 2
+
+                        if len(self.datasets) > 24:
+                            table1 = kruskal_wallis_datasets.iloc[:, 50:56]
+                            met = kruskal_wallis_datasets.iloc[:, 0]
+                            met2 = kruskal_wallis_datasets.iloc[:, 1]
+                            table1 = pd.concat([met, met2, table1], axis=1)
+                            table1 = table1.to_numpy()
+                            for row in table1:
+                                for datum in row:
+                                    self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                    col_count += 1
+                                col_count = 0
+                                self.analysis_report.ln(th)  # critical
+                            self.analysis_report.y += 2
+
+                        if len(self.datasets) > 27:
+                            table1 = kruskal_wallis_datasets.iloc[:, 56:62]
+                            met = kruskal_wallis_datasets.iloc[:, 0]
+                            met2 = kruskal_wallis_datasets.iloc[:, 1]
+                            table1 = pd.concat([met, met2, table1], axis=1)
+                            table1 = table1.to_numpy()
+                            for row in table1:
+                                for datum in row:
+                                    self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                    col_count += 1
+                                col_count = 0
+                                self.analysis_report.ln(th)  # critical
+                            self.analysis_report.y += 2
+
+                        if len(self.datasets) > 30:
+                            table1 = kruskal_wallis_datasets.iloc[:, 62:68]
+                            met = kruskal_wallis_datasets.iloc[:, 0]
+                            met2 = kruskal_wallis_datasets.iloc[:, 1]
+                            table1 = pd.concat([met, met2, table1], axis=1)
+                            table1 = table1.to_numpy()
+                            for row in table1:
+                                for datum in row:
+                                    self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                    col_count += 1
+                                col_count = 0
+                                self.analysis_report.ln(th)  # critical
+                            self.analysis_report.y += 2
+
+                        if len(self.datasets) > 33:
+                            table1 = kruskal_wallis_datasets.iloc[:, 68:74]
+                            met = kruskal_wallis_datasets.iloc[:, 0]
+                            met2 = kruskal_wallis_datasets.iloc[:, 1]
+                            table1 = pd.concat([met, met2, table1], axis=1)
+                            table1 = table1.to_numpy()
+                            for row in table1:
+                                for datum in row:
+                                    self.analysis_report.cell(col_width_list[col_count], th, str(datum), border=1)
+                                    col_count += 1
+                                col_count = 0
+                                self.analysis_report.ln(th)  # critical
+                            self.analysis_report.y += 2
+
+                        if len(self.datasets) > 36:
+                            self.analysis_report.x = 0
+                            self.analysis_report.y = 280
+                            self.analysis_report.cell(0, 4, 'A maximum of 36 dataset results could be displayed', 1,
+                                                    align="C")
+                            self.footer()
+            #self.footer()
 
         # LAST PAGE - Create Runtime Summary Page---------------------------------------
         if self.training:
@@ -1287,7 +1424,7 @@ class ReportJob(Job):
                 left = False
             else:
                 self.analysis_report.x = 1
-                self.analysis_report.y = last_y + 100
+                self.analysis_report.y = last_y + 70
                 left = True
         self.footer()
 
