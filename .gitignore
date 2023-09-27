@@ -5,19 +5,13 @@
 __pycache__
 .pytest_cache
 demo/
-demo_old/
 catboost_info/
-testlogs/
 dask_logs/
 OUTPUT/
-OSA_OUTPUT/
-OSA/
 docs/build/
-job_old.e
 job.o
 job.e
 logs.log
-Scratchpad.ipynb
 UserData/
 UserRepData/
 UserOutput/
@@ -32,3 +26,6 @@ run_configs/cedars_amd.cfg
 data/AMD_Final/*
 data/PLCO/*
 run_configs/cedars_plco.cfg
+run_configs/cedars_gametes.cfg
+exp_configs/
+exp_data/
