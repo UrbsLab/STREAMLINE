@@ -1,6 +1,7 @@
 import os
 import pickle
 import argparse
+import logging
 from streamline.modeling.utils import SUPPORTED_MODELS_SMALL
 
 
@@ -63,7 +64,7 @@ def load_config(output_path, experiment_name, config=None):
             config_file = pickle.load(file)
             config.update(config_file)
     except FileNotFoundError:
-        pass
+        logging.warning("CLI Params File Not Found")
     return config
 
 

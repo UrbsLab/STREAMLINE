@@ -140,7 +140,10 @@ def check_phase_9(output_path, experiment_name, rep_data_path):
     for filename in glob.glob(output_path + "/" + experiment_name + '/jobsCompleted/job_apply*'):
         filename = str(Path(filename).as_posix())
         ref = filename.split('/')[-1].split('.')[0]
-        phase9_jobs.remove(ref)
+        try:
+            phase9_jobs.remove(ref)
+        except ValueError:
+            pass
     return phase9_jobs
 
 
