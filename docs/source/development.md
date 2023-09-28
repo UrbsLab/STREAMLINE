@@ -4,7 +4,13 @@ This section summarizes the past, present, and future development of STREAMLINE.
 ***
 ## Release History
 
-### Current Release - Beta 0.3.3 (September 22, 2023)
+### Current Release - Beta 0.3.4 (September 28, 2023)
+#### Minor Updates
+* Improved PDF report formatting to more clearly display first page, and account for having a larger number of datasets analyzed at once. 
+* Fixed edge case bug for running multiple separate replication and replication report phases in legacy mode. 
+
+
+### Beta 0.3.3 (September 22, 2023)
 #### Major Updates
 * Added a new data cleaning element - removal of invariant features. During C2 cleaning phase of data processing, features with only one value, only Nans or a mix of one value and Nan are removed from the dataset. This has been similarly updated for the replication phase, removing the same features that were removed during the original Phase 1 data cleaning. 
 #### Minor Updates
