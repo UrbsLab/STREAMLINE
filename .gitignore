@@ -7,6 +7,7 @@ __pycache__
 demo/
 catboost_info/
 dask_logs/
+OSA/
 OUTPUT/
 docs/build/
 job.o

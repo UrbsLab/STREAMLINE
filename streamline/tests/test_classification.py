@@ -17,7 +17,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo",
-model_algorithms = ["LR", "DT", "NB"]
+model_algorithms = ["LR", "DT", "NB", "ANN"]
 rep_data_path = "./data/DemoRepData/"
 
 

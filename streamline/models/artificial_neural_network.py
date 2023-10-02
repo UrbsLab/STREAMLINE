@@ -29,5 +29,12 @@ class MLPClassifier(BaseModel, ABC):
                                                     self.param_grid['alpha'][1], log=True),
                        'max_iter': trial.suggest_categorical('max_iter', self.param_grid['max_iter']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
+        n_layers = trial.suggest_int('n_layers', self.param_grid['n_layers'][0], self.param_grid['n_layers'][1])
+        layers = []
+        for i in range(n_layers):
+            layers.append(
+                trial.suggest_int('n_units_l{}'.format(i), self.param_grid['layer_size'][0],
+                                  self.param_grid['layer_size'][1]))
+            self.params['hidden_layer_sizes'] = tuple(layers)
         mean_cv_score = self.hyper_eval()
         return mean_cv_score

@@ -110,6 +110,15 @@ class BaseModel:
             logging.info('  Params: ')
             for key, value in best_trial.params.items():
                 logging.info('    {}: {}'.format(key, value))
+            if self.small_name == "ANN":
+                # Handle special parameter requirement for ANN
+                layers = []
+                for j in range(best_trial.params['n_layers']):
+                    layer_name = 'n_units_l' + str(j)
+                    layers.append(best_trial.params[layer_name])
+                    del best_trial.params[layer_name]
+                best_trial.params['hidden_layer_sizes'] = tuple(layers)
+                del best_trial.params['n_layers']
             # Specify model with optimized hyperparameters
             # Export final model hyperparamters to csv file
             self.params = best_trial.params

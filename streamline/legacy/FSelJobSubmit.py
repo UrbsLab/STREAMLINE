@@ -13,7 +13,7 @@ def run_cluster(argv):
     n_datasets = int(argv[2])
     MI, MS = "MI", "MS"
     algorithms = None if argv[3] == "None" else eval(argv[3])
-    print(algorithms)
+    # print(algorithms)
     class_label = argv[4]
     instance_label = argv[5] if argv[5] != "None" else None
     export_scores = eval(argv[6])
