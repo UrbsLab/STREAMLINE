@@ -55,6 +55,8 @@ class StatsRunner:
         self.algorithms = None
         self.get_algorithms()
 
+        self.algorithms = sorted(self.algorithms)
+
         self.scale_data = scale_data
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
@@ -94,7 +96,7 @@ class StatsRunner:
         dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
         remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'jobsCompleted', 'dask_logs',
                        'logs', 'jobs', 'DatasetComparisons',
-                       self.experiment_name + '_ML_Pipeline_Report.pdf']
+                       self.experiment_name + '_STREAMLINE_Report.pdf']
 
         for text in remove_list:
             if text in dataset_paths:

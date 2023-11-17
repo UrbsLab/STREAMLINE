@@ -13,11 +13,11 @@ from streamline.runners.compare_runner import CompareRunner
 from streamline.runners.report_runner import ReportRunner
 from streamline.runners.replicate_runner import ReplicationRunner
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo"
-model_algorithms = ["LR", "DT", "NB"]
+model_algorithms = ["LR", "DT", "NB", "ANN"]
 rep_data_path = "./data/DemoRepData/"
 
 

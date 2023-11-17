@@ -1,7 +1,7 @@
 import argparse
 import configparser
 from streamline.utils.parser_helpers import str2bool, save_config, load_config
-from streamline.utils.parser_helpers import parse_general
+from streamline.utils.parser_helpers import parse_general, parse_replicate
 from streamline.utils.parser_helpers import parse_logistic
 from streamline.utils.parser_helpers import parser_function_all
 from streamline.utils.parser_helpers import PARSER_LIST
@@ -88,6 +88,17 @@ def single_parse(mode_params, argv, config_dict=None):
             else:
                 config_dict = load_config(config_dict['output_path'],
                                           config_dict['experiment_name'], config_dict)
+                if i == 9:
+                    config_dict_copy = parse_replicate(argv, config_dict)
+                    if not config_dict_copy['rep_data_path'] == "":
+                        config_dict['rep_data_path'] = config_dict_copy['rep_data_path']
+                    if not config_dict_copy['dataset_for_rep'] == "":
+                        config_dict['dataset_for_rep'] = config_dict_copy['dataset_for_rep']
+                    if not config_dict_copy['rep_export_feature_correlations']:
+                        config_dict['rep_export_feature_correlations'] \
+                            = config_dict_copy['rep_export_feature_correlations']
+                    if not config_dict_copy['exclude_rep_plots'] == 'None':
+                        config_dict['exclude_rep_plots'] = config_dict_copy['exclude_rep_plots']
             config_dict = parse_logistic(argv, config_dict)
     return config_dict
 
@@ -140,17 +151,26 @@ def parser_function(argv):
         config.read(config_file)
         for s in config.sections():
             config_dict.update({k: eval(v) for k, v in config.items(s)})
+        save_config(config_dict['output_path'],
+                    config_dict['experiment_name'],
+                    config_dict)
     elif mode_params['do_till_report']:
         print("Running till Report Generation Stage")
         config = parser_function_all(argv)
         config_dict.update(config)
         config_dict.update(mode_params)
+        save_config(config_dict['output_path'],
+                    config_dict['experiment_name'],
+                    config_dict)       
 
     for key in mode_params:
         if mode_params[key] and key not in ['config', 'do_till_report']:
             config = single_parse(mode_params, argv, config_dict)
             config_dict.update(config)
             config_dict.update(mode_params)
+            save_config(config_dict['output_path'],
+                        config_dict['experiment_name'],
+                        config_dict)  
 
     config_dict = process_params(config_dict)
 

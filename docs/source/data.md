@@ -72,13 +72,13 @@ New users can easily run STREAMLINE on these datasets in whatever run-mode desir
 
 ***
 ### Real-World HCC Dataset
-The first demo dataset (`hcc_data.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 surived (class 0).
+The first demo dataset (`hcc_data.csv`) is an example of a real-world biomedical classification task. This is a [Hepatocellular Carcinoma (HCC)](https://archive.ics.uci.edu/dataset/423/hcc+survival) dataset taken from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/). It includes 165 instances, 49 features, and a binary class label. It also includes a mix of categorical and quantitative features (however all categorical features are binary), about 10% missing values, and class imbalance, i.e. 63 deceased (class = 1), and 102 survived (class 0).
 
 ***
 ### Custom Extension of HCC Dataset
 The second demo dataset (`hcc_data_custom.csv`) is similar to the first, but we have made a number of modifications to it in order to test the data cleaning and feature engineering functionalities of STREAMLINE. 
 
-Modifcations include the following:
+Modifications include the following:
 1. Removal of covariate features (i.e. 'Gender' and 'Age at diagnosis')
 2. Addition of two simulated instances with a missing class label (to test basic data cleaning)
 3. Addition of two simulated instances with a high proportion of missing values (to test instance missingness data cleaning)
@@ -86,6 +86,7 @@ Modifcations include the following:
 5. Addition of three simulated, text-valued categorical features with 2, 3, or 4 unique values, respectively (to test one-hot-encoding of text-based features)
 6. Addition of three simulated quantiative features with high missingness (to test feature missingness data cleaning)
 7. Addition of three pairs of correlated quanatiative features (6 features added in total), with correlations of -1.0, 0.9, and 1.0, respectively (to test high correlation data cleaning)
+8. Addition of three simulated features with (1) invariant feature values, (2) all missing values, and (3) a mix of invariant values and missing values. 
 
 These simulated features and instances have been clearly identified in the feature names and instances IDs of this dataset. 
 
@@ -98,5 +99,7 @@ Modifications included adding a simulated instance that includes a new (as-of-ye
 2. The 3-value text-valued categorical feature
 3. The binary numerically encoded categorical feature
 4. The 3-value numerically encoded categorical feature
+
+We also added a new, previously unseen feature value to each of the invariant feature columns.
 
 The code to generate the additional features and instances within the custom `hcc_data_custom.csv` and `hcc_data_custom_rep.csv` can be found in the notebook at `/data/Generate_Expanded_HCC_dataset.ipynb`.

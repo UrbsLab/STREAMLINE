@@ -26,7 +26,7 @@ def class_eval(y_true, y_pred):
     if np.unique(y_true).size == 2:
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
         # Calculate Accuracy metrics
-        ac = accuracy_score(y_true, y_pred, average='weighted')
+        ac = accuracy_score(y_true, y_pred)
         bac = balanced_accuracy_score(y_true, y_pred)
         # Calculate Precision and Recall
         re = recall_score(y_true, y_pred, average='weighted')  # a.k.a. sensitivity or TPR

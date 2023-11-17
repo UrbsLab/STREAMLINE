@@ -174,6 +174,21 @@ class ReplicateJob(Job):
 
         transition_df.loc["Original"] = eda.counts_summary(save=False)
 
+        with open(self.experiment_path + '/' + self.train_name +
+                  '/exploratory/binary_categorical_dict.pickle', 'rb') as infile:
+            binary_categorical_dict = dict(pickle.load(infile))
+
+        for key in binary_categorical_dict:
+            unique_vals = list(eda.dataset.data[key].unique())
+            unique_vals = [x for x in unique_vals if not pd.isnull(x)]
+            if sorted(unique_vals) != sorted(binary_categorical_dict[key]):
+                new_values = list(set(eda.dataset.data[key].unique()) - set(binary_categorical_dict[key]))
+                logging.warning("New Value found in Binary Categorical Variable " + str(key)
+                                + ", replacing with null value")
+                for feat in new_values:
+                    logging.warning('\t' + str(feat))
+                eda.dataset.data[key].replace(new_values, np.nan, inplace=True)
+
         # ordinal decode the variables
         try:
             with open(self.experiment_path + '/' + self.train_name +
@@ -195,7 +210,10 @@ class ReplicateJob(Job):
                         eda.dataset.data.replace({feat: rename_dict}, inplace=True)
                         ord_labels.loc[feat]['Category'] = list(labels) + new_labels
                         ord_labels.loc[feat]['Encoding'] = list(range(len(list(labels)))) + [None, ] * len(new_labels)
-                        logging.warning("New Value found in Binary Categorical Variable, filling with null value")
+                        logging.warning("New Value found in Textual Binary Categorical Variable " + str(feat)
+                                        + ", replacing with null value")
+                        for x in new_labels:
+                            logging.warning('\t' + str(x))
                     else:
                         new_labels = list(set(labels) - set(ord_labels.loc[feat]['Category']))
                         labels = ord_labels.loc[feat]['Category']
@@ -230,11 +248,11 @@ class ReplicateJob(Job):
 
         # Recreate missingness features in replication phase
         for feat in eda.engineered_features:
-            eda.dataset.data['miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
-            eda.categorical_features.append('miss_' + feat)
-        eda.engineered_features = ['miss_' + feat for feat in eda.engineered_features]
+            eda.dataset.data['Miss_' + feat] = eda.dataset.data[feat].isnull().astype(int)
+            eda.categorical_features.append('Miss_' + feat)
+        eda.engineered_features = ['Miss_' + feat for feat in eda.engineered_features]
 
-        transition_df.loc["E1"] = eda.counts_summary(save=False)
+        #transition_df.loc["E1"] = eda.counts_summary(save=False)
 
         try:
             # Removing dropped features
@@ -250,7 +268,7 @@ class ReplicateJob(Job):
         except FileNotFoundError:
             pass
 
-        transition_df.loc["C2"] = eda.counts_summary(save=False)
+        #transition_df.loc["C2"] = eda.counts_summary(save=False)
 
         try:
             with open(self.experiment_path + '/' + self.train_name +
@@ -290,7 +308,7 @@ class ReplicateJob(Job):
             if feat not in post_processed_vars and feat not in correlated_features:
                 eda.drop_ignored_rowcols([feat])
 
-        transition_df.loc["E2"] = eda.counts_summary(save=False)
+        #transition_df.loc["E2"] = eda.counts_summary(save=False)
 
         # Removing highly correlated features
         for feat in correlated_features:
@@ -300,7 +318,7 @@ class ReplicateJob(Job):
                 eda.quantitative_features.remove(feat)
         eda.dataset.data.drop(correlated_features, axis=1, inplace=True)
 
-        transition_df.loc["C4"] = eda.counts_summary(save=False)
+        #transition_df.loc["C4"] = eda.counts_summary(save=False)
 
         eda.categorical_features = list(set(post_processed_vars).intersection(set(eda.categorical_features)))
         eda.quantitative_features = list(set(post_processed_vars).intersection(set(eda.quantitative_features)))
@@ -311,7 +329,7 @@ class ReplicateJob(Job):
 
         eda.dataset.data = eda.dataset.data[post_processed_vars]
 
-        transition_df.loc["Final"] = eda.counts_summary(save=False)
+        transition_df.loc["R1"] = eda.counts_summary(save=False)
 
         transition_df.to_csv(self.full_path + "/replication/" + self.apply_name + '/exploratory/'
                              + 'DataProcessSummary.csv', index=True)

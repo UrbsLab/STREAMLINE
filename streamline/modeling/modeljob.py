@@ -80,6 +80,7 @@ class ModelJob(Job):
         self.job_start_time = time.time()  # for tracking phase runtime
         self.algorithm = model.small_name
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
+        # logging.info('Model Type: ' + model.model_type)
 
         if model.model_type != "Regression":
             ret = self.run_model(model)

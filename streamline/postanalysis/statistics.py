@@ -972,8 +972,8 @@ class StatsJob(Job):
 
                 test_y = test[self.outcome_label].values
             else:
-                logging.warning(self.outcome_label)
-                logging.warning(rep_data.columns)
+                # logging.warning(self.outcome_label)
+                # logging.warning(rep_data.columns)
                 test_y = rep_data[self.outcome_label].values
 
             no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases

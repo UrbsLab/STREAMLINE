@@ -7,10 +7,7 @@ __pycache__
 demo/
 demo_old/
 catboost_info/
-<<<<<<< HEAD
 ./tests/*
-=======
->>>>>>> main
 testlogs/
 dask_logs/
 OUTPUT/
@@ -32,7 +29,6 @@ tests/
 OSAData.zip
 multiplexer_dataset/
 gametes_dataset/
-tests/
 run_configs/cedars_amd.cfg
 data/AMD_Final/*
 data/PLCO/*

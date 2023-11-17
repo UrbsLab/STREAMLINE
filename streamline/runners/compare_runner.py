@@ -47,6 +47,8 @@ class CompareRunner:
         self.algorithms = None
         self.get_algorithms()
 
+        self.algorithms = sorted(self.algorithms)
+
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
 
