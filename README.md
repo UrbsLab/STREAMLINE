@@ -122,3 +122,5 @@ and Pedro Ribeiro for their code contributions and feedback.
 We also thank the following collaborators for their feedback on application
 of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon,
 Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and Diego Mazzotti.
+
+Funding supporting this work comes from NIH grants: R01 AI173095, U01 AG066833, and P01 HL160471.
