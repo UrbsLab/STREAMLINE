@@ -143,7 +143,8 @@ def parse_eda(argv, params_dict=None):
     #                     help='export univariate analysis plots (note: univariate analysis still output by default)',
     #                     default=True)
     parser.add_argument('--exclude-eda-output', dest='exclude_eda_output',
-                        type=comma_sep_choices(['describe_csv', 'univariate_plots', 'correlation_plots']),
+                        type=comma_sep_choices(['describe_csv', 'univariate_plots',
+                                                'correlation_plots', 'correlation']),
                         help='comma seperated list of eda outputs to exclude',
                         default='None')
 

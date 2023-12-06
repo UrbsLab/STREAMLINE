@@ -105,7 +105,7 @@ class DataProcessRunner:
         self.top_features = top_features
         self.exclude_eda_output = exclude_eda_output
 
-        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots']
+        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots', 'correlation']
 
         exploration_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
@@ -121,6 +121,12 @@ class DataProcessRunner:
                 plot_list.remove("Univariate Analysis")
             if 'correlation_plots' in exclude_eda_output:
                 plot_list.remove("Feature Correlation")
+            if 'correlation' in exclude_eda_output:
+                exploration_list.remove("Feature Correlation")
+                try:
+                    plot_list.remove("Feature Correlation")
+                except ValueError:
+                    pass
 
         self.exploration_list = exploration_list
         self.plot_list = plot_list

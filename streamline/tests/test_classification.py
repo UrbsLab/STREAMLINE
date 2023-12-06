@@ -27,7 +27,7 @@ def test_classification():
         os.mkdir(output_path)
 
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
-                            exclude_eda_output=None,
+                            exclude_eda_output=['correlation'],
                             class_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
                             categorical_features=['Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
                                                   'Hepatitis B e Antigen', 'Hepatitis B Core Antibody',
