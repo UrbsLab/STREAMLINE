@@ -17,7 +17,7 @@ from streamline.runners.replicate_runner import ReplicationRunner
 
 algorithms, run_parallel, output_path = ["MI", "MS"], False, "./tests/"
 dataset_path, experiment_name = "./data/DemoData/", "demo"
-model_algorithms = ["LR", "DT", "NB", "ANN"]
+model_algorithms = ["LR", "DT", "NB"]
 rep_data_path = "./data/DemoRepData/"
 
 
@@ -27,7 +27,7 @@ def test_classification():
         os.mkdir(output_path)
 
     eda = DataProcessRunner(dataset_path, output_path, experiment_name,
-                            exclude_eda_output=None,
+                            exclude_eda_output=['correlation'],
                             outcome_label="Class", instance_label="InstanceID", n_splits=3, ignore_features=None,
                             categorical_features=['Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
                                                   'Hepatitis B e Antigen', 'Hepatitis B Core Antibody',

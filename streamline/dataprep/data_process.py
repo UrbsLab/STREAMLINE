@@ -74,7 +74,7 @@ class DataProcess(Job):
         self.experiment_path = experiment_path
         self.random_state = random_state
 
-        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots']
+        known_exclude_options = ['describe_csv', 'univariate_plots', 'correlation_plots', 'correlation']
 
         explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
         plot_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
@@ -89,6 +89,9 @@ class DataProcess(Job):
             if 'univariate_plots' in exclude_eda_output:
                 plot_list.remove("Univariate Analysis")
             if 'correlation_plots' in exclude_eda_output:
+                plot_list.remove("Feature Correlation")
+            if 'correlation' in exclude_eda_output:
+                explorations_list.remove("Feature Correlation")
                 plot_list.remove("Feature Correlation")
 
         for item in plot_list:
@@ -463,12 +466,15 @@ class DataProcess(Job):
 
         # Run initial EDA from the Dataset Class
         logging.info("Running Initial EDA:")
-        self.dataset.initial_eda(self.experiment_path)
+        # self.dataset.initial_eda(self.experiment_path)
+        self.initial_eda(initial='initial/')
 
         # Running all data manipulation steps: cleaning and feature engineering
         self.data_manipulation()
 
-        self.anomaly_detection()
+        # Removing anomaly detection to help debug big memory issue
+        # if "Anomaly" in self.explorations:
+        #     self.anomaly_detection()
 
         # Running EDA after all data manipulation
         self.second_eda(top_features)
@@ -694,7 +700,11 @@ class DataProcess(Job):
         transition_df.loc["E2"] = self.counts_summary(save=False)
 
         # Drop highly correlated features with correlation greater that max_correlation
-        self.drop_highly_correlated_features()  # Completed
+        if (self.correlation_removal_threshold is None or self.correlation_removal_threshold > 1
+                or "Feature Correlation" not in self.explorations):
+            pass
+        else:
+            self.drop_highly_correlated_features()  # Completed
         transition_df.loc["C4"] = self.counts_summary(save=False)
 
         # Create features-only version of processed dataset and save as .csv
@@ -1138,6 +1148,22 @@ class DataProcess(Job):
         else:
             logging.info("No Features with correlation higher than parameter")
 
+    def initial_eda(self, initial='initial/'):
+        # Describe and save description if user specified
+        logging.warning(self.experiment_path)
+        if "Describe" in self.explorations:
+            self.dataset.describe_data(self.experiment_path, initial=initial)
+            total_missing = self.dataset.missingness_counts(self.experiment_path, initial=initial)
+            self.dataset.missing_count_plot(self.experiment_path, plot=False, initial=initial)
+            self.dataset.counts_summary(self.experiment_path, total_missing, False,
+                                        show_plots=False, initial=initial)
+
+        # Export feature correlation plot if user specified
+        if "Feature Correlation" in self.explorations:
+            logging.info("Generating Feature Correlation Heatmap...")
+            self.dataset.feature_correlation(self.experiment_path, None, plot=False,
+                                             show_plots=False, initial=initial)
+
     def second_eda(self, top_features=20):
         # Running EDA after all the new data processing/manipulation
         logging.info("Running Basic Exploratory Analysis...")
@@ -1159,7 +1185,7 @@ class DataProcess(Job):
                 plot = True
                 x_data = self.dataset.feature_only_data()
                 self.dataset.feature_correlation(self.experiment_path, x_data, plot=plot, show_plots=self.show_plots)
-        del x_data
+                del x_data
 
         # Conduct uni-variate analyses of association between individual features and class
         if "Univariate Analysis" in self.explorations:
