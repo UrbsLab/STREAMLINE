@@ -45,7 +45,7 @@ and regression outcome data.
 most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
 
 ### Publications and Citations
-The most recent publication on STREAMLINE (release Beta 0.3.4) is available as a preprint on arxiv [here](
+The most recent publication on STREAMLINE (release Beta 0.3.4) with benchmarking on simulated data and application to investigate obstructive sleep apena risk prediction as a clinical outcome is available as a preprint on arxiv [here](
 https://doi.org/10.48550/arXiv.2312.05461). 
 
 The first publication detailing the initial implementation of STREAMLINE (release Beta 0.2.4) and applying it to
