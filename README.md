@@ -48,7 +48,7 @@ most recent release of STREAMLINE before use. We are actively updating this soft
 The most recent publication on STREAMLINE (release Beta 0.3.4) is available as a preprint on arxiv [here](
 https://doi.org/10.48550/arXiv.2312.05461). 
 
-The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to
+The first publication detailing the initial implementation of STREAMLINE (release Beta 0.2.4) and applying it to
 simulated benchmark data can be found [here](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9), or as a preprint on arxiv, [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
 See [citations](https://urbslab.github.io/STREAMLINE/citation.html) for more information on citing STREAMLINE, as well as publications applying STREAMLINE and publications on algorithms developed in our research group and incorporated into STREAMLINE.
