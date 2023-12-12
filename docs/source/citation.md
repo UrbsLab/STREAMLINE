@@ -1,6 +1,22 @@
 # Citing STREAMLINE
 
-If you use STREAMLINE in a scientific publication, please consider citing the following paper as well as noting the *release* applied within the manuscript (i.e. the Beta 0.2.4 release was applied in the publication below):
+If you use STREAMLINE in a scientific publication, please consider citing the following paper as well as noting the *release* applied within the manuscript. 
+
+The most recent release (Beta 0.3.4) was applied in the most recent pre-print below:
+
+[Urbanowicz, Ryan, et al. "STREAMLINE: An Automated Machine Learning Pipeline for Biomedicine Applied to Examine the Utility of Photography-Based Phenotypes for OSA Prediction Across International Sleep Centers." arXiv preprint arXiv:2312.05461.](https://doi.org/10.48550/arXiv.2312.05461)
+
+BibTeX Citation:
+```
+@article{urbanowicz2023streamlineosa,
+  title={STREAMLINE: An Automated Machine Learning Pipeline for Biomedicine Applied to Examine the Utility of Photography-Based Phenotypes for OSA Prediction Across International Sleep Centers},
+  author={Urbanowicz, Ryan J and Bandhey, Harsh and Keenan, Brendan T and Maislin, Greg and Hwang, Sy and Mowery, Danielle L and Lynch, Shannon M and Mazzotti, Diego R and Han, Fang and Li, Quing Yun and Penzel, Thomas and Tufik, Sergio and Bittencourt, Lia and Gislason, Thorarinn and de Chazal, Philip and Singh, Bhajan and McArdle, Nigel and Chen, Ning-Hung and Pack, Allan and Schwab, Richard J and Cistulli, Peter A and Magalang, Ulysses J},
+  journal={arXiv preprint arXiv:2312.05461},
+  year={2023}
+}
+```
+
+The first STREAMLINE publication (Beta 0.2.4 release was applied in the publication below):
 
 [Urbanowicz, Ryan, et al. "STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison." Genetic Programming Theory and Practice XIX. Singapore: Springer Nature Singapore, 2023. 201-231.](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9)
 
@@ -16,15 +32,15 @@ BibTeX Citation:
 }
 ```
 
-If you wish to cite the STREAMLINE codebase instead, please use the following (indicating the release used in the link, for example, v0.2.5-beta):
+If you wish to cite the STREAMLINE codebase instead, please use the following (indicating the release used in the link, for example, v0.3.4-beta):
 ```
-@misc{streamline2022,
+@misc{streamline2023,
   author = {Urbanowicz, Ryan and Zhang, Robert},
   title = {STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline},
-  year = {2022},
+  year = {2023},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.5-beta} }
+  howpublished = {\url{https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.4-beta} }
 }
 ```
 ## STREAMLINE Applications
@@ -101,7 +117,7 @@ A [preprint](https://arxiv.org/abs/2008.12829) describing an early version of wh
 }
 ```
 
-The STREAMLINE [preprint](https://arxiv.org/abs/2206.12002).
+The STREAMLINE (v0.2.4) [preprint](https://arxiv.org/abs/2206.12002).
 ```
 @article{urbanowicz2022streamline,
   title={STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison},
