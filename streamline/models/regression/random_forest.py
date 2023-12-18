@@ -1,10 +1,9 @@
 from abc import ABC
 from streamline.modeling.submodels import RegressionModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.ensemble import RandomForestRegressor
 
 
-class SVR(RegressionModel, ABC):
+class RFRegressor(RegressionModel, ABC):
     model_name = "Random Forest"
     small_name = "RF"
     color = "navy"
@@ -13,8 +12,9 @@ class SVR(RegressionModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(RandomForestRegressor, "Random Forest", cv_folds,
                          scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name, model_type="Regression")
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'n_estimators': [10, 1000], 'max_depth': [1, 30], 'min_samples_split': [2, 50],
+                           'min_samples_leaf': [1, 50], 'max_features': [None, 'auto', 'log2'], 'bootstrap': [True],
+                           'oob_score': [False, True], 'random_state': [random_state, ]}
         self.small_name = "RF"
         self.color = "navy"
         self.n_jobs = n_jobs

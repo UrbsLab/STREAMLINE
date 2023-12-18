@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.linear_model import LogisticRegression as LogR
 
 
@@ -12,8 +11,9 @@ class LogisticRegression(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LogR, "Logistic Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'penalty': ['l2', 'l1'], 'C': [1e-05, 100000.0], 'dual': [True, False],
+                           'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+                           'class_weight': [None, 'balanced'], 'max_iter': [10, 1000], 'random_state': [random_state, ]}
         self.small_name = "LR"
         self.color = "dimgrey"
         self.n_jobs = n_jobs

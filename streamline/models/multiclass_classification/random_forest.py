@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import MulticlassClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.ensemble import RandomForestClassifier as RF
 
 
@@ -12,8 +11,10 @@ class RandomForestClassifier(MulticlassClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(RF, "Random Forest", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'n_estimators': [10, 1000], 'criterion': ['gini', 'entropy'], 'max_depth': [1, 30],
+                           'min_samples_split': [2, 50], 'min_samples_leaf': [1, 50],
+                           'max_features': [None, 'auto', 'log2'], 'bootstrap': [True], 'oob_score': [False, True],
+                           'class_weight': [None, 'balanced'], 'random_state': [random_state, ]}
         self.small_name = "RF"
         self.color = "blue"
         self.n_jobs = n_jobs

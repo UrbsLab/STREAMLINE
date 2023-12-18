@@ -1,19 +1,18 @@
 from abc import ABC
 from streamline.modeling.submodels import RegressionModel
-from streamline.modeling.parameters import get_parameters
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import ElasticNet as EN
 
 
-class SVR(RegressionModel, ABC):
+class ElasticNet(RegressionModel, ABC):
     model_name = "Elastic Net"
     small_name = "EN"
     color = "steelblue"
 
     def __init__(self, cv_folds=3, scoring_metric='explained_variance',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
-        super().__init__(ElasticNet, "Elastic Net", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name, model_type="Regression")
-        self.param_grid['random_state'] = [random_state, ]
+        super().__init__(EN, "Elastic Net", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {'alpha': [1e-3, 1], 'l1_ratio': [0, 1], 'max_iter': [2000, 2500],
+                           'random_state': [random_state, ]}
         self.small_name = "EN"
         self.color = "steelblue"
         self.n_jobs = n_jobs

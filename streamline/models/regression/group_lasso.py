@@ -1,19 +1,21 @@
 from abc import ABC
 from streamline.modeling.submodels import RegressionModel
-from streamline.modeling.parameters import get_parameters
-from group_lasso import GroupLasso
+from group_lasso import GroupLasso as GL
 
 
-class SVR(RegressionModel, ABC):
+class GroupLasso(RegressionModel, ABC):
     model_name = "Group Lasso"
     small_name = "GL"
     color = "orange"
 
     def __init__(self, cv_folds=3, scoring_metric='explained_variance',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
-        super().__init__(GroupLasso, "Group Lasso", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name, model_type="Regression")
-        self.param_grid['random_state'] = [random_state, ]
+        super().__init__(GL, "Group Lasso", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {'group_reg': [1e-3, 1], 'n_iter': [2000, 2500],
+                           'scale_reg': ['group_size', 'none', 'inverse_group_size'], 'random_state': [random_state, ],
+                           # 'subsampling_scheme': [0.1,0.9],
+                           # 'frobenius_lipschitz': [True],
+                           }
         self.small_name = "GL"
         self.color = "orange"
         self.n_jobs = n_jobs

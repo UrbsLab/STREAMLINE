@@ -1,7 +1,6 @@
 import logging
 from abc import ABC
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.parameters import get_parameters
 from skeLCS import eLCS
 from skXCS import XCS
 from skExSTraCS import ExSTraCS
@@ -16,7 +15,8 @@ class eLCSClassifier(BinaryClassificationModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
                  iterations=None, N=None, nu=None):
         super().__init__(eLCS, "eLCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
+        self.param_grid = {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
+                           'nu': [1, 10], }
         if iterations:
             self.param_grid['learning_iterations'] = [iterations, ]
         if N:
@@ -48,7 +48,8 @@ class XCSClassifier(BinaryClassificationModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
                  iterations=None, N=None, nu=None):
         super().__init__(XCS, "XCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
+        self.param_grid = {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
+                           'nu': [1, 10], }
         if iterations:
             self.param_grid['learning_iterations'] = [iterations, ]
         if N:
@@ -81,7 +82,9 @@ class ExSTraCSClassifier(BinaryClassificationModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
                  iterations=None, N=None, nu=None, expert_knowledge=None):
         super().__init__(ExSTraCS, "ExSTraCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
+        self.param_grid = {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
+                           'nu': [1, 10],
+                           'rule_compaction': ['None', 'QRF']}
         if iterations:
             self.param_grid['learning_iterations'] = [iterations, ]
         if N:

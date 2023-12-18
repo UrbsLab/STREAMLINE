@@ -1,19 +1,18 @@
 from abc import ABC
 from streamline.modeling.submodels import RegressionModel
-from streamline.modeling.parameters import get_parameters
-from sklearn.ensemble import AdaBoostRegressor
+from sklearn.ensemble import AdaBoostRegressor as ABR
 
 
-class SVR(RegressionModel, ABC):
+class AdaBoostRegressor(RegressionModel, ABC):
     model_name = "AdaBoost"
     small_name = "AB"
     color = "teal"
 
     def __init__(self, cv_folds=3, scoring_metric='explained_variance',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
-        super().__init__(AdaBoostRegressor, "AdaBoost", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name, model_type="Regression")
-        self.param_grid['random_state'] = [random_state, ]
+        super().__init__(ABR, "AdaBoost", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {'n_estimators': [10, 1000], 'learning_rate': [.0001, 0.3],
+                           'loss': ['linear', 'square', 'exponential'], 'random_state': [random_state, ]}
         self.small_name = "AB"
         self.color = "teal"
         self.n_jobs = n_jobs

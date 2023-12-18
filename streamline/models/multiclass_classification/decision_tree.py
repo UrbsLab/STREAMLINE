@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import MulticlassClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.tree import DecisionTreeClassifier as DT
 
 
@@ -12,8 +11,10 @@ class DecisionTreeClassifier(MulticlassClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(DT, "Decision Tree", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'criterion': ['gini', 'entropy'], 'splitter': ['best', 'random'], 'max_depth': [1, 30],
+                           'min_samples_split': [2, 50], 'min_samples_leaf': [1, 50],
+                           'max_features': [None, 'auto', 'log2'], 'class_weight': [None, 'balanced'],
+                           'random_state': [random_state, ]}
         self.small_name = "DT"
         self.color = "yellow"
         self.n_jobs = n_jobs

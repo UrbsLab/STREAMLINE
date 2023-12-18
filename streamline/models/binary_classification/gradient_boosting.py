@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.ensemble import GradientBoostingClassifier as GB
 from xgboost import XGBClassifier as XGB
 from lightgbm import LGBMClassifier as LGB
@@ -15,8 +14,9 @@ class GBClassifier(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GB, "Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'n_estimators': [10, 1000], 'loss': ['deviance', 'exponential'],
+                           'learning_rate': [0.0001, 0.3], 'min_samples_leaf': [1, 50], 'min_samples_split': [2, 50],
+                           'max_depth': [1, 30], 'random_state': [random_state, ]}
         self.small_name = "GB"
         self.color = "cornflowerblue"
         self.n_jobs = n_jobs
@@ -48,8 +48,12 @@ class XGBClassifier(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(XGB, "Extreme Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'booster': ['gbtree'], 'objective': ['binary:logistic'], 'verbosity': [0],
+                           'reg_lambda': [1e-08, 1.0], 'alpha': [1e-08, 1.0], 'eta': [1e-08, 1.0],
+                           'gamma': [1e-08, 1.0], 'max_depth': [1, 30], 'grow_policy': ['depthwise', 'lossguide'],
+                           'n_estimators': [10, 1000], 'min_samples_split': [2, 50], 'min_samples_leaf': [1, 50],
+                           'subsample': [0.5, 1.0], 'min_child_weight': [0.1, 10], 'colsample_bytree': [0.1, 1.0],
+                           'nthread': [1], 'random_state': [random_state, ]}
         self.small_name = "XGB"
         self.color = "cyan"
         self.n_jobs = n_jobs
@@ -97,8 +101,11 @@ class LGBClassifier(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LGB, "Light Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'objective': ['binary'], 'metric': ['binary_logloss'], 'verbosity': [-1],
+                           'boosting_type': ['gbdt'], 'num_leaves': [2, 256], 'max_depth': [1, 30],
+                           'reg_alpha': [1e-08, 10.0], 'reg_lambda': [1e-08, 10.0], 'colsample_bytree': [0.4, 1.0],
+                           'subsample': [0.4, 1.0], 'subsample_freq': [1, 7], 'min_child_samples': [5, 100],
+                           'n_estimators': [10, 1000], 'num_threads': [1], 'random_state': [random_state, ]}
         self.small_name = "LGB"
         self.color = "pink"
         self.n_jobs = n_jobs
@@ -145,8 +152,9 @@ class CGBClassifier(BinaryClassificationModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(CGB, "Category Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state,
                          cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'learning_rate': [0.0001, 0.3], 'iterations': [10, 500], 'depth': [1, 10],
+                           'l2_leaf_reg': [1, 9], 'loss_function': ['Logloss'], 'verbose': [False],
+                           'random_state': [random_state, ]}
         self.small_name = "CGB"
         self.color = "magenta"
         self.n_jobs = n_jobs

@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.neural_network import MLPClassifier as MLP
 
 
@@ -12,8 +11,11 @@ class MLPClassifier(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(MLP, "Artificial Neural Network", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'n_layers': [1, 3], 'layer_size': [1, 100],
+                           'activation': ['identity', 'logistic', 'tanh', 'relu'],
+                           'learning_rate': ['constant', 'invscaling', 'adaptive'], 'momentum': [0.1, 0.9],
+                           'solver': ['sgd', 'adam'], 'batch_size': ['auto'], 'alpha': [0.0001, 0.05],
+                           'max_iter': [200], 'random_state': [random_state, ]}
         self.small_name = "ANN"
         self.color = "red"
         self.n_jobs = n_jobs

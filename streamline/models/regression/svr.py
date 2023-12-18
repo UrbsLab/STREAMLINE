@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import RegressionModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.svm import SVR as SVRModel
 
 
@@ -13,8 +12,8 @@ class SVR(RegressionModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(SVRModel, "Support Vector Regression", cv_folds, scoring_metric, metric_direction,
                          random_state, cv)
-        self.param_grid = get_parameters(self.model_name, model_type="Regression")
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'kernel': ['poly', 'rbf'], 'C': [0.1, 1000], 'gamma': ['scale'], 'degree': [1, 6],
+                           'random_state': [random_state, ]}
         self.small_name = "SVR"
         self.color = "rosybrown"
         self.n_jobs = n_jobs

@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.parameters import get_parameters
 from gplearn.genetic import SymbolicClassifier as GP
 
 
@@ -12,8 +11,15 @@ class GPClassifier(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GP, "Genetic Programming", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'population_size': [100, 1000], 'generations': [10, 500], 'tournament_size': [3, 50],
+                           'init_method': ['grow', 'full', 'half and half'],
+                           'function_set': [['add', 'sub', 'mul', 'div'],
+                                            ['add', 'sub', 'mul', 'div', 'sqrt', 'log',
+                                             'abs', 'neg', 'inv', 'max', 'min'],
+                                            ['add', 'sub', 'mul', 'div', 'sqrt', 'log',
+                                             'abs', 'neg', 'inv', 'max', 'min', 'sin', 'cos', 'tan']],
+                           'parsimony_coefficient': [0.001, 0.01], 'low_memory': [True],
+                           'random_state': [random_state, ]}
         self.small_name = "GP"
         self.color = "purple"
         self.n_jobs = n_jobs

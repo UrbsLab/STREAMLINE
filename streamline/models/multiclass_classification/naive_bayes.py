@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import MulticlassClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.naive_bayes import GaussianNB as NB
 
 

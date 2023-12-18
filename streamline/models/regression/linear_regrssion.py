@@ -1,18 +1,17 @@
 from abc import ABC
 from streamline.modeling.submodels import RegressionModel
-from streamline.modeling.parameters import get_parameters
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression as LRModel
 
 
-class SVR(RegressionModel, ABC):
+class LinearRegression(RegressionModel, ABC):
     model_name = "Linear Regression"
     small_name = "LR"
     color = "red"
 
     def __init__(self, cv_folds=3, scoring_metric='explained_variance',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
-        super().__init__(LinearRegression, "Linear Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name, model_type="Regression")
+        super().__init__(LRModel, "Linear Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {}
         # self.param_grid['random_state'] = [random_state, ]
         self.small_name = "LR"
         self.color = "red"

@@ -1,6 +1,5 @@
 from abc import ABC
 from streamline.modeling.submodels import BinaryClassificationModel
-from streamline.modeling.parameters import get_parameters
 from sklearn.svm import SVC as SVC
 
 
@@ -12,8 +11,8 @@ class SupportVectorClassifier(BinaryClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(SVC, "Support Vector Machine", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = get_parameters(self.model_name)
-        self.param_grid['random_state'] = [random_state, ]
+        self.param_grid = {'kernel': ['linear', 'poly', 'rbf'], 'C': [0.1, 1000], 'gamma': ['scale'], 'degree': [1, 6],
+                           'probability': [True], 'class_weight': [None, 'balanced'], 'random_state': [random_state, ]}
         self.small_name = "SVM"
         self.color = "orange"
         self.n_jobs = n_jobs
