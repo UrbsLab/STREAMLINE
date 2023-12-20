@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from statistics import median
 from streamline.utils.job import Job
+from streamline.featurefns.utils import SUPPORTED_ALGORITHM_OBJ
 import seaborn as sns
 sns.set_theme()
 
@@ -42,6 +43,9 @@ class FeatureSelection(Job):
         self.filter_poor_features = filter_poor_features
         self.overwrite_cv = overwrite_cv
         self.show_plots = show_plots
+        self.algorithm_list_sn = [o.small_name for o in SUPPORTED_ALGORITHM_OBJ]
+        self.algorithm_list_pn = [o.path_name for o in SUPPORTED_ALGORITHM_OBJ]
+        self.algorithm_list_fn = [o.model_name for o in SUPPORTED_ALGORITHM_OBJ]
 
     def run(self):
         """
@@ -62,14 +66,12 @@ class FeatureSelection(Job):
         # logging.warning("MI in algorithms" + str("MI" in self.algorithms))
         # logging.warning("MS in algorithms" + str("MS" in self.algorithms))
         # logging.warning("len(algorithms):" + str(len(self.algorithms)))
-        if "MI" in self.algorithms:
-            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MI",
-                                                                            "mutual_information",
-                                                                            selected_feature_lists, meta_feature_ranks)
-        # Manage and summarize MultiSURF feature importance scores
-        if "MS" in self.algorithms:
-            selected_feature_lists, meta_feature_ranks = self.report_ave_fs("MS", "multisurf",
-                                                                            selected_feature_lists, meta_feature_ranks)
+        for algo in SUPPORTED_ALGORITHM_OBJ:
+            if algo.small_name in self.algorithms:
+                selected_feature_lists, meta_feature_ranks = self.report_ave_fs(algo.small_name,
+                                                                                algo.path_name,
+                                                                                selected_feature_lists,
+                                                                                meta_feature_ranks)
         # Conduct collective feature selection
         logging.info('Applying collective feature selection...')
         if len(self.algorithms) != 0:
@@ -198,6 +200,8 @@ class FeatureSelection(Job):
                 algorithm_name = "Mutual Information"
             elif algorithm == "MS":
                 algorithm_name = "MultiSURF"
+            elif algorithm == "MSS":
+                algorithm_name = "MultiSURFstar"
             plt.xlabel(str(algorithm_name) + ' Median Score')
             plt.yticks(np.arange(len(ns['Names'])), ns['Names'])
             plt.title('Sorted Median ' + str(algorithm_name) + ' Scores')

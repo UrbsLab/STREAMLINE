@@ -1,3 +1,4 @@
+import logging
 import os
 import glob
 import pickle
@@ -7,6 +8,7 @@ from pathlib import Path
 from joblib import Parallel, delayed
 from streamline.featurefns.selection import FeatureSelection
 from streamline.featurefns.importance import FeatureImportance
+from streamline.featurefns.utils import SUPPORTED_ALGORITHM_OBJ
 from streamline.utils.runners import runner_fn, num_cores
 from streamline.utils.cluster import get_cluster
 
@@ -46,6 +48,7 @@ class FeatureImportanceRunner:
         self.instance_label = instance_label
         self.instance_subset = instance_subset
         self.algorithms = list(algorithms)
+        logging.warning(algorithms)
         # assert (algorithms in ["MI", "MS"])
         self.use_turf = use_turf
         self.turf_pct = turf_pct
@@ -56,9 +59,9 @@ class FeatureImportanceRunner:
         self.reserved_memory = reserved_memory
 
         if self.turf_pct == 'False' or self.turf_pct == False:
-            self.turf_pct == False
+            self.turf_pct = False
         else:
-            self.turf_pct == True
+            self.turf_pct = True
 
         if self.n_jobs is None:
             self.n_jobs = 1
@@ -92,55 +95,32 @@ class FeatureImportanceRunner:
                 if not os.path.exists(full_path + "/feature_selection"):
                     os.mkdir(full_path + "/feature_selection")
 
-            if "MI" in self.algorithms:
-                if not os.path.exists(full_path + "/feature_selection/mutual_information"):
-                    os.mkdir(full_path + "/feature_selection/mutual_information")
-                if not os.path.exists(full_path + "/feature_selection/mutual_information/pickledForPhase4"):
-                    os.mkdir(full_path + "/feature_selection/mutual_information/pickledForPhase4")
-                for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
-                    cv_train_path = str(Path(cv_train_path).as_posix())
+            for obj in SUPPORTED_ALGORITHM_OBJ:
+                if obj.small_name in self.algorithms:
+                    if not os.path.exists(full_path + "/feature_selection/" + obj.path_name):
+                        os.mkdir(full_path + "/feature_selection/" + obj.path_name)
+                    if not os.path.exists(full_path + "/feature_selection/" + obj.path_name + "/pickledForPhase4"):
+                        os.mkdir(full_path + "/feature_selection/" + obj.path_name + "/pickledForPhase4")
+                    for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
+                        cv_train_path = str(Path(cv_train_path).as_posix())
 
-                    if self.run_cluster == "SLURMOld":
-                        self.submit_slurm_cluster_job(cv_train_path, experiment_path, "MI")
-                        continue
+                        if self.run_cluster == "SLURMOld":
+                            self.submit_slurm_cluster_job(cv_train_path, experiment_path, obj.small_name)
+                            continue
 
-                    if self.run_cluster == "LSFOld":
-                        self.submit_lsf_cluster_job(cv_train_path, experiment_path, "MI")
-                        continue
+                        if self.run_cluster == "LSFOld":
+                            self.submit_lsf_cluster_job(cv_train_path, experiment_path, obj.small_name)
+                            continue
 
-                    job_obj = FeatureImportance(cv_train_path, experiment_path, self.outcome_label,
-                                                self.instance_label, self.instance_subset, "MI",
-                                                self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
-                    if run_parallel:
-                        # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                        job_list.append(job_obj)
-                    else:
-                        job_obj.run()
+                        job_obj = FeatureImportance(cv_train_path, experiment_path, self.outcome_label,
+                                                    self.instance_label, self.instance_subset, obj.small_name,
+                                                    self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
+                        if run_parallel:
+                            # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
+                            job_list.append(job_obj)
+                        else:
+                            job_obj.run()
 
-            if "MS" in self.algorithms:
-                if not os.path.exists(full_path + "/feature_selection/multisurf"):
-                    os.mkdir(full_path + "/feature_selection/multisurf")
-                if not os.path.exists(full_path + "/feature_selection/multisurf/pickledForPhase4"):
-                    os.mkdir(full_path + "/feature_selection/multisurf/pickledForPhase4")
-                for cv_train_path in glob.glob(full_path + "/CVDatasets/*_CV_*Train.csv"):
-                    cv_train_path = str(Path(cv_train_path).as_posix())
-
-                    if self.run_cluster == "SLURMOld":
-                        self.submit_slurm_cluster_job(cv_train_path, experiment_path, "MS")
-                        continue
-
-                    if self.run_cluster == "LSFOld":
-                        self.submit_lsf_cluster_job(cv_train_path, experiment_path, "MS")
-                        continue
-
-                    job_obj = FeatureImportance(cv_train_path, experiment_path, self.outcome_label,
-                                                self.instance_label, self.instance_subset, "MS",
-                                                self.use_turf, self.turf_pct, self.random_state, self.n_jobs)
-                    if run_parallel:
-                        # p = multiprocessing.Process(target=runner_fn, args=(job_obj,))
-                        job_list.append(job_obj)
-                    else:
-                        job_obj.run()
         if run_parallel and run_parallel != "False" and not self.run_cluster:
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if self.run_cluster and "Old" not in self.run_cluster:

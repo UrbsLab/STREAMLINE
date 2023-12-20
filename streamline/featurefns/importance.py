@@ -73,7 +73,7 @@ class FeatureImportance(Job):
         # Save phase runtime
         self.save_runtime(self.algorithm.path_name)
         # Print phase completion
-        logging.info(self.algorithm.dataset.name + " C " + str(self.algorithm.cv_count) + " phase 3 "
+        logging.info(self.algorithm.dataset.name + " CV " + str(self.algorithm.cv_count) + " phase 3 "
                      + self.algorithm.model_name + " evaluation complete")
         job_file = open(
             self.algorithm.experiment_path + '/jobsCompleted/job_' + self.algorithm.path_name + '_'
