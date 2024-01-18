@@ -133,6 +133,9 @@ We welcome ideas, suggestions on improving the pipeline, [code-contributions](ht
 ### Running in Google Colab Notebook
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/nknyJWhm7pg/0.jpg)](https://www.youtube.com/watch?v=nknyJWhm7pg)
 
+### Running in Jupyter Notebook
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/blat3gAfUaI/0.jpg)](https://www.youtube.com/watch?v=blat3gAfUaI)
+
 ***
 # Acknowledgements
 The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
