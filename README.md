@@ -15,6 +15,8 @@ The schematic below summarizes the automated STREAMLINE analysis pipeline with i
 
 * A simple demonstration of STREAMLINE on example biomedical data in our ready-to-run Google Colab Notebook [here](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
 
+* A video tutorial series covering AutoML and STREAMLINE is available [here](https://www.youtube.com/playlist?list=PLafPhSv1OSDcvu8dcbxb-LHyasQ1ZvxfJ)
+
 ### Pipeline Design
 The goal of STREAMLINE is to provide an easy and transparent framework
 to reliably learn predictive associations from tabular data with a particular focus on the needs of biomedical data applications. 
