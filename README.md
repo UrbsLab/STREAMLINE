@@ -117,6 +117,12 @@ We welcome ideas, suggestions on improving the pipeline, [code-contributions](ht
 
 * For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
 
+### Other STREAMLINE Videos on YouTube
+
+#### Brief Introduction to Automated Machine Learning
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/IjX0phz3LLE/0.jpg)](https://www.youtube.com/watch?v=IjX0phz3LLE)
+
+
 ***
 # Acknowledgements
 The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
