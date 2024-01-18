@@ -117,11 +117,17 @@ We welcome ideas, suggestions on improving the pipeline, [code-contributions](ht
 
 * For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
 
-### Other STREAMLINE Videos on YouTube
+### Other STREAMLINE Tutorial Videos on YouTube
 
-#### Brief Introduction to Automated Machine Learning
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/IjX0phz3LLE/0.jpg)](https://www.youtube.com/watch?v=IjX0phz3LLE)
 
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/sAB8d1KnMDw/0.jpg)](https://www.youtube.com/watch?v=sAB8d1KnMDw)
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/5HnangrEF5E/0.jpg)](https://www.youtube.com/watch?v=5HnangrEF5E)
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/qMi9vhVag-4/0.jpg)](https://www.youtube.com/watch?v=qMi9vhVag-4)
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/nknyJWhm7pg/0.jpg)](https://www.youtube.com/watch?v=nknyJWhm7pg)
 
 ***
 # Acknowledgements
