@@ -17,6 +17,9 @@ The schematic below summarizes the automated STREAMLINE analysis pipeline with i
 
 * A video tutorial series covering all aspects of STREAMLINE is available [here](https://www.youtube.com/playlist?list=PLafPhSv1OSDcvu8dcbxb-LHyasQ1ZvxfJ)
 
+### YouTube Overview of STREAMLINE
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/xVc4JEbnIs8/0.jpg)](https://www.youtube.com/watch?v=xVc4JEbnIs8)
+
 ### Pipeline Design
 The goal of STREAMLINE is to provide an easy and transparent framework
 to reliably learn predictive associations from tabular data with a particular focus on the needs of biomedical data applications. 
