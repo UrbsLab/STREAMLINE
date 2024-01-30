@@ -137,7 +137,7 @@ We welcome ideas, suggestions on improving the pipeline, [code-contributions](ht
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/blat3gAfUaI/0.jpg)](https://www.youtube.com/watch?v=blat3gAfUaI)
 
 ### Running From Command Line
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/-5yjGxnJ7eI/0.jpg)](https://www.youtube.com/watch?v=-5yjGxnJ7eI)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/5yjGxnJ7eI/0.jpg)](https://www.youtube.com/watch?v=5yjGxnJ7eI)
 
 ***
 # Acknowledgements
