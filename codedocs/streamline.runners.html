@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.runners package &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="streamline.runners.clean_runner module" href="streamline.runners.clean_runner.html" />
+    <link rel="prev" title="streamline.postanalysis.statistics module" href="streamline.postanalysis.statistics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.runners package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+      <li class="breadcrumb-item active">streamline.runners package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/codedocs/streamline.runners.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-streamline.runners">
+<span id="streamline-runners-package"></span><h1>streamline.runners package<a class="headerlink" href="#module-streamline.runners" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.clean_runner.html">streamline.runners.clean_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.clean_runner.html#streamline.runners.clean_runner.CleanRunner"><code class="docutils literal notranslate"><span class="pre">CleanRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.clean_runner.html#streamline.runners.clean_runner.CleanRunner.run"><code class="docutils literal notranslate"><span class="pre">CleanRunner.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.compare_runner.html">streamline.runners.compare_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.compare_runner.html#streamline.runners.compare_runner.CompareRunner"><code class="docutils literal notranslate"><span class="pre">CompareRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.compare_runner.html#streamline.runners.compare_runner.CompareRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">CompareRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.compare_runner.html#streamline.runners.compare_runner.CompareRunner.run"><code class="docutils literal notranslate"><span class="pre">CompareRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.compare_runner.html#streamline.runners.compare_runner.CompareRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">CompareRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.compare_runner.html#streamline.runners.compare_runner.CompareRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">CompareRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.dataprocess_runner.html">streamline.runners.dataprocess_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner.make_dir_tree"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.make_dir_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner.run"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner.save_metadata"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.save_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.dataprocess_runner.html#streamline.runners.dataprocess_runner.DataProcessRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">DataProcessRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.eda_runner.html">streamline.runners.eda_runner module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.feature_runner.html">streamline.runners.feature_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureImportanceRunner"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureImportanceRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureImportanceRunner.run"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureImportanceRunner.save_metadata"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner.save_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureImportanceRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureImportanceRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">FeatureImportanceRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureSelectionRunner"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureSelectionRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureSelectionRunner.run"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureSelectionRunner.save_metadata"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner.save_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureSelectionRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.feature_runner.html#streamline.runners.feature_runner.FeatureSelectionRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">FeatureSelectionRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.model_runner.html">streamline.runners.model_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.run"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.save_alginfo"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner.save_alginfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.save_metadata"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner.save_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">ModelExperimentRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.replicate_runner.html">streamline.runners.replicate_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner.get_algorithms"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner.get_algorithms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner.run"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner.save_metadata"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner.save_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.replicate_runner.html#streamline.runners.replicate_runner.ReplicationRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">ReplicationRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.report_runner.html">streamline.runners.report_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner"><code class="docutils literal notranslate"><span class="pre">ReportRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">ReportRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.run"><code class="docutils literal notranslate"><span class="pre">ReportRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">ReportRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">ReportRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.runners.stats_runner.html">streamline.runners.stats_runner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.runners.stats_runner.html#streamline.runners.stats_runner.StatsRunner"><code class="docutils literal notranslate"><span class="pre">StatsRunner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.stats_runner.html#streamline.runners.stats_runner.StatsRunner.get_cluster_params"><code class="docutils literal notranslate"><span class="pre">StatsRunner.get_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.stats_runner.html#streamline.runners.stats_runner.StatsRunner.run"><code class="docutils literal notranslate"><span class="pre">StatsRunner.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.stats_runner.html#streamline.runners.stats_runner.StatsRunner.save_metadata"><code class="docutils literal notranslate"><span class="pre">StatsRunner.save_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.stats_runner.html#streamline.runners.stats_runner.StatsRunner.submit_lsf_cluster_job"><code class="docutils literal notranslate"><span class="pre">StatsRunner.submit_lsf_cluster_job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.runners.stats_runner.html#streamline.runners.stats_runner.StatsRunner.submit_slurm_cluster_job"><code class="docutils literal notranslate"><span class="pre">StatsRunner.submit_slurm_cluster_job()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.postanalysis.statistics.html" class="btn btn-neutral float-left" title="streamline.postanalysis.statistics module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.runners.clean_runner.html" class="btn btn-neutral float-right" title="streamline.runners.clean_runner module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

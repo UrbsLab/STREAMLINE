@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STREAMLINE &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="About (FAQs)" href="about.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">STREAMLINE</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="streamline">
+<h1>STREAMLINE<a class="headerlink" href="#streamline" title="Link to this heading"></a></h1>
+<img alt="_images/STREAMLINE_Logo_Full.png" src="_images/STREAMLINE_Logo_Full.png" />
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
+that empowers anyone to easily train, interpret, and apply a variety of predictive models as
+part of a rigorous and optionally customizable data mining analysis. It is programmed in
+Python 3 using many common libraries including <a class="reference external" href="https://pandas.pydata.org/">Pandas</a>
+and <a class="reference external" href="https://scikit-learn.org/stable/">scikit-learn</a>.</p>
+<p>The schematic below summarizes the automated STREAMLINE analysis pipeline with individual elements organized into 9 phases.</p>
+<img alt="_images/STREAMLINE_paper_new_lightcolor.png" src="_images/STREAMLINE_paper_new_lightcolor.png" />
+<ul class="simple">
+<li><p>We recommend reviewing this documentation to gain a deeper understanding of STREAMLINE with respect to it’s overall design, what it includes, how it works, what it can be used for, and implementation highlights that differentiate it from other AutoML tools.</p></li>
+<li><p>Start with a simple demonstration of STREAMLINE on example biomedical data in our ready-to-run in a Google Colab Notebook <a class="reference external" href="https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing">here</a>.</p></li>
+</ul>
+<section id="current-limitations">
+<h3>Current Limitations<a class="headerlink" href="#current-limitations" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>At present, STREAMLINE is limited to supervised learning on tabular, binary classification data. We are currently expanding STREAMLINE to multi-class and regression outcome data.</p></li>
+<li><p>STREAMLINE also does not automate feature extraction from unstructured data (e.g. text, images, video, time-series data), or handle more advanced aspects of data cleaning or feature engineering that would likely require domain expertise for a given dataset.</p></li>
+<li><p>As STREAMLINE is currently in its ‘beta’ release, we recommend users first check that they have downloaded the most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.</p></li>
+</ul>
+</section>
+</section>
+<section id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Link to this heading"></a></h2>
+<p>We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given classification
+problem, nor that the included ML modeling algorithms will yield the best performance possible.
+We intend many expansions/improvements to this pipeline in the future.  We welcome feedback, suggestions, and contributions for improvement.</p>
+</section>
+<section id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Link to this heading"></a></h2>
+<p>We welcome ideas, suggestions on improving the pipeline, <a class="reference external" href="https://https://urbslab.github.io/STREAMLINE/contributing.html">code-contributions</a>, and collaborations!</p>
+<p>For general questions, or to discuss potential collaborations (applying, or extending STREAMLINE); contact Ryan Urbanowicz at <a class="reference external" href="mailto:ryan&#46;urbanowicz&#37;&#52;&#48;cshs&#46;org">ryan<span>&#46;</span>urbanowicz<span>&#64;</span>cshs<span>&#46;</span>org</a>.</p>
+<p>For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at <a class="reference external" href="mailto:harsh&#46;bandhey&#37;&#52;&#48;cshs&#46;org">harsh<span>&#46;</span>bandhey<span>&#64;</span>cshs<span>&#46;</span>org</a>.</p>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
+The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang and Harsh Bandhey. Special thanks to
+Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang,
+and Pedro Ribeiro for their code contributions and feedback.</p>
+<p>We also thank the following collaborators for their feedback on application
+of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon,
+Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and Diego Mazzotti.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="about.html" class="btn btn-neutral float-right" title="About (FAQs)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

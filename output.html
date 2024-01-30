@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navigating STREAMLINE Output &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Doing More with STREAMLINE" href="more.html" />
+    <link rel="prev" title="Run Parameters" href="parameters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Navigating STREAMLINE Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#notebooks">Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#experiment-folder-hierarchy">Experiment Folder (Hierarchy)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-file-details">Output File Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pdf-report-s">PDF Report(s)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#testing-evaluation-report">Testing Evaluation Report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#replication-evaluation-report">Replication Evaluation Report</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#experiment-meta-info">Experiment Meta Info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasetcomparisons">DatasetComparisons</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#statistical-significance-comparisons">Statistical Significance Comparisons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#datacompboxplots">dataCompBoxplots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#hcc-data-custom">hcc-data_custom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cvdatasets">CVDatasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exploratory">exploratory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#feature-selection">feature_selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-evaluation">model_evaluation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#models">models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#replication">replication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#runtime">runtime</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scale-impute">scale_impute</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#figures-summary">Figures Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Navigating STREAMLINE Output</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/output.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="navigating-streamline-output">
+<h1>Navigating STREAMLINE Output<a class="headerlink" href="#navigating-streamline-output" title="Link to this heading"></a></h1>
+<p>This section covers the different outputs generated by STREAMLINE. The sections below will use the demo run of STREAMLINE on two <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a> as a specific example for navigating the output files generated.</p>
+<hr class="docutils" />
+<section id="notebooks">
+<h2>Notebooks<a class="headerlink" href="#notebooks" title="Link to this heading"></a></h2>
+<p>During or after the notebook runs, users can inspect the individual code and text (i.e. markdown) cells of the notebook. Individual cells can be collapsed or expanded by clicking on the small arrowhead on the left side of each cell. The first set of cells include basic notebook instructions and then specify all run parameters (which a user can edit direclty within the notebook). Later cells run the underlying STREAMLINE code for up to 9 phases, plus output folder cleaning (and downloading output files in the case of the Colab Notebook).</p>
+<p>These later code cells will automatically display many of the notifications, results, and output figures generated by STREAMLINE.</p>
+<p>As mentioned, the Google Colab notebook will automatically download the output folder as a zipped folder, as well as automatically open the testing and replication PDF reports on your computer. Users can then extract this downloaded output folder and view all individual output files arranged into analysis subdirectories. You can also view output files in Google Colab by opening the file-explorer pane on the left side of the notebook.</p>
+</section>
+<hr class="docutils" />
+<section id="experiment-folder-hierarchy">
+<h2>Experiment Folder (Hierarchy)<a class="headerlink" href="#experiment-folder-hierarchy" title="Link to this heading"></a></h2>
+<p>After running STREAMLINE you will find the ‘experiment folder’ (named by the <a class="reference internal" href="parameters.html#experiment-name"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></span></a> parameter) saved to folder specified by <a class="reference internal" href="parameters.html#output-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">output_path</span></code></span></a>. In the Colab Notebook demo, this would be <code class="docutils literal notranslate"><span class="pre">/content/DemoOutput/demo_experiment/</span></code>.</p>
+<p>Opening the above experiment folder you will find the following folder/file hierarchy:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DatasetComparisons</span></code> - all statistical significance results and plots for comparing modeling performance across multiple ‘target datasets’ run</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataCompBoxplots</span></code> - all data comparison boxplots</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hcc_data</span></code> - all output specific to the first ‘target dataset’ analyzed</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">CVDatasets</span></code> - copies of all training and testing datasets in .csv format (as well as intermediate files if <a class="reference internal" href="parameters.html#overwrite-cv"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exploratory</span></code> - all phase 1 exploratory data analysis (EDA) output, files at this level are post-processed EDA output</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">initial</span></code> - all pre-processed EDA output</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">univariate_analyses</span></code> - all univariate analysis results and plots</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature_selection</span></code> - all phase 3 &amp; 4 output (feature importance estimation and feature selection)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">multisurf</span></code> - MultiSURF scores and a summary figure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mutual_information</span></code> - mutual information scores and a summary figure</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_evaluation</span></code> - all model evaluation output (phase 6)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature_importance</span></code> - all model feature importance estimation scores and figures</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metricBoxplots</span></code> - all evaluation metric boxplots comparing algorithm performance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickled_metrics</span></code> - all evaluation metrics pickled separately for each algorithm and CV dataset combo</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">statistical_comparisons</span></code> - all statistical significance results comparing algorithm performance</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">models</span></code> - all model output (phase 5), including pickled model objects and selected hyperparameter settings for each algorithm and CV dataset combo</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickledModels</span></code> - all models saved as pickled objects</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale_impute</span></code> - all trained imputation and scaling maps saved as pickled objects</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hcc_data_custom</span></code> - contains all output specific to the second ‘target dataset’ analyzed</p>
+<ul>
+<li><p><em>Has the same folder hierarchy as <code class="docutils literal notranslate"><span class="pre">hcc_data</span></code> above with the addition of a <code class="docutils literal notranslate"><span class="pre">replication</span></code> folder</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replication</span></code> - all phase 8 (i.e. replication) output for the second ‘target dataset’ analyzed</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">hcc_data_custom_rep</span></code> - all replication output for the this specific ‘replication dataset’ (in this demo there was only one)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">exploratory</span></code> - all exploratory data analysis (EDA) output for this ‘replication dataset’, files at this level are post-processed EDA output</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">initial</span></code> - all pre-processed EDA output for this ‘replication dataset’</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_evaluation</span></code> - all model evaluation output for this ‘replication dataset’</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">metricBoxplots</span></code> - all evaluation metric boxplots comparing algorithm performance for this ‘replication dataset’</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pickled_metrics</span></code> - all evaluation metrics pickled separately for each algorithm and CV dataset combo (for this ‘replication dataset’)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">statistical_comparisons</span></code> - all statistical significance results comparing algorithm performance (for this ‘replication dataset’)</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jobs</span></code> - contains cluster job submission files <em>(empty if output ‘cleaning’ applied)</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">jobsCompleted</span></code> - contains cluster checks for job completion <em>(empty if output ‘cleaning’ applied)</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logs</span></code> - contains cluster job output and error logs <em>(empty if output ‘cleaning’ applied)</em></p></li>
+</ul>
+<p>Notice that the folders <code class="docutils literal notranslate"><span class="pre">hcc_data</span></code> and <code class="docutils literal notranslate"><span class="pre">hcc_data_custom</span></code> have similar contents, but represent the analysis for each ‘target’ dataset run at once with STREAMLINE. If a user were to include 4 datasets in the folder specified by the <a class="reference internal" href="parameters.html#dataset-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">dataset_path</span></code></span></a> parameter (each conforming to the <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">Input Data Requirements</span></a>) they would find 4 respective folders in their experiment fold, each named after a respective dataset.</p>
+</section>
+<hr class="docutils" />
+<section id="output-file-details">
+<h2>Output File Details<a class="headerlink" href="#output-file-details" title="Link to this heading"></a></h2>
+<p>This section will take a deeper dive into the individual output files within an experiment folder.</p>
+<section id="pdf-report-s">
+<h3>PDF Report(s)<a class="headerlink" href="#pdf-report-s" title="Link to this heading"></a></h3>
+<section id="testing-evaluation-report">
+<h4>Testing Evaluation Report<a class="headerlink" href="#testing-evaluation-report" title="Link to this heading"></a></h4>
+<p>When you first open the experiment folder, you will find the file <code class="docutils literal notranslate"><span class="pre">demo_experiment_ML_Pipeline_Report.pdf</span></code>. This is an automatically formatted PDF summarizing key findings during the model training and evaluation. It conveniently documents all STREAMLINE run parameters, and summarizes key results for data processing, processed data EDA, model evaluation, feature importance, algorithm comparisons, dataset comparisons, and runtime.</p>
+</section>
+<section id="replication-evaluation-report">
+<h4>Replication Evaluation Report<a class="headerlink" href="#replication-evaluation-report" title="Link to this heading"></a></h4>
+<p>A simpler ‘replication report’ is generated for each ‘replication dataset’ applied to the models trained by a single ‘target dataset’. You can find the demo replication report at the following path: <code class="docutils literal notranslate"><span class="pre">/demo_experiment/hcc_data_custom/replication/hcc_data_custom_rep/demo_experiment_ML_Pipeline_Replication_Report.pdf</span></code>. This report differs from the testing evaluation report in that it excludes the following irrelevant elements: (1) univariate analysis summary, (2) feature importance summary, (3) dataset comparison summary, and (4) runtime summary.</p>
+</section>
+</section>
+<section id="experiment-meta-info">
+<h3>Experiment Meta Info<a class="headerlink" href="#experiment-meta-info" title="Link to this heading"></a></h3>
+<p>When you first open the experiment folder, you will also find <code class="docutils literal notranslate"><span class="pre">algInfo.pickle</span></code> and <code class="docutils literal notranslate"><span class="pre">metadata.pickle</span></code> which are used internally by STREAMLINE across most phases, as well as by the ‘Useful Notebooks’, covered in <a class="reference internal" href="more.html#doing-more-with-streamline"><span class="std std-ref">Doing More with STREAMLINE</span></a>.</p>
+</section>
+<section id="datasetcomparisons">
+<h3>DatasetComparisons<a class="headerlink" href="#datasetcomparisons" title="Link to this heading"></a></h3>
+<p>At the beginning of the <a class="reference internal" href="#testing-evaluation-report"><span class="xref myst">testing evaluation report</span></a>, each dataset is assigned an abbreviated designation of ‘D#’ (e.g. D1, D2, etc) based on the alphabetical order of each dataset name. These designations are used in some of the files included within this folder.</p>
+<section id="statistical-significance-comparisons">
+<h4>Statistical Significance Comparisons<a class="headerlink" href="#statistical-significance-comparisons" title="Link to this heading"></a></h4>
+<p>When you first open this folder you will find <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files containing all statistical significance results comparing modeling performance across two or more ‘target datasets’ run at once with STREAMLINE.</p>
+<p>STREAMLINE applies three non-parametric tests of significance:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance">Kruskal Wallis one-way analysis of variance</a> - used for comparing two or more independent samples of equal or different sample sizes</p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">Mann-Whitney U test</a> (aka Wicoxon rank-sum test) - used for pair-wise independent sample comparisons</p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test">Wilcoxon signed-rank test</a> - used for pair-wise dependent sample comparisons.</p></li>
+</ol>
+<p>The <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files in this folder include the above significance tests’ results comparing model performance between ‘target datasets’:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">BestCompare</span></code> files: (1) apply the given test to each evalution metric, (2) only compares the models from the ‘top-performing-algorithm’ for a given metric/dataset - determined by which had the best median metric value for in a ‘sample’ (3)  where a ‘sample’ is the set of <em>k</em> trained CV models for a given algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KruskalWallis</span></code> files: (1) applies Kruskal Wallis to each evalution metric for a given algorithm across dataset ‘samples’, (2) where a ‘sample’ is the set of <em>k</em> trained CV models for that algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MannWhitney</span></code> files: (1) applies Mann-Whitney to each evalution metric for a given algorithm examining pairs of dataset ‘samples’, (2) where a ‘sample’ is the set of <em>k</em> trained CV models for that algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WilcoxonRank</span></code> files: (1) applies Wilcoxon to each evalution metric for a given algorithm examining pairs of dataset ‘samples’, (2) where a ‘sample’ is the set of <em>k</em> trained CV models for that algorithm</p></li>
+</ul>
+</section>
+<section id="datacompboxplots">
+<h4>dataCompBoxplots<a class="headerlink" href="#datacompboxplots" title="Link to this heading"></a></h4>
+<p>This folder contains two different types of box plots comparing dataset performance:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DataCompare</span></code>: (1) one plot for each combination of algorithm + evaluation metric (only ROC-AUC, and PRC-AUC metrics), (2) the ‘sample’ making up each individual box-and-whisker is the set of <em>k</em> trained CV models for that algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataCompareAllModels</span></code>: (1) one plot for each evaluation metric (all 16 classification metrics), (2) the ‘sample’ making up each individual box-and-whisker is the set of median algorithm performances, (3) lines are overlaid on the boxplot to illustrate differences in median performance between datasets for all algorithms.</p></li>
+</ol>
+</section>
+</section>
+<section id="hcc-data-custom">
+<h3>hcc-data_custom<a class="headerlink" href="#hcc-data-custom" title="Link to this heading"></a></h3>
+<p>We will focus on the <code class="docutils literal notranslate"><span class="pre">hcc_data_custom</span></code> folder to walk through the remaining files, since (unlike the <code class="docutils literal notranslate"><span class="pre">hcc_data</span></code> folder) also includes the results of a replication analyis. However, note that you will find mostly the same set of files within <code class="docutils literal notranslate"><span class="pre">hcc_data</span></code> or for any uniquely named dataset in the folder specified by the <a class="reference internal" href="parameters.html#dataset-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">dataset_path</span></code></span></a> parameter.</p>
+<p>The only file you will see when opening this folder is <code class="docutils literal notranslate"><span class="pre">runtimes.csv</span></code> which documents STREAMLINE’s runtime on different phases and machine learning modeling algorithms.</p>
+<section id="cvdatasets">
+<h4>CVDatasets<a class="headerlink" href="#cvdatasets" title="Link to this heading"></a></h4>
+<p>This folder contains all training and testing datsets (named as <code class="docutils literal notranslate"><span class="pre">[DATANAME]_CV_[PARTITION]_[Train</span> <span class="pre">or</span> <span class="pre">Test].csv</span></code>). These cross validation (CV) datasets have undergone processing, imputation, scaling, and feature selection, and are the datasets used for model training and evaluation in phase 5.</p>
+<p>Additionally, if <a class="reference internal" href="parameters.html#overwrite-cv"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></span></a> and <a class="reference internal" href="parameters.html#del-old-cv"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">del_old_cv</span></code></span></a> were both <code class="docutils literal notranslate"><span class="pre">False</span></code>, you will see two additional sets of CV datasets with either <code class="docutils literal notranslate"><span class="pre">CVOnly</span></code> or <code class="docutils literal notranslate"><span class="pre">CVPre</span></code> in their filenames. These are intermediary versions of the CV datasets (included as a further sanity check), allowing users to examine how these datasets have changed prior to phase 2 (scaling and imputation), and phase 4 (feature selection).<code class="docutils literal notranslate"><span class="pre">CVOnly</span></code> identifies CV datasets that have undergone phase 1 processing (i.e. cleaning, feature engineering, and CV partitioning). <code class="docutils literal notranslate"><span class="pre">CVPre</span></code> identifies CV datasets that have additionally undergone phase 2 (scaling and imputation).</p>
+</section>
+<section id="exploratory">
+<h4>exploratory<a class="headerlink" href="#exploratory" title="Link to this heading"></a></h4>
+<p>We will begin by explaining the files you see when first opening this folder. All of these files represent exploratory data analysis (EDA) of the ‘processed data’ (i.e. after automated cleaning and feature engineering).</p>
+<section id="exploratory-plots">
+<h5>exploratory (plots)<a class="headerlink" href="#exploratory-plots" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ClassCountsBarPlot</span></code> - a simple bar plot illustrating class balance or imbalance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataMissingnessHistogram</span></code> - a histogram illustrating the frequency of data missingness across features</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FeatureCorrelations</span></code> - a pearson feature correlation heatmap</p></li>
+</ul>
+</section>
+<section id="exploratory-csv">
+<h5>exploratory (.csv)<a class="headerlink" href="#exploratory-csv" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ClassCounts</span></code> - documents the number of instances in the data for each class</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">correlation_feature_cleaning</span></code> - documents feature pairs that met the <a class="reference internal" href="parameters.html#correlation-removal-threshold"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">correlation_removal_threshold</span></code></span></a> identifying which feature was retained vs deleted from the dataset</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataCounts</span></code> - documents dataset counts for number of instances, features, feature types, and missing values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataMissingness</span></code> - documents missing value counts for all columns in the dataset</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DataProcessSummary</span></code> - documents incremental changes to instance, feature, feature type, missing value, and class counts during the individual cleaning and feature engineering steps in phase 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DescribeDataset</span></code> - output from standard pandas <code class="docutils literal notranslate"><span class="pre">describe()</span></code> function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DtypesDataset</span></code> - output from standard pandas <code class="docutils literal notranslate"><span class="pre">dtypes()</span></code> function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FeatureCorrelations</span></code> - documents all pearson feature correlations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Missingness_Engineered_Features</span></code> - documents any newly engineered ‘missingness’ features added to the dataset based on the <a class="reference internal" href="parameters.html#featureeng-missingness"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">featureeng_missingness</span></code></span></a> cutoff</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Missingness_Feature_Cleaning</span></code> - documents any features that have been removed from the data because their missingness was &gt;= <a class="reference internal" href="parameters.html#cleaning-missingness"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">cleaning_missingness</span></code></span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Numerical_Encoding_Map</span></code> - documents the numerical encoding mapping for any binary text-valued features in the dataset</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NumUniqueDataset</span></code> - output from standard pandas <code class="docutils literal notranslate"><span class="pre">nunique()</span></code> function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OriginalFeatureNames</span></code> - documents all original feature names from the ‘target dataset’ prior to any processing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">processed_categorical_features</span></code> - documents all processed feature names that were be treated as categorical</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">processed_quantitative_features</span></code> - documents all processed feature names that were be treated as quantitative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ProcessedFeatureNames</span></code> - documents all feature names for the processed ‘target dataset’</p></li>
+</ul>
+</section>
+<section id="exploratory-pickle">
+<h5>exploratory (pickle)<a class="headerlink" href="#exploratory-pickle" title="Link to this heading"></a></h5>
+<p>A variety of other pickle files can be found in this folder, used internally for data processing in the replication phase.</p>
+</section>
+<section id="initial">
+<h5>initial<a class="headerlink" href="#initial" title="Link to this heading"></a></h5>
+<p>This subfolder includes a subset of the same files found in <code class="docutils literal notranslate"><span class="pre">exploratory</span></code>, however these files represent the ‘initial’ exploratory data analysis (EDA) prior to cleaning and feature engineering.</p>
+</section>
+<section id="univariate-analysis">
+<h5>univariate analysis<a class="headerlink" href="#univariate-analysis" title="Link to this heading"></a></h5>
+<p>This subfolder includes plots and a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> report focused on exploratory univariate analyses on the given processed ‘target dataset’.</p>
+</section>
+<section id="univariate-analysis-plots">
+<h5>univariate analysis (plots)<a class="headerlink" href="#univariate-analysis-plots" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Barplot</span></code> plots: simple barplots illustrating the relationship between a given categorical feature and outcome if the <a class="reference external" href="https://en.wikipedia.org/wiki/Chi-squared_test">Chi Square Test</a> was significant based on <a class="reference internal" href="parameters.html#sig-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Boxplot</span></code> plots: simple boxplots illustrating the relationship between a given quantitative feature and outcome if the <a class="reference external" href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">Mann-Whitney U test</a> was significant based on <a class="reference internal" href="parameters.html#sig-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a></p></li>
+</ul>
+</section>
+<section id="univariate-analysis-csv">
+<h5>univariate analysis (.csv)<a class="headerlink" href="#univariate-analysis-csv" title="Link to this heading"></a></h5>
+<p><code class="docutils literal notranslate"><span class="pre">Univariate_Signifiance.csv</span></code> documents the p-value, test statistic, and test name applied across all processed features in the ‘target dataset’</p>
+</section>
+</section>
+<section id="feature-selection">
+<h4>feature_selection<a class="headerlink" href="#feature-selection" title="Link to this heading"></a></h4>
+<p>Includes all output for phases 3 and 4 (feature importance estimation and feature selection).</p>
+<ul class="simple">
+<li><p>When first opening this folder you will find <code class="docutils literal notranslate"><span class="pre">InformativeFeatureSummary.csv</span></code> which summarizes feature counts kept or removed during feature selection (i.e. Informative vs. Uninformative) for each individual CV partition.</p></li>
+</ul>
+<section id="multisurf">
+<h5>multisurf<a class="headerlink" href="#multisurf" title="Link to this heading"></a></h5>
+<p>This subfolder includes (1) <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files with MultiSURF scores for each CV partition and (2) <code class="docutils literal notranslate"><span class="pre">TopAverageScores</span></code>, a plot of the top (<a class="reference internal" href="parameters.html#top-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_fi_features</span></code></span></a>) features (based on median MultiSURF score over CV paritions)</p>
+</section>
+<section id="mutual-information">
+<h5>mutual_information<a class="headerlink" href="#mutual-information" title="Link to this heading"></a></h5>
+<p>This subfolder includes (1) <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files with mutual information scores for each CV partition and (2) <code class="docutils literal notranslate"><span class="pre">TopAverageScores</span></code>, a plot of the top (<a class="reference internal" href="parameters.html#top-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_fi_features</span></code></span></a>) features (based on median mutual information score over CV paritions)</p>
+</section>
+</section>
+<section id="model-evaluation">
+<h4>model_evaluation<a class="headerlink" href="#model-evaluation" title="Link to this heading"></a></h4>
+<p>We will begin by explaining the files you see when first opening this folder.</p>
+<section id="model-evaluation-plots">
+<h5>model_evaluation (plots)<a class="headerlink" href="#model-evaluation-plots" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[ALGORITHM]_ROC</span></code> plots: <a class="reference external" href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">reciever operating characteristic (ROC)</a> plot for a given algorithm illustrating performance across all CV partitions (i.e. ‘folds’), as well as the mean ROC curve and +- 1 standard deviation of the CV partitions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[ALGORITHM]_PRC</span></code> plots: <a class="reference external" href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html#:~:text=The%20precision%2Drecall%20curve%20shows,a%20low%20false%20negative%20rate.">precision-recall curve (ROC)</a> plot for a given algorithm illustrating performance across all CV partitions (i.e. ‘folds’), as well as the mean PRC and +- 1 standard deviation of the CV partitions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Summary_ROC</span></code> plot - <a class="reference external" href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">reciever operating characteristic (ROC)</a> plot comparing mean (CV partition) ROC curves across all algorithms.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Summary_PRC</span></code> plot - <a class="reference external" href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html#:~:text=The%20precision%2Drecall%20curve%20shows,a%20low%20false%20negative%20rate.">precision-recall curve (ROC)</a> plot comparing mean (CV partition) PRCs across all algorithms.</p></li>
+</ul>
+</section>
+<section id="model-evaluation-csv">
+<h5>model_evaluation (.csv)<a class="headerlink" href="#model-evaluation-csv" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[ALGORITHM]_performance</span></code>: documents the 16 model performance metrics for each CV partition for this algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Summary_performance_mean</span></code> - documents the 16 performance metrics (<em>mean</em> across CV partition) for each algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Summary_performance_median</span></code> - documents the 16 performance metrics (<em>median</em> across CV partition) for each algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Summary_performance_std</span></code> - documents the 16 performance metrics (<em>standard deviation</em> across CV partitions) for each algorithm</p></li>
+</ul>
+</section>
+<section id="feature-importance">
+<h5>feature_importance<a class="headerlink" href="#feature-importance" title="Link to this heading"></a></h5>
+<p>This subfolder includes all model specific feature importance outputs including plots and <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files for the ‘target dataset’.</p>
+<p>Plots are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Compare_FI_Norm</span></code> - composite feature importance plot illustrating <em>normalized</em> model feature importance scores across all algorithms run. <a class="reference internal" href="parameters.html#top-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_fi_features</span></code></span></a> features are displayed and ranked based on the across-algorithm sum of mean <em>normalized</em> and <em>weighted</em> feature importance scores. This <em>weighting</em> is based on the model performance indicated by <a class="reference internal" href="parameters.html#metric-weight"><span class="std std-ref">‘metric_weight’</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Compare_FI_Norm_Weight</span></code> - composite feature importance plot illustrating <em>normalized</em> and <em>weighted</em>  model feature importance scores across all algorithms run. <a class="reference internal" href="parameters.html#top-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_fi_features</span></code></span></a> features are displayed and ranked based on the across-algorithm sum of mean <em>normalized</em> and <em>weighted</em> feature importance scores. This <em>weighting</em> is based on the model performance indicated by <a class="reference internal" href="parameters.html#metric-weight"><span class="std std-ref">‘metric_weight’</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[ALGORITHM]_boxplot</span></code> plots: boxplot of model feature importance scores (for a given algorithm). <a class="reference internal" href="parameters.html#top-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_fi_features</span></code></span></a> features are displayed, ranked by mean model feature importance scores (across CV partitions).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[ALGORITHM]_histogram</span></code> plots: histogram illustrating the distribution of the mean (across CV partitions) model feature importance scores (for a given algorithm).</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">[ALGORITHM]_FI</span></code>: documents all model feature importance estimates (for the full list of processed features) for each CV partition (for a given algorithm)</p></li>
+</ul>
+</section>
+<section id="metricboxplots">
+<h5>metricBoxplots<a class="headerlink" href="#metricboxplots" title="Link to this heading"></a></h5>
+<p>This subfolder contains separate boxplox plots for each model evaluation metric. Each plot compares the set of algorithms run across all CV partitions.</p>
+</section>
+<section id="pickled-metrics">
+<h5>pickled_metrics<a class="headerlink" href="#pickled-metrics" title="Link to this heading"></a></h5>
+<p>This subfolder contains pickle files (used internally) to store evaluation metrics for each algorithm and CV partition combination.</p>
+</section>
+<section id="statistical-comparisons">
+<h5>statistical_comparisons<a class="headerlink" href="#statistical-comparisons" title="Link to this heading"></a></h5>
+<p>This subfolder contains <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files documenting statistical significance tests comparing algorithm performance on the given ‘target dataset’.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">KruskalWallis</span></code> - documents <a class="reference external" href="https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance">Kruskal Wallis</a> applied to each evalution metric between algorithm ‘samples’, (2) where a ‘sample’ is the set of <em>k</em> trained CV models for that algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MannWhitneyU</span></code> files: documents <a class="reference external" href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">Mann-Whitney</a> applied to a given evalution metric between pairs of algorithm ‘samples’, (2) where a ‘sample’ is the set of <em>k</em> trained CV models for that algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WilcoxonRank</span></code> files: documents <a class="reference external" href="https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test">Wilcoxon</a> applied to a given evalution metric between pairs of algorithm ‘samples’, (2) where a ‘sample’ is the set of <em>k</em> trained CV models for that algorithm</p></li>
+<li><p><em>Note: <code class="docutils literal notranslate"><span class="pre">MannWhitneyU</span></code> and <code class="docutils literal notranslate"><span class="pre">WilcoxonRank</span></code> files are only generated for a given evaluation metric if the <code class="docutils literal notranslate"><span class="pre">KruskalWallis</span></code> test for that metric was significant.</em></p></li>
+</ul>
+</section>
+</section>
+<section id="models">
+<h4>models<a class="headerlink" href="#models" title="Link to this heading"></a></h4>
+<p>Upon opening this folder you will see <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files for each algorithm and CV partition combination documenting the ‘best’ hyperparameter settings identified by <a class="reference external" href="https://optuna.org/">Optuna</a> and used to train each respective final model.</p>
+<p>Also included is the <code class="docutils literal notranslate"><span class="pre">pickledModels</span></code> subfolder containing all trained and pickled model objects for each algorithm and CV partition combination. Beyond the testing and replication data performance evaluation output by STREAMLINE, these models can be unpickled and applied in the future to document (1) training performance on the training datasets, (2) further replication datasets, and (3) applied to unlabled data to make outcome predictions.</p>
+</section>
+<section id="replication">
+<h4>replication<a class="headerlink" href="#replication" title="Link to this heading"></a></h4>
+<p>This folder will include a subfolder for every ‘replication dataset’ being applied to a given ‘target dataset’. In the demo, this only includes <code class="docutils literal notranslate"><span class="pre">hcc_data_custom_rep</span></code>. Within this folder you will find a subset of relevant the folders and output files we have already covered; plotting and documenting the given replication dataset and the findings when evaluating all trained models using this replication dataset. This includes the PDF <a class="reference internal" href="#replication-evaluation-report"><span class="xref myst">Replication Evaluation Report</span></a> and a ‘processed’ copy of the given ‘replication dataset’.</p>
+</section>
+<section id="runtime">
+<h4>runtime<a class="headerlink" href="#runtime" title="Link to this heading"></a></h4>
+<p>This folder includes <code class="docutils literal notranslate"><span class="pre">.txt</span></code> files documenting the runtimes spent on different phases and algorithms within STREAMLINE. As previously mentioned, these times are summarized within <code class="docutils literal notranslate"><span class="pre">runtimes.csv</span></code> generated for each ‘target dataset’ (e.g. <code class="docutils literal notranslate"><span class="pre">/demo_experiment/hcc_data_custom/runtimes.csv</span></code>).</p>
+</section>
+<section id="scale-impute">
+<h4>scale_impute<a class="headerlink" href="#scale-impute" title="Link to this heading"></a></h4>
+<p>This folder includes all pickled trained mappings used internally for missing value imputation and applying standard scaling to new data.</p>
+</section>
+</section>
+</section>
+<section id="figures-summary">
+<h2>Figures Summary<a class="headerlink" href="#figures-summary" title="Link to this heading"></a></h2>
+<p>Below is an example overview of the different figures generated by STREAMLINE for binary classification data. Note that these current images were generated from the Beta 0.2.5 release, and have been improved, updated and expanded since.</p>
+<p><img alt="alttext" src="_images/STREAMLINE_Figures.png" /></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="parameters.html" class="btn btn-neutral float-left" title="Run Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="more.html" class="btn btn-neutral float-right" title="Doing More with STREAMLINE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

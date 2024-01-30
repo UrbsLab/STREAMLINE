@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.postanalysis.dataset_compare &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.postanalysis.dataset_compare</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.postanalysis.dataset_compare</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">kruskal</span><span class="p">,</span> <span class="n">wilcoxon</span><span class="p">,</span> <span class="n">mannwhitneyu</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">ABBREVIATION</span><span class="p">,</span> <span class="n">COLORS</span><span class="p">,</span> <span class="n">is_supported_model</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">SUPPORTED_MODELS</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="CompareJob">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob">[docs]</a>
+<span class="k">class</span> <span class="nc">CompareJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This &#39;Job&#39; script is called by DataCompareMain.py which runs non-parametric statistical analysis</span>
+<span class="sd">    comparing ML algorithm performance between all target datasets included in the original Phase 1 data folder,</span>
+<span class="sd">    for each evaluation metric.</span>
+<span class="sd">    Also compares the best overall model for each target dataset, for each evaluation metric.</span>
+<span class="sd">    This runs once for the entire pipeline analysis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;XCS&quot;</span><span class="p">,</span> <span class="s2">&quot;eLCS&quot;</span><span class="p">),</span>
+                 <span class="n">class_label</span><span class="o">=</span><span class="s2">&quot;Class&quot;</span><span class="p">,</span> <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sig_cutoff</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">show_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiment_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">experiment_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiment_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="n">output_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">=</span> <span class="n">experiment_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="n">experiment_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">datasets</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span><span class="p">)</span>
+        <span class="n">remove_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.DS_Store&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;algInfo.pickle&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;jobsCompleted&#39;</span><span class="p">,</span> <span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="s1">&#39;jobs&#39;</span><span class="p">,</span> <span class="s1">&#39;DatasetComparisons&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;UsefulNotebooks&#39;</span><span class="p">,</span> <span class="s1">&#39;dask_logs&#39;</span><span class="p">,</span>
+                       <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;_STREAMLINE_Report.pdf&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">remove_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">:</span>
+                <span class="n">datasets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="c1"># ensures consistent ordering of datasets and assignment of temporary identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
+
+        <span class="n">dataset_directory_paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">dataset</span>
+            <span class="n">dataset_directory_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span> <span class="o">=</span> <span class="n">dataset_directory_paths</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span> <span class="o">=</span> <span class="n">class_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">=</span> <span class="n">instance_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span> <span class="o">=</span> <span class="n">sig_cutoff</span>
+
+        <span class="k">if</span> <span class="n">algorithms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="n">SUPPORTED_MODELS</span>
+            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown algorithm in exclude: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">algorithms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_supported_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">algorithms</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span> <span class="o">=</span> <span class="n">show_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ABBREVIATION</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">COLORS</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">COLORS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CompareJob.run">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>  <span class="c1"># for tracking phase runtime</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/Summary_performance_mean.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># Create directory to store dataset statistical comparisons</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons&#39;</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Running Statistical Significance Comparisons Between Multiple Datasets...&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kruscall_wallis</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mann_whitney_u</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wilcoxon_rank</span><span class="p">()</span>
+
+        <span class="n">global_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_kruscall_wallis</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_mann_whitney_u</span><span class="p">(</span><span class="n">global_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_wilcoxon_rank</span><span class="p">(</span><span class="n">global_data</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Generate Boxplots Comparing Dataset Performance...&#39;</span><span class="p">)</span>
+        <span class="c1"># Generate boxplots comparing average algorithm performance</span>
+        <span class="c1"># (for a given metric) across all dataset comparisons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_compare_bp_all</span><span class="p">()</span>
+
+        <span class="c1"># Generate boxplots comparing a specific algorithm&#39;s CV performance (</span>
+        <span class="c1"># for AUC_ROC or AUC_PRC) across all dataset comparisons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_compare_bp</span><span class="p">()</span>
+        <span class="c1"># Print phase completion</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Phase 7 complete&quot;</span><span class="p">)</span>
+        <span class="n">job_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/jobsCompleted/job_data_compare&#39;</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">job_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;complete&#39;</span><span class="p">)</span>
+        <span class="n">job_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.kruscall_wallis">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.kruscall_wallis">[docs]</a>
+    <span class="k">def</span> <span class="nf">kruscall_wallis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each algorithm apply non-parametric Kruskal Wallis one-way ANOVA on ranks.</span>
+<span class="sd">        Determines if there is a statistically significant difference in performance</span>
+<span class="sd">        between original target datasets across CV runs.</span>
+<span class="sd">        Completed for each standard metric separately.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Median_D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+            <span class="n">kruskal_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+                <span class="n">temp_array</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">med_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">dataset_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">:</span>
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">dataset_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_performance.csv&#39;</span>
+                    <span class="n">td</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="n">temp_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">td</span><span class="p">[</span><span class="n">metric</span><span class="p">])</span>
+                    <span class="n">med_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">td</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">())</span>
+                <span class="k">try</span><span class="p">:</span>  <span class="c1"># Run kruskal Wallis</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="o">*</span><span class="n">temp_array</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">6</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span><span class="p">:</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">med_list</span><span class="p">)):</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Median_D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">med_list</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="c1"># Export analysis summary to .csv file</span>
+            <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/KruskalWallis_&#39;</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.wilcoxon_rank">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.wilcoxon_rank">[docs]</a>
+    <span class="k">def</span> <span class="nf">wilcoxon_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each algorithm, apply non-parametric Wilcoxon Rank Sum (pairwise comparisons).</span>
+<span class="sd">        This tests individual algorithm pairs of original target datasets (for each metric)</span>
+<span class="sd">        to determine if there is a statistically significant difference in performance across CV runs.</span>
+<span class="sd">        Test statistic will be zero if all scores from one set are</span>
+<span class="sd">        larger than the other.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="s1">&#39;Data2&#39;</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Median_Data&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+            <span class="n">master_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inter_set_fn</span><span class="p">(</span><span class="n">wilcoxon</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+            <span class="c1"># Export test results</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">master_list</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">label</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/WilcoxonRank_&#39;</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.mann_whitney_u">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.mann_whitney_u">[docs]</a>
+    <span class="k">def</span> <span class="nf">mann_whitney_u</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For each algorithm, apply non-parametric Mann Whitney U-test (pairwise comparisons).</span>
+<span class="sd">        Mann Whitney tests dataset pairs (for each metric)</span>
+<span class="sd">        to determine if there is a statistically significant difference in performance across CV runs.</span>
+<span class="sd">        Test statistic will be zero if all scores from one set are</span>
+<span class="sd">        larger than the other.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="s1">&#39;Data2&#39;</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Median_Data&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+            <span class="c1"># Export test results</span>
+            <span class="n">master_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inter_set_fn</span><span class="p">(</span><span class="n">mannwhitneyu</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">master_list</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">label</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/MannWhitney_&#39;</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.best_kruscall_wallis">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.best_kruscall_wallis">[docs]</a>
+    <span class="k">def</span> <span class="nf">best_kruscall_wallis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For best performing algorithm on a given metric and dataset, apply non-parametric</span>
+<span class="sd">        Kruskal Wallis one-way ANOVA on ranks.</span>
+<span class="sd">        Determines if there is a statistically significant difference in performance</span>
+<span class="sd">        between original target datasets across CV runs</span>
+<span class="sd">        on best algorithm for given metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Best_Alg_D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Median_D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">kruskal_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">global_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="n">best_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">best_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">dataset_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">:</span>
+                <span class="n">alg_med</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">alg_data</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">dataset_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_performance.csv&#39;</span>
+                    <span class="n">td</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="n">alg_med</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">td</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">())</span>
+                    <span class="n">alg_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">td</span><span class="p">[</span><span class="n">metric</span><span class="p">])</span>
+                <span class="c1"># Find the best algorithm for given metric based on average</span>
+                <span class="n">best_med</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">alg_med</span><span class="p">)</span>
+                <span class="n">best_index</span> <span class="o">=</span> <span class="n">alg_med</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">best_med</span><span class="p">)</span>
+                <span class="n">best_alg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="n">best_index</span><span class="p">]</span>
+                <span class="n">best_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alg_data</span><span class="p">[</span><span class="n">best_index</span><span class="p">])</span>
+                <span class="n">best_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">best_alg</span><span class="p">,</span> <span class="n">best_med</span><span class="p">])</span>
+            <span class="n">global_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">best_data</span><span class="p">,</span> <span class="n">best_list</span><span class="p">])</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="o">*</span><span class="n">best_data</span><span class="p">)</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">))</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">6</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span><span class="p">:</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_list</span><span class="p">)):</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Best_Alg_D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_list</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;Median_D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">best_list</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="c1"># Export analysis summary to .csv file</span>
+        <span class="n">kruskal_summary</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/BestCompare_KruskalWallis.csv&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">global_data</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.best_mann_whitney_u">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.best_mann_whitney_u">[docs]</a>
+    <span class="k">def</span> <span class="nf">best_mann_whitney_u</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For best performing algorithm on a given metric and dataset,</span>
+<span class="sd">        apply non-parametric Mann Whitney U-test (pairwise comparisons).</span>
+<span class="sd">        Mann Whitney tests dataset pairs (for each metric)</span>
+<span class="sd">        to determine if there is a statistically significant difference</span>
+<span class="sd">        in performance across CV runs. Test statistic will be zero if all scores from one set are</span>
+<span class="sd">        larger than the other.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inter_set_best_fn</span><span class="p">(</span><span class="n">mannwhitneyu</span><span class="p">,</span> <span class="n">global_data</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/BestCompare_MannWhitney.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.best_wilcoxon_rank">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.best_wilcoxon_rank">[docs]</a>
+    <span class="k">def</span> <span class="nf">best_wilcoxon_rank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For best performing algorithm on a given metric and dataset, apply</span>
+<span class="sd">        non-parametric Mann Whitney U-test (pairwise comparisons).</span>
+<span class="sd">        Mann Whitney tests dataset pairs (for each metric)</span>
+<span class="sd">        to determine if there is a statistically significant difference in</span>
+<span class="sd">        performance across CV runs. Test statistic will be zero if all scores from one set are</span>
+<span class="sd">        larger than the other.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inter_set_best_fn</span><span class="p">(</span><span class="n">wilcoxon</span><span class="p">,</span> <span class="n">global_data</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/BestCompare_WilcoxonRank.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.data_compare_bp_all">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.data_compare_bp_all">[docs]</a>
+    <span class="k">def</span> <span class="nf">data_compare_bp_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a boxplot comparing algorithm performance (CV average of each target metric)</span>
+<span class="sd">        across all target datasets to be compared.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/dataCompBoxplots&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/dataCompBoxplots&#39;</span><span class="p">)</span>
+
+        <span class="c1"># One boxplot generated for each available metric</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+            <span class="n">data_name_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">alg_values_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Dictionary of all algorithms run that will each have a list of respective mean metric value</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+                <span class="c1"># Used to generate algorithm lines on top of boxplot</span>
+                <span class="n">alg_values_dict</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># For each target dataset</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">:</span>
+                <span class="n">data_name_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">each</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">each</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/Summary_performance_mean.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">rownames</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># makes a list of algorithm names from file</span>
+                <span class="n">rownames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rownames</span><span class="p">)</span>
+                <span class="c1"># Grab data in metric column</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>  <span class="c1"># Dataframe of average target metric values for each algorithm</span>
+                <span class="n">col_list</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># List of average target metric values for each algorithm</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rownames</span><span class="p">)):</span>  <span class="c1"># For each algorithm</span>
+                    <span class="n">alg_values_dict</span><span class="p">[</span><span class="n">rownames</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col_list</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="c1"># Create dataframe of average target metric where columns are datasets, and rows are algorithms</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">col</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">data_name_list</span>
+            <span class="c1"># Generate boxplot (with legend for each box) ---------------------------------------</span>
+            <span class="c1"># Plot boxplots</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">data_name_list</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+            <span class="c1"># Plot lines for each algorithm (to illustrate algorithm performance trajectories between datasets)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">)):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">alg_values_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                         <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c1"># Specify plot labels</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Dataset&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.01</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="c1"># Export and/or show plot</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/dataCompBoxplots/DataCompareAllModels_&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">,</span>
+                <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
+
+                <span class="c1"># plt.cla() # not required</span>
+
+<div class="viewcode-block" id="CompareJob.data_compare_bp">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.data_compare_bp">[docs]</a>
+    <span class="k">def</span> <span class="nf">data_compare_bp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a boxplot comparing average algorithm performance (for a given target metric)</span>
+<span class="sd">        across all target datasets to be compared.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ROC AUC&#39;</span><span class="p">,</span> <span class="s1">&#39;PRC AUC&#39;</span><span class="p">]</span>  <span class="c1"># Hard coded</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/dataCompBoxplots&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/dataCompBoxplots&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metric_list</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+                <span class="n">data_name_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">:</span>
+                    <span class="n">data_name_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">each</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">each</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_performance.csv&#39;</span><span class="p">,</span>
+                                       <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                    <span class="c1"># Grab data in metric column</span>
+                    <span class="n">col</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">col</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">data_name_list</span>
+                <span class="c1"># Generate boxplot (with legend for each box)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">data_name_list</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+                <span class="c1"># Specify plot labels</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Dataset&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                <span class="c1"># Export and/or show plot</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/DatasetComparisons/dataCompBoxplots/DataCompare_&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span>
+                    <span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span></div>
+
+                    <span class="c1"># plt.cla() # not required</span>
+
+<div class="viewcode-block" id="CompareJob.save_runtime">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.save_runtime">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save phase runtime</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">runtime_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/runtime/runtime_compare.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span><span class="p">))</span>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.inter_set_fn">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.inter_set_fn">[docs]</a>
+    <span class="k">def</span> <span class="nf">inter_set_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">):</span>
+        <span class="n">master_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">)):</span>
+                    <span class="c1"># Grab info on first dataset</span>
+                    <span class="n">file1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span>
+                        <span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_performance.csv&#39;</span>
+                    <span class="n">td1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file1</span><span class="p">)</span>
+                    <span class="n">set1</span> <span class="o">=</span> <span class="n">td1</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+                    <span class="n">med1</span> <span class="o">=</span> <span class="n">td1</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+                    <span class="c1"># Grab info on second dataset</span>
+                    <span class="n">file2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_directory_paths</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">abbrev</span><span class="p">[</span>
+                        <span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_performance.csv&#39;</span>
+                    <span class="n">td2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file2</span><span class="p">)</span>
+                    <span class="n">set2</span> <span class="o">=</span> <span class="n">td2</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+                    <span class="n">med2</span> <span class="o">=</span> <span class="n">td2</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+
+                    <span class="n">temp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp_summary</span><span class="p">(</span><span class="n">set1</span><span class="p">,</span> <span class="n">set2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">med1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)))</span>
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">med2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)))</span>
+                    <span class="n">master_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">master_list</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.inter_set_best_fn">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.inter_set_best_fn">[docs]</a>
+    <span class="k">def</span> <span class="nf">inter_set_best_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">global_data</span><span class="p">):</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="s1">&#39;Data1&#39;</span><span class="p">,</span> <span class="s1">&#39;Data2&#39;</span><span class="p">,</span> <span class="s1">&#39;Statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;P-Value&#39;</span><span class="p">,</span> <span class="s1">&#39;Sig(*)&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Best_Alg_Data&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Median_Data&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">master_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">)):</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">)):</span>
+                    <span class="n">set1</span> <span class="o">=</span> <span class="n">global_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">x</span><span class="p">]</span>
+                    <span class="n">med1</span> <span class="o">=</span> <span class="n">global_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">set2</span> <span class="o">=</span> <span class="n">global_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">y</span><span class="p">]</span>
+                    <span class="n">med2</span> <span class="o">=</span> <span class="n">global_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">y</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">temp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temp_summary</span><span class="p">(</span><span class="n">set1</span><span class="p">,</span> <span class="n">set2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">global_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">med1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)))</span>
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">global_data</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">y</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">med2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)))</span>
+                    <span class="n">master_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
+
+        <span class="c1"># Export analysis summary to .csv file</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">master_list</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="CompareJob.temp_summary">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.temp_summary">[docs]</a>
+    <span class="k">def</span> <span class="nf">temp_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set1</span><span class="p">,</span> <span class="n">set2</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+
+        <span class="n">temp_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="c1"># handle error when metric values are equal for both algorithms</span>
+        <span class="k">if</span> <span class="n">set1</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">set2</span><span class="p">):</span>  <span class="c1"># Check if all nums are equal in sets</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">set1</span><span class="p">,</span> <span class="n">set2</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NA_error&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Summarize test information in list</span>
+        <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;D&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">set1</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">set2</span><span class="p">):</span>
+            <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">6</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span><span class="p">:</span>
+            <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">temp_list</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

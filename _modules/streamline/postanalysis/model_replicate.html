@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.postanalysis.model_replicate &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.postanalysis.model_replicate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.postanalysis.model_replicate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">streamline.dataprep.data_process</span> <span class="kn">import</span> <span class="n">DataProcess</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.basemodel</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">ABBREVIATION</span><span class="p">,</span> <span class="n">SUPPORTED_MODELS</span><span class="p">,</span> <span class="n">is_supported_model</span>
+<span class="kn">from</span> <span class="nn">streamline.postanalysis.statistics</span> <span class="kn">import</span> <span class="n">StatsJob</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
+
+
+<span class="c1"># Evaluation metrics</span>
+<span class="c1"># from scipy import interp,stats</span>
+
+
+<div class="viewcode-block" id="ReplicateJob">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob">[docs]</a>
+<span class="k">class</span> <span class="nc">ReplicateJob</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This &#39;Job&#39; script conducts exploratory analysis on the new replication dataset then</span>
+<span class="sd">    applies and evaluates all trained models on one or more previously unseen hold-out</span>
+<span class="sd">    or replication study dataset(s). It also generates new evaluation figure.</span>
+<span class="sd">    It does not deal with model feature importance estimation as this is a part of model training interpretation only.</span>
+<span class="sd">    This script is run once for each replication dataset in rep_data_path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_filename</span><span class="p">,</span> <span class="n">dataset_for_rep</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">,</span> <span class="n">match_label</span><span class="p">,</span>
+                 <span class="n">ignore_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;XCS&quot;</span><span class="p">,</span> <span class="s2">&quot;eLCS&quot;</span><span class="p">),</span> <span class="n">cv_partitions</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">exclude_plots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">categorical_cutoff</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sig_cutoff</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">scale_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">impute_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">multi_impute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_filename</span> <span class="o">=</span> <span class="n">dataset_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_for_rep</span> <span class="o">=</span> <span class="n">dataset_for_rep</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">=</span> <span class="n">full_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span> <span class="o">=</span> <span class="n">class_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">=</span> <span class="n">instance_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span> <span class="o">=</span> <span class="n">match_label</span>
+
+        <span class="k">if</span> <span class="n">algorithms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="n">SUPPORTED_MODELS</span>
+            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown algorithm in exclude: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">algorithms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_supported_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+
+        <span class="n">known_exclude_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;plot_ROC&#39;</span><span class="p">,</span> <span class="s1">&#39;plot_PRC&#39;</span><span class="p">,</span> <span class="s1">&#39;plot_metric_boxplots&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_correlations&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">exclude_plots</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">exclude_plots</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known_exclude_options</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unknown exclusion option &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exclude_plots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_roc</span> <span class="o">=</span> <span class="s1">&#39;plot_ROC&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_prc</span> <span class="o">=</span> <span class="s1">&#39;plot_PRC&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_metric_boxplots</span> <span class="o">=</span> <span class="s1">&#39;plot_metric_boxplots&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude_plots</span> <span class="o">=</span> <span class="n">exclude_plots</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_feature_correlations</span> <span class="o">=</span> <span class="s1">&#39;feature_correlations&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span> <span class="o">=</span> <span class="n">show_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_partitions</span> <span class="o">=</span> <span class="n">cv_partitions</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_cutoff</span> <span class="o">=</span> <span class="n">categorical_cutoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span> <span class="o">=</span> <span class="n">sig_cutoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_data</span> <span class="o">=</span> <span class="n">scale_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">impute_data</span> <span class="o">=</span> <span class="n">impute_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span> <span class="o">=</span> <span class="n">scoring_metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multi_impute</span> <span class="o">=</span> <span class="n">multi_impute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore_features</span> <span class="o">=</span> <span class="n">ignore_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># replication dataset being analyzed in this job</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ReplicateJob.run">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Load Replication Dataset</span>
+        <span class="n">rep_data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+        <span class="n">rep_feature_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rep_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">rep_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rep_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">match_label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rep_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+
+        <span class="c1"># Load original training dataset (could include &#39;match label&#39;)</span>
+        <span class="c1"># replication dataset file extension</span>
+        <span class="n">train_data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_for_rep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+        <span class="c1"># train_data.clean_data(ignore_features=self.ignore_features)</span>
+
+        <span class="n">all_train_feature_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">train_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">all_train_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_train_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">match_label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_train_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+
+        <span class="c1"># Confirm that all features in original training data appear in replication datasets</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_train_feature_list</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">rep_feature_list</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Error: One or more features in training dataset did not appear in replication dataset!&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Grab and order replication data columns to match training data columns</span>
+        <span class="n">rep_data</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">rep_data</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">train_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+        <span class="c1"># Create Folder hierarchy</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;exploratory&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;exploratory&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;exploratory&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;initial&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;exploratory&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;initial&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;model_evaluation&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;model_evaluation&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;model_evaluation&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;pickled_metrics&#39;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;model_evaluation&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;pickled_metrics&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Load previously identified list of categorical</span>
+        <span class="c1"># variables and create an index list to identify respective columns</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/initial/initial_categorical_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">categorical_variables</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/initial/initial_quantitative_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">quantitative_variables</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="n">rep_data</span><span class="o">.</span><span class="n">categorical_variables</span> <span class="o">=</span> <span class="n">categorical_variables</span>
+        <span class="n">rep_data</span><span class="o">.</span><span class="n">quantitative_variables</span> <span class="o">=</span> <span class="n">quantitative_variables</span>
+
+        <span class="n">eda</span> <span class="o">=</span> <span class="n">DataProcess</span><span class="p">(</span><span class="n">rep_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span><span class="p">,</span> <span class="n">ignore_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ignore_features</span><span class="p">,</span>
+                          <span class="n">categorical_features</span><span class="o">=</span><span class="n">categorical_variables</span><span class="p">,</span> <span class="n">quantitative_features</span><span class="o">=</span><span class="n">quantitative_variables</span><span class="p">,</span>
+                          <span class="n">exclude_eda_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">categorical_cutoff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_cutoff</span><span class="p">,</span> <span class="n">sig_cutoff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span><span class="p">,</span>
+                          <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span> <span class="n">show_plots</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span><span class="p">)</span>
+
+        <span class="c1"># Arguments changed to send to correct locations describe_data(self)</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;replication/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span>
+
+        <span class="n">eda</span><span class="o">.</span><span class="n">identify_feature_types</span><span class="p">()</span>
+
+        <span class="n">transition_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Instances&#39;</span><span class="p">,</span> <span class="s1">&#39;Total Features&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;Categorical Features&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;Quantitative Features&#39;</span><span class="p">,</span> <span class="s1">&#39;Missing Values&#39;</span><span class="p">,</span>
+                                              <span class="s1">&#39;Missing Percent&#39;</span><span class="p">,</span> <span class="s1">&#39;Class 0&#39;</span><span class="p">,</span> <span class="s1">&#39;Class 1&#39;</span><span class="p">])</span>
+
+        <span class="n">transition_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;Original&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">counts_summary</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span>
+                  <span class="s1">&#39;/exploratory/binary_categorical_dict.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">binary_categorical_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">binary_categorical_dict</span><span class="p">:</span>
+            <span class="n">unique_vals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="n">unique_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">unique_vals</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique_vals</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">binary_categorical_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">binary_categorical_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;New Value found in Binary Categorical Variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                                <span class="o">+</span> <span class="s2">&quot;, replacing with null value&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">new_values</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">feat</span><span class="p">))</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">new_values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># ordinal decode the variables</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span>
+                      <span class="s1">&#39;/exploratory/ordinal_encoding.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="n">ord_labels</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">ord_labels</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+
+                    <span class="n">temp_y</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feat</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+                        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_y</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">new_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">]))</span>
+                        <span class="n">labels</span> <span class="o">=</span> <span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">]</span>
+                        <span class="n">rename_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">:</span>
+                            <span class="n">rename_dict</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">lab</span>
+                        <span class="n">rename_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rename_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="n">feat</span><span class="p">:</span> <span class="n">rename_dict</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="n">new_labels</span>
+                        <span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Encoding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">))))</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_labels</span><span class="p">)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;New Value found in Textual Binary Categorical Variable &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+                                        <span class="o">+</span> <span class="s2">&quot;, replacing with null value&quot;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_labels</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">]))</span>
+                        <span class="n">labels</span> <span class="o">=</span> <span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">]</span>
+                        <span class="n">rename_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="n">new_labels</span><span class="p">))</span>
+                        <span class="n">rename_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rename_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="n">feat</span><span class="p">:</span> <span class="n">rename_dict</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="n">new_labels</span>
+                        <span class="n">ord_labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">feat</span><span class="p">][</span><span class="s1">&#39;Encoding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">+</span> <span class="n">new_labels</span><span class="p">)))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span>
+                      <span class="s1">&#39;/exploratory/apply_ordinal_encoding.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">ord_labels</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+            <span class="n">ord_labels</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span>
+                              <span class="s1">&#39;/exploratory/Numerical_Encoding_Map.csv&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># ExploratoryAnalysis - basic data cleaning</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">drop_ignored_rowcols</span><span class="p">()</span>
+
+        <span class="n">transition_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;C1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">counts_summary</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">initial_eda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span><span class="p">)</span>
+
+        <span class="c1"># Missingness Feature Reconstruction</span>
+        <span class="c1"># Read all engineered feature names</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span>
+                      <span class="s1">&#39;/exploratory/engineered_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">engineered_features</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">engineered_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># Recreate missingness features in replication phase</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">engineered_features</span><span class="p">:</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Miss_&#39;</span> <span class="o">+</span> <span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Miss_&#39;</span> <span class="o">+</span> <span class="n">feat</span><span class="p">)</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">engineered_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miss_&#39;</span> <span class="o">+</span> <span class="n">feat</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">engineered_features</span><span class="p">]</span>
+
+        <span class="c1">#transition_df.loc[&quot;E1&quot;] = eda.counts_summary(save=False)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Removing dropped features</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span>
+                      <span class="s1">&#39;/exploratory/removed_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="n">removed_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">removed_features</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
+                    <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="p">:</span>
+                    <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">removed_features</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1">#transition_df.loc[&quot;C2&quot;] = eda.counts_summary(save=False)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span>
+                      <span class="s1">&#39;/exploratory/post_processed_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="n">post_processed_vars</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="n">non_binary_categorical</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">non_binary_categorical</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+        <span class="c1"># logging.warning(non_binary_categorical)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_binary_categorical</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">one_hot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">non_binary_categorical</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">non_binary_categorical</span><span class="p">)</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">one_hot_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">one_hot_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">non_binary_categorical</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">one_hot_df</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># adding features not seen in test data</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">post_processed_vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">one_hot_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+
+        <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">+=</span> <span class="n">eda</span><span class="o">.</span><span class="n">one_hot_features</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span>
+                      <span class="s1">&#39;/exploratory/correlated_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="n">correlated_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="n">correlated_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># removing extra features</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">post_processed_vars</span> <span class="ow">and</span> <span class="n">feat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">correlated_features</span><span class="p">:</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">drop_ignored_rowcols</span><span class="p">([</span><span class="n">feat</span><span class="p">])</span>
+
+        <span class="c1">#transition_df.loc[&quot;E2&quot;] = eda.counts_summary(save=False)</span>
+
+        <span class="c1"># Removing highly correlated features</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">correlated_features</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="p">:</span>
+                <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">correlated_features</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1">#transition_df.loc[&quot;C4&quot;] = eda.counts_summary(save=False)</span>
+
+        <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">post_processed_vars</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">)))</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">post_processed_vars</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">post_processed_vars</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span> <span class="o">+</span> <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Final Variables in Train are not equal to post processed sum of &quot;</span>
+                      <span class="s2">&quot;Categorical and Quantitative in Replication phase, something is wrong&quot;</span><span class="p">)</span>
+
+        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">post_processed_vars</span><span class="p">]</span>
+
+        <span class="n">transition_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;R1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">counts_summary</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">transition_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/exploratory/&#39;</span>
+                             <span class="o">+</span> <span class="s1">&#39;DataProcessSummary.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Pickle list of feature names to be treated as categorical variables</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span>
+                  <span class="s1">&#39;/exploratory/categorical_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+        <span class="c1"># Pickle list of processed feature names</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span>
+                  <span class="s1">&#39;/exploratory/post_processed_features.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span> <span class="n">outfile</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span>
+                  <span class="s1">&#39;/exploratory/ProcessedFeatureNames.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="n">quoting</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_MINIMAL</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+
+        <span class="c1"># Save a copy of the processed replication dataset (used by useful notebook to allign prediction probabilities to instance IDs)</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span><span class="o">+</span><span class="s2">&quot;_Processed.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Export basic exploratory analysis files</span>
+        <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">describe_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span><span class="p">)</span>
+
+        <span class="n">total_missing</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">missingness_counts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span><span class="p">)</span>
+
+        <span class="n">eda</span><span class="o">.</span><span class="n">counts_summary</span><span class="p">(</span><span class="n">total_missing</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">replicate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Create features-only version of dataset for some operations</span>
+        <span class="n">x_rep_data</span> <span class="o">=</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_only_data</span><span class="p">()</span>
+
+        <span class="c1"># Export feature correlation plot if user specified</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_feature_correlations</span><span class="p">:</span>
+            <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">feature_correlation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span><span class="p">,</span> <span class="n">x_rep_data</span><span class="p">,</span> <span class="n">show_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">x_rep_data</span>  <span class="c1"># memory cleanup</span>
+
+        <span class="c1"># Rep Data Preparation for each Training Partition Model set</span>
+        <span class="c1"># (rep data will potentially be scaled, imputed and feature</span>
+        <span class="c1"># selected in the same was as was done for each corresponding CV training partition)</span>
+        <span class="n">master_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Will hold all evalDict&#39;s, one for each cv dataset.</span>
+
+        <span class="n">cv_dataset_paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/CVDatasets/*_CV_*Train.csv&quot;</span><span class="p">))</span>
+        <span class="n">cv_dataset_paths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cv_dataset_path</span><span class="p">))</span> <span class="k">for</span> <span class="n">cv_dataset_path</span> <span class="ow">in</span> <span class="n">cv_dataset_paths</span><span class="p">]</span>
+        <span class="n">cv_partitions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cv_dataset_paths</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cv_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cv_partitions</span><span class="p">):</span>
+            <span class="c1"># Get corresponding training CV dataset</span>
+            <span class="n">cv_train_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/CVDatasets/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_Train.csv&#39;</span>
+            <span class="n">cv_train_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">cv_train_path</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="c1"># Get List of features in cv dataset</span>
+            <span class="c1"># (if feature selection took place this may only include a subset of original training data features)</span>
+            <span class="n">train_feature_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cv_train_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">train_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">in</span> <span class="n">train_feature_list</span><span class="p">:</span>
+                    <span class="n">train_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">train_feature_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">match_label</span><span class="p">)</span>
+            <span class="c1"># Working copy of original dataframe -</span>
+            <span class="c1"># a new version will be created for each CV partition to be applied to each corresponding set of models</span>
+            <span class="n">cv_rep_data</span> <span class="o">=</span> <span class="n">rep_data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1"># Impute dataframe based on training imputation</span>
+
+            <span class="c1"># if self.ignore_features is not None:</span>
+            <span class="c1">#     for feature in self.ignore_features:</span>
+            <span class="c1">#         if feature in all_train_feature_list:</span>
+            <span class="c1">#             feature_name_list.remove(feature)</span>
+            <span class="c1">#</span>
+            <span class="c1"># if removed_features:</span>
+            <span class="c1">#     for feature in removed_features:</span>
+            <span class="c1">#         if feature in all_train_feature_list:</span>
+            <span class="c1">#             feature_name_list.remove(feature)</span>
+            <span class="c1">#</span>
+            <span class="c1"># if correlated_features:</span>
+            <span class="c1">#     for feature in correlated_features:</span>
+            <span class="c1">#         if feature in all_train_feature_list:</span>
+            <span class="c1">#             feature_name_list.remove(feature)</span>
+            <span class="c1"># one_hot_list = list()</span>
+            <span class="c1"># for var in post_processed_vars:</span>
+            <span class="c1">#     if var not in all_train_feature_list:</span>
+            <span class="c1">#         one_hot_list.append(var)</span>
+            <span class="c1">#</span>
+            <span class="c1"># feature_name_list = all_train_feature_list + engineered_features + one_hot_list</span>
+
+            <span class="n">feature_name_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">post_processed_vars</span><span class="p">)</span>
+            <span class="n">feature_name_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">class_label</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">instance_label</span><span class="p">:</span>
+                <span class="n">feature_name_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span><span class="p">:</span>
+                <span class="n">feature_name_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">eda</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">match_label</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">impute_data</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># assumes imputation was actually run in training (i.e. user had impute_data setting as &#39;True&#39;)</span>
+                    <span class="n">cv_rep_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">impute_rep_data</span><span class="p">(</span><span class="n">cv_count</span><span class="p">,</span> <span class="n">cv_rep_data</span><span class="p">,</span> <span class="n">feature_name_list</span><span class="p">,</span>
+                                                       <span class="n">eda</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">eda</span><span class="o">.</span><span class="n">quantitative_features</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Unknow Exception in Imputation: &quot;</span>
+                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span><span class="p">))</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="c1"># raise e</span>
+
+            <span class="c1"># Scale dataframe based on training scaling</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_data</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># assumes imputation was actually run in training (i.e. user had impute_data setting as &#39;True&#39;)</span>
+                    <span class="n">cv_rep_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_rep_data</span><span class="p">(</span><span class="n">cv_count</span><span class="p">,</span> <span class="n">cv_rep_data</span><span class="p">,</span> <span class="n">feature_name_list</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="c1"># If there was no imputation data in respective dataset,</span>
+                    <span class="c1"># thus no imputation files were created, bypass loading of imputation data.</span>
+                    <span class="c1"># Requires new replication data to have no missing values, as there is no</span>
+                    <span class="c1"># established internal scheme to conduct imputation.</span>
+                    <span class="c1"># logging.warning(e)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Notice: Scaling was not conducted for the following target dataset, &quot;</span>
+                                    <span class="s2">&quot;so scaling was not conducted for replication data: &quot;</span>
+                                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span><span class="p">))</span>
+                    <span class="c1"># raise e</span>
+
+            <span class="c1"># Conduct feature selection based on training selection</span>
+            <span class="c1"># (Filters out any features not in the final cv training dataset)</span>
+            <span class="n">cv_rep_data</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">cv_train_data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">cv_train_data</span>  <span class="c1"># memory cleanup</span>
+            <span class="c1"># Prep data for evaluation</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cv_rep_data</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">x_test</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y_test</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="c1"># Unpickle algorithm info from training phases of pipeline</span>
+
+            <span class="n">eval_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+                <span class="n">eval_dict</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/replication/&quot;</span>
+                                      <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/pickled_metrics/&#39;</span>
+                                      <span class="o">+</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span>
+                                      <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_metrics.pickle&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+                <span class="c1"># includes everything from training except feature importance values</span>
+            <span class="n">master_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eval_dict</span><span class="p">)</span>  <span class="c1"># update master list with evalDict for this CV model</span>
+
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">StatsJob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/replication/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span>
+                         <span class="n">cv_partitions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_partitions</span><span class="p">,</span> <span class="n">top_features</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">sig_cutoff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sig_cutoff</span><span class="p">,</span>
+                         <span class="n">metric_weight</span><span class="o">=</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span> <span class="n">scale_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_data</span><span class="p">,</span>
+                         <span class="n">exclude_plots</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_plots</span><span class="p">,</span> <span class="n">show_plots</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span><span class="p">)</span>
+
+        <span class="n">result_table</span><span class="p">,</span> <span class="n">metric_dict</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">primary_stats</span><span class="p">(</span><span class="n">master_list</span><span class="p">,</span> <span class="n">rep_data</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">stats</span><span class="o">.</span><span class="n">do_plot_roc</span><span class="p">(</span><span class="n">result_table</span><span class="p">)</span>
+        <span class="n">stats</span><span class="o">.</span><span class="n">do_plot_prc</span><span class="p">(</span><span class="n">result_table</span><span class="p">,</span> <span class="n">rep_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metric_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">stats</span><span class="o">.</span><span class="n">save_metric_stats</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_metric_boxplots</span><span class="p">:</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">metric_boxplots</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">)</span>
+
+        <span class="c1"># Save Kruskal Wallis, Mann Whitney, and Wilcoxon Rank Sum Stats</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">kruskal_summary</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kruskal_wallis</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">)</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">mann_whitney_u</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">kruskal_summary</span><span class="p">)</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">wilcoxon_rank</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">metric_dict</span><span class="p">,</span> <span class="n">kruskal_summary</span><span class="p">)</span>
+
+        <span class="c1"># Print phase completion</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s2">&quot; phase 9 complete&quot;</span><span class="p">)</span>
+        <span class="n">job_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/jobsCompleted/job_apply_&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">job_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;complete&#39;</span><span class="p">)</span>
+        <span class="n">job_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ReplicateJob.impute_rep_data">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.impute_rep_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">impute_rep_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span> <span class="n">cv_rep_data</span><span class="p">,</span> <span class="n">all_train_feature_list</span><span class="p">,</span> <span class="n">cat_features</span><span class="p">,</span> <span class="n">quant_features</span><span class="p">):</span>
+        <span class="c1"># Impute categorical features (i.e. those included in the mode_dict)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">impute_cat_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/scale_impute/categorical_imputer_cv&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                <span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pickle&#39;</span>  <span class="c1"># Corresponding pickle file name with scalingInfo</span>
+            <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">impute_cat_info</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+            <span class="n">mode_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">mode_dict</span><span class="p">:</span>  <span class="c1"># was the given feature identified as and treated as categorical during training?</span>
+                    <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">mode_dict</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># If there was no missing data in respective dataset,</span>
+            <span class="c1"># thus no imputation files were created, bypass loading of imputation data and do simple imputation</span>
+            <span class="k">if</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Notice: Categorical Imputation was not conducted for the following target dataset &quot;</span>
+                                <span class="s2">&quot;so categorical values were imputed using the median:&quot;</span>
+                                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">cat_features</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">cv_rep_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">impute_rep_df</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">impute_oridinal_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/scale_impute/ordinal_imputer_cv&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                <span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pickle&#39;</span>  <span class="c1"># Corresponding pickle file name with scalingInfo</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_impute</span><span class="p">:</span>  <span class="c1"># multiple imputation of quantitative features</span>
+                <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">impute_oridinal_info</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+                <span class="n">imputer</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+                <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">inst_rep</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># Prepare data for scikit imputation</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                    <span class="n">x_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">x_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+                    <span class="n">inst_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># pull out instance labels in case they include text</span>
+                <span class="n">y_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="n">x_rep_impute</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x_rep</span><span class="p">)</span>
+                <span class="c1"># Recombine x and y</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                    <span class="n">impute_rep_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">y_rep</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]),</span>
+                                            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_rep_impute</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">all_train_feature_list</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                            <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">impute_rep_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">y_rep</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]),</span>
+                        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">inst_rep</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">]),</span>
+                        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_rep_impute</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">all_train_feature_list</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># simple (median) imputation of quantitative features</span>
+                <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">impute_oridinal_info</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+                <span class="n">median_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+                <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">median_dict</span><span class="p">:</span>  <span class="c1"># was the given feature identified as and treated as categorical during training?</span>
+                        <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">median_dict</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="c1"># If there was no missing data in respective dataset,</span>
+            <span class="c1"># thus no imputation files were created, bypass loading of imputation data and do simple imputation</span>
+            <span class="k">if</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Notice: Quantitative Imputation was not conducted for the following target dataset &quot;</span>
+                                <span class="s2">&quot;so quantitative values were imputed with the mean: &quot;</span>
+                                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_name</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">quant_features</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">cv_rep_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">cv_rep_data</span><span class="p">[</span><span class="n">feat</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">impute_rep_df</span> <span class="o">=</span> <span class="n">cv_rep_data</span>
+
+        <span class="k">return</span> <span class="n">impute_rep_df</span></div>
+
+
+<div class="viewcode-block" id="ReplicateJob.scale_rep_data">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.scale_rep_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">scale_rep_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span> <span class="n">cv_rep_data</span><span class="p">,</span> <span class="n">all_train_feature_list</span><span class="p">):</span>
+        <span class="c1"># Corresponding pickle file name with scalingInfo</span>
+        <span class="n">scale_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/scale_impute/scaler_cv&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pickle&#39;</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">scale_info</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">decimal_places</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">inst_rep</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Scale target replication data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="n">x_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">inst_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">]</span>  <span class="c1"># pull out instance labels in case they include text</span>
+        <span class="n">y_rep</span> <span class="o">=</span> <span class="n">cv_rep_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span>
+        <span class="c1"># Scale features (x)</span>
+        <span class="n">x_rep_scaled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x_rep</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">decimal_places</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">x_rep</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="c1"># Recombine x and y</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="n">scale_rep_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">y_rep</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]),</span>
+                                      <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_rep_scaled</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">all_train_feature_list</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scale_rep_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">y_rep</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]),</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">inst_rep</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">]),</span>
+                 <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">x_rep_scaled</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">all_train_feature_list</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scale_rep_df</span></div>
+
+
+<div class="viewcode-block" id="ReplicateJob.eval_model">
+<a class="viewcode-back" href="../../../codedocs/streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.eval_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">eval_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">):</span>
+        <span class="n">model_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/models/pickledModels/&#39;</span> <span class="o">+</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> \
+                     <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pickle&#39;</span>
+        <span class="c1"># Corresponding pickle file name with scalingInfo</span>
+        <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">model_info</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+        <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># Prediction evaluation</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">BaseModel</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="n">algorithm</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">small_name</span> <span class="o">=</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span>
+
+        <span class="n">metric_list</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> \
+            <span class="n">prec_rec_auc</span><span class="p">,</span> <span class="n">ave_prec</span><span class="p">,</span> <span class="n">probas_</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">model_evaluation</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">metric_list</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">prec_rec_auc</span><span class="p">,</span> <span class="n">ave_prec</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">probas_</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

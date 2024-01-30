@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.utils.cluster &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.utils.cluster</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.utils.cluster</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">dask_jobqueue</span> <span class="kn">import</span> <span class="n">SLURMCluster</span><span class="p">,</span> <span class="n">LSFCluster</span><span class="p">,</span> <span class="n">SGECluster</span>
+<span class="kn">from</span> <span class="nn">dask_jobqueue</span> <span class="kn">import</span> <span class="n">HTCondorCluster</span><span class="p">,</span> <span class="n">MoabCluster</span><span class="p">,</span> <span class="n">OARCluster</span><span class="p">,</span> <span class="n">PBSCluster</span>
+
+<span class="n">cluster_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;HTCondor&#39;</span><span class="p">:</span> <span class="n">HTCondorCluster</span><span class="p">,</span>
+    <span class="s1">&#39;LSF&#39;</span><span class="p">:</span> <span class="n">LSFCluster</span><span class="p">,</span>
+    <span class="s1">&#39;Moab&#39;</span><span class="p">:</span> <span class="n">MoabCluster</span><span class="p">,</span>
+    <span class="s1">&#39;OAR&#39;</span><span class="p">:</span> <span class="n">OARCluster</span><span class="p">,</span>
+    <span class="s1">&#39;PBS&#39;</span><span class="p">:</span> <span class="n">PBSCluster</span><span class="p">,</span>
+    <span class="s1">&#39;SGE&#39;</span><span class="p">:</span> <span class="n">SGECluster</span><span class="p">,</span>
+    <span class="s1">&#39;SLURM&#39;</span><span class="p">:</span> <span class="n">SLURMCluster</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_cluster">
+<a class="viewcode-back" href="../../../codedocs/streamline.utils.cluster.html#streamline.utils.cluster.get_cluster">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cluster</span><span class="p">(</span><span class="n">cluster_type</span><span class="o">=</span><span class="s1">&#39;SLURM&#39;</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s1">&#39;defq&#39;</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s1">&#39;SLURM&#39;</span><span class="p">:</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">SLURMCluster</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="n">queue</span><span class="p">,</span>
+                                   <span class="n">cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">memory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                   <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
+                                   <span class="n">log_directory</span><span class="o">=</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/dask_logs/&quot;</span><span class="p">)</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">maximum_jobs</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s2">&quot;LSF&quot;</span><span class="p">:</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">LSFCluster</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="n">queue</span><span class="p">,</span>
+                                 <span class="n">cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">mem</span><span class="o">=</span><span class="n">memory</span> <span class="o">*</span> <span class="mi">1000000000</span><span class="p">,</span>
+                                 <span class="n">memory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                 <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;24:00&quot;</span><span class="p">,</span>
+                                 <span class="n">log_directory</span><span class="o">=</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/dask_logs/&quot;</span><span class="p">)</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">maximum_jobs</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s1">&#39;UGE&#39;</span><span class="p">:</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">SGECluster</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="n">queue</span><span class="p">,</span>
+                                 <span class="n">cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">memory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                 <span class="n">resource_spec</span><span class="o">=</span><span class="s2">&quot;mem_free=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                 <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
+                                 <span class="n">log_directory</span><span class="o">=</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/dask_logs/&quot;</span><span class="p">)</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">maximum_jobs</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s1">&#39;HTCondor&#39;</span><span class="p">:</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">HTCondorCluster</span><span class="p">(</span><span class="n">cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                      <span class="n">disk</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                      <span class="n">memory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                      <span class="n">log_directory</span><span class="o">=</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/dask_logs/&quot;</span><span class="p">)</span>
+            <span class="n">cluster</span><span class="o">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">maximum_jobs</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cluster_type</span> <span class="o">==</span> <span class="s1">&#39;Local&#39;</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">cluster</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cluster</span> <span class="o">=</span> <span class="n">cluster_dict</span><span class="p">[</span><span class="n">cluster_type</span><span class="p">](</span><span class="n">queue</span><span class="o">=</span><span class="n">queue</span><span class="p">,</span>
+                                                     <span class="n">cores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                                     <span class="n">memory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+                                                     <span class="n">walltime</span><span class="o">=</span><span class="s2">&quot;24:00:00&quot;</span><span class="p">,</span>
+                                                     <span class="n">log_directory</span><span class="o">=</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/dask_logs/&quot;</span><span class="p">)</span>
+                <span class="n">cluster</span><span class="o">.</span><span class="n">adapt</span><span class="p">(</span><span class="n">maximum_jobs</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown or Unsupported Cluster Type&quot;</span><span class="p">)</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Exception: Unknown Exception&quot;</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Running dask-cluster&quot;)</span>
+    <span class="c1"># print(client.scheduler_info())</span>
+    <span class="k">return</span> <span class="n">client</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

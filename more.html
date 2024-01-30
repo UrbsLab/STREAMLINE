@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doing More with STREAMLINE &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development Notes" href="development.html" />
+    <link rel="prev" title="Navigating STREAMLINE Output" href="output.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Doing More with STREAMLINE</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#useful-notebooks">Useful Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-modeling-algorithm-hyperparameter-options">Updating Modeling Algorithm Hyperparameter Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-new-modeling-algorithms">Adding New Modeling Algorithms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Doing More with STREAMLINE</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/more.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="doing-more-with-streamline">
+<h1>Doing More with STREAMLINE<a class="headerlink" href="#doing-more-with-streamline" title="Link to this heading"></a></h1>
+<p>Before, or after running STREAMLINE, there are a number of things a user can do to get even more out of this framework and it’s main phases.</p>
+<hr class="docutils" />
+<section id="useful-notebooks">
+<h2>Useful Notebooks<a class="headerlink" href="#useful-notebooks" title="Link to this heading"></a></h2>
+<p>Included in the STREAMLINE repository is the folder <code class="docutils literal notranslate"><span class="pre">UsefulNotebooks</span></code> containing a variety of Jupyter Notebooks, each designed to work with an ‘experiment’ folder containing the output of a STREAMLINE run. As an overview, these notebooks are designed to:</p>
+<ol class="arabic simple">
+<li><p>Regenerate key plots based on user specifications</p></li>
+<li><p>Reporting model prediction probabilities for testing and replication dataset instances</p></li>
+<li><p>Generate additional figures, including:</p>
+<ul class="simple">
+<li><p>A feature imporance rank heatmap</p></li>
+<li><p>Model vizualizations for decision tree and genetic programming models</p></li>
+</ul>
+</li>
+<li><p>Examining the impact of using decision thresholds other than the default 0.5.</p></li>
+<li><p>Run a complete training data evaluation of all models.</p></li>
+</ol>
+<p>Below we detail what each of these notebooks do (in alphabetical order):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DecisionThreshold_Interactive.ipynb</span></code>: allow users to interactively examine different decision thresholds for a target model, and see how this new threshold impacts confusion matrix metrics (i.e. TP, TN, FP, FN).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DecisionThreshold_TestEval.ipynb</span></code>: allow users to (1) re-evaluate all trained models on the respective testing datasets using a decision threshold other than the default 0.5, (2) re-generate metric evaluation boxplots comparing algorithm performance using this new decision threshold, and (3) re-run statistical significance analyses comparing algorithm performance using this new decision threshold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DecisionThreshold_TrainEval.ipynb</span></code>: allow users to (1) re-evaluate all trained models on respective training datasets using the standard decision threshold of 0.5 or some other threshold, (2) re-generate metric evaluation boxplots comparing algorithm performance using this new decision threshold, and (3) re-run statistical significance analyses comparing algorithm performance using this new decision threshold.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GenPlots_CompositeFI.ipynb</span></code>:  allow users to generate custom variations of the composite feature importance plots.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GenPlots_FI_Heatmap.ipynb</span></code>: allow users to generate an interactive html visualization of ranked feature importance estimates across algorithms.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GenPlots_ROC_PRC.ipynb</span></code>: allow users to generate (1) ROC and PRC plots for each algorithm (over all CV partitions) if this function was previously turned off in the pipeline, (2) all ROC and PRC plots with the legend inside the plot rather than to the upper right, and (3) allow code-savy users to easily modify this notebook to regenerate these plots to their own specifications.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ModelViz_DT_GP.ipynb</span></code>: allow users to generate a direct visualization of the models generated by algorithms that create directly interpretable models (i.e. decision tree, and genetic programming).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PredictionProbs_Replication.ipynb</span></code>: will generate model (class 1) prediction probabilities for instances of respective replication dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PredictionProbs_Test_EvalMetricAccess.ipynb</span></code>: will (1) show users how to access all model evaluation metrics from internal pickle files, and (2) generate model (class 1) prediction probabilities for instances of the respective testing dataset.</p></li>
+<li><p><em>Note: Users can run these notebooks ‘as-is’ if they ran the demo code for the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>, or they can modify the notebook parameters to run on a different experiment folder, or change the notebook code to further customize their output.</em></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="updating-modeling-algorithm-hyperparameter-options">
+<h2>Updating Modeling Algorithm Hyperparameter Options<a class="headerlink" href="#updating-modeling-algorithm-hyperparameter-options" title="Link to this heading"></a></h2>
+<p>The hard-coded range of hyperparameter options and their value options/ranges for each algorithm can be found within <code class="docutils literal notranslate"><span class="pre">streamline/modeling/parameters.py</span></code>.
+Code-savy users can adjust these value option/ranges for each ML algorithm if desired. However if you do so, and publish results of running STREAMLINE we stongly recommend indicating this or any other code changes for reproducibility.</p>
+</section>
+<hr class="docutils" />
+<section id="adding-new-modeling-algorithms">
+<h2>Adding New Modeling Algorithms<a class="headerlink" href="#adding-new-modeling-algorithms" title="Link to this heading"></a></h2>
+<p>New models can easily be added to STREAMLINE by creating a custom class
+and wrapping it as warped class derived form the STREAMLINE <code class="docutils literal notranslate"><span class="pre">BaseModel</span></code> with
+specific information such as name, plot colors and hyper parameters for the sweep.</p>
+<p>An example wrapped code is given below. This is also given as file in the
+info directory of the github <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/elastic_net.py">here</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.basemodel</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">SGDClassifier</span> <span class="k">as</span> <span class="n">SGD</span>
+
+
+<span class="k">class</span> <span class="nc">ElasticNetClassifier</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+    <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;Elastic Net&quot;</span>
+    <span class="n">small_name</span> <span class="o">=</span> <span class="s2">&quot;EN&quot;</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;aquamarine&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span>
+                 <span class="n">metric_direction</span><span class="o">=</span><span class="s1">&#39;maximize&#39;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">SGD</span><span class="p">,</span> <span class="s2">&quot;Elastic Net&quot;</span><span class="p">,</span> <span class="n">cv_folds</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="p">,</span> <span class="n">metric_direction</span><span class="p">,</span> <span class="n">random_state</span><span class="p">,</span> <span class="n">cv</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;elasticnet&#39;</span><span class="p">],</span> <span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;log_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;modified_huber&#39;</span><span class="p">],</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+                           <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">],</span> <span class="s1">&#39;l1_ratio&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="s1">&#39;class_weight&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;balanced&#39;</span><span class="p">],</span>
+                           <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">random_state</span><span class="p">,</span> <span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">small_name</span> <span class="o">=</span> <span class="s2">&quot;EN&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;aquamarine&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+
+    <span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">&#39;penalty&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;penalty&#39;</span><span class="p">]),</span>
+                       <span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]),</span>
+                       <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;l1_ratio&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                       <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">&#39;max_iter&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;max_iter&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;max_iter&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                       <span class="s1">&#39;l1_ratio&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s1">&#39;l1_ratio&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;l1_ratio&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                                       <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;l1_ratio&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                       <span class="s1">&#39;class_weight&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">&#39;class_weight&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;class_weight&#39;</span><span class="p">]),</span>
+                       <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">&#39;random_state&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_grid</span><span class="p">[</span><span class="s1">&#39;random_state&#39;</span><span class="p">])}</span>
+
+        <span class="n">mean_cv_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyper_eval</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">mean_cv_score</span>
+</pre></div>
+</div>
+<p>This .py file can be kept in the <code class="docutils literal notranslate"><span class="pre">streamline/models</span></code> folders and it will be automatically picked up by the STREAMLINE
+pipeline dynamically</p>
+<p>To make your own model make an arbitrarily named Class Derived form the <code class="docutils literal notranslate"><span class="pre">BaseModel</span></code> class in STREAMLINE.</p>
+<p>The base class should be given it’s own</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model_name</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">small_name</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">color</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">param_grid</span></code></p></li>
+</ul>
+<p>And initialized with an sklearn compatible model class such as <code class="docutils literal notranslate"><span class="pre">SGD</span></code> here.</p>
+<p>The init and super class init parameters should be the same as above.</p>
+<p>An objective function should also be written for optuna such that all the parameters are suggested
+through an optuna trial. All the parameters should be suggested in a proper form using the most proper
+type of the variable and the proper function in the API documentation of
+Trial as described <a class="reference external" href="https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html">here</a></p>
+<p>Specifically we want to correctly parameters should be categorical, integer, or
+discrete or continuous in linear or log domain and their ranges.
+The parameters that go in these functions should be what is defined in the param_grid variable.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="output.html" class="btn btn-neutral float-left" title="Navigating STREAMLINE Output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="development.html" class="btn btn-neutral float-right" title="Development Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

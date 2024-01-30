@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run Parameters &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Navigating STREAMLINE Output" href="output.html" />
+    <link rel="prev" title="Running STREAMLINE" href="running.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-guide">Quick Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#essential-parameters-phases-1-9">Essential Parameters (Phases 1-9)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#general-parameters-phase-1">General Parameters (Phase 1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-processing-parameters-phase-1">Data Processing Parameters (Phase 1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#imputation-scaling-parameters-phase-2">Imputation &amp; Scaling Parameters (Phase 2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#feature-importance-estimation-parameters-phase-3">Feature Importance Estimation Parameters (Phase 3)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#feature-selection-parameters-phase-4">Feature Selection Parameters (Phase 4)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modeling-parameters-phase-5">Modeling Parameters (Phase 5)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#post-analysis-parameters-phase-6">Post-Analysis Parameters (Phase 6)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compare-data-parameters-phase-7">Compare Data Parameters (Phase 7)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replication-parameters-phase-8">Replication Parameters (Phase 8)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary-report-parameters-phase-9">Summary Report Parameters (Phase 9)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cleanup-parameters">Cleanup Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multiprocessing-parameters">Multiprocessing Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logging-parameters">Logging Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-details">Parameter Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#essential-parameters-phase-1-9">Essential Parameters (Phase 1-9)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#dataset-path">dataset_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#output-path">output_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#experiment-name">experiment_name</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#class-label">class_label</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instance-label">instance_label</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#match-label">match_label</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ignore-features-path">ignore_features_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#categorical-feature-path">categorical_feature_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#quantitative-feature-path">quantitative_feature_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rep-data-path">rep_data_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dataset-for-rep">dataset_for_rep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config">config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-till-report">do_till_report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-eda">do_eda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-dataprep">do_dataprep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-feat-imp">do_feat_imp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-feat-sel">do_feat_sel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-model">do_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-stats">do_stats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-compare-dataset">do_compare_dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-report">do_report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-replicate">do_replicate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-rep-report">do_rep_report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-cleanup">do_cleanup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#applytoreplication">applyToReplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#demo-run">demo_run</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-data-prompt">use_data_prompt</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">General Parameters (Phase 1)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cv-partitions">cv_partitions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#partition-method">partition_method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#categorical-cutoff">categorical_cutoff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sig-cutoff">sig_cutoff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#random-state">random_state</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Data Processing Parameters (Phase 1)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exclude-eda-output">exclude_eda_output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#top-uni-features">top_uni_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#featureeng-missingness">featureeng_missingness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleaning-missingness">cleaning_missingness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#correlation-removal-threshold">correlation_removal_threshold</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Imputation &amp; Scaling Parameters (Phase 2)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#impute-data">impute_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multi-impute">multi_impute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scale-data">scale_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overwrite-cv">overwrite_cv</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Feature Importance Estimation Parameters (Phase 3)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#do-mutual-info">do_mutual_info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-multisurf">do_multisurf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-turf">use_turf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#turf-pct">turf_pct</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instance-subset">instance_subset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#n-jobs">n_jobs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Feature Selection Parameters (Phase 4)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#filter-poor-features">filter_poor_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#max-features-to-keep">max_features_to_keep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#export-scores">export_scores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#top-fi-features">top_fi_features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overwrite-cv-feat">overwrite_cv_feat</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Modeling Parameters (Phase 5)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#algorithms">algorithms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exclude">exclude</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#training-subsample">training_subsample</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#use-uniform-fi">use_uniform_fi</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#primary-metric">primary_metric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metric-direction">metric_direction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#n-trials">n_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timeout">timeout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#export-hyper-sweep-plots">export_hyper_sweep_plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#do-lcs-sweep">do_lcs_sweep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lcs-nu">lcs_nu</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lcs-iterations">lcs_iterations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lcs-n">lcs_N</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lcs-timeout">lcs_timeout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-resubmit">model_resubmit</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Post-Analysis Parameters (Phase 6)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exclude-plots">exclude_plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metric-weight">metric_weight</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#top-model-fi-features">top_model_fi_features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Replication Parameters (Phase 8)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#exclude-rep-plots">exclude_rep_plots</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Cleanup Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#del-time">del_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#del-old-cv">del_old_cv</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Multiprocessing Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#run-parallel">run_parallel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-cluster">run_cluster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reserved-memory">reserved_memory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#queue">queue</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Logging Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#verbose">verbose</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logging-level">logging_level</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#guidelines-for-setting-parameters">Guidelines for Setting Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ensuring-output-reproducibility">Ensuring Output Reproducibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reducing-runtime-and-memory-use">Reducing Runtime and Memory Use</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#improving-modeling-performance">Improving Modeling Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-guidelines">Other Guidelines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Run Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/parameters.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="run-parameters">
+<h1>Run Parameters<a class="headerlink" href="#run-parameters" title="Link to this heading"></a></h1>
+<p>Here we review the run parameters available across the 9 phases of STREAMLINE. We begin with a quick guide/summary of all run parameters according to run mode along with their default values (when applicable). Then we provide further descriptions, formatting, valid values, and guidance (as needed) for each run parameter. Lastly, we provide overall guidance on setting STEAMLINE run parameters.</p>
+<hr class="docutils" />
+<section id="quick-guide">
+<h2>Quick Guide<a class="headerlink" href="#quick-guide" title="Link to this heading"></a></h2>
+<p>The quick guide below distinguishes essential from non-essential run parameters within streamline, and further breaks down non-essential run paramters by pipeline phase. The name of each parameter is given for the command-line, configuration file, and notebooks (same for both Colab and Jupyter Notebooks), as well as the internal STREAMLINE default value (which ocassionally differ from the default values used in the notebooks for the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>).</p>
+<ul class="simple">
+<li><p>Run parameters without default values are incidated with ‘no default’.</p></li>
+<li><p>Run parameters that are not used in one of the run modes are indicated with ‘NA’.</p></li>
+<li><p>All run parameters include quick links to their respective details in <a class="reference internal" href="#parameter-details">Parameter Details</a>, including their description, format, values, and other tips.</p></li>
+</ul>
+<section id="essential-parameters-phases-1-9">
+<h3>Essential Parameters (Phases 1-9)<a class="headerlink" href="#essential-parameters-phases-1-9" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--data-path</p></td>
+<td><p><a class="reference internal" href="#dataset-path"><span class="xref myst">dataset_path</span></a></p></td>
+<td><p>data_path</p></td>
+<td><p>no default</p></td>
+</tr>
+<tr class="row-odd"><td><p>--out-path</p></td>
+<td><p><a class="reference internal" href="#output-path"><span class="xref myst">output_path</span></a></p></td>
+<td><p>output_path</p></td>
+<td><p>no default</p></td>
+</tr>
+<tr class="row-even"><td><p>--exp-name</p></td>
+<td><p><a class="reference internal" href="#experiment-name"><span class="xref myst">experiment_name</span></a></p></td>
+<td><p>experiment_name</p></td>
+<td><p>no default</p></td>
+</tr>
+<tr class="row-odd"><td><p>--class-label</p></td>
+<td><p><a class="reference internal" href="#class-label"><span class="xref myst">class_label</span></a></p></td>
+<td><p>class_label</p></td>
+<td><p>‘Class’</p></td>
+</tr>
+<tr class="row-even"><td><p>--inst-label</p></td>
+<td><p><a class="reference internal" href="#instance-label"><span class="xref myst">instance_label</span></a></p></td>
+<td><p>instance_label</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>--match-label</p></td>
+<td><p><a class="reference internal" href="#match-label"><span class="xref myst">match_label</span></a></p></td>
+<td><p>match_label</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>--fi</p></td>
+<td><p><a class="reference internal" href="#ignore-features-path"><span class="xref myst">ignore_features_path</span></a></p></td>
+<td><p>ignore_features</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>--cf</p></td>
+<td><p><a class="reference internal" href="#categorical-feature_path"><span class="xref myst">categorical_feature_path</span></a></p></td>
+<td><p>categorical_feature_headers</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>--qf</p></td>
+<td><p><a class="reference internal" href="#quantitative-feature_path"><span class="xref myst">quantitative_feature_path</span></a></p></td>
+<td><p>quantitiative_feature_headers</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>--rep-path</p></td>
+<td><p><a class="reference internal" href="#rep-data-path"><span class="xref myst">rep_data_path</span></a></p></td>
+<td><p>rep_data_path</p></td>
+<td><p>no default</p></td>
+</tr>
+<tr class="row-even"><td><p>--dataset</p></td>
+<td><p><a class="reference internal" href="#dataset-for-rep"><span class="xref myst">dataset_for_rep</span></a></p></td>
+<td><p>dataset_for_rep</p></td>
+<td><p>no default</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config"><span class="xref myst">--config</span></a> or -c</p></td>
+<td><p>NA</p></td>
+<td><p>NA</p></td>
+<td><p>no default</p></td>
+</tr>
+<tr class="row-even"><td><p>--do-till-report or -dtr</p></td>
+<td><p><a class="reference internal" href="#do-till-report"><span class="xref myst">do_till_report</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-eda</p></td>
+<td><p><a class="reference internal" href="#do-eda"><span class="xref myst">do_eda</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>--do-dataprep</p></td>
+<td><p><a class="reference internal" href="#do-dataprep"><span class="xref myst">do_dataprep</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-feat-imp</p></td>
+<td><p><a class="reference internal" href="#do-feat_imp"><span class="xref myst">do_feat_imp</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>--do-feat-sel</p></td>
+<td><p><a class="reference internal" href="#do-feat_sel"><span class="xref myst">do_feat_sel</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-model</p></td>
+<td><p><a class="reference internal" href="#do-model"><span class="xref myst">do_model</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>--do-stats</p></td>
+<td><p><a class="reference internal" href="#do-stats"><span class="xref myst">do_stats</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-compare-dataset</p></td>
+<td><p><a class="reference internal" href="#do-compare-dataset"><span class="xref myst">do_compare_dataset</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>--do-report</p></td>
+<td><p><a class="reference internal" href="#do-report"><span class="xref myst">do_report</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-replicate</p></td>
+<td><p><a class="reference internal" href="#do-replicate"><span class="xref myst">do_replicate</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>--do-rep-report</p></td>
+<td><p><a class="reference internal" href="#do-rep-report"><span class="xref myst">do_rep_report</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-cleanup</p></td>
+<td><p><a class="reference internal" href="#do-cleanup"><span class="xref myst">do_cleanup</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>NA</p></td>
+<td><p>NA</p></td>
+<td><p><a class="reference internal" href="#applyToReplication"><span class="xref myst">applyToReplication</span></a></p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>NA</p></td>
+<td><p>NA</p></td>
+<td><p><a class="reference internal" href="#demo-run"><span class="xref myst">demo_run</span></a></p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>NA</p></td>
+<td><p>NA</p></td>
+<td><p><a class="reference internal" href="#use-data-prompt"><span class="xref myst">use_data_prompt</span></a> (Colab)</p></td>
+<td><p>True</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="general-parameters-phase-1">
+<h3>General Parameters (Phase 1)<a class="headerlink" href="#general-parameters-phase-1" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--cv</p></td>
+<td><p><a class="reference internal" href="#cv-partitions"><span class="xref myst">cv_partitions</span></a></p></td>
+<td><p>n_splits</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-odd"><td><p>--part</p></td>
+<td><p><a class="reference internal" href="#partition-method"><span class="xref myst">partition_method</span></a></p></td>
+<td><p>partition_method</p></td>
+<td><p>‘Stratified’</p></td>
+</tr>
+<tr class="row-even"><td><p>--cat-cutoff</p></td>
+<td><p><a class="reference internal" href="#categorical-cutoff"><span class="xref myst">categorical_cutoff</span></a></p></td>
+<td><p>categorical_cutoff</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-odd"><td><p>--sig</p></td>
+<td><p><a class="reference internal" href="#sig-cutoff"><span class="xref myst">sig_cutoff</span></a></p></td>
+<td><p>sig_cutoff</p></td>
+<td><p>0.05</p></td>
+</tr>
+<tr class="row-even"><td><p>--rand-state</p></td>
+<td><p><a class="reference internal" href="#random-state"><span class="xref myst">random_state</span></a></p></td>
+<td><p>random_state</p></td>
+<td><p>42</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="data-processing-parameters-phase-1">
+<h3>Data Processing Parameters (Phase 1)<a class="headerlink" href="#data-processing-parameters-phase-1" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--exclude-eda-output</p></td>
+<td><p><a class="reference internal" href="#exclude-eda-output"><span class="xref myst">exclude_eda_output</span></a></p></td>
+<td><p>exclude_eda_output</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>--top-uni-feature</p></td>
+<td><p><a class="reference internal" href="#top-uni-features"><span class="xref myst">top_uni_features</span></a></p></td>
+<td><p>top_uni_features</p></td>
+<td><p>20</p></td>
+</tr>
+<tr class="row-even"><td><p>--feat_miss</p></td>
+<td><p><a class="reference internal" href="#featureeng-missingness"><span class="xref myst">featureeng_missingness</span></a></p></td>
+<td><p>featureeng_missingness</p></td>
+<td><p>0.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>--clean_miss</p></td>
+<td><p><a class="reference internal" href="#cleaning-missingness"><span class="xref myst">cleaning_missingness</span></a></p></td>
+<td><p>cleaning_missingness</p></td>
+<td><p>0.5</p></td>
+</tr>
+<tr class="row-even"><td><p>--corr_thresh</p></td>
+<td><p><a class="reference internal" href="#correlation-removal-threshold"><span class="xref myst">correlation_removal_threshold</span></a></p></td>
+<td><p>correlation_removal_threshold</p></td>
+<td><p>1.0</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="imputation-scaling-parameters-phase-2">
+<h3>Imputation &amp; Scaling Parameters (Phase 2)<a class="headerlink" href="#imputation-scaling-parameters-phase-2" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--impute</p></td>
+<td><p><a class="reference internal" href="#impute-data"><span class="xref myst">impute_data</span></a></p></td>
+<td><p>impute_data</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>--multi-impute</p></td>
+<td><p><a class="reference internal" href="#multi-impute"><span class="xref myst">multi_impute</span></a></p></td>
+<td><p>multi_impute</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>--scale</p></td>
+<td><p><a class="reference internal" href="#scale-data"><span class="xref myst">scale_data</span></a></p></td>
+<td><p>scale_data</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>--over-cv</p></td>
+<td><p><a class="reference internal" href="#overwrite-cv"><span class="xref myst">overwrite_cv</span></a></p></td>
+<td><p>overwrite_cv</p></td>
+<td><p>True</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="feature-importance-estimation-parameters-phase-3">
+<h3>Feature Importance Estimation Parameters (Phase 3)<a class="headerlink" href="#feature-importance-estimation-parameters-phase-3" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--do-mi</p></td>
+<td><p><a class="reference internal" href="#do-mutual-info"><span class="xref myst">do_mutual_info</span></a></p></td>
+<td><p>do_mutual_info</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-ms</p></td>
+<td><p><a class="reference internal" href="#do-multisurf"><span class="xref myst">do_multisurf</span></a></p></td>
+<td><p>do_multisurf</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>--use-turf</p></td>
+<td><p><a class="reference internal" href="#use-turf"><span class="xref myst">use_turf</span></a></p></td>
+<td><p>use_TURF</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--turf-pct</p></td>
+<td><p><a class="reference internal" href="#turf-pct"><span class="xref myst">turf_pct</span></a></p></td>
+<td><p>TURF_pct</p></td>
+<td><p>0.5</p></td>
+</tr>
+<tr class="row-even"><td><p>--inst-sub</p></td>
+<td><p><a class="reference internal" href="#instance-subset"><span class="xref myst">instance_subset</span></a></p></td>
+<td><p>instance_subset</p></td>
+<td><p>2000</p></td>
+</tr>
+<tr class="row-odd"><td><p>--n-jobs</p></td>
+<td><p><a class="reference internal" href="#n-jobs"><span class="xref myst">n_jobs</span></a></p></td>
+<td><p>cores</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="feature-selection-parameters-phase-4">
+<h3>Feature Selection Parameters (Phase 4)<a class="headerlink" href="#feature-selection-parameters-phase-4" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--filter-feat</p></td>
+<td><p><a class="reference internal" href="#filter-poor-features"><span class="xref myst">filter_poor_features</span></a></p></td>
+<td><p>filter_poor_features</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>--max-feat</p></td>
+<td><p><a class="reference internal" href="#max-features-to-keep"><span class="xref myst">max_features_to_keep</span></a></p></td>
+<td><p>max_features_to_keep</p></td>
+<td><p>2000</p></td>
+</tr>
+<tr class="row-even"><td><p>--export-scores</p></td>
+<td><p><a class="reference internal" href="#export-scores"><span class="xref myst">export_scores</span></a></p></td>
+<td><p>export_scores</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>--top-fi-features</p></td>
+<td><p><a class="reference internal" href="#top-fi-features"><span class="xref myst">top_fi_features</span></a></p></td>
+<td><p>top_fi_features</p></td>
+<td><p>40</p></td>
+</tr>
+<tr class="row-even"><td><p>--over-cv-feat</p></td>
+<td><p><a class="reference internal" href="#overwrite-cv-feat"><span class="xref myst">overwrite_cv_feat</span></a></p></td>
+<td><p>overwrite_cv_feat</p></td>
+<td><p>True</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="modeling-parameters-phase-5">
+<h3>Modeling Parameters (Phase 5)<a class="headerlink" href="#modeling-parameters-phase-5" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--algorithms</p></td>
+<td><p><a class="reference internal" href="#algorithms"><span class="xref myst">algorithms</span></a></p></td>
+<td><p>algorithms</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>--exclude</p></td>
+<td><p><a class="reference internal" href="#exclude"><span class="xref myst">exclude</span></a></p></td>
+<td><p>exclude</p></td>
+<td><p>‘eLCS,XCS’</p></td>
+</tr>
+<tr class="row-even"><td><p>--subsample</p></td>
+<td><p><a class="reference internal" href="#training-subsample"><span class="xref myst">training_subsample</span></a></p></td>
+<td><p>training_subsample</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>--use-uniformFI</p></td>
+<td><p><a class="reference internal" href="#use-uniform-fi"><span class="xref myst">use_uniform_fi</span></a></p></td>
+<td><p>use_uniform_FI</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>--metric</p></td>
+<td><p><a class="reference internal" href="#primary-metric"><span class="xref myst">primary_metric</span></a></p></td>
+<td><p>primary_metric</p></td>
+<td><p>‘balanced_accuracy’</p></td>
+</tr>
+<tr class="row-odd"><td><p>--metric-direction</p></td>
+<td><p><a class="reference internal" href="#metric-direction"><span class="xref myst">metric_direction</span></a></p></td>
+<td><p>metric_direction</p></td>
+<td><p>‘maximize’</p></td>
+</tr>
+<tr class="row-even"><td><p>--n-trials</p></td>
+<td><p><a class="reference internal" href="#n-trials"><span class="xref myst">n_trials</span></a></p></td>
+<td><p>n_trials</p></td>
+<td><p>200</p></td>
+</tr>
+<tr class="row-odd"><td><p>--timeout</p></td>
+<td><p><a class="reference internal" href="#timeout"><span class="xref myst">timeout</span></a></p></td>
+<td><p>timeout</p></td>
+<td><p>900</p></td>
+</tr>
+<tr class="row-even"><td><p>--export-hyper-sweep</p></td>
+<td><p><a class="reference internal" href="#export-hyper-sweep-plots"><span class="xref myst">export_hyper_sweep_plots</span></a></p></td>
+<td><p>export_hyper_sweep_plots</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--do-LCS-sweep</p></td>
+<td><p><a class="reference internal" href="#do-lcs-sweep"><span class="xref myst">do_lcs_sweep</span></a></p></td>
+<td><p>do_lcs_sweep</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>--nu</p></td>
+<td><p><a class="reference internal" href="#lcs-nu"><span class="xref myst">lcs_nu</span></a></p></td>
+<td><p>lcs_nu</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>--iter</p></td>
+<td><p><a class="reference internal" href="#lcs-iterations"><span class="xref myst">lcs_iterations</span></a></p></td>
+<td><p>lcs_iterations</p></td>
+<td><p>200000</p></td>
+</tr>
+<tr class="row-even"><td><p>--N</p></td>
+<td><p><a class="reference internal" href="#lcs-n"><span class="xref myst">lcs_n</span></a></p></td>
+<td><p>lcs_N</p></td>
+<td><p>2000</p></td>
+</tr>
+<tr class="row-odd"><td><p>--lcs-timeout</p></td>
+<td><p><a class="reference internal" href="#lcs-timeout"><span class="xref myst">lcs_timeout</span></a></p></td>
+<td><p>lcs_timeout</p></td>
+<td><p>1200</p></td>
+</tr>
+<tr class="row-even"><td><p>--model-resubmit</p></td>
+<td><p><a class="reference internal" href="#model-resubmit"><span class="xref myst">model_resubmit</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="post-analysis-parameters-phase-6">
+<h3>Post-Analysis Parameters (Phase 6)<a class="headerlink" href="#post-analysis-parameters-phase-6" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--exclude-plots</p></td>
+<td><p><a class="reference internal" href="#exclude-plots"><span class="xref myst">exclude_plots</span></a></p></td>
+<td><p>exclude_plots</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>--metric-weight</p></td>
+<td><p><a class="reference internal" href="#metric-weight"><span class="xref myst">metric_weight</span></a></p></td>
+<td><p>metric_weight</p></td>
+<td><p>‘balanced_accuracy’</p></td>
+</tr>
+<tr class="row-even"><td><p>--top-model-fi-features</p></td>
+<td><p><a class="reference internal" href="#top-model-fi-features"><span class="xref myst">top_model_fi_features</span></a></p></td>
+<td><p>top_model_fi_features</p></td>
+<td><p>40</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="compare-data-parameters-phase-7">
+<h3>Compare Data Parameters (Phase 7)<a class="headerlink" href="#compare-data-parameters-phase-7" title="Link to this heading"></a></h3>
+<p>There are currently no run parameters to adjust for this phase.</p>
+</section>
+<section id="replication-parameters-phase-8">
+<h3>Replication Parameters (Phase 8)<a class="headerlink" href="#replication-parameters-phase-8" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--exclude-rep-plots</p></td>
+<td><p><a class="reference internal" href="#exclude-rep-plots"><span class="xref myst">exclude_rep_plots</span></a></p></td>
+<td><p>exclude_rep_plots</p></td>
+<td><p>None</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="summary-report-parameters-phase-9">
+<h3>Summary Report Parameters (Phase 9)<a class="headerlink" href="#summary-report-parameters-phase-9" title="Link to this heading"></a></h3>
+<p>There are currently no run parameters to adjust for this phase.</p>
+</section>
+<section id="cleanup-parameters">
+<h3>Cleanup Parameters<a class="headerlink" href="#cleanup-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--del-time</p></td>
+<td><p><a class="reference internal" href="#del-time"><span class="xref myst">del_time</span></a></p></td>
+<td><p>del_time</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>--del-old-cv</p></td>
+<td><p><a class="reference internal" href="#del-old-cv"><span class="xref myst">del_old_cv</span></a></p></td>
+<td><p>del_old_cv</p></td>
+<td><p>True</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="multiprocessing-parameters">
+<h3>Multiprocessing Parameters<a class="headerlink" href="#multiprocessing-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--run-parallel</p></td>
+<td><p><a class="reference internal" href="#run-parallel"><span class="xref myst">run_parallel</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--run-cluster</p></td>
+<td><p><a class="reference internal" href="#run-cluster"><span class="xref myst">run_cluster</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>“SLURM”</p></td>
+</tr>
+<tr class="row-even"><td><p>--res-mem</p></td>
+<td><p><a class="reference internal" href="#reserved-memory"><span class="xref myst">reserved_memory</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>--queue</p></td>
+<td><p><a class="reference internal" href="#queue"><span class="xref myst">queue</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>“defq”</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="logging-parameters">
+<h3>Logging Parameters<a class="headerlink" href="#logging-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command-line Parameter</p></th>
+<th class="head"><p>Config File Parameter</p></th>
+<th class="head"><p>Notebook Parameter</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>--verbose</p></td>
+<td><p><a class="reference internal" href="#verbose"><span class="xref myst">verbose</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>--logging-level</p></td>
+<td><p><a class="reference internal" href="#logging-level"><span class="xref myst">logging_level</span></a></p></td>
+<td><p>NA</p></td>
+<td><p>‘INFO’</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="parameter-details">
+<h2>Parameter Details<a class="headerlink" href="#parameter-details" title="Link to this heading"></a></h2>
+<p>This section will go into greater depth for each run parameter, primarily using the configuration file parameter name to identify each.</p>
+<ul class="simple">
+<li><p><em>Parameters identified as (str) format should be entered with single quotation marks within notebooks, or when using a configuration file, but without them when using command line arguments (CLA).</em></p></li>
+</ul>
+<hr class="docutils" />
+<section id="essential-parameters-phase-1-9">
+<h3>Essential Parameters (Phase 1-9)<a class="headerlink" href="#essential-parameters-phase-1-9" title="Link to this heading"></a></h3>
+<section id="dataset-path">
+<h4>dataset_path<a class="headerlink" href="#dataset-path" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> path to the folder containing one or more ‘target datasets’ to be analyzed that meet dataset <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">formatting requirements</span></a></p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'/content/STREAMLINE/data/DemoData'</span></code></p></li>
+<li><p><strong>Values:</strong> must be a valid folder-path</p></li>
+<li><p><strong>Tips:</strong> STREAMLINE automatically detects the number of ‘target datasets’ in this folder and will run a complete analysis on each, comparing dataset performance in phase 7</p></li>
+</ul>
+</section>
+<section id="output-path">
+<h4>output_path<a class="headerlink" href="#output-path" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> path to an output folder where STREAMLINE will save the experiment folder (containing all output files)</p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'/content/DemoOutput'</span></code></p></li>
+<li><p><strong>Values:</strong> must be a valid folder-path, however the lowest level of the folder (e.g. DemoOutput) does not already have to exist, and will be automatically created if it does not</p></li>
+<li><p><strong>Tips:</strong> When running multiple STREAMLINE experiments, it’s convenient to leave this parameter the same and just update <code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></p></li>
+</ul>
+</section>
+<section id="experiment-name">
+<h4>experiment_name<a class="headerlink" href="#experiment-name" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a unique name for the current STREAMLINE experiment output folder that will be created within <code class="docutils literal notranslate"><span class="pre">output_path</span></code></p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'demo_experiment'</span></code></p></li>
+<li><p><strong>Values:</strong> any string value name (avoid spaces)</p></li>
+<li><p><strong>Tips:</strong> a short, unique, and descriptive name is encouraged</p></li>
+</ul>
+</section>
+<section id="class-label">
+<h4>class_label<a class="headerlink" href="#class-label" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the name of the class/outcome column found in the dataset header</p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'Class'</span></code></p></li>
+<li><p><strong>Values:</strong> the case-sensitive name used in the dataset to identify the outcome labels column</p></li>
+</ul>
+</section>
+<section id="instance-label">
+<h4>instance_label<a class="headerlink" href="#instance-label" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the name of the instance ID column that may (or may not) be included in the dataset</p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'InstanceID'</span></code></p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or the case-sensitive name used in the dataset to identify the instance ID column (if present)</p></li>
+<li><p><strong>Tips:</strong> having an instance ID column in the data allows users to later identify model predictions for specific instances in the dataset, as well as reverse-engineer instance subgroups in the dataset downstream using the ExSTraCS modeling algorithm’s capability to detect and characterize heterogeneous associations. This may not be necessesary for most users.</p></li>
+</ul>
+</section>
+<section id="match-label">
+<h4>match_label<a class="headerlink" href="#match-label" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the name of the match/group ID column that can be included in a dataset to keep instances with the same match label together within the same CV partition</p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'MatchID'</span></code></p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or the case-sensitive name used in the dataset to identify the match/group ID column (if present)</p></li>
+<li><p><strong>Tips:</strong> having a match/group ID column in the data allows users to apply machine learning modeling to datasets where instances with different outcomes have been matched based on other covariates that the user wants to account for (e.g. age, sex, race, etc)</p></li>
+</ul>
+</section>
+<section id="ignore-features-path">
+<h4>ignore_features_path<a class="headerlink" href="#ignore-features-path" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a list of feature names for STREAMLINE to immediately drop from the target datasets</p></li>
+<li><p><strong>Format:</strong></p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the ‘target datasets’, e.g. <code class="docutils literal notranslate"><span class="pre">['IgnoredFeature1','IgnoredFeature2']</span></code></p></li>
+<li><p>for command line arguments: provide a (str) path to a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file including a row of feature names that can be found in any of the ‘target datasets’, e.g. <code class="docutils literal notranslate"><span class="pre">'/content/STREAMLINE/data/MadeUp/ignoreFeat.csv'</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or (for either format) should include case-sensitive feature names found in at least one of the ‘target datasets’</p></li>
+<li><p><strong>Tips:</strong> useful for easily dropping features found in the datasets that users may wish to exclude if those features might lead to data leakage, or for other data quality reasons</p></li>
+</ul>
+</section>
+<section id="categorical-feature-path">
+<h4>categorical_feature_path<a class="headerlink" href="#categorical-feature-path" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a list of feature names for STREAMLINE to explicitly treat as categorical feature types</p></li>
+<li><p><strong>Format:</strong></p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of (str) feature names that can be found in any of the ‘target datasets’, e.g. <code class="docutils literal notranslate"><span class="pre">['Feature1','Feature7']</span></code></p></li>
+<li><p>for command line arguments: provide a (str) path to a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file including a row of feature names that can be found in any of the ‘target datasets’, e.g. <code class="docutils literal notranslate"><span class="pre">'/content/STREAMLINE/data/DemoFeatureTypes/hcc_cat_feat.csv'</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or (for either format) should include case-sensitive feature names found in at least one of the ‘target datasets’</p></li>
+<li><p><strong>Tips:</strong></p>
+<ul>
+<li><p>When specifying <code class="docutils literal notranslate"><span class="pre">categorical_feature_path</span></code> feature names and leaving <code class="docutils literal notranslate"><span class="pre">quantiative_feature_path</span> <span class="pre">=</span> <span class="pre">None</span></code> all other features will be automatically treated as quanatiative</p></li>
+<li><p>When specifying <code class="docutils literal notranslate"><span class="pre">quantiative_feature_path</span></code> feature names and leaving <code class="docutils literal notranslate"><span class="pre">categorical_feature_path</span> <span class="pre">=</span> <span class="pre">None</span></code> all other features will be automatically treated as categorical</p></li>
+<li><p>When specifying feature names for both <code class="docutils literal notranslate"><span class="pre">categorical_feature_path</span></code> and <code class="docutils literal notranslate"><span class="pre">quantiative_feature_path</span></code>, any features in the data not specified by one of theses lists will have it’s feature type determined automatically using <a class="reference internal" href="#categorical_cutoff"><span class="xref myst">categorical_cutoff</span></a></p></li>
+<li><p>Note: any text-valued features in a dataset will automatically be numerically encoded and treated as categorical features (overriding any other user specifications)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="quantitative-feature-path">
+<h4>quantitative_feature_path<a class="headerlink" href="#quantitative-feature-path" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a list of feature names for STREAMLINE to explicitly treat as quantitative feature types</p>
+<ul>
+<li><p>All other aspects of this parameter are the same as for <a class="reference internal" href="#categorical_feature_path"><span class="xref myst">categorical_feature_path</span></a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="rep-data-path">
+<h4>rep_data_path<a class="headerlink" href="#rep-data-path" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> path to the folder containing one or more ‘replication datasets’ to be evaluated using previously trained models for a specific ‘target dataset’ (see <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">data formatting requirements</span></a>)</p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'/content/STREAMLINE/data/DemoRepData'</span></code></p></li>
+<li><p><strong>Values:</strong> must be a valid folder-path</p></li>
+<li><p><strong>Tips:</strong> STREAMLINE automatically detects the number of ‘replication datasets’ in this folder and will run a complete evaluation on each.</p></li>
+</ul>
+</section>
+<section id="dataset-for-rep">
+<h4>dataset_for_rep<a class="headerlink" href="#dataset-for-rep" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> path to the individual ‘target dataset’ file used to train the models which you want to evaluate with the above ‘replication datasets’ (see <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">data formatting requirements</span></a>)</p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">'/content/STREAMLINE/data/DemoData/hcc_data_custom.csv'</span></code></p></li>
+<li><p><strong>Values:</strong> must be a valid file-path</p></li>
+<li><p><strong>Tips:</strong> STREAMLINE’s replication phase is set up to evaluate all models trained from a single ‘target datasets’ at once using one or more replication datasets, specific to that ‘target dataset’. The replication phase can be run multiple times, each for a new ‘target dataset’, and it’s own respective ‘replication dataset(s)’.</p></li>
+</ul>
+</section>
+<section id="config">
+<h4>config<a class="headerlink" href="#config" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> path to the configuration file used to run STREAMLINE from the command line using a configuration file <a class="reference internal" href="running.html#using-a-configuration-file-locally"><span class="std std-ref">locally</span></a> or on a <a class="reference internal" href="running.html#using-a-configuration-file-cluster"><span class="std std-ref">cluster</span></a></p></li>
+<li><p><strong>Format:</strong> (str), e.g. <code class="docutils literal notranslate"><span class="pre">run_configs/local.cfg</span></code></p></li>
+<li><p><strong>Values:</strong> must be a valid file-path to a properly formatted configuration file</p></li>
+</ul>
+</section>
+<section id="do-till-report">
+<h4>do_till_report<a class="headerlink" href="#do-till-report" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to automatically run all phases excluding phase 8 (i.e. replication), and part of phase 9 (i.e. PDF report for replication)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-till-report</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-eda">
+<h4>do_eda<a class="headerlink" href="#do-eda" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 1 (i.e. EDA and Processing)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-eda</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-dataprep">
+<h4>do_dataprep<a class="headerlink" href="#do-dataprep" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 2 (i.e. Imputation and Scaling)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-dataprep</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-feat-imp">
+<h4>do_feat_imp<a class="headerlink" href="#do-feat-imp" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 3 (i.e. Feature Importance Estimation)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-feat-imp</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-feat-sel">
+<h4>do_feat_sel<a class="headerlink" href="#do-feat-sel" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 4 (i.e. Feature Selection)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-feat-sel</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-model">
+<h4>do_model<a class="headerlink" href="#do-model" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 5 (i.e. Modeling)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-model</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-stats">
+<h4>do_stats<a class="headerlink" href="#do-stats" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 6 (i.e. Post-Analysis)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-stats</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-compare-dataset">
+<h4>do_compare_dataset<a class="headerlink" href="#do-compare-dataset" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 7 (i.e. Compare Datasets)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-compare-dataset</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-report">
+<h4>do_report<a class="headerlink" href="#do-report" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 9 (i.e. Summary Report) specific to phases 1-7</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-report</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-replicate">
+<h4>do_replicate<a class="headerlink" href="#do-replicate" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 8 (i.e. Replication) specific to phases 1-7</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-replicate</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-rep-report">
+<h4>do_rep_report<a class="headerlink" href="#do-rep-report" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run phase 9 (i.e. Summary Report) specific to phase 8</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-rep-report</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-cleanup">
+<h4>do_cleanup<a class="headerlink" href="#do-cleanup" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to run output file cleanup (optional)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--do-cleanup</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="applytoreplication">
+<h4>applyToReplication<a class="headerlink" href="#applytoreplication" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a notebook-specific parameter indicating whether to include running phase 8 (i.e. Replication)</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="demo-run">
+<h4>demo_run<a class="headerlink" href="#demo-run" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a notebook-specific parameter indicating whether to automatically run the notebook on the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a></p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="use-data-prompt">
+<h4>use_data_prompt<a class="headerlink" href="#use-data-prompt" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> a notebook-specific parameter that activates a notebook prompt to gather essential run parameter information directly from the user rather than have them manually update code cells</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id1">
+<h3>General Parameters (Phase 1)<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<section id="cv-partitions">
+<h4>cv_partitions<a class="headerlink" href="#cv-partitions" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> <em>k</em>, the number of <em>k</em>-fold cross validation training/testing data partitions to create and apply throughout pipeline</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> an integer between <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">10</span></code> is recommended</p></li>
+<li><p><strong>Tips:</strong> smaller values will yield shorter STREAMLINE run times, but training datasets will have a smaller number of instances</p></li>
+</ul>
+</section>
+<section id="partition-method">
+<h4>partition_method<a class="headerlink" href="#partition-method" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the cross validation strategy used</p></li>
+<li><p><strong>Format:</strong> (str)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">'Stratified'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Random'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'Group'</span></code></p></li>
+<li><p><strong>Tips:</strong> <code class="docutils literal notranslate"><span class="pre">'Stratified'</span></code> is generally recommended in order to keep class balance as similar as possible within respective partitions, however <code class="docutils literal notranslate"><span class="pre">'Group'</span></code> can be selected when <code class="docutils literal notranslate"><span class="pre">match_label</span></code> has been specified to keep instances with the same match/group ID together within a respective partition</p></li>
+</ul>
+</section>
+<section id="categorical-cutoff">
+<h4>categorical_cutoff<a class="headerlink" href="#categorical-cutoff" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the number of unique values observed for a given feature in a ‘target dataset’ after which a variable is automatcially considered to be quantitative</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> an integer between <code class="docutils literal notranslate"><span class="pre">3</span></code> and <code class="docutils literal notranslate"><span class="pre">10</span></code> is generally recommended, but should be set in a dataset-specific manner</p></li>
+<li><p><strong>Tips:</strong> this parameter will only be used if the user hasn’t specifically indicated which features to treat as categorical or quantitative using <a class="reference internal" href="#categorical_feature_path"><span class="xref myst">categorical_feature_path</span></a> and/or <a class="reference internal" href="#quantitative_feature_path"><span class="xref myst">quantitative_feature_path</span></a>, respectively. However depending on the specific dataset, users can sometimes conveniently set this parameter to correctly assign variable types, e.g. if all categorical features in the dataset have fewer than 5 unique values, but quantitative ones all have more than 10 unique values, setting <code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span> <span class="pre">=</span> <span class="pre">7</span></code> will make correct feature type assignments automatically.</p></li>
+</ul>
+</section>
+<section id="sig-cutoff">
+<h4>sig_cutoff<a class="headerlink" href="#sig-cutoff" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the statistical significance cutoff used throughout the pipeline used in deciding whether to run pair-wise non-parametric statistical comparisons following group comparisons, and for identifying significant results in output files with a ‘*’</p></li>
+<li><p><strong>Format:</strong> (float)</p></li>
+<li><p><strong>Values:</strong> a value &lt;= <code class="docutils literal notranslate"><span class="pre">0.05</span></code> is recommended</p></li>
+<li><p><strong>Tips:</strong> Note: STREAMLINE does not currently automatically account for multiple testing - users should take this into consideration themselves</p></li>
+</ul>
+</section>
+<section id="random-state">
+<h4>random_state<a class="headerlink" href="#random-state" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> sets a specific random seed for the STREAMLINE run (important for pipeline reproducibility)</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> any positive integer value is fine</p></li>
+<li><p><strong>Tips:</strong> make sure to use the same value for <code class="docutils literal notranslate"><span class="pre">random_state</span></code> in a separate run along with the same datasets and run parameters to obtain reproducible pipeline results</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id2">
+<h3>Data Processing Parameters (Phase 1)<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="exclude-eda-output">
+<h4>exclude_eda_output<a class="headerlink" href="#exclude-eda-output" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 1</p></li>
+<li><p><strong>Format:</strong></p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of valid options (str) , e.g. <code class="docutils literal notranslate"><span class="pre">['describe','univariate_plots','correlation_plots']</span></code></p></li>
+<li><p>for command line arguments: provide as a list of comma separated values with no spaces, e.g. <code class="docutils literal notranslate"><span class="pre">describe,univariate_plots,correlation_plots</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or [<code class="docutils literal notranslate"><span class="pre">'describe'</span></code>, <code class="docutils literal notranslate"><span class="pre">'univariate_plots'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'correlation_plots'</span></code>] - provided in format above</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">describe</span></code> - don’t run or output the set of standard pandas functions (i.e. <code class="docutils literal notranslate"><span class="pre">Describe()</span></code>, <code class="docutils literal notranslate"><span class="pre">Dtypes()</span></code>, and <code class="docutils literal notranslate"><span class="pre">nunique()</span></code>) as <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">univariate_plots</span></code> - don’t output individual univariate analysis plots illustrating features vs. outcome (by default STREAMLINE outputs these plots for any feature with a significant univariate association based on <a class="reference internal" href="#sig-cutoff"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">correlation_plots</span></code> - don’t output feature correlation heatmaps for the ‘initial’ or ‘processed’ data EDA</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="top-uni-features">
+<h4>top_uni_features<a class="headerlink" href="#top-uni-features" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> number of most significant features to report in the notebook and PDF summary</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> an integer between <code class="docutils literal notranslate"><span class="pre">10</span></code> and <code class="docutils literal notranslate"><span class="pre">40</span></code> is recommended</p></li>
+</ul>
+</section>
+<section id="featureeng-missingness">
+<h4>featureeng_missingness<a class="headerlink" href="#featureeng-missingness" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the proportion of missing values within a feature (<em>above which</em>) a new binary categorical feature is generated that indicates if the value for an instance was missing or not</p></li>
+<li><p><strong>Format:</strong> (float)</p></li>
+<li><p><strong>Values:</strong> (<code class="docutils literal notranslate"><span class="pre">0.0</span></code> - <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+<li><p><strong>Tips:</strong> this parameter controls automated feature engineering of a new ‘missingness’ feature, generated for another pre-existing feature in the ‘target dataset’. It’s useful for identifying the potentially predictive value of any feature who’s missingness is not completely at random (NCAR)</p></li>
+</ul>
+</section>
+<section id="cleaning-missingness">
+<h4>cleaning_missingness<a class="headerlink" href="#cleaning-missingness" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the proportion of missing values, within a feature or instance, (<em>at which</em>) the given feature or instance will be automatically cleaned (i.e. removed) from the processed ‘target dataset’</p></li>
+<li><p><strong>Format:</strong> (float)</p></li>
+<li><p><strong>Values:</strong> (<code class="docutils literal notranslate"><span class="pre">0.0</span></code> - <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+<li><p><strong>Tips:</strong> this parameter controls automated data cleaning based on feature or instance ‘missingness’. STREAMLINE will first remove features with high missingness, then subsequently remove any instances with missingness over this proportion.</p></li>
+</ul>
+</section>
+<section id="correlation-removal-threshold">
+<h4>correlation_removal_threshold<a class="headerlink" href="#correlation-removal-threshold" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the (pearson) feature correlation at which one out of a pair of features is randomly removed from the processed ‘target dataset’</p></li>
+<li><p><strong>Format:</strong> (float)</p></li>
+<li><p><strong>Values:</strong> (<code class="docutils literal notranslate"><span class="pre">0.0</span></code> - <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+<li><p><strong>Tips:</strong> this parameter controls automated data cleaning based on feature correlation. The safest setting (to avoid missing predictive information) is the default of 1.0 (i.e. perfect correlation between two features). Note: STREAMLINE interprets this parameter as both a positive and negative correlation threshold.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id3">
+<h3>Imputation &amp; Scaling Parameters (Phase 2)<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="impute-data">
+<h4>impute_data<a class="headerlink" href="#impute-data" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to apply missing data imputation to features in the data or not</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> leaving to the default value of <code class="docutils literal notranslate"><span class="pre">True</span></code> is recommended but not always neccessary depending on whether missing data is present in the original datasets or what algorithms a user wishes to run (e.g. ExSTraCS can handle missing values in data)</p></li>
+</ul>
+</section>
+<section id="multi-impute">
+<h4>multi_impute<a class="headerlink" href="#multi-impute" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to apply multiple imputation using scikit-learn’s <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.impute.IterativeImputer.html">IterativeImputer</a> for imputing missing values in quantiative features. Mode imputation is always applied for categorical features.</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> for larger datasets, multiple imputation can run very slowly, and take up alot of disk space in the pickled imputation files that are automatically stored for downstream imputation of replication data or further external application of the models. When <code class="docutils literal notranslate"><span class="pre">False</span></code>, median imputation is instead used for quantiative features.</p></li>
+</ul>
+</section>
+<section id="scale-data">
+<h4>scale_data<a class="headerlink" href="#scale-data" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to apply standard scaling to features in the data or not</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> leaving to the default value of <code class="docutils literal notranslate"><span class="pre">True</span></code> is recommended but not always neccessary depending on what algorithms a user wishes to run (see <a class="reference internal" href="pipeline.html#Phase-2-imputation-and-scaling"><span class="std std-ref">Imputation and Scaling</span></a>)</p></li>
+</ul>
+</section>
+<section id="overwrite-cv">
+<h4>overwrite_cv<a class="headerlink" href="#overwrite-cv" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to overwrite the phase 1 version of CV (training and testing) datasets with newly imputed and scaled CV datasets</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however <code class="docutils literal notranslate"><span class="pre">False</span></code> allows users to view intermediary CV datasets following phase one data processing and CV partitioning</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id4">
+<h3>Feature Importance Estimation Parameters (Phase 3)<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="do-mutual-info">
+<h4>do_mutual_info<a class="headerlink" href="#do-mutual-info" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to run mutual information as a feature importance estimation algorithm (prior to modeling)</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> mutual information is good at detecting univariate association between a given feature and outcome. While we recommend running both feature importance algorithms, users should specify <code class="docutils literal notranslate"><span class="pre">True</span></code> for at least one algorithm.</p></li>
+</ul>
+</section>
+<section id="do-multisurf">
+<h4>do_multisurf<a class="headerlink" href="#do-multisurf" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to run MultiSURF as a feature importance estimation algorithm (prior to modeling)</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> MultiSURF is good at detecting both features involved in an interaction and univariate association with outcome. While we recommend running both feature importance algorithms, users should specify <code class="docutils literal notranslate"><span class="pre">True</span></code> for at least one algorithm.</p></li>
+</ul>
+</section>
+<section id="use-turf">
+<h4>use_turf<a class="headerlink" href="#use-turf" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to run TuRF, a wrapper algorithm that operates around MultiSURF, improving it’s ability to detect feature interactions in data with larger numbers of features</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> using TuRF is strongly recommended in datasets with &gt;10,000 features, but can improve feature importance rankings in datasets with fewer features as well</p></li>
+</ul>
+</section>
+<section id="turf-pct">
+<h4>turf_pct<a class="headerlink" href="#turf-pct" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> this parameter currently serves two functions: (1) it determines the propotion of instances removed from consideration during a TuRF iteration, and (2) it dictates the number of TuRF iteractions (where the nubmer of iterations is 1/<code class="docutils literal notranslate"><span class="pre">turf_pct</span></code>)</p></li>
+<li><p><strong>Format:</strong> (float)</p></li>
+<li><p><strong>Values:</strong> (<code class="docutils literal notranslate"><span class="pre">0.01</span></code>- <code class="docutils literal notranslate"><span class="pre">0.5</span></code>)</p></li>
+<li><p><strong>Tips:</strong> setting <code class="docutils literal notranslate"><span class="pre">turf_pct</span></code> to 0.5 will run MultiSURF twice, removing the lowest scoring half of features in the first iteration (and giving them a very low feature importance score), then running MultiSURF again on the remaining features to rescore them. A setting of 0.2 would remove 20% of features each iteration, over 5 iterations. Thus lower values for this parameter will increase run time.</p></li>
+</ul>
+</section>
+<section id="instance-subset">
+<h4>instance_subset<a class="headerlink" href="#instance-subset" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the number of randomly chosen instances in the training data used to use for running MultiSURF</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> any integer above <code class="docutils literal notranslate"><span class="pre">500</span></code> is recommended, but the default of <code class="docutils literal notranslate"><span class="pre">2000</span></code> seems to be a reasonable trade-off in many cases between run time and performance</p></li>
+<li><p><strong>Tips:</strong> the MultiSURF algorithm scales quadratically with the number of features in the data, but linearly with the number of features. Thus a dataset with a large number of training instances can make MultiSURF run very slowly. However, MultiSURF does not necessarily need to see all training instances to reasonably estimate feature imporance. If this parameter is set larger than the number of instances in a given training dataset, it will simply use all available training instances.</p></li>
+</ul>
+</section>
+<section id="n-jobs">
+<h4>n_jobs<a class="headerlink" href="#n-jobs" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the number of CPU cores dedicated to running MultiSURF</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">-1</span></code>, or a positive integer &lt;= the number of cores available on your machine</p></li>
+<li><p><strong>Tips:</strong> -1 will run MultiSURF on all available cores when run locally</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h3>Feature Selection Parameters (Phase 4)<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="filter-poor-features">
+<h4>filter_poor_features<a class="headerlink" href="#filter-poor-features" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to apply feature selection to the dataset</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> when set to <code class="docutils literal notranslate"><span class="pre">False</span></code> all features will be preserved in the datasets for phase 5 modeling</p></li>
+</ul>
+</section>
+<section id="max-features-to-keep">
+<h4>max_features_to_keep<a class="headerlink" href="#max-features-to-keep" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates the maximum number of top scorign features to retain in the datasets prior to phase 5 modeling (based on the scores of the feature importance estimation algorithms, i.e. Mutual Information and MultiSURF)</p></li>
+<li><p><strong>Format:</strong> (int or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>Values:</strong> any positive integer &gt; <code class="docutils literal notranslate"><span class="pre">1</span></code> is acceptable</p></li>
+<li><p><strong>Tips:</strong> we have set the default of this parameter to <code class="docutils literal notranslate"><span class="pre">2000</span></code> primarily to limit the computational burden of modeling. Users should use their own judgment in setting this parameter for the dataset/task in hand. When set to <code class="docutils literal notranslate"><span class="pre">None</span></code> and <a class="reference internal" href="#filter-poor-features"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">True</span></code>, STREAMLINE will automatically remove any feature that scored &lt;= 0 for each feature importance estimation algorithm run. When set to an integer such as <code class="docutils literal notranslate"><span class="pre">2000</span></code> and <a class="reference internal" href="#filter-poor-features"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">True</span></code>, STREAMLINE will first remove any feature that scored &lt;= <code class="docutils literal notranslate"><span class="pre">0</span></code> for each feature importance estimation algorithm run, then alternate between the sets of feature importance rankings keeping the top scoring (non-redundant) features from each algorithm.</p></li>
+</ul>
+</section>
+<section id="export-scores">
+<h4>export_scores<a class="headerlink" href="#export-scores" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to export barplots for the feature importance estimation algorithms (Mutual Information and MultiSURF) summarizing average feature importance scores over CV training partitions</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="top-fi-features">
+<h4>top_fi_features<a class="headerlink" href="#top-fi-features" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> number of top scoring features (mean over CV runs) to illustrate in the above feature importance estimation bar plots generated when [`export_scores’](#export-scores) = `True`</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> an integer between <code class="docutils literal notranslate"><span class="pre">10</span></code> and <code class="docutils literal notranslate"><span class="pre">40</span></code> is recommended</p></li>
+</ul>
+</section>
+<section id="overwrite-cv-feat">
+<h4>overwrite_cv_feat<a class="headerlink" href="#overwrite-cv-feat" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to overwrite the phase 2 version of CV (training and testing) datasets with newly feature selected CV datasets</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> will reduce the number of output files generated (and storage space) keeping only the final processed, imputed, scaled, and feature selected CV datasets, however <code class="docutils literal notranslate"><span class="pre">False</span></code> allows users to view intermediary CV datasets following phase two imputation and scaling</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id6">
+<h3>Modeling Parameters (Phase 5)<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="algorithms">
+<h4>algorithms<a class="headerlink" href="#algorithms" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> used to specify which machine learning modeling algorithms will be applied</p></li>
+<li><p><strong>Format:</strong> (list of ‘str’ values, or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of (str) algorithm identifiers, e.g. <code class="docutils literal notranslate"><span class="pre">['NB','LR','EN','DT','RF','XGB','SVM','ANN','KNN','GP','ExSTraCS]</span></code></p></li>
+<li><p>for command line arguments: provide as a list of comma separated values with no spaces, e.g. <code class="docutils literal notranslate"><span class="pre">NB,LR,EN,DT,RF,XGB,SVM,ANN,KNN,GP,ExSTraCS</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or any subset of the following [‘NB’,’LR’,’EN’,’DT’,’RF’,’GB’,’XGB’,’LBG’,’CGB’,’SVM’,’ANN’,’KNN’,’GP’,’eLCS’,’XCS’,’ExSTraCS], where:</p>
+<ul>
+<li><p>Naive Bayes (NB)</p></li>
+<li><p>Logistic Regression (LR)</p></li>
+<li><p>Elastic Net (EN)</p></li>
+<li><p>Decision Tree (DT)</p></li>
+<li><p>Random Forest (RF)</p></li>
+<li><p>Gradient Boosting (GB)</p></li>
+<li><p>Extreame Gradient Boosting (XGB)</p></li>
+<li><p>Light Gradient Boosting (LGB)</p></li>
+<li><p>Category Gradient Boosting (CGB)</p></li>
+<li><p>Support Vector Machines (SVM)</p></li>
+<li><p>Artificial Neural Networks (ANN)</p></li>
+<li><p>K-Nearest Neighbors (KNN)</p></li>
+<li><p>Genetic Programming, i.e. symbolic classification (GP)</p></li>
+<li><p>Educational Learning Classifier System (eLCS)</p></li>
+<li><p>‘X’ Classifier System (XCS)</p></li>
+<li><p>Extended Supervised Tracking Classifier System (ExSTraCS)</p></li>
+</ul>
+</li>
+<li><p><strong>Tips:</strong> setting this parameter to <code class="docutils literal notranslate"><span class="pre">None</span></code> will run all algorithms in STREAMLINE with the exception of any algorithms specified within <a class="reference internal" href="#exclude"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">exclude</span></code></span></a>. To run a fairly comprehensive subset of algorithms (without running them all), we recommend <code class="docutils literal notranslate"><span class="pre">['NB','LR','EN','DT','RF','XGB','SVM','ANN','KNN','GP','ExSTraCS]</span></code>. Specifying algorithms using this parameter is most convenient when you want to run a small subset of algorithms, e.g. <code class="docutils literal notranslate"><span class="pre">['NB','LR','DT']</span></code></p></li>
+</ul>
+</section>
+<section id="exclude">
+<h4>exclude<a class="headerlink" href="#exclude" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> used to specify which machine learning modeling algorithms to exclude from analysis</p></li>
+<li><p><strong>Format:</strong> (list of ‘str’ values, or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of (str) algorithm identifiers, e.g. <code class="docutils literal notranslate"><span class="pre">['eLCS','XCS']</span></code></p></li>
+<li><p>for command line arguments: provide as a list of comma separated values with no spaces, e.g. <code class="docutils literal notranslate"><span class="pre">eLCS,XCS</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> same as for <code class="docutils literal notranslate"><span class="pre">algorithms</span></code> above</p></li>
+<li><p><strong>Tips:</strong> setting this parameter to <code class="docutils literal notranslate"><span class="pre">None</span></code> just tells STREAMLINE not to exclude any additional algorithms not already specified within <a class="reference internal" href="#algorithms"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></span></a>. Currently, by default STREAMLINE excludes <code class="docutils literal notranslate"><span class="pre">eLCS</span></code> and <code class="docutils literal notranslate"><span class="pre">XCS</span></code> from an analysis. Specifying algorithms using this parameter is most convenient when you want to exclude a small subset of algorithms, e.g. <code class="docutils literal notranslate"><span class="pre">['SVM','eLCS','XCS']</span></code>.</p></li>
+</ul>
+</section>
+<section id="training-subsample">
+<h4>training_subsample<a class="headerlink" href="#training-subsample" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong>  the number of randomly chosen instances in the training data used to use for training certain longer running algorithms (i.e. XGB,SVM,KN,ANN,LR,eLCS,XCS,ExStraCS)</p></li>
+<li><p><strong>Format:</strong> (<code class="docutils literal notranslate"><span class="pre">0</span></code>, or another int)</p></li>
+<li><p><strong>Values:</strong> the default of <code class="docutils literal notranslate"><span class="pre">0</span></code> will use all training data. Otherwise, any positive integer is acceptable.</p></li>
+<li><p><strong>Tips:</strong> In general, we recommend leaving this parameter to <code class="docutils literal notranslate"><span class="pre">0</span></code>, however some algorithms may take a very long time to run. If you’re worried about this recommend setting this parameter to <code class="docutils literal notranslate"><span class="pre">2000</span></code> as a reasonable trade-off in many cases between run time and performance.</p></li>
+</ul>
+</section>
+<section id="use-uniform-fi">
+<h4>use_uniform_fi<a class="headerlink" href="#use-uniform-fi" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to override any available (modeling-algorithm-specific) model-feature-importance estimation methods, instead using scikit-learn’s <a class="reference external" href="https://scikit-learn.org/stable/modules/permutation_importance.html">permutation importance</a> estimator uniformly for all algorithms</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> when <code class="docutils literal notranslate"><span class="pre">True</span></code>, model feature importance will be estimated in the same way for all models/algorithms. However, when <code class="docutils literal notranslate"><span class="pre">False</span></code> the following algorithms have their own unique strategies of estimating model feature importance, that will be used instead: (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS). Any algorithms without an internal strategy for estimating model feature importance will rely on permuation importance by default.</p></li>
+</ul>
+</section>
+<section id="primary-metric">
+<h4>primary_metric<a class="headerlink" href="#primary-metric" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the evaluation metric used to optimize hyperparameters</p></li>
+<li><p><strong>Format:</strong> (str)</p></li>
+<li><p><strong>Values:</strong> We recommend <code class="docutils literal notranslate"><span class="pre">'balanced_accuracy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'roc_auc'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'f1'</span></code> (based on the users needs/priorities), however it can be any available metric identifier from (https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter)</p></li>
+</ul>
+</section>
+<section id="metric-direction">
+<h4>metric_direction<a class="headerlink" href="#metric-direction" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether the <a class="reference internal" href="#primary_metric"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">primary_metric</span></code></span></a> should be maximized or minimized during hyperparameter optimization</p></li>
+<li><p><strong>Format:</strong> (str)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">maximize</span></code> or <code class="docutils literal notranslate"><span class="pre">minimize</span></code></p></li>
+<li><p><strong>Tips:</strong> For almost all metrics (including <code class="docutils literal notranslate"><span class="pre">'balanced_accuracy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'roc_auc'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'f1'</span></code>), this should be <code class="docutils literal notranslate"><span class="pre">maximize</span></code></p></li>
+</ul>
+</section>
+<section id="n-trials">
+<h4>n_trials<a class="headerlink" href="#n-trials" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> an <a class="reference external" href="https://optuna.org/">Optuna</a> parameter controlling the number of hyperparameter optimization trials to be conducted</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> any positive integer &gt; <code class="docutils literal notranslate"><span class="pre">1</span></code>, (<code class="docutils literal notranslate"><span class="pre">200</span></code> by default)</p></li>
+<li><p><strong>Tips:</strong> When this parameter is set to a larger value, hyperparameter optimization will take longer to complete, but a broader range of hyperparameter configurations will be considered which can improve algorithm modeling performance</p></li>
+</ul>
+</section>
+<section id="timeout">
+<h4>timeout<a class="headerlink" href="#timeout" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> an <a class="reference external" href="https://optuna.org/">Optuna</a> parameter controlling the total number of <em>seconds</em> until a given hyperparameter sweep stops running new trials</p></li>
+<li><p><strong>Format:</strong> (int, or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>Values:</strong> any positive integer &gt; <code class="docutils literal notranslate"><span class="pre">1</span></code>, (<code class="docutils literal notranslate"><span class="pre">900</span></code> by default, i.e. 15 minutes), or <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>Tips:</strong> To ensure STREAMLINE reproducibility, this parameter must be set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, however this will force all algorithms to fully complete the number of trials specified by <a class="reference internal" href="#n-trials"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">n_trials</span></code></span></a>. When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.</p></li>
+</ul>
+</section>
+<section id="export-hyper-sweep-plots">
+<h4>export_hyper_sweep_plots<a class="headerlink" href="#export-hyper-sweep-plots" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to generate an <a class="reference external" href="https://optuna.org/">Optuna</a>-plot visualizing the hyperparameter sweep of an algorithm on a given dataset</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="do-lcs-sweep">
+<h4>do_lcs_sweep<a class="headerlink" href="#do-lcs-sweep" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to apply an <a class="reference external" href="https://optuna.org/">Optuna</a> hyperparameter sweep to one of the rule-based ML algorithms, i.e. (eLCS, XCS, ExSTraCS)</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> Learning classifier system (LCS), i.e. rule-based ML modeling algorithms can be computationally expensive, but have fairly reliable default run parameter settings. This parameter allow users to avoid a hyperparameter sweep, and train each LCS algorithm only once on manually specified run parameters. To save run time, in general we recommend leaving this parameter to <code class="docutils literal notranslate"><span class="pre">False</span></code> and specifying the LCS run parameters described below. Watch this <a class="reference external" href="https://www.youtube.com/watch?v=CRge_cZ2cJc">video</a> to learn LCS basics.</p></li>
+</ul>
+</section>
+<section id="lcs-nu">
+<h4>lcs_nu<a class="headerlink" href="#lcs-nu" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> specifies the <em>nu</em> parameter used by LCS algorithms (i.e. eLCS,XCS,ExSTraCS)</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> (<code class="docutils literal notranslate"><span class="pre">1</span></code> - <code class="docutils literal notranslate"><span class="pre">10</span></code>)</p></li>
+<li><p><strong>Tips:</strong> higher values place more pressure for these algorithms to generate perfectly accurate rules, which easily leads to overfitting in noisy problems. Unless you know that your models should be able to achieve 100% testing accuracy on the target data, we recommend leaving this parameter to the default of <code class="docutils literal notranslate"><span class="pre">1</span></code>. Watch this <a class="reference external" href="https://www.youtube.com/watch?v=CRge_cZ2cJc">video</a> to learn LCS basics.</p></li>
+</ul>
+</section>
+<section id="lcs-iterations">
+<h4>lcs_iterations<a class="headerlink" href="#lcs-iterations" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> specifies the number of learning iterations an LCS algorithm will run (i.e. eLCS,XCS,ExSTraCS)</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> a positive integer at least two times larger than the number of training instances in the target data</p></li>
+<li><p><strong>Tips:</strong> each iteration, an LCS algorithm focuses on one instance in the training dataset, thus this parameter should always be larger (ideally much larger) than the number of training instances in the data. For most users we recommend the default value of <code class="docutils literal notranslate"><span class="pre">200000</span></code> as a starting point, however, as a key run parameter, more learning iterations is typically expected to improve LCS algorithm performance. Watch this <a class="reference external" href="https://www.youtube.com/watch?v=CRge_cZ2cJc">video</a> to learn LCS basics.</p></li>
+</ul>
+</section>
+<section id="lcs-n">
+<h4>lcs_N<a class="headerlink" href="#lcs-n" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> specifies the maximum rule-population size for an LCS algorithm (i.e. eLCS,XCS,ExSTraCS)</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> a positive integer &gt; <code class="docutils literal notranslate"><span class="pre">50</span></code></p></li>
+<li><p><strong>Tips:</strong> LCS algorithms learn a population (i.e set) of rules that collectively constitute the learned model. When this parameter is larger, LCS will take longer to run. However, LCS algorithms require a larger rule-population to solve more complex problems or analyze larger datasets. For most users we recommend the default value of <code class="docutils literal notranslate"><span class="pre">2000</span></code> as a starting point, however, as a key run parameter, a larger rule-population is typically expected to improve LCS algorithm performance. Watch this <a class="reference external" href="https://www.youtube.com/watch?v=CRge_cZ2cJc">video</a> to learn LCS basics.</p></li>
+</ul>
+</section>
+<section id="lcs-timeout">
+<h4>lcs_timeout<a class="headerlink" href="#lcs-timeout" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> similar to <a class="reference internal" href="#timeout"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a>, this <a class="reference external" href="https://optuna.org/">Optuna</a> parameter controlling the total number of <em>seconds</em> until an LCS algorithm hyperparameter sweep stops running new trials. LCS uses a separate run parameter for this since it can take alot longer to run an LCS hyperparameter sweep.</p></li>
+<li><p><strong>Format:</strong> (int, or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><strong>Values:</strong> any positive integer &gt; <code class="docutils literal notranslate"><span class="pre">1</span></code>, (<code class="docutils literal notranslate"><span class="pre">1200</span></code> by default, i.e. 20 minutes), or <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>Tips:</strong> To ensure STREAMLINE reproducibility, this parameter must be set to <code class="docutils literal notranslate"><span class="pre">None</span></code> if <a class="reference internal" href="#do-lcs-sweep"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">do_lcs_sweep</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">True</span></code>, however this will force LCS algorithms to fully complete the number of trials specified by <a class="reference internal" href="#n-trials"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">n_trials</span></code></span></a>. When set to an integer, Optuna will submit new trials (as previous ones complete), up until this time limit, and then only use the hyperparameter sweep trials it has completed to pick the best hyperparameter settings for the given LCS algorithm. Any trial already started after this time limit is reached, will continue to run until completion. This means that one LCS algorithm can spend more total time on hyperparameter trials than another, when this parameter is given a time limit.</p></li>
+</ul>
+</section>
+<section id="model-resubmit">
+<h4>model_resubmit<a class="headerlink" href="#model-resubmit" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE that this is a secondary run attempt of phase 5 (i.e. modeling)</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--model-resubmit</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> set this parameter to <code class="docutils literal notranslate"><span class="pre">True</span></code> either because (1) one of the previous model training jobs timed-out, or failed and the user wants to re-submit them or (2) the user had previously run phase 5 on a subset of available algorithms, but now they’d like to run additional algorithms</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id7">
+<h3>Post-Analysis Parameters (Phase 6)<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="exclude-plots">
+<h4>exclude_plots<a class="headerlink" href="#exclude-plots" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 6 (post-analysis)</p></li>
+<li><p><strong>Format:</strong></p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of valid options (str), e.g. <code class="docutils literal notranslate"><span class="pre">['plot_ROC','plot_PRC']</span></code></p></li>
+<li><p>for command line arguments: provide as a list of comma separated values with no spaces, e.g. <code class="docutils literal notranslate"><span class="pre">plot_ROC,plot_PRC</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or [<code class="docutils literal notranslate"><span class="pre">'plot_ROC'</span></code>, <code class="docutils literal notranslate"><span class="pre">'plot_PRC'</span></code>, <code class="docutils literal notranslate"><span class="pre">'plot_FI_box'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'plot_metric_boxplots'</span></code>] - provided in format above</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_ROC</span></code> - don’t output ROC plots individually for each algorithm including all CV results and averages</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_PRC</span></code> - don’t output PRC plots individually for each algorithm including all CV results and averages</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_FI_box</span></code> - don’t output model feature importance boxplots for each algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_metric_boxplots</span></code> - don’t output evaluation metric boxplots for each metric comparing algorithm performance</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="metric-weight">
+<h4>metric_weight<a class="headerlink" href="#metric-weight" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the evaluation metric used to weigh model feature importance estimates in the composite feature importance plots</p></li>
+<li><p><strong>Format:</strong> (str)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">balanced_accuracy</span></code> or <code class="docutils literal notranslate"><span class="pre">roc_auc</span></code></p></li>
+<li><p><strong>Tips:</strong> we recommend setting the this parameter the same as <a class="reference internal" href="#primary-metric"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">primary_metric</span></code></span></a> if possible</p></li>
+</ul>
+</section>
+<section id="top-model-fi-features">
+<h4>top_model_fi_features<a class="headerlink" href="#top-model-fi-features" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the number of top scoring features (based on model feature importance estimates) to illustrate in feature importance figures (i.e. feature importance boxplots, and composite feature importance plots)</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> an integer between <code class="docutils literal notranslate"><span class="pre">10</span></code> and <code class="docutils literal notranslate"><span class="pre">40</span></code> is recommended</p></li>
+<li><p><strong>Tips:</strong></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id8">
+<h3>Replication Parameters (Phase 8)<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<section id="exclude-rep-plots">
+<h4>exclude_rep_plots<a class="headerlink" href="#exclude-rep-plots" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> allows users to exclude some of the outputs automatically generated by STREAMLINE during phase 8 (replication)</p></li>
+<li><p><strong>Format:</strong></p>
+<ol class="arabic simple">
+<li><p>for notebook or config file modes: provide a (list) of valid options (str), e.g. <code class="docutils literal notranslate"><span class="pre">['plot_ROC',</span> <span class="pre">'plot_PRC']</span></code></p></li>
+<li><p>for command line arguments: provide as a list of comma separated values with no spaces, e.g. <code class="docutils literal notranslate"><span class="pre">plot_ROC,plot_PRC</span></code></p></li>
+</ol>
+</li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">None</span></code>, or [<code class="docutils literal notranslate"><span class="pre">'feature_correlations'</span></code>,<code class="docutils literal notranslate"><span class="pre">'plot_ROC'</span></code>, <code class="docutils literal notranslate"><span class="pre">'plot_PRC'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'plot_metric_boxplots'</span></code>] - provided in format above</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature_correlations</span></code> - don’t output feature correlation heatmaps for the replication datasets during replication EDA</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_ROC</span></code> - don’t output ROC plots individually for each algorithm including all CV results and averages</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_PRC</span></code> - don’t output PRC plots individually for each algorithm including all CV results and averages</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plot_metric_boxplots</span></code> - don’t output evaluation metric boxplots for each metric comparing algorithm performance</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id9">
+<h3>Cleanup Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="del-time">
+<h4>del_time<a class="headerlink" href="#del-time" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to delete individual runtime files from the output experiment folder</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--del-time</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="del-old-cv">
+<h4>del_old_cv<a class="headerlink" href="#del-old-cv" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to delete intermediary cross validation datasets (i.e. training and testing datasets prior to completed data processing, imputation, scaling, and feature selection) form the output experiment folder</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--del-old-cv</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> this parameter is only relevant if <a class="reference internal" href="#overwrite-cv"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></span></a> was set to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id10">
+<h3>Multiprocessing Parameters<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<section id="run-parallel">
+<h4>run_parallel<a class="headerlink" href="#run-parallel" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to run STREAMLINE in parallel (locally) with CPU core multiprocessing</p></li>
+<li><p><strong>Format:</strong> (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>Tips:</strong> this parameter is only relevant when [`run_cluster](#run-cluster) = `False`</p></li>
+</ul>
+</section>
+<section id="run-cluster">
+<h4>run_cluster<a class="headerlink" href="#run-cluster" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indicates whether or not to run STREAMLINE on an dask-compatible computing cluster (HPC)</p></li>
+<li><p><strong>Format:</strong>  (bool or str)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">False</span></code>, or a string identifying the cluster type from options below:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">LSF</span></code> - LSFCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SLURM</span></code> - SLURMCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTCondor</span></code> - HTCondorCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Moab</span></code> - MoabCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OAR</span></code> - OARCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PBS</span></code> - PBSCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SGE</span></code> - SGECluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UGE</span></code> - SGECluster variant used at our institution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Local</span></code> - LocalCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SLURMOld</span></code> - Legacy job submission for SLURMCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LSFOld</span></code> - Legacy job submission for LSFCluster</p></li>
+</ul>
+</li>
+<li><p><strong>Tips:</strong> The default of <code class="docutils literal notranslate"><span class="pre">&quot;SLURM&quot;</span></code> is specific to our institutions HPC hardware/software, and may not be relevant to many users</p></li>
+</ul>
+</section>
+<section id="reserved-memory">
+<h4>reserved_memory<a class="headerlink" href="#reserved-memory" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> the memory (in Gigabytes) reserved for STREAMLINE jobs</p></li>
+<li><p><strong>Format:</strong> (int)</p></li>
+<li><p><strong>Values:</strong> an integer generally &gt; <code class="docutils literal notranslate"><span class="pre">1</span></code> or &lt; the maximum memory available for an HPC job on your system (consult your cluster documentation or administrator)</p></li>
+</ul>
+</section>
+<section id="queue">
+<h4>queue<a class="headerlink" href="#queue" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> indiates the queue within your HPC where your STREAMLINE jobs will be scheduled to run</p></li>
+<li><p><strong>Format:</strong>  (str)</p></li>
+<li><p><strong>Values:</strong> any viable str name for a queue you have access to at your institution</p></li>
+<li><p><strong>Tips:</strong> The default of <code class="docutils literal notranslate"><span class="pre">&quot;defq&quot;</span></code> is specific to our institutions HPC hardware/software, and may not be relevant to many users</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id11">
+<h3>Logging Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<section id="verbose">
+<h4>verbose<a class="headerlink" href="#verbose" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE to send all print output and warnings to the command line output</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--verbose</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+<section id="logging-level">
+<h4>logging_level<a class="headerlink" href="#logging-level" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Description:</strong> boolean flag telling STREAMLINE what loggin level to use in the command line output</p></li>
+<li><p><strong>Format:</strong> [Command Line Argument] just use flag (i.e. <code class="docutils literal notranslate"><span class="pre">--logging-level</span></code>), [Configuration File] (bool)</p></li>
+<li><p><strong>Values:</strong> <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="guidelines-for-setting-parameters">
+<h2>Guidelines for Setting Parameters<a class="headerlink" href="#guidelines-for-setting-parameters" title="Link to this heading"></a></h2>
+<section id="ensuring-output-reproducibility">
+<h3>Ensuring Output Reproducibility<a class="headerlink" href="#ensuring-output-reproducibility" title="Link to this heading"></a></h3>
+<p>STREAMLINE is completely reproducible when the <a class="reference internal" href="#timeout"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a> parameter is set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, and. This also assumes that STREAMLINE is being run on the same datasets, with the same run parameters (including <a class="reference internal" href="#random-state"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">random_state</span></code></span></a>).</p>
+<p>When <a class="reference internal" href="#timeout"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a> is <em>not</em> set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, STREAMLINE output can sometimes vary slightly (particularly when parallelized) since Optuna (for hyperparameter optimization) may not complete the same number of optimization trials within the user specified time limit on different
+computing resources.</p>
+<p>However, having a <a class="reference internal" href="#timeout"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a> value specified helps ensure STREAMLINE run completion within a reasonable time frame.</p>
+</section>
+<section id="reducing-runtime-and-memory-use">
+<h3>Reducing Runtime and Memory Use<a class="headerlink" href="#reducing-runtime-and-memory-use" title="Link to this heading"></a></h3>
+<p>Conducting a more effective ML analysis typically demands a much larger amount of computing power and runtime. However, we provide general guidelines here for limiting overall runtime of a STREAMLINE experiment.</p>
+<ol class="arabic simple">
+<li><p>Run/include a fewer number of datasets in <a class="reference internal" href="#dataset_path"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">dataset_path</span></code></span></a> at once.</p></li>
+<li><p>Run using fewer ML <a class="reference internal" href="#algorithms"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></span></a> at once:</p>
+<ul class="simple">
+<li><p>Naive Bayes, Logistic Regression, and Decision Trees are typically fastest.</p></li>
+<li><p>Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).</p></li>
+</ul>
+</li>
+<li><p>Run using a smaller number of <a class="reference internal" href="#cv-partitions"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">cv_partitions</span></code></span></a>.</p></li>
+<li><p>Run without generating additional plots (see <a class="reference internal" href="#exclude-eda-output"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">exclude_eda_output</span></code></span></a>, <a class="reference internal" href="#export-hyper-sweep-plots"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">export_hyper_sweep_plots</span></code></span></a>,<a class="reference internal" href="#exclude-plots"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">exclude_plots</span></code></span></a>, <a class="reference internal" href="#exclude-rep-plots"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">exclude_rep_plots</span></code></span></a>).</p></li>
+<li><p>In large datasets with missing values, set <a class="reference internal" href="#multi-impute"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">multi_impute</span></code></span></a> to <code class="docutils literal notranslate"><span class="pre">False</span></code>. This will apply simple mean imputation to numerical features instead (saving computational time, memory and output file space).</p></li>
+<li><p>Set <a class="reference internal" href="#use-turf"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">use_TURF</span></code></span></a> as <code class="docutils literal notranslate"><span class="pre">False</span></code>. However we strongly recommend setting this to <code class="docutils literal notranslate"><span class="pre">True</span></code> in feature spaces &gt; 10,000 in order to avoid missing feature interactions during feature selection.</p></li>
+<li><p>Set <a class="reference internal" href="#turf-pct"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">TURF_pct</span></code></span></a> no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.</p></li>
+<li><p>Set <a class="reference internal" href="#instance-subset"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">instance_subset</span></code></span></a> at or below <code class="docutils literal notranslate"><span class="pre">2000</span></code> (speeds up multiSURF feature importance evaluation at potential expense of performance).</p></li>
+<li><p>Set <a class="reference internal" href="#max-features-to-keep"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">max_features_to_keep</span></code></span></a> at or below <code class="docutils literal notranslate"><span class="pre">2000</span></code> and <a class="reference internal" href="#filter-poor-features"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">True</span></code> (this limits the maximum number of features that can be passed on to ML modeling).</p></li>
+<li><p>Set <a class="reference internal" href="#training-subsample"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">training_subsample</span></code></span></a> at or below <code class="docutils literal notranslate"><span class="pre">2000</span></code> (this limits the number of sample used to train particularly expensive ML modeling algorithms). However avoid setting this too low, or ML algorithms may not have enough training instances to effectively learn.</p></li>
+<li><p>Set <a class="reference internal" href="#n-trials"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">n_trials</span></code></span></a> and/or <a class="reference internal" href="#timeout"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a> to lower values (this limits the time spent on hyperparameter optimization).</p></li>
+<li><p>If using eLCS, XCS, or ExSTraCS, set <a class="reference internal" href="#do-lcs-sweep"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">do_lcs_sweep</span></code></span></a> to <code class="docutils literal notranslate"><span class="pre">False</span></code>, <a class="reference internal" href="#lcs_iterations"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">lcs_iterations</span></code></span></a> at or below <code class="docutils literal notranslate"><span class="pre">200000</span></code>, and <a class="reference internal" href="#lcs-n"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">lcs_n</span></code></span></a> at or below <code class="docutils literal notranslate"><span class="pre">2000</span></code>.</p></li>
+</ol>
+</section>
+<section id="improving-modeling-performance">
+<h3>Improving Modeling Performance<a class="headerlink" href="#improving-modeling-performance" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Generally speaking, the more computational time you are willing to spend on ML, the better the results. Doing the opposite of the above tips for reducing runtime, will likely improve performance.</p></li>
+<li><p>In certain situations, setting <a class="reference internal" href="#filter-poor-features"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code></span></a> to <code class="docutils literal notranslate"><span class="pre">False</span></code>, and relying on the ML algorithms alone to identify relevant features can possibly yield better performance. However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).</p></li>
+<li><p>Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These learning classifier system (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).</p></li>
+<li><p>In problems with no noise (i.e. datasets where it is possible to achieve 100% testing accuracy), LCS algorithms (i.e. eLCS, XCS, and ExSTraCS) perform better when <a class="reference internal" href="#lcs-nu"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">lcs_nu</span></code></span></a> is set larger than <code class="docutils literal notranslate"><span class="pre">1</span></code> (i.e. <code class="docutils literal notranslate"><span class="pre">5</span></code> or <code class="docutils literal notranslate"><span class="pre">10</span></code> recommended).  This applies significantly more pressure for individual rules to achieve perfect accuracy.  In noisy problems this may lead to significant overfitting.</p></li>
+</ul>
+</section>
+<section id="other-guidelines">
+<h3>Other Guidelines<a class="headerlink" href="#other-guidelines" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.</p></li>
+<li><p>Logistic Regression’ baseline model feature importance estimation is determined by the exponential of the feature’s coefficient. This should only be used if data scaling is applied by the pipeline. Otherwise <a class="reference internal" href="#use_uniform_fi"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">use_uniform_fi</span></code></span></a> should be <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p>While the STREAMLINE includes <a class="reference internal" href="#impute-data"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">impute_data</span></code></span></a> as an option that can be turned off in phase 2, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while <a class="reference internal" href="#impute-data"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">impute_data</span></code></span></a> is set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running.html" class="btn btn-neutral float-left" title="Running STREAMLINE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Navigating STREAMLINE Output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

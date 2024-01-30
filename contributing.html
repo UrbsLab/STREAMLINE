@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Citing STREAMLINE" href="citation.html" />
+    <link rel="prev" title="Development Notes" href="development.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#project-layout">Project Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-contribute">How to Contribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#before-submitting-a-pull-request">Before Submitting a Pull Request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating-the-documentation">Updating the Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#after-submitting-a-pull-request">After Submitting a Pull Request</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h1>
+<p>We welcome you to <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/issues/">check the existing issues</a> for bugs or enhancements to work on.
+If you have an idea for an extension to STREAMLINE, please <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/issues//new">file a new issue</a>,
+or email harsh.bandhey&#64;cshs.org to discuss it.</p>
+<hr class="docutils" />
+<section id="project-layout">
+<h2>Project Layout<a class="headerlink" href="#project-layout" title="Link to this heading"></a></h2>
+<p>The latest release of STREAMLINE is on the <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/tree/main">main branch</a>,
+whereas the legacy/Beta 0.2.5 version of STREAMLINE is on the <a class="reference external" href="https://github.com/STREAMLINE/tree/legacy">legacy branch</a>.</p>
+<p>The in-development code is stored in the  <a class="reference external" href="https://github.com/STREAMLINE/tree/dev">development branch</a>
+Make sure you are looking at and working on the correct branch if you’re looking to contribute code.</p>
+<p>In terms of directory structure:</p>
+<ul class="simple">
+<li><p>All of STREAMLINE’s code sources are in the <code class="docutils literal notranslate"><span class="pre">streamline</span></code> directory</p></li>
+<li><p>The documentation sources are in the <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> directory</p></li>
+<li><p>Unit tests for STREAMLINE are in the <code class="docutils literal notranslate"><span class="pre">streamline/tests</span></code> module</p></li>
+</ul>
+<p>Make sure to familiarize yourself with the project layout before making any major contributions.</p>
+</section>
+<hr class="docutils" />
+<section id="how-to-contribute">
+<h2>How to Contribute<a class="headerlink" href="#how-to-contribute" title="Link to this heading"></a></h2>
+<p>The preferred way to contribute to STREAMLINE is to fork the
+<a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/">main repository</a> on
+GitHub:</p>
+<ol class="arabic">
+<li><p>Fork the <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/">project repository</a>:
+click on the ‘Fork’ button near the top of the page. This creates
+a copy of the code under your account on the GitHub server.</p></li>
+<li><p>Clone this copy to your local disk:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   $ git clone git@github.com:YourLogin/STREAMLINE.git
+   $ cd STREAMLINE
+</pre></div>
+</div>
+</li>
+<li><p>Create a branch to hold your changes:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   $ git checkout -b my-contribution
+</pre></div>
+</div>
+</li>
+<li><p>Make sure your local environment is set up correctly for development. Installation instructions are almost identical to <a class="reference internal" href="install.html"><span class="std std-doc">the user instructions</span></a></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   $ pip install -r requirements
+</pre></div>
+</div>
+</li>
+<li><p>Start making changes on your newly created branch, remembering to never work on the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch! Work on this copy on your computer using Git to do the version control.</p></li>
+<li><p>Once some changes are saved locally, you can use your tweaked version of STREAMLINE by navigating to the project’s base directory and running STREAMLINE in a script.</p></li>
+<li><p>To check your changes haven’t broken any existing tests and to check new tests you’ve added pass run the following (note, you must have the <code class="docutils literal notranslate"><span class="pre">pytest</span></code> package installed within your dev environment for this to work):</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   $ pytest --log-cli-level=INFO
+</pre></div>
+</div>
+</li>
+<li><p>When you’re done editing and local testing, run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   $ git add &lt;modified_files&gt;
+   $ git commit -m &lt;git messages&gt;
+</pre></div>
+</div>
+<p>to record your changes in Git, then push them to GitHub with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>   $ git push -u origin my-contribution
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Finally, go to the web page of your fork of the STREAMLINE repo, and click ‘Pull Request’ (PR) to send your changes to the maintainers for review. Make sure that you send your PR to the <code class="docutils literal notranslate"><span class="pre">dev</span></code> branch, as the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch is reserved for the latest stable release. This will start the CI server to check all the project’s unit tests run and send an email to the maintainers.</p>
+<p>(For details on the above look up the <a class="reference external" href="http://git-scm.com/documentation">Git documentation</a> on the web.)</p>
+</section>
+<hr class="docutils" />
+<section id="before-submitting-a-pull-request">
+<h2>Before Submitting a Pull Request<a class="headerlink" href="#before-submitting-a-pull-request" title="Link to this heading"></a></h2>
+<p>Before you submit a pull request for your contribution, please work through this checklist to make sure that you have done everything necessary so we can efficiently review and accept your changes.</p>
+<p>If your contribution changes STREAMLINE in any way:</p>
+<ul class="simple">
+<li><p>Update the <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/tree/main/docs/source">documentation</a> so all of your changes are reflected there.</p></li>
+<li><p>Update the <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/blob/main/README.md">README</a> if anything there has changed.</p></li>
+</ul>
+<p>If your contribution involves any code changes:</p>
+<ul class="simple">
+<li><p>Update the <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/tree/main/streamine/tests">project unit tests</a> to test your code changes.</p></li>
+<li><p>Make sure that your code is properly commented with <a class="reference external" href="https://www.python.org/dev/peps/pep-0257/">docstrings</a> and comments explaining your rationale behind non-obvious coding practices.</p></li>
+</ul>
+<p>If your contribution requires a new library dependency:</p>
+<ul class="simple">
+<li><p>Double-check that the new dependency is easy to install via <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p></li>
+<li><p>Add it to the <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="updating-the-documentation">
+<h2>Updating the Documentation<a class="headerlink" href="#updating-the-documentation" title="Link to this heading"></a></h2>
+<p>We use <a class="reference external" href="https://www.sphinx-doc.org/">sphinx</a> to manage our <a class="reference external" href="https://urbslab.github.io/STREAMLINE/">documentation</a>.
+This allows us to write the docs in Markdown and compile them to HTML as needed.
+Below are a few useful tips/commands to know when updating the documentation.</p>
+<ul>
+<li><p>Install additional documentation packages to generate documentation locally</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ pip install sphinx sphinx_rtd_theme myst-parser
+</pre></div>
+</div>
+</li>
+<li><p>Edit/Add markdown or reST files in the <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> folder.</p></li>
+<li><p>Each new added markdown or reST file needs to be added into the <code class="docutils literal notranslate"><span class="pre">toctree</span></code> in <code class="docutils literal notranslate"><span class="pre">docs/source/index.rst</span></code> file.</p></li>
+<li><p>You can use the following command to creates a fresh build of the documentation in HTML. Always run this before deploying the documentation to GitHub.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> $ sphinx-build -b html docs/source docs/build/html -E -a
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="after-submitting-a-pull-request">
+<h2>After Submitting a Pull Request<a class="headerlink" href="#after-submitting-a-pull-request" title="Link to this heading"></a></h2>
+<p>After submitting your pull request, GitHub Actions will automatically run unit tests on your changes and make sure that your updated code runs.</p>
+<p>Check back shortly after submitting your pull request to make sure that your code passes these checks.
+If any of the checks come back with a red X, then do your best to address the errors.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="development.html" class="btn btn-neutral float-left" title="Development Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="citation.html" class="btn btn-neutral float-right" title="Citing STREAMLINE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

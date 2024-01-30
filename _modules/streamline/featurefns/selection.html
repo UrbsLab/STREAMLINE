@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.featurefns.selection &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.featurefns.selection</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.featurefns.selection</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">statistics</span> <span class="kn">import</span> <span class="n">median</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="FeatureSelection">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection">[docs]</a>
+<span class="k">class</span> <span class="nc">FeatureSelection</span><span class="p">(</span><span class="n">Job</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature Selection Job for CV Data Splits</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">n_splits</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">class_label</span><span class="p">,</span> <span class="n">instance_label</span><span class="p">,</span> <span class="n">export_scores</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">top_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">max_features_to_keep</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">filter_poor_features</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">show_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            export_scores: flag to export top feature scores (default=True)</span>
+<span class="sd">            top_features: number of top features to consider (default=20)</span>
+<span class="sd">            max_features_to_keep: maximum number of features to keep (default=2000)</span>
+<span class="sd">            filter_poor_features: flag to filter poor features (default=True)</span>
+<span class="sd">            overwrite_cv: overwrite last cross validation dataset (default=False)</span>
+<span class="sd">            show_plots: flag to show plots (default=False)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">=</span> <span class="n">full_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="n">algorithms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_splits</span> <span class="o">=</span> <span class="n">n_splits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span> <span class="o">=</span> <span class="n">class_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">=</span> <span class="n">instance_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_scores</span> <span class="o">=</span> <span class="n">export_scores</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">top_features</span> <span class="o">=</span> <span class="n">top_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_features_to_keep</span> <span class="o">=</span> <span class="n">max_features_to_keep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter_poor_features</span> <span class="o">=</span> <span class="n">filter_poor_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cv</span> <span class="o">=</span> <span class="n">overwrite_cv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span> <span class="o">=</span> <span class="n">show_plots</span>
+
+<div class="viewcode-block" id="FeatureSelection.run">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run all elements of the feature selection: reports average feature importance scores across</span>
+<span class="sd">        CV sets and applies collective feature selection to generate new feature selected datasets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># def job(full_path,do_mutual_info,do_multisurf,max_features_to_keep,</span>
+        <span class="c1">#         filter_poor_features,top_features,export_scores,class_label,</span>
+        <span class="c1">#         instance_label,cv_partitions,overwrite_cv,jupyterRun):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">dataset_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">selected_feature_lists</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">meta_feature_ranks</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># total_features = 0</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Plotting Feature Importance Scores...&#39;</span><span class="p">)</span>
+        <span class="c1"># Manage and summarize mutual information feature importance scores</span>
+        <span class="c1"># logging.warning(&quot;MI in algorithms&quot; + str(&quot;MI&quot; in self.algorithms))</span>
+        <span class="c1"># logging.warning(&quot;MS in algorithms&quot; + str(&quot;MS&quot; in self.algorithms))</span>
+        <span class="c1"># logging.warning(&quot;len(algorithms):&quot; + str(len(self.algorithms)))</span>
+        <span class="k">if</span> <span class="s2">&quot;MI&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+            <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">meta_feature_ranks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_ave_fs</span><span class="p">(</span><span class="s2">&quot;MI&quot;</span><span class="p">,</span>
+                                                                            <span class="s2">&quot;mutual_information&quot;</span><span class="p">,</span>
+                                                                            <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">meta_feature_ranks</span><span class="p">)</span>
+        <span class="c1"># Manage and summarize MultiSURF feature importance scores</span>
+        <span class="k">if</span> <span class="s2">&quot;MS&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+            <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">meta_feature_ranks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_ave_fs</span><span class="p">(</span><span class="s2">&quot;MS&quot;</span><span class="p">,</span> <span class="s2">&quot;multisurf&quot;</span><span class="p">,</span>
+                                                                            <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">meta_feature_ranks</span><span class="p">)</span>
+        <span class="c1"># Conduct collective feature selection</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Applying collective feature selection...&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_poor_features</span><span class="p">:</span>
+                <span class="c1"># Identify top feature subset for each cv</span>
+                <span class="n">cv_selected_list</span><span class="p">,</span> <span class="n">informative_feature_counts</span><span class="p">,</span> <span class="n">uninformative_feature_counts</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">select_features</span><span class="p">(</span><span class="n">selected_feature_lists</span><span class="p">,</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">max_features_to_keep</span><span class="p">,</span> <span class="n">meta_feature_ranks</span><span class="p">)</span>
+                <span class="c1"># Save count of features identified as informative for each CV partitions</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">report_informative_features</span><span class="p">(</span><span class="n">informative_feature_counts</span><span class="p">,</span> <span class="n">uninformative_feature_counts</span><span class="p">)</span>
+                <span class="c1"># Generate new datasets with selected feature subsets</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gen_filtered_datasets</span><span class="p">(</span><span class="n">cv_selected_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/CVDatasets&#39;</span><span class="p">,</span>
+                                           <span class="n">dataset_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cv</span><span class="p">)</span>
+        <span class="c1"># Save phase runtime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_runtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span><span class="p">)</span>
+        <span class="c1"># Print phase completion</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">dataset_name</span> <span class="o">+</span> <span class="s2">&quot; Phase 4 Complete&quot;</span><span class="p">)</span>
+        <span class="n">experiment_path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">job_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">experiment_path</span> <span class="o">+</span> <span class="s1">&#39;/jobsCompleted/job_featureselection_&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">job_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;complete&#39;</span><span class="p">)</span>
+        <span class="n">job_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FeatureSelection.report_informative_features">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.report_informative_features">[docs]</a>
+    <span class="k">def</span> <span class="nf">report_informative_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">informative_feature_counts</span><span class="p">,</span> <span class="n">uninformative_feature_counts</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves counts of informative vs uninformative features (i.e. those with feature</span>
+<span class="sd">        importance scores &lt;= 0) in an csv file.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            informative_feature_counts: count of informative features to save</span>
+<span class="sd">            uninformative_feature_counts: count of uninformative features to save</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Informative&#39;</span><span class="p">:</span> <span class="n">informative_feature_counts</span><span class="p">,</span> <span class="s1">&#39;Uninformative&#39;</span><span class="p">:</span> <span class="n">uninformative_feature_counts</span><span class="p">}</span>
+        <span class="n">count_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+        <span class="n">count_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/feature_selection/InformativeFeatureSummary.csv&quot;</span><span class="p">,</span>
+                        <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;CV_Partition&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FeatureSelection.report_ave_fs">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.report_ave_fs">[docs]</a>
+    <span class="k">def</span> <span class="nf">report_ave_fs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">algorithmlabel</span><span class="p">,</span>
+                      <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">meta_feature_ranks</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads feature importance results from phase 3, stores sorted feature importance scores for all</span>
+<span class="sd">        cvs, creates a list of all feature names that have a feature importance score greater than 0</span>
+<span class="sd">        (i.e. some evidence that it may be informative), and creates a barplot of average</span>
+<span class="sd">        feature importance scores.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            algorithm: name of algorithm reporting for</span>
+<span class="sd">            algorithmlabel: label of algorithm reporting for (used for saving logs)</span>
+<span class="sd">            selected_feature_lists: list of selected features for processing (dictionary for data storage)</span>
+<span class="sd">            meta_feature_ranks: dictionary for data storage</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Load and manage feature importance scores ------------------------------------------------------------------</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cv_keep_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">feature_name_ranks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># stores sorted feature importance dictionaries for all CVs</span>
+        <span class="n">cv_score_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_splits</span><span class="p">):</span>
+            <span class="n">score_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> <span class="o">+</span> <span class="n">algorithmlabel</span> <span class="o">+</span> <span class="s2">&quot;/pickledForPhase4/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                <span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.pickle&#39;</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">score_info</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">score_dict</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># dictionary of feature importance scores (original feature order)</span>
+            <span class="n">score_sorted_features</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># dictionary of feature importance scores (in decreasing order)</span>
+            <span class="n">feature_name_ranks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_sorted_features</span><span class="p">)</span>
+            <span class="c1"># update cv_score_dict so there is a list of scores (from CV runs) for each feature</span>
+            <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cv_score_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">score_dict</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">cv_score_dict</span><span class="p">:</span>
+                    <span class="n">cv_score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cv_score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">raw_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">cv_score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">])</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # Update score_dict so it includes feature importance sums across all cvs.</span>
+<span class="sd">            if counter == 0:</span>
+<span class="sd">                scoreSum = copy.deepcopy(scoreDict)</span>
+<span class="sd">            else:</span>
+<span class="sd">                for each in raw_data[1]:</span>
+<span class="sd">                    scoreSum[each] += score_dict[each]</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">keep_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">score_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">keep_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
+            <span class="n">cv_keep_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">keep_list</span><span class="p">)</span>
+        <span class="n">selected_feature_lists</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv_keep_list</span>  <span class="c1"># stores feature names to keep for all algorithms and CVs</span>
+        <span class="c1"># stores sorted feature importance dictionaries for all algorithms and CVs</span>
+        <span class="n">meta_feature_ranks</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_name_ranks</span>
+
+        <span class="c1"># Generate barplot of average scores------------------------------------------------------------------------</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_scores</span><span class="p">:</span>
+            <span class="c1"># Get median score for each features</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cv_score_dict</span><span class="p">:</span>
+                <span class="n">cv_score_dict</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">median</span><span class="p">(</span><span class="n">cv_score_dict</span><span class="p">[</span><span class="n">v</span><span class="p">])</span>
+            <span class="n">df_string</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cv_score_dict</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Feature&#39;</span><span class="p">,</span> <span class="s1">&#39;Importance&#39;</span><span class="p">])</span>\
+                <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;Importance&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">df_string</span><span class="p">)</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # Make the sum of scores an average</span>
+<span class="sd">            for v in scoreSum:</span>
+<span class="sd">                scoreSum[v] = scoreSum[v] / float(cv_partitions)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1"># Sort averages (decreasing order and print top &#39;n&#39; and plot top &#39;n&#39;</span>
+            <span class="n">f_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">f_scores</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">cv_score_dict</span><span class="p">:</span>
+                <span class="n">f_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
+                <span class="n">f_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cv_score_dict</span><span class="p">[</span><span class="n">each</span><span class="p">])</span>
+            <span class="n">names_scores</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Names&#39;</span><span class="p">:</span> <span class="n">f_names</span><span class="p">,</span> <span class="s1">&#39;Scores&#39;</span><span class="p">:</span> <span class="n">f_scores</span><span class="p">}</span>
+            <span class="n">ns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">names_scores</span><span class="p">)</span>
+            <span class="n">ns</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;Scores&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># Select top &#39;n&#39; to report and plot</span>
+            <span class="n">ns</span> <span class="o">=</span> <span class="n">ns</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_features</span><span class="p">)</span>
+            <span class="c1"># Visualize sorted feature scores</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;Scores&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;barh&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">ns</span><span class="p">[</span><span class="s1">&#39;Names&#39;</span><span class="p">],</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;Scores&#39;</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Features&#39;</span><span class="p">)</span>
+            <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;MI&quot;</span><span class="p">:</span>
+                <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s2">&quot;Mutual Information&quot;</span>
+            <span class="k">elif</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;MS&quot;</span><span class="p">:</span>
+                <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s2">&quot;MultiSURF&quot;</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; Median Score&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ns</span><span class="p">[</span><span class="s1">&#39;Names&#39;</span><span class="p">])),</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;Names&#39;</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Sorted Median &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; Scores&#39;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saved Feature Importance Plots at&quot;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> <span class="o">+</span> <span class="n">algorithmlabel</span> <span class="o">+</span> <span class="s2">&quot;/TopAverageScores.png&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/feature_selection/&quot;</span> <span class="o">+</span> <span class="n">algorithmlabel</span> <span class="o">+</span> <span class="s2">&quot;/TopAverageScores.png&quot;</span><span class="p">),</span>
+                        <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_plots</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+                <span class="c1"># plt.cla() # not required</span>
+        <span class="k">return</span> <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">meta_feature_ranks</span></div>
+
+
+<div class="viewcode-block" id="FeatureSelection.select_features">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.select_features">[docs]</a>
+    <span class="k">def</span> <span class="nf">select_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_feature_lists</span><span class="p">,</span> <span class="n">max_features_to_keep</span><span class="p">,</span> <span class="n">meta_feature_ranks</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to select features</span>
+
+<span class="sd">        Identifies feature to keep for each cv.</span>
+<span class="sd">        If more than one feature importance algorithm was applied, collective feature selection</span>
+<span class="sd">        is applied so that the union of informative features is preserved.</span>
+<span class="sd">        Overall, only informative features (i.e. those with a score &gt; 0 are preserved).</span>
+<span class="sd">        If there are more informative features than the max_features_to_keep,</span>
+<span class="sd">        then only those top scoring features are preserved.</span>
+<span class="sd">        To reduce the feature list to some max limit, we alternate between algorithm ranked feature</span>
+<span class="sd">        lists grabbing the top features from each until the max limit is reached.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            selected_feature_lists: dictionary fpr data storage</span>
+<span class="sd">            max_features_to_keep: number of maximum features to keep</span>
+<span class="sd">            meta_feature_ranks: dictionary for data storage</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            cv_selected_list, informative_feature_counts, uninformative_feature_counts</span>
+<span class="sd">            list of final selected features for each cv</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cv_selected_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># final list of selected features for each cv (list of lists)</span>
+        <span class="n">num_algorithms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">)</span>
+        <span class="n">informative_feature_counts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">uninformative_feature_counts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta_feature_ranks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1">#     &#39;Interesting&#39; features determined by union of feature selection results (from different algorithms)</span>
+        <span class="k">if</span> <span class="n">num_algorithms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_splits</span><span class="p">):</span>
+                <span class="c1"># grab first algorithm&#39;s lists of feature names to keep</span>
+                <span class="c1"># Determine union</span>
+                <span class="n">union_list</span> <span class="o">=</span> <span class="n">selected_feature_lists</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_algorithms</span><span class="p">):</span>  <span class="c1"># number of union comparisons</span>
+                    <span class="n">union_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">union_list</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">selected_feature_lists</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">informative_feature_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">union_list</span><span class="p">))</span>
+                <span class="n">uninformative_feature_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total_features</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">union_list</span><span class="p">))</span>
+                <span class="c1"># Further reduce selected feature set if it is larger than max_features_to_keep</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">union_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_features_to_keep</span><span class="p">:</span>  <span class="c1"># Apply further filtering if more than max features remains</span>
+                    <span class="c1"># Create score list dictionary with indexes in union list</span>
+                    <span class="n">new_feature_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_feature_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_features_to_keep</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">meta_feature_ranks</span><span class="p">:</span>
+                            <span class="n">target_feature</span> <span class="o">=</span> <span class="n">meta_feature_ranks</span><span class="p">[</span><span class="n">each</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">target_feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_feature_list</span><span class="p">:</span>
+                                <span class="n">new_feature_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_feature</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_feature_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_features_to_keep</span><span class="p">:</span>
+                                <span class="k">break</span>
+                        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">union_list</span> <span class="o">=</span> <span class="n">new_feature_list</span>
+                <span class="n">union_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>  <span class="c1"># Added to ensure script random seed reproducibility</span>
+                <span class="n">cv_selected_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">union_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Only one algorithm applied (collective feature selection not applied)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_splits</span><span class="p">):</span>
+                <span class="n">feature_list</span> <span class="o">=</span> <span class="n">selected_feature_lists</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># grab first algorithm&#39;s lists</span>
+                <span class="n">informative_feature_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_list</span><span class="p">))</span>
+                <span class="n">uninformative_feature_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">total_features</span> <span class="o">-</span> <span class="n">informative_feature_counts</span><span class="p">)</span>
+                <span class="c1"># Apply further filtering if more than max features remains</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_features_to_keep</span><span class="p">:</span>
+                    <span class="c1"># Create score list dictionary with indexes in union list</span>
+                    <span class="n">new_feature_list</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_feature_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_features_to_keep</span><span class="p">:</span>
+                        <span class="n">target_feature</span> <span class="o">=</span> <span class="n">meta_feature_ranks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                        <span class="n">new_feature_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_feature</span><span class="p">)</span>
+                        <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">feature_list</span> <span class="o">=</span> <span class="n">new_feature_list</span>
+                <span class="n">cv_selected_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cv_selected_list</span><span class="p">,</span> <span class="n">informative_feature_counts</span><span class="p">,</span> <span class="n">uninformative_feature_counts</span></div>
+
+
+<div class="viewcode-block" id="FeatureSelection.gen_filtered_datasets">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.gen_filtered_datasets">[docs]</a>
+    <span class="k">def</span> <span class="nf">gen_filtered_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_selected_list</span><span class="p">,</span> <span class="n">path_to_csv</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">overwrite_cv</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes the lists of final features to be kept and creates new filtered cv training and</span>
+<span class="sd">        testing datasets including only those features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cv_selected_list: list of list for name of features selected for each cv</span>
+<span class="sd">            path_to_csv: path to cv splits from the last phase</span>
+<span class="sd">            dataset_name: name of dataset</span>
+<span class="sd">            overwrite_cv: rename or overwrite old cv splits</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># create lists to hold training and testing set dataframes.</span>
+        <span class="n">train_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">test_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_splits</span><span class="p">):</span>
+            <span class="c1"># Load training partition</span>
+            <span class="n">train_set</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="s2">&quot;_Train.csv&quot;</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">train_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">train_set</span><span class="p">)</span>
+            <span class="c1"># Load testing partition</span>
+            <span class="n">test_set</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="s2">&quot;_Test.csv&quot;</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">test_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">test_set</span><span class="p">)</span>
+            <span class="c1"># Training datasets</span>
+            <span class="n">label_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">label_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">)</span>
+            <span class="n">label_list</span> <span class="o">=</span> <span class="n">label_list</span> <span class="o">+</span> <span class="n">cv_selected_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">td_train</span> <span class="o">=</span> <span class="n">train_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">label_list</span><span class="p">]</span>
+            <span class="n">td_test</span> <span class="o">=</span> <span class="n">test_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">label_list</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">overwrite_cv</span><span class="p">:</span>
+                <span class="c1"># Remove old CV files</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Train.csv&quot;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Test.csv&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Rename old CV files</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span>
+                          <span class="s2">&quot;_Train.csv&quot;</span><span class="p">,</span> <span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CVPre_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Train.csv&quot;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span>
+                          <span class="s2">&quot;_Test.csv&quot;</span><span class="p">,</span> <span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CVPre_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Test.csv&quot;</span><span class="p">)</span>
+
+            <span class="n">td_train</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Train.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">td_test</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_to_csv</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">dataset_name</span> <span class="o">+</span> <span class="s1">&#39;_CV_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_Test.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FeatureSelection.save_runtime">
+<a class="viewcode-back" href="../../../codedocs/streamline.featurefns.selection.html#streamline.featurefns.selection.FeatureSelection.save_runtime">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save phase runtime</span>
+<span class="sd">        Args:</span>
+<span class="sd">            full_path: full path of current experiment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">runtime_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/runtime/runtime_featureselection.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_start_time</span><span class="p">))</span>
+        <span class="n">runtime_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

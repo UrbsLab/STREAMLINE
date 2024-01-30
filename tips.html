@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guidelines for Setting Parameters &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Guidelines for Setting Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tips.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="guidelines-for-setting-parameters">
+<h1>Guidelines for Setting Parameters<a class="headerlink" href="#guidelines-for-setting-parameters" title="Link to this heading"></a></h1>
+<section id="reducing-runtime">
+<h2>Reducing runtime<a class="headerlink" href="#reducing-runtime" title="Link to this heading"></a></h2>
+<p>Conducting a more effective ML analysis typically demands a much larger amount of computing power and runtime. However, we provide general guidelines here for limiting overall runtime of a STREAMLINE experiment.</p>
+<ol class="arabic simple">
+<li><p>Run on a fewer number of datasets at once.</p></li>
+<li><p>Run using fewer ML algorithms at once:</p>
+<ul class="simple">
+<li><p>Naive Bayes, Logistic Regression, and Decision Trees are typically fastest.</p></li>
+<li><p>Genetic Programming, eLCS, XCS, and ExSTraCS often take the longest (however other algorithms such as SVM, KNN, and ANN can take even longer when the number of instances is very large).</p></li>
+</ul>
+</li>
+<li><p>Run using a smaller number of <code class="docutils literal notranslate"><span class="pre">cv_partitions</span></code> (however keep in mind that this will impact the power of statistical significance testing in comparing algorithm and dataset formance, since it relies on the sample from multiple CV partitions)</p></li>
+<li><p>Run without generating plots (i.e. <code class="docutils literal notranslate"><span class="pre">export_feature_correlations</span></code>, <code class="docutils literal notranslate"><span class="pre">export_univariate_plots</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_PRC</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_ROC</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_FI_box</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_metric_boxplots</span></code>).</p></li>
+<li><p>In large datasets with missing values, set <code class="docutils literal notranslate"><span class="pre">multi_impute</span></code> to ‘False’. This will apply simple mean imputation to numerical features instead.</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">use_TURF</span></code> as ‘False’. However we strongly recommend setting this to ‘True’ in feature spaces &gt; 10,000 in order to avoid missing feature interactions during feature selection.</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">TURF_pct</span></code> no lower than 0.5.  Setting at 0.5 is by far the fastest, but it will operate more effectively in very large feature spaces when set lower.</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">instance_subset</span></code> at or below 2000 (speeds up multiSURF feature importance evaluation at potential expense of performance).</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">max_features_to_keep</span></code> at or below 2000 and <code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code> = ‘True’ (this limits the maximum number of features that can be passed on to ML modeling).</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">training_subsample</span></code> at or below 2000 (this limits the number of sample used to train particularly expensive ML modeling algorithms). However avoid setting this too low, or ML algorithms may not have enough training instances to effectively learn.</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">n_trials</span></code> and/or timeout to lower values (this limits the time spent on hyperparameter optimization).</p></li>
+<li><p>If using eLCS, XCS, or ExSTraCS, set <code class="docutils literal notranslate"><span class="pre">do_lcs_sweep</span></code> to ‘False’, <code class="docutils literal notranslate"><span class="pre">iterations</span></code> at or below 200000, and <code class="docutils literal notranslate"><span class="pre">N</span></code> at or below 2000.</p></li>
+</ol>
+</section>
+<section id="improving-modeling-performance">
+<h2>Improving Modeling Performance<a class="headerlink" href="#improving-modeling-performance" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Generally speaking, the more computational time you are willing to spend on ML, the better the results. Doing the opposite of the above tips for reducing runtime, will likely improve performance.</p></li>
+<li><p>In certain situations, setting <code class="docutils literal notranslate"><span class="pre">feature_selection</span></code> to ‘False’, and relying on the ML algorithms alone to identify relevant features will yield better performance.  However, this may only be computationally practical when the total number of features in an original dataset is smaller (e.g. under 2000).</p></li>
+<li><p>Note that eLCS, XCS, and ExSTraCS are newer algorithm implementations developed by our research group.  As such, their algorithm performance may not yet be optimized in contrast to the other well established and widely utilized options. These learning classifier system (LCS) algorithms are unique however, in their ability to model very complex associations in data, while offering a largely interpretable model made up of simple, human readable IF:THEN rules. They have also been demonstrated to be able to tackle both complex feature interactions as well as heterogeneous patterns of association (i.e. different features are predictive in different subsets of the training data).</p></li>
+<li><p>In problems with no noise (i.e. datasets where it is possible to achieve 100% testing accuracy), LCS algorithms (i.e. eLCS, XCS, and ExSTraCS) perform better when <code class="docutils literal notranslate"><span class="pre">nu</span></code> is set larger than 1 (i.e. 5 or 10 recommended).  This applies significantly more pressure for individual rules to achieve perfect accuracy.  In noisy problems this may lead to significant overfitting.</p></li>
+</ul>
+</section>
+<section id="other-guidelines">
+<h2>Other Guidelines<a class="headerlink" href="#other-guidelines" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>SVM and ANN modeling should only be applied when data scaling is applied by the pipeline.</p></li>
+<li><p>Logistic Regression’ baseline model feature importance estimation is determined by the exponential of the feature’s coefficient. This should only be used if data scaling is applied by the pipeline.  Otherwise <code class="docutils literal notranslate"><span class="pre">use_uniform_FI</span></code> should be True.</p></li>
+<li><p>While the STREAMLINE includes <code class="docutils literal notranslate"><span class="pre">impute_data</span></code> as an option that can be turned off in <code class="docutils literal notranslate"><span class="pre">DataPreprocessing</span></code>, most algorithm implementations (all those standard in scikit-learn) cannot handle missing data values with the exception of eLCS, XCS, and ExSTraCS. In general, STREAMLINE is expected to fail with an errors if run on data with missing values, while <code class="docutils literal notranslate"><span class="pre">impute_data</span></code> is set to ‘False’.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

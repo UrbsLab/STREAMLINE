@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detailed Pipeline Walkthrough &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Datasets" href="data.html" />
+    <link rel="prev" title="About (FAQs)" href="about.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Detailed Pipeline Walkthrough</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#phase-1-data-exploration-processing">Phase 1: Data Exploration &amp; Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initial-eda">Initial EDA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numerical-encoding-of-text-based-features">Numerical Encoding of Text-based Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-data-cleaning-and-feature-engineering">Basic Data Cleaning and Feature Engineering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#processed-data-eda">Processed Data EDA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#k-fold-cross-validation-cv-partitioning">k-fold Cross Validation (CV) Partitioning</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-2-imputation-and-scaling">Phase 2: Imputation and Scaling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#imputation">Imputation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scaling">Scaling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-3-feature-importance-estimation">Phase 3: Feature Importance Estimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-4-feature-selection">Phase 4: Feature Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-5-machine-learning-ml-modeling">Phase 5: Machine Learning (ML) Modeling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-selection">Model Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hyperparameter-optimization">Hyperparameter Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#train-optimized-model">Train ‘Optimized’ Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#model-feature-importance-estimation">Model Feature Importance Estimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluate-performance">Evaluate Performance</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-6-post-analysis">Phase 6: Post-Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-7-compare-datasets">Phase 7: Compare Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-8-replication">Phase 8: Replication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-9-summary-report">Phase 9: Summary Report</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Detailed Pipeline Walkthrough</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pipeline.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="detailed-pipeline-walkthrough">
+<h1>Detailed Pipeline Walkthrough<a class="headerlink" href="#detailed-pipeline-walkthrough" title="Link to this heading"></a></h1>
+<p>This section is for users who want a more detailed understanding of (1) what STREAMLINE does, (2) what happens in durring each phase, (3) why it’s designed the way it has been, (4) what user options are available to customize a run, and (5) what to expect when running a given phase. Phases 1-6 make up the core automated pipeline, with Phase 7 and beyond being run optionally based on user needs. Phases are organized to both encapsulate related pipeline elements, as well as to address practical computational needs. STREAMLINE includes reliable default run parameters so that it can easily be used ‘as-is’, but these parameters can be adjusted for further customization. We refer to a single run of the entire STREAMLINE pipeline as an ‘experiment’, with all outputs saved to a single ‘experiment folder’ for later examination and re-use.</p>
+<p>To avoid confusion on ‘dataset’ terminology we briefly review our definitions here:</p>
+<ol class="arabic simple">
+<li><p><strong>Target dataset</strong> - A whole dataset (minus any instances the user may wish to hold out for replication) that has not yet undergone any other data partitioning and is intended to be used in the training and testing of models within STREAMLINE. Could also be referred to as the ‘development dataset’.</p></li>
+<li><p><strong>Training dataset</strong> - A generally larger partition of the target dataset used in training a model</p></li>
+<li><p><strong>Testing dataset</strong> - A generally smaller partition of the target dataset used to evaluate the trained model</p></li>
+<li><p><strong>Validation dataset</strong> - The temporary, secondary hold-out partition of a given training dataset used for hyperparameter optimization. This is the product of using nested (aka double) cross-validation in STREAMLINE as a whole.</p></li>
+<li><p><strong>Replication dataset</strong> - Further data that is withheld from STREAMLINE phases 1-7 to (1) compare model evaluations on the same hold-out data and (2) verify the replicatability and generalizability of model performance on data collected from other sites or sample populations. A replication dataset should have at least all of the features present in the target dataset which it seeks to replicate.</p></li>
+</ol>
+<hr class="docutils" />
+<section id="phase-1-data-exploration-processing">
+<h2>Phase 1: Data Exploration &amp; Processing<a class="headerlink" href="#phase-1-data-exploration-processing" title="Link to this heading"></a></h2>
+<p>This phase; (1) provides the user with key information about the target dataset(s) they wish to analyze, via an initial exploratory data analysis (EDA) (2) numerically encodes any text-based feature values in the data, (3) applies basic data cleaning and feature engineering to process the data, (4) informs the user how the data has been changed by the data processing, via a secondary, more in-depth EDA, and then (5) partitions the data using k-fold cross validation.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs once for each target dataset to be analyzed</p></li>
+<li><p><strong>Run Time:</strong> Typically fast, except when evaluating and visualizing feature correlation in datasets with a large number of features</p></li>
+</ul>
+<section id="initial-eda">
+<h3>Initial EDA<a class="headerlink" href="#initial-eda" title="Link to this heading"></a></h3>
+<p>Characterizes the orignal dataset as loaded by the user, including: data dimensions, feature type counts, missing value counts, class balance, other standard pandas data summaries (i.e. describe(), dtypes(), nunique()) and feature correlations (pearson).</p>
+<p>For precision, we strongly suggest users identify which features in their data should be treated as categorical vs. quantitative using the <a class="reference internal" href="parameters.html#categorical-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_feature_path</span></code></span></a> and/or <a class="reference internal" href="parameters.html#quantitative-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">quantitative_feature_path</span></code></span></a> run parameters. However, if not specified by the user, STREAMLINE will attempt to automatically determine feature types relying on the <a class="reference internal" href="parameters.html#categorical-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></span></a> parameter. Any features with fewer unique values than <a class="reference internal" href="parameters.html#categorical-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></span></a> will be treated as categorical, and all others will be treated as quantitative.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap</p></li>
+</ul>
+</section>
+<section id="numerical-encoding-of-text-based-features">
+<h3>Numerical Encoding of Text-based Features<a class="headerlink" href="#numerical-encoding-of-text-based-features" title="Link to this heading"></a></h3>
+<p>Detects any features in the data with non-numeric values and applies <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">LabelEncoder</a> to make them numeric as required by scikit-learn machine learning packages.</p>
+</section>
+<section id="basic-data-cleaning-and-feature-engineering">
+<h3>Basic Data Cleaning and Feature Engineering<a class="headerlink" href="#basic-data-cleaning-and-feature-engineering" title="Link to this heading"></a></h3>
+<p>Applies the following steps to the target data, keeping track of changes to all data counts along the way:</p>
+<ol class="arabic simple">
+<li><p>Remove any instances that are missing an outcome label (as these can not be used while conducting supervised learning)</p></li>
+<li><p>Remove any features identified by the user with <a class="reference internal" href="parameters.html#ignore-features-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">ignore_features_path</span></code></span></a> (a convenience for users that may wish to exclude one or more features from the analysis without changing the original dataset)</p></li>
+<li><p>Engineer/add ‘missingness’ features. Any original feature with a missing value proportion greater than <a class="reference internal" href="parameters.html#featureeng-missingness"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">featureeng_missingness</span></code></span></a> will have a new feature added to the dataset that encodes missingness with 0 = not missing and 1 = missing. This allows the user to examine whether missingness is <a class="reference external" href="https://en.wikipedia.org/wiki/Missing_data">‘not at random’ (MNAR)</a>, and is predictive of outcome itself.</p></li>
+<li><p>Remove any features that have invariant values (i.e. they are always the same), or that have only one value in addition to missing values. Then remove any features with a missingness greater than <a class="reference internal" href="parameters.html#cleaning-missingness"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">cleaning_missingness</span></code></span></a>. Afterwards, remove any instances in the data that may have a missingness greater than <a class="reference internal" href="parameters.html#cleaning-missingness"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">cleaning_missingness</span></code></span></a>.</p></li>
+<li><p>Engineer/add <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html">one-hot-encoding</a> for any categorical features in the data. This ensures that all categorical features are treated as such throughout all aspects of the pipeline. For example, a single categorical feature with 3 possible states will be encoded as 3 separate binary-valued features indicating whether an instance has that feature’s state or not. Feature names are automatically updated by STREAMLINE to reflect this change.</p></li>
+<li><p>Remove highly correlated features based on <a class="reference internal" href="parameters.html#correlation-removal-threshold"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">correlation_removal_threshold</span></code></span></a>. Randomly removes one feature of a highly correlated feature pair (Pearson). While perfectly correlated features can be safely cleaned in this way, there is a chance of information loss when removing less correlated features.</p></li>
+</ol>
+<ul class="simple">
+<li><p><strong>Output:</strong> CSV file summarizing changes to data counts during these cleaning and engineering steps.</p></li>
+</ul>
+</section>
+<section id="processed-data-eda">
+<h3>Processed Data EDA<a class="headerlink" href="#processed-data-eda" title="Link to this heading"></a></h3>
+<p>Completes a more comprehensive EDA of the processed dataset including: everything examined in the initial EDA, as well as a univariate association analysis of all features using Chi-Square (for categorical features), or Mann-Whitney U-Test (for quantitative features).</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap, (5) a CSV file summarizing the univariate analyses including the test applied, test statistic, and p-value for each feature, (6) for any feature with a univariate analysis p-value less than <a class="reference internal" href="parameters.html#sig-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a> (i.e. significant association with outcome), a bar-plot will be generated if it is categorical, and a box-plot will be generated if it is quantitative.</p></li>
+</ul>
+</section>
+<section id="k-fold-cross-validation-cv-partitioning">
+<h3>k-fold Cross Validation (CV) Partitioning<a class="headerlink" href="#k-fold-cross-validation-cv-partitioning" title="Link to this heading"></a></h3>
+<p>For k-fold CV, STREAMLINE uses ‘Stratified’ partitioning by default, which aims to maintain the same/similar class balance within the ‘k’ training and testing datasets. The value of ‘k’ can be adjusted with <a class="reference internal" href="parameters.html#cv-partitions"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">cv_partitions</span></code></span></a>. However using <a class="reference internal" href="parameters.html#partition-method"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">partition_method</span></code></span></a>, users can also select ‘Random’ or ‘Group’ partitioning.</p>
+<p>Of note, ‘Group’ partitioning requires the dataset to include a column identified by <a class="reference internal" href="parameters.html#match-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">match_label</span></code></span></a>. This column includes a group membership identifier for each instance which indicates that any instance with the same group ID should be kept within the same partition during cross validation. This was originally intended for running STREAMLINE on epidemiological data that had been matched for one or more covariates (e.g. age, sex, race) in order to adjust for their effects during modeling.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> CSV files for each training and testing dataset generated following partitioning. Note, by default STREAMLINE will overwrite these files as the working datasets undergo imputation, scaling and feature selection in subsequent phases. However, the user can keep copies of these intermediary CV datasets for review using the parameter <a class="reference internal" href="parameters.html#overwrite-cv"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></span></a>.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="phase-2-imputation-and-scaling">
+<h2>Phase 2: Imputation and Scaling<a class="headerlink" href="#phase-2-imputation-and-scaling" title="Link to this heading"></a></h2>
+<p>This phase conducts additional data preparation elements of the pipeline that occur after CV partitioning, i.e. missing value imputation and feature scaling. Both elements are ‘trained’ and applied separately to each individual training dataset. The respective testing datasets are not looked at when running imputation or feature scaling learning to avoid potential data leakage. However the learned imputation and scaling patterns are applied in the same way to the testing data as they were in the training data. Both imputation and scaling can optionally be turned off using the parameters <a class="reference internal" href="parameters.html#impute-data"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">impute_data</span></code></span></a> and <a class="reference internal" href="parameters.html#scale-data"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">scale_data</span></code></span></a>, respectively for some specific use cases, however imputation must be on when missing data is present in order to run most scikit-learn modeling algorithms, and scaling should be on for certain modeling algorithms learn effectively (e.g. artificial neural networks), and for if the user wishes to infer feature importances directly from certain algorithm’s internal estimators (e.g. logistic regression).</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs ‘k’ times for each target dataset being analyzed (where k is number of CV partitions)</p></li>
+<li><p><strong>Run Time:</strong> Typically fast, with the exception of imputing larger datasets with many missing values</p></li>
+</ul>
+<section id="imputation">
+<h3>Imputation<a class="headerlink" href="#imputation" title="Link to this heading"></a></h3>
+<p>This phase first conducts imputation to replace any remaining missing values in the dataset with a ‘value guess’. While missing value imputation could be reasonably viewed as data manufacturing, it is a common practice and viewed here as a necessary ‘evil’ in order to run scikit-learn modeling algorithms downstream (which mostly require complete datasets). Imputation is completed prior to scaling since it can influence the correct center and scale to be used.</p>
+<p>Missing value imputation seeks to make a reasonable, educated guess as to the value of a given missing data entry. By default, STREAMLINE uses ‘mode imputation’ for all categorical values, and <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.impute.IterativeImputer.html">multivariate imputation</a> for all quantitative features. However, for larger datasets, multivariate imputation can be slow and require alot of memory. Therefore, the user can deactivate multiple imputation with the <a class="reference internal" href="parameters.html#multi-impute"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">multi_impute</span></code></span></a>
+parameter, and STREAMLINE will use median imputation for quantitative features instead.</p>
+</section>
+<section id="scaling">
+<h3>Scaling<a class="headerlink" href="#scaling" title="Link to this heading"></a></h3>
+<p>Second, this phase conducts feature scaling with <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html">StandardScalar</a> to transform features to have a mean at zero with unit variance. This is only necessary for certain modeling algorithms, but it should not hinder the performance of other algorithms. The primary drawback to scaling prior to modeling is that any future data applied to the model will need to be scaled in the same way prior to making predictions. Furthermore, for algorithms that have directly interpretable models (e.g. decision tree), the values specified by these models need to be un-scaled in order to understand the model in the context of the original data values. STREAMLINE includes a <a class="reference internal" href="more.html"><span class="std std-doc">Useful Notebook</span></a> that can generate direct model visualizations for decision tree and genetic programming models. This code automatically un-scales the values specified in these models so they retain their interpretability.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> (1) Learned imputation and scaling strategies for each training dataset are saved as pickled objects allowing any replication or other future data to be identically processed prior to running it through the model. (2) If <a class="reference internal" href="parameters.html#overwrite-cv"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></span></a> is False, new imputed and scaled copies of the training and testing datasets are saved as CSV output files, otherwise the old dataset files are overwritten with these new ones to save space.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="phase-3-feature-importance-estimation">
+<h2>Phase 3: Feature Importance Estimation<a class="headerlink" href="#phase-3-feature-importance-estimation" title="Link to this heading"></a></h2>
+<p>This phase applies feature importance estimation algorithms (i.e. <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html">Mutual information (MI)</a> and <a class="reference external" href="https://github.com/UrbsLab/scikit-rebate">MultiSURF</a>, found in the ReBATE software package) often used as filter-based feature selection algorithms. Both algorithms are run by default, however the user can deactivate either using <a class="reference internal" href="parameters.html#do-mutual-info"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_mutual_info</span></code></span></a> or <a class="reference internal" href="parameters.html#do-multisurf"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_multisurf</span></code></span></a>, respectively. MI scores features based on their univariate association with outcome, while MultiSURF scores features in a manner that is sensitive to both univariate and epistatic (i.e. multivariate feature interaction) associations.</p>
+<p>For datasets with a larger number of features (i.e. &gt; 10,000) we recommend turning on the TuRF wrapper algorithm with <a class="reference internal" href="parameters.html#use-turf"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">use_turf</span></code></span></a>, which has been shown to improve the sensitivity of MultiSURF to interactions, particularly in larger feature spaces. Users can increase the number of TuRF iterations (and performance) by decreasing <a class="reference internal" href="parameters.html#turf-pct"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">turf_pct</span></code></span></a> from 0.5, to approaching 0. However, this will significantly increase MultiSURF run time.</p>
+<p>Overall, this phase is important not only for subsequent feature selection, but as an opportunity to evaluate feature importance estimates prior to modeling outside of the initial univariate analyses (conducted on the entire dataset). Further, comparing feature rankings between MI, and MultiSURF can highlight features that may have little or no univariate effects, but that are involved in epistatic interactions that are predictive of outcome.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs ‘k’ times for each algorithm (MI and MultiSURF) and each target dataset being analyzed (where k is number of CV partitions)</p></li>
+<li><p><strong>Run Time:</strong> Typically reasonably fast, but takes more time to run MultiSURF, in particular as the number of training instances approaches the default <a class="reference internal" href="parameters.html#instance-subset"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">instance_subset</span></code></span></a> parameter of 2000 instances, or if this parameter set higher in larger datasets. This is because MultiSURF scales quadratically with the number of training instances.</p></li>
+<li><p><strong>Output:</strong> CSV files of feature importance scores for both algorithms and each CV partition ranked from largest to smallest scores.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="phase-4-feature-selection">
+<h2>Phase 4: Feature Selection<a class="headerlink" href="#phase-4-feature-selection" title="Link to this heading"></a></h2>
+<p>This phase uses the feature importance estimates learned in the prior phase to conduct feature selection using a ‘collective’ feature selection approach. By default, STREAMLINE will remove any features from the training data that scored 0 or less by both feature importance algorithms (i.e. features deemed uninformative). Users can optionally ensure retention of all features prior to modeling by setting <a class="reference internal" href="parameters.html#filter-poor-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code></span></a> to False. Users can also specify a maximum number of features to retain in each training dataset using <a class="reference internal" href="parameters.html#max-features-to_keep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">max_features_to_keep</span></code></span></a> (which can help reduce overall pipeline runtime and make learning easier for modeling algorithms). If after removing ‘uninformative features’ there are still more features present than the user specified maximum, STREAMLINE will pick the unique top scoring features from one algorithm then the next until the maximum is reached and all other features are removed. Any features identified for removal from the training data are similarly removed from the testing data.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs ‘k’ times for each target dataset being analyzed (where k is number of CV partitions)</p></li>
+<li><p><strong>Run Time:</strong> Fast</p></li>
+<li><p><strong>Output:</strong> (1) CSV files summarizing feature selection for a target dataset (i.e. how many features were identified as informative or uninformative within each CV partition) and (2) a barplot of average feature importance scores (across CV partitions). The user can specify the maximum number of top scoring features to be plotted using <a class="reference internal" href="parameters.html#top-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_fi_features</span></code></span></a>.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="phase-5-machine-learning-ml-modeling">
+<h2>Phase 5: Machine Learning (ML) Modeling<a class="headerlink" href="#phase-5-machine-learning-ml-modeling" title="Link to this heading"></a></h2>
+<p>At the heart of STREAMLINE, this phase conducts (1) machine learning modeling using the training data, (2) model feature importance estimation (also with the training data), and (3) model evaluation on testing data. STREAMLINE uniquely includes 3 rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS. These ‘learning classifier systems’ have been demonstrated to be able to detect complex associations while providing human interpretable models in the form of IF:THEN rule-sets. The ExSTraCS algorithm was developed by our research group to specifically handle the challenges of scalability, noise, and detection of epistasis and genetic heterogeneity in biomedical data mining.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs ‘k’ times for each algorithm and each target dataset being analyzed (where k is number of CV partitions)</p></li>
+<li><p><strong>Run Time:</strong> Slowest phase, but can be sped up by reducing the set of ML methods selected to run, or deactivating ML methods that run slowly on large datasets</p></li>
+</ul>
+<section id="model-selection">
+<h3>Model Selection<a class="headerlink" href="#model-selection" title="Link to this heading"></a></h3>
+<p>The first step is to decide which modeling algorithms to run. By default, STREAMLINE applies 14 of the 16 algorithms (excluding eLCS and XCS) it currently has built in. eLCS and XCS are currently experimental implementations of rule-based ML algorithms. Users can specify a specific subset of algorithms to run using <a class="reference internal" href="parameters.html#algorithms"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></span></a>, or alternatively indicate a list of algorithms to exclude from all available algorithms using <a class="reference internal" href="parameters.html#exclude"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">exclude</span></code></span></a>. STREAMLINE is also set up so that more advanced users can add other scikit-learn compatible modeling algorithms to run within the pipeline (as explained in <a class="reference internal" href="#models.md"><span class="xref myst">Adding New Modeling Algorithms</span></a>). This allows STREAMLINE to be used as a rigorous framework to easily benchmark new modeling algorithms in comparison to other established algorithms.</p>
+<p>Modeling algorithms vary in the implicit or explicit assumptions they make, the manner in which they learn, how they represent a solution (as a model), how well they handle different patterns of association in the data, how long they take to run, and how complex and/or interpretable the resulting model can be. To reduce runtime in datasets with a large number of training instances, users can specify a limited random number of training instances to use in training algorithms that run slowly in such datasets using <a class="reference internal" href="parameters.html#training-subsample"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">training_subsample</span></code></span></a>.</p>
+<p>In the STREAMLINE demo, we run only the fastest/simplest three algorithms (Naive Bayes, Logistic Regression, and Decision Tree), however these algorithms all have known limitations in their ability to detect complex associations in data. We encourage users to utilize a wider variety of the 14 established available algorithms, in their analyses, to give STREAMLINE the best opportunity to identify a best performing model for the given task (which is effectively impossible to predict for a given dataset ahead of time).</p>
+<p>We recommend users utilize at least the following set of algorithms within STREAMLINE: Naive Bayes, Logistic Regression, Decision Tree, Random Forest, XGBoost, SVM, ANN, and ExSTraCS as we have found these to be a reliable set of algorithms with an array of complementary strengths and weaknesses on different problems. <a class="reference external" href="https://github.com/UrbsLab/scikit-ExSTraCS">ExSTraCS</a> is a rule-based machine learning algorithm in the sub-family of algorithms called <a class="reference external" href="https://www.youtube.com/watch?v=CRge_cZ2cJc">learning classifier systems (LCS)</a> that has been specifically adapted to the challenges of biomedical data analysis.</p>
+</section>
+<section id="hyperparameter-optimization">
+<h3>Hyperparameter Optimization<a class="headerlink" href="#hyperparameter-optimization" title="Link to this heading"></a></h3>
+<p>Most machine learning algorithms have a variety of hyperparameter options that influence how the algorithm runs and performs on a given dataset. In designing STREAMLINE we sought to identify the full set of important hyperparameters for each algorithm, along with a comprehensive range of possible settings and hard-coded these into the pipeline.  STREAMLINE adopts the <a class="reference external" href="https://optuna.org/">Optuna</a> package to conduct automated Bayesian optimization of hyperparameters for most algorithms by default. The evaluation metric ‘balanced accuracy’ is used to optimize hyperparameters as it takes class imbalance into account and places equal weight on the accurate prediction of both class outcomes. However, users can select an alternative metric with <a class="reference internal" href="parameters.html#primary-metric"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">primary_metric</span></code></span></a> and whether that metric needs to be maximized or minimized using the <a class="reference internal" href="parameters.html#metric-direction"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">metric_direction</span></code></span></a> parameter. To conduct the hyperparameter sweep, Optuna splits a given training dataset further, applying 3-fold cross validation to generate further internal training and validation partitions with which to evaluate different hyperparameter combinations.</p>
+<p>Users can also configure how Optuna operates in STREAMLINE with <a class="reference internal" href="parameters.html#n-trials"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">n_trials</span></code></span></a> and <a class="reference internal" href="parameters.html#timeout"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a> which controls the target number of hyperparameter value combination trials to conduct, as well as how much total time to try and complete these trials before picking the best hyperparameters found. To ensure reproducibility of the pipeline, note that <a class="reference internal" href="parameters.html#timeout"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></span></a> should be set to ‘None’ (however this can take much longer to complete depending on other pipeline settings).</p>
+<p>Notable exceptions to most algorithms; Naive Bayes has no parameters to optimize, and rule-based (i.e. LCS) ML algorithms including ExSTraCS, eLCS, and XCS can be computationally expensive thus STREAMLINE is set to use their default hyperparameter settings without a sweep unless the user updates <a class="reference internal" href="parameters.html#do-lcs-sweep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_lcs_sweep</span></code></span></a> and <a class="reference internal" href="parameters.html#lcs-timeout"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">lcs_timeout</span></code></span></a>.  While these LCS algorithms have many possible hyperparameters to manipulate they have largely stable performance when leaving most of their parameters to default values. Exceptions to this include the key LCS hyperparameters (1) number of learning iterations, (2) maximum rule-population size, and (3) accuracy pressure (nu), which can be manually controlled without a hyperparameter sweep by <a class="reference internal" href="parameters.html#lcs-iterations"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">lcs_iterations</span></code></span></a>, <a class="reference internal" href="parameters.html#lcs-n"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">lcs_N</span></code></span></a>, and <a class="reference internal" href="parameters.html#lcs-nu"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">lcs_nu</span></code></span></a>, respectively.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> CSV files specifying the optimized hyperparameter settings found by Optuna for each partition and algorithm combination.</p></li>
+</ul>
+</section>
+<section id="train-optimized-model">
+<h3>Train ‘Optimized’ Model<a class="headerlink" href="#train-optimized-model" title="Link to this heading"></a></h3>
+<p>Having selected the best hyperparameter combination identified for a given training dataset and algorithm, STREAMLINE now retrains each model on the entire training dataset using those respective hyperparameter settings. This yields a total of ‘k’ potentially ‘optimized’ models for each algorithm.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> All trained models are pickled as python objects that can be loaded and applied later.</p></li>
+</ul>
+</section>
+<section id="model-feature-importance-estimation">
+<h3>Model Feature Importance Estimation<a class="headerlink" href="#model-feature-importance-estimation" title="Link to this heading"></a></h3>
+<p>Next, STREAMINE estimates and summarizes model feature importance scores for every algorithm run. This is distinct from the initial feature importance estimation phase, in that these estimates are specific to a given model as a useful part of model interpretation/explanation. By default, STREAMLINE employes <a class="reference external" href="https://scikit-learn.org/stable/modules/permutation_importance.html">permutation feature importance</a> for estimating feature importances scores in the same uniform manner across all algorithms. Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS). The user can instead use these estimates by setting <a class="reference internal" href="parameters.html#use-uniform-fi"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">use_uniform_fi</span></code></span></a> to <code class="docutils literal notranslate"><span class="pre">False</span></code>. This will direct STREAMLINE to report any available internal feature importance estimate for a given algorithm, while still utilizing permutation feature importance for algorithms with no such internal estimator.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> All feature importance scores are pickled as python objects for use in the next phase of the pipeline.</p></li>
+</ul>
+</section>
+<section id="evaluate-performance">
+<h3>Evaluate Performance<a class="headerlink" href="#evaluate-performance" title="Link to this heading"></a></h3>
+<p>The last step in this phase is to evaluate all trained models using their respective testing datasets.  A total of 16 standard classification metrics calculated for each model including: balanced accuracy, standard accuracy, F1 Score, sensitivity (recall), specificity, precision (positive predictive value), true positives, true negatives, false postitives, false negatives, negative predictive value, likeliehood ratio positive, likeliehood ratio negative, area under the ROC, area under the PRC, and average precision of PRC.</p>
+<ul class="simple">
+<li><p><strong>Output:</strong> All evaluation metrics are pickled as python objects for use in the next phase of the pipeline.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="phase-6-post-analysis">
+<h2>Phase 6: Post-Analysis<a class="headerlink" href="#phase-6-post-analysis" title="Link to this heading"></a></h2>
+<p>This phase combines all modeling results to generate summary statistics files, generate results plots, and conduct non-parametric statistical significance analysis comparing ML performance across CV runs.</p>
+<ul>
+<li><p><strong>Output (Evaluation Metrics):</strong></p>
+<ol class="arabic simple">
+<li><p>Testing data evaluation metrics for each CV partition - CSV file for each modeling algorithm</p></li>
+<li><p>Average testing data evaluation metrics for each modeling algorithm - CSV file for mean, median, and standard deviation</p></li>
+<li><p>ROC and PRC curves for each CV partition in contrast with the average curve - ROC and PRC plot for each modeling algorithm</p>
+<ul class="simple">
+<li><p>The generation of these plots can be turned off with <a class="reference internal" href="parameters.html#exclude-plots"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">exclude_plots</span></code></span></a></p></li>
+</ul>
+</li>
+<li><p>Summary ROC and PRC plots - compares average ROC or PRC curves over all CV partitions for each modeling algorithm</p></li>
+<li><p>Boxplots for each evaluation metric - comparing algorithm performance over all CV partitions</p>
+<ul class="simple">
+<li><p>The generation of these plots can be turned off with <a class="reference internal" href="parameters.html#exclude-plots"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">exclude_plots</span></code></span></a></p></li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p><strong>Output (Model Feature Importance):</strong></p>
+<ol class="arabic">
+<li><p>Model feature importance estimates for each CV partition - CSV file for each modeling algorithm</p></li>
+<li><p>Boxplots comparing feature importance scores for each CV partition - CSV file for each modeling algorithm</p></li>
+<li><p>Composite feature importance barplots illustrating average feature importance scores across all algorithms (2 versions)</p>
+<ol class="arabic simple">
+<li><p>Feature importance scores are normalized prior to visualization</p></li>
+<li><p>Feature importance scores are normalized and weighted by average model performance metric (balanced accuracy by default)</p>
+<ul class="simple">
+<li><p>The metric used to weight this plot can be changed with <a class="reference internal" href="parameters.html#metric-weight"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">metric_weight</span></code></span></a></p></li>
+</ul>
+</li>
+</ol>
+<ul class="simple">
+<li><p>Number of top scoring features illustrated in feature importance plots is controled by <a class="reference internal" href="parameters.html#top-model-fi-features"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">top_model_fi_features</span></code></span></a></p></li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p><strong>Output (Statistical Significance):</strong></p>
+<ol class="arabic simple">
+<li><p>Kruskal Wallis test results assessing whether there is a significant difference for each performance metric among all algorithms - CSV file</p>
+<ul class="simple">
+<li><p>For any metric that yields a significant difference based on <a class="reference internal" href="parameters.html#sig-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a>, pairwise statistical tests between algorithms will be conducted using both the Mann Whitney U-test and the Wilcoxon Rank Test</p></li>
+</ul>
+</li>
+<li><p>Pairwise statistical tests between algorithms using both the Mann Whitney U-test and the Wilcoxon Rank Test - CSV file for each statistic and significance test.</p></li>
+</ol>
+</li>
+<li><p><strong>Parallelizability:</strong> Runs once for each target dataset being analyzed.</p></li>
+<li><p><strong>Run Time:</strong> Moderately fast - turning off some figure generation can make this phase faster</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="phase-7-compare-datasets">
+<h2>Phase 7: Compare Datasets<a class="headerlink" href="#phase-7-compare-datasets" title="Link to this heading"></a></h2>
+<p>This phase should be run when STREAMLINE was applied to more than one target dataset during the ‘experiment’. It applies further non-parametric statistical significance testing between datasets to identify if performance differences were observed among datasets comparing (1) the best performing algorithms or (2) on an algorithm-by-algorithm basis. It also generates plots to compare performance across datasets and examine algorithm performance consistency.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs once - not parallelizable</p></li>
+<li><p><strong>Run Time:</strong> Fast</p></li>
+<li><p><strong>Output (Comparing Best Performing Algorithms for each Metric):</strong></p>
+<ol class="arabic simple">
+<li><p>Kruskal Wallis test results assessing whether there is a significant difference between median CV performance metric among all datasets focused on the best performing algorithm for each dataset - CSV file</p>
+<ul>
+<li><p>For any metric that yields a significant difference based on <a class="reference internal" href="parameters.html#sig-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a>, pairwise statistical tests between datasets will be conducted using both the Mann Whitney U-test and the Wilcoxon Rank Test</p></li>
+</ul>
+</li>
+<li><p>Pairwise statistical tests between datasets focused on the best performing algorithm for each dataset using both the Mann Whitney U-test and the Wilcoxon Rank Test - CSV file for each significance test.</p></li>
+</ol>
+</li>
+<li><p><strong>Output (Comparing Algorithms Independently):</strong></p>
+<ol class="arabic simple">
+<li><p>Kruskal Wallis test results assessing whether there is a significant difference for each median CV performance metric among all datasets - CSV file for each algorithm</p>
+<ul>
+<li><p>For any metric that yields a significant difference based on <a class="reference internal" href="parameters.html#sig-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></span></a>, pairwise statistical tests between datasets will be conducted using both the Mann Whitney U-test and the Wilcoxon Rank Test</p></li>
+</ul>
+</li>
+<li><p>Pairwise statistical tests between datasets using both the Mann Whitney U-test and the Wilcoxon Rank Test - CSV file for each significance test and algorithm</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="phase-8-replication">
+<h2>Phase 8: Replication<a class="headerlink" href="#phase-8-replication" title="Link to this heading"></a></h2>
+<p>This phase of STREAMLINE is only run when the user has further hold out data , i.e. one or more ‘replication’ datasets, which will be used to re-evaluate all models trained on a given target dataset. This means that this phase would need to be run once to evaluate the models of each original target dataset Notably, this phase would be the first time that all models are evaluated on the same set of data which is useful for more confidently picking a ‘best’ model and further evaluating model generalizability and it’s ability to replicate performance on data collected at different times, sites, or populations.
+To run this phase the user needs to specify the filepath to the target dataset to be replicated with <a class="reference internal" href="parameters.html#dataset-for-rep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">dataset_for_rep</span></code></span></a> as well as the folderpath to the folder containing one or more replication datasets using <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">rep_data_path</span></code></span></a>.</p>
+<p>This phase begins by conducting an initial exploratory data analysis (EDA) on the new replication dataset(s), followed by processing the dataset in the same way as the original target dataset, yielding the same number of features (but not necessarily the same number of instances). This processing includes cleaning, feature engineering, missing value imputation, feature scaling, and feature selection. Then EDA is repeated to confirm processing of the replication dataset and generate a feature correlation heatmap, however univariate analyses are not repeated on the replication data.</p>
+<p>Next all models previously trained for the target dataset are re-evaluated across all metrics using each replication dataset with results saved separately. Similarly all model evaluation plots (with the exception of feature importance plots) are automatically generated. As before non-parametric statistical tests are applied to examine differences in algorithm performance.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs once for each replication dataset being analyzed for a given target dataset.</p></li>
+<li><p><strong>Run Time:</strong> Moderately fast</p></li>
+<li><p><strong>Output:</strong> Similar outputs to Phase 1 minus univariate analyses, and similar outputs to Phase 6 minus feature importance assessments.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="phase-9-summary-report">
+<h2>Phase 9: Summary Report<a class="headerlink" href="#phase-9-summary-report" title="Link to this heading"></a></h2>
+<p>This final phase generates a pre-formatted PDF report summarizing (1) STREAMLINE run parameters, (2) key exploratory analysis for the processed target data, (3) key ML modeling results (including metrics and feature importances), (4) dataset comparisons (if relevant), (5) key statistical significance comparisons, and (6) runtime. STREAMLINE collects run-time information on each phase of the pipeline and for the training of each ML algorithm model.</p>
+<p>Separate reports are generated representing the findings from running Phases 1-7, i.e. ‘Testing Data Evaluation Report’, as well as for Phase 8 if run on replication data, i.e. ‘Replication Data Evaluation Report’.</p>
+<ul class="simple">
+<li><p><strong>Parallelizability:</strong> Runs once - not parallelizable</p></li>
+<li><p><strong>Run Time:</strong> About a minute</p></li>
+<li><p><strong>Output:</strong> One or more PDF reports</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="about.html" class="btn btn-neutral float-left" title="About (FAQs)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data.html" class="btn btn-neutral float-right" title="Datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

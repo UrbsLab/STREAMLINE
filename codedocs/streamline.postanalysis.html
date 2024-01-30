@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.postanalysis package &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="streamline.postanalysis.dataset_compare module" href="streamline.postanalysis.dataset_compare.html" />
+    <link rel="prev" title="streamline.models.support_vector_machine module" href="streamline.models.support_vector_machine.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+      <li class="breadcrumb-item active">streamline.postanalysis package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/codedocs/streamline.postanalysis.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-streamline.postanalysis">
+<span id="streamline-postanalysis-package"></span><h1>streamline.postanalysis package<a class="headerlink" href="#module-streamline.postanalysis" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html">streamline.postanalysis.dataset_compare module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob"><code class="docutils literal notranslate"><span class="pre">CompareJob</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.best_kruscall_wallis"><code class="docutils literal notranslate"><span class="pre">CompareJob.best_kruscall_wallis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.best_mann_whitney_u"><code class="docutils literal notranslate"><span class="pre">CompareJob.best_mann_whitney_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.best_wilcoxon_rank"><code class="docutils literal notranslate"><span class="pre">CompareJob.best_wilcoxon_rank()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.data_compare_bp"><code class="docutils literal notranslate"><span class="pre">CompareJob.data_compare_bp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.data_compare_bp_all"><code class="docutils literal notranslate"><span class="pre">CompareJob.data_compare_bp_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.inter_set_best_fn"><code class="docutils literal notranslate"><span class="pre">CompareJob.inter_set_best_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.inter_set_fn"><code class="docutils literal notranslate"><span class="pre">CompareJob.inter_set_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.kruscall_wallis"><code class="docutils literal notranslate"><span class="pre">CompareJob.kruscall_wallis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.mann_whitney_u"><code class="docutils literal notranslate"><span class="pre">CompareJob.mann_whitney_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.run"><code class="docutils literal notranslate"><span class="pre">CompareJob.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.save_runtime"><code class="docutils literal notranslate"><span class="pre">CompareJob.save_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.temp_summary"><code class="docutils literal notranslate"><span class="pre">CompareJob.temp_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.dataset_compare.html#streamline.postanalysis.dataset_compare.CompareJob.wilcoxon_rank"><code class="docutils literal notranslate"><span class="pre">CompareJob.wilcoxon_rank()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.postanalysis.gererate_report.html">streamline.postanalysis.gererate_report module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob"><code class="docutils literal notranslate"><span class="pre">ReportJob</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.footer"><code class="docutils literal notranslate"><span class="pre">ReportJob.footer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.format_fn"><code class="docutils literal notranslate"><span class="pre">ReportJob.format_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.job"><code class="docutils literal notranslate"><span class="pre">ReportJob.job()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.pub_model_mean_stats"><code class="docutils literal notranslate"><span class="pre">ReportJob.pub_model_mean_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.pub_model_median_stats"><code class="docutils literal notranslate"><span class="pre">ReportJob.pub_model_median_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.pub_runtime"><code class="docutils literal notranslate"><span class="pre">ReportJob.pub_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.pub_univariate"><code class="docutils literal notranslate"><span class="pre">ReportJob.pub_univariate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ReportJob.run"><code class="docutils literal notranslate"><span class="pre">ReportJob.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.list_to_string"><code class="docutils literal notranslate"><span class="pre">list_to_string()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.postanalysis.gererate_report.html#streamline.postanalysis.gererate_report.ngi"><code class="docutils literal notranslate"><span class="pre">ngi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.postanalysis.model_replicate.html">streamline.postanalysis.model_replicate module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob"><code class="docutils literal notranslate"><span class="pre">ReplicateJob</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.eval_model"><code class="docutils literal notranslate"><span class="pre">ReplicateJob.eval_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.impute_rep_data"><code class="docutils literal notranslate"><span class="pre">ReplicateJob.impute_rep_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.run"><code class="docutils literal notranslate"><span class="pre">ReplicateJob.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.model_replicate.html#streamline.postanalysis.model_replicate.ReplicateJob.scale_rep_data"><code class="docutils literal notranslate"><span class="pre">ReplicateJob.scale_rep_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.postanalysis.statistics.html">streamline.postanalysis.statistics module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob"><code class="docutils literal notranslate"><span class="pre">StatsJob</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.composite_fi_plot"><code class="docutils literal notranslate"><span class="pre">StatsJob.composite_fi_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_fi_boxplots"><code class="docutils literal notranslate"><span class="pre">StatsJob.do_fi_boxplots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_fi_histogram"><code class="docutils literal notranslate"><span class="pre">StatsJob.do_fi_histogram()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_model_prc"><code class="docutils literal notranslate"><span class="pre">StatsJob.do_model_prc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_model_roc"><code class="docutils literal notranslate"><span class="pre">StatsJob.do_model_roc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_plot_prc"><code class="docutils literal notranslate"><span class="pre">StatsJob.do_plot_prc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.do_plot_roc"><code class="docutils literal notranslate"><span class="pre">StatsJob.do_plot_roc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.fi_stats"><code class="docutils literal notranslate"><span class="pre">StatsJob.fi_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.frac_fi"><code class="docutils literal notranslate"><span class="pre">StatsJob.frac_fi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.get_fi_to_viz_sorted"><code class="docutils literal notranslate"><span class="pre">StatsJob.get_fi_to_viz_sorted()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.kruskal_wallis"><code class="docutils literal notranslate"><span class="pre">StatsJob.kruskal_wallis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.mann_whitney_u"><code class="docutils literal notranslate"><span class="pre">StatsJob.mann_whitney_u()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.metric_boxplots"><code class="docutils literal notranslate"><span class="pre">StatsJob.metric_boxplots()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.parse_runtime"><code class="docutils literal notranslate"><span class="pre">StatsJob.parse_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.prep_fi"><code class="docutils literal notranslate"><span class="pre">StatsJob.prep_fi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.preparation"><code class="docutils literal notranslate"><span class="pre">StatsJob.preparation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.primary_stats"><code class="docutils literal notranslate"><span class="pre">StatsJob.primary_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.run"><code class="docutils literal notranslate"><span class="pre">StatsJob.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.save_fi"><code class="docutils literal notranslate"><span class="pre">StatsJob.save_fi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.save_metric_stats"><code class="docutils literal notranslate"><span class="pre">StatsJob.save_metric_stats()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.save_runtime"><code class="docutils literal notranslate"><span class="pre">StatsJob.save_runtime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.select_for_composite_viz"><code class="docutils literal notranslate"><span class="pre">StatsJob.select_for_composite_viz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.weight_fi"><code class="docutils literal notranslate"><span class="pre">StatsJob.weight_fi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.weight_frac_fi"><code class="docutils literal notranslate"><span class="pre">StatsJob.weight_frac_fi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.postanalysis.statistics.html#streamline.postanalysis.statistics.StatsJob.wilcoxon_rank"><code class="docutils literal notranslate"><span class="pre">StatsJob.wilcoxon_rank()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.models.support_vector_machine.html" class="btn btn-neutral float-left" title="streamline.models.support_vector_machine module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.postanalysis.dataset_compare.html" class="btn btn-neutral float-right" title="streamline.postanalysis.dataset_compare module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

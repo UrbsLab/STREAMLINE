@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.runners.model_runner &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.runners.model_runner</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.runners.model_runner</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">ABBREVIATION</span><span class="p">,</span> <span class="n">COLORS</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.modeljob</span> <span class="kn">import</span> <span class="n">ModelJob</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">model_str_to_obj</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">SUPPORTED_MODELS</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">is_supported_model</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.runners</span> <span class="kn">import</span> <span class="n">model_runner_fn</span><span class="p">,</span> <span class="n">num_cores</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.cluster</span> <span class="kn">import</span> <span class="n">get_cluster</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">get_fi_for_ExSTraCS</span>
+
+
+<div class="viewcode-block" id="ModelExperimentRunner">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelExperimentRunner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runner Class for running all the model jobs for</span>
+<span class="sd">    cross-validation splits.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">experiment_name</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;XCS&quot;</span><span class="p">,</span> <span class="s2">&quot;eLCS&quot;</span><span class="p">),</span> <span class="n">class_label</span><span class="o">=</span><span class="s2">&quot;Class&quot;</span><span class="p">,</span>
+                 <span class="n">instance_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span> <span class="n">metric_direction</span><span class="o">=</span><span class="s1">&#39;maximize&#39;</span><span class="p">,</span>
+                 <span class="n">training_subsample</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">use_uniform_fi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+                 <span class="n">timeout</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span> <span class="n">save_plots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">do_lcs_sweep</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lcs_nu</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">lcs_n</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">lcs_iterations</span><span class="o">=</span><span class="mi">200000</span><span class="p">,</span>
+                 <span class="n">lcs_timeout</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">resubmit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">run_cluster</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">queue</span><span class="o">=</span><span class="s1">&#39;defq&#39;</span><span class="p">,</span> <span class="n">reserved_memory</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            output_path: path to output directory</span>
+<span class="sd">            experiment_name: name of experiment (no spaces)</span>
+<span class="sd">            algorithms: list of str of ML models to run</span>
+<span class="sd">            scoring_metric: primary scikit-learn specified scoring metric used for hyperparameter optimization and \</span>
+<span class="sd">                            permutation-based model feature importance evaluation, default=&#39;balanced_accuracy&#39;</span>
+<span class="sd">            metric_direction: direction to optimize the scoring metric in optuna, \</span>
+<span class="sd">                              either &#39;maximize&#39; or &#39;minimize&#39;, default=&#39;maximize&#39;</span>
+<span class="sd">            training_subsample: for long running algos (XGB,SVM,ANN,KNN), option to subsample training set \</span>
+<span class="sd">                                (0 for no subsample, default=0)</span>
+<span class="sd">            use_uniform_fi: overrides use of any available feature importance estimate methods from models, \</span>
+<span class="sd">                            instead using permutation_importance uniformly, default=True</span>
+<span class="sd">            n_trials: number of bayesian hyperparameter optimization trials using optuna \</span>
+<span class="sd">                      (specify an integer or None) default=200</span>
+<span class="sd">            timeout: seconds until hyperparameter sweep stops running new trials \</span>
+<span class="sd">                    (Note: it may run longer to finish last trial started) \</span>
+<span class="sd">                    If set to None, STREAMLINE is completely replicable, but will take longer to run \</span>
+<span class="sd">                    default=900 i.e. 900 sec = 15 minutes default \</span>
+<span class="sd">            save_plots: export optuna-generated hyperparameter sweep plots, default False</span>
+<span class="sd">            do_lcs_sweep: do LCS hyper-param tuning or use below params, default=False</span>
+<span class="sd">            lcs_nu: fixed LCS nu param (recommended range 1-10), set to larger value for data with \</span>
+<span class="sd">                    less or no noise, default=1</span>
+<span class="sd">            lcs_iterations: fixed LCS number of learning iterations param, default=200000</span>
+<span class="sd">            lcs_n: fixed LCS rule population maximum size param, default=2000</span>
+<span class="sd">            lcs_timeout: seconds until hyperparameter sweep stops for LCS algorithms, default=1200</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="n">output_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">=</span> <span class="n">experiment_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span> <span class="o">=</span> <span class="n">class_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span> <span class="o">=</span> <span class="n">instance_label</span>
+
+        <span class="k">if</span> <span class="n">algorithms</span> <span class="o">==</span> <span class="s2">&quot;All&quot;</span> <span class="ow">or</span> <span class="n">algorithms</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]:</span>
+            <span class="n">algorithms</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">algorithms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SUPPORTED_MODELS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">is_supported_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown algorithm in exclude: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">algorithms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_supported_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">is_supported_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown algorithm in exclude: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+
+        <span class="c1"># print(self.algorithms)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span> <span class="o">=</span> <span class="n">scoring_metric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span> <span class="o">=</span> <span class="n">metric_direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_subsample</span> <span class="o">=</span> <span class="n">training_subsample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uniform_fi</span> <span class="o">=</span> <span class="n">use_uniform_fi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span> <span class="o">=</span> <span class="n">n_trials</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_plots</span> <span class="o">=</span> <span class="n">save_plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_lcs_sweep</span> <span class="o">=</span> <span class="n">do_lcs_sweep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcs_nu</span> <span class="o">=</span> <span class="n">lcs_nu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcs_n</span> <span class="o">=</span> <span class="n">lcs_n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcs_iterations</span> <span class="o">=</span> <span class="n">lcs_iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcs_timeout</span> <span class="o">=</span> <span class="n">lcs_timeout</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resubmit</span> <span class="o">=</span> <span class="n">resubmit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="o">=</span> <span class="n">run_cluster</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span> <span class="o">=</span> <span class="n">reserved_memory</span>
+
+        <span class="c1"># Argument checks</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Output path must exist (from phase 1) before phase 4 can begin&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Experiment must exist (from phase 1) before phase 4 can begin&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_metadata</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_alginfo</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ModelExperimentRunner.run">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="c1"># Iterate through datasets, ignoring common folders</span>
+        <span class="n">dataset_paths</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">)</span>
+        <span class="n">remove_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.DS_Store&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;algInfo.pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;jobsCompleted&#39;</span><span class="p">,</span> <span class="s1">&#39;dask_logs&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;logs&#39;</span><span class="p">,</span> <span class="s1">&#39;jobs&#39;</span><span class="p">,</span> <span class="s1">&#39;DatasetComparisons&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">remove_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">dataset_paths</span><span class="p">:</span>
+                <span class="n">dataset_paths</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="n">job_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resubmit</span><span class="p">:</span>
+            <span class="n">phase5completed</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/jobsCompleted/job_model*&#39;</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+                <span class="n">ref</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">phase5completed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">phase5completed</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s2">&quot;metadata.pickle&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">filter_poor_features</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Filter Poor Features&#39;</span><span class="p">]</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">dataset_directory_path</span> <span class="ow">in</span> <span class="n">dataset_paths</span><span class="p">:</span>
+            <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">dataset_directory_path</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/models&#39;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/models&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation&#39;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/models/pickledModels&#39;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/models/pickledModels&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/pickled_metrics&#39;</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s1">&#39;/model_evaluation/pickled_metrics&#39;</span><span class="p">)</span>
+
+            <span class="n">cv_dataset_paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">full_path</span> <span class="o">+</span> <span class="s2">&quot;/CVDatasets/*_CV_*Train.csv&quot;</span><span class="p">))</span>
+            <span class="n">cv_dataset_paths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cv_dataset_path</span><span class="p">))</span> <span class="k">for</span> <span class="n">cv_dataset_path</span> <span class="ow">in</span> <span class="n">cv_dataset_paths</span><span class="p">]</span>
+            <span class="n">cv_partitions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cv_dataset_paths</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cv_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cv_partitions</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+                    <span class="n">abbrev</span> <span class="o">=</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span>
+                    <span class="n">target_file</span> <span class="o">=</span> <span class="s1">&#39;job_model_&#39;</span> <span class="o">+</span> <span class="n">dataset_directory_path</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> \
+                                  <span class="n">abbrev</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span>
+                    <span class="k">if</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="n">phase5completed</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                        <span class="c1"># target for a re-submit</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="o">==</span> <span class="s2">&quot;SLURMOld&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">submit_slurm_cluster_job</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">abbrev</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">)</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="o">==</span> <span class="s2">&quot;LSFOld&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">submit_lsf_cluster_job</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">abbrev</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">)</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># logging.info(&quot;Running Model &quot;+str(algorithm))</span>
+                    <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;eLCS&#39;</span><span class="p">,</span> <span class="s1">&#39;XCS&#39;</span><span class="p">,</span> <span class="s1">&#39;ExSTraCS&#39;</span><span class="p">]:</span>
+                        <span class="n">model</span> <span class="o">=</span> <span class="n">model_str_to_obj</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)(</span><span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                            <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span>
+                                                            <span class="n">metric_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span>
+                                                            <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                                                            <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;ExSTraCS&#39;</span><span class="p">:</span>
+                            <span class="n">expert_knowledge</span> <span class="o">=</span> <span class="n">get_fi_for_ExSTraCS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span>
+                                                                   <span class="n">dataset_directory_path</span><span class="p">,</span>
+                                                                   <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span>
+                                                                   <span class="n">filter_poor_features</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_lcs_sweep</span><span class="p">:</span>
+                                <span class="n">model</span> <span class="o">=</span> <span class="n">model_str_to_obj</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)(</span><span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                                    <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span>
+                                                                    <span class="n">metric_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span>
+                                                                    <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                                                                    <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+                                                                    <span class="n">expert_knowledge</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">expert_knowledge</span><span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">model</span> <span class="o">=</span> <span class="n">model_str_to_obj</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)(</span><span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                                    <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span>
+                                                                    <span class="n">metric_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span>
+                                                                    <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                                                                    <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+                                                                    <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lcs_iterations</span><span class="p">,</span>
+                                                                    <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lcs_n</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lcs_nu</span><span class="p">,</span>
+                                                                    <span class="n">expert_knowledge</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">expert_knowledge</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_lcs_sweep</span><span class="p">:</span>
+                                <span class="n">model</span> <span class="o">=</span> <span class="n">model_str_to_obj</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)(</span><span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                                    <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span>
+                                                                    <span class="n">metric_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span>
+                                                                    <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                                                                    <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">model</span> <span class="o">=</span> <span class="n">model_str_to_obj</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)(</span><span class="n">cv_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                                    <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span>
+                                                                    <span class="n">metric_direction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span>
+                                                                    <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+                                                                    <span class="n">cv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+                                                                    <span class="n">iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lcs_iterations</span><span class="p">,</span>
+                                                                    <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lcs_n</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lcs_nu</span><span class="p">)</span>
+
+                    <span class="n">job_obj</span> <span class="o">=</span> <span class="n">ModelJob</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_subsample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniform_fi</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">save_plots</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">run_parallel</span> <span class="ow">and</span> <span class="n">run_parallel</span> <span class="o">!=</span> <span class="s2">&quot;False&quot;</span><span class="p">:</span>
+                        <span class="c1"># p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))</span>
+                        <span class="c1"># job_list.append(p)</span>
+                        <span class="n">job_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">job_obj</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">job_obj</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">run_parallel</span> <span class="ow">and</span> <span class="n">run_parallel</span> <span class="o">!=</span> <span class="s2">&quot;False&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span><span class="p">:</span>
+            <span class="c1"># run_jobs(job_list)</span>
+            <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">num_cores</span><span class="p">)(</span>
+                <span class="n">delayed</span><span class="p">(</span><span class="n">model_runner_fn</span><span class="p">)(</span><span class="n">job_obj</span><span class="p">,</span> <span class="n">model</span>
+                                         <span class="p">)</span> <span class="k">for</span> <span class="n">job_obj</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">job_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="ow">and</span> <span class="s2">&quot;Old&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span><span class="p">:</span>
+            <span class="n">get_cluster</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span>
+            <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">([</span><span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">model_runner_fn</span><span class="p">)(</span><span class="n">job_obj</span><span class="p">,</span> <span class="n">model</span>
+                                                        <span class="p">)</span> <span class="k">for</span> <span class="n">job_obj</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">job_list</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="ModelExperimentRunner.save_metadata">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.save_metadata">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Load metadata</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s2">&quot;metadata.pickle&quot;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># Update metadata</span>
+        <span class="c1"># Comment our this metadata, so it doesn&#39;t show up in the report.</span>
+        <span class="c1"># metadata[&#39;Naive Bayes&#39;] = str(&#39;Naive Bayes&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Logistic Regression&#39;] = str(&#39;Logistic Regression&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Decision Tree&#39;] = str(&#39;Decision Tree&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Random Forest&#39;] = str(&#39;Random Forest&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Gradient Boosting&#39;] = str(&#39;Gradient Boosting&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Extreme Gradient Boosting&#39;] = str(&#39;Extreme Gradient Boosting&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Light Gradient Boosting&#39;] = str(&#39;Light Gradient Boosting&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Category Gradient Boosting&#39;] = str(&#39;Category Gradient Boosting&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Support Vector Machine&#39;] = str(&#39;Support Vector Machine&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Artificial Neural Network&#39;] = str(&#39;Artificial Neural Network&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;K-Nearest Neighbors&#39;] = str(&#39;K-Nearest Neighbors&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;Genetic Programming&#39;] = str(&#39;Genetic Programming&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;eLCS&#39;] = str(&#39;eLCS&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;XCS&#39;] = str(&#39;XCS&#39; in self.algorithms)</span>
+        <span class="c1"># metadata[&#39;ExSTraCS&#39;] = str(&#39;ExSTraCS&#39; in self.algorithms)</span>
+        <span class="c1"># Add new algorithms here...</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Primary Metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Training Subsample for KNN,ANN,SVM,and XGB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_subsample</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Uniform Feature Importance Estimation (Models)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniform_fi</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Hyperparameter Sweep Number of Trials&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Hyperparameter Timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Export Hyperparameter Sweep Plots&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_plots</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Do LCS Hyperparameter Sweep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_lcs_sweep</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;nu&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcs_nu</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;Training Iterations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcs_iterations</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;N (Rule Population Size)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcs_n</span>
+        <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;LCS Hyperparameter Sweep Timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcs_timeout</span>
+        <span class="c1"># Pickle the metadata for future use</span>
+        <span class="n">pickle_out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s2">&quot;metadata.pickle&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">pickle_out</span><span class="p">)</span>
+        <span class="n">pickle_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ModelExperimentRunner.save_alginfo">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.save_alginfo">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_alginfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">alg_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">SUPPORTED_MODELS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+                <span class="n">alg_info</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">algorithm</span><span class="p">],</span> <span class="n">COLORS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">alg_info</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="n">ABBREVIATION</span><span class="p">[</span><span class="n">algorithm</span><span class="p">],</span> <span class="n">COLORS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]]</span>
+
+        <span class="c1"># Pickle the algorithm information dictionary for future use</span>
+        <span class="n">pickle_out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s2">&quot;algInfo.pickle&quot;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">alg_info</span><span class="p">,</span> <span class="n">pickle_out</span><span class="p">)</span>
+        <span class="n">pickle_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ModelExperimentRunner.get_cluster_params">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.get_cluster_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_cluster_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">):</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">full_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_label</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">instance_label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoring_metric</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_direction</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">n_trials</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_subsample</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">uniform_fi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_plots</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">]</span>
+        <span class="n">cluster_params</span> <span class="o">+=</span> <span class="p">[</span><span class="n">algorithm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_lcs_sweep</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">lcs_iterations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcs_n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcs_nu</span><span class="p">]</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cluster_params</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">cluster_params</span></div>
+
+
+<div class="viewcode-block" id="ModelExperimentRunner.submit_slurm_cluster_job">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.submit_slurm_cluster_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">submit_slurm_cluster_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">):</span>
+        <span class="n">job_ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">job_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/jobs/P5_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span> \
+                   <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;_run.sh&#39;</span>
+        <span class="n">sh_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">job_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/bash</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#SBATCH -p &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#SBATCH --job-name=&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#SBATCH --mem=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;G&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># sh_file.write(&#39;#BSUB -M &#39;+str(maximum_memory)+&#39;GB&#39;+&#39;\n&#39;)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#SBATCH -o &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/logs/P5_&#39;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.o</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#SBATCH -e &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/logs/P5_&#39;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.e</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/streamline/legacy&quot;</span> <span class="o">+</span> <span class="s1">&#39;/ModelJobSubmit.py&#39;</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cluster_params</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;srun&#39;</span><span class="p">,</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">]</span> <span class="o">+</span> <span class="n">cluster_params</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;sbatch &#39;</span> <span class="o">+</span> <span class="n">job_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelExperimentRunner.submit_lsf_cluster_job">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.model_runner.html#streamline.runners.model_runner.ModelExperimentRunner.submit_lsf_cluster_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">submit_lsf_cluster_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">):</span>
+        <span class="n">job_ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">job_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> \
+                   <span class="o">+</span> <span class="s1">&#39;/jobs/P5_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;_run.sh&#39;</span>
+        <span class="n">sh_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">job_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/bash</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -q &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -J &#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -R &quot;rusage[mem=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;G]&quot;&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -M &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;GB&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#BSUB -o &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span>
+            <span class="o">+</span> <span class="s1">&#39;/logs/P5_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.o</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#BSUB -e &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span>
+            <span class="o">+</span> <span class="s1">&#39;/logs/P5_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cv_count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.e</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/streamline/legacy&quot;</span> <span class="o">+</span> <span class="s1">&#39;/ModelJobSubmit.py&#39;</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cluster_params</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">cv_count</span><span class="p">)</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">]</span> <span class="o">+</span> <span class="n">cluster_params</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;bsub &lt; &#39;</span> <span class="o">+</span> <span class="n">job_name</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

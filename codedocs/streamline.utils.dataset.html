@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.utils.dataset module &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="streamline.utils.evaluation module" href="streamline.utils.evaluation.html" />
+    <link rel="prev" title="streamline.utils.cluster module" href="streamline.utils.cluster.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+          <li class="breadcrumb-item"><a href="streamline.utils.html">streamline.utils package</a></li>
+      <li class="breadcrumb-item active">streamline.utils.dataset module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/codedocs/streamline.utils.dataset.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-streamline.utils.dataset">
+<span id="streamline-utils-dataset-module"></span><h1>streamline.utils.dataset module<a class="headerlink" href="#module-streamline.utils.dataset" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.utils.dataset.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates dataset with path of tabular file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_path</strong> – path of tabular file (as csv, tsv, or txt)</p></li>
+<li><p><strong>class_label</strong> – column label for the outcome to be predicted in the dataset</p></li>
+<li><p><strong>match_label</strong> – column to identify unique groups of instances in the dataset             that have been ‘matched’ as part of preparing the dataset with cases and controls             that have been matched for some co-variates             Match label is really only used in the cross validation partitioning             It keeps any set of instances with the same match label value in the same partition.</p></li>
+<li><p><strong>instance_label</strong> – Instance label is mostly used by the rule based learner in modeling,             we use it to trace back heterogeneous subgroups to the instances in the original dataset</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.clean_data">
+<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.clean_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.clean_data" title="Link to this definition"></a></dt>
+<dd><p>Basic data cleaning: Drops any instances with a missing outcome
+value as well as any features (ignore_features) specified by user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.counts_summary">
+<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.counts_summary" title="Link to this definition"></a></dt>
+<dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
+features, and class counts. Also saves a simple bar graph of class counts if user specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiment_path</strong> – </p></li>
+<li><p><strong>total_missing</strong> – total missing values (optional, runs again if not given)</p></li>
+<li><p><strong>plot</strong> – flag to output bar graph in the experiment log folder</p></li>
+<li><p><strong>show_plots</strong> – flag to show plots</p></li>
+<li><p><strong>initial</strong> – flag for initial eda</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.describe_data">
+<span class="sig-name descname"><span class="pre">describe_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.describe_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.describe_data" title="Link to this definition"></a></dt>
+<dd><p>Conduct and export basic dataset descriptions including basic column statistics, column variable types
+(i.e. int64 vs. float64), and unique value counts for each column</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.eda">
+<span class="sig-name descname"><span class="pre">eda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.eda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.eda" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.feature_correlation">
+<span class="sig-name descname"><span class="pre">feature_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.feature_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.feature_correlation" title="Link to this definition"></a></dt>
+<dd><p>Calculates feature correlations via pearson correlation and exports a respective heatmap visualization.
+Due to computational expense this may not be recommended for datasets with a large number of instances
+and/or features unless needed. The generated heatmap will be difficult to read with a large number
+of features in the target dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiment_path</strong> – </p></li>
+<li><p><strong>x_data</strong> – data with only feature columns</p></li>
+<li><p><strong>plot</strong> – </p></li>
+<li><p><strong>show_plots</strong> – </p></li>
+<li><p><strong>initial</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.feature_only_data">
+<span class="sig-name descname"><span class="pre">feature_only_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.feature_only_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.feature_only_data" title="Link to this definition"></a></dt>
+<dd><p>Create features-only version of dataset for some operations
+Returns: dataframe x_data with only features</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.get_headers">
+<span class="sig-name descname"><span class="pre">get_headers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.get_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.get_headers" title="Link to this definition"></a></dt>
+<dd><p>Return feature names of the datasets</p>
+<p>Returns: list of feature names</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.get_outcome">
+<span class="sig-name descname"><span class="pre">get_outcome</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.get_outcome"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.get_outcome" title="Link to this definition"></a></dt>
+<dd><p>Function to get outcome value form data
+Returns: outcome column</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.initial_eda">
+<span class="sig-name descname"><span class="pre">initial_eda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'initial/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.initial_eda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.initial_eda" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.load_data">
+<span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.load_data" title="Link to this definition"></a></dt>
+<dd><p>Function to load data in dataset</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.missing_count_plot">
+<span class="sig-name descname"><span class="pre">missing_count_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.missing_count_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.missing_count_plot" title="Link to this definition"></a></dt>
+<dd><p>Plots a histogram of missingness across all data columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.missingness_counts">
+<span class="sig-name descname"><span class="pre">missingness_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.missingness_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.missingness_counts" title="Link to this definition"></a></dt>
+<dd><p>Count and export missing values for all data columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.non_feature_data">
+<span class="sig-name descname"><span class="pre">non_feature_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.non_feature_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.non_feature_data" title="Link to this definition"></a></dt>
+<dd><p>Create non features version of dataset for some operations
+Returns: dataframe y_data with only non features</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.set_original_headers">
+<span class="sig-name descname"><span class="pre">set_original_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'exploratory'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.set_original_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.set_original_headers" title="Link to this definition"></a></dt>
+<dd><p>Exports dataset header labels for use as a reference later in the pipeline.</p>
+<p>Returns: list of headers labels</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.utils.dataset.Dataset.set_processed_headers">
+<span class="sig-name descname"><span class="pre">set_processed_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'exploratory'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/utils/dataset.html#Dataset.set_processed_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.utils.dataset.Dataset.set_processed_headers" title="Link to this definition"></a></dt>
+<dd><p>Exports dataset header labels for use as a reference later in the pipeline.</p>
+<p>Returns: list of headers labels</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.utils.cluster.html" class="btn btn-neutral float-left" title="streamline.utils.cluster module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.utils.evaluation.html" class="btn btn-neutral float-right" title="streamline.utils.evaluation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

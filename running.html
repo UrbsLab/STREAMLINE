@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running STREAMLINE &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Run Parameters" href="parameters.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running STREAMLINE</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#google-colab-notebook">Google Colab Notebook</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-demo-colab">Running the Demo (Colab)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-your-own-datasets-colab">Running Your Own Datasets (Colab)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#easy-mode">Easy Mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#manual-mode">Manual Mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#jupyter-notebook">Jupyter Notebook</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-demo-jupyter">Running the Demo (Jupyter)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-your-own-datasets-jupyter">Running Your Own Datasets (Jupyter)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command Line Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#locally">Locally</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#using-a-configuration-file-locally">Using a Configuration File (Locally)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-command-line-arguments-locally">Using Command-Line Arguments (Locally)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cpu-computing-cluster">CPU Computing Cluster</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#helpful-tools">Helpful Tools</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster-specific-run-parameters">Cluster-Specific Run Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-a-configuration-file-cluster">Using a Configuration File (Cluster)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-command-line-arguments-cluster">Using Command-Line Arguments (Cluster)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#checking-streamline-job-completion">Checking STREAMLINE Job Completion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#picking-a-run-mode">Picking a Run Mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-run-streamline-on-google-colab">Why run STREAMLINE on Google Colab?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Running STREAMLINE</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/running.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="running-streamline">
+<h1>Running STREAMLINE<a class="headerlink" href="#running-streamline" title="Link to this heading"></a></h1>
+<p>This section details how to run STREAMLINE in any of its run modes. These include:</p>
+<ol class="arabic simple">
+<li><p><strong>Google Colab Notebook:</strong> (run remotely on free google cloud resources)</p>
+<ul class="simple">
+<li><p><em>Both an ‘easy’ and ‘manual’ run mode is available for users run their own data</em></p></li>
+</ul>
+</li>
+<li><p><strong>Jupyter Notebook:</strong> (run locally on your PC)</p></li>
+<li><p><strong>Command Line Interface:</strong> (locally or on a ‘dask-compatable’ CPU Computing Cluster)</p></li>
+</ol>
+<p>While the notebooks only allow STREAMLINE to be run serially, it can be ‘<a class="reference external" href="https://en.wikipedia.org/wiki/Embarrassingly_parallel">embarrassingly</a>’ parallelized when run from the command line in one of two ways:</p>
+<ul class="simple">
+<li><p><strong>Local command line:</strong> basic CPU core parallelization</p></li>
+<li><p><strong>CPU Computing Cluster:</strong> job submission parallelization</p></li>
+</ul>
+<p>When run from the command line, STREAMLINE can be run in one of two ways:</p>
+<ul class="simple">
+<li><p><strong>Using a Configuration File:</strong> run all, or any number of phases using a single command that points to a ‘configuration file’ with all necessary run parameters</p></li>
+<li><p><strong>Using Command-Line Arguments:</strong> run all, or any number of phases using command line arguments</p></li>
+</ul>
+<p>For more details and guidelines on selecting a run mode, see ‘<a class="reference internal" href="#picking-a-run-mode">Picking a Run Mode</a>’.</p>
+<p>All users may benefit from reviewing the ‘<a class="reference internal" href="tips.html"><span class="std std-doc">Guidelines for Setting Run Parameters</span></a>’ section for tips on (1) ensuring reproducibility (2) reducing runtime, and (3) improving modeling performance. Details on the variety of outputs generated by STREAMLINE can be found in ‘<a class="reference internal" href="output.html"><span class="std std-doc">Navigating STREAMLINE Output</span></a>’.</p>
+<p>Once you’ve completed the <a class="reference internal" href="install.html"><span class="std std-doc">installation</span></a> instructions for the run mode desired, follow the mode-specific directions below for running STREAMLINE.</p>
+<hr class="docutils" />
+<section id="google-colab-notebook">
+<h2>Google Colab Notebook<a class="headerlink" href="#google-colab-notebook" title="Link to this heading"></a></h2>
+<p>This run mode is best for (1) easily trying out STREAMLINE on demonstration data, (2) running analyses on small datasets, or (3) educational purposes. Check out this <a class="reference external" href="https://www.tutorialspoint.com/google_colab/index.htm">tutorial</a> to lean the basics of a <a class="reference external" href="https://research.google.com/colaboratory/">Google Colab Notebook</a>.</p>
+<p>Below we first detail how to run the Colab Notebook on the included <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>, then how to adapt this notebook to run on your own dataset(s) as well as change STREAMLINE run parameters if desired.</p>
+<section id="running-the-demo-colab">
+<h3>Running the Demo (Colab)<a class="headerlink" href="#running-the-demo-colab" title="Link to this heading"></a></h3>
+<p>The STREAMLINE Google Colab Notebook is set up to run a limited analysis applying all 9 phases of the pipeline. This includes 3-fold cross validation, and applying only three of the faster ML modeling algorithms to 2 example ‘target datasets’, and a ‘replication dataset’ relevant to only one of the target datasets. These datasets are detailed in <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">Demonstration Data</span></a>. This demo should take 6-7 minutes to run on Google Cloud, with results viewable in the notebook. The notebook will also automatically download the PDF summary reports, and the zipped ‘experiment folder’ with all output files, with the user’s permission.</p>
+<p>To run this demo, do the following:</p>
+<ol class="arabic simple">
+<li><p>Set up a Google account (if you don’t already have one). Click <a class="reference external" href="https://support.google.com/accounts/answer/27441?hl=en">here</a> for help.</p></li>
+<li><p>Open the STREAMLINE Google Colab Notebook by clicking the link below:
+<a class="reference external" href="https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing">https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing</a></p></li>
+<li><p>[Optional] Open the <code class="docutils literal notranslate"><span class="pre">Runtime</span></code> menu and select <code class="docutils literal notranslate"><span class="pre">Disconnect</span> <span class="pre">and</span> <span class="pre">delete</span> <span class="pre">runtime</span></code>. <em>This clears the memory of the previous notebook run. This is only necessary when the underlying base code is modified, but it may be useful to troubleshoot if modifications to the notebook do not seem to have an effect.</em></p></li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">Runtime</span></code> menu and select <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">all</span></code>. <em>This will run all code cells of the notebook, i.e. all phases of STREAMLINE.</em></p></li>
+</ol>
+<p>At this point the notebook will do the following automatically:</p>
+<ul class="simple">
+<li><p>Reserve a limited amount of free memory (RAM) and disk space on Google Cloud.</p></li>
+<li><p>Load the most recent STREAMLINE repository into memory from Github. <em>The STREAMLINE release version is automatically indicated in the summary PDF reports.</em></p></li>
+<li><p>Install other necessary python packages in the Google Colab Environment.</p></li>
+<li><p>Run the entirety of STREAMLINE on the <a class="reference internal" href="#sample.md#demonstration-data"><span class="xref myst">demonstration datasets</span></a>.</p></li>
+<li><p>Download the PDF ‘testing evaluation’ and the ‘replication evaluation’ summary reports automatically. <em>Google will ask for user permission the first time</em></p></li>
+<li><p>Download the zipped ‘experiment folder’ with all output files to your local computer.</p></li>
+</ul>
+<p>See ‘<a class="reference internal" href="output.html#notebooks"><span class="std std-ref">Notebook Output</span></a>’ for more on examining output within the notebook and ‘<a class="reference internal" href="output.html#output-files"><span class="std std-ref">Output Files</span></a>’</p>
+</section>
+<section id="running-your-own-datasets-colab">
+<h3>Running Your Own Datasets (Colab)<a class="headerlink" href="#running-your-own-datasets-colab" title="Link to this heading"></a></h3>
+<p>Before running STREAMLINE on new data, make sure it adheres to ‘<a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">Input Data Requirements</span></a>’. To update the STREAMLINE Colab Notebook to run on one or more user specified ‘target datasets’, users can chose between an ‘easy’ and ‘manual mode.</p>
+<p>As above, begin by opening the STREAMLINE Google Colab Notebook by clicking the link below:
+<a class="reference external" href="https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing">https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing</a></p>
+<p>Before running, update the run parameters within the ‘STREAMLINE RUN PARAMETERS’ section of the notebook as indicated below.</p>
+<p><em>Note that, for brevity, some parameter names used in the notebook (used below) are slightly different from those used in the command line. Details on STREAMLINE run parameters are given <a class="reference internal" href="parameters.html"><span class="std std-doc">here</span></a>.</em></p>
+<section id="easy-mode">
+<h4>Easy Mode<a class="headerlink" href="#easy-mode" title="Link to this heading"></a></h4>
+<p>This mode is most convenient if you want to run the notebook on other data, but want to be prompted to enter/select essential parameter information instead of adjusting parameters within run parameter code cells. This mode will prompt the user for essential ‘experiment’ and dataset-specific run parameter values. This mode is also convenient as it allows you to select datasets directly from your local computer rather than creating new folders within the temporary Colab Notebook workspace. All other non-essential run parmameters need to be updated within respective code cells.</p>
+<ol class="arabic simple">
+<li><p>In the first code cell, set (<a class="reference internal" href="parameters.html#demo-run"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">demo_run</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code>) and ([`use_data_prompt’](parameters.md#use-data-prompt) = `True`)</p>
+<ul class="simple">
+<li><p><em>This tells the notebook that you don’t want to run the demo datasets, and you want to be ‘prompted’ to enter/select essential run parameters rather than edit the respective code cells</em></p></li>
+</ul>
+</li>
+<li><p>[Optional] Update non-essential run parameters (within respective code cells) to the users specifications</p>
+<ul class="simple">
+<li><p>*Most commonly, this would include <a class="reference internal" href="parameters.html#cv-partitions"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">n_splits</span></code></span></a>, <a class="reference internal" href="parameters.html#categorical-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></span></a>, and <a class="reference internal" href="parameters.html#algorithms"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></span></a></p></li>
+<li><p><em>We also strongly recommend specifying <a class="reference internal" href="parameters.html#categorical-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_feature_headers</span></code></span></a> and/or <a class="reference internal" href="parameters.html#quantitative-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">quantitiative_feature_headers</span></code></span></a> as lists of feature names in the dataset(s) headers that should be treated as either categorical or quanatiative</em></p></li>
+<li><p><em>If only one of these lists is specified, all features not specified in that list will be treated as the other feature type by default</em></p></li>
+</ul>
+</li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">Runtime</span></code> menu and select <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">all</span></code>.</p></li>
+<li><p>Reply to the prompts requesting the following essential parameter values:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="parameters.html#experiment-name"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></span></a> - a unique name for the ouput folder for the current STREAMLINE ‘experiment’</p></li>
+<li><p><a class="reference internal" href="parameters.html#dataset-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">data_path</span></code></span></a> - use file navigation window to select the folder containing one or more ‘target datasets’ to be analyzed</p>
+<ul>
+<li><p><em>These datasets must adhere to the formatting detailed in ‘<a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">Input Data Requirements</span></a>’</em></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="parameters.html#class-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">class_label</span></code></span></a> - specify the header name for the outcome column in the dataset(s), e.g. ‘Class’</p></li>
+<li><p><a class="reference internal" href="parameters.html#instance-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></span></a> - specify the header name for the unique instance IDs in the dataset(s) or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if not relevant</p></li>
+<li><p><a class="reference internal" href="parameters.html#match-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">match_label</span></code></span></a> - specify the header name for the match/group column in the dataset(s) or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if not relevant</p></li>
+<li><p><a class="reference internal" href="parameters.html#applytoreplication"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">applyToReplication</span></code></span></a> - indicate <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> as to whether ‘replication data’ is available for the replication phase</p></li>
+<li><p><a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">rep_data_path</span></code></span></a> - use file navigation window to select the folder containing one or more ‘replication datasets’ to be analyzed</p>
+<ul>
+<li><p><em>All datasets in this folder should be replicates for a single ‘target dataset’, and similarly adhere to <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">formatting</span></a> requirments</em></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="parameters.html#dataset-for-rep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">dataset_for_rep</span></code></span></a> - specify the filename (with extension) of the original ‘target dataset’ to indicate which models the replication data will be applied to</p></li>
+</ul>
+</li>
+</ol>
+<ul class="simple">
+<li><p><em>After providing valid entries for these prompts, all phases of STREAMLINE will run in sequence within the notebook.</em></p></li>
+<li><p><em>STREAMLINE outputfiles are automatically saved to the output ‘experiment folder’ named <code class="docutils literal notranslate"><span class="pre">UserOutput</span></code> within the temporary notebook workspace, as well as optionally downloaded to the users computer after completion</em></p></li>
+</ul>
+</section>
+<section id="manual-mode">
+<h4>Manual Mode<a class="headerlink" href="#manual-mode" title="Link to this heading"></a></h4>
+<ol class="arabic simple">
+<li><p>In the first code cell, set (<a class="reference internal" href="parameters.html#demo-run"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">demo_run</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code>) and ([`use_data_prompt’](parameters.md#use-data-prompt) = `False`)</p>
+<ul class="simple">
+<li><p><em>This tells the notebook that you don’t want to run the demo datasets, but you want update all run parameters (essential and non-essential) within respective code cells</em></p></li>
+</ul>
+</li>
+<li><p>Click on the ‘Files’ tab on the left side of the notebook (pictured as a blank folder), and right-click on ‘content’ folder (i.e. the temporary google colab workspace) and create a ‘New Folder’ to contain your target dataset(s), called <code class="docutils literal notranslate"><span class="pre">UserData</span></code> (or some other name if you also update the <a class="reference internal" href="parameters.html#dataset-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">data_path</span></code></span></a> parameter)</p></li>
+<li><p>Save your <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">formatted</span></a> target dataset(s) within this folder</p>
+<ul class="simple">
+<li><p><em>Note: We recommend making sure datasets run within Google Colab do not contain any sensitive or protected health information (PHI)</em></p></li>
+</ul>
+</li>
+<li><p>[Optional] Repeat steps 2-3 for any replication dataset(s) you wish to apply to the models trained for a specific ‘target dataset’</p>
+<ul class="simple">
+<li><p><em>If you have no replication data, make sure to update the <a class="reference internal" href="parameters.html#applytoreplication"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">applyToReplication</span></code></span></a> parameter to <code class="docutils literal notranslate"><span class="pre">False</span></code></em></p></li>
+</ul>
+</li>
+<li><p>Update (essential and non-essential) run parameter code cells to the dataset and users specifications</p>
+<ul class="simple">
+<li><p><em>Note: You can leave <a class="reference internal" href="parameters.html#output-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">output_path</span></code></span></a> as <code class="docutils literal notranslate"><span class="pre">/content/UserOutput</span></code> and all output will be saved to this automatically created folder</em></p></li>
+<li><p><em>If you run more than one STREAMLINE ‘experiments’ in a single session, make sure to update <a class="reference internal" href="parameters.html#experiment-name"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></span></a> each time to avoid overwriting a prior experiment</em></p></li>
+</ul>
+</li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">Runtime</span></code> menu and select <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">all</span></code></p></li>
+</ol>
+<ul class="simple">
+<li><p><em>Note: Common errors preventing the notebook from running to completion include issues with file/path names, dataset formatting, or other incorrect changes to other run parameter settings</em></p></li>
+<li><p><em>The notebook includes comments after each run parameter, indicating the format and value options for each</em></p></li>
+</ul>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="jupyter-notebook">
+<h2>Jupyter Notebook<a class="headerlink" href="#jupyter-notebook" title="Link to this heading"></a></h2>
+<p>This run mode is best for (1) confirming successful STREAMLINE installation for local computer use, (2) running STREAMLINE in a notebook on your own computer’s resources (generally faster than Colab Notebook), (3) running analyses on small to moderately sized datasets, (4) viewing output directly within a notebook, or (5) educational purposes. Click <a class="reference external" href="https://jupyter.readthedocs.io/en/latest/running.html">here</a> to learn the basics of Jupyter Notebook.</p>
+<p>Running STREAMLINE in Jupyter Notebook is largely the same as for running it in Google Colab. Below we specify how to run the Jupyter Notebook on the included <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>, then how to adapt it to run on your own dataset(s).</p>
+<section id="running-the-demo-jupyter">
+<h3>Running the Demo (Jupyter)<a class="headerlink" href="#running-the-demo-jupyter" title="Link to this heading"></a></h3>
+<p>The STREAMLINE Jupyter Notebook is also set up to run a limited analysis applying all 9 phases of the pipeline. This includes 3-fold cross validation, and applying only three of the faster ML modeling algorithms to 2 example ‘target datasets’, and a ‘replication dataset’ relevant to only one of the target datasets. These datasets are detailed in <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">Demonstration Data</span></a>. This demo should take about 2-5 minutes to run (depending on your computer hardware), with results viewable in the notebook. The notebook will automatically save the ‘experiment folder’ (named <code class="docutils literal notranslate"><span class="pre">DemoOutput</span></code>) with all output files (including PDF reports).</p>
+<ol class="arabic simple">
+<li><p>From your command line, open Jupyter Notebook by typing <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">notebook</span></code>.</p></li>
+<li><p>Within the Jupyter local file browser that opens, navigate into the previously saved/installed <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory where you find the file named <code class="docutils literal notranslate"><span class="pre">STREAMLINE-Notebook.ipypnb</span></code>.</p></li>
+<li><p>Click to open <code class="docutils literal notranslate"><span class="pre">STREAMLINE-Notebook.ipypnb</span></code> as a Jupyter Notebook in a new page open in your web browser.</p></li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">Kernel</span></code> menu and select <code class="docutils literal notranslate"><span class="pre">Restart</span> <span class="pre">&amp;</span> <span class="pre">Run</span> <span class="pre">All</span></code>. <em>This will run all code cells of the notebook, i.e. all phases of STREAMLINE.</em></p></li>
+</ol>
+<p>At this point the notebook will do the following automatically:</p>
+<ul class="simple">
+<li><p>Run the entirety of STREAMLINE on the <a class="reference internal" href="#sample.md#demonstration-data"><span class="xref myst">demonstration datasets</span></a>.</p></li>
+<li><p>Save all output files (including PDF reports) as an ‘experiment folder’ named <code class="docutils literal notranslate"><span class="pre">DemoOutput</span></code> within the <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory.</p></li>
+</ul>
+<p>See ‘<a class="reference internal" href="output.html#notebooks"><span class="std std-ref">Notebook Output</span></a>’ for more on examining output within the notebook and ‘<a class="reference internal" href="output.html#output-files"><span class="std std-ref">Output Files</span></a>’</p>
+</section>
+<section id="running-your-own-datasets-jupyter">
+<h3>Running Your Own Datasets (Jupyter)<a class="headerlink" href="#running-your-own-datasets-jupyter" title="Link to this heading"></a></h3>
+<p>Begin by opening <code class="docutils literal notranslate"><span class="pre">STREAMLINE-Notebook.ipypnb</span></code> as a Jupyter Notebook (steps 1-3 above). Before running, update the run parameters within the ‘STREAMLINE RUN PARAMETERS’ section of the notebook as indicated below.</p>
+<p><em>Note that, for brevity, some parameter names used in the notebook (used below) are slightly different from those used in the command line. Details on STREAMLINE run parameters are given <a class="reference internal" href="parameters.html"><span class="std std-doc">here</span></a>.</em></p>
+<ol class="arabic simple">
+<li><p>In the first code cell, set ([`demo_run’](parameters.md#demo-run) = `False`)</p>
+<ul class="simple">
+<li><p><em>This tells the notebook that you don’t want to run the demo datasets, and you want to be ‘prompted’ to enter/select essential run parameters rather than edit the respective code cells</em></p></li>
+</ul>
+</li>
+<li><p>Update essential run parameters (within respective code cells) to the user/dataset’s specifications</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="parameters.html#experiment-name"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></span></a> - a unique name for the ouput folder for the current STREAMLINE ‘experiment’</p></li>
+<li><p><a class="reference internal" href="parameters.html#dataset-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">data_path</span></code></span></a> -  path to the folder containing one or more ‘target datasets’ to be analyzed</p>
+<ul>
+<li><p><em>These datasets must adhere to the formatting detailed in ‘<a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">Input Data Requirements</span></a>’</em></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="parameters.html#output-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">output_path</span></code></span></a> - path to the folder (that will be automatically created if it doesn’t yet exist) in which the ‘experiment folder’ including all STREAMLINE output will be saved</p>
+<ul>
+<li><p><em>Note: You can leave <a class="reference internal" href="parameters.html#output-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">output_path</span></code></span></a> as <code class="docutils literal notranslate"><span class="pre">./UserOutput</span></code> if you’ve named this folder <code class="docutils literal notranslate"><span class="pre">UserOutput</span></code></em></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="parameters.html#class-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">class_label</span></code></span></a> - the header name for the outcome column in the dataset(s), e.g. ‘Class’</p></li>
+<li><p><a class="reference internal" href="parameters.html#instance-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></span></a> - the header name for the unique instance IDs in the dataset(s) or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if not relevant</p></li>
+<li><p><a class="reference internal" href="parameters.html#match-label"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">match_label</span></code></span></a> - the header name for the match/group column in the dataset(s) or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if not relevant</p></li>
+<li><p><a class="reference internal" href="parameters.html#ignore-features-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">ignore_features</span></code></span></a> - list of text-valued feature names in target datasets that you want STREAMLINE to drop from the analysis, or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if not relevant</p></li>
+<li><p><a class="reference internal" href="parameters.html#categorical-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_feature_headers</span></code></span></a>  - list of text-valued feature names in the dataset(s) headers that should be treated as categorical or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if <a class="reference internal" href="parameters.html#quantitative-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">quantitiative_feature_headers</span></code></span></a> were specified and you want all other features to be treated as categorical, or you want feature types to be automatically decided using <a class="reference internal" href="parameters.html#categorical-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></span></a></p></li>
+<li><p><a class="reference internal" href="parameters.html#quantitative-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">quantitiative_feature_headers</span></code></span></a> - list of text-valued feature names in the dataset(s) headers that should be treated as quantitative or specify <code class="docutils literal notranslate"><span class="pre">None</span></code> if <a class="reference internal" href="parameters.html#categorical-feature-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_feature_headers</span></code></span></a> were specified and you want all other features to be treated as quantitative, or you want feature types to be automatically decided using <a class="reference internal" href="parameters.html#categorical-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></span></a></p></li>
+<li><p><a class="reference internal" href="parameters.html#applytoreplication"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">applyToReplication</span></code></span></a> - indicate <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> as to whether ‘replication data’ is available for the replication phase</p></li>
+<li><p><a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">rep_data_path</span></code></span></a> - path to folder containing one or more ‘replication datasets’ to be analyzed</p>
+<ul>
+<li><p><em>All datasets in this folder should be replicates for a single ‘target dataset’, and similarly adhere to <a class="reference internal" href="data.html#input-data-requirements"><span class="std std-ref">formatting</span></a> requirments</em></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="parameters.html#dataset-for-rep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">dataset_for_rep</span></code></span></a> - path to the file (with extension) of the original ‘target dataset’ to indicate which models the replication data will be applied to</p></li>
+</ul>
+</li>
+<li><p>[Optional] Update non-essential run parameters (within respective code cells) to the users specifications</p>
+<ul class="simple">
+<li><p>*Most commonly, this would include <a class="reference internal" href="parameters.html#cv-partitions"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">n_splits</span></code></span></a>, <a class="reference internal" href="parameters.html#categorical-cutoff"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></span></a>, and <a class="reference internal" href="parameters.html#algorithms"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></span></a></p></li>
+</ul>
+</li>
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">Kernel</span></code> menu and select <code class="docutils literal notranslate"><span class="pre">Restart</span> <span class="pre">&amp;</span> <span class="pre">Run</span> <span class="pre">All</span></code>. <em>This will run all code cells of the notebook, i.e. all phases of STREAMLINE.</em></p></li>
+</ol>
+<ul class="simple">
+<li><p><em>Note: It can take multiple hours or longer to run this notebook on larger datasets and/or using all machine learning modeling algorithms. We recommend using a computing cluster for such tasks if possible.</em></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="command-line-interface">
+<h2>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h2>
+<p>This run mode is best for (1) most efficiently running STREAMLINE with parallelization options, (2) users comfortable with command lines, or (3) running moderate to large datasets and/or more exhaustive run parameter configurations.</p>
+<p>Running STREAMLINE from the command line can be done locally (with or without CPU core parallelization), or on a dask-compatable CPU computing cluster. Any of these scenarios can also be run from a single command (i.e. all phases at once) using a ‘configuration file’, or separately one phase at a time. Below we indicate how to run all of these possible command line run configurations using the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a> as an example. As for Google Colab and Jupyter Notebook run modes, to run STREAMLINE on datasets other than the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>, essential run parameters should be specified/updated accordingly. STREAMLINE command line run parameters specified in a configuration file, or as command line arguments have slightly different names as detailed within the <a class="reference internal" href="parameters.html"><span class="std std-doc">run parameters section</span></a>.</p>
+<section id="locally">
+<h3>Locally<a class="headerlink" href="#locally" title="Link to this heading"></a></h3>
+<p>This section explains running STREAMLINE locally using the command line interface.</p>
+<section id="using-a-configuration-file-locally">
+<h4>Using a Configuration File (Locally)<a class="headerlink" href="#using-a-configuration-file-locally" title="Link to this heading"></a></h4>
+<p>All phases of STREAMLINE can be run (in sequence) with a single simple command by editing and calling an associated configuration file (<code class="docutils literal notranslate"><span class="pre">run_configs/local.cfg</span></code>) as indicated below.</p>
+<ul class="simple">
+<li><p><em>Note: This approach also allows users to run any subset of sequential STREAMLINE phases (e.g. Phase 1 alone for EDA, or Phases 1-4 for EDA, data processing, and feature selection) using the different ‘phases to run’ flags within the configuration file.</em></p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>Open your command line interface and navigate to the installed <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory.</p></li>
+<li><p>To run the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>, skip to step 5. To view the pre-specified configuration file, click <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/local.cfg">here</a>.</p></li>
+<li><p>Assuming you want to run your own dataset(s), further navigate into the <code class="docutils literal notranslate"><span class="pre">run_configs</span></code> folder and open <code class="docutils literal notranslate"><span class="pre">local.cfg</span></code> in a text editor to update the essential and non-essential run parameters accordingly (see <a class="reference internal" href="parameters.html"><span class="std std-doc">run parameters</span></a> and <a class="reference internal" href="install.html#terminal-text-editors"><span class="std std-ref">terminal text editors</span></a> for help).</p>
+<ul class="simple">
+<li><p><em>Under ‘phases to run’ the <a class="reference internal" href="parameters.html#do-till-report"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_till_report</span></code></span></a> parameter (when set to <code class="docutils literal notranslate"><span class="pre">True</span></code>) will automatically run all phases up until <a class="reference internal" href="parameters.html#do-replicate"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_replicate</span></code></span></a> by default. <a class="reference internal" href="parameters.html#do-replicate"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_replicate</span></code></span></a>, <a class="reference internal" href="parameters.html#do-rep-report"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_rep_report</span></code></span></a> and <a class="reference internal" href="parameters.html#do-cleanup"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_cleanup</span></code></span></a> must all be specified individually</em></p></li>
+<li><p><em>To run a subset of phases (e.g. phases 1-4), set <a class="reference internal" href="parameters.html#do-till-report"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_till_report</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code>, and <a class="reference internal" href="parameters.html#do-eda"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_eda</span></code></span></a>, <a class="reference internal" href="parameters.html#do-dataprep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_dataprep</span></code></span></a>, <a class="reference internal" href="parameters.html#do-feat-imp"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">do_feat_imp</span></code></span></a>, and <a class="reference internal" href="#paramters.md#do-feat-sel"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">do_feat_sel</span></code></span></a> each to <code class="docutils literal notranslate"><span class="pre">True</span></code> and the other ‘do’ phases to <code class="docutils literal notranslate"><span class="pre">False</span></code></em></p></li>
+<li><p><em>Make sure to keep [`run_cluster’](parameters.md#run-cluster) = `False`, which tells STREAMLINE to be run locally rather than on a CPU computing cluster</em></p></li>
+<li><p><em>Optionally set [`run_parallel’](parameters.md#run-parallel) = `False`, which will turn off local multi-core CPU parallelization</em></p></li>
+</ul>
+</li>
+<li><p>Navigate back to the <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> base directory.</p></li>
+<li><p>Run the following command within the <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> base directory:</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">c</span> <span class="n">run_configs</span><span class="o">/</span><span class="n">local</span><span class="o">.</span><span class="n">cfg</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><em>Note: You can save your own <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files to call with this command. We recommend copying renaming, and editing <code class="docutils literal notranslate"><span class="pre">local.cfg</span></code> and then calling this new configuration file as an argument to <code class="docutils literal notranslate"><span class="pre">run.py</span></code></em></p></li>
+</ul>
+</section>
+<section id="using-command-line-arguments-locally">
+<h4>Using Command-Line Arguments (Locally)<a class="headerlink" href="#using-command-line-arguments-locally" title="Link to this heading"></a></h4>
+<p>STREAMLINE phases can also be called individually from the command line without a configuration file (instead specifying run parameters as arguments). This can be helpful, in particular, if you want to run a big analysis, and would like to look at the output of phases along the way without committing to running the whole pipeline upfront. Similar to any other run mode, make sure to specify arguments for all ‘essential’ run parameters for a given dataset.</p>
+<ul class="simple">
+<li><p><em>Note: Command line run parameters have slightly different identifiers than for the configuration file (see <a class="reference internal" href="parameters.html"><span class="std std-doc">run parameters</span></a>)</em></p></li>
+<li><p><em>Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run</em></p>
+<ul>
+<li><p><em>Make sure to specify <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-cluster</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code>, which tells STREAMLINE to be run locally rather than on a CPU computing cluster</em></p></li>
+<li><p><em>Optionally specify <a class="reference internal" href="parameters.html#run-parallel"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-parallel</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code>, which will turn off local multi-core CPU parallelization</em></p></li>
+</ul>
+</li>
+<li><p><em>Note: When specifying <a class="reference internal" href="parameters.html#ignore-features-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--fi</span></code></span></a>, <a class="reference internal" href="parameters.html#categorical_feature_path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--cf</span></code></span></a>, or <a class="reference internal" href="parameters.html#quantitative_feature_path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--qf</span></code></span></a> using this run approach, it is necessary to pass a file-path to a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files found in <code class="docutils literal notranslate"><span class="pre">STREAMLINE/data/DemoFeatureTypes</span></code>.</em></p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>Open your command line interface and navigate to the installed <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory.</p></li>
+<li><p>The subsections below provide different example scenarios running <code class="docutils literal notranslate"><span class="pre">run.py</span></code> on the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>. These scenarios run STREAMLINE similarly to our other demo run mode examples above, but we set <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-cluster</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">False</span></code> (necessary) and optionally <a class="reference internal" href="parameters.html#run-parallel"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-parallel</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">True</span></code> for each example.</p></li>
+</ol>
+<section id="all-phases-at-once-replication-data-included">
+<h5>All Phases at Once (Replication Data Included)<a class="headerlink" href="#all-phases-at-once-replication-data-included" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">till</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">rep</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">clean</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">class</span><span class="o">-</span><span class="n">label</span> <span class="n">Class</span> <span class="o">--</span><span class="n">inst</span><span class="o">-</span><span class="n">label</span> <span class="n">InstanceID</span> <span class="o">--</span><span class="n">cf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_cat_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">qf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_quant_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">cv</span> <span class="mi">3</span> <span class="o">--</span><span class="n">algorithms</span><span class="o">=</span><span class="n">NB</span><span class="p">,</span><span class="n">LR</span><span class="p">,</span><span class="n">DT</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">replicate</span> <span class="o">--</span><span class="n">rep</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoRepData</span> <span class="o">--</span><span class="n">dataset</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span><span class="o">/</span><span class="n">hcc_data_custom</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="all-main-phases-at-once-no-replication-data">
+<h5>All Main Phases at Once (No Replication Data)<a class="headerlink" href="#all-main-phases-at-once-no-replication-data" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">till</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">clean</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">class</span><span class="o">-</span><span class="n">label</span> <span class="n">Class</span> <span class="o">--</span><span class="n">inst</span><span class="o">-</span><span class="n">label</span> <span class="n">InstanceID</span> <span class="o">--</span><span class="n">cf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_cat_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">qf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_quant_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">cv</span> <span class="mi">3</span> <span class="o">--</span><span class="n">algorithms</span><span class="o">=</span><span class="n">NB</span><span class="p">,</span><span class="n">LR</span><span class="p">,</span><span class="n">DT</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="one-phase-at-a-time">
+<h5>One Phase at a Time<a class="headerlink" href="#one-phase-at-a-time" title="Link to this heading"></a></h5>
+<p>The following commands can be run one after the other (in sequence), waiting for the previous command to complete.</p>
+<section id="phase-1-data-exploration-processing">
+<h6>Phase 1 - Data Exploration &amp; Processing:<a class="headerlink" href="#phase-1-data-exploration-processing" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">eda</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">class</span><span class="o">-</span><span class="n">label</span> <span class="n">Class</span> <span class="o">--</span><span class="n">inst</span><span class="o">-</span><span class="n">label</span> <span class="n">InstanceID</span> <span class="o">--</span><span class="n">cf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_cat_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">qf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_quant_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">cv</span> <span class="mi">3</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-2-imputation-and-scaling">
+<h6>Phase 2 - Imputation and Scaling:<a class="headerlink" href="#phase-2-imputation-and-scaling" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">dataprep</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-3-feature-importance-estimation">
+<h6>Phase 3 - Feature Importance Estimation<a class="headerlink" href="#phase-3-feature-importance-estimation" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">feat</span><span class="o">-</span><span class="n">imp</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-4-feature-selection">
+<h6>Phase 4 - Feature Selection<a class="headerlink" href="#phase-4-feature-selection" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">feat</span><span class="o">-</span><span class="n">sel</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-5-machine-learning-ml-modeling">
+<h6>Phase 5 - Machine Learning (ML) Modeling<a class="headerlink" href="#phase-5-machine-learning-ml-modeling" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">model</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">algorithms</span> <span class="n">NB</span><span class="p">,</span><span class="n">LR</span><span class="p">,</span><span class="n">DT</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-6-post-analysis">
+<h6>Phase 6 - Post-Analysis<a class="headerlink" href="#phase-6-post-analysis" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">stats</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-7-compare-datasets">
+<h6>Phase 7 - Compare Datasets<a class="headerlink" href="#phase-7-compare-datasets" title="Link to this heading"></a></h6>
+<p>If there is only one ‘target dataset’ in the given analysis, skip this command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">compare</span><span class="o">-</span><span class="n">dataset</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-8-replication">
+<h6>Phase 8 - Replication<a class="headerlink" href="#phase-8-replication" title="Link to this heading"></a></h6>
+<p>If there are no replication datasets, skip this command. If you have multiple ‘target datasets’ each with one or more associated replication datasets, run this command once for each original target dataset (updating <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--rep-path</span></code></span></a> and <a class="reference internal" href="parameters.html#dataset-for-rep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--dataset</span></code></span></a> for each).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">replicate</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">rep</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoRepData</span> <span class="o">--</span><span class="n">dataset</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span><span class="o">/</span><span class="n">hcc_data_custom</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="phase-9-summary-report-s">
+<h6>Phase 9 - Summary Report(s)<a class="headerlink" href="#phase-9-summary-report-s" title="Link to this heading"></a></h6>
+<p>Run the following command to generate the main PDF report (summarizing testing data evaluations of the models).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple ‘target datasets’ each with one or more associated replication datasets, run this command once for each original target dataset (updating <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--rep-path</span></code></span></a> and <a class="reference internal" href="parameters.html#dataset-for-rep"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--dataset</span></code></span></a> for each).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">rep</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">rep</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoRepData</span> <span class="o">--</span><span class="n">dataset</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span><span class="o">/</span><span class="n">hcc_data_custom</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="optional-clean-up">
+<h6>Optional Clean-up<a class="headerlink" href="#optional-clean-up" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">clean</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="k">del</span><span class="o">-</span><span class="n">time</span> <span class="o">--</span><span class="k">del</span><span class="o">-</span><span class="n">old</span><span class="o">-</span><span class="n">cv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="kc">False</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">parallel</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+<section id="cpu-computing-cluster">
+<h3>CPU Computing Cluster<a class="headerlink" href="#cpu-computing-cluster" title="Link to this heading"></a></h3>
+<p>This section explains running STREAMLINE remotely on a dask-compatible CPU computing cluster (i.e. HPC).</p>
+<section id="helpful-tools">
+<h4>Helpful Tools<a class="headerlink" href="#helpful-tools" title="Link to this heading"></a></h4>
+<p>First let’s discuss the role of a couple helpful tools mentioned in the <a class="reference internal" href="install.html#additional-tools"><span class="std std-ref">installation</span></a> section for running STREAMLINE on a computing cluster.</p>
+<section id="nano">
+<h5>nano<a class="headerlink" href="#nano" title="Link to this heading"></a></h5>
+<p>GNU nano is a text editor for Unix-like computing systems or operating environments using a command line interface. This would be incredibly handy for editing the configuration file through a ssh terminal when running STREAMLINE with a configuration file.</p>
+<p>A detailed guide can be found <a class="reference external" href="https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor">here</a></p>
+<p>A gist of the application is that you can edit a configuration file such as e.g. <code class="docutils literal notranslate"><span class="pre">run_configs/cedars.cfg</span></code> using the following steps:</p>
+<ol class="arabic simple">
+<li><p>Go to the root <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> folder.</p></li>
+<li><p>Type <code class="docutils literal notranslate"><span class="pre">nano</span> <span class="pre">run_configs/cedars.cfg</span></code> in the terminal to open the file in nano.</p></li>
+<li><p>Edit the configuration file as needed.</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">X</span></code> to close the file and <code class="docutils literal notranslate"><span class="pre">Y</span></code> to save the changes.</p></li>
+</ol>
+</section>
+<section id="tmux">
+<h5>tmux<a class="headerlink" href="#tmux" title="Link to this heading"></a></h5>
+<p>tmux is a terminal multiplexer/emulator. It lets you switch easily between several programs in one terminal, detach them (they keep running in the background) and reattach them to a different terminal. This is particularly important when you want to run all phases of STREAMLINE automatically from a single command. To achieve this, STREAMLINE runs a script on the head node (i.e. job submission node) that monitors phase completion and submits new jobs for the next phase. A terminal emulator allows you to start a full pipeline run and close the window without killing the job.</p>
+<p>A detailed guide on using it can be found <a class="reference external" href="https://www.redhat.com/sysadmin/introduction-tmux-linux">here</a></p>
+<p>A gist of the application is that you can open a new terminal that will stay open even if you disconnect and close your terminal using the following steps:</p>
+<ol class="arabic simple">
+<li><p>Go to the root streamline folder.</p></li>
+<li><p>Type and run <code class="docutils literal notranslate"><span class="pre">tmux</span> <span class="pre">new</span> <span class="pre">-s</span> <span class="pre">mysession</span></code></p></li>
+<li><p>Open the required config file using nano (e.g. <code class="docutils literal notranslate"><span class="pre">run_configs/cedars.cfg</span></code>)</p></li>
+<li><p>Make the necessary in the changes in the config file.</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">X</span></code> to close the file and <code class="docutils literal notranslate"><span class="pre">Y</span></code> to save the changes.</p></li>
+<li><p>Run required commands.</p></li>
+<li><p>Press <code class="docutils literal notranslate"><span class="pre">Ctrl</span> <span class="pre">+</span> <span class="pre">b</span></code> and then the <code class="docutils literal notranslate"><span class="pre">d</span></code> key to close the terminal.</p></li>
+</ol>
+</section>
+</section>
+<section id="cluster-specific-run-parameters">
+<h4>Cluster-Specific Run Parameters<a class="headerlink" href="#cluster-specific-run-parameters" title="Link to this heading"></a></h4>
+<p>You should be aware of 3 cluster-specific run parameters:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">run-cluster</span></code></span></a>: flag for type of cluster, discussed in detail below (when not <code class="docutils literal notranslate"><span class="pre">False</span></code>, this over-rides any value specified for <code class="docutils literal notranslate"><span class="pre">run-parallel</span></code>)</p></li>
+<li><p><a class="reference internal" href="parameters.html#queue"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">queue</span></code></span></a>: the partition queue used for job submissions</p></li>
+<li><p><a class="reference internal" href="parameters.html#reserved-memory"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code></span></a>: memory (in GB) reserved per job</p></li>
+</ul>
+<section id="run-cluster-parameter">
+<h5>Run Cluster Parameter<a class="headerlink" href="#run-cluster-parameter" title="Link to this heading"></a></h5>
+<p>The <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">run-cluster</span></code></span></a> parameter is the most important parameter here. It should be set to <code class="docutils literal notranslate"><span class="pre">False</span></code> when running locally, but to use a cluster, specify as a string value for the cluster-type. Currently, clusters supported by <a class="reference external" href="https://jobqueue.dask.org/en/latest/api.html">dask-jobqueue</a> are supported with the following settings options for <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">run-cluster</span></code></span></a>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LSF</span></code>: LSFCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SLURM</span></code>: SLURMCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTCondor</span></code>: HTCondorCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Moab</span></code>: MoabCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OAR</span></code>: OARCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PBS</span></code>: PBSCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SGE</span></code>: SGECluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UGE</span></code>: SGECluster variant used at our institution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Local</span></code>: LocalCluster</p></li>
+</ul>
+<p>Additionally, the earlier/legacy method of STREAMLINE manual job submission is supported for <code class="docutils literal notranslate"><span class="pre">SLURM</span></code> and <code class="docutils literal notranslate"><span class="pre">LSF</span></code> using the string values below for <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">run-cluster</span></code></span></a>. This will generate and submit jobs using shell files as was used in <em>STREAMLINE release 0.2.5</em> and earlier. This legacy option ensures that minimal memory/computation is used on the head node (i.e. job-submit node).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SLURMOld</span></code>: Legacy job submission for SLURMCluster</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LSFOld</span></code> Legacy job submission for LSFCluster</p></li>
+</ul>
+</section>
+<section id="queue-and-memory-parameters">
+<h5>Queue and Memory Parameters<a class="headerlink" href="#queue-and-memory-parameters" title="Link to this heading"></a></h5>
+<p>Check with your cluster administrator on how to set these these cluster-specific parameters. We have set defaults for these parameters for use on our own institution’s HPC (i.e. <a class="reference internal" href="parameters.html#queue"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">queue</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">defq</span></code>, and <a class="reference internal" href="parameters.html#reserved-memory"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">4</span></code>).</p>
+</section>
+</section>
+<section id="using-a-configuration-file-cluster">
+<h4>Using a Configuration File (Cluster)<a class="headerlink" href="#using-a-configuration-file-cluster" title="Link to this heading"></a></h4>
+<p>This is largely the same as running STREAMLINE from a <a class="reference internal" href="#using-a-configuration-file-locally"><span class="xref myst">configuration file locally</span></a>, with the addition of three cluster-specific parameters ( <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">run-cluster</span></code></span></a>,<a class="reference internal" href="parameters.html#queue"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">queue</span></code></span></a>, and <a class="reference internal" href="parameters.html#reserved-memory"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code></span></a>).</p>
+<ol class="arabic simple">
+<li><p>Open your command line interface within your HPC and navigate to the installed <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory.</p></li>
+<li><p>Edit any run parameters within a configuration file according to your needs (making sure to update <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">run-cluster</span></code></span></a>,<a class="reference internal" href="parameters.html#queue"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">queue</span></code></span></a>, and <a class="reference internal" href="parameters.html#reserved-memory"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code></span></a> within the multiprocessing section).</p></li>
+</ol>
+<ul class="simple">
+<li><p><em>We have included example configuration files set up to run the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a> on three different clusters we utilize (i.e. <code class="docutils literal notranslate"><span class="pre">cedars.cfg</span></code> <code class="docutils literal notranslate"><span class="pre">cedars_old.cfg</span></code> and <code class="docutils literal notranslate"><span class="pre">upenn.cfg</span></code>), using <code class="docutils literal notranslate"><span class="pre">SLURM</span></code>, <code class="docutils literal notranslate"><span class="pre">UGE</span></code>, and <code class="docutils literal notranslate"><span class="pre">LSF</span></code>, respectively. We will focus here on <code class="docutils literal notranslate"><span class="pre">SLURM</span></code> as an example with the respective configuration file (<code class="docutils literal notranslate"><span class="pre">cedars.cfg</span></code>) found <a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/blob/main/run_configs/cedars.cfg">here</a></em></p></li>
+</ul>
+<ol class="arabic simple" start="2">
+<li><p>Run the following command within the <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> base directory:</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">c</span> <span class="n">run_configs</span><span class="o">/</span><span class="n">cedars</span><span class="o">.</span><span class="n">cfg</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><em>Note: The configuration filename and location can be anything as long as it’s a valid configuration file set up to run on your dask-compatable cluster.</em></p></li>
+<li><p><em>Note: When using this run strategy, it is strongly recommended to use a <a class="reference internal" href="#tmux"><span class="xref myst">terminal emulator</span></a> and check with your cluster administrator to make sure that your system allows light weight, but longer duration code to be run from the head node that monitors job completion and can submit new jobs. If not, we recommend running STREAMLINE one phase at a time in legacy mode (i.e. <code class="docutils literal notranslate"><span class="pre">run-cluster</span></code> = <code class="docutils literal notranslate"><span class="pre">SLURMOld</span></code> or <code class="docutils literal notranslate"><span class="pre">LSFOld</span></code>) which only uses the head node to submit jobs.</em></p></li>
+</ul>
+</section>
+<section id="using-command-line-arguments-cluster">
+<h4>Using Command-Line Arguments (Cluster)<a class="headerlink" href="#using-command-line-arguments-cluster" title="Link to this heading"></a></h4>
+<p>This is largely the same as running STREAMLINE using <a class="reference internal" href="#using-command-line-arguments"><span class="xref myst">command-line arguments locally</span></a> with the addition of three cluster-specific parameters ( <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-cluster</span></code></span></a>,<a class="reference internal" href="parameters.html#queue"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">queue</span></code></span></a>, and <a class="reference internal" href="parameters.html#reserved-memory"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--res-mem</span></code></span></a>), and users can ignore <a class="reference internal" href="parameters.html#run-parallel"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-parallel</span></code></span></a>.</p>
+<ol class="arabic simple">
+<li><p>Open your command line interface within your HPC and navigate to the installed <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory.</p></li>
+<li><p>The subsections below provide different example scenarios running <code class="docutils literal notranslate"><span class="pre">run.py</span></code> on the <a class="reference internal" href="data.html#demonstration-data"><span class="std std-ref">demonstration datasets</span></a>, however users can adjust these arguments for their own data. Also, here <a class="reference internal" href="parameters.html#run-parallel"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-parallel</span></code></span></a> is automatically overridden by <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-cluster</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">SLURM</span></code> (or whatever cluster-name is specified or than <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p></li>
+</ol>
+<ul class="simple">
+<li><p><em>Note: Any unspecified non-essential run parameters will be assigned their default values for a given STREAMLINE run</em></p></li>
+<li><p><em>Note: When specifying <a class="reference internal" href="parameters.html#ignore-features-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--fi</span></code></span></a>, <a class="reference internal" href="parameters.html#categorical_feature_path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--cf</span></code></span></a>, or <a class="reference internal" href="parameters.html#quantitative_feature_path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--qf</span></code></span></a> using this run approach, it is necessary to pass a file-path to a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file including a list of feature names for that parameter, rather than directly listing these feature names. We use this approach in the examples below using <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files found in <code class="docutils literal notranslate"><span class="pre">STREAMLINE/data/DemoFeatureTypes</span></code>.</em></p></li>
+</ul>
+<section id="id1">
+<h5>All Phases at Once (Replication Data Included)<a class="headerlink" href="#id1" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><em>Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.</em></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">till</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">rep</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">clean</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">class</span><span class="o">-</span><span class="n">label</span> <span class="n">Class</span> <span class="o">--</span><span class="n">inst</span><span class="o">-</span><span class="n">label</span> <span class="n">InstanceID</span> <span class="o">--</span><span class="n">cf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_cat_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">qf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_quant_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">cv</span> <span class="mi">3</span> <span class="o">--</span><span class="n">algorithms</span><span class="o">=</span><span class="n">NB</span><span class="p">,</span><span class="n">LR</span><span class="p">,</span><span class="n">DT</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">replicate</span> <span class="o">--</span><span class="n">rep</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoRepData</span> <span class="o">--</span><span class="n">dataset</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span><span class="o">/</span><span class="n">hcc_data_custom</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h5>All Main Phases at Once (No Replication Data)<a class="headerlink" href="#id2" title="Link to this heading"></a></h5>
+<ul class="simple">
+<li><p><em>Notice: this approach will run a lightweight script on the headnode monitoring job completion and submitting jobs for subsequent phases until completion of all phases.</em></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">till</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">clean</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">class</span><span class="o">-</span><span class="n">label</span> <span class="n">Class</span> <span class="o">--</span><span class="n">inst</span><span class="o">-</span><span class="n">label</span> <span class="n">InstanceID</span> <span class="o">--</span><span class="n">cf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_cat_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">qf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_quant_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">cv</span> <span class="mi">3</span> <span class="o">--</span><span class="n">algorithms</span><span class="o">=</span><span class="n">NB</span><span class="p">,</span><span class="n">LR</span><span class="p">,</span><span class="n">DT</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h5>One Phase at a Time<a class="headerlink" href="#id3" title="Link to this heading"></a></h5>
+<p>The following commands can be run one after the other (in sequence), waiting for all jobs of the previous phase to complete successfully. For minimal head node overhead, we recommend running these jobs using <a class="reference internal" href="parameters.html#run-cluster"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--run-cluster</span></code></span></a> = <code class="docutils literal notranslate"><span class="pre">SLURMOld</span></code> or <code class="docutils literal notranslate"><span class="pre">LSFOld``</span> <span class="pre">rather</span> <span class="pre">than</span> </code>SLURM` (if available to you).</p>
+<section id="id4">
+<h6>Phase 1 - Data Exploration &amp; Processing:<a class="headerlink" href="#id4" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">eda</span> <span class="o">--</span><span class="n">data</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">class</span><span class="o">-</span><span class="n">label</span> <span class="n">Class</span> <span class="o">--</span><span class="n">inst</span><span class="o">-</span><span class="n">label</span> <span class="n">InstanceID</span> <span class="o">--</span><span class="n">cf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_cat_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">qf</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoFeatureTypes</span><span class="o">/</span><span class="n">hcc_quant_feat</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">cv</span> <span class="mi">3</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h6>Phase 2 - Imputation and Scaling:<a class="headerlink" href="#id5" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">dataprep</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h6>Phase 3 - Feature Importance Estimation<a class="headerlink" href="#id6" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">feat</span><span class="o">-</span><span class="n">imp</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h6>Phase 4 - Feature Selection<a class="headerlink" href="#id7" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">feat</span><span class="o">-</span><span class="n">sel</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h6>Phase 5 - Machine Learning (ML) Modeling<a class="headerlink" href="#id8" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">model</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">algorithms</span> <span class="n">NB</span><span class="p">,</span><span class="n">LR</span><span class="p">,</span><span class="n">DT</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h6>Phase 6 - Post-Analysis<a class="headerlink" href="#id9" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">stats</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id10">
+<h6>Phase 7 - Compare Datasets<a class="headerlink" href="#id10" title="Link to this heading"></a></h6>
+<p>If there is only one ‘target dataset’ in the given analysis, skip this command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">compare</span><span class="o">-</span><span class="n">dataset</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id11">
+<h6>Phase 8 - Replication<a class="headerlink" href="#id11" title="Link to this heading"></a></h6>
+<p>If there are no replication datasets, skip this command. If you have multiple ‘target datasets’ each with one or more associated replication datasets, run this command once for each original target dataset (updating <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--rep-path</span></code></span></a> and <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--dataset</span></code></span></a> for each).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">replicate</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">rep</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoRepData</span> <span class="o">--</span><span class="n">dataset</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span><span class="o">/</span><span class="n">hcc_data_custom</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h6>Phase 9 - Summary Report(s)<a class="headerlink" href="#id12" title="Link to this heading"></a></h6>
+<p>Run the following command to generate the main PDF report (summarizing testing data evaluations of the models).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+<p>If the models of a STREAMLINE experiment were applied to replication data in phase 8 you can generate a report for the replication of a single target dataset using the following command. If you have multiple ‘target datasets’ each with one or more associated replication datasets, run this command once for each original target dataset (updating <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--rep-path</span></code></span></a> and <a class="reference internal" href="parameters.html#rep-data-path"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">--dataset</span></code></span></a> for each).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">rep</span><span class="o">-</span><span class="n">report</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">rep</span><span class="o">-</span><span class="n">path</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoRepData</span> <span class="o">--</span><span class="n">dataset</span> <span class="o">./</span><span class="n">data</span><span class="o">/</span><span class="n">DemoData</span><span class="o">/</span><span class="n">hcc_data_custom</span><span class="o">.</span><span class="n">csv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+<section id="id13">
+<h6>Optional Clean-up<a class="headerlink" href="#id13" title="Link to this heading"></a></h6>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">do</span><span class="o">-</span><span class="n">clean</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="k">del</span><span class="o">-</span><span class="n">time</span> <span class="o">--</span><span class="k">del</span><span class="o">-</span><span class="n">old</span><span class="o">-</span><span class="n">cv</span> <span class="o">--</span><span class="n">run</span><span class="o">-</span><span class="n">cluster</span> <span class="n">SLURM</span> <span class="o">--</span><span class="n">res</span><span class="o">-</span><span class="n">mem</span> <span class="mi">4</span> <span class="o">--</span><span class="n">queue</span> <span class="n">defq</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="checking-streamline-job-completion">
+<h4>Checking STREAMLINE Job Completion<a class="headerlink" href="#checking-streamline-job-completion" title="Link to this heading"></a></h4>
+<p>Whether running STREAMLINE from the configuration file or using command-line arguments, users may wish to check on the job completion status for jobs within a given phase. For example; (1) if running STREAMLINE one phase at a time, users will want to ensure that all jobs of the current phase have completed before inintiating the next, or (2) if the modeling phase is taking a long time to complete, you may wish to know what algorithms are still training. This can be accomplished using the included <code class="docutils literal notranslate"><span class="pre">checker.py</span></code> script.</p>
+<p>First, make sure you are in the installed <code class="docutils literal notranslate"><span class="pre">STREAMLINE</span></code> directory. Then you can check the parameter options of <code class="docutils literal notranslate"><span class="pre">checker.py</span></code> with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">checker</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>As an example, let’s say the user wants to check the status of modeling jobs on their cluster during phase 5. They could run the following command which assumes we are running the demonstration data, as above.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">checker</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">phase</span> <span class="mi">5</span> <span class="o">--</span><span class="n">count</span><span class="o">-</span><span class="n">only</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>This would return the number of STREAMLINE jobs that have not yet completed (or failed to run) within phase 5.</p>
+<p>Alternatively, the command below would output the names of the jobs that have not completed, which (in the case of phase 5) would inform the user which algorithms were still running.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">checker</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">out</span><span class="o">-</span><span class="n">path</span> <span class="n">DemoOutput</span> <span class="o">--</span><span class="n">exp</span><span class="o">-</span><span class="n">name</span> <span class="n">demo_experiment</span> <span class="o">--</span><span class="n">phase</span> <span class="mi">5</span> 
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="picking-a-run-mode">
+<h2>Picking a Run Mode<a class="headerlink" href="#picking-a-run-mode" title="Link to this heading"></a></h2>
+<section id="why-run-streamline-on-google-colab">
+<h3>Why run STREAMLINE on Google Colab?<a class="headerlink" href="#why-run-streamline-on-google-colab" title="Link to this heading"></a></h3>
+<p>Running STREAMLINE on Google Colab is best for:</p>
+<ol class="arabic simple">
+<li><p>Running the STREAMLINE demonstration on the included demo data</p></li>
+<li><p>Users with little to no coding experience</p></li>
+<li><p>Users that want the quickest/easiest approach to running STREAMLINE</p></li>
+<li><p>Users that do not have access to a very powerful computer or compute cluster.</p></li>
+<li><p>Applying STREAMLINE to smaller-scale analyses (in particular when only using free/limited Google Cloud resources):</p>
+<ul class="simple">
+<li><p>Smaller datasets (e.g. &lt; 500 instances and features)</p></li>
+<li><p>A small number of total datasets (e.g. 1 or 2)</p></li>
+<li><p>Only using the simplest/quickest modeling algorithms (e.g. Naive Bayes, Decision Trees, Logistic Regression)</p></li>
+<li><p>Only using 1 or 2 modeling algorithms</p></li>
+</ul>
+</li>
+<li><p><strong>Google Colab Notebook</strong> - on free Google Cloud resources [Anyone can run]:</p>
+<ul class="simple">
+<li><p>Advantages</p>
+<ul>
+<li><p>No coding or PC environment experience needed</p></li>
+<li><p>Automatically installs and uses the most recent version of STREAMLINE</p></li>
+<li><p>Computing can performed directly on Google Cloud from anywhere</p></li>
+<li><p>One-click run of whole pipeline (all phases)</p></li>
+<li><p>Offers in-notebook viewing of results and ability to save notebook as documentation of analysis</p></li>
+<li><p>Allows easy customizability of nearly all aspects of the pipeline with minimal coding/environment experience</p></li>
+</ul>
+</li>
+<li><p>Disadvantages:</p>
+<ul>
+<li><p>Can only run pipeline serially</p></li>
+<li><p>Slowest of the run options</p></li>
+<li><p>Limited by google cloud computing allowances (may only work for smaller datasets)</p></li>
+</ul>
+</li>
+<li><p>Notes: Requires a Google account (free)</p></li>
+</ul>
+</li>
+<li><p><strong>Jupyter Notebook</strong> - locally [Basic experience]:</p>
+<ul class="simple">
+<li><p>Advantages:</p>
+<ul>
+<li><p>Does not rely on free computing limitations of Google Cloud (but rather your own computer’s limitations)</p></li>
+<li><p>One-click run of whole pipeline (all phases)</p></li>
+<li><p>Offers in-notebook viewing of results and ability to save notebook as documentation of analysis</p></li>
+<li><p>Allows easy customizability of all aspects of the pipeline with minimal coding/environment experience</p></li>
+</ul>
+</li>
+<li><p>Disadvantages:</p>
+<ul>
+<li><p>Can only run pipeline serially</p></li>
+<li><p>Slower runtime than from command-line</p></li>
+<li><p>Beginners have to set up their computing environment</p></li>
+</ul>
+</li>
+<li><p>Notes: Requires Anaconda3, Python3, and several other minor Python package installations</p></li>
+</ul>
+</li>
+<li><p><strong>Command Line (Local)</strong> [Command-line Users]:</p>
+<ul class="simple">
+<li><p>Advantages:</p>
+<ul>
+<li><p>Typically runs faster than within Jupyter Notebook</p></li>
+<li><p>A more versatile option for those with command-line experience</p></li>
+<li><p>One-command run of whole pipeline available when using a configuration file to run</p></li>
+<li><p>Can optionally run the pipeline one phase at a time</p></li>
+</ul>
+</li>
+<li><p>Disadvantages:</p>
+<ul>
+<li><p>Can only run pipeline serially or with limited local cpu core parallelization</p></li>
+<li><p>Command-line experience recommended</p></li>
+</ul>
+</li>
+<li><p>Notes: Requires Anaconda3, Python3, and several other minor Python package installations</p></li>
+</ul>
+</li>
+<li><p><strong>Command Line (HPC Cluster)</strong> [Computing Cluster Users]:</p>
+<ul class="simple">
+<li><p>Advantages:</p>
+<ul>
+<li><p>By far the fastest, most efficient way to run STREAMLINE</p></li>
+<li><p>Offers ability to run STREAMLINE over 7 types of HPC systems</p></li>
+<li><p>One-command run of whole pipeline available when using a configuration file to run</p></li>
+<li><p>Can optionally run the pipeline one phase at a time</p></li>
+</ul>
+</li>
+<li><p>Disadvantages:</p>
+<ul>
+<li><p>Experience with command-line and dask-compatible clusters recommended</p></li>
+<li><p>Access to a computing cluster required</p></li>
+</ul>
+</li>
+<li><p>Notes: Requires Anaconda3, Python3, and several other minor Python package installations. Cluster runs of STREAMLINE were set up using <code class="docutils literal notranslate"><span class="pre">dask-jobqueue</span></code> and thus should support 7 types of clusters as described in the <a class="reference external" href="https://jobqueue.dask.org/en/latest/api.html">dask documentation</a>. Currently we have only directly tested STREAMLINE on SLURM and LSF clusters. Further codebase adaptation may be needed for clusters types not on the above link.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parameters.html" class="btn btn-neutral float-right" title="Run Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

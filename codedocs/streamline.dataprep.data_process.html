@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.dataprep.data_process module &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="streamline.dataprep.exploratory_analysis module" href="streamline.dataprep.exploratory_analysis.html" />
+    <link rel="prev" title="streamline.dataprep package" href="streamline.dataprep.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+          <li class="breadcrumb-item"><a href="streamline.dataprep.html">streamline.dataprep package</a></li>
+      <li class="breadcrumb-item active">streamline.dataprep.data_process module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/codedocs/streamline.dataprep.data_process.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-streamline.dataprep.data_process">
+<span id="streamline-dataprep-data-process-module"></span><h1>streamline.dataprep.data_process module<a class="headerlink" href="#module-streamline.dataprep.data_process" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.dataprep.data_process.</span></span><span class="sig-name descname"><span class="pre">DataProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantitative_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_eda_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">featureeng_missingness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaning_missingness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation_removal_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Stratified'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="streamline.utils.job.html#streamline.utils.job.Job" title="streamline.utils.job.Job"><code class="xref py py-class docutils literal notranslate"><span class="pre">Job</span></code></a></p>
+<p>Exploratory Data Analysis Class for the EDA/Phase 1 step of STREAMLINE</p>
+<p>Initialization function for Exploratory Data Analysis Class. Parameters are defined below.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> – a streamline.utils.dataset.Dataset object or a path to dataset text file</p></li>
+<li><p><strong>experiment_path</strong> – path to experiment the logging directory folder</p></li>
+<li><p><strong>ignore_features</strong> – list of string of column names of features to ignore or                             path to .csv file with feature labels to be ignored in analysis (default=None)</p></li>
+<li><p><strong>categorical_features</strong> – list of string of column names of features to ignore or                             path to .csv file with feature labels specified to be treated as categorical where possible                            (default=None)</p></li>
+<li><p><strong>categorical_cutoff</strong> – number of unique values for a variable is considered to be quantitative vs categorical                            (default=10)</p></li>
+<li><p><strong>exclude_eda_output</strong> – list of names of analysis to do while doing EDA (must be in set X)</p></li>
+<li><p><strong>categorical_cutoff</strong> – categorical cut off to consider a feature categorical by analysis, default=10</p></li>
+<li><p><strong>sig_cutoff</strong> – significance cutoff for continuous variables, default=0.05</p></li>
+<li><p><strong>featureeng_missingness</strong> – the proportion of missing values within a feature (above which) a new
+binary categorical feature is generated that indicates if the
+value for an instance was missing or not</p></li>
+<li><p><strong>cleaning_missingness</strong> – the proportion of missing values, within a feature or instance, (at which) the
+given feature or instance will be automatically cleaned (i.e. removed)
+from the processed ‘target dataset’</p></li>
+<li><p><strong>correlation_removal_threshold</strong> – the (pearson) feature correlation at which one out of a pair of
+features is randomly removed from the processed ‘target dataset’</p></li>
+<li><p><strong>random_state</strong> – random state to set seeds for reproducibility of algorithms</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.categorical_feature_encoding">
+<span class="sig-name descname"><span class="pre">categorical_feature_encoding</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.categorical_feature_encoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.categorical_feature_encoding" title="Link to this definition"></a></dt>
+<dd><p>Categorical feature encoding using sklearn onehot encoder
+not used/implemented</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.categorical_feature_encoding_pandas">
+<span class="sig-name descname"><span class="pre">categorical_feature_encoding_pandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.categorical_feature_encoding_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.categorical_feature_encoding_pandas" title="Link to this definition"></a></dt>
+<dd><p>Categorical feature encoding using pandas get_dummies function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.counts_summary">
+<span class="sig-name descname"><span class="pre">counts_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.counts_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.counts_summary" title="Link to this definition"></a></dt>
+<dd><p>Reports various dataset counts: i.e. number of instances, total features, categorical features, quantitative
+features, and class counts. Also saves a simple bar graph of class counts if user specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save</strong> – </p></li>
+<li><p><strong>total_missing</strong> – total missing values (optional, runs again if not given)</p></li>
+<li><p><strong>plot</strong> – flag to output bar graph in the experiment log folder</p></li>
+<li><p><strong>replicate</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.data_manipulation">
+<span class="sig-name descname"><span class="pre">data_manipulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.data_manipulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.data_manipulation" title="Link to this definition"></a></dt>
+<dd><p>Wrapper function for all data cleaning and feature engineering data manipulation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.drop_highly_correlated_features">
+<span class="sig-name descname"><span class="pre">drop_highly_correlated_features</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.drop_highly_correlated_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.drop_highly_correlated_features" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.drop_ignored_rowcols">
+<span class="sig-name descname"><span class="pre">drop_ignored_rowcols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignored_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.drop_ignored_rowcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.drop_ignored_rowcols" title="Link to this definition"></a></dt>
+<dd><p>Basic data cleaning: Drops any instances with a missing outcome
+value as well as any features (ignore_features) specified by user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.drop_invariant">
+<span class="sig-name descname"><span class="pre">drop_invariant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.drop_invariant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.drop_invariant" title="Link to this definition"></a></dt>
+<dd><p>Basic data cleaning: Drops any invariant features found by pandas</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.feature_engineering">
+<span class="sig-name descname"><span class="pre">feature_engineering</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.feature_engineering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.feature_engineering" title="Link to this definition"></a></dt>
+<dd><p>Feature Engineering - Missingness as a feature (missingness feature engineering phase)</p>
+<p>Using the used run parameter we define the minimum missingness of a variable at which
+streamline will automatically engineer a new feature (i.e. 0 not missing vs. 1 missing).</p>
+<p>This parameter would have value of 0-1 and default of 0.5 meaning any feature with a
+missingness of &gt;50% will have a corresponding missingness feature added.</p>
+<p>This new feature would have the inserted label of “<a href="#id1"><span class="problematic" id="id2">Miss_</span></a>”+originalFeatureName.
+The list of feature names for which a missingness feature was constructed
+is saved in self.engineered_features. In the ‘apply’ phase, we use this feature list
+to build similar new missingness features added to the replication dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.feature_removal">
+<span class="sig-name descname"><span class="pre">feature_removal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.feature_removal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.feature_removal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.graph_selector">
+<span class="sig-name descname"><span class="pre">graph_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.graph_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.graph_selector" title="Link to this definition"></a></dt>
+<dd><p>Assuming a categorical class outcome, a
+barplot is generated given a categorical feature, and a boxplot is generated given a quantitative feature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>feature_name</strong> – feature name of the column the function is doing operation on</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.identify_feature_types">
+<span class="sig-name descname"><span class="pre">identify_feature_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.identify_feature_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.identify_feature_types" title="Link to this definition"></a></dt>
+<dd><p>Automatically identify categorical vs. quantitative features/variables
+Takes a dataframe (of independent variables) with column labels and
+returns a list of column names identified as
+being categorical based on user defined cutoff (categorical_cutoff).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.instance_removal">
+<span class="sig-name descname"><span class="pre">instance_removal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.instance_removal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.instance_removal" title="Link to this definition"></a></dt>
+<dd><p>dropping instances with feature/columns missingness greater that cleaning missingness percentage</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.join">
+<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.join"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.join" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.label_encoder">
+<span class="sig-name descname"><span class="pre">label_encoder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.label_encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.label_encoder" title="Link to this definition"></a></dt>
+<dd><p>Numerical Data Encoder:
+for any features in the data (other than the instanceID, but including the class column) if the
+feature (which should also be considered to be categorical - so check that feature is in the list of features
+being treated as categorical, and if not add it to that list) has any non-numerical values, numerically encode
+these values based on alphabetical order of the feature values.
+As we do this we create a new output .csv file (called Numerical_Encoding_Map.csv),
+where each row provides the feature that was numerically encoded,
+and the subsequent columns provide a mapping of the original values to new numerical values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.make_log_folders">
+<span class="sig-name descname"><span class="pre">make_log_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.make_log_folders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.make_log_folders" title="Link to this definition"></a></dt>
+<dd><p>Makes folders for logging exploratory data analysis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.run" title="Link to this definition"></a></dt>
+<dd><p>Wrapper function to run_explore and KFoldPartitioner</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>top_features</strong> – no of top features to consider (default=20)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.run_process">
+<span class="sig-name descname"><span class="pre">run_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.run_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.run_process" title="Link to this definition"></a></dt>
+<dd><p>Run Exploratory Data Process accordingly on the EDA Object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>top_features</strong> – no of top features to consider (default=20)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.save_runtime">
+<span class="sig-name descname"><span class="pre">save_runtime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.save_runtime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.save_runtime" title="Link to this definition"></a></dt>
+<dd><p>Export runtime for this phase of the pipeline on current target dataset</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.second_eda">
+<span class="sig-name descname"><span class="pre">second_eda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.second_eda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.second_eda" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.test_selector">
+<span class="sig-name descname"><span class="pre">test_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.test_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.test_selector" title="Link to this definition"></a></dt>
+<dd><p>Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>feature_name</strong> – name of feature column operation is running on</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.univariate_analysis">
+<span class="sig-name descname"><span class="pre">univariate_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.univariate_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.univariate_analysis" title="Link to this definition"></a></dt>
+<dd><p>Calculates univariate association significance between each individual feature and class outcome.
+Assumes categorical outcome using Chi-square test for
+categorical features and Mann-Whitney Test for quantitative features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>top_features</strong> – no of top features to show/consider</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.dataprep.data_process.DataProcess.univariate_plots">
+<span class="sig-name descname"><span class="pre">univariate_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sorted_p_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/dataprep/data_process.html#DataProcess.univariate_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.dataprep.data_process.DataProcess.univariate_plots" title="Link to this definition"></a></dt>
+<dd><p>Checks whether p-value of each feature is less than or equal to significance cutoff.
+If so, calls graph_selector to generate an appropriate plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sorted_p_list</strong> – sorted list of p-values</p></li>
+<li><p><strong>top_features</strong> – no of top features to consider (default=20)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.dataprep.html" class="btn btn-neutral float-left" title="streamline.dataprep package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.dataprep.exploratory_analysis.html" class="btn btn-neutral float-right" title="streamline.dataprep.exploratory_analysis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

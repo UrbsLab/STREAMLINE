@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.runners.model_runner module &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="streamline.runners.replicate_runner module" href="streamline.runners.replicate_runner.html" />
+    <link rel="prev" title="streamline.runners.feature_runner module" href="streamline.runners.feature_runner.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.utils.html">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+          <li class="breadcrumb-item"><a href="streamline.runners.html">streamline.runners package</a></li>
+      <li class="breadcrumb-item active">streamline.runners.model_runner module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/codedocs/streamline.runners.model_runner.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-streamline.runners.model_runner">
+<span id="streamline-runners-model-runner-module"></span><h1>streamline.runners.model_runner module<a class="headerlink" href="#module-streamline.runners.model_runner" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">streamline.runners.model_runner.</span></span><span class="sig-name descname"><span class="pre">ModelExperimentRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('XCS',</span> <span class="pre">'eLCS')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Class'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced_accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'maximize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training_subsample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_uniform_fi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_trials</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">900</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_lcs_sweep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcs_nu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcs_n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcs_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcs_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resubmit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_cluster</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'defq'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved_memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Runner Class for running all the model jobs for
+cross-validation splits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> – path to output directory</p></li>
+<li><p><strong>experiment_name</strong> – name of experiment (no spaces)</p></li>
+<li><p><strong>algorithms</strong> – list of str of ML models to run</p></li>
+<li><p><strong>scoring_metric</strong> – primary scikit-learn specified scoring metric used for hyperparameter optimization and                             permutation-based model feature importance evaluation, default=’balanced_accuracy’</p></li>
+<li><p><strong>metric_direction</strong> – direction to optimize the scoring metric in optuna,                               either ‘maximize’ or ‘minimize’, default=’maximize’</p></li>
+<li><p><strong>training_subsample</strong> – for long running algos (XGB,SVM,ANN,KNN), option to subsample training set                                 (0 for no subsample, default=0)</p></li>
+<li><p><strong>use_uniform_fi</strong> – overrides use of any available feature importance estimate methods from models,                             instead using permutation_importance uniformly, default=True</p></li>
+<li><p><strong>n_trials</strong> – number of bayesian hyperparameter optimization trials using optuna                       (specify an integer or None) default=200</p></li>
+<li><p><strong>timeout</strong> – seconds until hyperparameter sweep stops running new trials                     (Note: it may run longer to finish last trial started)                     If set to None, STREAMLINE is completely replicable, but will take longer to run                     default=900 i.e. 900 sec = 15 minutes default             save_plots: export optuna-generated hyperparameter sweep plots, default False</p></li>
+<li><p><strong>do_lcs_sweep</strong> – do LCS hyper-param tuning or use below params, default=False</p></li>
+<li><p><strong>lcs_nu</strong> – fixed LCS nu param (recommended range 1-10), set to larger value for data with                     less or no noise, default=1</p></li>
+<li><p><strong>lcs_iterations</strong> – fixed LCS number of learning iterations param, default=200000</p></li>
+<li><p><strong>lcs_n</strong> – fixed LCS rule population maximum size param, default=2000</p></li>
+<li><p><strong>lcs_timeout</strong> – seconds until hyperparameter sweep stops for LCS algorithms, default=1200</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner.get_cluster_params">
+<span class="sig-name descname"><span class="pre">get_cluster_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner.get_cluster_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner.get_cluster_params" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner.save_alginfo">
+<span class="sig-name descname"><span class="pre">save_alginfo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner.save_alginfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner.save_alginfo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner.save_metadata">
+<span class="sig-name descname"><span class="pre">save_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner.save_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner.save_metadata" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner.submit_lsf_cluster_job">
+<span class="sig-name descname"><span class="pre">submit_lsf_cluster_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner.submit_lsf_cluster_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner.submit_lsf_cluster_job" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="streamline.runners.model_runner.ModelExperimentRunner.submit_slurm_cluster_job">
+<span class="sig-name descname"><span class="pre">submit_slurm_cluster_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">full_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/streamline/runners/model_runner.html#ModelExperimentRunner.submit_slurm_cluster_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#streamline.runners.model_runner.ModelExperimentRunner.submit_slurm_cluster_job" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.runners.feature_runner.html" class="btn btn-neutral float-left" title="streamline.runners.feature_runner module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.runners.replicate_runner.html" class="btn btn-neutral float-right" title="streamline.runners.replicate_runner module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

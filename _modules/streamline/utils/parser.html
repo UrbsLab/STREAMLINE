@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.utils.parser &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.utils.parser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.utils.parser</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.parser_helpers</span> <span class="kn">import</span> <span class="n">str2bool</span><span class="p">,</span> <span class="n">save_config</span><span class="p">,</span> <span class="n">load_config</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.parser_helpers</span> <span class="kn">import</span> <span class="n">parse_general</span><span class="p">,</span> <span class="n">parse_replicate</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.parser_helpers</span> <span class="kn">import</span> <span class="n">parse_logistic</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.parser_helpers</span> <span class="kn">import</span> <span class="n">parser_function_all</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.parser_helpers</span> <span class="kn">import</span> <span class="n">PARSER_LIST</span>
+
+
+<div class="viewcode-block" id="process_params">
+<a class="viewcode-back" href="../../../codedocs/streamline.utils.parser.html#streamline.utils.parser.process_params">[docs]</a>
+<span class="k">def</span> <span class="nf">process_params</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_cluster&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">]:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_parallel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_till_report&#39;</span><span class="p">]:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_eda&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_dataprep&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_feat_imp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_feat_sel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_stats&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_compare_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_report&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_feat_imp&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_feat_sel&#39;</span><span class="p">]</span> \
+            <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_report&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_rep_report&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="s1">&#39;feat_algorithms&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">feat_algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_mutual_info&#39;</span><span class="p">]:</span>
+                <span class="n">feat_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;MI&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_multisurf&#39;</span><span class="p">]:</span>
+                <span class="n">feat_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;MS&quot;</span><span class="p">)</span>
+            <span class="n">params</span><span class="p">[</span><span class="s1">&#39;feat_algorithms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat_algorithms</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_model&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_stats&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;do_compare_dataset&quot;</span><span class="p">]</span> \
+            <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_report&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_replicate&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;do_rep_report&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;All&#39;</span><span class="p">:</span> 
+            <span class="n">params</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;ignore_features_path&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;ignore_features_path&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;ignore_features_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;categorical_feature_path&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;categorical_feature_path&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;categorical_feature_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;match_label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;match_label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;match_label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;instance_label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;instance_label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;instance_label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_cluster&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_cluster&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_parallel&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_parallel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_parallel&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;run_parallel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+
+<div class="viewcode-block" id="single_parse">
+<a class="viewcode-back" href="../../../codedocs/streamline.utils.parser.html#streamline.utils.parser.single_parse">[docs]</a>
+<span class="k">def</span> <span class="nf">single_parse</span><span class="p">(</span><span class="n">mode_params</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">config_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">config_dict</span> <span class="o">=</span> <span class="n">parse_general</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;do_eda&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_dataprep&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_feat_imp&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_feat_sel&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_model&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_stats&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_compare_dataset&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_report&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_replicate&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_rep_report&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;do_cleanup&#39;</span><span class="p">,</span> <span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">mode_params</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">config_dict</span> <span class="o">=</span> <span class="n">PARSER_LIST</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+                <span class="n">save_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                            <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span>
+                            <span class="n">config_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">]:</span>
+                <span class="n">config_dict</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                                          <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span> <span class="n">config_dict</span><span class="p">)</span>
+                <span class="n">config_dict</span> <span class="o">=</span> <span class="n">PARSER_LIST</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+                <span class="n">save_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                            <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span>
+                            <span class="n">config_dict</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">config_dict</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                                          <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span> <span class="n">config_dict</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+                    <span class="n">config_dict_copy</span> <span class="o">=</span> <span class="n">parse_replicate</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;rep_data_path&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                        <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;rep_data_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;rep_data_path&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;dataset_for_rep&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                        <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;dataset_for_rep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;dataset_for_rep&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;rep_export_feature_correlations&#39;</span><span class="p">]:</span>
+                        <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;rep_export_feature_correlations&#39;</span><span class="p">]</span> \
+                            <span class="o">=</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;rep_export_feature_correlations&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;exclude_rep_plots&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                        <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;exclude_rep_plots&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_dict_copy</span><span class="p">[</span><span class="s1">&#39;exclude_rep_plots&#39;</span><span class="p">]</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">parse_logistic</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">config_dict</span></div>
+
+
+
+<div class="viewcode-block" id="parser_function">
+<a class="viewcode-back" href="../../../codedocs/streamline.utils.parser.html#streamline.utils.parser.parser_function">[docs]</a>
+<span class="k">def</span> <span class="nf">parser_function</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;STREAMLINE: </span><span class="se">\n</span><span class="s2">&quot;</span>
+                                                 <span class="s2">&quot;Simple Transparent End-To-End Automated Machine &quot;</span>
+                                                 <span class="s2">&quot;Learning Pipeline for Supervised Learning in Tabular &quot;</span>
+                                                 <span class="s2">&quot;Binary Classification Data&quot;</span><span class="p">,</span>
+                                     <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--config&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">,</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to load config file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;give output to command line&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-till-report&#39;</span><span class="p">,</span> <span class="s1">&#39;--dtr&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_till_report&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to do all phases&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-eda&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_eda&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to eda&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-dataprep&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_dataprep&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to data preprocessing&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-feat-imp&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_feat_imp&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to feature importance&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-feat-sel&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_feat_sel&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to feature selection&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-model&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_model&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run models&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-stats&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_stats&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run statistics&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-compare-dataset&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_compare_dataset&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run compare dataset dataset&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-report&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_report&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run report dataset&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-replicate&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_replicate&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run replication dataset&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-rep-report&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_rep_report&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run replication report&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--do-cleanup&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;do_cleanup&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;flag to run cleanup&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">,</span> <span class="n">unknown</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">mode_params</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mode_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;verbose&#39;</span> <span class="ow">in</span> <span class="n">mode_params</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">mode_params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Improper Phase Declaration&quot;</span><span class="p">)</span>
+
+    <span class="n">config_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">mode_params</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">config_file</span> <span class="o">=</span> <span class="n">mode_params</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">sections</span><span class="p">():</span>
+            <span class="n">config_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="nb">eval</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">s</span><span class="p">)})</span>
+        <span class="n">save_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                    <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span>
+                    <span class="n">config_dict</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode_params</span><span class="p">[</span><span class="s1">&#39;do_till_report&#39;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running till Report Generation Stage&quot;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">parser_function_all</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+        <span class="n">config_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">config_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mode_params</span><span class="p">)</span>
+        <span class="n">save_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                    <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span>
+                    <span class="n">config_dict</span><span class="p">)</span>       
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">mode_params</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;do_till_report&#39;</span><span class="p">]:</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">single_parse</span><span class="p">(</span><span class="n">mode_params</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+            <span class="n">config_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">config_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mode_params</span><span class="p">)</span>
+            <span class="n">save_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;output_path&#39;</span><span class="p">],</span>
+                        <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">],</span>
+                        <span class="n">config_dict</span><span class="p">)</span>  
+
+    <span class="n">config_dict</span> <span class="o">=</span> <span class="n">process_params</span><span class="p">(</span><span class="n">config_dict</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">config_dict</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

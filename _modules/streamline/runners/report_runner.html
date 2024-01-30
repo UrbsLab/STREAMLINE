@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.runners.report_runner &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../../../about.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">streamline.runners.report_runner</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for streamline.runners.report_runner</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">SUPPORTED_MODELS</span>
+<span class="kn">from</span> <span class="nn">streamline.modeling.utils</span> <span class="kn">import</span> <span class="n">is_supported_model</span>
+<span class="kn">from</span> <span class="nn">streamline.postanalysis.gererate_report</span> <span class="kn">import</span> <span class="n">ReportJob</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.runners</span> <span class="kn">import</span> <span class="n">runner_fn</span>
+<span class="kn">from</span> <span class="nn">streamline.utils.cluster</span> <span class="kn">import</span> <span class="n">get_cluster</span>
+
+
+<div class="viewcode-block" id="ReportRunner">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner">[docs]</a>
+<span class="k">class</span> <span class="nc">ReportRunner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Runner Class for collating dataset compare job</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiment_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;XCS&quot;</span><span class="p">,</span> <span class="s2">&quot;eLCS&quot;</span><span class="p">),</span>
+                 <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rep_data_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset_for_rep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">run_cluster</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s1">&#39;defq&#39;</span><span class="p">,</span> <span class="n">reserved_memory</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            output_path: path to output directory</span>
+<span class="sd">            experiment_name: name of experiment (no spaces)</span>
+<span class="sd">            algorithms: list of str of ML models to run</span>
+<span class="sd">            training: Indicate True or False for whether to generate pdf summary for pipeline \</span>
+<span class="sd">                      training or followup application analysis to new dataset,default=True</span>
+<span class="sd">            rep_data_path: path to directory containing replication or hold-out testing datasets \</span>
+<span class="sd">                           (must have at least all features with same labels as in</span>
+<span class="sd">                           original training dataset),default=None</span>
+<span class="sd">            dataset_for_rep: path to target original training dataset</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiment_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">experiment_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiment_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="n">output_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">=</span> <span class="n">experiment_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span> <span class="o">=</span> <span class="n">experiment_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="o">=</span> <span class="n">training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rep_data_path</span> <span class="o">=</span> <span class="n">rep_data_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_data_path</span> <span class="o">=</span> <span class="n">dataset_for_rep</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="o">=</span> <span class="n">run_cluster</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span> <span class="o">=</span> <span class="n">reserved_memory</span>
+
+        <span class="k">if</span> <span class="n">algorithms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="n">SUPPORTED_MODELS</span>
+            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown algorithm in exclude: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">algorithms</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_supported_model</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span>
+
+        <span class="c1"># Argument checks</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Output path must exist (from phase 1) before phase 6 can begin&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Experiment must exist (from phase 1) before phase 6 can begin&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReportRunner.run">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SLURMOld&quot;</span><span class="p">,</span> <span class="s2">&quot;LSFOld&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="o">==</span> <span class="s2">&quot;SLURMOld&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">submit_slurm_cluster_job</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="o">==</span> <span class="s2">&quot;LSFOld&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">submit_lsf_cluster_job</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">job_obj</span> <span class="o">=</span> <span class="n">ReportJob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_data_path</span><span class="p">)</span>
+            <span class="c1"># running direct because it&#39;s faster</span>
+            <span class="n">HACK</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">run_parallel</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">HACK</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">run_parallel</span> <span class="ow">and</span> <span class="n">run_parallel</span> <span class="o">!=</span> <span class="s2">&quot;False&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span><span class="p">:</span>
+                    <span class="c1"># p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))</span>
+                    <span class="c1"># p.start()</span>
+                    <span class="c1"># p.join()</span>
+                    <span class="n">Parallel</span><span class="p">()(</span><span class="n">delayed</span><span class="p">(</span><span class="n">runner_fn</span><span class="p">)(</span><span class="n">job_obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">job_obj</span> <span class="ow">in</span> <span class="p">[</span><span class="n">job_obj</span><span class="p">,</span> <span class="p">])</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span> <span class="ow">and</span> <span class="s2">&quot;Old&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span><span class="p">:</span>
+                    <span class="n">get_cluster</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_cluster</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span>
+                    <span class="n">dask</span><span class="o">.</span><span class="n">compute</span><span class="p">([</span><span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="n">runner_fn</span><span class="p">)(</span><span class="n">job_obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">job_obj</span> <span class="ow">in</span> <span class="p">[</span><span class="n">job_obj</span><span class="p">,</span> <span class="p">]])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">job_obj</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">job_obj</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ReportRunner.get_cluster_params">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.get_cluster_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_cluster_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">output_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_data_path</span><span class="p">]</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cluster_params</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">cluster_params</span></div>
+
+
+<div class="viewcode-block" id="ReportRunner.submit_slurm_cluster_job">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.submit_slurm_cluster_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">submit_slurm_cluster_job</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">job_ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">job_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/jobs/PDF_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;_run.sh&#39;</span>
+        <span class="n">sh_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">job_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/bash</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#SBATCH -p &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#SBATCH --job-name=&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#SBATCH --mem=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;G&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># sh_file.write(&#39;#BSUB -M &#39;+str(maximum_memory)+&#39;GB&#39;+&#39;\n&#39;)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#SBATCH -o &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span>
+            <span class="s1">&#39;/logs/PDF_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.o</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#SBATCH -e &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span>
+            <span class="s1">&#39;/logs/PDF_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.e</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/streamline/legacy&quot;</span> <span class="o">+</span> <span class="s1">&#39;/ReportJobSubmit.py&#39;</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cluster_params</span><span class="p">()</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;srun&#39;</span><span class="p">,</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">]</span> <span class="o">+</span> <span class="n">cluster_params</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;sbatch &#39;</span> <span class="o">+</span> <span class="n">job_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ReportRunner.submit_lsf_cluster_job">
+<a class="viewcode-back" href="../../../codedocs/streamline.runners.report_runner.html#streamline.runners.report_runner.ReportRunner.submit_lsf_cluster_job">[docs]</a>
+    <span class="k">def</span> <span class="nf">submit_lsf_cluster_job</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">job_ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">job_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;/jobs/PDF_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;_run.sh&#39;</span>
+        <span class="n">sh_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">job_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/bash</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -q &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -J &#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -R &quot;rusage[mem=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;G]&quot;&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#BSUB -M &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reserved_memory</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;GB&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#BSUB -o &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span>
+            <span class="s1">&#39;/logs/PDF_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.o</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;#BSUB -e &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span>
+            <span class="s1">&#39;/logs/PDF_&#39;</span> <span class="o">+</span> <span class="n">job_ref</span> <span class="o">+</span> <span class="s1">&#39;.e</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/streamline/legacy&quot;</span> <span class="o">+</span> <span class="s1">&#39;/ReportJobSubmit.py&#39;</span>
+        <span class="n">cluster_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cluster_params</span><span class="p">()</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">]</span> <span class="o">+</span> <span class="n">cluster_params</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sh_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;bsub &lt; &#39;</span> <span class="o">+</span> <span class="n">job_name</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

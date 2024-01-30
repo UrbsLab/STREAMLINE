@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Running STREAMLINE" href="running.html" />
+    <link rel="prev" title="Datasets" href="data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#google-colab-notebook">Google Colab Notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#local-installation">Local Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#git">Git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anaconda">Anaconda</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-commands">Installation Commands</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#jupyter-notebook">Jupyter Notebook</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-installation">Cluster Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cluster-compatability">Cluster Compatability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-tools">Additional Tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#terminal-emulators">Terminal Emulators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#terminal-text-editors">Terminal Text Editors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#known-installation-issues">Known Installation Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Code Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/install.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<p>Installation instructions for different run modes of STREAMLINE.</p>
+<hr class="docutils" />
+<section id="google-colab-notebook">
+<h2>Google Colab Notebook<a class="headerlink" href="#google-colab-notebook" title="Link to this heading"></a></h2>
+<p>No installation is required to run STREAMLINE in the included Google Colab Notebook. The only other step is to make sure that you have a Google account (free) and click the link below:</p>
+<p><a class="reference external" href="https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing">https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing</a></p>
+</section>
+<hr class="docutils" />
+<section id="local-installation">
+<h2>Local Installation<a class="headerlink" href="#local-installation" title="Link to this heading"></a></h2>
+<p>The instructions below are for installing STREAMINE locally in order to run it either in the included Jupyter Noteook or from the command line.</p>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<p>First, be sure to install or confirm previous installation of the following prerequisites.</p>
+<section id="git">
+<h4>Git<a class="headerlink" href="#git" title="Link to this heading"></a></h4>
+<p>Install git (if not already installed).</p>
+<ul class="simple">
+<li><p>You can test for an existing installation by typing <code class="docutils literal notranslate"><span class="pre">git</span></code> in your command-line.</p></li>
+<li><p>Git installation instructions can be found <a class="reference external" href="https://github.com/git-guides/install-git">here</a>.</p></li>
+</ul>
+</section>
+<section id="anaconda">
+<h4>Anaconda<a class="headerlink" href="#anaconda" title="Link to this heading"></a></h4>
+<p>We recommend installing the most recent stable version of Anaconda3 appropriate for your operating system (if not already installed) which automatically includes Python3 and a number of other common packages used by STREAMLINE (e.g. pandas, scikit-learn, etc.). Python3 is the most essential prerequisite here. Additional required Python packages will automatically be installed by the installation commands (below).</p>
+<ul class="simple">
+<li><p>You can test for an existing installation by typing <code class="docutils literal notranslate"><span class="pre">conda</span></code> on your command-line.</p></li>
+<li><p>Anaconda installation instructions can be found <a class="reference external" href="https://docs.anaconda.com/anaconda/install/index.html">here</a></p></li>
+<li><p>If you already have Anaconda installed, we recommend updating conda and anaconda (as follows) prior to running STREAMLINE to avoid downstream module/environment errors</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">update</span> <span class="n">conda</span>
+<span class="n">conda</span> <span class="n">update</span> <span class="n">anaconda</span>
+</pre></div>
+</div>
+<p>While STREAMLINE can run on native Python3, this is not generally recomended, since issue resolution becomes complex, especially in MacOS based systems.</p>
+</section>
+</section>
+<section id="installation-commands">
+<h3>Installation Commands<a class="headerlink" href="#installation-commands" title="Link to this heading"></a></h3>
+<p>After confirming that you have the prerequisites above, navigate to the directory where you want to save STREAMLINE, and use the following commands in the command-line terminal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">single</span><span class="o">-</span><span class="n">branch</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">UrbsLab</span><span class="o">/</span><span class="n">STREAMLINE</span>
+<span class="n">cd</span> <span class="n">STREAMLINE</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>The above 3 commands do the following:</p>
+<ol class="arabic simple">
+<li><p>Download the most recent release repository of STREAMLINE</p></li>
+<li><p>Navigate to the root STREAMLINE directory from where the package can run</p></li>
+<li><p>Install all other packages required to run STREAMLINE on the local system (see <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> for the complete list of these packages)</p></li>
+</ol>
+<p>Now the STREAMLINE package can be run from the STREAMLINE root directory.</p>
+<section id="troubleshooting">
+<h4>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h4>
+<p>If you see errors or warnings when running the above commands, this may indicate that the required packages might not be installing properly, which may prevent STREAMLINE from running to completion. We recommend always testing the STREAMLINE installation first by <a class="reference internal" href="running.html"><span class="std std-doc">running</span></a> it (in the desired <a class="reference internal" href="running.html#picking-a-run-mode"><span class="std std-ref">run mode</span></a>) on the <a class="reference internal" href="#sample.md#demonstration-data"><span class="xref myst">demonstration</span></a> data with included/example default run parameters. Issues related to installation will be evident if you get ‘module’ related errors when running STREAMLINE. This is most likely to happen if you are working from a previous installation of Anaconda, and you should update both <code class="docutils literal notranslate"><span class="pre">conda</span></code> and <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> first and then retry the commands above.</p>
+</section>
+</section>
+<section id="jupyter-notebook">
+<h3>Jupyter Notebook<a class="headerlink" href="#jupyter-notebook" title="Link to this heading"></a></h3>
+<p>If you with to run STREAMLINE using the included Jupyter Notebook, additionally do the following:</p>
+<ol class="arabic">
+<li><p>Make sure the jupyter package is installed using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">jupyter</span>
+</pre></div>
+</div>
+</li>
+<li><p>Run Jupyter Notebook using the command <code class="docutils literal notranslate"><span class="pre">jupyter</span> <span class="pre">notebook</span></code></p></li>
+<li><p>Within the web page that opens, navigate into the saved STREAMLINE folder and open the <code class="docutils literal notranslate"><span class="pre">STREAMLINE-Notebook.ipynb</span></code> file.</p></li>
+</ol>
+<p>For more information on Jupyter Notebook, click <a class="reference external" href="https://jupyter.org/">here</a>.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="cluster-installation">
+<h2>Cluster Installation<a class="headerlink" href="#cluster-installation" title="Link to this heading"></a></h2>
+<p>STREAMLINE installation for a CPU computing cluster (i.e. HPC) is essentially the same as for local installation, but may include extra steps or troubleshooting based on your HPC setup. As for local installation, generally within your cluster home/working directory, you’ll want to install Git, Anaconda (with Python3), and use the installation commands to download STREAMLINE and other required Python packages.</p>
+<section id="cluster-compatability">
+<h3>Cluster Compatability<a class="headerlink" href="#cluster-compatability" title="Link to this heading"></a></h3>
+<p>We have set up STREAMLINE to be able to able to run on 7 different types of HPC clusters using <code class="docutils literal notranslate"><span class="pre">dask_jobqueue</span></code> including [LSF, SLURM, PBS, OAR, Moab, SGE, HTCondor] as documented <a class="reference external" href="https://jobqueue.dask.org/en/latest/api.html">here</a>. To date we have explicitly tested STREAMLINE only on LSF and SLURM clusters.</p>
+</section>
+<section id="additional-tools">
+<h3>Additional Tools<a class="headerlink" href="#additional-tools" title="Link to this heading"></a></h3>
+<p>Here we recommend additional tools that may help in running big jobs across all STREAMLINE phases, from a single command. These tool include terminal emulators like <code class="docutils literal notranslate"><span class="pre">tmux</span></code> and <code class="docutils literal notranslate"><span class="pre">screen</span></code> and terminal text editors like <code class="docutils literal notranslate"><span class="pre">nano</span></code> and <code class="docutils literal notranslate"><span class="pre">vim</span></code>. In most likelihood these would already be installed in your cluster or available as modules in your cluster.</p>
+<section id="terminal-emulators">
+<h4>Terminal Emulators<a class="headerlink" href="#terminal-emulators" title="Link to this heading"></a></h4>
+<p>A terminal emulator is particularly important when you want to run all phases of STREAMLINE automatically from a single command. To achieve this, STREAMLINE runs a script on the head node (i.e. job submission node) that monitors phase completion and submits new jobs for the next phase. Typically, closing your terminal would interupt this process.</p>
+<p>Terminal emulator programs allow you to create several “pseudo terminals” from a single terminal. They decouple your programs from the main terminal, protecting them from accidentally disconnecting. You can detach <code class="docutils literal notranslate"><span class="pre">tmux</span></code> or <code class="docutils literal notranslate"><span class="pre">screen</span></code> from the login terminal, and all your programs will continue to run safely in the background. Later, we can reattach them to the same or a different terminal to monitor the process.</p>
+<p>These are also very useful for running multiple programs with a single connection, such as when you’re remotely connecting to a machine using Secure Shell (SSH).</p>
+<p>We recommend using <code class="docutils literal notranslate"><span class="pre">tmux</span></code> as a terminal emulator. A quick guide on using it can be found <a class="reference external" href="https://www.redhat.com/sysadmin/introduction-tmux-linux">here</a>.</p>
+</section>
+<section id="terminal-text-editors">
+<h4>Terminal Text Editors<a class="headerlink" href="#terminal-text-editors" title="Link to this heading"></a></h4>
+<p>Terminal text editors are simple text editor programs that allow you to edit files through the terminal. These are particularly useful here for quickly editing the configuration file that specifies all STREAMLINE run parameters for running all phases from a single command.</p>
+<p>We recommend using <code class="docutils literal notranslate"><span class="pre">nano</span></code> as a text editor. A quick guide on using it can be found <a class="reference external" href="https://www.hostinger.com/tutorials/how-to-install-and-use-nano-text-editor">here</a></p>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="known-installation-issues">
+<h2>Known Installation Issues<a class="headerlink" href="#known-installation-issues" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Scipy version error, the way the STREAMLINE is set up it needs scipy&gt;=1.8.0. If you find this is not true or
+get a version error output, please run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">scipy</span></code></p></li>
+<li><p>The lightgbm package on pypi doesn’t work out of the box using pip on MacOS. The following command should solve the problem:
+<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">conda-forge</span> <span class="pre">lightgbm</span></code></p></li>
+<li><p>The most recent skrebate package (0.7) does not install correctly with the standard <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">skrebate</span></code> command, however it does with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">skrebate==0.7</span></code>.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data.html" class="btn btn-neutral float-left" title="Datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running.html" class="btn btn-neutral float-right" title="Running STREAMLINE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

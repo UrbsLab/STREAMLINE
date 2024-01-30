@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>streamline.utils package &mdash; STREAMLINE 2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1e5e4989"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="streamline.utils.checker module" href="streamline.utils.checker.html" />
+    <link rel="prev" title="streamline.runners.stats_runner module" href="streamline.runners.stats_runner.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            STREAMLINE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About (FAQs)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Navigating STREAMLINE Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../more.html">Doing More with STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="streamline.html">streamline package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="streamline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="streamline.dataprep.html">streamline.dataprep package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.featurefns.html">streamline.featurefns package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.modeling.html">streamline.modeling package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.models.html">streamline.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.postanalysis.html">streamline.postanalysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="streamline.runners.html">streamline.runners package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">streamline.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">Code Documentation</a></li>
+          <li class="breadcrumb-item"><a href="streamline.html">streamline package</a></li>
+      <li class="breadcrumb-item active">streamline.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/codedocs/streamline.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-streamline.utils">
+<span id="streamline-utils-package"></span><h1>streamline.utils package<a class="headerlink" href="#module-streamline.utils" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.checker.html">streamline.utils.checker module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase"><code class="docutils literal notranslate"><span class="pre">check_phase()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_1"><code class="docutils literal notranslate"><span class="pre">check_phase_1()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_10"><code class="docutils literal notranslate"><span class="pre">check_phase_10()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_11"><code class="docutils literal notranslate"><span class="pre">check_phase_11()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_2"><code class="docutils literal notranslate"><span class="pre">check_phase_2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_3"><code class="docutils literal notranslate"><span class="pre">check_phase_3()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_4"><code class="docutils literal notranslate"><span class="pre">check_phase_4()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_5"><code class="docutils literal notranslate"><span class="pre">check_phase_5()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_6"><code class="docutils literal notranslate"><span class="pre">check_phase_6()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_7"><code class="docutils literal notranslate"><span class="pre">check_phase_7()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_8"><code class="docutils literal notranslate"><span class="pre">check_phase_8()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.checker.html#streamline.utils.checker.check_phase_9"><code class="docutils literal notranslate"><span class="pre">check_phase_9()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.cleanup.html">streamline.utils.cleanup module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.cleanup.html#streamline.utils.cleanup.Cleaner"><code class="docutils literal notranslate"><span class="pre">Cleaner</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.cleanup.html#streamline.utils.cleanup.Cleaner.rm_tree"><code class="docutils literal notranslate"><span class="pre">Cleaner.rm_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.cleanup.html#streamline.utils.cleanup.Cleaner.run"><code class="docutils literal notranslate"><span class="pre">Cleaner.run()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.cluster.html">streamline.utils.cluster module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.cluster.html#streamline.utils.cluster.get_cluster"><code class="docutils literal notranslate"><span class="pre">get_cluster()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.dataset.html">streamline.utils.dataset module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.clean_data"><code class="docutils literal notranslate"><span class="pre">Dataset.clean_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.counts_summary"><code class="docutils literal notranslate"><span class="pre">Dataset.counts_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.describe_data"><code class="docutils literal notranslate"><span class="pre">Dataset.describe_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.eda"><code class="docutils literal notranslate"><span class="pre">Dataset.eda()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.feature_correlation"><code class="docutils literal notranslate"><span class="pre">Dataset.feature_correlation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.feature_only_data"><code class="docutils literal notranslate"><span class="pre">Dataset.feature_only_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.get_headers"><code class="docutils literal notranslate"><span class="pre">Dataset.get_headers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.get_outcome"><code class="docutils literal notranslate"><span class="pre">Dataset.get_outcome()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.initial_eda"><code class="docutils literal notranslate"><span class="pre">Dataset.initial_eda()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.load_data"><code class="docutils literal notranslate"><span class="pre">Dataset.load_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.missing_count_plot"><code class="docutils literal notranslate"><span class="pre">Dataset.missing_count_plot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.missingness_counts"><code class="docutils literal notranslate"><span class="pre">Dataset.missingness_counts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.non_feature_data"><code class="docutils literal notranslate"><span class="pre">Dataset.non_feature_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.set_original_headers"><code class="docutils literal notranslate"><span class="pre">Dataset.set_original_headers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.dataset.html#streamline.utils.dataset.Dataset.set_processed_headers"><code class="docutils literal notranslate"><span class="pre">Dataset.set_processed_headers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.evaluation.html">streamline.utils.evaluation module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.evaluation.html#streamline.utils.evaluation.class_eval"><code class="docutils literal notranslate"><span class="pre">class_eval()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.job.html">streamline.utils.job module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.job.html#streamline.utils.job.Job"><code class="docutils literal notranslate"><span class="pre">Job</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.job.html#streamline.utils.job.Job.run"><code class="docutils literal notranslate"><span class="pre">Job.run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="streamline.utils.job.html#streamline.utils.job.Job.run_cluster"><code class="docutils literal notranslate"><span class="pre">Job.run_cluster()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.parser.html">streamline.utils.parser module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.parser.html#streamline.utils.parser.parser_function"><code class="docutils literal notranslate"><span class="pre">parser_function()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.parser.html#streamline.utils.parser.process_params"><code class="docutils literal notranslate"><span class="pre">process_params()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.parser.html#streamline.utils.parser.single_parse"><code class="docutils literal notranslate"><span class="pre">single_parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="streamline.utils.runners.html">streamline.utils.runners module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.runners.html#streamline.utils.runners.check_if_single_phase"><code class="docutils literal notranslate"><span class="pre">check_if_single_phase()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.runners.html#streamline.utils.runners.model_runner_fn"><code class="docutils literal notranslate"><span class="pre">model_runner_fn()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.runners.html#streamline.utils.runners.parallel_eda_call"><code class="docutils literal notranslate"><span class="pre">parallel_eda_call()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.runners.html#streamline.utils.runners.run_jobs"><code class="docutils literal notranslate"><span class="pre">run_jobs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.runners.html#streamline.utils.runners.runner_fn"><code class="docutils literal notranslate"><span class="pre">runner_fn()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="streamline.utils.runners.html#streamline.utils.runners.sub_jobs"><code class="docutils literal notranslate"><span class="pre">sub_jobs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="streamline.runners.stats_runner.html" class="btn btn-neutral float-left" title="streamline.runners.stats_runner module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="streamline.utils.checker.html" class="btn btn-neutral float-right" title="streamline.utils.checker module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
