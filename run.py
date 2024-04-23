@@ -91,7 +91,7 @@ def len_datasets(output_path, experiment_name):
     return len(datasets)
 
 
-def run(params):
+def run(params): #second part
     start_g = time.time()
 
     if params['do_eda']:
@@ -256,20 +256,20 @@ def run(params):
 if __name__ == '__main__':
 
     # NOTE: All keys must be small
-    config_dict = parser_function(sys.argv)
+    config_dict = parser_function(sys.argv) #run first  #returns dictionary of configuration parameters
 
-    if not os.path.exists(config_dict['output_path']):
+    if not os.path.exists(config_dict['output_path']): #make the output path = everything stored here
         os.mkdir(str(config_dict['output_path']))
 
-    if config_dict['verbose']:
+    if config_dict['verbose']: # do we want verbose output to command line. 
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setLevel(logging.INFO)
         stdout_handler.setFormatter(formatter)
         logger.addHandler(stdout_handler)
     else:
-        file_handler = logging.FileHandler(str(config_dict['output_path']) + '/logs.log')
+        file_handler = logging.FileHandler(str(config_dict['output_path']) + '/logs.log') #otherwise puts output into log. 
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
-    sys.exit(run(config_dict))
+    sys.exit(run(config_dict)) 

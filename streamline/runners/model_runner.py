@@ -284,7 +284,7 @@ class ModelExperimentRunner:
                     if run_parallel and run_parallel != "False":
                         # p = multiprocessing.Process(target=model_runner_fn, args=(job_obj, model))
                         # job_list.append(p)
-                        job_list.append((job_obj, copy.deepcopy(model)))
+                        job_list.append((job_obj, copy.deepcopy(model))) #adds a job object
                     else:
                         job_obj.run(model)
         if run_parallel and run_parallel != "False" and not self.run_cluster:
@@ -296,7 +296,7 @@ class ModelExperimentRunner:
             get_cluster(self.run_cluster,
                         self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
-                                                        ) for job_obj, model in job_list])
+                                                        ) for job_obj, model in job_list]) # job list  create all run objects and then run with dask compute
 
     def save_metadata(self):
         # Load metadata
@@ -377,9 +377,9 @@ class ModelExperimentRunner:
             '#SBATCH -e ' + self.output_path + '/' + self.experiment_name + '/logs/P5_'
             + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
 
-        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ModelJobSubmit.py'
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ModelJobSubmit.py' #
         cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + cluster_params) #
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
