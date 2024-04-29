@@ -196,7 +196,7 @@ The following commands can be run one after the other (in sequence), waiting for
 
 ###### Phase 1 - Data Exploration & Processing:
 ```
-python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms NB,LR,DT --run-cluster False --run-parallel True
+python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --run-cluster False --run-parallel True
 ```
 ###### Phase 2 - Imputation and Scaling:
 ```
@@ -346,7 +346,7 @@ The following commands can be run one after the other (in sequence), waiting for
 
 ###### Phase 1 - Data Exploration & Processing:
 ```
-python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --algorithms NB,LR,DT --run-cluster SLURM --res-mem 4 --queue defq
+python run.py --do-eda --data-path ./data/DemoData --out-path DemoOutput --exp-name demo_experiment --class-label Class --inst-label InstanceID --cf ./data/DemoFeatureTypes/hcc_cat_feat.csv --qf ./data/DemoFeatureTypes/hcc_quant_feat.csv --cv 3 --run-cluster SLURM --res-mem 4 --queue defq
 ```
 ###### Phase 2 - Imputation and Scaling:
 ```

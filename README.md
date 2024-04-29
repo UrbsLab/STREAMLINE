@@ -15,6 +15,11 @@ The schematic below summarizes the automated STREAMLINE analysis pipeline with i
 
 * A simple demonstration of STREAMLINE on example biomedical data in our ready-to-run Google Colab Notebook [here](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
 
+* A video tutorial playlist covering all aspects of STREAMLINE is available [here](https://www.youtube.com/playlist?list=PLafPhSv1OSDcvu8dcbxb-LHyasQ1ZvxfJ)
+
+### YouTube Overview of STREAMLINE
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/xVc4JEbnIs8/0.jpg)](https://www.youtube.com/watch?v=xVc4JEbnIs8)
+
 ### Pipeline Design
 The goal of STREAMLINE is to provide an easy and transparent framework
 to reliably learn predictive associations from tabular data with a particular focus on the needs of biomedical data applications. 
@@ -45,10 +50,11 @@ and regression outcome data.
 most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
 
 ### Publications and Citations
-The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to
-simulated benchmark data can be found [here](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9).
+The most recent publication on STREAMLINE (release Beta 0.3.4) with benchmarking on simulated data and application to investigate obstructive sleep apena risk prediction as a clinical outcome is available as a preprint on arxiv [here](
+https://doi.org/10.48550/arXiv.2312.05461). 
 
-This paper is also available as a preprint on arxiv, [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
+The first publication detailing the initial implementation of STREAMLINE (release Beta 0.2.4) and applying it to
+simulated benchmark data can be found [here](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9), or as a preprint on arxiv, [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
 
 See [citations](https://urbslab.github.io/STREAMLINE/citation.html) for more information on citing STREAMLINE, as well as publications applying STREAMLINE and publications on algorithms developed in our research group and incorporated into STREAMLINE.
 
@@ -110,6 +116,28 @@ We welcome ideas, suggestions on improving the pipeline, [code-contributions](ht
 * For general questions, or to discuss potential collaborations (applying, or extending STREAMLINE); contact Ryan Urbanowicz at ryan.urbanowicz@cshs.org.
 
 * For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
+
+# Other STREAMLINE Tutorial Videos on YouTube
+### A Brief Introduction to Automated Machine Learning
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/IjX0phz3LLE/0.jpg)](https://www.youtube.com/watch?v=IjX0phz3LLE)
+
+### A Detailed Walkthrough
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/sAB8d1KnMDw/0.jpg)](https://www.youtube.com/watch?v=sAB8d1KnMDw)
+
+### Input Data
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/5HnangrEF5E/0.jpg)](https://www.youtube.com/watch?v=5HnangrEF5E)
+
+### Run Parameters
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/qMi9vhVag-4/0.jpg)](https://www.youtube.com/watch?v=qMi9vhVag-4)
+
+### Running in Google Colab Notebook
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/nknyJWhm7pg/0.jpg)](https://www.youtube.com/watch?v=nknyJWhm7pg)
+
+### Running in Jupyter Notebook
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/blat3gAfUaI/0.jpg)](https://www.youtube.com/watch?v=blat3gAfUaI)
+
+### Running From Command Line
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/-5yjGxnJ7eI/0.jpg)](https://www.youtube.com/watch?v=-5yjGxnJ7eI)
 
 ***
 # Acknowledgements
