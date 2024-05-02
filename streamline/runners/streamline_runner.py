@@ -96,33 +96,6 @@ class STREAMLINERunner:
         self.featuresel_filter_poor_features = filter_poor_features
         self.featuresel_export_scores = export_scores
 
-        #ModelExperimentRunner
-        """
-        Args:
-            algorithms: list of str of ML models to run
-            scoring_metric: primary scikit-learn specified scoring metric used for hyperparameter optimization and \
-                            permutation-based model feature importance evaluation, default='balanced_accuracy'
-            metric_direction: direction to optimize the scoring metric in optuna, \
-                              either 'maximize' or 'minimize', default='maximize'
-            training_subsample: for long running algos (XGB,SVM,ANN,KNN), option to subsample training set \
-                                (0 for no subsample, default=0)
-            use_uniform_fi: overrides use of any available feature importance estimate methods from models, \
-                            instead using permutation_importance uniformly, default=True
-            n_trials: number of bayesian hyperparameter optimization trials using optuna \
-                      (specify an integer or None) default=200
-            timeout: seconds until hyperparameter sweep stops running new trials \
-                    (Note: it may run longer to finish last trial started) \
-                    If set to None, STREAMLINE is completely replicable, but will take longer to run \
-                    default=900 i.e. 900 sec = 15 minutes default \
-            save_plots: export optuna-generated hyperparameter sweep plots, default False
-            do_lcs_sweep: do LCS hyper-param tuning or use below params, default=False
-            lcs_nu: fixed LCS nu param (recommended range 1-10), set to larger value for data with \
-                    less or no noise, default=1
-            lcs_iterations: fixed LCS number of learning iterations param, default=200000
-            lcs_n: fixed LCS rule population maximum size param, default=2000
-            lcs_timeout: seconds until hyperparameter sweep stops for LCS algorithms, default=1200
-
-        """
         self.ml_algorithms = ml_algorithms
         self.exclude = exclude
         self.scoring_metric = scoring_metric
@@ -139,30 +112,6 @@ class STREAMLINERunner:
         self.lcs_timeout = lcs_timeout
         self.resubmit = resubmit
 
-        #StatsRunner
-        """
-        Args:
-            output_path: path to output directory
-            experiment_name: name of experiment (no spaces)
-            algorithms: list of str of ML models to run
-            scoring_metric='balanced_accuracy'
-            sig_cutoff: significance cutoff, default=0.05
-            metric_weight='balanced_accuracy'
-            scale_data=True
-            plot_roc: Plot ROC curves individually for each algorithm including all CV results and averages,
-                                default=True
-            plot_prc: Plot PRC curves individually for each algorithm including all CV results and averages,
-                                default=True
-            plot_metric_boxplots: Plot box plot summaries comparing algorithms for each metric, default=True
-            plot_fi_box: Plot feature importance boxplots and histograms for each algorithm, default=True
-            metric_weight: ML model metric used as weight in composite FI plots \
-                           (only supports balanced_accuracy or roc_auc as options). \
-                           Recommend setting the same as primary_metric if possible, \
-                           default='balanced_accuracy'
-            top_features: number of top features to illustrate in figures, default=40
-            show_plots: flag to show plots
-
-        """
         self.scale_data = stats_scale_data
         self.plot_roc = plot_roc
         self.plot_prc = plot_prc
@@ -178,8 +127,7 @@ class STREAMLINERunner:
         # if os.path.exists(self.output_path+'/'+self.experiment_name):
         #     shutil.rmtree(self.output_path+'/'+self.experiment_name)
         dpr = DataProcessRunner(data_path=self.data_path, output_path=self.output_path,
-                experiment_name=self.experiment_name, exploration_list=self.exploration_list,
-                plot_list=self.plot_list, outcome_label=self.outcome_label,
+                experiment_name=self.experiment_name, outcome_label=self.outcome_label,
                 instance_label=self.instance_label, match_label=self.match_label,
                 n_splits=self.n_splits, partition_method=self.partition_method,
                 ignore_features=self.ignore_features, categorical_features=self.categorical_features,
@@ -233,19 +181,14 @@ class STREAMLINERunner:
                                 lcs_timeout=self.lcs_timeout, resubmit=self.resubmit)
         model_exp.run(run_parallel=run_para)
         stats = StatsRunner(output_path=self.output_path, experiment_name=self.experiment_name, 
-                    algorithms=self.ml_algorithms, exclude=self.exclude, 
                     outcome_label=self.outcome_label, instance_label=self.instance_label, 
                     scoring_metric=self.scoring_metric,
                     top_features=self.top_features, sig_cutoff=self.sig_cutoff, 
                     metric_weight=self.metric_weight, scale_data=self.scale_data,
-                    plot_roc=self.plot_roc, plot_prc=self.plot_prc, 
-                    plot_fi_box=self.plot_fi_box, 
-                    plot_metric_boxplots=self.plot_metric_boxplots, 
                     show_plots=self.show_plots)
         stats.run(run_parallel=run_para)     
         if self.gen_report:
-            rep = ReportRunner(self.output_path, self.experiment_name, 
-                   algorithms=self.ml_algorithms, exclude=self.exclude)
+            rep = ReportRunner(self.output_path, self.experiment_name)
             rep.run(run_parallel=run_para)
         if self.clean:
             dataset_paths = os.listdir(self.output_path + "/" + self.experiment_name)
