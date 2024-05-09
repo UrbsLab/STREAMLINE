@@ -5,7 +5,9 @@ import configparser
 from pathlib import Path
 
 
-def load_default_config(config_dict):
+def load_default_config(config_dict=None):
+    if config_dict == None:
+        config_dict = dict()
     script_dir = os.path.dirname(os.path.abspath(__file__))
     config_file = str(Path(script_dir)) + '/default.cfg'
     config = configparser.ConfigParser()

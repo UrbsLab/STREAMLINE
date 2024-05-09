@@ -37,7 +37,7 @@ class CompareJob(Job):
         self.outcome_type = outcome_type
 
         datasets = os.listdir(self.experiment_path)
-        remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+        remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'runparams.pickle', 'overview_log.log', 
                        'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons',
                        'UsefulNotebooks', 'dask_logs',
                        self.experiment_name + '_STREAMLINE_Report.pdf']

@@ -36,9 +36,11 @@ class STREAMLINERunner:
     def process_argv(self, argv):
         self.load_default_params()
         mode_params = parser_function_definition(argv)
-        self.params.update(mode_params)
+        # self.params.update(mode_params)
+        print(mode_params)
 
         if mode_params['config'] != "":
+            self.params['config'] = mode_params['config']
             self.load_config_params()
 
         def check_cli(mode_params):
@@ -65,7 +67,7 @@ class STREAMLINERunner:
         self.save_params()
     
     def load_default_params(self):
-        self.params.update(load_default_config(self.params))
+        self.params.update(load_default_config())
 
     def load_config_params(self):
         config_file = self.params['config']
@@ -109,7 +111,7 @@ class STREAMLINERunner:
             stdout_handler.setFormatter(formatter)
             logger.addHandler(stdout_handler)
         else:
-            file_handler = logging.FileHandler(str(self.params['output_path']) +
+            file_handler = logging.FileHandler(str(self.params['output_path']) + '/' +
                                                str(self.params['experiment_name'])
                                                + '/overview_log.log')
             file_handler.setLevel(logging.INFO)
@@ -119,7 +121,7 @@ class STREAMLINERunner:
     def get_len_datasets(self):
         output_path, experiment_name  = self.params['output_path'], self.params['experiment_name']
         datasets = os.listdir(output_path + '/' + experiment_name)
-        remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+        remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle', 'runparams.pickle', 'overview_log.log', 
                     'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons',
                     'UsefulNotebooks', 'dask_logs',
                     experiment_name + '_STREAMLINE_Report.pdf']

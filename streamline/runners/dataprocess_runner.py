@@ -218,7 +218,8 @@ class DataProcessRunner:
         if not re.match(r'^[A-Za-z0-9_]+$', self.experiment_name):
             raise Exception('Experiment Name must be alphanumeric')
         if os.path.exists(self.output_path + '/' + self.experiment_name):
-            if not os.listdir(self.output_path + '/' + self.experiment_name) == ['runparams.pickle']:
+            # print(os.listdir(self.output_path + '/' + self.experiment_name))
+            if not sorted(os.listdir(self.output_path + '/' + self.experiment_name)) == ['overview_log.log', 'runparams.pickle']:
                 raise Exception(
                     "Error: A folder with the specified experiment name already exists at "
                     "" + self.output_path + '/' + self.experiment_name + '. This path/folder name must be unique.')

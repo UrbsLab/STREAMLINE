@@ -14,5 +14,5 @@ def load_class_from_folder(path=None):
         for cls in classes_list:
             if ('streamline' in str(cls)) and not ('FeatureAlgorithm' in str(cls)):
                 classes.append(cls)
-    logging.warning(classes)
+    # logging.warning(classes)
     return sorted(classes, key=lambda x: x.model_name)
