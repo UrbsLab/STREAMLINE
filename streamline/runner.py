@@ -117,6 +117,7 @@ class STREAMLINERunner:
             file_handler.setLevel(logging.INFO)
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
+        return logger
 
     def get_len_datasets(self):
         output_path, experiment_name  = self.params['output_path'], self.params['experiment_name']
