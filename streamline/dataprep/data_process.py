@@ -175,16 +175,17 @@ class DataProcess(Job):
         self.save_runtime()
 
     def anomaly_detection(self, use_normalized_data=True, num_instances_to_show=50):
+        """
+        Perform anomaly detection on the dataset using various methods, create visualizations, and save results.
 
-        # Perform anomaly detection on the dataset using various methods, create visualizations, and save results.
+        Args:
+            use_normalized_data:  If True, normalize the data before performing anomaly detection (bool).
+            num_instances_to_show: Number of instances to show in the ranking heatmap. If None, show all instances.  (int or None)
 
-        # Parameters:
-        #     use_normalized_data (bool): If True, normalize the data before performing anomaly detection.
-        #       num_instances_to_show (int or None): Number of instances to show in the ranking heatmap.
-        #                                        If None, show all instances.
+        Returns:
+            None
+        """
 
-        # Returns:
-        #     None
 
         # Make a copy of the original data
         logging.info('Running anomaly detection.')
@@ -1228,6 +1229,7 @@ class DataProcess(Job):
                     p_value_dict[column] = self.test_selector(column)
 
             dict_items = list(p_value_dict.items())
+            # logging.warn(dict_items)
             sorted_p_list = sorted(dict_items, key=lambda item: float(item[1][0]))
             sorted_p_list = [(item[0], float(item[1][0])) for item in sorted_p_list]
             # Save p-values to file
@@ -1252,12 +1254,13 @@ class DataProcess(Job):
             for each in sorted_p_list_temp[:min_num]:
                 logging.info(each[0] + ": (p-val = " + str(each[1]) + ")")
 
-        except Exception:
+        except Exception as e:
             sorted_p_list = []  # won't actually be sorted
             logging.warning('WARNING: Exploratory univariate analysis failed due to scipy package '
                             'version error when running mannwhitneyu test. '
                             'To fix, we recommend updating scipy to version 1.8.0 or greater '
                             'using: pip install --upgrade scipy')
+            # logging.error(e)
             for column in self.dataset.data:
                 if column != self.dataset.outcome_label and column != self.dataset.instance_label:
                     sorted_p_list.append([column, 'None'])
@@ -1274,7 +1277,7 @@ class DataProcess(Job):
         outcome_label = self.dataset.outcome_label
         p_val, test_stat, test_name = None, None, None
         try:
-            if self.outcome_type == "Binary":
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                 # test_name, test_stat = None, None
                 # Feature and outcome both are discrete/categorical/binary
                 if feature_name in self.dataset.categorical_variables:
@@ -1324,6 +1327,8 @@ class DataProcess(Job):
                     p_val = p
                     test_stat = c
                     test_name = "Spearman Correlation"
+            else:
+                raise Exception("Invalid Outcome Type" + str(self.outcome_type))
         except Exception as e:
             logging.error(e)
             raise Exception("scipy error, check if you've install correct version of scipy")

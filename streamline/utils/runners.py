@@ -21,6 +21,18 @@ def check_if_single_phase(params):
         return True
     else:
         return False
+    
+
+def len_datasets(output_path, experiment_name):
+    datasets = os.listdir(output_path + '/' + experiment_name)
+    remove_list = ['.DS_Store', 'metadata.pickle', 'metadata.csv', 'algInfo.pickle',
+                'jobsCompleted', 'logs', 'jobs', 'DatasetComparisons',
+                'UsefulNotebooks', 'dask_logs',
+                experiment_name + '_STREAMLINE_Report.pdf']
+    for text in remove_list:
+        if text in datasets:
+            datasets.remove(text)
+    return len(datasets)
         
 
 def parallel_eda_call(eda_job, params):

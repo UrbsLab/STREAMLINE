@@ -215,18 +215,20 @@ class DataProcessRunner:
         # Check to make sure data_path exists and experiment name is valid & unique
         if not os.path.exists(self.data_path):
             raise Exception("Provided data_path does not exist")
-        if os.path.exists(self.output_path + '/' + self.experiment_name):
-            raise Exception(
-                "Error: A folder with the specified experiment name already exists at "
-                "" + self.output_path + '/' + self.experiment_name + '. This path/folder name must be unique.')
         if not re.match(r'^[A-Za-z0-9_]+$', self.experiment_name):
             raise Exception('Experiment Name must be alphanumeric')
+        if os.path.exists(self.output_path + '/' + self.experiment_name):
+            if not os.listdir(self.output_path + '/' + self.experiment_name) == ['runparams.pickle']:
+                raise Exception(
+                    "Error: A folder with the specified experiment name already exists at "
+                    "" + self.output_path + '/' + self.experiment_name + '. This path/folder name must be unique.')
 
         # Create output folder if it doesn't already exist
         if not os.path.exists(self.output_path):
             os.mkdir(self.output_path)
         # Create Experiment folder, with log and job folders
-        os.mkdir(self.output_path + '/' + self.experiment_name)
+        if not os.path.exists(self.output_path + '/' + self.experiment_name):
+            os.mkdir(self.output_path + '/' + self.experiment_name)
         os.mkdir(self.output_path + '/' + self.experiment_name + '/jobsCompleted')
         os.mkdir(self.output_path + '/' + self.experiment_name + '/jobs')
         os.mkdir(self.output_path + '/' + self.experiment_name + '/logs')

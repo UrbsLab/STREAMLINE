@@ -52,7 +52,9 @@ def str2bool(v):
 def save_config(output_path, experiment_name, config_dict):
     if not os.path.exists(config_dict['output_path']):
         os.mkdir(str(config_dict['output_path']))
-    with open(output_path + '/' + experiment_name + '_params.pickle', 'wb') as file:
+    if not os.path.exists(config_dict['experiment_name']):
+        os.mkdir(str(config_dict['experiment_name']))
+    with open(output_path + '/' + experiment_name + '/runparams.pickle', 'wb') as file:
         pickle.dump(config_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
@@ -60,11 +62,11 @@ def load_config(output_path, experiment_name, config=None):
     if config is None:
         config = dict()
     try:
-        with open(output_path + '/' + experiment_name + '_params.pickle', 'rb') as file:
+        with open(output_path + '/' + experiment_name + '/runparams.pickle', 'rb') as file:
             config_file = pickle.load(file)
             config.update(config_file)
     except FileNotFoundError:
-        logging.warning("CLI Params File Not Found")
+        logging.warning("Run Params File Not Found")
     return config
 
 

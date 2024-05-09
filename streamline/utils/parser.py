@@ -103,15 +103,17 @@ def single_parse(mode_params, argv, config_dict=None):
     return config_dict
 
 
-def parser_function(argv):
+def parser_function_definition(argv):
     parser = argparse.ArgumentParser(description="STREAMLINE: \n"
                                                  "Simple Transparent End-To-End Automated Machine "
-                                                 "Learning Pipeline for Supervised Learning in Tabular "
-                                                 "Binary Classification Data",
+                                                 "Learning Pipeline for Supervised Learning in Tabular Data",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--config', '-c',
                         dest='config', type=str, default="",
                         help='flag to load config file')
+    parser.add_argument('--check', '--chk',
+                        dest='checker', type=str2bool, nargs='?', const=True, default=False,
+                        help='flag to check progress')
     parser.add_argument('--verbose', dest='verbose', type=str2bool, nargs='?', const=True, default=False,
                         help='give output to command line')
     parser.add_argument('--do-till-report', '--dtr', dest='do_till_report', type=str2bool, nargs='?', const=True,
@@ -142,7 +144,9 @@ def parser_function(argv):
     mode_params = vars(args)
     if len(mode_params) == 0 or ('verbose' in mode_params and len(mode_params) == 1):
         return Exception("Improper Phase Declaration")
+    return mode_params
 
+def parser_function_process(argv, mode_params):
     config_dict = dict()
 
     if mode_params['config'] != "":
@@ -164,7 +168,7 @@ def parser_function(argv):
                     config_dict)       
 
     for key in mode_params:
-        if mode_params[key] and key not in ['config', 'do_till_report']:
+        if mode_params[key] and key not in ['config', 'do_till_report', 'verbose', 'checker']:
             config = single_parse(mode_params, argv, config_dict)
             config_dict.update(config)
             config_dict.update(mode_params)
@@ -175,3 +179,8 @@ def parser_function(argv):
     config_dict = process_params(config_dict)
 
     return config_dict
+
+
+def parser_function(argv):
+    mode_params = parser_function_definition(argv)
+    return parser_function_process(argv, mode_params)
