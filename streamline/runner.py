@@ -37,7 +37,7 @@ class STREAMLINERunner:
         self.load_default_params()
         mode_params = parser_function_definition(argv)
         # self.params.update(mode_params)
-        print(mode_params)
+        # print(mode_params)
 
         if mode_params['config'] != "":
             self.params['config'] = mode_params['config']
