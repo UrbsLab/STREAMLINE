@@ -78,7 +78,7 @@ class ModelExperimentRunner:
         self.outcome_type = outcome_type
         self.instance_label = instance_label
 
-        if outcome_type is None:
+        if self.outcome_type is None:
             file = open(self.output_path + '/' + self.experiment_name + '/' + "metadata.pickle", 'rb')
             metadata = pickle.load(file)
             self.outcome_type = metadata['Outcome Type']
@@ -351,17 +351,21 @@ class ModelExperimentRunner:
         pickle_out.close()
 
     def get_cluster_params(self, full_path, algorithm, cv_count):
-        cluster_params = [full_path, self.output_path, self.experiment_name, cv_count, self.outcome_label,
-                          self.instance_label, self.scoring_metric, self.metric_direction,
-                          self.n_trials, self.timeout, self.training_subsample,
-                          self.uniform_fi, self.save_plots, self.random_state]
-        cluster_params += [algorithm, self.n_jobs, self.do_lcs_sweep,
-                           self.lcs_iterations, self.lcs_n, self.lcs_nu]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P5_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self, full_path, algorithm, cv_count):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(full_path, algorithm, cv_count)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P5_' + str(algorithm) \
                    + '_' + str(cv_count) + '_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
@@ -378,14 +382,13 @@ class ModelExperimentRunner:
             + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ModelJobSubmit.py'
-        cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P5_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self, full_path, algorithm, cv_count):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(full_path, algorithm, cv_count)
         job_name = self.output_path + '/' + self.experiment_name \
                    + '/jobs/P5_' + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
@@ -402,8 +405,7 @@ class ModelExperimentRunner:
             + '/logs/P5_' + str(algorithm) + '_' + str(cv_count) + '_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ModelJobSubmit.py'
-        cluster_params = self.get_cluster_params(full_path, algorithm, cv_count)
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P5_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

@@ -95,13 +95,21 @@ class ReportRunner:
         pickle_in.close()
 
     def get_cluster_params(self):
-        cluster_params = [self.output_path, self.experiment_name, None,
-                          self.training, self.train_data_path, self.rep_data_path]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/PDF_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params()
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/PDF_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -117,14 +125,13 @@ class ReportRunner:
             '/logs/PDF_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ReportJobSubmit.py'
-        cluster_params = self.get_cluster_params()
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/PDF_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params()
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/PDF_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -140,8 +147,7 @@ class ReportRunner:
             '/logs/PDF_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/ReportJobSubmit.py'
-        cluster_params = self.get_cluster_params()
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/PDF_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

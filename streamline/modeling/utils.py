@@ -42,6 +42,11 @@ def model_str_to_obj(string):
     return MODEL_DICT[string]
 
 
+def model_str_to_obj(string):
+    assert is_supported_model(string)
+    return MODEL_DICT[string]
+
+
 def get_fi_for_ExSTraCS(output_path, experiment_name, dataset_name, class_label, instance_label,
                         cv, filter_poor_features):
     """

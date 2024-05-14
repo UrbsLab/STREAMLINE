@@ -67,10 +67,19 @@ class DataProcess(Job):
         """
         super().__init__()
         if type(dataset) != Dataset:
-            raise (Exception("dataset input is not of type Dataset"))
-        self.dataset = dataset
-        self.outcome_type = dataset.outcome_type
-        self.dataset_path = dataset.path
+            try:
+                assert(type(dataset) == tuple)
+                dataset_path, outcome_label, match_label, instance_label, outcome_type =  dataset
+                self.dataset = Dataset(dataset_path, outcome_label, match_label, instance_label, outcome_type, load_data=False)
+                self.load_data = False
+                self.dataset_path = dataset.path
+            except Exception as e:
+                raise (Exception("dataset input is invalid " + str(e)))
+        else:
+            self.dataset = dataset
+            self.outcome_type = dataset.outcome_type
+            self.dataset_path = dataset.path
+            self.load_data = True
         self.experiment_path = experiment_path
         self.random_state = random_state
 
@@ -164,6 +173,9 @@ class DataProcess(Job):
 
         """
         self.job_start_time = time.time()
+        if not self.load_data:
+            self.dataset.load_data()
+            self.outcome_type = self.dataset.outcome_type
 
         # Conduct Exploratory Analysis, Data Cleaning, and Feature Engineering
         self.run_process(top_features)

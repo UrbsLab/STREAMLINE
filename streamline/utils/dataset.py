@@ -12,7 +12,7 @@ sns.set_theme()
 
 class Dataset:
     def __init__(self, dataset_path, outcome_label, match_label=None, instance_label=None,
-                 outcome_type=None, categorical_cutoff=10):
+                 outcome_type=None, categorical_cutoff=10, load_data=True):
         """
         Creates dataset with path of tabular file
 
@@ -39,7 +39,8 @@ class Dataset:
         self.quantitative_variables = None
         self.outcome_type = outcome_type
         self.categorical_cutoff = categorical_cutoff
-        self.load_data()
+        if load_data:
+            self.load_data()
 
     def load_data(self):
         """

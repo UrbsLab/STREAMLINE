@@ -223,17 +223,21 @@ class ReplicationRunner:
         pickle_in.close()
 
     def get_cluster_params(self, dataset_filename):
-        exclude_param = ','.join(self.exclude_plots) if self.exclude_plots else None
-        cluster_params = [dataset_filename, self.dataset_for_rep, self.full_path, self.outcome_label, self.instance_label,
-                          self.match_label, None, None, self.cv_partitions, exclude_param,
-                          self.categorical_cutoff, self.sig_cutoff,
-                          self.scale_data, self.impute_data,
-                          self.multi_impute, self.show_plots, self.scoring_metric, self.random_state]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P9_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self, dataset_filename):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(dataset_filename)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P9_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -250,7 +254,7 @@ class ReplicationRunner:
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/RepJobSubmit.py'
         cluster_params = self.get_cluster_params(dataset_filename)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P9_' + job_ref + '_params.pickle', ])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
@@ -273,7 +277,7 @@ class ReplicationRunner:
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/RepJobSubmit.py'
         cluster_params = self.get_cluster_params(dataset_filename)
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P9_' + job_ref + '_params.pickle', ])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

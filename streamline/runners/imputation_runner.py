@@ -113,16 +113,23 @@ class ImputationRunner:
         pickle_out.close()
 
     def get_cluster_params(self, cv_train_path, cv_test_path):
-        cluster_params = [cv_train_path, cv_test_path,
-                          self.output_path + "/" + self.experiment_name,
-                          self.scale_data, self.impute_data, self.multi_impute, self.overwrite_cv,
-                          self.outcome_label, self.instance_label, self.random_state]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P2_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self, cv_train_path, cv_test_path):
-        job_ref = str(time.time())
-        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
+        # full_path = self.output_path + "/" + self.experiment_name
+        job_ref = self.get_cluster_params(cv_train_path, cv_test_path)
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P2_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
         sh_file.write('#SBATCH -p ' + self.queue + '\n')
@@ -131,20 +138,19 @@ class ImputationRunner:
         # sh_file.write('#BSUB -M '+str(maximum_memory)+'GB'+'\n')
         sh_file.write(
             '#SBATCH -o ' + self.output_path + '/' + self.experiment_name +
-            '/logs/P1_' + job_ref + '.o\n')
+            '/logs/P2_' + job_ref + '.o\n')
         sh_file.write(
             '#SBATCH -e ' + self.output_path + '/' + self.experiment_name +
-            '/logs/P1_' + job_ref + '.e\n')
+            '/logs/P2_' + job_ref + '.e\n')
 
-        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/DataJobSubmit.py'
-        cluster_params = self.get_cluster_params(cv_train_path, cv_test_path)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/DataJobSubmit.py' 
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P2_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self, cv_train_path, cv_test_path):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(cv_train_path, cv_test_path)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P2_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -160,8 +166,7 @@ class ImputationRunner:
             '/logs/P2_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/DataJobSubmit.py'
-        cluster_params = self.get_cluster_params(cv_train_path, cv_test_path)
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P2_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

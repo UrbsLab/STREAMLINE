@@ -202,12 +202,16 @@ class ReportJob(Job):
         self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
         self.analysis_report.y += 1
 
-        self.analysis_report.set_font('Times', 'B', 9)
-        self.analysis_report.multi_cell(w=69, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 7)
-        self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
-        self.analysis_report.y += 1
+
+        if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
+            self.analysis_report.x += 90
+            self.analysis_report.set_font('Times', 'B', 10)
+            self.analysis_report.multi_cell(w=69, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 8)
+            self.analysis_report.x += 90
+            self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
+            self.analysis_report.y += 1
 
         self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=69, h=4, txt='Stats and Figure Settings:', border=1, align='L')
@@ -248,34 +252,27 @@ class ReportJob(Job):
             for each in self.datasets:
                 list_datasets = list_datasets + ('D' + str(i) + ' = ' + str(each) + '\n')
                 i += 1
-            self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ', border=1,
-                                            align='L')
+            self.analysis_report.set_font('Times', 'B', 9)
+            self.analysis_report.multi_cell(w=110, h=4, txt='Target Training Dataset:', border=1, align='L')
+            self.analysis_report.x += 70
             self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.multi_cell(w=110, h=4, txt=self.train_name, border=1, align='L')
+            
+            #self.analysis_report.y += 5
+            #self.analysis_report.x = 70 #10
+            self.analysis_report.x += 70
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', 'B', 9)
 
-            self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.multi_cell(w=180, h=4, txt=list_datasets, border=1, align='L')
-            # self.analysis_report.multi_cell(w=180, h=4,
-            # txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
+            self.analysis_report.multi_cell(w=110, h=4, txt='Applied to Following Replication Dataset(s):', border=1, align='L')
+            self.analysis_report.x += 70
+            self.analysis_report.y += 1  # Space below section header
+            self.analysis_report.set_font('Times', '', 7)
+            self.analysis_report.multi_cell(w=110, h=4, txt= list_datasets, border=1, align='L')
+            #self.analysis_report.multi_cell(w=180, h=4, txt='Applied to Following Replication Dataset(s): ' + '\n' + list_datasets, border=1, align='L')
 
-        self.analysis_report.y += 2  # Margin below Datasets
-
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
-
-        self.analysis_report.y += 1  # Margin below page header
-        top_of_list = self.analysis_report.y  # Page height for start of algorithm settings
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.multi_cell(w=90, h=4, txt='General Pipeline Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
-        self.analysis_report.multi_cell(w=90, h=4,
-                                        txt=' ' + list_to_string(cv) + ' ' + list_to_string(
-                                            cat_cut) + ' ' + list_to_string(stat_cut) + ' ' + list_to_string(
-                                            general),
-                                        border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.multi_cell(w=90, h=4, txt='EDA and Processing Settings:', border=1, align='L')
+        self.analysis_report.x += 70
         self.analysis_report.y += 1  # Space below section header
         self.analysis_report.set_font('Times', 'B', 9)
         self.analysis_report.multi_cell(w=110, h=4, txt='Target Data Settings:', border=1, align='L')
@@ -286,45 +283,11 @@ class ReportJob(Job):
                                         txt=' ' + list_to_string(targetdata),
                                         border=1, align='L')
 
-        # bottom_of_list = self.analysis_report.y
-        # self.analysis_report.y = bottom_of_list + 2
+        # self.analysis_report.y += 2  # Margin below Datasets
 
-        self.analysis_report.x += 90
-        self.analysis_report.y = top_of_list  # 96
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.multi_cell(w=90, h=4, txt='ML Modeling Algorithms:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(ls2), border=1, align='L')
-        self.analysis_report.y += 1
+        # self.analysis_report.set_font('Times', 'B', 10)
+        # self.analysis_report.cell(w=180, h=4, txt='STREAMLINE Run Settings', ln=2, border=1, align='L')
 
-        self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.multi_cell(w=90, h=4, txt='Modeling Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(modeling), border=1, align='L')
-        self.analysis_report.y += 1
-
-        if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
-            self.analysis_report.x += 90
-            self.analysis_report.set_font('Times', 'B', 10)
-            self.analysis_report.multi_cell(w=90, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
-            self.analysis_report.y += 1  # Space below section header
-            self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.x += 90
-            self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
-            self.analysis_report.y += 1
-
-        self.analysis_report.x += 90
-        self.analysis_report.set_font('Times', 'B', 10)
-        self.analysis_report.multi_cell(w=90, h=4, txt='Stats and Figure Settings:', border=1, align='L')
-        self.analysis_report.y += 1  # Space below section header
-        self.analysis_report.set_font('Times', '', 8)
-        self.analysis_report.x += 90
-        self.analysis_report.multi_cell(w=90, h=4, txt=' ' + list_to_string(stats), border=1, align='L')
 
         """
         try_again = True

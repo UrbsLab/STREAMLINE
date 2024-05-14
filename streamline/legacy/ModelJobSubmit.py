@@ -7,43 +7,56 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(str(Path(SCRIPT_DIR).parent.parent))
 
 from streamline.modeling.modeljob import ModelJob
-from streamline.modeling.utils import model_str_to_obj
 from streamline.modeling.utils import get_fi_for_ExSTraCS
 
 
 def run_cluster(argv):
-    full_path = argv[1]
-    output_path = argv[2]
-    experiment_name = argv[3]
-    cv_count = int(argv[4])
-    outcome_label = argv[5]
-    outcome_type = argv[6]
-    instance_label = argv[7] if argv[7] != "None" else None
-    scoring_metric = argv[8]
-    metric_direction = argv[9]
-    n_trials = int(argv[10])
-    timeout = int(argv[11])
-    training_subsample = int(argv[12])
-    uniform_fi = eval(argv[13])
-    save_plot = eval(argv[14])
-    random_state = None if argv[15] == "None" else int(argv[15])
-    algorithm = argv[16]
-    n_jobs = None if argv[17] == "None" else int(argv[17])
-    do_lcs_sweep = eval(argv[18])
-    lcs_iterations = int(argv[19])
-    lcs_n = int(argv[20])
-    lcs_nu = int(argv[21])
+    param_path = argv[1]
+    with open(param_path, "rb") as input_file:
+        params = pickle.load(input_file)
+    globals().update(params)
+    print(params)
+    print(vars())
 
+    # if outcome_type == "Binary":
+    #     with GlobalImport() as gi:
+    #         from streamline.modeling.classification_utils import model_str_to_obj
+    #         gi()
+
+    # elif outcome_type == "Continuous":
+    #     if scoring_metric == 'balanced_accuracy':
+    #         scoring_metric = 'explained_variance'
+    #     with GlobalImport() as gi:
+    #         from streamline.modeling.regression_utils import model_str_to_obj
+    #         gi()
+    # elif outcome_type == "Multiclass":
+    #     # logging.info("Using Multiclass Classification Models")
+    #     with GlobalImport() as gi:
+    #         from streamline.modeling.multiclass_utils import model_str_to_obj
+    #         gi()
+    # else:
+    #     raise Exception("Unknown Outcome Type:" + str(outcome_type))
+    
     file = open(output_path + '/' + experiment_name + '/' + "metadata.pickle", 'rb')
     metadata = pickle.load(file)
     filter_poor_features = metadata['Filter Poor Features']
+    outcome_type = metadata['Outcome Type']
     file.close()
-
     dataset_directory_path = full_path.split('/')[-1]
+
+    if outcome_type == "Binary":
+        from streamline.modeling.classification_utils import model_str_to_obj
+    elif outcome_type == "Multiclass":
+        from streamline.modeling.multiclass_utils import model_str_to_obj
+    elif outcome_type == "Continuous":
+        from streamline.modeling.regression_utils import model_str_to_obj
+    else:
+        raise Exception("Unknown Outcome Type:" + str(outcome_type))
 
     job_obj = ModelJob(full_path, output_path, experiment_name, cv_count, outcome_label,
                        instance_label, scoring_metric, metric_direction, n_trials,
-                       timeout, training_subsample, uniform_fi, save_plot, random_state)
+                       timeout, training_subsample, uniform_fi, save_plots, random_state)
+
 
     if algorithm not in ['eLCS', 'XCS', 'ExSTraCS']:
         model = model_str_to_obj(algorithm)(cv_folds=3,

@@ -96,14 +96,22 @@ class CompareRunner:
         pickle_in.close()
 
     def get_cluster_params(self):
-        cluster_params = [self.output_path, self.experiment_name, None,
-                          self.outcome_label, self.outcome_type, self.instance_label, self.sig_cutoff, self.show_plots]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P7_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self):
-        job_ref = str(time.time())
-        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
+        job_ref = self.get_cluster_params()
+        job_name = self.output_path + '/' + self.experiment_name + '/jobs/P7_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
         sh_file.write('#SBATCH -p ' + self.queue + '\n')
@@ -118,8 +126,7 @@ class CompareRunner:
             '/logs/P7_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/CompareJobSubmit.py'
-        cluster_params = self.get_cluster_params()
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P7_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
@@ -141,8 +148,7 @@ class CompareRunner:
             '/logs/P7_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/CompareJobSubmit.py'
-        cluster_params = self.get_cluster_params()
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P7_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

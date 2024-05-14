@@ -162,6 +162,15 @@ class DataProcessRunner:
                     unique_datanames.append(data_name)
                     file_count += 1
 
+                    try:
+                        dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label,
+                                        self.outcome_type)
+                        self.outcome_type = dataset.outcome_type
+                        self.save_metadata()
+                    except Exception:
+                        dataset = (dataset_path, self.outcome_label, self.match_label, self.instance_label, self.outcome_type)
+
+
                     if not os.path.exists(self.output_path + '/' + self.experiment_name + '/' + data_name):
                         os.makedirs(self.output_path + '/' + self.experiment_name + '/' + data_name)
 
@@ -172,10 +181,7 @@ class DataProcessRunner:
                     if self.run_cluster == "LSFOld":
                         self.submit_lsf_cluster_job(dataset_path)
                         continue
-                    dataset = Dataset(dataset_path, self.outcome_label, self.match_label, self.instance_label,
-                                      self.outcome_type)
-                    self.outcome_type = dataset.outcome_type
-                    self.save_metadata()
+
                     job_obj = DataProcess(dataset, self.output_path + '/' + self.experiment_name,
                                           self.ignore_features,
                                           self.categorical_features, self.quantitative_features,

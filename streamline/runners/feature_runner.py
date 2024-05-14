@@ -142,14 +142,21 @@ class FeatureImportanceRunner:
         pickle_out.close()
 
     def get_cluster_params(self, cv_train_path, experiment_path, algorithm):
-        cluster_params = [cv_train_path, experiment_path, self.outcome_label,
-                          self.instance_label, self.instance_subset, algorithm,
-                          self.use_turf, self.turf_pct, self.random_state, self.n_jobs]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self, cv_train_path, experiment_path, algorithm):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(cv_train_path, experiment_path, algorithm)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -165,14 +172,13 @@ class FeatureImportanceRunner:
             '/logs/P3_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FImpJobSubmit.py'
-        cluster_params = self.get_cluster_params(cv_train_path, experiment_path, algorithm)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self, cv_train_path, experiment_path, algorithm):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(cv_train_path, experiment_path, algorithm)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -188,8 +194,8 @@ class FeatureImportanceRunner:
             '/logs/P3_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FImpJobSubmit.py'
-        cluster_params = self.get_cluster_params(cv_train_path, experiment_path, algorithm)
-        command = ' '.join(['python', file_path] + cluster_params)
+
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P3_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)
@@ -323,16 +329,21 @@ class FeatureSelectionRunner:
         pickle_out.close()
 
     def get_cluster_params(self, full_path, n_datasets):
-        algorithms = "'['" + "','".join(self.algorithms) + "']'"
-        cluster_params = [full_path, n_datasets, algorithms,
-                          self.outcome_label, self.instance_label, self.export_scores,
-                          self.top_features, self.max_features_to_keep,
-                          self.filter_poor_features, self.overwrite_cv]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self, full_path, n_datasets):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(full_path, n_datasets)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -348,14 +359,13 @@ class FeatureSelectionRunner:
             '/logs/P4_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FSelJobSubmit.py'
-        cluster_params = self.get_cluster_params(full_path, n_datasets)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self, full_path, n_datasets):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(full_path, n_datasets)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -369,10 +379,8 @@ class FeatureSelectionRunner:
         sh_file.write(
             '#BSUB -e ' + self.output_path + '/' + self.experiment_name +
             '/logs/P4_' + job_ref + '.e\n')
-
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/FSelJobSubmit.py'
-        cluster_params = self.get_cluster_params(full_path, n_datasets)
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P4_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

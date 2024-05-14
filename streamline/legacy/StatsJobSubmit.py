@@ -10,27 +10,14 @@ from streamline.postanalysis.statistics import StatsJob
 
 
 def run_cluster(argv):
-    full_path = argv[1]
-    experiment_path = '/'.join(full_path.split('/')[:-1])
-    outcome_label = argv[2]
-    outcome_type = argv[3]
-    instance_label = argv[4] if argv[4] != "None" else None
-    scoring_metric = argv[5]
-    len_cv = int(argv[6])
-    top_features = int(argv[7]) if argv[7] != "None" else None
-    sig_cutoff = float(argv[8]) if argv[8] != "None" else None
-    metric_weight = argv[9] if argv[9] != "None" else None
-    scale_data = eval(argv[10])
-    if argv[11] != 'None':
-        exclude_options = argv[11].split(',')
-        exclude_options = [x.strip() for x in exclude_options]
-    else:
-        exclude_options = None
-    show_plots = eval(argv[12])
+    param_path = argv[1]
+    with open(param_path, "rb") as input_file:
+        params = pickle.load(input_file)
+    globals().update(params)
 
     job_obj = StatsJob(full_path, outcome_label, outcome_type, instance_label, scoring_metric,
                        len_cv, top_features, sig_cutoff, metric_weight, scale_data,
-                       exclude_options,
+                       exclude_plots,
                        show_plots)
     job_obj.run()
 

@@ -167,17 +167,21 @@ class StatsRunner:
         pickle_in.close()
 
     def get_cluster_params(self, full_path, len_cv):
-        exclude_param = ','.join(self.exclude_plots) if self.exclude_plots else None
-        cluster_params = [full_path, self.outcome_label, self.outcome_type, self.instance_label,
-                          self.scoring_metric,
-                          len_cv, self.top_features, self.sig_cutoff, self.metric_weight, self.scale_data,
-                          exclude_param,
-                          self.show_plots]
-        cluster_params = [str(i) for i in cluster_params]
-        return cluster_params
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
+                params[param] = getattr(self, param)
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
+        return job_ref
 
     def submit_slurm_cluster_job(self, dataset_path, len_cv):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(dataset_path, len_cv)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -193,14 +197,13 @@ class StatsRunner:
             '/logs/P6_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/StatsJobSubmit.py'
-        cluster_params = self.get_cluster_params(dataset_path, len_cv)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self, dataset_path, len_cv):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(dataset_path, len_cv)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -216,8 +219,7 @@ class StatsRunner:
             '/logs/P6_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/StatsJobSubmit.py'
-        cluster_params = self.get_cluster_params(dataset_path, len_cv)
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P6_' + job_ref + '_params.pickle',])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)
