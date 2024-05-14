@@ -262,19 +262,30 @@ class DataProcessRunner:
         pickle.dump(metadata, pickle_out)
         pickle_out.close()
 
+    # def get_cluster_params(self, dataset_path):
+    #     exclude_param = ','.join(self.exclude_eda_output) if self.exclude_eda_output else None
+    #     cluster_params = [dataset_path, self.output_path, self.experiment_name, exclude_param,
+    #                       self.outcome_label, self.outcome_type, self.instance_label, self.match_label, self.n_splits,
+    #                       self.partition_method, self.ignore_features, self.categorical_features,
+    #                       self.quantitative_features, self.top_features,
+    #                       self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
+    #                       self.cleaning_missingness, self.correlation_removal_threshold, self.random_state]
+    #     cluster_params = [str(i) if type(i) != list else '"' + str(i) + '"' for i in cluster_params]
+    #     return cluster_params
+
     def get_cluster_params(self, dataset_path):
-        exclude_param = ','.join(self.exclude_eda_output) if self.exclude_eda_output else None
-        cluster_params = [dataset_path, self.output_path, self.experiment_name, exclude_param,
-                          self.outcome_label, self.outcome_type, self.instance_label, self.match_label, self.n_splits,
-                          self.partition_method, self.ignore_features, self.categorical_features,
-                          self.quantitative_features, self.top_features,
-                          self.categorical_cutoff, self.sig_cutoff, self.featureeng_missingness,
-                          self.cleaning_missingness, self.correlation_removal_threshold, self.random_state]
-        cluster_params = [str(i) if type(i) != list else '"' + str(i) + '"' for i in cluster_params]
-        return cluster_params
+        job_ref = str(time.time())
+        params = {}
+        for param in dir(self):
+            if not param.startswith("__"):
+                params[param] = getattr(self, param)
+        params[dataset_path] = dataset_path
+        pickle.dump(params, open(self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle', 'wb'))
+        return job_ref
+
 
     def submit_slurm_cluster_job(self, dataset_path):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(dataset_path)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -290,14 +301,14 @@ class DataProcessRunner:
             '/logs/P1_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/EDAJobSubmit.py'
-        cluster_params = self.get_cluster_params(dataset_path)
-        command = ' '.join(['srun', 'python', file_path] + cluster_params)
+        
+        command = ' '.join(['srun', 'python', file_path] + (self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle'))
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
 
     def submit_lsf_cluster_job(self, dataset_path):
-        job_ref = str(time.time())
+        job_ref = self.get_cluster_params(dataset_path)
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
         sh_file.write('#!/bin/bash\n')
@@ -313,8 +324,7 @@ class DataProcessRunner:
             '/logs/P1_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/EDAJobSubmit.py'
-        cluster_params = self.get_cluster_params(dataset_path)
-        command = ' '.join(['python', file_path] + cluster_params)
+        command = ' '.join(['python', file_path] + (self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle'))
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)
