@@ -18,6 +18,7 @@ xgboost
 lightgbm
 catboost
 gplearn
+group-lasso
 ipython
 fpdf
 scikit-XCS

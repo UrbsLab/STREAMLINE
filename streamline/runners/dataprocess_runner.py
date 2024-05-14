@@ -274,13 +274,17 @@ class DataProcessRunner:
     #     return cluster_params
 
     def get_cluster_params(self, dataset_path):
+        extra_kwargs = locals()
+        extra_kwargs.pop('self')
         job_ref = str(time.time())
         params = {}
         for param in dir(self):
-            if not param.startswith("__"):
+            if not (param.startswith("__") or 'bound method' in str(getattr(self, param))):
                 params[param] = getattr(self, param)
-        params[dataset_path] = dataset_path
-        pickle.dump(params, open(self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle', 'wb'))
+        for param in extra_kwargs:
+            params[param] = extra_kwargs[param]
+        with open(self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle', 'wb') as f:
+            pickle.dump(params, f)
         return job_ref
 
 
@@ -302,7 +306,7 @@ class DataProcessRunner:
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/EDAJobSubmit.py'
         
-        command = ' '.join(['srun', 'python', file_path] + (self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle'))
+        command = ' '.join(['srun', 'python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle'])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('sbatch ' + job_name)
@@ -324,7 +328,7 @@ class DataProcessRunner:
             '/logs/P1_' + job_ref + '.e\n')
 
         file_path = str(Path(__file__).parent.parent.parent) + "/streamline/legacy" + '/EDAJobSubmit.py'
-        command = ' '.join(['python', file_path] + (self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle'))
+        command = ' '.join(['python', file_path] + [self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_params.pickle'])
         sh_file.write(command + '\n')
         sh_file.close()
         os.system('bsub < ' + job_name)

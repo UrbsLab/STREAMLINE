@@ -51,9 +51,9 @@ def str2bool(v):
 
 def save_config(output_path, experiment_name, config_dict):
     if not os.path.exists(config_dict['output_path']):
-        os.mkdir(str(config_dict['output_path']))
+        os.makedirs(str(config_dict['output_path']))
     if not os.path.exists(str(config_dict['output_path']) + '/' + config_dict['experiment_name']):
-        os.mkdir(str(config_dict['output_path']) + '/' + str(config_dict['experiment_name']))
+        os.makedirs(str(config_dict['output_path']) + '/' + str(config_dict['experiment_name']))
     with open(output_path + '/' + experiment_name + '/runparams.pickle', 'wb') as file:
         pickle.dump(config_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
 

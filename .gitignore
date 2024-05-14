@@ -33,3 +33,4 @@ run_configs/cedars_amd.cfg
 data/AMD_Final/*
 data/PLCO/*
 run_configs/cedars_plco.cfg
+test*.cfg
