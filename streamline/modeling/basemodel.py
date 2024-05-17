@@ -5,110 +5,105 @@ from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 import warnings
+
+# Suppress specific warnings from sklearn, scipy, and optuna
 warnings.filterwarnings(action='ignore', module='sklearn')
 warnings.filterwarnings(action='ignore', module='scipy')
 warnings.filterwarnings(action='ignore', module='optuna')
 warnings.filterwarnings(action="ignore", category=ConvergenceWarning, module="sklearn")
 
-
 class BaseModel:
-    def __init__(self, model, model_name,
-                 cv_folds=3, scoring_metric='balanced_accuracy', metric_direction='maximize',
-                 random_state=None, cv=None, sampler=None, n_jobs=None):
+    def __init__(self, model, model_name, cv_folds=3, scoring_metric='balanced_accuracy', 
+                 metric_direction='maximize', random_state=None, cv=None, sampler=None, n_jobs=None):
         """
-        Base Model Class for all ML Models
+        Base Model Class for all Machine Learning Models.
 
         Args:
-            model:
-            model_name:
-            cv_folds:
-            scoring_metric:
-            metric_direction:
-            random_state:
-            cv:
-            sampler:
-            n_jobs:
+            model: The model to be used (e.g., a scikit-learn estimator).
+            model_name: The name of the model.
+            cv_folds: Number of cross-validation folds.
+            scoring_metric: Metric used for scoring the model.
+            metric_direction: Direction to optimize the scoring metric ('maximize' or 'minimize').
+            random_state: Random state for reproducibility.
+            cv: Custom cross-validation strategy.
+            sampler: Sampler for hyperparameter optimization.
+            n_jobs: Number of parallel jobs for cross-validation.
         """
-        self.is_single = True
+        self.is_single = True  # Flag to check if the parameter grid has single values
         if model is not None:
-            self.model = model()
-        self.small_name = model_name.replace(" ", "_")
+            self.model = model()  # Initialize the model
+        self.small_name = model_name.replace(" ", "_")  # Simplified model name without spaces
         self.model_name = model_name
-        self.y_train = None
-        self.x_train = None
-        self.param_grid = None
-        self.params = None
+        self.y_train = None  # Placeholder for training labels
+        self.x_train = None  # Placeholder for training data
+        self.param_grid = None  # Parameter grid for optimization
+        self.params = None  # Optimized parameters
         self.random_state = random_state
         self.scoring_metric = scoring_metric
         self.metric_direction = metric_direction
-        if cv is None:
-            self.cv = StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=self.random_state)
-        else:
-            self.cv = cv
-
-        if sampler is None:
-            self.sampler = optuna.samplers.TPESampler(seed=self.random_state)
-        else:
-            self.sampler = sampler
-        self.study = None
+        self.cv = cv if cv else StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=self.random_state)
+        self.sampler = sampler if sampler else optuna.samplers.TPESampler(seed=self.random_state)
+        self.study = None  # Optuna study for optimization
         optuna.logging.set_verbosity(optuna.logging.WARNING)
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
         """
-        Unimplemented objective function stub, needs to be overridden
+        Objective function for Optuna optimization. This function needs to be overridden in derived classes.
+
         Args:
-            trial: optuna trial object
-            params: dict of optional params or None
+            trial: Optuna trial object.
+            params: Additional parameters for the trial.
         """
         raise NotImplementedError
 
     @ignore_warnings(category=ConvergenceWarning)
     def optimize(self, x_train, y_train, n_trails, timeout, feature_names=None):
         """
-        Common model optimization function
+        Optimize model hyperparameters using Optuna.
 
         Args:
-            x_train: train data
-            y_train: label data
-            n_trails: number of optuna trials
-            timeout: maximum time for optuna trial timeout
-            feature_names: header/name of features
-
+            x_train: Training data.
+            y_train: Training labels.
+            n_trails: Number of Optuna trials.
+            timeout: Maximum time for each Optuna trial.
+            feature_names: Names of features (used in specific models).
         """
         self.x_train = x_train
         self.y_train = y_train
+        
+        # Check if the parameter grid contains single values
         for key, value in self.param_grid.items():
             if len(value) > 1 and key != 'expert_knowledge':
                 self.is_single = False
                 break
 
         if not self.is_single:
-            optuna.logging.set_verbosity(optuna.logging.WARNING)
+            # Perform hyperparameter optimization with Optuna
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
             if self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
                 pos_inst = sum(y_train)
                 neg_inst = len(y_train) - pos_inst
                 class_weight = neg_inst / float(pos_inst)
                 self.study.optimize(lambda trial: self.objective(trial, params={'class_weight': class_weight}),
-                                    n_trials=n_trails, timeout=timeout,
-                                    catch=(ValueError,))
+                                    n_trials=n_trails, timeout=timeout, catch=(ValueError,))
             elif self.model_name == "Genetic Programming":
                 self.study.optimize(lambda trial: self.objective(trial, params={'feature_names': feature_names}),
-                                    n_trials=n_trails, timeout=timeout,
-                                    catch=(ValueError,))
+                                    n_trials=n_trails, timeout=timeout, catch=(ValueError,))
             else:
                 self.study.optimize(lambda trial: self.objective(trial), n_trials=n_trails, timeout=timeout,
                                     catch=(ValueError,))
 
+            # Log best trial results
             logging.info('Best trial:')
             best_trial = self.study.best_trial
             logging.info('  Value: ' + str(best_trial.value))
             logging.info('  Params: ')
             for key, value in best_trial.params.items():
                 logging.info('    {}: {}'.format(key, value))
+            
             if self.small_name == "ANN":
-                # Handle special parameter requirement for ANN
+                # Special handling for ANN model parameters
                 layers = []
                 for j in range(best_trial.params['n_layers']):
                     layer_name = 'n_units_l' + str(j)
@@ -116,11 +111,12 @@ class BaseModel:
                     del best_trial.params[layer_name]
                 best_trial.params['hidden_layer_sizes'] = tuple(layers)
                 del best_trial.params['n_layers']
-            # Specify model with optimized hyperparameters
-            # Export final model hyperparamters to csv file
+            
+            # Set model parameters to the best trial's parameters
             self.params = best_trial.params
             self.model = copy.deepcopy(self.model).set_params(**best_trial.params)
         else:
+            # If no optimization is needed, use the given parameters directly
             self.params = copy.deepcopy(self.param_grid)
             for key, value in self.param_grid.items():
                 self.params[key] = value[0]
@@ -128,14 +124,16 @@ class BaseModel:
 
     def feature_importance(self):
         """
-        Unimplemented feature importance function stub
+        Placeholder for a method to calculate feature importance. Needs to be overridden in derived classes.
         """
         raise NotImplementedError
 
     def hyper_eval(self):
         """
-        Hyper eval for objective function
-        Returns: Returns hyper eval for objective function
+        Evaluate model performance with cross-validation.
+
+        Returns:
+            mean_cv_score: Mean cross-validation score.
         """
         logging.debug("Trial Parameters: " + str(self.params))
         logging.debug("Trial Metric: " + str(self.scoring_metric))
@@ -152,24 +150,32 @@ class BaseModel:
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
                                             scoring=self.scoring_metric,
                                             cv=self.cv, n_jobs=self.n_jobs).mean()
-        logging.debug("Trail Completed")
+        logging.debug("Trial Completed")
         logging.debug("Mean CV Score:" + str(mean_cv_score))
         return mean_cv_score
 
     def fit(self, x_train, y_train, n_trails, timeout, feature_names=None):
         """
-        Caller function to optimize
+        Fit the model to the training data after optimizing hyperparameters.
+
+        Args:
+            x_train: Training data.
+            y_train: Training labels.
+            n_trails: Number of Optuna trials.
+            timeout: Maximum time for each Optuna trial.
+            feature_names: Names of features (used in specific models).
         """
         self.optimize(x_train, y_train, n_trails, timeout, feature_names)
         self.model.fit(x_train, y_train)
 
     def predict(self, x_in):
         """
-        Function to predict with trained model
+        Predict labels for the input data using the trained model.
+
         Args:
-            x_in: input data
+            x_in: Input data.
 
-        Returns: predictions y_pred
-
+        Returns:
+            y_pred: Predicted labels.
         """
         return self.model.predict(x_in)

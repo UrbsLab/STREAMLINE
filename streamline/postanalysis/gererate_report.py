@@ -204,12 +204,10 @@ class ReportJob(Job):
 
 
         if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
-            self.analysis_report.x += 90
             self.analysis_report.set_font('Times', 'B', 10)
             self.analysis_report.multi_cell(w=69, h=4, txt='LCS Settings (eLCS,XCS,ExSTraCS):', border=1, align='L')
             self.analysis_report.y += 1  # Space below section header
             self.analysis_report.set_font('Times', '', 8)
-            self.analysis_report.x += 90
             self.analysis_report.multi_cell(w=69, h=4, txt=' ' + list_to_string(lcs), border=1, align='L')
             self.analysis_report.y += 1
 
