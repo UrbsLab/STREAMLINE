@@ -92,6 +92,17 @@ def parse_general(argv, params_dict=None):
     return update_dict_from_parser(argv, parser, params_dict)
 
 
+def parse_checker(argv, params_dict=None):
+    parser = argparse.ArgumentParser(description='program to check if run is complete')
+    parser.add_argument('--phase', dest='phase', type=int, help='phase to check')
+    parser.add_argument('--count-only', dest='len_only', type=bool, default=False, help='show only no of jobs')
+    parser.add_argument('--rep-data-path', dest='rep_data_path', type=str,
+                        help='replication dataset path')
+    parser.add_argument('--dataset-for-rep', dest='dataset_for_rep',
+                        type=str, help='train dataset for replication path')
+    return update_dict_from_parser(argv, parser, params_dict)
+    
+
 def parse_eda(argv, params_dict=None):
     # Parse arguments
     parser = argparse.ArgumentParser(description="",

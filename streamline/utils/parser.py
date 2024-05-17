@@ -1,7 +1,7 @@
 import argparse
 import configparser
 from streamline.utils.parser_helpers import str2bool, save_config, load_config
-from streamline.utils.parser_helpers import parse_general, parse_replicate
+from streamline.utils.parser_helpers import parse_general, parse_replicate, parse_checker
 from streamline.utils.parser_helpers import parse_logistic
 from streamline.utils.parser_helpers import parser_function_all
 from streamline.utils.parser_helpers import PARSER_LIST
@@ -70,7 +70,8 @@ def single_parse(mode_params, argv, config_dict=None):
             'do_report',
             'do_replicate',
             'do_rep_report',
-            'do_cleanup', ]
+            'do_cleanup', 
+            'checker']
     for i in range(len(keys)):
         if mode_params[keys[i]]:
             if i == 0:
@@ -90,6 +91,17 @@ def single_parse(mode_params, argv, config_dict=None):
                                           config_dict['experiment_name'], config_dict)
                 if i == 9:
                     config_dict_copy = parse_replicate(argv, config_dict)
+                    if not config_dict_copy['rep_data_path'] == "":
+                        config_dict['rep_data_path'] = config_dict_copy['rep_data_path']
+                    if not config_dict_copy['dataset_for_rep'] == "":
+                        config_dict['dataset_for_rep'] = config_dict_copy['dataset_for_rep']
+                    if not config_dict_copy['rep_export_feature_correlations']:
+                        config_dict['rep_export_feature_correlations'] \
+                            = config_dict_copy['rep_export_feature_correlations']
+                    if not config_dict_copy['exclude_rep_plots'] == 'None':
+                        config_dict['exclude_rep_plots'] = config_dict_copy['exclude_rep_plots']
+                if i == 11:
+                    config_dict_copy = parse_checker(argv, config_dict)
                     if not config_dict_copy['rep_data_path'] == "":
                         config_dict['rep_data_path'] = config_dict_copy['rep_data_path']
                     if not config_dict_copy['dataset_for_rep'] == "":

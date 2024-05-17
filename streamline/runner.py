@@ -11,6 +11,9 @@ from streamline.utils.parser_helpers import save_config
 from streamline.utils.config_loader import load_default_config
 from streamline.utils.parser import parser_function_definition
 from streamline.utils.parser import parser_function_all, single_parse, process_params
+from streamline.utils.parser_helpers import parse_checker, parse_general
+from streamline.utils.checker import check_phase
+
 
 warnings.filterwarnings("ignore")
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -27,6 +30,8 @@ class STREAMLINERunner:
 
     def __init__(self, argv=None, run=False):
         self.params = dict()
+        self.runner = run
+        self.checker = None
         if argv:
             self.process_argv(argv)
         if run:
@@ -47,6 +52,8 @@ class STREAMLINERunner:
             flag = False
             if mode_params['do_till_report']:
                 flag = True
+            if mode_params['checker']:
+                flag = True
             for key in mode_params:
                 if mode_params[key] and key not in ['config', 'do_till_report', 'verbose', 'checker']:
                     flag = True
@@ -55,7 +62,8 @@ class STREAMLINERunner:
         if check_cli(mode_params):
             self.load_cli_params(mode_params, argv)
 
-        self.params = process_params(self.params)
+        if not self.checker:
+            self.params = process_params(self.params)
 
         for param in self.essential_params:
             if param not in self.params:
@@ -86,7 +94,14 @@ class STREAMLINERunner:
             self.params.update(config)
             save_config(self.params['output_path'],
                         self.params['experiment_name'],
-                        self.params)       
+                        self.params)
+        if mode_params['checker']:
+            print("Checking Progress")
+            config = parse_general(argv, self.params)
+            config = parse_checker(argv, config)
+            self.params.update(config)
+            self.checker = True
+            return
 
         for key in mode_params:
             if mode_params[key] and key not in ['config', 'do_till_report', 'verbose', 'checker']:
@@ -95,7 +110,7 @@ class STREAMLINERunner:
                 self.params.update(mode_params)
                 save_config(self.params['output_path'],
                             self.params['experiment_name'],
-                            self.params)  
+                            self.params)
 
     def save_params(self):
         save_config(self.params['output_path'], self.params['experiment_name'], self.params)
@@ -183,6 +198,11 @@ class STREAMLINERunner:
         if str(self.params['run_cluster']) == "LSF":
             time.sleep(2)
         del obj
+
+    def check_progress(self):
+        check_phase(self.params['output_path'], self.params['experiment_name'], 
+                    self.params['phase'], self.params['len_only'],
+                    self.params['rep_data_path'], self.params['dataset_for_rep'])
 
     def run(self):
         start_g = time.time()

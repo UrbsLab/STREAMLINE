@@ -13,5 +13,8 @@ if __name__ == '__main__':
     stl_runner.process_argv(sys.argv)
     logger = stl_runner.set_logger()
     # logging.warn(stl_runner.params)
-    stl_runner.run()
+    if stl_runner.checker:
+        stl_runner.check_progress()
+    else:
+        stl_runner.run()
     logging.warning("FINISHED!!")
