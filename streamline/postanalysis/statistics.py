@@ -1463,6 +1463,7 @@ class StatsJob(Job):
             else:
                 plt.close('all')
                 # plt.cla() # not required
+            algorithm_counter += 1
 
     def composite_fi_plot(self, fi_list, all_feature_list_to_viz, fig_name,
                           y_label_text, metric_ranking, metric_weighting):
