@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from statistics import median
+from statistics import median, mean
 from streamline.utils.job import Job
 from streamline.featurefns.utils import SUPPORTED_ALGORITHM_OBJ
 import seaborn as sns
@@ -164,11 +164,49 @@ class FeatureSelection(Job):
         # stores sorted feature importance dictionaries for all algorithms and CVs
         meta_feature_ranks[algorithm] = feature_name_ranks
 
-        # Generate barplot of average scores------------------------------------------------------------------------
+        # Generate boxplot and barplot of average scores------------------------------------------------------------------------
         if self.export_scores:
+            ns = self.export_fsel_plots(algorithm, algorithmlabel, cv_score_dict.copy(), 'Mean')
+            ns = self.export_fsel_plots(algorithm, algorithmlabel, cv_score_dict.copy(), 'Median')
+            self.export_fsel_boxplots(algorithm, algorithmlabel, cv_score_dict.copy(), order=list(ns['Names']))
+        return selected_feature_lists, meta_feature_ranks
+
+    def export_fsel_boxplots(self, algorithm, algorithmlabel, cv_score_dict, order=None):
+            boxplot_df = pd.DataFrame(cv_score_dict)
+            if order != None:
+                boxplot_df = boxplot_df[order]
+            boxplot_df.boxplot(fontsize=8, rot=90)
+            plt.xlabel('Features')
+            algorithm_name = ""
+            if algorithm == "MI":
+                algorithm_name = "Mutual Information"
+            elif algorithm == "MS":
+                algorithm_name = "MultiSURF"
+            elif algorithm == "MSS":
+                algorithm_name = "MultiSURFstar"
+            plt.ylabel(str(algorithm_name) + ' Score')
+            plt.xticks(np.arange(len(boxplot_df.columns)), boxplot_df.columns)
+            plt.title(str(algorithm_name) + 'Score Boxplots')
+            logging.info("Saved Feature Importance Plots at")
+            logging.info(self.full_path + "/feature_selection/" + algorithmlabel + "/ScoresBoxplots.png")
+            plt.savefig((self.full_path + "/feature_selection/" + algorithmlabel + "/ScoresBoxplots.png"),
+                        bbox_inches="tight")
+            if self.show_plots:
+                plt.show()
+            else:
+                plt.close('all')
+            plt.cla() # not required
+
+    def export_fsel_plots(self, algorithm, algorithmlabel, cv_score_dict, metric='Mean'):
+
+
             # Get median score for each features
+            if metric == 'Mean':
+                metric_fn = mean
+            elif metric == 'Median':
+                metric_fn = median
             for v in cv_score_dict:
-                cv_score_dict[v] = median(cv_score_dict[v])
+                cv_score_dict[v] = metric_fn(cv_score_dict[v])
             df_string = pd.DataFrame(cv_score_dict.items(), columns=['Feature', 'Importance'])\
                 .sort_values('Importance', ascending=False).head(10).to_string()
             logging.info(df_string)
@@ -202,19 +240,19 @@ class FeatureSelection(Job):
                 algorithm_name = "MultiSURF"
             elif algorithm == "MSS":
                 algorithm_name = "MultiSURFstar"
-            plt.xlabel(str(algorithm_name) + ' Median Score')
+            plt.xlabel(str(algorithm_name) + ' ' + metric + ' Score')
             plt.yticks(np.arange(len(ns['Names'])), ns['Names'])
-            plt.title('Sorted Median ' + str(algorithm_name) + ' Scores')
+            plt.title('Sorted ' + metric + ' ' + str(algorithm_name) + ' Scores')
             logging.info("Saved Feature Importance Plots at")
-            logging.info(self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png")
-            plt.savefig((self.full_path + "/feature_selection/" + algorithmlabel + "/TopAverageScores.png"),
+            logging.info(self.full_path + "/feature_selection/" + algorithmlabel + "/Top" + metric + "Scores.png")
+            plt.savefig((self.full_path + "/feature_selection/" + algorithmlabel + "/Top" + metric + "Scores.png"),
                         bbox_inches="tight")
             if self.show_plots:
                 plt.show()
             else:
                 plt.close('all')
                 # plt.cla() # not required
-        return selected_feature_lists, meta_feature_ranks
+            return ns
 
     def select_features(self, selected_feature_lists, max_features_to_keep, meta_feature_ranks):
         """

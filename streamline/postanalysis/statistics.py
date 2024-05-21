@@ -550,9 +550,10 @@ class StatsJob(Job):
             results = {'Max Error': mes, 'Mean Absolute Error': maes, 'Mean Squared Error': mses,
                        'Median Absolute Error': mdaes, 'Explained Variance': evss, 'Pearson Correlation': corrs}
             dr = pd.DataFrame(results)
+            dr.index = list(range(0, self.cv_partitions))
+            dr.index.name = 'CV #'
             filepath = self.full_path + '/model_evaluation/' + self.abbrev[algorithm] + "_performance.csv"
-            dr.to_csv(filepath, header=True, index=False)
-            metric_dict[algorithm] = results
+            dr.to_csv(filepath, header=True, index=True)
 
             # Save Average FI Stats
             if master_list is None:
@@ -702,8 +703,10 @@ class StatsJob(Job):
                        'Precision (PPV)': s_pr, 'ROC AUC': aucs, 'PRC AUC': praucs,
                        'PRC APS': aveprecs}
             dr = pd.DataFrame(results)
+            dr.index = list(range(0, self.cv_partitions))
+            dr.index.name = 'CV #'
             filepath = self.full_path + '/model_evaluation/' + self.abbrev[algorithm] + "_performance.csv"
-            dr.to_csv(filepath, header=True, index=False)
+            dr.to_csv(filepath, header=True, index=True)
             metric_dict[algorithm] = results
 
             # Save Median FI Stats
@@ -866,9 +869,10 @@ class StatsJob(Job):
                        'NPV': s_npv, 'LR+': s_lrp, 'LR-': s_lrm, 'ROC AUC': aucs, 'PRC AUC': praucs,
                        'PRC APS': aveprecs}
             dr = pd.DataFrame(results)
+            dr.index = list(range(0, self.cv_partitions))
+            dr.index.name = 'CV #'
             filepath = self.full_path + '/model_evaluation/' + self.abbrev[algorithm] + "_performance.csv"
-            dr.to_csv(filepath, header=True, index=False)
-            metric_dict[algorithm] = results
+            dr.to_csv(filepath, header=True, index=True)
 
             # Save FI scores for all CV models
             if master_list is None:
@@ -978,7 +982,7 @@ class StatsJob(Job):
 
             no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
             # Plot no-skill line
-            plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill', alpha=.8)
+            plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill (cutoff = %0.3f)' % (no_skill), alpha=.8)
             # Plot average line for all CVs
             std_pr_auc = np.std(praucs)
             plt.plot(mean_recall, mean_prec, color=self.colors[algorithm],
@@ -1062,7 +1066,7 @@ class StatsJob(Job):
         no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
 
         # Plot no-skill line
-        plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill', alpha=.8)
+        plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill (cutoff = %0.3f)' % (no_skill), alpha=.8)
         # Specify plot axes,labels, and legend
         plt.xticks(np.arange(0.0, 1.1, step=0.1))
         plt.xlabel("Recall (Sensitivity)", fontsize=15)

@@ -941,11 +941,11 @@ class ReportJob(Job):
                 self.analysis_report.set_font(family='times', size=9)
                 self.analysis_report.image(
                     self.experiment_path + '/' + self.datasets[
-                        k] + '/feature_selection/mutual_information/TopAverageScores.png',
+                        k] + '/feature_selection/mutual_information/TopMeanScores.png',
                     5,
                     12, 100, 135)  # Images adjusted to fit a width of 100 and length of 135
                 self.analysis_report.image(
-                    self.experiment_path + '/' + self.datasets[k] + '/feature_selection/multisurf/TopAverageScores.png',
+                    self.experiment_path + '/' + self.datasets[k] + '/feature_selection/multisurf/TopMeanScores.png',
                     105, 12,
                     100,
                     135)
