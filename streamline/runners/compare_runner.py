@@ -17,7 +17,7 @@ class CompareRunner:
     def __init__(self, output_path, experiment_name, experiment_path=None,
                  outcome_label="Class", outcome_type="Binary", instance_label=None, sig_cutoff=0.05,
                  show_plots=False,
-                 run_cluster=False, queue='defq', reserved_memory=4):
+                 run_cluster=False, queue='defq', reserved_memory=4, walltime=24):
         """
         Args:
             output_path: path to output directory
@@ -55,6 +55,7 @@ class CompareRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
 
         # Argument checks
         if not os.path.exists(self.output_path):

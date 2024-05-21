@@ -21,7 +21,7 @@ class StatsRunner:
                  scoring_metric='balanced_accuracy',
                  top_features=40, sig_cutoff=0.05, metric_weight='balanced_accuracy', scale_data=True,
                  exclude_plots=None, show_plots=False,
-                 run_cluster=False, queue='defq', reserved_memory=4):
+                 run_cluster=False, queue='defq', reserved_memory=4, walltime=24):
         """
         Args:
             output_path: path to output directory
@@ -81,6 +81,7 @@ class StatsRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
 
         # Argument checks
         if not os.path.exists(self.output_path):
@@ -138,7 +139,7 @@ class StatsRunner:
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster,
-                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
+                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory, self.walltime)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):

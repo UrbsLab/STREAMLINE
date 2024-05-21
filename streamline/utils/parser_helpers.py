@@ -388,6 +388,8 @@ def parse_logistic(argv, params_dict=None):
                         help='reserved memory for the job (in Gigabytes)', )
     parser.add_argument('--queue', dest='queue', type=str,
                         help='default partition queue', )
+    parser.add_argument('--walltime', dest='walltime', type=int,
+                        help='max runtime for job', )
     return update_dict_from_parser(argv, parser, params_dict)
 
 

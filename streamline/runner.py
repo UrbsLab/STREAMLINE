@@ -227,7 +227,8 @@ class STREAMLINERunner:
                                     random_state=self.params['random_state'],
                                     run_cluster=self.params['run_cluster'],
                                     queue=self.params['queue'],
-                                    reserved_memory=self.params['reserved_memory'])
+                                    reserved_memory=self.params['reserved_memory'],
+                                    walltime=self.params['walltime'])
 
             self.run_phase(eda, 1)
             self.params['outcome_type'] = eda.outcome_type
@@ -241,7 +242,8 @@ class STREAMLINERunner:
                                 instance_label=self.params['instance_label'], random_state=self.params['random_state'],
                                 run_cluster=self.params['run_cluster'],
                                 queue=self.params['queue'],
-                                reserved_memory=self.params['reserved_memory'])
+                                reserved_memory=self.params['reserved_memory'],
+                                walltime=self.params['walltime'])
             self.run_phase(dpr, 2)
 
         if self.params['do_feat_imp']:
@@ -255,7 +257,8 @@ class STREAMLINERunner:
                                             random_state=self.params['random_state'], n_jobs=self.params['n_jobs'],
                                             run_cluster=self.params['run_cluster'],
                                             queue=self.params['queue'],
-                                            reserved_memory=self.params['reserved_memory'])
+                                            reserved_memory=self.params['reserved_memory'],
+                                            walltime=self.params['walltime'])
             self.run_phase(f_imp, 3)
 
         if self.params['do_feat_sel']:
@@ -271,7 +274,8 @@ class STREAMLINERunner:
                                         n_jobs=self.params['n_jobs'],
                                         run_cluster=self.params['run_cluster'],
                                         queue=self.params['queue'],
-                                        reserved_memory=self.params['reserved_memory'])
+                                        reserved_memory=self.params['reserved_memory'],
+                                        walltime=self.params['walltime'])
             self.run_phase(f_sel, 4)
 
         if self.params['do_model']:
@@ -292,7 +296,8 @@ class STREAMLINERunner:
                                         random_state=self.params['random_state'], n_jobs=self.params['n_jobs'],
                                         run_cluster=self.params['run_cluster'],
                                         queue=self.params['queue'],
-                                        reserved_memory=self.params['reserved_memory'])
+                                        reserved_memory=self.params['reserved_memory'],
+                                        walltime=self.params['walltime'])
 
             self.run_phase(model, 5)
 
@@ -308,7 +313,8 @@ class STREAMLINERunner:
                                 exclude_plots=self.params['exclude_plots'], show_plots=False,
                                 run_cluster=self.params['run_cluster'],
                                 queue=self.params['queue'],
-                                reserved_memory=self.params['reserved_memory'])
+                                reserved_memory=self.params['reserved_memory'],
+                                walltime=self.params['walltime'])
             self.run_phase(stats, 6)
 
         if self.params['do_compare_dataset']:
@@ -320,7 +326,8 @@ class STREAMLINERunner:
                                         show_plots=False,
                                         run_cluster=self.params['run_cluster'],
                                         queue=self.params['queue'],
-                                        reserved_memory=self.params['reserved_memory'])
+                                        reserved_memory=self.params['reserved_memory'], 
+                                        walltime=self.params['walltime'])
                 self.run_phase(compare, 7)
 
         if self.params['do_report']:
@@ -329,7 +336,8 @@ class STREAMLINERunner:
                                 experiment_path=None,
                                 run_cluster=self.params['run_cluster'],
                                 queue=self.params['queue'],
-                                reserved_memory=self.params['reserved_memory'])
+                                reserved_memory=self.params['reserved_memory'],
+                                walltime=self.params['walltime'])
             self.run_phase(report, 8)
 
         if self.params['do_replicate']:
@@ -341,7 +349,8 @@ class STREAMLINERunner:
                                         exclude_plots=self.params['exclude_rep_plots'],
                                         run_cluster=self.params['run_cluster'],
                                         queue=self.params['queue'],
-                                        reserved_memory=self.params['reserved_memory'])
+                                        reserved_memory=self.params['reserved_memory'], 
+                                        walltime=self.params['walltime'])
             self.run_phase(replicate, 9)
 
         if self.params['do_rep_report']:
@@ -352,7 +361,8 @@ class STREAMLINERunner:
                                 dataset_for_rep=self.params['dataset_for_rep'],
                                 run_cluster=self.params['run_cluster'],
                                 queue=self.params['queue'],
-                                reserved_memory=self.params['reserved_memory'])
+                                reserved_memory=self.params['reserved_memory'],
+                                walltime=self.params['walltime'])
             self.run_phase(report, 10)
 
         if self.params['do_cleanup']:

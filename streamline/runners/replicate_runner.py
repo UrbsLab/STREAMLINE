@@ -20,7 +20,7 @@ class ReplicationRunner:
 
     def __init__(self, rep_data_path, dataset_for_rep, output_path, experiment_name,
                  outcome_label=None, instance_label=None, match_label=None,
-                 exclude_plots=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
+                 exclude_plots=None, run_cluster=False, queue='defq', reserved_memory=4, walltime=24, show_plots=False):
         """
 
         Args:
@@ -104,6 +104,7 @@ class ReplicationRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
 
         # Argument checks
         if not os.path.exists(self.output_path):

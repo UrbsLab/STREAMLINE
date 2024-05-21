@@ -50,7 +50,7 @@ class DataProcessRunner:
                  ignore_features=None, categorical_features=None, quantitative_features=None, top_features=20,
                  categorical_cutoff=10, sig_cutoff=0.05, featureeng_missingness=0.5, cleaning_missingness=0.5,
                  correlation_removal_threshold=1.0,
-                 random_state=None, run_cluster=False, queue='defq', reserved_memory=4, show_plots=False):
+                 random_state=None, run_cluster=False, queue='defq', reserved_memory=4, walltime=24, show_plots=False):
         """
         Initializer for a runner class for Exploratory Data Analysis Jobs
 
@@ -136,6 +136,7 @@ class DataProcessRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
         self.show_plots = show_plots
         self.random_state = random_state
         self.sig_cutoff = sig_cutoff
@@ -207,7 +208,7 @@ class DataProcessRunner:
 
         if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster,
-                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
+                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory, self.walltime)
             dask.compute([dask.delayed(
                 parallel_eda_call
             )(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list])

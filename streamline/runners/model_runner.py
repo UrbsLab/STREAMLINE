@@ -40,7 +40,7 @@ class ModelExperimentRunner:
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
                  lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None,
                  run_cluster=False,
-                 queue='defq', reserved_memory=4):
+                 queue='defq', reserved_memory=4, walltime=24):
 
         """
         Args:
@@ -163,6 +163,7 @@ class ModelExperimentRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
 
         # Argument checks
         if not os.path.exists(self.output_path):
@@ -294,7 +295,7 @@ class ModelExperimentRunner:
                                          ) for job_obj, model in tqdm(job_list))
         if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster,
-                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
+                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory, self.walltime)
             dask.compute([dask.delayed(model_runner_fn)(job_obj, model
                                                         ) for job_obj, model in job_list])
 

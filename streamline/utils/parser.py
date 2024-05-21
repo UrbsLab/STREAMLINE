@@ -52,7 +52,8 @@ def process_params(params):
         params['run_parallel'] = False
     if params['run_parallel'] == "True":
         params['run_parallel'] = True
-
+    if type(params['walltime']) == str:
+        params['walltime'] = int(params['walltime'])
     return params
 
 

@@ -17,7 +17,7 @@ class ImputationRunner:
 
     def __init__(self, output_path, experiment_name, scale_data=True, impute_data=True,
                  multi_impute=True, overwrite_cv=True, outcome_label="Class", instance_label=None, random_state=None,
-                 run_cluster=False, queue='defq', reserved_memory=4):
+                 run_cluster=False, queue='defq', reserved_memory=4, walltime=24):
         """
 
         Args:
@@ -41,6 +41,7 @@ class ImputationRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
 
         # Argument checks-------------------------------------------------------------
         if not os.path.exists(self.output_path):
@@ -97,7 +98,7 @@ class ImputationRunner:
             Parallel(n_jobs=num_cores)(delayed(runner_fn)(job_obj) for job_obj in job_list)
         if self.run_cluster and "Old" not in self.run_cluster:
             get_cluster(self.run_cluster,
-                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
+                        self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory, self.walltime)
             dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in job_list])
 
     def save_metadata(self):

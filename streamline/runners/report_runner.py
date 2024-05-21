@@ -4,7 +4,7 @@ import time
 import dask
 from pathlib import Path
 from joblib import Parallel, delayed
-from streamline.postanalysis.gererate_report import ReportJob
+from streamline.postanalysis.generate_report import ReportJob
 from streamline.utils.runners import runner_fn
 from streamline.utils.cluster import get_cluster
 
@@ -16,7 +16,7 @@ class ReportRunner:
 
     def __init__(self, output_path=None, experiment_name=None, experiment_path=None,
                  training=True, rep_data_path=None, dataset_for_rep=None,
-                 run_cluster=False, queue='defq', reserved_memory=4):
+                 run_cluster=False, queue='defq', reserved_memory=4, walltime=24):
         """
         Args:
             output_path: path to output directory
@@ -46,6 +46,7 @@ class ReportRunner:
         self.run_cluster = run_cluster
         self.queue = queue
         self.reserved_memory = reserved_memory
+        self.walltime = walltime
         self.algorithms = None
         self.get_algorithms()
 
