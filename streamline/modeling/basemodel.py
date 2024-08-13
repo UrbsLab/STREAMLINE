@@ -88,6 +88,7 @@ class BaseModel:
 
         if not self.is_single:
             optuna.logging.set_verbosity(optuna.logging.WARNING)
+            logging.info("Running Optuna Hyperparameter Optimization")
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
             if self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
                 pos_inst = sum(y_train)
@@ -124,6 +125,8 @@ class BaseModel:
             self.params = best_trial.params
             self.model = copy.deepcopy(self.model).set_params(**best_trial.params)
         else:
+            logging.info("Only one set of hyperparameters")
+            logging.info("Skipping Optuna Hyperparameter Optimization")
             self.params = copy.deepcopy(self.param_grid)
             for key, value in self.param_grid.items():
                 self.params[key] = value[0]
