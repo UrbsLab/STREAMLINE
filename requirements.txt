@@ -1,5 +1,5 @@
 matplotlib
-numpy
+numpy==1.26.4
 optuna
 sqlalchemy<2.0
 plotly>=4.0.0
