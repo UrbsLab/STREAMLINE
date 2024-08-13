@@ -90,7 +90,7 @@ class ExSTraCSClassifier(BaseModel, ABC):
             self.param_grid['nu'] = [nu, ]
         if len(self.param_grid['learning_iterations']) == 1 and len(self.param_grid['N']) == 1 and \
             len(self.param_grid['nu']) == 1:
-            self.param_grid['rule_compaction'] = [None, ]
+            self.param_grid['rule_compaction'] = ['QRF', ]
         self.param_grid['expert_knowledge'] = expert_knowledge
         self.param_grid['random_state'] = [random_state, ]
         self.small_name = "ExSTraCS"
