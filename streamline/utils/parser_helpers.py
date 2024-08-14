@@ -293,8 +293,8 @@ def parse_model(argv, params_dict=None):
                                                                             'for LCS algorithms', default=1200)
     parser.add_argument('--rc', dest='lcs_rc', type=str,
                         help='do ExSTraCS rule compaction', default='QRF')
-    parser.add_argument('--ek', dest='lcs_ek', type=str,
-                        help='use MS feature importance as expert knowledge in ExSTraCS', default='QRF')
+    parser.add_argument('--ek', dest='lcs_ek', type=str2bool, nargs='?',
+                        help='use MS feature importance as expert knowledge in ExSTraCS', default=True)
     return update_dict_from_parser(argv, parser, params_dict)
 
 

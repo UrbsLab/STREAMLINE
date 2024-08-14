@@ -82,7 +82,7 @@ class BaseModel:
         self.x_train = x_train
         self.y_train = y_train
         for key, value in self.param_grid.items():
-            if len(value) > 1 and key != 'expert_knowledge':
+            if key != 'expert_knowledge' and len(value) > 1:
                 self.is_single = False
                 break
 

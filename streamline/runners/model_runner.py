@@ -183,7 +183,7 @@ class ModelExperimentRunner:
                         self.submit_lsf_cluster_job(full_path, abbrev, cv_count)
                         continue
 
-                    # logging.info("Running Model "+str(algorithm))
+                    # print("Running Model "+str(algorithm))
                     if algorithm not in ['eLCS', 'XCS', 'ExSTraCS']:
                         model = model_str_to_obj(algorithm)(cv_folds=3,
                                                             scoring_metric=self.scoring_metric,
@@ -192,7 +192,7 @@ class ModelExperimentRunner:
                                                             cv=None, n_jobs=self.n_jobs)
                     else:
                         if algorithm == 'ExSTraCS':
-                            if self.lcs_ek and self.lcs_ek != "None":
+                            if self.lcs_ek and self.lcs_ek != "False":
                                 expert_knowledge = get_fi_for_ExSTraCS(self.output_path, self.experiment_name,
                                                                     dataset_directory_path,
                                                                     self.class_label, self.instance_label, cv_count,

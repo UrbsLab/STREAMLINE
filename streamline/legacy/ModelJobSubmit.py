@@ -12,6 +12,7 @@ from streamline.modeling.utils import get_fi_for_ExSTraCS
 
 
 def run_cluster(argv):
+    print(argv)
     full_path = argv[1]
     output_path = argv[2]
     experiment_name = argv[3]
@@ -32,8 +33,9 @@ def run_cluster(argv):
     lcs_iterations = int(argv[18])
     lcs_n = int(argv[19])
     lcs_nu = int(argv[20])
-    lcs_ek = eval(argv[21])
-    lcs_rc = None if argv[22] == "None" else argv[22]
+    lcs_ek = False if argv[21] == "None" else eval(argv[21])
+    lcs_rc = None if argv[22] == "None" else str(argv[22])
+    print("lcs_ek:", lcs_ek, "; lcs_rc:", lcs_rc)
 
     file = open(output_path + '/' + experiment_name + '/' + "metadata.pickle", 'rb')
     metadata = pickle.load(file)
@@ -54,7 +56,7 @@ def run_cluster(argv):
                                             cv=None, n_jobs=n_jobs)
     else:
         if algorithm == 'ExSTraCS':
-            if lcs_ek and lcs_ek == "None":
+            if lcs_ek:
                 expert_knowledge = get_fi_for_ExSTraCS(output_path, experiment_name,
                                                     dataset_directory_path,
                                                     class_label, instance_label, cv_count,
