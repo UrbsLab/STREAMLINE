@@ -238,7 +238,7 @@ class ModelExperimentRunner:
                         job_obj.run(model)
         if run_parallel and run_parallel != "False" and not self.run_cluster:
             # run_jobs(job_list)
-            Parallel(n_jobs=num_cores)(
+            Parallel(n_jobs=num_cores, prefer="threads")(
                 delayed(model_runner_fn)(job_obj, model
                                          ) for job_obj, model in tqdm(job_list))
         if self.run_cluster and "Old" not in self.run_cluster:
