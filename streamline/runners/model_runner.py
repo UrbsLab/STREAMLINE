@@ -28,7 +28,7 @@ class ModelExperimentRunner:
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize',
                  training_subsample=0, use_uniform_fi=True, n_trials=200,
                  timeout=900, save_plots=False, do_lcs_sweep=False, lcs_nu=1, lcs_n=2000, lcs_iterations=200000,
-                 lcs_timeout=1200, resubmit=False, random_state=None, n_jobs=None,
+                 lcs_timeout=1200, lcs_ek=True, lcs_rc='QRF', resubmit=False, random_state=None, n_jobs=None,
                  run_cluster=False,
                  queue='defq', reserved_memory=4):
 
@@ -105,6 +105,8 @@ class ModelExperimentRunner:
         self.lcs_n = lcs_n
         self.lcs_iterations = lcs_iterations
         self.lcs_timeout = lcs_timeout
+        self.lcs_ek = lcs_ek
+        self.lcs_rc = lcs_rc
 
         self.resubmit = resubmit
         self.random_state = random_state
@@ -190,17 +192,21 @@ class ModelExperimentRunner:
                                                             cv=None, n_jobs=self.n_jobs)
                     else:
                         if algorithm == 'ExSTraCS':
-                            expert_knowledge = get_fi_for_ExSTraCS(self.output_path, self.experiment_name,
-                                                                   dataset_directory_path,
-                                                                   self.class_label, self.instance_label, cv_count,
-                                                                   filter_poor_features)
+                            if self.lcs_ek and self.lcs_ek != "None":
+                                expert_knowledge = get_fi_for_ExSTraCS(self.output_path, self.experiment_name,
+                                                                    dataset_directory_path,
+                                                                    self.class_label, self.instance_label, cv_count,
+                                                                    filter_poor_features)
+                            else:
+                                expert_knowledge = None
                             if self.do_lcs_sweep:
                                 model = model_str_to_obj(algorithm)(cv_folds=3,
                                                                     scoring_metric=self.scoring_metric,
                                                                     metric_direction=self.metric_direction,
                                                                     random_state=self.random_state,
                                                                     cv=None, n_jobs=self.n_jobs,
-                                                                    expert_knowledge=copy.deepcopy(expert_knowledge))
+                                                                    expert_knowledge=copy.deepcopy(expert_knowledge),
+                                                                    lcs_rc=self.lcs_rc)
                             else:
                                 model = model_str_to_obj(algorithm)(cv_folds=3,
                                                                     scoring_metric=self.scoring_metric,
@@ -209,7 +215,8 @@ class ModelExperimentRunner:
                                                                     cv=None, n_jobs=self.n_jobs,
                                                                     iterations=self.lcs_iterations,
                                                                     N=self.lcs_n, nu=self.lcs_nu,
-                                                                    expert_knowledge=copy.deepcopy(expert_knowledge))
+                                                                    expert_knowledge=copy.deepcopy(expert_knowledge),
+                                                                    lcs_rc=self.lcs_rc)
                         else:
                             if self.do_lcs_sweep:
                                 model = model_str_to_obj(algorithm)(cv_folds=3,
@@ -305,7 +312,7 @@ class ModelExperimentRunner:
                           self.n_trials, self.timeout, self.training_subsample,
                           self.uniform_fi, self.save_plots, self.random_state]
         cluster_params += [algorithm, self.n_jobs, self.do_lcs_sweep,
-                           self.lcs_iterations, self.lcs_n, self.lcs_nu]
+                           self.lcs_iterations, self.lcs_n, self.lcs_nu, self.lcs_ek, self.lcs_rc]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 

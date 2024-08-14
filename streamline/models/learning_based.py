@@ -79,7 +79,7 @@ class ExSTraCSClassifier(BaseModel, ABC):
 
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
-                 iterations=None, N=None, nu=None, expert_knowledge=None):
+                 iterations=None, N=None, nu=None, expert_knowledge=None, lcs_rc='QRF'):
         super().__init__(ExSTraCS, "ExSTraCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = get_parameters(self.model_name)
         if iterations:
@@ -90,7 +90,7 @@ class ExSTraCSClassifier(BaseModel, ABC):
             self.param_grid['nu'] = [nu, ]
         if len(self.param_grid['learning_iterations']) == 1 and len(self.param_grid['N']) == 1 and \
             len(self.param_grid['nu']) == 1:
-            self.param_grid['rule_compaction'] = ['QRF', ]
+            self.param_grid['rule_compaction'] = [lcs_rc, ]
         logging.info("Printing Rule Compaction Parameters")
         logging.info(str(self.param_grid['rule_compaction']))
         self.param_grid['expert_knowledge'] = expert_knowledge

@@ -291,6 +291,10 @@ def parse_model(argv, params_dict=None):
                         default=2000)
     parser.add_argument('--lcs-timeout', dest='lcs_timeout', type=int, help='seconds until hyper parameter sweep stops '
                                                                             'for LCS algorithms', default=1200)
+    parser.add_argument('--rc', dest='lcs_rc', type=str,
+                        help='do ExSTraCS rule compaction', default='QRF')
+    parser.add_argument('--ek', dest='lcs_ek', type=str,
+                        help='use MS feature importance as expert knowledge in ExSTraCS', default='QRF')
     return update_dict_from_parser(argv, parser, params_dict)
 
 
