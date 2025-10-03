@@ -164,11 +164,6 @@ class P1Runner:
             ds_out_dir = os.path.join(self.output_path, self.experiment_name, data_name)
             os.makedirs(ds_out_dir, exist_ok=True)
 
-            # Bash submission modes (shell scripts)
-            if self.run_cluster in ("BashSLURM", "BashLSF"):
-                self._submit_bash_job(dataset_path)
-                continue
-
             # Load DataFrame
             if file_extension == 'csv':
                 df = pd.read_csv(dataset_path, na_values='NA', sep=',')
@@ -183,6 +178,10 @@ class P1Runner:
                 nunique = df[self.outcome_label].nunique()
                 self.outcome_type = "Binary" if nunique == 2 else ("Multiclass" if 2 < nunique <= self.categorical_cutoff else "Continuous")
                 self.save_metadata()
+
+            if self.run_cluster in ("BashSLURM", "BashLSF"):
+                self._submit_bash_job(dataset_path)
+                continue
 
             dp = self._build_dataprocess(df, data_name, cv_path=self.cv_input_root)
             job_obj_list.append(dp)
@@ -222,6 +221,10 @@ class P1Runner:
                     nunique = df[self.outcome_label].nunique()
                     self.outcome_type = "Binary" if nunique == 2 else ("Multiclass" if 2 < nunique <= self.categorical_cutoff else "Continuous")
                     self.save_metadata()
+
+                if self.run_cluster in ("BashSLURM", "BashLSF"):
+                    self._submit_bash_job(dataset_path)
+                    continue
 
                 dp = self._build_dataprocess(df, ds_name, cv_path=ds_dir, force_import_only=True)
                 job_obj_list.append(dp)

@@ -3,9 +3,9 @@ import argparse
 import json
 from typing import Optional, Dict, Any
 
-from .runner import P2Runner
-from .loader import list_imputers
-from .scale_loader import list_scalers
+from streamline.p2_impute_scale.p2_runner import P2Runner
+from streamline.p2_impute_scale.utils.impute_loader import list_imputers
+from streamline.p2_impute_scale.utils.scale_loader import list_scalers
 
 
 def _maybe_json(v: Optional[str]) -> Dict[str, Any]:
@@ -104,16 +104,16 @@ def main():
 
 if __name__ == "__main__":
     # Inspect dynamic components
-    # python -m streamline.phases.p2_impute_scale.cli --output_path ./out --experiment_name MyExp --list-imputers
-    # python -m streamline.phases.p2_impute_scale.cli --output_path ./out --experiment_name MyExp --list-scalers
+    # python -m streamline.p2_impute_scale.p2_cli --output_path ./out --experiment_name MyExp --list-imputers
+    # python -m streamline.p2_impute_scale.p2_cli --output_path ./out --experiment_name MyExp --list-scalers
 
     # # Serial run (use defaults from metadata.pickle)
-    # python -m streamline.phases.p2_impute_scale.cli \
+    # python -m streamline.p2_impute_scale.p1_cli \
     # --output_path ./out \
     # --experiment_name MyExp
 
     # # Force specific imputer & scaler (with params)
-    # python -m streamline.phases.p2_impute_scale.cli \
+    # python -m streamline.p2_impute_scale.p1_cli \
     # --output_path ./out \
     # --experiment_name MyExp \
     # --imputer_id knn \

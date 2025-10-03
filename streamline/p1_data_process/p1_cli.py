@@ -139,13 +139,13 @@ def main():
 
 if __name__ == "__main__":
     # # Serial
-    # python -m streamline.phases.p1_data_process.cli \
+    # python -m streamline.p1_data_process.p1_cli \
     # --data_path ./data \
     # --output_path ./out \
     # --experiment_name MyExp
 
     # # Local Dask with 1 worker per core
-    # python -m streamline.phases.p1_data_process.cli \
+    # python -m streamline.p1_data_process.p1_cli \
     # --data_path ./data \
     # --output_path ./out \
     # --experiment_name MyExp \
