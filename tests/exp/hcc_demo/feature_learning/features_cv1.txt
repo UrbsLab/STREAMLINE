@@ -1,2 +1,0 @@
-FL_PCA_PC1
-FL_PCA_PC2
