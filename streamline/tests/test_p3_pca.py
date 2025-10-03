@@ -34,7 +34,6 @@ def test_p3_pca_writes_outputs(tmp_path):
     ).run()
 
     train = pd.read_csv(tr); test = pd.read_csv(te)
-    logging.warn((tr, te))
     # original + 2 engineered features
     assert "FL_PCA_PC1" in train.columns and "FL_PCA_PC2" in train.columns
     assert "FL_PCA_PC1" in test.columns and "FL_PCA_PC2" in test.columns

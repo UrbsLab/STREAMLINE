@@ -1,0 +1,26 @@
+{
+  "dataset": "hcc_demo",
+  "cv": 1,
+  "namespace": "FL_PCA",
+  "keep_original_features": true,
+  "learner": {
+    "id": "pca",
+    "params": {
+      "n_components": 2,
+      "random_state": 0,
+      "svd_solver": "auto"
+    }
+  },
+  "input_feature_count": 2,
+  "engineered_feature_count": 2,
+  "final_feature_count": 4,
+  "train_shape": [
+    4,
+    5
+  ],
+  "test_shape": [
+    2,
+    5
+  ],
+  "random_state": 0
+}
