@@ -1,77 +1,56 @@
-import os
-from skrebate import TURF
-from skrebate import MultiSURF as MultiSURFClass
+# streamline/phases/p4_feature_importance/registry/multisurf.py
+from __future__ import annotations
+from typing import Dict, Any, List, Optional
+import pandas as pd
+import numpy as np
 
-from streamline.featurefns.feature_algorithm import FeatureAlgorithm
+class MultiSURF:
+    id = "multisurf"
+    def __init__(self, n_neighbors: Optional[int] = None, random_state: int | None = None, **kwargs):
+        self.n_neighbors = n_neighbors
+        self.random_state = random_state
+        self.kwargs = kwargs
+        self._cols: List[str] = []
+        self._scores: Dict[str, float] = {}
+        self._impl = None
 
+    def fit(self, X: pd.DataFrame, y: pd.Series):
+        self._cols = X.columns.tolist()
+        try:
+            from skrebate import MultiSURF as _MultiSURF
+        except Exception as e:
+            raise ImportError("MultiSURF requires the 'skrebate' package. Install it to use this importance.") from e
+        self._impl = _MultiSURF(n_neighbors=self.n_neighbors, random_state=self.random_state, **self.kwargs).fit(X.values, y.values)
+        # skrebate puts scores in feature_importances_ on the fitted estimator
+        imp = getattr(self._impl, "feature_importances_", None)
+        if imp is None:
+            imp = np.zeros(len(self._cols))
+        self._scores = {c: float(s) for c, s in zip(self._cols, imp)}
+        return self
 
-class MultiSURF(FeatureAlgorithm):
-    """
-    Initializer for MultiSURF
-    """
-    model_name = "MultiSURF"
-    small_name = "MS"
-    path_name = "multisurf"
+    def _ranked(self) -> List[str]:
+        return sorted(self._cols, key=lambda c: self._scores.get(c,0.0), reverse=True)
 
-    def __init__(self, cv_train_path, experiment_path, outcome_label, instance_label=None, instance_subset=2000,
-                 params=(('use_turf', True), ('turf_pct', True)), random_state=None, n_jobs=None):
-        """
+    def get_support_mask(self, *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> List[bool]:
+        if top_k is not None:
+            keep = set(self._ranked()[:int(top_k)])
+            return [c in keep for c in self._cols]
+        if threshold is not None:
+            return [self._scores.get(c,0.0) >= float(threshold) for c in self._cols]
+        return [True]*len(self._cols)
 
-        Args:
-            cv_train_path: path for the cross-validation dataset created
-            experiment_path:
-            outcome_label:
-            instance_label:
-            instance_subset:
-            random_state:
-            n_jobs:
+    def get_support_names(self, cols: List[str], *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> List[str]:
+        mask = self.get_support_mask(top_k=top_k, threshold=threshold)
+        return [c for c, m in zip(self._cols, mask) if m]
 
-        """
-        super().__init__(cv_train_path, experiment_path, outcome_label, instance_label=instance_label,
-                         instance_subset=instance_subset,
-                         random_state=random_state, n_jobs=n_jobs)
-        self.cv_count = None
-        params = dict(params)
-        self.use_turf = params['use_turf']
-        self.turf_pct = params['turf_pct']
-        self.n_jobs = n_jobs
+    def transform(self, X: pd.DataFrame, *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> pd.DataFrame:
+        names = self.get_support_names(self._cols, top_k=top_k, threshold=threshold)
+        return X.loc[:, names]
 
-    def run_algorithm(self):
-        """
-        Run multiSURF (a Relief-based feature importance algorithm able to detect both univariate
-        and interaction effects) and return scores as well as file path/name information
-        """
-        # Format instance sampled dataset (prevents MultiSURF from running a very long time in large instance spaces)
+    def get_scores(self) -> Dict[str, float]:
+        return dict(self._scores)
 
-        # New code
-        headers = list(self.dataset.data.columns)
-        if self.instance_label:
-            headers.remove(self.instance_label)
-        headers.remove(self.outcome_label)
-        data_features = self.dataset.data[headers + [self.outcome_label, ]]
-        n = data_features.shape[0]
-        if self.instance_subset is not None:
-            n = min(data_features.shape[0], self.instance_subset)
-        data_features = data_features.sample(n)
-        data_phenotypes = data_features[self.outcome_label]
-        data_features = data_features.drop(self.outcome_label, axis=1)
-
-        # Run MultiSURF
-        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + self.path_name + "/"):
-            os.makedirs(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + self.path_name + "/")
-        output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + self.path_name + "/" \
-                      + self.path_name + "_scores_cv_" + str(self.cv_count) + '.csv'
-
-        if self.n_jobs is None:
-            self.n_jobs = 1
-
-        if self.use_turf:
-            try:
-                clf = TURF(MultiSURFClass(n_jobs=self.n_jobs), pct=self.turf_pct).fit(data_features.values,
-                                                                                      data_phenotypes.values)
-            except ModuleNotFoundError:
-                raise Exception("sk-rebate version error")
-        else:
-            clf = MultiSURFClass(n_jobs=self.n_jobs).fit(data_features.values, data_phenotypes.values)
-        scores = clf.feature_importances_
-        return scores, output_path
+    def get_params(self) -> Dict[str, Any]:
+        p = {"n_neighbors": self.n_neighbors, "random_state": self.random_state}
+        p.update(self.kwargs or {})
+        return p

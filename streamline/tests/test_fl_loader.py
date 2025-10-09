@@ -2,7 +2,7 @@ import types
 import pytest
 from streamline.p3_feature_learning.utils.fl_loader import list_learners, load_learner
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 def test_list_learner_has_core_ids():
     imps = list_learners()

@@ -1,95 +1,148 @@
-import os
-import csv
-import time
-import random
-import pickle
-import logging
+# streamline/phases/p4_feature_importance/job.py
+from __future__ import annotations
+import os, time, json, pickle, random, logging
+from typing import Optional, Dict, Any, Tuple
 import numpy as np
-from streamline.utils.job import Job
-from streamline.utils.dataset import Dataset
-from streamline.featurefns.utils import LABELS
-from streamline.featurefns.utils import algorithm_str_to_obj
+import pandas as pd
+from streamline.p4_feature_importance.utils.fi_loader import load_importance
 
-
-class FeatureImportance(Job):
+class FeatureImportance:
     """
-    Initializer for Feature Importance Job
+    Phase 4: Feature Importance using MultiSURF / MultiSURF* / Mutual Information.
     """
-
-    def __init__(self, cv_train_path, experiment_path, outcome_label, instance_label=None, instance_subset=2000,
-                 algorithm="MS", use_turf=True, turf_pct=True, random_state=None, n_jobs=None):
-        """
-
-        Args:
-            cv_train_path: path for the cross-validation dataset created
-            experiment_path:
-            outcome_label:
-            instance_label:
-            instance_subset:
-            algorithm:
-            use_turf:
-            turf_pct:
-            random_state:
-            n_jobs:
-
-        """
-        super().__init__()
-        self.name = algorithm
-        params = (('use_turf', use_turf), ('turf_pct', turf_pct))
-        if not (self.name in LABELS):
-            raise Exception("Feature importance algorithm not found")
-        self.algorithm = algorithm_str_to_obj(algorithm)(cv_train_path, experiment_path, outcome_label,
-                                                         instance_label=instance_label, instance_subset=instance_subset,
-                                                         params=params, random_state=random_state, n_jobs=n_jobs)
+    def __init__(
+        self,
+        cv_train_path: str,
+        cv_test_path: str,
+        experiment_path: str,
+        *,
+        importance_id: str = "mutualinformation",
+        importance_params: "Dict[str, Any] | None" = None,
+        top_k: "int | None" = None,
+        threshold: "float | None" = None,
+        keep_original_features: bool = False,
+        overwrite_cv: bool = True,
+        outcome_label: str = "Class",
+        outcome_type: Optional[str] = None,      # "Binary" | "Multiclass" | "Continuous" (for MI)
+        instance_label: Optional[str] = None,
+        random_state: Optional[int] = None,
+    ):
+        self.cv_train_path = cv_train_path
+        self.cv_test_path = cv_test_path
+        self.experiment_path = experiment_path
+        self.importance_id = importance_id
+        self.importance_params = importance_params or {}
+        self.top_k = top_k
+        self.threshold = threshold
+        self.keep_original_features = keep_original_features
+        self.overwrite_cv = overwrite_cv
+        self.outcome_label = outcome_label
+        self.outcome_type = outcome_type
+        self.instance_label = instance_label
         self.random_state = random_state
 
-    def run(self):
-        """
-        Run all elements of the feature importance evaluation:
-        applies either mutual information and multisurf and saves a sorted dictionary
-        of features with associated scores
-
-        """
-
+        self.dataset_name: Optional[str] = None
+        self.cv_count: Optional[str] = None
         self.job_start_time = time.time()
-        random.seed(self.random_state)
-        np.random.seed(self.random_state)
-        self.algorithm.prepare_data()
-        logging.info('Prepared Train and Test for: ' + str(self.algorithm.dataset.name)
-                     + "_CV_" + str(self.algorithm.cv_count))
 
-        scores, output_path = self.algorithm.run_algorithm()
+    def run(self):
+        random.seed(self.random_state); np.random.seed(self.random_state)
 
-        logging.info('Sort and pickle feature importance scores...')
-        header = self.algorithm.dataset.data.columns.values.tolist()
-        header.remove(self.algorithm.outcome_label)
-        if self.algorithm.instance_label is not None:
-            header.remove(self.algorithm.instance_label)
-        # Save sorted feature importance scores:
-        score_dict, score_sorted_features = self.algorithm.sort_save_fi_scores(scores, header,
-                                                                               self.algorithm.path_name)
-        # Pickle feature importance information to be used in Phase 4 (feature selection)
-        self.algorithm.pickle_scores(self.algorithm.path_name, scores, score_dict, score_sorted_features)
-        # Save phase runtime
-        self.save_runtime(self.algorithm.path_name)
-        # Print phase completion
-        logging.info(self.algorithm.dataset.name + " CV " + str(self.algorithm.cv_count) + " phase 3 "
-                     + self.algorithm.model_name + " evaluation complete")
-        job_file = open(
-            self.algorithm.experiment_path + '/jobsCompleted/job_' + self.algorithm.path_name + '_'
-            + self.algorithm.dataset.name + '_' + str(self.algorithm.cv_count) + '.txt', 'w')
-        job_file.write('complete')
-        job_file.close()
+        tr, te = self._load_data()
+        y_tr = tr[self.outcome_label]; y_te = te[self.outcome_label]
 
-    def save_runtime(self, output_name):
-        """
-        Save phase runtime
-        Args:
-            output_name: name of the output tag
-        """
-        runtime_file = open(
-            self.algorithm.experiment_path + '/' + self.algorithm.dataset.name
-            + '/runtime/runtime_' + output_name + '_CV_'
-            + str(self.algorithm.cv_count) + '.txt', 'w')
-        runtime_file.write(str(time.time() - self.job_start_time))
-        runtime_file.close()
+        inst_tr = inst_te = None
+        if self.instance_label is not None and self.instance_label in tr.columns:
+            inst_tr = tr[self.instance_label]; inst_te = te[self.instance_label]
+
+        drop_cols = [self.outcome_label] + ([self.instance_label] if self.instance_label in tr.columns else [])
+        Xtr = tr.drop(columns=drop_cols, errors="ignore")
+        Xte = te.drop(columns=drop_cols, errors="ignore")
+
+        # If MI and outcome_type is not given, try metadata default later (runner wires it)
+        params = dict(self.importance_params)
+        if self.importance_id == "mutualinformation" and self.outcome_type and "outcome_type" not in params:
+            params["outcome_type"] = self.outcome_type
+
+        sel = load_importance(self.importance_id, **params).fit(Xtr, y_tr)
+
+        # selected subset
+        Xtr_sel = sel.transform(Xtr, top_k=self.top_k, threshold=self.threshold)
+        Xte_sel = Xte.loc[:, Xtr_sel.columns]  # align columns
+
+        if self.keep_original_features:
+            Xtr_out = pd.concat([Xtr.reset_index(drop=True), Xtr_sel.reset_index(drop=True)], axis=1)
+            Xte_out = pd.concat([Xte.reset_index(drop=True), Xte_sel.reset_index(drop=True)], axis=1)
+        else:
+            Xtr_out, Xte_out = Xtr_sel, Xte_sel
+
+        # reassemble
+        if self.instance_label is None or self.instance_label not in tr.columns:
+            train_out = pd.concat([y_tr.reset_index(drop=True), Xtr_out], axis=1)
+            test_out  = pd.concat([y_te.reset_index(drop=True),  Xte_out], axis=1)
+        else:
+            train_out = pd.concat([y_tr.reset_index(drop=True), inst_tr.reset_index(drop=True), Xtr_out], axis=1)
+            test_out  = pd.concat([y_te.reset_index(drop=True),  inst_te.reset_index(drop=True),  Xte_out], axis=1)
+
+        self._write_cv_files(train_out, test_out)
+        self._write_artifacts(sel, list(Xtr.columns), list(Xtr_out.columns))
+        self._save_runtime()
+        self._complete_flag()
+
+    # ---- helpers ----
+    def _load_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        self.dataset_name = self.cv_train_path.split('/')[-3]
+        self.cv_count = self.cv_train_path.split('/')[-1].split("_")[-2]
+        tr = pd.read_csv(self.cv_train_path, na_values='NA', sep=',')
+        te = pd.read_csv(self.cv_test_path, na_values='NA', sep=',')
+        return tr, te
+
+    def _write_cv_files(self, train: pd.DataFrame, test: pd.DataFrame):
+        if self.overwrite_cv:
+            os.remove(self.cv_train_path); os.remove(self.cv_test_path)
+        else:
+            cvdir = os.path.join(self.experiment_path, self.dataset_name, "CVDatasets")
+            os.rename(self.cv_train_path, os.path.join(cvdir, f"{self.dataset_name}_CVOnly_{self.cv_count}_Train.csv"))
+            os.rename(self.cv_test_path,  os.path.join(cvdir, f"{self.dataset_name}_CVOnly_{self.cv_count}_Test.csv"))
+        train.to_csv(self.cv_train_path, index=False)
+        test.to_csv(self.cv_test_path, index=False)
+
+    def _write_artifacts(self, sel, in_cols, out_cols):
+        base = os.path.join(self.experiment_path, self.dataset_name, "feature_importance")
+        os.makedirs(base, exist_ok=True)
+
+        # rankings/scores
+        scores = sel.get_scores()
+        pd.DataFrame({"feature": list(scores.keys()), "score": list(scores.values())}) \
+            .sort_values("score", ascending=False).to_csv(os.path.join(base, f"scores_cv{self.cv_count}.csv"), index=False)
+
+        with open(os.path.join(base, f"importance_cv{self.cv_count}.pickle"), "wb") as f:
+            pickle.dump({"id": self.importance_id, "params": sel.get_params()}, f)
+
+        with open(os.path.join(base, f"selected_features_cv{self.cv_count}.txt"), "w") as f:
+            f.write("\n".join(out_cols))
+
+        manifest = {
+            "dataset": self.dataset_name,
+            "cv": int(self.cv_count),
+            "importance": {"id": self.importance_id, "params": sel.get_params()},
+            "top_k": self.top_k,
+            "threshold": self.threshold,
+            "keep_original_features": bool(self.keep_original_features),
+            "input_feature_count": len(in_cols),
+            "selected_feature_count": len(out_cols),
+        }
+        with open(os.path.join(base, f"feature_importance_manifest_cv{self.cv_count}.json"), "w") as f:
+            json.dump(manifest, f, indent=2)
+
+    def _save_runtime(self):
+        rt = os.path.join(self.experiment_path, self.dataset_name, "runtime")
+        os.makedirs(rt, exist_ok=True)
+        with open(os.path.join(rt, f"runtime_feature_importance{self.cv_count}.txt"), "w+") as f:
+            f.write(str(time.time() - self.job_start_time))
+
+    def _complete_flag(self):
+        done = os.path.join(self.experiment_path, "jobsCompleted")
+        os.makedirs(done, exist_ok=True)
+        with open(os.path.join(done, f"job_feature_importance_{self.dataset_name}_{self.cv_count}.txt"), "w") as f:
+            f.write("complete")

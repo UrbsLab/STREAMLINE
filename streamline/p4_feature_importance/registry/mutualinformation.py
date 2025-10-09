@@ -1,45 +1,63 @@
-import os
-from sklearn.feature_selection import mutual_info_classif
-from streamline.featurefns.feature_algorithm import FeatureAlgorithm
+# streamline/phases/p4_feature_importance/registry/mutual_information.py
+from __future__ import annotations
+from typing import Dict, Any, List, Optional
+import numpy as np
+import pandas as pd
+from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
 
+class MutualInformation:
+    id = "mutualinformation"
 
-class MutualInformation(FeatureAlgorithm):
-    """
-    Initializer for Feature Importance Job
-    """
-    model_name = "Mutual Information"
-    small_name = "MI"
-    path_name = "mutual_information"
-
-    def __init__(self, cv_train_path, experiment_path, outcome_label, instance_label=None, instance_subset=2000,
-                 params=None, random_state=None, n_jobs=None):
+    def __init__(self, outcome_type: str = "Binary", n_neighbors: int = 3, random_state: int | None = None, **kwargs):
         """
+        outcome_type: "Binary" | "Multiclass" | "Continuous"
+        n_neighbors: for MI estimators
+        """
+        self.outcome_type = outcome_type
+        self.n_neighbors = int(n_neighbors)
+        self.random_state = random_state
+        self.kwargs = kwargs
+        self._cols: List[str] = []
+        self._scores: Dict[str, float] = {}
 
-        Args:
-            cv_train_path: path for the cross-validation dataset created
-            experiment_path:
-            outcome_label:
-            instance_label:
-            instance_subset:
-            random_state:
-            n_jobs:
-        """
-        super().__init__(cv_train_path, experiment_path, outcome_label, instance_label=instance_label,
-                         instance_subset=instance_subset,
-                         random_state=random_state, n_jobs=n_jobs)
-        self.cv_count = None
-        self.params = params
-        self.n_jobs = n_jobs
+    def fit(self, X: pd.DataFrame, y: pd.Series):
+        self._cols = X.columns.tolist()
+        Xn = X.select_dtypes(include=["number"])
+        cols = Xn.columns.tolist()
+        # compute MI only for numeric features; others get score 0
+        if self.outcome_type in ("Binary", "Multiclass"):
+            scores = mutual_info_classif(Xn.values, y.values, n_neighbors=self.n_neighbors, random_state=self.random_state)
+        else:
+            scores = mutual_info_regression(Xn.values, y.values, n_neighbors=self.n_neighbors, random_state=self.random_state)
+        self._scores = {c: float(s) for c, s in zip(cols, scores)}
+        for c in self._cols:
+            self._scores.setdefault(c, 0.0)
+        return self
 
-    def run_algorithm(self):
-        """
-        Run mutual information on target training dataset and return scores as well as file path/name information.
-        """
-        alg_name = self.path_name
-        output_path = self.experiment_path + '/' + self.dataset.name + "/feature_selection/" \
-                      + alg_name + '/' + alg_name + "_scores_cv_" + str(self.cv_count) + '.csv'
-        if not os.path.exists(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/"):
-            os.makedirs(self.experiment_path + '/' + self.dataset.name + "/feature_selection/" + alg_name + "/")
-        scores = mutual_info_classif(self.dataset.feature_only_data(), self.dataset.get_outcome(),
-                                     random_state=self.random_state)
-        return scores, output_path
+    def _ranked(self) -> List[str]:
+        return sorted(self._cols, key=lambda c: self._scores.get(c,0.0), reverse=True)
+
+    def get_support_mask(self, *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> List[bool]:
+        if top_k is not None:
+            keep = set(self._ranked()[:int(top_k)])
+            return [c in keep for c in self._cols]
+        if threshold is not None:
+            return [self._scores.get(c,0.0) >= float(threshold) for c in self._cols]
+        # default: keep all
+        return [True]*len(self._cols)
+
+    def get_support_names(self, cols: List[str], *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> List[str]:
+        mask = self.get_support_mask(top_k=top_k, threshold=threshold)
+        return [c for c, m in zip(self._cols, mask) if m]
+
+    def transform(self, X: pd.DataFrame, *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> pd.DataFrame:
+        names = self.get_support_names(self._cols, top_k=top_k, threshold=threshold)
+        return X.loc[:, names]
+
+    def get_scores(self) -> Dict[str, float]:
+        return dict(self._scores)
+
+    def get_params(self) -> Dict[str, Any]:
+        p = {"outcome_type": self.outcome_type, "n_neighbors": self.n_neighbors, "random_state": self.random_state}
+        p.update(self.kwargs or {})
+        return p
