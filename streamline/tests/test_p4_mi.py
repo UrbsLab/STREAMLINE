@@ -18,15 +18,15 @@ def _seed(tmp: Path, ds="Toy"):
     with open(exp/"metadata.pickle", "wb") as f: pickle.dump({"Outcome Label":"Class","Outcome Type":"Binary"}, f)
     return exp, ds_dir, tr, te
 
-def test_p4_mutual_info_topk():
+def test_p4_mutual_info():
     tmp_path = Path("tests")
     exp, ds_dir, tr, te = _seed(tmp_path)
     FeatureImportance(
         cv_train_path=str(tr),
         cv_test_path=str(te),
         experiment_path=str(exp),
-        importance_id="mutualinformation",
-        importance_params={"outcome_type":"Binary", "n_neighbors":3},
+        model_id="mutualinformation",
+        model_params={"outcome_type":"Binary", "n_neighbors":3},
         top_k=1,
         threshold=None,
         keep_original_features=False,

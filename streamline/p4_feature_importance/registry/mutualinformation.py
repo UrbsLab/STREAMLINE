@@ -1,4 +1,4 @@
-# streamline/phases/p4_feature_importance/registry/mutual_information.py
+# streamline/p4_feature_importance/registry/mutual_information.py
 from __future__ import annotations
 from typing import Dict, Any, List, Optional
 import numpy as np
@@ -7,12 +7,11 @@ from sklearn.feature_selection import mutual_info_classif, mutual_info_regressio
 
 class MutualInformation:
     id = "mutualinformation"
+    model_name = "Mutual Information"
+    small_name = "MI"
+    path_name = "mutualinformation"
 
     def __init__(self, outcome_type: str = "Binary", n_neighbors: int = 3, random_state: int | None = None, **kwargs):
-        """
-        outcome_type: "Binary" | "Multiclass" | "Continuous"
-        n_neighbors: for MI estimators
-        """
         self.outcome_type = outcome_type
         self.n_neighbors = int(n_neighbors)
         self.random_state = random_state
@@ -24,7 +23,6 @@ class MutualInformation:
         self._cols = X.columns.tolist()
         Xn = X.select_dtypes(include=["number"])
         cols = Xn.columns.tolist()
-        # compute MI only for numeric features; others get score 0
         if self.outcome_type in ("Binary", "Multiclass"):
             scores = mutual_info_classif(Xn.values, y.values, n_neighbors=self.n_neighbors, random_state=self.random_state)
         else:
@@ -43,7 +41,6 @@ class MutualInformation:
             return [c in keep for c in self._cols]
         if threshold is not None:
             return [self._scores.get(c,0.0) >= float(threshold) for c in self._cols]
-        # default: keep all
         return [True]*len(self._cols)
 
     def get_support_names(self, cols: List[str], *, top_k: Optional[int] = None, threshold: Optional[float] = None) -> List[str]:

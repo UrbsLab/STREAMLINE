@@ -1,4 +1,4 @@
-# streamline/phases/p4_feature_selection/loader.py
+# streamline/p4_feature_importance/utils/fi_loader.py
 from __future__ import annotations
 import importlib, inspect, os
 from pathlib import Path
@@ -9,7 +9,7 @@ PKG_BASE = "streamline.p4_feature_importance.registry"
 FOLDER = Path(__file__).parent.parent / "registry"
 __CACHE: Optional[Dict[str, Type]] = None
 
-def _is_importance_class(cls: Type) -> bool:
+def _is_selector_class(cls: type) -> bool:
     need = ("fit","transform","get_support_mask","get_support_names","get_scores","get_params")
     return inspect.isclass(cls) and hasattr(cls,"id") and all(hasattr(cls, m) for m in need)
 
@@ -29,7 +29,7 @@ def _discover() -> Dict[str, Type]:
         if not mod: continue
         for name in dir(mod):
             cls = getattr(mod, name)
-            if _is_importance_class(cls) and getattr(cls,"__module__","").startswith(modname):
+            if _is_selector_class(cls) and getattr(cls, "__module__", "").startswith(modname):
                 found[cls.id] = cls
     return found
 
@@ -38,8 +38,8 @@ def list_importances() -> Dict[str, Type]:
     if __CACHE is None: __CACHE = _discover()
     return dict(__CACHE)
 
-def load_importance(importance_id: str, **params):
-    sels = list_importances()
-    if importance_id not in sels:
-        raise ValueError(f"importance '{importance_id}' not found. Available: {', '.join(sorted(sels))}")
-    return sels[importance_id](**params)
+def load_importance(model_id: str, **params):
+    models = list_importances()
+    if model_id not in models:
+        raise ValueError(f"Feature-importance model '{model_id}' not found. Available: {', '.join(sorted(models))}")
+    return models[model_id](**params)
