@@ -27,7 +27,7 @@ UserOutput/
 DemoOutput/
 DemoOutputLocal/
 OSAData/
-./tests/
+tests/
 OSAData.zip
 multiplexer_dataset/
 gametes_dataset/

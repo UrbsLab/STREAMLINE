@@ -66,4 +66,12 @@ def main():
     runner.run()
 
 if __name__ == "__main__":
+    # # MultiSURF with TURF, sample 2000 rows for fitting, write
+    # # ./<exp>/<dataset>/feature_selection/multisurf/multisurf_scores_cv_1.csv
+    # python -m streamline.phases.p4_feature_selection.cli \
+    # --output_path ./out --experiment_name MyExp \
+    # --selector_id multisurf \
+    # --selector_params '{"use_turf": true, "turf_pct": 0.5, "n_jobs": 4}' \
+    # --top_k 100 \
+    # --instance_subset 2000
     main()

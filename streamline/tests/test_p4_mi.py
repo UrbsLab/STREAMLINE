@@ -25,8 +25,8 @@ def test_p4_mutual_info_topk():
         cv_train_path=str(tr),
         cv_test_path=str(te),
         experiment_path=str(exp),
-        selector_id="mutualinformation",
-        selector_params={"outcome_type":"Binary", "n_neighbors":3},
+        importance_id="mutualinformation",
+        importance_params={"outcome_type":"Binary", "n_neighbors":3},
         top_k=1,
         threshold=None,
         keep_original_features=False,
@@ -42,7 +42,7 @@ def test_p4_mutual_info_topk():
     assert list(train.columns) == ["Class","x1"]
     assert list(test.columns)  == ["Class","x1"]
 
-    base = ds_dir / "feature_selection"
+    base = ds_dir / "feature_importance"
     assert (base / "scores_cv1.csv").exists()
-    assert (base / "selector_cv1.pickle").exists()
+    assert (base / "importance_cv1.pickle").exists()
     assert (base / "selected_features_cv1.txt").exists()
