@@ -1,5 +1,5 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.p6_modeling.utils.submodels import BinaryClassificationModel
 from gplearn.genetic import SymbolicClassifier as GP
 
 

@@ -1,5 +1,5 @@
 from abc import ABC
-from streamline.modeling.submodels import RegressionModel
+from streamline.p6_modeling.utils.submodels import RegressionModel
 from sklearn.ensemble import RandomForestRegressor
 
 

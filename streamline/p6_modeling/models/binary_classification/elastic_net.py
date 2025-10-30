@@ -1,5 +1,5 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.p6_modeling.utils.submodels import BinaryClassificationModel
 from sklearn.linear_model import SGDClassifier as SGD
 
 

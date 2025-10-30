@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.p6_modeling.utils.submodels import BinaryClassificationModel
 from skeLCS import eLCS
 from skXCS import XCS
 from skExSTraCS import ExSTraCS

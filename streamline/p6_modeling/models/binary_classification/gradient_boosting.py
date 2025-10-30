@@ -1,5 +1,5 @@
 from abc import ABC
-from streamline.modeling.submodels import BinaryClassificationModel
+from streamline.p6_modeling.utils.submodels import BinaryClassificationModel
 from sklearn.ensemble import GradientBoostingClassifier as GB
 from xgboost import XGBClassifier as XGB
 from lightgbm import LGBMClassifier as LGB

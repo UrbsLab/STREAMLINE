@@ -1,5 +1,5 @@
 from abc import ABC
-from streamline.modeling.submodels import MulticlassClassificationModel
+from streamline.p6_modeling.utils.submodels import MulticlassClassificationModel
 from sklearn.neural_network import MLPClassifier as MLP
 
 
