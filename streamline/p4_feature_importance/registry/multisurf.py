@@ -28,11 +28,11 @@ class MultiSURF:
             from skrebate import MultiSURF as _MultiSURF
             if self.use_turf:
                 from skrebate import TURF as _TURF
-                base = _MultiSURF(n_neighbors=self.n_neighbors, n_jobs=self.n_jobs, random_state=self.random_state, **self.kwargs)
+                base = _MultiSURF(n_jobs=self.n_jobs, **self.kwargs)
                 self._impl = _TURF(base, pct=self.turf_pct).fit(X.values, y.values)
                 importances = getattr(self._impl, "feature_importances_", None)
             else:
-                self._impl = _MultiSURF(n_neighbors=self.n_neighbors, n_jobs=self.n_jobs, random_state=self.random_state, **self.kwargs).fit(X.values, y.values)
+                self._impl = _MultiSURF( n_jobs=self.n_jobs, **self.kwargs).fit(X.values, y.values)
                 importances = getattr(self._impl, "feature_importances_", None)
         except ModuleNotFoundError as e:
             raise Exception("MultiSURF requires the 'skrebate' package (pip install skrebate).") from e

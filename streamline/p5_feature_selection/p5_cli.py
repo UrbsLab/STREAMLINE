@@ -66,3 +66,13 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()
+
+
+if __name__ == "__main__":
+    
+    # # Serial run (use defaults from metadata.pickle)
+    # python -m streamline.p5_feature_selection.p5_cli \
+    # --output_path ./test \
+    # --experiment_name MyExp --show_plots 1
+    
+    main()

@@ -22,7 +22,7 @@ class MultiSURFStar:
         self._cols = X.columns.tolist()
         try:
             from skrebate import MultiSURFstar as _MultiSURFStar
-            self._impl = _MultiSURFStar(n_jobs=self.n_jobs, random_state=self.random_state, **self.kwargs).fit(X.values, y.values)
+            self._impl = _MultiSURFStar(n_jobs=self.n_jobs, **self.kwargs).fit(X.values, y.values)
             importances = getattr(self._impl, "feature_importances_", None)
         except ModuleNotFoundError as e:
             raise Exception("MultiSURF* requires the 'skrebate' package (pip install skrebate).") from e

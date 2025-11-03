@@ -4,7 +4,8 @@ from typing import Dict, List, Tuple, Optional
 import pandas as pd
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")
+import seaborn as sns
+sns.set_theme(style="whitegrid")
 import matplotlib.pyplot as plt
 from statistics import median
 from streamline.p5_feature_selection.utils.fi_resolver import resolve_algorithms
@@ -177,7 +178,7 @@ class DefaultFeatureSelector:
         dataset_name: str,
         n_splits: int,
         class_label: str,
-        instance_label: str | None,
+        instance_label: "str | None",
         cv_selected_list: List[List[str]],
         overwrite_cv: bool,
     ):

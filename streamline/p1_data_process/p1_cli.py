@@ -3,7 +3,7 @@ import argparse
 import json
 from typing import List, Optional
 
-from .runner import P1Runner
+from streamline.p1_data_process.p1_runner import P1Runner
 
 
 def _csv_or_list(v: Optional[str]) -> Optional[List[str]]:
@@ -140,14 +140,14 @@ def main():
 if __name__ == "__main__":
     # # Serial
     # python -m streamline.p1_data_process.p1_cli \
-    # --data_path ./data \
-    # --output_path ./out \
+    # --data_path ./data/DemoData \
+    # --output_path ./test \
     # --experiment_name MyExp
 
     # # Local Dask with 1 worker per core
     # python -m streamline.p1_data_process.p1_cli \
-    # --data_path ./data \
-    # --output_path ./out \
+    # --data_path ./data/DemoData \
+    # --output_path ./test \
     # --experiment_name MyExp \
     # --run_cluster Local
 

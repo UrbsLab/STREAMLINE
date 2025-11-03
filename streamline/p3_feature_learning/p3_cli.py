@@ -63,3 +63,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    # # Serial run (use defaults from metadata.pickle)
+    # python -m streamline.p3_feature_learning.p3_cli \
+    # --output_path ./test \
+    # --experiment_name MyExp

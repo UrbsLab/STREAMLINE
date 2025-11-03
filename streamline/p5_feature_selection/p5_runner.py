@@ -33,7 +33,7 @@ class P5Runner:
         output_path: str,
         experiment_name: str,
         *,
-        algorithms: List[str] | str | None = "auto",   # <-- default auto
+        algorithms: "List[str] | str | None" = "auto",   # <-- default auto
         n_splits: int = 10,
         class_label: str = "Class",
         instance_label: Optional[str] = None,
@@ -42,7 +42,7 @@ class P5Runner:
         overwrite_cv: bool = False,
         # strategy
         selector_id: str = "default",
-        selector_params: dict | None = None,
+        selector_params: "dict | None" = None,
         # plotting/summary
         export_scores: bool = True,
         top_features: int = 20,

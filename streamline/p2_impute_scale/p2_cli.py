@@ -108,12 +108,12 @@ if __name__ == "__main__":
     # python -m streamline.p2_impute_scale.p2_cli --output_path ./out --experiment_name MyExp --list-scalers
 
     # # Serial run (use defaults from metadata.pickle)
-    # python -m streamline.p2_impute_scale.p1_cli \
-    # --output_path ./out \
+    # python -m streamline.p2_impute_scale.p2_cli \
+    # --output_path ./test \
     # --experiment_name MyExp
 
     # # Force specific imputer & scaler (with params)
-    # python -m streamline.p2_impute_scale.p1_cli \
+    # python -m streamline.p2_impute_scale.p2_cli \
     # --output_path ./out \
     # --experiment_name MyExp \
     # --imputer_id knn \

@@ -1,5 +1,18 @@
 import argparse
 from streamline.p6_modeling.p6_runner import P6Runner
+from streamline.p6_modeling.utils.loader import list_models, list_all_models
+
+def _print_models(entries, title: str):
+    print(f"\n{title}")
+    if not entries:
+        print("  (none found)")
+        return
+    # neat, one-per-line: <type>  <id>  (<alt_id>)  -  <name>  [module]
+    for e in entries:
+        alt = f" ({e['alt_id']})" if e.get("alt_id") else ""
+        mod = f"  [{e['module']}]" if e.get("module") else ""
+        print(f"  {e['type']:<24} {e['id']:<12}{alt:<18} - {e['name']}{mod}")
+    print("")
 
 def main():
     ap = argparse.ArgumentParser("STREAMLINE Phase 6 (Modeling) CLI",
@@ -14,6 +27,12 @@ def main():
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--models", default=None,
                     help="CSV of model ids (small_name or underscored model_name). Omit to auto-discover.")
+
+    # NEW: listing modes
+    ap.add_argument("--list_models", action="store_true",
+                    help="List models for --model_type and exit.")
+    ap.add_argument("--list_models_all", action="store_true",
+                    help="List models for all types and exit.")
 
     # calibration (handled in BaseModel.fit)
     ap.add_argument("--calibrate", type=int, default=0, help="1 to enable probability calibration")
@@ -38,6 +57,18 @@ def main():
 
     args = ap.parse_args()
 
+    # ---- NEW: handle listing and exit ----
+    if args.list_models_all:
+        entries = list_all_models()
+        _print_models(entries, title="Available models (ALL types):")
+        return
+
+    if args.list_models:
+        entries = list_models(args.model_type)
+        _print_models(entries, title=f"Available models ({args.model_type}):")
+        return
+
+    # ---- normal run ----
     P6Runner(
         output_path=args.output_path,
         experiment_name=args.experiment_name,

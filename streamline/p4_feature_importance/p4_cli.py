@@ -82,8 +82,8 @@ def main():
 
 if __name__ == "__main__":
     # # run three models (comma-separated), pass params to only multisurf via JSON
-    # python -m streamline.phases.p4_feature_importance.cli \
-    # --output_path ./out --experiment_name MyExp \
+    # python -m streamline.p4_feature_importance.p4_cli \
+    # --output_path ./test --experiment_name MyExp \
     # --models "mutualinformation,multisurf,multisurfstar" \
     # --models_params '{"multisurf":{"use_turf": true, "turf_pct": 0.5, "n_jobs": 4}}' \
     # --top_k 100 --instance_subset 2000

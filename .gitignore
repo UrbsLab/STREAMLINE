@@ -27,6 +27,7 @@ UserOutput/
 DemoOutput/
 DemoOutputLocal/
 OSAData/
+test/
 tests/
 OSAData.zip
 multiplexer_dataset/
