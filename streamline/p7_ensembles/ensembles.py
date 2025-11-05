@@ -42,6 +42,7 @@ class EnsemblePhaseJob:
 
         # BaseModel kwargs shared by all ensembles
         self.model_kwargs = dict(
+            # cross-validation for optuna tuning inside ensembles (if any)
             cv_folds=3, scoring_metric=scoring_metric, metric_direction=metric_direction,
             random_state=random_state, cv=None, sampler=None, n_jobs=n_jobs
         )
