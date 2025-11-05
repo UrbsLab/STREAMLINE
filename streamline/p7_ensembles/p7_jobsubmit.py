@@ -1,4 +1,3 @@
-# streamline/phases/p7_ensemble/p7_jobsubmit.py
 import argparse
 from streamline.p7_ensembles.p7_runner import EnsemblePhaseJob
 
