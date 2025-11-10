@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import List, Tuple, Optional, Dict, Any
 import numpy as np
 import optuna
-from mlxtend.classifier import StackingClassifier
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 from streamline.p6_modeling.utils.submodels import BinaryClassificationModel
+from streamline.p7_ensembles.utils.stacking_model import StackingClassifier
 
 def _base_list(pairs: List[Tuple[str, object]]):
     return [est for _, est in pairs]
