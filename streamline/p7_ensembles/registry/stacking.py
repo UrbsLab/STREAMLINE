@@ -58,7 +58,8 @@ class _StackingBase(BinaryClassificationModel):
             classifiers=_base_list(self._base_estimators),
             meta_classifier=meta,
             use_probas=False,
-            use_clones=True
+            use_clones=True,
+            fit_base_estimators=False,
         )
 
     # ---- BaseModel integration ----------------------------------------------

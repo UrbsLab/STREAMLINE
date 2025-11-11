@@ -1,230 +1,301 @@
 from __future__ import annotations
-import os, re, pickle, logging, time
+import os, re, pickle, logging, json
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict, Any
 
 import numpy as np
 import pandas as pd
+
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import (
-    accuracy_score, balanced_accuracy_score, f1_score,
-    precision_score, recall_score, confusion_matrix,
-    roc_auc_score, precision_recall_curve, roc_curve, auc, average_precision_score,
+    accuracy_score, balanced_accuracy_score, f1_score, precision_score, recall_score,
+    confusion_matrix, roc_auc_score, precision_recall_curve, roc_curve, average_precision_score, auc
 )
 
 from streamline.p7_ensembles.utils.loader import get_ensemble_by_id
-# We intentionally do NOT subclass prior Job to keep this phase standalone as requested before.
 
-class EnsembleJob:
+
+class EnsemblePhaseJob:
     """
     Phase 7: Ensemble Learning on top of Phase 6 models.
     Loads pickled base models per CV split, builds requested ensembles, fits on CV-Train, evaluates on CV-Test.
     Saves:
       - models/pickledModels/<ENSEMBLE_ID>_<cv>.pickle
       - model_evaluation/pickled_metrics/<ENSEMBLE_ID>_CV_<cv>_metrics.pickle
+    - Fits on CV Train and evaluates on CV Test
+    - Saves per-CV metrics & ROC/PRC curves to dataset_dir/ensemble_evaluation
     """
-
     def __init__(
         self,
         dataset_dir: str,                 # <output>/<exp>/<dataset>
         n_splits: int,
         outcome_label: str = "Class",
         instance_label: Optional[str] = None,
-        # ensembles: CSV of ids (vote_hard,vote_soft,stack_lr,stack_dt,stack_rf)
-        ensembles: Optional[str] = "vote_hard,vote_soft,stack_lr",
-        base_model_filter: Optional[str] = None,  # CSV of base model small_names to include; None = all found
+        # ensembles: CSV of ids (hard_voting,soft_voting,stack_lr,stack_dt,stack_rf)
+        ensembles: Optional[str] = "hard_voting,soft_voting,stack_lr",
+        base_models: Optional[str] = None,    # comma list of small names filter (e.g., "LR,SVM,NB")
+        calibrate: int = 0,
+        calibrate_method: str = "sigmoid",
+        calibrate_cv: int = 5,
         random_state: Optional[int] = 0,
     ):
-        self.dataset_dir = Path(dataset_dir)
+        self.ds_dir = Path(dataset_dir)
+        self.dataset_name = self.ds_dir.name
         self.n_splits = int(n_splits)
         self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.ensemble_ids = [e.strip() for e in (ensembles or "").split(",") if e.strip()]
-        self.base_model_filter = None
-        if base_model_filter:
-            self.base_model_filter = {s.strip() for s in base_model_filter.split(",") if s.strip()}
+        self.base_filter = [s.strip() for s in (base_models or "").split(",") if s.strip()] or None
+        self.calibrate = bool(calibrate)
+        self.calibrate_method = calibrate_method
+        self.calibrate_cv = int(calibrate_cv)
         self.random_state = random_state
 
-        # out dirs
-        (self.dataset_dir / "models" / "pickledModels").mkdir(parents=True, exist_ok=True)
-        (self.dataset_dir / "model_evaluation" / "pickled_metrics").mkdir(parents=True, exist_ok=True)
-        (self.dataset_dir / "runtime").mkdir(parents=True, exist_ok=True)
+        # output dirs
+        self.out_root = self.ds_dir / "ensemble_evaluation"
+        _ensure_dir(self.out_root)
+        _ensure_dir(self.out_root / "pickled_ensembles")
+        _ensure_dir(self.out_root / "metrics_by_cv")
+        _ensure_dir(self.out_root / "curves_by_cv")
 
-        self.job_start_time = None
-
-    # ----------------------------
-    # Main
-    # ----------------------------
     def run(self):
-        self.job_start_time = time.time()
         for cv in range(self.n_splits):
-            logging.info(f"[P7] CV {cv} — loading base models, building ensembles")
-            base_estimators = self._load_base_estimators(cv)
-            if not base_estimators:
-                logging.warning(f"[P7] No base estimators found for CV {cv}, skipping.")
+            logging.info(f"[P7] {self.dataset_name} CV={cv}: loading base estimators...")
+            base_ests = _load_base_estimators(self.ds_dir, cv, self.base_filter)
+            if not base_ests:
+                logging.warning(f"[P7] No base estimators found for CV {cv}. Skipping.")
                 continue
 
-            X_train, y_train, X_test, y_test = self._load_cv_data(cv)
+            train_df, test_df = _load_cv_df(self.ds_dir, self.dataset_name, cv)
+            train_df = _drop_instance(train_df, self.instance_label)
+            test_df  = _drop_instance(test_df,  self.instance_label)
+            X_train, y_train = _prep_xy(train_df, self.outcome_label)
+            X_test,  y_test  = _prep_xy(test_df,  self.outcome_label)
 
             for ens_id in self.ensemble_ids:
-                cls = get_ensemble_by_id(ens_id)
-                est = cls.build(base_estimators)
+                Ens = get_ensemble_by_id(ens_id)
+                ens_small = getattr(Ens, "small_name", ens_id.upper())
+                ens_name  = getattr(Ens, "name", ens_id)
 
-                # fit
-                est.fit(X_train, y_train)
+                logging.info(f"[P7] Building ensemble: {ens_name} using {len(base_ests)} base models")
+                model = Ens.build(base_estimators=base_ests, random_state=self.random_state)
 
-                # predict labels
-                y_pred = est.predict(X_test)
-
-                # basic metrics (label-based)
-                metrics_dict = self._basic_class_metrics(y_test, y_pred)
-
-                # probabilities for ROC/PRC:
-                proba = None
-                if hasattr(est, "predict_proba"):
-                    try:
-                        proba = est.predict_proba(X_test)[:, 1]
-                    except Exception:
-                        proba = None
-
-                if proba is not None:
-                    fpr, tpr, _ = roc_curve(y_test, proba)
-                    prec, rec, _ = precision_recall_curve(y_test, proba)
-                    metrics_dict["ROC AUC"] = float(auc(fpr, tpr))
-                    metrics_dict["PRC AUC"] = float(auc(rec, prec))
-                    metrics_dict["PRC APS"] = float(average_precision_score(y_test, proba))
-                    metrics_dict["_curves"] = {"fpr": fpr, "tpr": tpr, "precision": prec, "recall": rec}
+                if ens_small in ("hard_voting", "soft_voting"):  
+                    # ------- Voting ensembles -------
+                    if self.calibrate:
+                        model_cv = CalibratedClassifierCV(
+                            base_estimator=model, method=self.calibrate_method, cv=self.calibrate_cv
+                        )
+                        model_cv.fit(X_train, y_train)  # calibration fits wrapper
+                        model = model_cv  # use calibrated version
+                    else:
+                        model.fit(X_train, y_train)
+                    # (metrics/curves saving stays as before)
                 else:
-                    # HARD VOTING special handling (threshold sweep over base probs → majority vote)
-                    if ens_id.lower() == "vote_hard":
-                        curves = self._hard_voting_curves(base_estimators, X_test, y_test)
-                        metrics_dict["ROC AUC"] = float(curves["roc_auc"])
-                        metrics_dict["PRC AUC"] = float(curves["prc_auc"])
-                        metrics_dict["PRC APS"] = float(curves["prc_aps"])
-                        metrics_dict["_curves"] = {
-                            "fpr": curves["fpr"], "tpr": curves["tpr"],
-                            "precision": curves["precision"], "recall": curves["recall"]
-                        }
+                    # ------- Manual stacking -------
+                    logging.info(f"[P7] Building ensemble (stacking): {ens_name} [meta on {self.meta_train_source}]")
+                    meta = Ens._default_meta(random_state=self.random_state)
 
-                # save model + metrics
-                alg = cls.id
-                with open(self.dataset_dir / "models" / "pickledModels" / f"{alg}_{cv}.pickle", "wb") as f:
-                    pickle.dump(est, f)
-                with open(self.dataset_dir / "model_evaluation" / "pickled_metrics" / f"{alg}_CV_{cv}_metrics.pickle", "wb") as f:
-                    pickle.dump(metrics_dict, f)
+                    # choose meta training split
+                    if self.meta_train_source == "train":
+                        # Xm_train = _stack_meta_features(base_ests, X_train, prefer_proba=True)
+                        Xm_train = X_train
+                        ym_train = y_train
+                    else:  # "test"
+                        logging.warning("[P7] meta_train_source='test' will leak; using test for meta training by request.")
+                        # Xm_train = _stack_meta_features(base_ests, X_test, prefer_proba=True)
+                        Xm_train = X_test
+                        ym_train = y_test
 
-                logging.info(f"[P7] Saved ensemble {alg} for CV {cv}")
+                    # optional calibration ON THE META space (no CV of bases)
+                    if self.calibrate:
+                        model_cv = CalibratedClassifierCV(
+                            base_estimator=meta, method=self.calibrate_method, cv=self.calibrate_cv
+                        )
+                        model_cv.fit(Xm_train, ym_train)  # calibration fits wrapper
+                        model = model_cv  # use calibrated version
+                    else:
+                        model.fit(Xm_train, ym_train)
 
-        # runtime
-        rt = self.dataset_dir / "runtime" / "runtime_ensemble.txt"
-        rt.write_text(str(time.time() - self.job_start_time))
 
-    # ----------------------------
-    # Helpers
-    # ----------------------------
-    def _load_base_estimators(self, cv: int) -> List[Tuple[str, object]]:
-        """
-        Expect files: models/pickledModels/<SMALLNAME>_<cv>.pickle
-        Optionally filtered by base_model_filter
-        """
-        pm_dir = self.dataset_dir / "models" / "pickledModels"
-        if not pm_dir.exists():
-            return []
+                # Persist ensemble for this CV
+                with open(self.out_root / "pickled_ensembles" / f"{ens_small}_{cv}.pickle", "wb") as f:
+                    pickle.dump(model, f)
 
-        out: List[Tuple[str, object]] = []
-        for fn in os.listdir(pm_dir):
-            if not fn.endswith(".pickle"):
+                # Predictions
+                y_pred = model.predict(X_test)
+
+                # Metrics (discrete)
+                metrics = _calc_basic_metrics(y_test, y_pred)
+
+                # Curves & probabilistic metrics
+                roc_curve_dict = None
+                prc_curve_dict = None
+                roc_auc_val = None
+                prc_auc_val = None
+                aps_val = None
+
+                if ens_id == "hard_voting":
+                    roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
+                        _hard_voting_threshold_sweep(base_ests, X_test, y_test)
+                    # For reporting parity, also compute "naive" AUC using y_pred
+                    try:
+                        metrics["ROC AUC (hard from preds)"] = roc_auc_score(y_test, y_pred)
+                    except Exception:
+                        metrics["ROC AUC (hard from preds)"] = None
+                else:
+                    # Soft vote & Stacking expose proba
+                    proba = None
+                    if hasattr(model, "predict_proba"):
+                        proba = model.predict_proba(X_test)[:, 1]
+                    elif hasattr(model, "decision_function"):
+                        s = model.decision_function(X_test)
+                        proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                    if proba is not None:
+                        roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
+                            _calc_curves_scores_from_proba(y_test, proba)
+
+                if roc_auc_val is not None:
+                    metrics["ROC AUC"] = float(roc_auc_val)
+                if prc_auc_val is not None:
+                    metrics["PRC AUC"] = float(prc_auc_val)
+                if aps_val is not None:
+                    metrics["PRC APS"] = float(aps_val)
+
+                # Save metrics (per CV per ensemble)
+                mpath = self.out_root / "metrics_by_cv" / f"{ens_small}_CV_{cv}.json"
+                with open(mpath, "w") as f:
+                    json.dump(metrics, f, indent=2)
+
+                # Save curves (if available)
+                if roc_curve_dict:
+                    with open(self.out_root / "curves_by_cv" / f"{ens_small}_CV_{cv}_roc.json", "w") as f:
+                        json.dump(roc_curve_dict, f)
+                if prc_curve_dict:
+                    with open(self.out_root / "curves_by_cv" / f"{ens_small}_CV_{cv}_prc.json", "w") as f:
+                        json.dump(prc_curve_dict, f)
+
+                logging.info(f"[P7] Saved ensemble metrics/curves for {ens_small} CV={cv}")
+                
+
+
+def _ensure_dir(p: Path):
+    p.mkdir(parents=True, exist_ok=True)
+
+def _load_cv_df(dataset_dir: Path, dataset_name: str, cv_idx: int):
+    train = pd.read_csv(dataset_dir / "CVDatasets" / f"{dataset_name}_CV_{cv_idx}_Train.csv", na_values="NA")
+    test  = pd.read_csv(dataset_dir / "CVDatasets" / f"{dataset_name}_CV_{cv_idx}_Test.csv",  na_values="NA")
+    return train, test
+
+def _drop_instance(df: pd.DataFrame, instance_label: Optional[str]):
+    if instance_label and instance_label in df.columns:
+        return df.drop(columns=[instance_label])
+    return df
+
+def _prep_xy(df: pd.DataFrame, outcome_label: str):
+    X = df.drop(columns=[outcome_label]).values
+    y = df[outcome_label].values
+    return X, y
+
+def _load_base_estimators(dataset_dir: Path, cv_idx: int, allow_list: Optional[List[str]]) -> List[Tuple[str, Any]]:
+    pm = dataset_dir / "models" / "pickledModels"
+    if not pm.exists():
+        return []
+    out: List[Tuple[str, Any]] = []
+    for fn in os.listdir(pm):
+        if not fn.endswith(".pickle"):
+            continue
+        m = re.match(r"(.+?)_([0-9]+)\.pickle$", fn)
+        if not m:
+            continue
+        small, fold = m.group(1), int(m.group(2))
+        if fold != cv_idx:
+            continue
+        if allow_list and small not in allow_list:
+            continue
+        with open(pm / fn, "rb") as f:
+            try:
+                est = pickle.load(f)
+            except Exception as e:
+                logging.warning(f"Skipping model {fn}: {e}")
                 continue
-            m = re.match(r"(.+?)_([0-9]+)\.pickle$", fn)
-            if not m:
-                continue
-            small, fold = m.group(1), int(m.group(2))
-            if fold != cv:
-                continue
-            if self.base_model_filter and small not in self.base_model_filter:
-                continue
-            with open(pm_dir / fn, "rb") as f:
-                model = pickle.load(f)
-            out.append((small, model))
-        return sorted(out, key=lambda t: t[0])
+        out.append((small, est))
+    return sorted(out, key=lambda t: t[0])
 
-    def _load_cv_data(self, cv: int):
-        ds = self.dataset_dir.name
-        cv_dir = self.dataset_dir / "CVDatasets"
-        train = pd.read_csv(cv_dir / f"{ds}_CV_{cv}_Train.csv")
-        test  = pd.read_csv(cv_dir / f"{ds}_CV_{cv}_Test.csv")
-        if self.instance_label and self.instance_label in train.columns:
-            train = train.drop(columns=[self.instance_label])
-            test = test.drop(columns=[self.instance_label])
-        X_train = train.drop(columns=[self.outcome_label]).values
-        y_train = train[self.outcome_label].values
-        X_test  = test.drop(columns=[self.outcome_label]).values
-        y_test  = test[self.outcome_label].values
-        return X_train, y_train, X_test, y_test
+def _calc_basic_metrics(y_true, y_pred) -> Dict[str, float]:
+    cm = confusion_matrix(y_true, y_pred)
+    tn, fp, fn, tp = cm.ravel()
+    npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
+    lr_plus  = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    lr_minus = fn / (tn + fn) if (tn + fn) > 0 else 0.0
+    return {
+        "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
+        "Accuracy": accuracy_score(y_true, y_pred),
+        "F1": f1_score(y_true, y_pred),
+        "Precision": precision_score(y_true, y_pred),
+        "Recall": recall_score(y_true, y_pred),
+        "TP": float(tp), "TN": float(tn), "FP": float(fp), "FN": float(fn),
+        "NPV": npv, "LR+": lr_plus, "LR-": lr_minus,
+    }
 
-    @staticmethod
-    def _basic_class_metrics(y_true, y_pred) -> Dict[str, float]:
-        acc = accuracy_score(y_true, y_pred)
-        bacc = balanced_accuracy_score(y_true, y_pred)
-        f1 = f1_score(y_true, y_pred)
-        prec = precision_score(y_true, y_pred)
-        rec = recall_score(y_true, y_pred)
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        npv = tn / (tn + fn) if (tn + fn) else 0.0
-        lr_plus = tp / (tp + fp) if (tp + fp) else 0.0
-        lr_minus = fn / (tn + fn) if (tn + fn) else 0.0
-        return {
-            "Accuracy": float(acc),
-            "Balanced Accuracy": float(bacc),
-            "F1": float(f1),
-            "Precision": float(prec),
-            "Recall": float(rec),
-            "TP": int(tp), "TN": int(tn), "FP": int(fp), "FN": int(fn),
-            "NPV": float(npv), "LR+": float(lr_plus), "LR-": float(lr_minus),
-        }
+def _calc_curves_scores_from_proba(y_true, y_proba):
+    fpr, tpr, _ = roc_curve(y_true, y_proba)
+    roc = auc(fpr, tpr)
+    prec, rec, _ = precision_recall_curve(y_true, y_proba)
+    # ensure ascending recall for AUC
+    sidx = np.argsort(rec)
+    prc_auc = auc(rec[sidx], prec[sidx])
+    aps = average_precision_score(y_true, y_proba)
+    return {"fpr": fpr.tolist(), "tpr": tpr.tolist()}, {"precision": prec.tolist(), "recall": rec.tolist()}, roc, prc_auc, aps
 
-    @staticmethod
-    def _hard_voting_curves(base_estimators: List[Tuple[str, object]], X_test, y_test):
-        """
-        Compute ROC/PRC for hard voting by sweeping a threshold over base predict_proba
-        and majority-voting binary decisions.
-        """
+def _hard_voting_threshold_sweep(base_estimators, X_test, y_test, thresholds=None):
+    """
+    Build ROC/PRC for hard-vote by thresholding each base model's probabilities then majority vote.
+    """
+    if thresholds is None:
         thresholds = np.linspace(0.0, 1.0, 101)
-        fprs, tprs = [], []
-        precisions, recalls = [], []
+    # collect proba for positive class from bases that support predict_proba
+    base_probas = []
+    for _, est in base_estimators:
+        if hasattr(est, "predict_proba"):
+            base_probas.append(est.predict_proba(X_test)[:, 1])
+        else:
+            # try decision_function → map via min-max to [0,1]
+            if hasattr(est, "decision_function"):
+                s = est.decision_function(X_test)
+                s = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                base_probas.append(s)
+    base_probas = np.column_stack(base_probas) if base_probas else None
 
-        # precompute probas for speed; skip models that lack predict_proba
-        proba_list = []
-        for _, m in base_estimators:
-            if hasattr(m, "predict_proba"):
-                try:
-                    proba_list.append(m.predict_proba(X_test)[:, 1])
-                except Exception:
-                    pass
-        proba_arr = np.column_stack(proba_list) if proba_list else None
-
-        if proba_arr is None or proba_arr.shape[1] == 0:
-            # fallback: no curves possible
-            return {"fpr": [0,1], "tpr": [0,1], "precision": [1,0], "recall": [0,1], "roc_auc": 0.5, "prc_auc": 0.5, "prc_aps": 0.0}
-
+    tpr_list, fpr_list, prec_list, rec_list = [], [], [], []
+    if base_probas is None or base_probas.shape[1] == 0:
+        # fallback: predict hard from first estimator only (degenerate)
+        y_pred = base_estimators[0][1].predict(X_test)
+        cm = confusion_matrix(y_test, y_pred)
+        tn, fp, fn, tp = cm.ravel()
+        tpr_list = [tp / (tp + fn + 1e-12)]
+        fpr_list = [fp / (tn + fp + 1e-12)]
+        prec_list = [tp / (tp + fp + 1e-12)]
+        rec_list = [tp / (tp + fn + 1e-12)]
+    else:
         for th in thresholds:
-            votes = (proba_arr >= th).astype(int)          # shape: (n, n_models)
-            maj = (votes.mean(axis=1) >= 0.5).astype(int)  # majority
-            tn, fp, fn, tp = confusion_matrix(y_test, maj).ravel()
-            tpr = tp / (tp + fn) if (tp + fn) else 0.0
-            fpr = fp / (tn + fp) if (tn + fp) else 0.0
-            precision = tp / (tp + fp) if (tp + fp) else 1.0
-            recall = tpr
-            fprs.append(fpr); tprs.append(tpr)
-            precisions.append(precision); recalls.append(recall)
+            votes = (base_probas >= th).astype(int)
+            y_pred = (votes.mean(axis=1) >= 0.5).astype(int)
+            cm = confusion_matrix(y_test, y_pred)
+            tn, fp, fn, tp = cm.ravel()
+            tpr_list.append(tp / (tp + fn + 1e-12))
+            fpr_list.append(fp / (tn + fp + 1e-12))
+            prec_list.append(tp / (tp + fp + 1e-12))
+            rec_list.append(tp / (tp + fn + 1e-12))
 
-        # sort and integrate
-        idx = np.argsort(fprs)
-        fpr_s = np.array(fprs)[idx]; tpr_s = np.array(tprs)[idx]
-        rocA = auc(fpr_s, tpr_s)
-
-        idxp = np.argsort(recalls)
-        rec_s = np.array(recalls)[idxp]; pre_s = np.array(precisions)[idxp]
-        prcA = auc(rec_s, pre_s)
-        aps = float(average_precision_score(y_test, (proba_arr.mean(axis=1))))  # a quick proxy
-
-        return {"fpr": fpr_s, "tpr": tpr_s, "precision": pre_s, "recall": rec_s, "roc_auc": float(rocA), "prc_auc": float(prcA), "prc_aps": aps}
+    # ROC AUC
+    sidx = np.argsort(fpr_list)
+    roc = auc(np.array(fpr_list)[sidx], np.array(tpr_list)[sidx])
+    # PRC AUC
+    sidx2 = np.argsort(rec_list)
+    prc_auc = auc(np.array(rec_list)[sidx2], np.array(prec_list)[sidx2])
+    # APS (average precision like)
+    aps = float(np.mean(prec_list))
+    roc_curve_dict = {"fpr": list(np.array(fpr_list)[sidx]), "tpr": list(np.array(tpr_list)[sidx])}
+    prc_curve_dict = {"precision": list(np.array(prec_list)[sidx2]), "recall": list(np.array(rec_list)[sidx2])}
+    return roc_curve_dict, prc_curve_dict, roc, prc_auc, aps

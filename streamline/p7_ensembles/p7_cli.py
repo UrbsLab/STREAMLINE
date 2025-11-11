@@ -15,13 +15,15 @@ def main():
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--outcome_label", default="Class")
     ap.add_argument("--instance_label", default=None)
-    ap.add_argument("--ensembles", default="vote_hard,vote_soft,stack_lr")
+    ap.add_argument("--ensembles", default="hard_voting,soft_voting,stack_lr")
     ap.add_argument("--base_models", default=None)
     ap.add_argument("--scoring_metric", default="balanced_accuracy")
     ap.add_argument("--metric_direction", default="maximize")
-    ap.add_argument("--stack_tune", type=int, default=0, help="Tune stacking meta-classifiers with Optuna")
-    ap.add_argument("--stack_trials", type=int, default=30)
-    ap.add_argument("--stack_timeout", type=int, default=600)
+    # ap.add_argument("--stack_tune", type=int, default=0, help="Tune stacking meta-classifiers with Optuna")
+    # ap.add_argument("--stack_trials", type=int, default=30)
+    # ap.add_argument("--stack_timeout", type=int, default=600)
+    ap.add_argument("--meta_train_source", choices=["train","test"], default="train",
+                help="Where to train stacking meta-classifier from base outputs (no CV, no base refit)")
     ap.add_argument("--calibrate", type=int, default=0)
     ap.add_argument("--calibrate_method", default="sigmoid")
     ap.add_argument("--calibrate_cv", type=int, default=5)
@@ -47,9 +49,9 @@ def main():
         base_models=args.base_models,
         scoring_metric=args.scoring_metric,
         metric_direction=args.metric_direction,
-        stack_tune=bool(args.stack_tune),
-        stack_trials=args.stack_trials,
-        stack_timeout=args.stack_timeout,
+        # stack_tune=bool(args.stack_tune),
+        # stack_trials=args.stack_trials,
+        # stack_timeout=args.stack_timeout,
         calibrate=args.calibrate,
         calibrate_method=args.calibrate_method,
         calibrate_cv=args.calibrate_cv,

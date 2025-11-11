@@ -185,14 +185,14 @@ class StackingClassifier(_BaseXComposition, _BaseStackingClassifier, Transformer
         self,
         classifiers,
         meta_classifier,
-        use_probas=False,
+        use_probas=True,
         drop_proba_col=None,
         average_probas=False,
         verbose=0,
         use_features_in_secondary=False,
         store_train_meta_features=False,
         use_clones=True,
-        fit_base_estimators=True,
+        fit_base_estimators=False,
     ):
         self.classifiers = classifiers
         self.meta_classifier = meta_classifier
