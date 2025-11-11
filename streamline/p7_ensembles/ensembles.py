@@ -299,3 +299,25 @@ def _hard_voting_threshold_sweep(base_estimators, X_test, y_test, thresholds=Non
     roc_curve_dict = {"fpr": list(np.array(fpr_list)[sidx]), "tpr": list(np.array(tpr_list)[sidx])}
     prc_curve_dict = {"precision": list(np.array(prec_list)[sidx2]), "recall": list(np.array(rec_list)[sidx2])}
     return roc_curve_dict, prc_curve_dict, roc, prc_auc, aps
+
+# Class to use if we remove stacking class from mlextend
+
+def _stack_meta_features(base_estimators, X, prefer_proba=True):
+    """
+    Build meta features from frozen base estimators without refitting them:
+      - if predict_proba: use positive-class probs
+      - elif decision_function: min-max to [0,1]
+      - else: use predicted labels (0/1)
+    Returns: (n_samples, n_bases) numpy array
+    """
+    cols = []
+    for _, est in base_estimators:
+        if prefer_proba and hasattr(est, "predict_proba"):
+            cols.append(est.predict_proba(X)[:, 1])
+        elif hasattr(est, "decision_function"):
+            s = est.decision_function(X)
+            s = (s - s.min()) / (s.max() - s.min() + 1e-12)
+            cols.append(s)
+        else:
+            cols.append(est.predict(X).astype(float))
+    return np.column_stack(cols) if cols else np.empty((X.shape[0], 0))
