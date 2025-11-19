@@ -1274,7 +1274,7 @@ class DataProcess(Job):
         outcome_label = self.dataset.outcome_label
         p_val, test_stat, test_name = None, None, None
         try:
-            if self.outcome_type == "Binary":
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                 # test_name, test_stat = None, None
                 # Feature and outcome both are discrete/categorical/binary
                 if feature_name in self.dataset.categorical_variables:
