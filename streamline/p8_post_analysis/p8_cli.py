@@ -3,7 +3,7 @@ from streamline.p8_post_analysis.p8_runner import P8Runner
 
 
 def main():
-    ap = argparse.ArgumentParser("STREAMLINE Phase 7 (Statistics) CLI",
+    ap = argparse.ArgumentParser("STREAMLINE Phase 8 (Statistics) CLI",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     ap.add_argument("--output_path", required=True)
     ap.add_argument("--experiment_name", required=True)

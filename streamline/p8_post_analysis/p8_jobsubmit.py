@@ -9,7 +9,7 @@ def _b(x):
 
 
 def main():
-    ap = argparse.ArgumentParser("P7 Statistics jobsubmit (single dataset)")
+    ap = argparse.ArgumentParser("P8 Statistics jobsubmit (single dataset)")
     ap.add_argument("--dataset_dir", required=True)
     ap.add_argument("--outcome_label", default="Class")
     ap.add_argument("--outcome_type", default="Binary")

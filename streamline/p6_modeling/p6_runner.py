@@ -28,7 +28,7 @@ class P6Runner:
         experiment_name: str,
         *,
         outcome_label: str = "Class",
-        model_type: str = "BinaryClassification",     # "BinaryClassification" | "MulticlassClassification" | "Regression"
+        model_type: str = "Binary",     # "Binary" | "Multiclass" | "Regression"
         instance_label: Optional[str] = None,
         n_splits: int = 10,
         models: List[str] | str | None = None,        # CSV/list; None = auto-discover from registry

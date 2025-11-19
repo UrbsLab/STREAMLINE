@@ -11,7 +11,7 @@ def _print_models(entries, title: str):
     for e in entries:
         alt = f" ({e['alt_id']})" if e.get("alt_id") else ""
         mod = f"  [{e['module']}]" if e.get("module") else ""
-        print(f"  {e['type']:<24} {e['id']:<12}{alt:<18} - {e['name']}{mod}")
+        print(f"  {e['model_type']:<24} {e['small_name']:<12} {e['model_name']}")
     print("")
 
 def main():
@@ -21,8 +21,8 @@ def main():
     ap.add_argument("--experiment_name", required=True)
 
     ap.add_argument("--outcome_label", default="Class")
-    ap.add_argument("--model_type", default="BinaryClassification",
-                    help="BinaryClassification | MulticlassClassification | Regression")
+    ap.add_argument("--model_type", default="Binary",
+                    help="Binary | Multiclass | Regression")
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--models", default=None,

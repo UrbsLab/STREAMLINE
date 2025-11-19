@@ -64,7 +64,7 @@ def _run_p6_for_models(exp_root: Path, dataset_dir: Path, models_csv: str, calib
     ModelingPhaseJob(
         dataset_dir=str(dataset_dir),
         outcome_label="Class",
-        model_type="BinaryClassification",
+        model_type="Binary",
         instance_label=None,
         n_splits=1,
         models=models_csv,              # comma-separated: e.g., "LR,SVM,NB"

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class StatisticsPhaseJob:
     """
-    Phase 7: Statistics & post-analysis.
+    Phase 8: Statistics & post-analysis.
 
     Reimplementation of legacy StatsJob using the new phase layout.
 

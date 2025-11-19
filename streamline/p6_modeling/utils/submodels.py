@@ -29,6 +29,7 @@ warnings.filterwarnings(action="ignore", category=ConvergenceWarning, module="sk
 
 
 class BinaryClassificationModel(BaseModel, ABC):
+    model_type = "Binary"
     def __init__(
         self,
         model,
@@ -41,9 +42,6 @@ class BinaryClassificationModel(BaseModel, ABC):
         sampler=None,
         n_jobs=None,
         # pass-through calibration controls to BaseModel
-        calibrate: bool = False,
-        calibrate_method: str = "sigmoid",
-        calibrate_cv: int = 5,
     ):
         super().__init__(
             model=model,
@@ -55,12 +53,8 @@ class BinaryClassificationModel(BaseModel, ABC):
             cv=cv,
             sampler=sampler,
             n_jobs=n_jobs,
-            calibrate=calibrate,
-            calibrate_method=calibrate_method,
-            calibrate_cv=calibrate_cv,
         )
         optuna.logging.set_verbosity(optuna.logging.WARNING)
-        self.model_type = "BinaryClassification"
 
     def model_evaluation(self, x_test, y_test):
         """
@@ -103,6 +97,7 @@ class BinaryClassificationModel(BaseModel, ABC):
 
 
 class MulticlassClassificationModel(BaseModel, ABC):
+    model_type = "Multiclass"
     def __init__(
         self,
         model,
@@ -114,9 +109,6 @@ class MulticlassClassificationModel(BaseModel, ABC):
         cv=None,
         sampler=None,
         n_jobs=None,
-        calibrate: bool = False,
-        calibrate_method: str = "sigmoid",
-        calibrate_cv: int = 5,
     ):
         super().__init__(
             model=model,
@@ -128,12 +120,8 @@ class MulticlassClassificationModel(BaseModel, ABC):
             cv=cv,
             sampler=sampler,
             n_jobs=n_jobs,
-            calibrate=calibrate,
-            calibrate_method=calibrate_method,
-            calibrate_cv=calibrate_cv,
         )
         optuna.logging.set_verbosity(optuna.logging.WARNING)
-        self.model_type = "MulticlassClassification"
 
     def model_evaluation(self, x_test, y_test):
         """
@@ -203,6 +191,7 @@ class MulticlassClassificationModel(BaseModel, ABC):
 
 
 class RegressionModel(BaseModel, ABC):
+    model_type = "Regression"
     def __init__(
         self,
         model,
@@ -214,9 +203,6 @@ class RegressionModel(BaseModel, ABC):
         cv=None,
         sampler=None,
         n_jobs=None,
-        calibrate: bool = False,            # ignored for regression (safe to pass)
-        calibrate_method: str = "sigmoid",  # ignored
-        calibrate_cv: int = 5,              # ignored
     ):
         super().__init__(
             model=model,
@@ -228,12 +214,8 @@ class RegressionModel(BaseModel, ABC):
             cv=cv,
             sampler=sampler,
             n_jobs=n_jobs,
-            calibrate=False,                # ensure off for regression
-            calibrate_method=calibrate_method,
-            calibrate_cv=calibrate_cv,
         )
         optuna.logging.set_verbosity(optuna.logging.WARNING)
-        self.model_type = "Regression"
         self.cv = KFold(n_splits=cv_folds, shuffle=True, random_state=self.random_state)
 
     def model_evaluation(self, x_test, y_test):

@@ -15,15 +15,9 @@ from streamline.utils.cluster import get_cluster  # returns a connected Dask Cli
 logger = logging.getLogger(__name__)
 
 
-class P7Runner:
+class P8Runner:
     """
-    Phase 7 runner (Statistics / post-analysis).
-
-    Modes via run_cluster:
-      • "Serial"
-      • "Local"
-      • "BashSLURM" | "BashLSF"
-      • "<dask-cluster-name>" (get_cluster(...) provides a connected Client)
+    Phase 8 runner (Statistics / post-analysis).
     """
 
     def __init__(

@@ -23,7 +23,7 @@ class BaseModel:
         - Regression: returns a metrics dict
         - Binary/Multiclass: returns (metrics, fpr, tpr, roc_auc, prec, recall, pr_auc, ave_prec, probs)
     Subclasses must set:
-      - self.model_type in {"BinaryClassification", "MulticlassClassification", "Regression"}
+      - self.model_type in {"Binary", "Multiclass", "Regression"}
       - self.param_grid (dict of lists)
       - implement objective(trial, params=None)
       - call super().__init__(model=<sk_estimator_class>, model_name=<str>, ...)
@@ -41,9 +41,10 @@ class BaseModel:
         sampler=None,
         n_jobs=None,
         # NEW: calibration knobs (classification only)
-        calibrate: bool = False,
-        calibrate_method: str = "sigmoid",   # "sigmoid" | "isotonic"
-        calibrate_cv: int = 5,
+        # Don't need this because we have calibration in ModelJob now
+        # calibrate: bool = False,
+        # calibrate_method: str = "sigmoid",   # "sigmoid" | "isotonic"
+        # calibrate_cv: int = 5,
     ):
         self.is_single = True
         if model is not None:
@@ -71,11 +72,11 @@ class BaseModel:
         self.n_jobs = n_jobs
 
         # Calibration config
-        self.calibrate = bool(calibrate)
-        self.calibrate_method = calibrate_method
-        self.calibrate_cv = calibrate_cv
+        # self.calibrate = bool(calibrate)
+        # self.calibrate_method = calibrate_method
+        # self.calibrate_cv = calibrate_cv
 
-        # expected from subclass: self.model_type in {"BinaryClassification","MulticlassClassification","Regression"}
+        # expected from subclass: self.model_type in {"Binary","Multiclass","Regression"}
 
     # ----- to be implemented by subclasses -----
     def objective(self, trial, params=None):
@@ -157,18 +158,19 @@ class BaseModel:
         self.model.fit(x_train, y_train)
 
         # Optional probability calibration for classification models
-        if self.calibrate and getattr(self, "model_type", None) in {"BinaryClassification", "MulticlassClassification"}:
-            try:
-                cal = CalibratedClassifierCV(
-                    estimator=self.model,
-                    method=self.calibrate_method,
-                    cv=self.calibrate_cv
-                )
-                cal.fit(x_train, y_train)
-                self.model = cal
-                logging.info(f"Calibrated {self.small_name} with {self.calibrate_method} (cv={self.calibrate_cv})")
-            except Exception as e:
-                logging.warning(f"Calibration failed for {self.small_name}: {e}")
+        # Don't need this because we have calibration in ModelJob now
+        # if self.calibrate and getattr(self, "model_type", None) in {"Binary", "Multiclass"}:
+        #     try:
+        #         cal = CalibratedClassifierCV(
+        #             estimator=self.model,
+        #             method=self.calibrate_method,
+        #             cv=self.calibrate_cv
+        #         )
+        #         cal.fit(x_train, y_train)
+        #         self.model = cal
+        #         logging.info(f"Calibrated {self.small_name} with {self.calibrate_method} (cv={self.calibrate_cv})")
+        #     except Exception as e:
+        #         logging.warning(f"Calibration failed for {self.small_name}: {e}")
 
     def predict(self, x_in):
         return self.model.predict(x_in)

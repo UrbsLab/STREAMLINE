@@ -9,7 +9,7 @@ def main():
     ap = argparse.ArgumentParser("P6 Modeling jobsubmit (single dataset)")
     ap.add_argument("--dataset_dir", required=True)
     ap.add_argument("--outcome_label", default="Class")
-    ap.add_argument("--model_type", default="BinaryClassification")
+    ap.add_argument("--model_type", default="Binary")
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--models", default=None)

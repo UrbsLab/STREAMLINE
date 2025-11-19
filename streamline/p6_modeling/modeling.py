@@ -15,7 +15,7 @@ class ModelingPhaseJob:
         *,
         dataset_dir: str,                 # <output>/<experiment>/<dataset>
         outcome_label: str = "Class",
-        model_type: str = "BinaryClassification",
+        model_type: str = "Binary",     # "Binary" | "Multiclass" | "Regression"
         instance_label: Optional[str] = None,
         n_splits: int = 10,
         models: List[str] | str | None = None,     # CSV or list; if None -> auto discover
@@ -94,9 +94,9 @@ class ModelingPhaseJob:
                     n_jobs=-1,
                     scoring_metric=self.scoring_metric,
                     metric_direction=self.metric_direction,
-                    calibrate=self.calibrate,              # ← NEW
-                    calibrate_method=self.calibrate_method,
-                    calibrate_cv=self.calibrate_cv,
+                    # calibrate=self.calibrate,              # ← NEW
+                    # calibrate_method=self.calibrate_method,
+                    # calibrate_cv=self.calibrate_cv,
                 )
                 mj.run(model)
 

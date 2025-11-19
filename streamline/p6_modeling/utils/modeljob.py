@@ -130,7 +130,7 @@ class ModelJob:
                                     model.params)
 
         # ---------- NEW: probability calibration (classification only) ----------
-        if self.calibrate and model.model_type in ["BinaryClassification", "MulticlassClassification"]:
+        if self.calibrate and model.model_type in ["Binary", "Multiclass"]:
             try:
                 cal = CalibratedClassifierCV(estimator=model.model,
                                              method=self.calibrate_method,
@@ -169,7 +169,7 @@ class ModelJob:
             residual_train = y_train - y_train_pred
             residual_test = y_test - y_pred
             return ([metric_list, fi], [residual_train, residual_test, y_train_pred, y_pred, y_train, y_test])
-        elif model.model_type in ["BinaryClassification", "MulticlassClassification"]:
+        elif model.model_type in ["Binary", "Multiclass"]:
             metric_list, fpr, tpr, roc_auc, prec, recall, \
                 prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
             return [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
