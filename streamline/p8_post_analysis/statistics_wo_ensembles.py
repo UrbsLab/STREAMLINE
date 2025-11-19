@@ -1,42 +1,47 @@
 from __future__ import annotations
-
 import csv
 import glob
 import os
-import re
 import pickle
 import time
-import json
 import logging
 from pathlib import Path
-from statistics import mean, median, stdev
-from typing import List, Dict, Tuple, Optional, Any
-from sklearn.metrics import auc
+from typing import Optional, Sequence, Dict, Any, List
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
+from statistics import mean, median, stdev
+
+import seaborn as sns
 from scipy import stats
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
-import seaborn as sns
 
 sns.set_theme()
 logger = logging.getLogger(__name__)
 
 
-class StatsPhaseJob:
+class StatisticsPhaseJob:
     """
-    Phase 8: Statistics & post-analysis summary for STREAMLINE3.
+    Phase 8: Statistics & post-analysis.
 
-    This is the modernized version of the legacy StatsJob, adapted so that:
-      * algorithms are discovered from model_evaluation/pickled_metrics
-      * ensemble summaries can be added on top (if present from Phase 7)
+    Reimplementation of legacy StatsJob using the new phase layout.
+
+    Responsibilities (per dataset):
+      - Summarize model evaluation metrics across CV folds.
+      - Plot algorithm-wise ROC / PRC (per model and summary).
+      - Summarize and visualize feature importance.
+      - Run non-parametric stats (Kruskal-Wallis, Wilcoxon, Mann-Whitney).
+      - Produce residual plots for regression.
+      - Write per-phase runtime and update overall runtimes.csv.
     """
 
+    # ---- init / configuration -------------------------------------------------
     def __init__(
         self,
-        full_path: str,
+        dataset_dir: str,
+        *,
         outcome_label: str,
         outcome_type: str,
         instance_label: Optional[str],
@@ -46,48 +51,18 @@ class StatsPhaseJob:
         sig_cutoff: float = 0.05,
         metric_weight: str = "balanced_accuracy",
         scale_data: bool = True,
-        exclude_plots: Optional[List[str]] = None,
+        exclude_plots: Optional[Sequence[str]] = None,
         show_plots: bool = False,
-        include_ensembles: bool = True,
     ):
-        """
-        Args:
-            full_path: path to dataset dir: <output>/<experiment>/<dataset>
-            outcome_label: column name of outcome (e.g. 'Class')
-            outcome_type: 'Binary' | 'Multiclass' | 'Continuous'
-            instance_label: e.g. 'InstanceID' or None
-            scoring_metric: sklearn metric name used in modeling
-            cv_partitions: number of CV splits
-            top_features: number of top features for FI visualisations
-            sig_cutoff: alpha for Kruskal / Wilcoxon / Mann-Whitney
-            metric_weight: metric used for composite FI weighting
-            scale_data: kept for API parity (not used directly here)
-            exclude_plots: list of strings from
-                           ['plot_ROC', 'plot_PRC', 'plot_FI_box', 'plot_metric_boxplots']
-            show_plots: whether to show figures interactively
-            include_ensembles: if True, also summarize Phase 7 ensemble metrics if present
-        """
-        self.full_path = full_path
+        super().__init__()
+        self.full_path = dataset_dir
         self.outcome_label = outcome_label
         self.outcome_type = outcome_type
         self.instance_label = instance_label
-        self.data_name = self.full_path.split("/")[-1]
-        self.experiment_path = "/".join(self.full_path.split("/")[:-1])
-        self.cv_partitions = cv_partitions
-        self.scale_data = scale_data
-        self.scoring_metric = scoring_metric
-        self.top_features = top_features
-        self.sig_cutoff = sig_cutoff
-        self.metric_weight = metric_weight
-        self.show_plots = show_plots
-        self.include_ensembles = include_ensembles
+        self.data_name = os.path.basename(self.full_path)
+        self.experiment_path = os.path.dirname(self.full_path)
 
-        known_exclude_options = [
-            "plot_ROC",
-            "plot_PRC",
-            "plot_FI_box",
-            "plot_metric_boxplots",
-        ]
+        known_exclude_options = ["plot_ROC", "plot_PRC", "plot_FI_box", "plot_metric_boxplots"]
         if exclude_plots is not None:
             for x in exclude_plots:
                 if x not in known_exclude_options:
@@ -100,14 +75,69 @@ class StatsPhaseJob:
         self.plot_metric_boxplots = "plot_metric_boxplots" not in exclude_plots
         self.plot_fi_box = "plot_FI_box" not in exclude_plots
 
-        # Map metric_weight from sklearn name to human-friendly text used in plots
+        self.cv_partitions = int(cv_partitions)
+        self.scale_data = bool(scale_data)
+        self.scoring_metric = scoring_metric
+        self.top_features = int(top_features)
+        self.sig_cutoff = float(sig_cutoff)
+        self.metric_weight = metric_weight
+
+        # Continuous outcome: normalize metrics to regression-friendly defaults
         if self.outcome_type == "Continuous" and (
-            self.scoring_metric == "balanced_accuracy"
-            or self.metric_weight == "balanced_accuracy"
+            self.scoring_metric == "balanced_accuracy" or self.metric_weight == "balanced_accuracy"
         ):
             self.metric_weight = "explained_variance"
             self.scoring_metric = "explained_variance"
 
+        self.show_plots = bool(show_plots)
+
+        # Feature headers (processed / original)
+        if self.plot_fi_box:
+            self.feature_headers = pd.read_csv(
+                os.path.join(self.full_path, "exploratory", "ProcessedFeatureNames.csv"),
+                sep=",",
+            ).columns.values.tolist()
+            self.original_headers = self.feature_headers
+        else:
+            try:
+                self.feature_headers = pd.read_csv(
+                    os.path.join(self.full_path, "exploratory", "ProcessedFeatureNames.csv"),
+                    sep=",",
+                ).columns.values.tolist()
+                self.original_headers = self.feature_headers
+            except Exception:
+                self.original_headers = None
+                self.feature_headers = None
+
+        # Load algorithm definitions + abbrevs + colors from algInfo.pickle
+        if "replication" not in self.full_path:
+            self.partial_path = os.path.dirname(self.full_path)
+        else:
+            # mirrors old logic
+            self.partial_path = "/".join(self.full_path.split("/")[:-3])
+
+        with open(os.path.join(self.partial_path, "algInfo.pickle"), "rb") as f:
+            alg_info = pickle.load(f)
+
+        algorithms: List[str] = []
+        abbrev: Dict[str, str] = {}
+        colors: Dict[str, str] = {}
+        for algorithm, (include_flag, short, color) in alg_info.items():
+            if include_flag:
+                algorithms.append(algorithm)
+                abbrev[algorithm] = short
+                colors[algorithm] = color
+
+        self.algorithms = algorithms
+        self.abbrev = abbrev
+        self.colors = colors
+
+    # ---- main entry -----------------------------------------------------------
+    def run(self):
+        self.job_start_time = time.time()
+        logging.info("Running Statistics Summary for %s", self.data_name)
+
+        # Translate metric names for human-readable labels
         if self.outcome_type == "Binary":
             metric_term_dict = {
                 "balanced_accuracy": "Balanced Accuracy",
@@ -139,176 +169,59 @@ class StatsPhaseJob:
         else:
             raise ValueError(f"Unknown outcome_type: {self.outcome_type}")
 
-        self.metric_weight = metric_term_dict[self.metric_weight]
+        self.metric_weight = metric_term_dict.get(self.metric_weight, self.metric_weight)
 
-        # Prepare feature headers
-        if self.plot_fi_box:
-            self.feature_headers = pd.read_csv(
-                self.full_path + "/exploratory/ProcessedFeatureNames.csv", sep=","
-            ).columns.values.tolist()
-            self.original_headers = self.feature_headers
-        else:
-            try:
-                self.feature_headers = pd.read_csv(
-                    self.full_path + "/exploratory/ProcessedFeatureNames.csv", sep=","
-                ).columns.values.tolist()
-                self.original_headers = self.feature_headers
-            except Exception:
-                self.original_headers = None
-
-        # NEW: discover algorithms purely from model_evaluation outputs
-        (
-            self.algorithms,
-            self.abbrev,
-            self.colors,
-        ) = self._discover_algorithms_from_metrics()
-
-        if not self.algorithms:
-            logging.warning(
-                "No algorithms discovered in %s; stats will be limited.",
-                self.full_path,
-            )
-
-    # ------------------------------------------------------------------
-    # NEW: Algorithm discovery
-    # ------------------------------------------------------------------
-    def _discover_algorithms_from_metrics(
-        self,
-    ) -> Tuple[List[str], Dict[str, str], Dict[str, Tuple[float, float, float]]]:
-        """
-        Discover modeling algorithms from:
-            <dataset_dir>/model_evaluation/pickled_metrics/<ALG>_CV_<k>_metrics.pickle
-
-        Returns:
-            algorithms: list of small_names (e.g. "LR", "SVM")
-            abbrev: mapping algorithm -> abbrev used in file names (here same as algorithm)
-            colors: mapping algorithm -> RGB triple for plotting
-        """
-        metrics_dir = Path(self.full_path) / "model_evaluation" / "pickled_metrics"
-        algs: List[str] = []
-        if metrics_dir.is_dir():
-            for fn in os.listdir(metrics_dir):
-                if not fn.endswith("_metrics.pickle"):
-                    continue
-                # Expect pattern "<ALG>_CV_<fold>_metrics.pickle"
-                parts = fn.split("_CV_")
-                if len(parts) != 2:
-                    continue
-                alg = parts[0]
-                if alg:
-                    algs.append(alg)
-
-        algorithms = sorted(set(algs))
-        if not algorithms:
-            logging.warning(
-                "StatsPhaseJob: no modeling metrics found under %s", metrics_dir
-            )
-
-        abbrev = {a: a for a in algorithms}  # small_name == abbrev in v3
-        # Assign colors via seaborn palette
-        palette = sns.color_palette("tab10", n_colors=max(len(algorithms), 1))
-        colors = {
-            a: palette[i % len(palette)] for i, a in enumerate(algorithms)
-        }
-
-        return algorithms, abbrev, colors
-
-    # ------------------------------------------------------------------
-    # PUBLIC ENTRY
-    # ------------------------------------------------------------------
-    def run(self):
-        self.job_start_time = time.time()
-        logging.info("Running Statistics Summary for %s", self.data_name)
-
-        # Ensure dirs exist
+        # Prep dirs
         self.preparation()
 
-        # Core stats for base models (phase 6)
+        # Primary stats + plots
         if self.outcome_type == "Binary":
             result_table, metric_dict = self.primary_stats_classification()
-            if self.plot_roc:
-                self.do_plot_roc(result_table)
-            if self.plot_prc:
-                self.do_plot_prc(result_table)
+            logging.info("Generating ROC and PRC plots for binary classification...")
+            self.do_plot_roc(result_table)
+            self.do_plot_prc(result_table)
         elif self.outcome_type == "Multiclass":
             result_table, metric_dict = self.primary_stats_multiclass()
-            if self.plot_roc:
-                self.do_plot_roc(result_table)
-            if self.plot_prc:
-                self.do_plot_prc(result_table)
-        elif self.outcome_type == "Continuous":
+            logging.info("Generating ROC and PRC plots for multiclass classification...")
+            self.do_plot_roc(result_table)
+            self.do_plot_prc(result_table)
+        else:  # Continuous
             result_table, metric_dict = self.primary_stats_regression()
             self.residuals_regression()
-        else:
-            raise ValueError(f"Unknown outcome_type: {self.outcome_type}")
 
-        # Summaries of metrics across CV folds
+        # Save metric summary (mean / median / std)
+        logging.info("Saving metric summaries...")
         metrics = list(metric_dict[self.algorithms[0]].keys())
-        logging.info("Saving Metric Summaries...")
         self.save_metric_stats(metrics, metric_dict)
 
-        # Metric boxplots
+        # Boxplots
         if self.plot_metric_boxplots:
-            logging.info("Generating Metric Boxplots...")
+            logging.info("Generating metric boxplots...")
             self.metric_boxplots(metrics, metric_dict)
 
-        # Non-parametric tests (Kruskal, Wilcoxon, Mann-Whitney)
+        # Nonparametric stats
         if len(self.algorithms) > 1:
-            logging.info(
-                "Running Non-Parametric Statistical Significance Analysis..."
-            )
+            logging.info("Running non-parametric statistical tests...")
             kruskal_summary = self.kruskal_wallis(metrics, metric_dict)
             self.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
-        # Feature-importance stats & plots
-        ave_or_median = (
-            "median" if self.outcome_type in ("Binary", "Multiclass") else "mean"
-        )
+        # Feature importance stats & plots
+        ave_or_median = "median" if self.outcome_type in ("Binary", "Multiclass") else "mean"
         self.fi_stats(metric_dict, ave_or_median)
 
-        # Optional: summarize ensembles (Phase 7) if present
-        if self.include_ensembles:
-            try:
-                self.summarize_ensembles()
-            except Exception as e:
-                logging.warning(
-                    "Ensemble summary failed (non-fatal): %s", str(e)
-                )
-
-        # Save runtime for this phase
+        # Phase runtime + global runtimes
         self.save_runtime()
         self.parse_runtime()
 
         logging.info("%s statistics phase complete", self.data_name)
-        job_file = open(
-            self.experiment_path
-            + "/jobsCompleted/job_stats_"
-            + self.data_name
-            + ".txt",
-            "w",
-        )
-        job_file.write("complete")
-        job_file.close()
+        jobs_dir = os.path.join(self.experiment_path, "jobsCompleted")
+        os.makedirs(jobs_dir, exist_ok=True)
+        with open(os.path.join(jobs_dir, f"job_stats_{self.data_name}.txt"), "w") as f:
+            f.write("complete")
 
-    # ------------------------------------------------------------------
-    # Everything below is the same logic as your previous Stats job,
-    # just with class / attribute names adapted to StatsPhaseJob.
-    # (I’ve only touched parse_runtime very lightly to remove algInfo use.)
-    # ------------------------------------------------------------------
-
-    def preparation(self):
-        """
-        Creates directory for all results files, decodes included ML modeling
-        algorithms that were run
-        """
-        if not os.path.exists(self.full_path + "/model_evaluation"):
-            os.mkdir(self.full_path + "/model_evaluation")
-        if not os.path.exists(self.full_path + "/model_evaluation/feature_importance/"):
-            os.mkdir(self.full_path + "/model_evaluation/feature_importance/")
-
-    #-------------------------------------------------------------------------
-    # Below this line is essentially old streamline StatsJob code, lightly
+    # -------------------------------------------------------------------------
+    # Below this line is essentially your old streamline StatsJob code, lightly
     # adapted to paths and naming.
     # -------------------------------------------------------------------------
 
@@ -1698,343 +1611,49 @@ class StatsPhaseJob:
             weight_list = np.multiply(weights[i], frac_lists[i]).tolist()
             weighted_frac_lists.append(weight_list)
         return weighted_frac_lists
-    
-    def ensemble_stats_summary(self):
-        """
-        Summarize ensembles created in Phase 7 (if any exist) and
-        generate ensemble-only ROC / PRC summary plots + metrics tables.
-
-        Uses IO-only helpers:
-          - _collect_ensemble_metrics_core
-          - _plot_ensemble_roc_summary
-          - _plot_ensemble_prc_summary
-        """
-        ens_root = Path(self.full_path) / "ensemble_evaluation"
-        metrics_dir = ens_root / "metrics_by_cv"
-        curves_dir = ens_root / "curves_by_cv"
-
-        if not metrics_dir.exists():
-            logging.info("No ensemble_evaluation/metrics_by_cv found. Skipping ensemble summary.")
-            return
-
-        logging.info("Collecting ensemble statistics from %s", str(ens_root))
-
-        metrics_by_ens, metric_names = self._collect_ensemble_metrics_core(metrics_dir)
-        if not metrics_by_ens:
-            logging.info("No ensemble metrics found. Skipping ensemble summary.")
-            return
-
-        # write ensemble-only summary tables
-        self._write_ensemble_metric_summaries(ens_root, metrics_by_ens, metric_names)
-
-        # curves summary & plots
-        roc_summary, prc_summary = self._collect_ensemble_curves_core(curves_dir, metrics_by_ens.keys())
-        if self.plot_roc and roc_summary:
-            self._plot_ensemble_roc_summary(ens_root, roc_summary)
-        if self.plot_prc and prc_summary:
-            self._plot_ensemble_prc_summary(ens_root, prc_summary)
-
-    # ------------------- ensemble core helpers -------------------------
-    def _collect_ensemble_metrics_core(self, metrics_dir: Path) -> Tuple[Dict[str, Dict[str, List[float]]], List[str]]:
-        """
-        Collect per-CV JSON metrics for each ensemble id.
-        Returns:
-          metrics_by_ens: {ens_id: {metric_name: [values across CVs]}}
-          metric_names: list of metric names (from first ensemble)
-        """
-        metrics_by_ens: Dict[str, Dict[str, List[float]]] = {}
-        for fn in metrics_dir.glob("*.json"):
-            # pattern: <ens_id>_CV_<cv>.json
-            m = re.match(r"(.+?)_CV_(\d+)\.json$", fn.name)
-            if not m:
-                continue
-            ens_id = m.group(1)
-            with open(fn, "r") as f:
-                data = json.load(f)
-            md = metrics_by_ens.setdefault(ens_id, {})
-            for k, v in data.items():
-                try:
-                    val = float(v)
-                except Exception:
-                    continue
-                md.setdefault(k, []).append(val)
-
-        if not metrics_by_ens:
-            return {}, []
-
-        # Metric names from first ensemble
-        first_ens = next(iter(metrics_by_ens.keys()))
-        metric_names = sorted(metrics_by_ens[first_ens].keys())
-        return metrics_by_ens, metric_names
-
-    def _write_ensemble_metric_summaries(
-        self,
-        ens_root: Path,
-        metrics_by_ens: Dict[str, Dict[str, List[float]]],
-        metric_names: List[str],
-    ):
-        """
-        IO helper: write mean/median/std summary CSVs for ensemble metrics.
-        """
-        out_mean = ens_root / "Ensembles_performance_mean.csv"
-        out_median = ens_root / "Ensembles_performance_median.csv"
-        out_std = ens_root / "Ensembles_performance_std.csv"
-
-        # mean
-        with out_mean.open("w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["Ensemble"] + metric_names)
-            for ens_id, md in metrics_by_ens.items():
-                row = [ens_id]
-                for m in metric_names:
-                    vals = [float(x) for x in md.get(m, [])]
-                    row.append(str(mean(vals)) if vals else "nan")
-                w.writerow(row)
-
-        # median
-        with out_median.open("w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["Ensemble"] + metric_names)
-            for ens_id, md in metrics_by_ens.items():
-                row = [ens_id]
-                for m in metric_names:
-                    vals = [float(x) for x in md.get(m, [])]
-                    row.append(str(median(vals)) if vals else "nan")
-                w.writerow(row)
-
-        # std
-        with out_std.open("w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["Ensemble"] + metric_names)
-            for ens_id, md in metrics_by_ens.items():
-                row = [ens_id]
-                for m in metric_names:
-                    vals = [float(x) for x in md.get(m, [])]
-                    if len(vals) > 1:
-                        row.append(str(stdev(vals)))
-                    else:
-                        row.append("nan")
-                w.writerow(row)
-
-    def _collect_ensemble_curves_core(
-        self,
-        curves_dir: Path,
-        ensemble_ids,
-    ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
-        """
-        Core: aggregate ROC/PRC curves over CV for each ensemble id.
-
-        Returns:
-          roc_summary: {ens_id: {"fpr": common_fpr, "tpr": mean_tpr, "auc": mean_auc}}
-          prc_summary: {ens_id: {"recall": common_rec, "precision": mean_prec,
-                                 "pr_auc": mean_pr_auc, "aps": mean_aps}}
-        """
-        roc_summary: Dict[str, Dict[str, Any]] = {}
-        prc_summary: Dict[str, Dict[str, Any]] = {}
-
-        common_fpr = np.linspace(0.0, 1.0, 200)
-        common_rec = np.linspace(0.0, 1.0, 200)
-
-        for ens_id in ensemble_ids:
-            # ROC
-            tprs = []
-            aucs = []
-            for roc_file in curves_dir.glob(f"{ens_id}_CV_*_roc.json"):
-                with roc_file.open("r") as f:
-                    roc_data = json.load(f)
-                fpr = np.array(roc_data.get("fpr", []), dtype=float)
-                tpr = np.array(roc_data.get("tpr", []), dtype=float)
-                if fpr.size == 0 or tpr.size == 0:
-                    continue
-                tinterp = np.interp(common_fpr, fpr, tpr)
-                tinterp[0] = 0.0
-                tinterp[-1] = 1.0
-                tprs.append(tinterp)
-                aucs.append(auc(fpr, tpr))
-            if tprs:
-                mean_tpr = np.mean(tprs, axis=0)
-                mean_tpr[-1] = 1.0
-                roc_summary[ens_id] = {
-                    "fpr": common_fpr,
-                    "tpr": mean_tpr,
-                    "auc": float(np.mean(aucs)),
-                }
-
-            # PRC
-            precs = []
-            pr_aucs = []
-            aps_list = []
-            for prc_file in curves_dir.glob(f"{ens_id}_CV_*_prc.json"):
-                with prc_file.open("r") as f:
-                    prc_data = json.load(f)
-                prec = np.array(prc_data.get("precision", []), dtype=float)
-                rec = np.array(prc_data.get("recall", []), dtype=float)
-                if rec.size == 0 or prec.size == 0:
-                    continue
-                sidx = np.argsort(rec)
-                rec_sorted = rec[sidx]
-                prec_sorted = prec[sidx]
-                pinterp = np.interp(common_rec, rec_sorted, prec_sorted)
-                precs.append(pinterp)
-                pr_aucs.append(auc(rec_sorted, prec_sorted))
-                # approximate APS by simple average (we don't have raw y/proba here)
-                aps_list.append(float(np.mean(prec_sorted)))
-            if precs:
-                mean_prec = np.mean(precs, axis=0)
-                prc_summary[ens_id] = {
-                    "recall": common_rec,
-                    "precision": mean_prec,
-                    "pr_auc": float(np.mean(pr_aucs)),
-                    "aps": float(np.mean(aps_list)) if aps_list else float("nan"),
-                }
-
-        return roc_summary, prc_summary
-
-    # ------------------- ensemble plotting helpers ---------------------
-    def _plot_ensemble_roc_summary(self, ens_root: Path, roc_summary: Dict[str, Dict[str, Any]]):
-        """
-        IO + plotting: summary ROC curves comparing ensembles.
-        """
-        if not roc_summary:
-            return
-
-        plt.figure(figsize=(6, 6))
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-        colors = {}
-        for idx, ens_id in enumerate(sorted(roc_summary.keys())):
-            c = color_cycle[idx % len(color_cycle)]
-            colors[ens_id] = c
-            d = roc_summary[ens_id]
-            plt.plot(d["fpr"], d["tpr"], color=c,
-                     label=f"{ens_id}, AUC={d['auc']:.3f}")
-
-        # no-skill
-        plt.plot([0, 1], [0, 1], color='black', linestyle='--', label='No-Skill', alpha=.8)
-        plt.xticks(np.arange(0.0, 1.1, step=0.1))
-        plt.yticks(np.arange(0.0, 1.1, step=0.1))
-        plt.xlabel("False Positive Rate", fontsize=15)
-        plt.ylabel("True Positive Rate", fontsize=15)
-        plt.legend(loc="lower right", fontsize=8)
-        plt.title("Ensemble ROC Summary")
-
-        out_path = ens_root / "Summary_ROC_ensembles.png"
-        plt.savefig(out_path, bbox_inches="tight")
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
-
-    def _plot_ensemble_prc_summary(self, ens_root: Path, prc_summary: Dict[str, Dict[str, Any]]):
-        """
-        IO + plotting: summary PRC curves comparing ensembles.
-        """
-        if not prc_summary:
-            return
-
-        # no-skill baseline from first test set (same as base models)
-        try:
-            test = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
-            if self.instance_label is not None and self.instance_label in test.columns:
-                test = test.drop(self.instance_label, axis=1)
-            test_y = test[self.outcome_label].values
-            no_skill = len(test_y[test_y == 1]) / len(test_y)
-        except Exception:
-            no_skill = 0.5
-
-        plt.figure(figsize=(6, 6))
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
-        for idx, ens_id in enumerate(sorted(prc_summary.keys())):
-            c = color_cycle[idx % len(color_cycle)]
-            d = prc_summary[ens_id]
-            plt.plot(d["recall"], d["precision"], color=c,
-                     label=f"{ens_id}, AUC={d['pr_auc']:.3f}, APS={d['aps']:.3f}")
-
-        plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--',
-                 label='No-Skill', alpha=.8)
-        plt.xticks(np.arange(0.0, 1.1, step=0.1))
-        plt.yticks(np.arange(0.0, 1.1, step=0.1))
-        plt.xlabel("Recall (Sensitivity)", fontsize=15)
-        plt.ylabel("Precision (PPV)", fontsize=15)
-        plt.legend(loc="lower left", fontsize=8)
-        plt.title("Ensemble PRC Summary")
-
-        out_path = ens_root / "Summary_PRC_ensembles.png"
-        plt.savefig(out_path, bbox_inches="tight")
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
 
     def parse_runtime(self):
         """
-        Loads runtime summaries from the entire pipeline and parses them into
-        a single CSV runtime report.
-
-        This implementation no longer relies on pickle; it just
-        aggregates by the token after 'runtime_' in the filename. For model
-        runtimes, this will be the algorithm small_name (e.g. 'LR', 'SVM').
+        Loads runtime summaries from entire pipeline and parses them into a single summary file.
         """
-        dict_obj: Dict[str, float] = {}
-        dict_obj["preprocessing"] = 0.0
-
-        runtime_dir = Path(self.full_path) / "runtime"
-        for file_path in glob.glob(str(runtime_dir / "runtime_*.txt")):
+        dict_obj = dict()
+        dict_obj['preprocessing'] = 0
+        for file_path in glob.glob(self.full_path + '/runtime/*.txt'):
             file_path = str(Path(file_path).as_posix())
-            with open(file_path, "r") as f:
-                try:
-                    val = float(f.readline())
-                except Exception:
-                    continue
-
-            # file name: runtime_<ref>[_...].txt
-            fname = os.path.basename(file_path)
-            parts = fname.split("_")
-            if len(parts) < 2:
-                continue
-            ref = parts[1].split(".")[0]  # e.g. 'exploratory', 'Stats', 'LR'
-
-            if "preprocessing" in ref:
-                dict_obj["preprocessing"] = dict_obj.get("preprocessing", 0.0) + val
+            f = open(file_path, 'r')
+            val = float(f.readline())
+            ref = file_path.split('/')[-1].split('_')[1].split('.')[0]
+            if ref in self.abbrev:
+                ref = self.abbrev[ref]
+            if not (ref in dict_obj):
+                if 'preprocessing' in ref:
+                    dict_obj['preprocessing'] += val
+                dict_obj[ref] = val
             else:
-                dict_obj[ref] = dict_obj.get(ref, 0.0) + val
-
-        with open(self.full_path + "/runtimes.csv", mode="w", newline="") as file:
-            writer = csv.writer(
-                file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-            )
+                dict_obj[ref] += val
+        with open(self.full_path + '/runtimes.csv', mode='w', newline="") as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(["Pipeline Component", "Phase", "Time (sec)"])
-
-            # Phase 1 & 2 names are kept for backward compatibility
-            if "exploratory" in dict_obj:
-                writer.writerow(["Exploratory Analysis", 1, dict_obj["exploratory"]])
-            writer.writerow(["Scale and Impute", 2, dict_obj.get("preprocessing", 0.0)])
-
-            if "mutual" in dict_obj:
-                writer.writerow(["Mutual Information (Feature Importance)", 3, dict_obj["mutual"]])
-            if "multisurf" in dict_obj:
-                writer.writerow(["MultiSURF (Feature Importance)", 3, dict_obj["multisurf"]])
-
-            if "featureselection" in dict_obj:
-                writer.writerow(["Feature Selection", 4, dict_obj["featureselection"]])
-
-            # Any other keys that match algorithm small_names => Phase 6 Modeling
-            for alg in self.algorithms:
-                if alg in dict_obj:
-                    writer.writerow(
-                        [f"{alg} (Modeling)", 6, dict_obj[alg]]
-                    )
-
-            # Stats phase itself
-            if "Stats" in dict_obj:
-                writer.writerow(["Stats Summary", 8, dict_obj["Stats"]])
+            writer.writerow(["Exploratory Analysis", 1, dict_obj['exploratory']])
+            writer.writerow(["Scale and Impute", 2, dict_obj['preprocessing']])
+            try:
+                writer.writerow(["Mutual Information (Feature Importance)", 3, dict_obj['mutual']])
+            except KeyError:
+                pass
+            try:
+                writer.writerow(["MultiSURF (Feature Importance)", 3, dict_obj['multisurf']])
+            except KeyError:
+                pass
+            writer.writerow(["Feature Selection", 4, dict_obj['featureselection']])
+            for algorithm in self.algorithms:  # Report runtimes for each algorithm
+                writer.writerow(([algorithm + "(Modeling)", 5, dict_obj[self.abbrev[algorithm]]]))
+            writer.writerow(["Stats Summary", 6, dict_obj['Stats']])
 
     def save_runtime(self):
         """
         Save phase runtime
         """
-        runtime_file = open(
-            self.full_path + "/runtime/runtime_Stats.txt", "w"
-        )
+        runtime_file = open(self.full_path + '/runtime/runtime_Stats.txt', 'w')
         runtime_file.write(str(time.time() - self.job_start_time))
         runtime_file.close()
+
