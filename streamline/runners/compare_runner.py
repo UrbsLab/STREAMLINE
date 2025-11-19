@@ -62,28 +62,28 @@ class CompareRunner:
         if not os.path.exists(self.output_path + '/' + self.experiment_name):
             raise Exception("Experiment must exist (from phase 1) before phase 6 can begin")
 
-    def run(self, run_parallel=False):
+    def run(self, run_parallel=False): #UPenn or Cedars - LSFOld - uses shell file to submit. Old = shell file to submit. without shell , just LSF, etc. 5 types of hpcs
         if self.run_cluster in ["SLURMOld", "LSFOld"]:
             if self.run_cluster == "SLURMOld":
                 self.submit_slurm_cluster_job()
 
             if self.run_cluster == "LSFOld":
                 self.submit_lsf_cluster_job()
-        else:
+        else: # Not slurm or lsf OLD - Dask jobs submission. Run for local or HPC
             job_obj = CompareJob(self.output_path, self.experiment_name, None,
                                  self.outcome_label, self.outcome_type, self.instance_label, self.sig_cutoff,
                                  self.show_plots)
-            if run_parallel in ["multiprocessing", "True", True]:
+            if run_parallel in ["multiprocessing", "True", True]: #Multiprocessing but not on an HPC. 
                 # p = multiprocessing.Process(target=runner_fn, args=(job_obj, ))
                 # p.start()
                 # p.join()
                 Parallel()(delayed(runner_fn)(job_obj) for job_obj in [job_obj, ])
-            elif self.run_cluster and "Old" not in self.run_cluster:
+            elif self.run_cluster and "Old" not in self.run_cluster: #run on hpc - run jobs sequentially up to 400 (cluster defined)
                 get_cluster(self.run_cluster,
-                            self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory)
-                dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]])
+                            self.output_path + '/' + self.experiment_name, self.queue, self.reserved_memory) #function in utils. 
+                dask.compute([dask.delayed(runner_fn)(job_obj) for job_obj in [job_obj, ]]) # job object is like a list of jobs - and runs it. 
             else:
-                job_obj.run()
+                job_obj.run() #run locally without multiprocessing
 
     def get_algorithms(self):
         pickle_in = open(self.output_path + '/' + self.experiment_name + '/' + "algInfo.pickle", 'rb')
@@ -95,13 +95,13 @@ class CompareRunner:
         self.algorithms = algorithms
         pickle_in.close()
 
-    def get_cluster_params(self):
+    def get_cluster_params(self): 
         cluster_params = [self.output_path, self.experiment_name, None,
                           self.outcome_label, self.outcome_type, self.instance_label, self.sig_cutoff, self.show_plots]
         cluster_params = [str(i) for i in cluster_params]
         return cluster_params
 
-    def submit_slurm_cluster_job(self):
+    def submit_slurm_cluster_job(self): #legacy mode just for cedars (no head node) note cedars has a different hpc - we'd need to write a method for (this is the more recent one)
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P1_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')
@@ -124,7 +124,7 @@ class CompareRunner:
         sh_file.close()
         os.system('sbatch ' + job_name)
 
-    def submit_lsf_cluster_job(self):
+    def submit_lsf_cluster_job(self): #UPENN - Legacy mode (using shell file) - memory on head node
         job_ref = str(time.time())
         job_name = self.output_path + '/' + self.experiment_name + '/jobs/P7_' + job_ref + '_run.sh'
         sh_file = open(job_name, 'w')

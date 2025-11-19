@@ -103,7 +103,7 @@ def single_parse(mode_params, argv, config_dict=None):
     return config_dict
 
 
-def parser_function(argv):
+def parser_function(argv): #not an exhaustive list - just first parsing needed
     parser = argparse.ArgumentParser(description="STREAMLINE: \n"
                                                  "Simple Transparent End-To-End Automated Machine "
                                                  "Learning Pipeline for Supervised Learning in Tabular "
@@ -111,7 +111,7 @@ def parser_function(argv):
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--config', '-c',
                         dest='config', type=str, default="",
-                        help='flag to load config file')
+                        help='flag to load config file') #if this passed we don't need any of the items below
     parser.add_argument('--verbose', dest='verbose', type=str2bool, nargs='?', const=True, default=False,
                         help='give output to command line')
     parser.add_argument('--do-till-report', '--dtr', dest='do_till_report', type=str2bool, nargs='?', const=True,
