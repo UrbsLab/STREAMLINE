@@ -18,7 +18,7 @@ from sklearn.preprocessing import StandardScaler
 from streamline.utils.job import Job
 from streamline.utils.dataset import Dataset
 from streamline.dataprep.kfold_partitioning import KFoldPartitioner
-from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis, f_oneway, spearmanr
+from scipy.stats import chi2_contingency, mannwhitneyu, skew, kurtosis, f_oneway, kruskal, spearmanr
 import seaborn as sns
 import warnings
 
@@ -1266,68 +1266,81 @@ class DataProcess(Job):
 
     def test_selector(self, feature_name):
         """
-        Selects and applies appropriate univariate association test for a given feature. Returns resulting p-value
+        Selects and applies appropriate univariate association test for a given feature.
+        Returns resulting p-value, test statistic, and test name.
 
         Args:
             feature_name: name of feature column operation is running on
         """
         outcome_label = self.dataset.outcome_label
         p_val, test_stat, test_name = None, None, None
+
+        x = self.dataset.data[feature_name]
+        y = self.dataset.data[outcome_label]
+
         try:
-            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
-                # test_name, test_stat = None, None
-                # Feature and outcome both are discrete/categorical/binary
+            if self.outcome_type in ["Binary", "Multiclass"]:
+                # Outcome is discrete/categorical/binary
                 if feature_name in self.dataset.categorical_variables:
-                    # Calculate Contingency Table - Counts
-                    table_temp = pd.crosstab(self.dataset.data[feature_name], self.dataset.data[outcome_label])
+                    # Feature and outcome both categorical -> Chi-square test of independence (non-parametric)
+                    table_temp = pd.crosstab(x, y)
                     # Univariate association test (Chi Square Test of Independence - Non-parametric)
                     c, p, dof, expected = chi2_contingency(table_temp)
                     p_val = p
                     test_stat = c
                     test_name = "Chi Square Test"
-                # Feature is continuous and Outcome is discrete/categorical/binary
+
                 else:
-                    if len(self.dataset.data[outcome_label].unique()) == 2:
-                        # Univariate association test (Mann-Whitney Test - Non-parametric)
-                        c, p = mannwhitneyu(
-                            x=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 0],
-                            y=self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == 1],
-                            nan_policy='omit')
+                    # Feature continuous, outcome categorical/binary
+                    unique_outcomes = y.dropna().unique()
+
+                    if len(unique_outcomes) == 2:
+                        # Mann-Whitney U Test (non-parametric)
+                        group0 = x[y == unique_outcomes[0]].dropna()
+                        group1 = x[y == unique_outcomes[1]].dropna()
+
+                        c, p = mannwhitneyu(group0, group1, alternative="two-sided")
                         p_val = p
                         test_stat = c
                         test_name = "Mann-Whitney U Test"
                     else:
-                        categories = list(self.dataset.data[outcome_label].unique())
-                        samples = [self.dataset.data[feature_name].loc[self.dataset.data[outcome_label] == cat]
-                                   for cat in categories]
-                        c, p = f_oneway(*samples)
+                        # >2 outcome categories: Kruskal-Wallis H Test (non-parametric alternative to one-way ANOVA)
+                        samples = [
+                            x[y == cat].dropna()
+                            for cat in unique_outcomes
+                        ]
+                        c, p = kruskal(*samples)
                         p_val = p
                         test_stat = c
-                        test_name = "Analysis of Variance"
+                        test_name = "Kruskal-Wallis H Test"
+
             elif self.outcome_type == "Continuous":
-                # Feature is discrete/categorical/binary and Outcome is continuous
+                # Outcome continuous
                 if feature_name in self.dataset.categorical_variables:
-                    categories = list(self.dataset.data[feature_name].unique())
-                    samples = [self.dataset.data[outcome_label].loc[self.dataset.data[feature_name] == cat]
-                               for cat in categories]
-                    c, p = f_oneway(*samples)
+                    # Categorical feature, continuous outcome -> Kruskal-Wallis (non-parametric)
+                    categories = x.dropna().unique()
+                    samples = [
+                        y[x == cat].dropna()
+                        for cat in categories
+                    ]
+                    c, p = kruskal(*samples)
                     p_val = p
                     test_stat = c
-                    test_name = "Analysis of Variance"
-                # Feature is continuous and Outcome is continuous
+                    test_name = "Kruskal-Wallis H Test"
                 else:
-                    # Univariate association test (Mann-Whitney Test - Non-parametric)
-                    res = spearmanr(
-                        a=self.dataset.data[feature_name],
-                        b=self.dataset.data[outcome_label], nan_policy='omit')
+                    # Both continuous -> Spearman correlation (non-parametric)
+                    res = spearmanr(x, y, nan_policy="omit")
                     c, p = res.statistic, res.pvalue
                     p_val = p
                     test_stat = c
                     test_name = "Spearman Correlation"
+
         except Exception as e:
             logging.error(e)
-            raise Exception("scipy error, check if you've install correct version of scipy")
+            raise Exception("scipy error, check if you've installed correct version of scipy") from e
+
         return p_val, test_stat, test_name
+
 
     def univariate_plots(self, sorted_p_list=None, top_features=20):
         """
