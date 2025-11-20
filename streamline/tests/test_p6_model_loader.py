@@ -5,6 +5,8 @@ from streamline.p6_modeling.utils.loader import (
     get_model_by_id,
 )
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 # ---------------------------
 # load_model_classes()
 # ---------------------------

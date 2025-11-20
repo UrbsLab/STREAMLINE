@@ -121,7 +121,7 @@ class P8Runner:
 
     def _run_one(self, dataset_dir: str):
         StatisticsPhaseJob(
-            dataset_dir=dataset_dir,
+            full_path=dataset_dir,
             outcome_label=self.outcome_label,
             outcome_type=self.outcome_type,
             instance_label=self.instance_label,

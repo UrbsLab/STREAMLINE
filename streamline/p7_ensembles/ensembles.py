@@ -34,6 +34,7 @@ class EnsemblePhaseJob:
         # ensembles: CSV of ids (hard_voting,soft_voting,stack_lr,stack_dt,stack_rf)
         ensembles: Optional[str] = "hard_voting,soft_voting,stack_lr",
         base_models: Optional[str] = None,    # comma list of small names filter (e.g., "LR,SVM,NB")
+        meta_train_source: str = "train",  # "train" or "test"
         calibrate: int = 0,
         calibrate_method: str = "sigmoid",
         calibrate_cv: int = 5,
@@ -46,6 +47,7 @@ class EnsemblePhaseJob:
         self.instance_label = instance_label
         self.ensemble_ids = [e.strip() for e in (ensembles or "").split(",") if e.strip()]
         self.base_filter = [s.strip() for s in (base_models or "").split(",") if s.strip()] or None
+        self.meta_train_source = meta_train_source
         self.calibrate = bool(calibrate)
         self.calibrate_method = calibrate_method
         self.calibrate_cv = int(calibrate_cv)
@@ -74,13 +76,13 @@ class EnsemblePhaseJob:
 
             for ens_id in self.ensemble_ids:
                 Ens = get_ensemble_by_id(ens_id)
-                ens_small = getattr(Ens, "small_name", ens_id.upper())
-                ens_name  = getattr(Ens, "name", ens_id)
+                ens_small = getattr(Ens, "small_name", ens_id)
+                ens_name  = getattr(Ens, "model_name", ens_id)
 
                 logging.info(f"[P7] Building ensemble: {ens_name} using {len(base_ests)} base models")
-                model = Ens.build(base_estimators=base_ests, random_state=self.random_state)
+                model = Ens(base_estimators=base_ests, random_state=self.random_state)
 
-                if ens_small in ("hard_voting", "soft_voting"):  
+                if ens_id in ("hard_voting", "soft_voting"):  
                     # ------- Voting ensembles -------
                     if self.calibrate:
                         model_cv = CalibratedClassifierCV(
@@ -94,7 +96,7 @@ class EnsemblePhaseJob:
                 else:
                     # ------- Manual stacking -------
                     logging.info(f"[P7] Building ensemble (stacking): {ens_name} [meta on {self.meta_train_source}]")
-                    meta = Ens._default_meta(random_state=self.random_state)
+                    meta = model._default_meta()
 
                     # choose meta training split
                     if self.meta_train_source == "train":

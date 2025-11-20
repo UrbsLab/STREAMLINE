@@ -44,7 +44,9 @@ def _iter_modnames(folder: Path, package: str):
 def _try_import(modname: str) -> Optional[ModuleType]:
     try:
         return importlib.import_module(modname)
-    except Exception:
+    except Exception as e:
+        print(f"  [WARN] Failed to import module {modname!r}")
+        print(f"         Exception: {e!r}")
         return None
 
 

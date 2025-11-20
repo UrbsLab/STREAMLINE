@@ -25,7 +25,7 @@ sns.set_theme()
 logger = logging.getLogger(__name__)
 
 
-class StatsPhaseJob:
+class StatisticsPhaseJob:
     """
     Phase 8: Statistics & post-analysis summary for STREAMLINE3.
 
@@ -155,6 +155,7 @@ class StatsPhaseJob:
                 self.original_headers = self.feature_headers
             except Exception:
                 self.original_headers = None
+                self.feature_headers = None
 
         # NEW: discover algorithms purely from model_evaluation outputs
         (
@@ -270,7 +271,7 @@ class StatsPhaseJob:
         # Optional: summarize ensembles (Phase 7) if present
         if self.include_ensembles:
             try:
-                self.summarize_ensembles()
+                self.ensemble_stats_summary()
             except Exception as e:
                 logging.warning(
                     "Ensemble summary failed (non-fatal): %s", str(e)
@@ -624,6 +625,9 @@ class StatsPhaseJob:
                     if self.instance_label is not None:
                         headers.remove(self.instance_label)
                     headers.remove(self.outcome_label)
+                    
+                    if self.original_headers is None:
+                        self.original_headers = headers.copy()
                     for each in self.original_headers:
                         if each in headers:  # Check if current feature from original dataset was in the partition
                             # Deal with features not being in original order (find index of current feature list.index()
@@ -928,6 +932,8 @@ class StatsPhaseJob:
                         if self.instance_label in headers:
                             headers.remove(self.instance_label)
                     headers.remove(self.outcome_label)
+                    if self.original_headers is None:
+                        self.original_headers = headers.copy()
                     for each in self.original_headers:
                         # Check if current feature from original dataset was in the partition
                         if each in headers:
@@ -969,6 +975,8 @@ class StatsPhaseJob:
 
             # Save FI scores for all CV models
             if master_list is None:
+                if self.feature_headers is None:
+                    self.feature_headers = self.original_headers
                 self.save_fi(fi_all, self.abbrev[algorithm], self.feature_headers)
                 # self.save_fi(fi_all, self.abbrev[algorithm], self.original_headers) #bug
             # Store ave metrics for creating global ROC and PRC plots later
@@ -1776,6 +1784,8 @@ class StatsPhaseJob:
         """
         IO helper: write mean/median/std summary CSVs for ensemble metrics.
         """
+        if not ens_root.exists():
+            ens_root.mkdir(parents=True, exist_ok=True)
         out_mean = ens_root / "Ensembles_performance_mean.csv"
         out_median = ens_root / "Ensembles_performance_median.csv"
         out_std = ens_root / "Ensembles_performance_std.csv"
@@ -1979,7 +1989,8 @@ class StatsPhaseJob:
         dict_obj["preprocessing"] = 0.0
 
         runtime_dir = Path(self.full_path) / "runtime"
-        for file_path in glob.glob(str(runtime_dir / "runtime_*.txt")):
+        for file_path in glob.glob(str(runtime_dir / "runtime_*.txt")) \
+            + glob.glob(str(runtime_dir / "models/runtime_*.txt")):
             file_path = str(Path(file_path).as_posix())
             with open(file_path, "r") as f:
                 try:
@@ -2033,6 +2044,7 @@ class StatsPhaseJob:
         """
         Save phase runtime
         """
+        os.makedirs(self.full_path + '/runtime/' , exist_ok=True)
         runtime_file = open(
             self.full_path + "/runtime/runtime_Stats.txt", "w"
         )

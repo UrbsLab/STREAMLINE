@@ -19,9 +19,6 @@ class _StackingBase(BinaryClassificationModel):
     - If tune=False → no-op optimize; fixed meta model
     - If tune=True  → Optuna objective tunes meta params only, using BaseModel.hyper_eval()
     """
-    id: str = ""
-    model_name: str = ""
-    small_name: str = ""
 
     def __init__(self,
                  base_estimators: List[Tuple[str, object]],
@@ -45,6 +42,11 @@ class _StackingBase(BinaryClassificationModel):
     def _trial_params(self, trial: optuna.trial.Trial) -> Dict[str, Any]:
         """Translate _param_grid into concrete trial params."""
         return {}
+    
+    def fit(self, x_train, y_train, n_trails=100, timeout=450, feature_names=None):
+        """Optimize → fit → (optional) calibrate for classifiers."""
+        self.optimize(x_train, y_train, n_trails, timeout, feature_names)
+        self.model.fit(x_train, y_train)
 
     # ---- Stacking builder ---------------------------------------------------
     def _build(self, meta_params: Optional[Dict[str, Any]]):

@@ -17,11 +17,6 @@ def main():
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--ensembles", default="hard_voting,soft_voting,stack_lr")
     ap.add_argument("--base_models", default=None)
-    ap.add_argument("--scoring_metric", default="balanced_accuracy")
-    ap.add_argument("--metric_direction", default="maximize")
-    # ap.add_argument("--stack_tune", type=int, default=0, help="Tune stacking meta-classifiers with Optuna")
-    # ap.add_argument("--stack_trials", type=int, default=30)
-    # ap.add_argument("--stack_timeout", type=int, default=600)
     ap.add_argument("--meta_train_source", choices=["train","test"], default="train",
                 help="Where to train stacking meta-classifier from base outputs (no CV, no base refit)")
     ap.add_argument("--calibrate", type=int, default=0)
@@ -31,7 +26,6 @@ def main():
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
     ap.add_argument("--random_state", default=0)
-    ap.add_argument("--n_jobs", type=int, default=None)
     ap.add_argument("--list_ensembles", action="store_true")
     args = ap.parse_args()
 

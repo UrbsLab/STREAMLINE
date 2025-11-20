@@ -84,6 +84,8 @@ class ModelJob:
         logging.info(self.full_path.split('/')[-1] + " [CV_" + str(self.cv_count) + "] (" + self.algorithm
                      + ") training complete. ------------------------------------")
         experiment_path = '/'.join(self.full_path.split('/')[:-1])
+        if os.path.exists(experiment_path + '/jobsCompleted/') is False:
+            os.makedirs(experiment_path + '/jobsCompleted/')
         job_file = open(experiment_path + '/jobsCompleted/job_model_' + self.full_path.split('/')[-1]
                         + '_' + str(self.cv_count) + '_' + self.algorithm + '.txt', 'w')
         job_file.write('complete')
@@ -188,7 +190,8 @@ class ModelJob:
         return x_train, y_train, x_test, y_test
 
     def save_runtime(self):
-        runtime_file = open(self.full_path + '/runtime/runtime_' + self.algorithm + '_CV' + str(self.cv_count) + '.txt','w')
+        os.makedirs(self.full_path + '/runtime/models/' , exist_ok=True)
+        runtime_file = open(self.full_path + '/runtime/models/runtime_' + self.algorithm + '_CV' + str(self.cv_count) + '.txt','w')
         runtime_file.write(str(time.time() - self.job_start_time))
         runtime_file.close()
 

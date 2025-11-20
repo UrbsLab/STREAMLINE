@@ -12,11 +12,10 @@ class P7Runner:
         self, output_path, experiment_name, n_splits,
         outcome_label="Class", instance_label=None,
         ensembles="hard_voting,soft_voting,stack_lr", base_models=None,
-        scoring_metric="balanced_accuracy", metric_direction="maximize",
         meta_train_source="train",
         calibrate=0, calibrate_method="sigmoid", calibrate_cv=5,
         run_cluster="Serial", queue="defq", reserved_memory=4,
-        random_state=0, n_jobs=None,
+        random_state=0,
     ):
         self.exp_root = Path(output_path) / experiment_name
         if not self.exp_root.is_dir():
@@ -24,12 +23,10 @@ class P7Runner:
         self.kw = dict(
             n_splits=int(n_splits),
             outcome_label=outcome_label, instance_label=instance_label,
-            ensembles=ensembles, base_model_filter=base_models,
-            scoring_metric=scoring_metric, metric_direction=metric_direction,
+            ensembles=ensembles, base_models=base_models,
             meta_train_source=meta_train_source,
             calibrate=bool(calibrate), calibrate_method=calibrate_method, calibrate_cv=int(calibrate_cv),
-            random_state=random_state, n_jobs=n_jobs,
-            output_path=output_path, experiment_name=experiment_name,
+            random_state=random_state,
         )
         self.run_cluster = run_cluster or "Serial"
         self.queue = queue; self.reserved_memory = int(reserved_memory)
@@ -66,7 +63,7 @@ class P7Runner:
             "--outcome_label", self.kw["outcome_label"],
             "--instance_label", self.kw["instance_label"] or "",
             "--ensembles", self.kw["ensembles"] or "",
-            "--base_models", self.kw["base_model_filter"] or "",
+            "--base_models", self.kw["base_models"] or "",
             "--meta_train_source", self.kw.get("meta_train_source","train"),
             "--calibrate", str(int(self.kw["calibrate"])),
             "--calibrate_method", self.kw["calibrate_method"],

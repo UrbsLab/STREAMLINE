@@ -20,6 +20,10 @@ class HardVoting(BinaryClassificationModel):
         # No hyper-parameters; ensure self.model is a concrete estimator
         if callable(self.model):
             self.model = self.model()
+    
+    def fit(self, x_train, y_train, n_trails=None, timeout=None, feature_names=None):
+        self.optimize(x_train, y_train, n_trails, timeout, feature_names)
+        self.model.fit(x_train, y_train)
 
 class SoftVoting(BinaryClassificationModel):
     id = "soft_voting"
@@ -36,3 +40,7 @@ class SoftVoting(BinaryClassificationModel):
     def optimize(self, *args, **kwargs):
         if callable(self.model):
             self.model = self.model()
+            
+    def fit(self, x_train, y_train, n_trails=None, timeout=None, feature_names=None):
+        self.optimize(x_train, y_train, n_trails, timeout, feature_names)
+        self.model.fit(x_train, y_train)
