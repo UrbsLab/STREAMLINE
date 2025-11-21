@@ -6,9 +6,11 @@ from scipy.stats import pearsonr
 from sklearn import metrics
 from sklearn.metrics import (
     auc, max_error, mean_absolute_error, mean_squared_error,
-    median_absolute_error, explained_variance_score
+    median_absolute_error, explained_variance_score, 
+    brier_score_loss, precision_score, recall_score
 )
 from sklearn.model_selection import KFold
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.exceptions import ConvergenceWarning
 import warnings
 
@@ -61,16 +63,26 @@ class BinaryClassificationModel(BaseModel, ABC):
         Keep the legacy binary outputs (metric_list dict from class_eval + full curves)
         when probabilities are available; otherwise fall back to BaseModel default.
         """
-        # If predict_proba is missing, use BaseModel’s default evaluation
+        # If predict_proba is missing, use decision function or predict evaluation
         proba_fn = getattr(self.model, "predict_proba", None)
         if proba_fn is None:
-            return super().model_evaluation(x_test, y_test)
+            proba_fn = getattr(self.model, "decision_function", None)
+            if proba_fn is None:
+                return getattr(self.model, "predict", None)
 
         y_pred = self.model.predict(x_test)
         probas_ = proba_fn(x_test)
-        # If probas shape unexpected, defer to default
+        # If probas shape unexpected, raise error
         if probas_ is None or (hasattr(probas_, "ndim") and probas_.ndim == 1):
-            return super().model_evaluation(x_test, y_test)
+            raise ValueError("Unexpected probability shape in BinaryClassificationModel.model_evaluation")
+        
+        try:
+            # assume binary {0,1} with positive class prob in column 1
+            pos_proba = probas_[:, 1]
+            brier = brier_score_loss(y_test, pos_proba)
+        except Exception:
+            # fall back to NaN if something goes wrong / non-binary case
+            brier = float("nan")
 
         # Legacy metric list via class_eval if available; else compute a minimal dict
         if class_eval is not None:
@@ -83,6 +95,7 @@ class BinaryClassificationModel(BaseModel, ABC):
                 "f1": float(f1_score(y_test, y_pred)),
                 "roc_auc": float(roc_auc_score(y_test, probas_[:, 1])) if probas_ is not None else None,
                 "average_precision": float(average_precision_score(y_test, probas_[:, 1])) if probas_ is not None else None,
+                "brier_score": float(brier),
             }
 
         fpr, tpr, _ = metrics.roc_curve(y_test, probas_[:, 1])
@@ -130,12 +143,14 @@ class MulticlassClassificationModel(BaseModel, ABC):
         """
         proba_fn = getattr(self.model, "predict_proba", None)
         if proba_fn is None:
-            return super().model_evaluation(x_test, y_test)
+            proba_fn = getattr(self.model, "decision_function", None)
+            if proba_fn is None:
+                return getattr(self.model, "predict", None)
 
         y_pred = self.model.predict(x_test)
         probas_ = proba_fn(x_test)
         if probas_ is None or (hasattr(probas_, "ndim") and probas_.ndim != 2):
-            return super().model_evaluation(x_test, y_test)
+            raise ValueError("Unexpected probability shape in MulticlassClassificationModel.model_evaluation")
 
         # Legacy metric dict if available
         if class_eval is not None:
@@ -146,6 +161,18 @@ class MulticlassClassificationModel(BaseModel, ABC):
                 "balanced_accuracy": float(balanced_accuracy_score(y_test, y_pred)),
                 "accuracy": float(accuracy_score(y_test, y_pred)),
                 "f1": float(f1_score(y_test, y_pred, average="macro")),
+                "brier_score": self.multiclass_brier_score(y_test, probas_), 
+                # Additional multiclass metrics to compare
+                "f1_macro": float(f1_score(y_test, y_pred, average="macro")),
+                "f1_micro": float(f1_score(y_test, y_pred, average="micro")),
+                "precision_macro": float(precision_score(y_test, y_pred, average="macro")),
+                "precision_micro": float(precision_score(y_test, y_pred, average="micro")),
+                "recall_macro": float(recall_score(y_test, y_pred, average="macro")),
+                "recall_micro": float(recall_score(y_test, y_pred, average="micro")),
+                "roc_auc_macro": float(metrics.roc_auc_score(y_test, probas_, multi_class="ovo", average="macro")) if probas_ is not None else None,
+                "roc_auc_micro": float(metrics.roc_auc_score(y_test, probas_, multi_class="ovo", average="micro")) if probas_ is not None else None,
+                "average_precision_macro": float(metrics.average_precision_score(y_test, probas_, average="macro")) if probas_ is not None else None,
+                "average_precision_micro": float(metrics.average_precision_score(y_test, probas_, average="micro")) if probas_ is not None else None,
             }
 
         fpr, tpr, roc_auc = dict(), dict(), dict()
@@ -186,9 +213,41 @@ class MulticlassClassificationModel(BaseModel, ABC):
         fpr["macro"] = fpr_grid
         tpr["macro"] = mean_tpr
         roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+        
+        # Macro PR (via averaged precision on common recall grid)
+        recall_grid = np.linspace(0.0, 1.0, 1000)
+        mean_prec = np.zeros_like(recall_grid)
+
+        for i in range(n_classes):
+            # If recall[i] is decreasing (because you reversed it), use recall[i][::-1], prec[i][::-1]
+            mean_prec += np.interp(recall_grid, recall[i], prec[i])
+
+        mean_prec /= n_classes
+        recall["macro"] = recall_grid
+        prec["macro"] = mean_prec
+
+        # AUC of macro PR curve
+        prec_rec_auc["macro"] = auc(recall["macro"], prec["macro"])
+
+        # Macro average precision (scalar, using sklearn's macro averaging)
+        ave_prec["macro"] = metrics.average_precision_score(
+            y_test_dummies, probas_, average="macro"
+        )
 
         return metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_
+    
+    @staticmethod
+    def multiclass_brier_score(y_true, y_prob):
+        """
+        y_true: (n_samples,) integer labels
+        y_prob: (n_samples, n_classes) predicted probabilities
+        """
+        # One-hot encode labels
+        enc = OneHotEncoder(sparse_output=False)
+        y_true_onehot = enc.fit_transform(y_true.reshape(-1, 1))
 
+        # Compute multiclass Brier score
+        return np.mean(np.sum((y_prob - y_true_onehot) ** 2, axis=1))
 
 class RegressionModel(BaseModel, ABC):
     model_type = "Regression"
