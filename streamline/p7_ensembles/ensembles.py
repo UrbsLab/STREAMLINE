@@ -19,9 +19,6 @@ class EnsemblePhaseJob:
     """
     Phase 7: Ensemble Learning on top of Phase 6 models.
     Loads pickled base models per CV split, builds requested ensembles, fits on CV-Train, evaluates on CV-Test.
-    Saves:
-      - models/pickledModels/<ENSEMBLE_ID>_<cv>.pickle
-      - model_evaluation/pickled_metrics/<ENSEMBLE_ID>_CV_<cv>_metrics.pickle
     - Fits on CV Train and evaluates on CV Test
     - Saves per-CV metrics & ROC/PRC curves to dataset_dir/ensemble_evaluation
     """

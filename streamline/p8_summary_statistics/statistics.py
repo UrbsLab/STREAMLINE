@@ -19,6 +19,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from scipy import stats
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
+from streamline.p6_modeling.utils.loader import list_models, get_model_by_id
+
 import seaborn as sns
 
 sns.set_theme()
@@ -177,7 +179,7 @@ class StatisticsPhaseJob:
         self,
     ) -> Tuple[List[str], Dict[str, str], Dict[str, Tuple[float, float, float]]]:
         """
-        Discover modeling algorithms from:
+        Discover modeling algorithms for statistics from:
             <dataset_dir>/model_evaluation/pickled_metrics/<ALG>_CV_<k>_metrics.pickle
 
         Returns:
@@ -186,7 +188,8 @@ class StatisticsPhaseJob:
             colors: mapping algorithm -> RGB triple for plotting
         """
         metrics_dir = Path(self.full_path) / "model_evaluation" / "pickled_metrics"
-        algs: List[str] = []
+        present_algs: List[str] = []
+
         if metrics_dir.is_dir():
             for fn in os.listdir(metrics_dir):
                 if not fn.endswith("_metrics.pickle"):
@@ -197,20 +200,70 @@ class StatisticsPhaseJob:
                     continue
                 alg = parts[0]
                 if alg:
-                    algs.append(alg)
+                    present_algs.append(alg)
 
-        algorithms = sorted(set(algs))
-        if not algorithms:
+        present_set = set(present_algs)
+        if not present_set:
             logging.warning(
                 "StatsPhaseJob: no modeling metrics found under %s", metrics_dir
             )
 
-        abbrev = {a: a for a in algorithms}  # small_name == abbrev in v3
-        # Assign colors via seaborn palette
-        palette = sns.color_palette("tab10", n_colors=max(len(algorithms), 1))
-        colors = {
-            a: palette[i % len(palette)] for i, a in enumerate(algorithms)
-        }
+        # Registry-driven discovery
+        algorithms: List[str] = []
+        abbrev: Dict[str, str] = {}
+        colors: Dict[str, Tuple[float, float, float]] = {}
+
+        registry_entries = []
+        if list_models is not None:
+            try:
+                registry_entries = list_models(self.outcome_type)
+            except Exception as e:
+                logging.warning("StatsPhaseJob: list_all_models() failed: %r", e)
+
+        # Build a quick lookup: small_name -> (model_type, entry)
+        entries_by_small = {}
+        for entry in registry_entries:
+            small = (entry.get("small_name") or "").strip()
+            mt = (entry.get("model_type") or "").strip()
+            if small:
+                entries_by_small[small] = (mt, entry)
+
+        for alg in sorted(present_set):
+            mt, entry = entries_by_small.get(alg, ("", {}))
+            cls = None
+            if get_model_by_id is not None and mt:
+                # Try resolving the model class to read color attribute
+                try:
+                    cls = get_model_by_id(mt, alg)  # small_name
+                except Exception:
+                    # Fallback: try model_name / alt_id if small_name lookup fails
+                    model_name = entry.get("model_name") or entry.get("alt_id") or alg
+                    try:
+                        cls = get_model_by_id(mt, model_name)
+                    except Exception:
+                        cls = None
+                        
+            alg_name = cls.model_name if cls is not None else alg
+            algorithms.append(alg_name)
+            abbrev[alg_name] = cls.small_name if cls is not None else alg
+
+            if cls is not None and hasattr(cls, "color"):
+                colors[alg_name] = cls.color  # expect either named color or RGB tuple
+
+        # -----------------------------
+        # Color fallback using seaborn
+        # -----------------------------
+        if algorithms:
+            palette = sns.color_palette("tab10", n_colors=len(algorithms))
+            for i, alg in enumerate(algorithms):
+                if alg not in colors:
+                    colors[alg] = palette[i % len(palette)]
+        else:
+            # Keep old behavior (empty but valid return)
+            algorithms = sorted(present_set)
+            abbrev = {a: a for a in algorithms}
+            palette = sns.color_palette("tab10", n_colors=max(len(algorithms), 1))
+            colors = {a: palette[i % len(palette)] for i, a in enumerate(algorithms)}
 
         return algorithms, abbrev, colors
 

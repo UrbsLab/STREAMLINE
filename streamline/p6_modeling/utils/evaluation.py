@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import recall_score, precision_score, f1_score, confusion_matrix
@@ -8,62 +9,71 @@ from sklearn.metrics import recall_score, precision_score, f1_score, confusion_m
 
 def class_eval(y_true, y_pred):
     """
-    Calculates standard classification metrics including:
-    True positives, false positives, true negative, false negatives, standard accuracy, balanced accuracy
-    recall, precision, f1 score, negative predictive value, likelihood ratio positive, and likelihood ratio negative
+    Classification metric bundle.
 
-    Args:
-        y_true: True Labels
-        y_pred: Predicted Labels
+    Binary case returns:
+        [bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm]
 
-    Returns: list [bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm]
-    ordered list of balanced accuracy, accuracy, F1-score, recall, specificity, precision,
-    true positive, true negatives, false positives, false negatives, negative predictive value,
-    likelihood ratio positive, and likelihood ratio negative
-
+    Multiclass case returns:
+        [bac, ac, f1, re, pr]
     """
-    # Calculate true positive, true negative, false positive, and false negative.
+    # Binary classification
     if np.unique(y_true).size == 2:
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        # Calculate Accuracy metrics
+
+        # Accuracy metrics
         ac = accuracy_score(y_true, y_pred)
         bac = balanced_accuracy_score(y_true, y_pred)
-        # Calculate Precision and Recall
-        re = recall_score(y_true, y_pred, average='weighted')  # a.k.a. sensitivity or TPR
-        pr = precision_score(y_true, y_pred, average='weighted')
-        # Calculate F1 score
-        f1 = f1_score(y_true, y_pred, average='weighted')
 
-        # Calculate specificity, a.k.a. TNR
+        # Precision, recall, F1
+        re = recall_score(y_true, y_pred, average="weighted")  # sensitivity / TPR
+        pr = precision_score(y_true, y_pred, average="weighted")
+        f1 = f1_score(y_true, y_pred, average="weighted")
+
+        # Specificity (TNR)
         if tn == 0 and fp == 0:
-            sp = 0
+            sp = 0.0
         else:
             sp = tn / float(tn + fp)
-        # Calculate Negative predictive value
+
+        # Negative predictive value
         if tn == 0 and fn == 0:
-            npv = 0
+            npv = 0.0
         else:
             npv = tn / float(tn + fn)
-        # Calculate likelihood ratio postive
+
+        # Likelihood ratio positive: sensitivity / (1 - specificity)
         if sp == 1:
-            lrp = 0
+            lrp = 0.0
         else:
-            lrp = re / float(1 - sp)  # sensitivity / (1-specificity).... a.k.a. TPR/FPR... or TPR/(1-TNR)
-        # Calculate likelihood ratio negative
+            lrp = re / float(1 - sp)
+
+        # Likelihood ratio negative: (1 - sensitivity) / specificity
         if sp == 0:
-            lrm = 0
+            lrm = 0.0
         else:
-            lrm = (1 - re) / float(sp)  # (1-sensitivity) / specificity... a.k.a. FNR/TNR ... or (1-TPR)/TNR
-        # logging.warning([bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm])
+            lrm = (1 - re) / float(sp)
+
         return [bac, ac, f1, re, sp, pr, tp, tn, fp, fn, npv, lrp, lrm]
+
     else:
-        # Calculate Accuracy metrics
+        #Multiclass case
         ac = accuracy_score(y_true, y_pred)
         bac = balanced_accuracy_score(y_true, y_pred)
-        # Calculate Precision and Recall
-        re = recall_score(y_true, y_pred, average='weighted')  # a.k.a. sensitivity or TPR
-        pr = precision_score(y_true, y_pred, average='weighted')
-        # Calculate F1 score
-        f1 = f1_score(y_true, y_pred, average='weighted')
-        # logging.warning([bac, ac, f1, re, None, pr, None, None, None, None, None, None, None])
+        re = recall_score(y_true, y_pred, average="weighted")
+        pr = precision_score(y_true, y_pred, average="weighted")
+        f1 = f1_score(y_true, y_pred, average="weighted")
         return [bac, ac, f1, re, pr]
+
+
+def multiclass_brier_score(y_true, y_prob):
+    """
+    y_true: (n_samples,) integer labels
+    y_prob: (n_samples, n_classes) predicted probabilities
+    """
+    # One-hot encode labels
+    enc = OneHotEncoder(sparse_output=False)
+    y_true_onehot = enc.fit_transform(y_true.reshape(-1, 1))
+
+    # Compute multiclass Brier score
+    return np.mean(np.sum((y_prob - y_true_onehot) ** 2, axis=1))
