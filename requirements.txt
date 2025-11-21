@@ -24,6 +24,7 @@ fpdf
 scikit-XCS
 scikit-ExSTraCS
 scikit-eLCS
+skheros
 kaleido
 dask-jobqueue
 dask
