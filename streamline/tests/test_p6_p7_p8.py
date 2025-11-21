@@ -15,7 +15,7 @@ from sklearn.datasets import make_classification
 # Phase 6 / 7 / 8 imports – adjust if your module paths differ
 from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p7_ensembles.p7_runner import P7Runner
-from streamline.p8_post_analysis.p8_runner import P8Runner
+from streamline.p8_summary_statistics.p8_runner import P8Runner
 
 
 def _make_synthetic_cv_dataset(root: Path, n_splits: int = 3, n_samples: int = 120, random_state: int = 0):

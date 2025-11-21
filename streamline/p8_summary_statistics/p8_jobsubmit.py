@@ -1,5 +1,5 @@
 import argparse
-from streamline.p8_post_analysis.statistics import StatisticsPhaseJob
+from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
 
 
 def _b(x):

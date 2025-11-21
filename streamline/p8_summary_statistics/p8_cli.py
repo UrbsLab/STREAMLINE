@@ -1,5 +1,5 @@
 import argparse
-from streamline.p8_post_analysis.p8_runner import P8Runner
+from streamline.p8_summary_statistics.p8_runner import P8Runner
 
 
 def main():

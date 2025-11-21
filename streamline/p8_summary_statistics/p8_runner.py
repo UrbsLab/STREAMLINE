@@ -9,7 +9,7 @@ from typing import Optional, List
 import dask
 from dask.distributed import Client, LocalCluster
 
-from streamline.p8_post_analysis.statistics import StatisticsPhaseJob
+from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
 from streamline.utils.runners import num_cores
 from streamline.utils.cluster import get_cluster  # returns connected Dask Client
 
