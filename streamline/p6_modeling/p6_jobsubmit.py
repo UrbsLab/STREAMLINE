@@ -1,18 +1,24 @@
 import argparse
-from streamline.p6_modeling.modeling import ModelingPhaseJob
+from .modeling import ModelingPhaseJob  # or `.job` depending on your filename
 
-def _b(x): 
+def _b(x):
     if x is None: return False
-    return str(x).strip().lower() in ("1","true","t","yes","y")
+    return str(x).strip().lower() in ("1", "true", "t", "yes", "y")
 
 def main():
     ap = argparse.ArgumentParser("P6 Modeling jobsubmit (single dataset)")
     ap.add_argument("--dataset_dir", required=True)
     ap.add_argument("--outcome_label", default="Class")
-    ap.add_argument("--model_type", default="Binary")
+    ap.add_argument("--model_type", default="BinaryClassification")
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--models", default=None)
+    # JSON: per-model overrides
+    ap.add_argument(
+        "--model_params_json",
+        default=None,
+        help="JSON string mapping model ids to dicts of attribute overrides.",
+    )
 
     # calibration
     ap.add_argument("--calibrate", default="0")
@@ -40,6 +46,7 @@ def main():
         instance_label=(args.instance_label if args.instance_label else None),
         n_splits=int(args.n_splits),
         models=args.models,
+        model_params_json=args.model_params_json,
 
         calibrate=_b(args.calibrate),
         calibrate_method=args.calibrate_method,
@@ -54,7 +61,7 @@ def main():
         training_subsample=int(args.training_subsample),
         uniform_fi=_b(args.uniform_fi),
         save_plot=_b(args.save_plot),
-        random_state=(int(args.random_state) if (args.random_state not in (None,"","None")) else None),
+        random_state=(int(args.random_state) if (args.random_state not in (None, "", "None")) else None),
     ).run()
 
 if __name__ == "__main__":

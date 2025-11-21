@@ -32,6 +32,8 @@ class P6Runner:
         instance_label: Optional[str] = None,
         n_splits: int = 10,
         models: List[str] | str | None = None,        # CSV/list; None = auto-discover from registry
+        model_params_json: Optional[str] = None,
+
 
         # calibration (now handled inside BaseModel.fit)
         calibrate: bool = False,
@@ -60,6 +62,8 @@ class P6Runner:
         self.instance_label = instance_label
         self.n_splits = int(n_splits)
         self.models = models
+        self.model_params_json = model_params_json
+
 
         self.calibrate = bool(calibrate)
         self.calibrate_method = calibrate_method
@@ -121,6 +125,8 @@ class P6Runner:
             instance_label=self.instance_label,
             n_splits=self.n_splits,
             models=self.models,
+            model_params_json=self.model_params_json,
+
 
             # pass through to BaseModel via Job → Model construction
             calibrate=self.calibrate,
@@ -172,6 +178,9 @@ class P6Runner:
             "--save_plot", "1" if self.save_plot else "0",
             "--random_state", str(self.random_state) if self.random_state is not None else "",
         ]
+        if self.model_params_json:
+            json_arg = self.model_params_json.replace('"', '\\"')
+            args.extend(["--model_params_json", f'"{json_arg}"'])
         cmd = " ".join(args)
 
         with open(sh_path, "w") as sh:

@@ -1,6 +1,8 @@
 from __future__ import annotations
 import os
-from typing import List, Optional
+import json
+import logging
+from typing import List, Optional, Dict, Any
 from streamline.p6_modeling.utils.modeljob import ModelJob
 from streamline.p6_modeling.utils.loader import load_model_classes, get_model_by_id
 
@@ -19,6 +21,7 @@ class ModelingPhaseJob:
         instance_label: Optional[str] = None,
         n_splits: int = 10,
         models: List[str] | str | None = None,     # CSV or list; if None -> auto discover
+        model_params_json: Optional[str] = None,
         # calibration
         calibrate: bool = False,
         calibrate_method: str = "sigmoid",
@@ -59,6 +62,26 @@ class ModelingPhaseJob:
         self.uniform_fi = bool(uniform_fi)
         self.save_plot = bool(save_plot)
         self.random_state = random_state
+        
+                # --- NEW: parse model_params_json ---
+        self.model_params: Dict[str, Dict[str, Any]] = {}
+        if model_params_json:
+            try:
+                parsed = json.loads(model_params_json)
+                if isinstance(parsed, dict):
+                    # normalize keys to lowercase for matching
+                    self.model_params = {
+                        str(k).lower(): (v if isinstance(v, dict) else {})
+                        for k, v in parsed.items()
+                    }
+                else:
+                    logging.warning(
+                        "[P6] model_params_json must be a JSON object mapping model ids → dicts; got %r",
+                        type(parsed),
+                    )
+            except Exception as e:
+                logging.error("[P6] Failed to parse model_params_json: %r", e)
+                raise e
 
     def run(self):
         # Discover models if none provided
@@ -98,10 +121,38 @@ class ModelingPhaseJob:
                     # calibrate_method=self.calibrate_method,
                     # calibrate_cv=self.calibrate_cv,
                 )
+                
+                overrides = self._get_model_overrides(ModelCls)
+                for attr, value in overrides.items():
+                    setattr(model, attr, value)
+                
                 mj.run(model)
+                
 
         # mark complete
         jc_dir = os.path.join(os.path.dirname(self.dataset_dir), "jobsCompleted")
         os.makedirs(jc_dir, exist_ok=True)
         with open(os.path.join(jc_dir, f"job_modeling_{self.dataset_name}.txt"), "w") as f:
             f.write("complete")
+            
+    def _get_model_overrides(self, ModelCls) -> Dict[str, Any]:
+        """
+        Look up overrides from model_params_json using either small_name or model_name.
+        JSON keys are matched case-insensitively.
+        Example JSON:
+        {
+            "lr": {"param_grid": {"C": [0.01, 0.1, 1.0]}},
+            "Logistic Regression": {"n_trials": 100}
+        }
+        """
+        overrides: Dict[str, Any] = {}
+        small = getattr(ModelCls, "small_name", "").lower()
+        mname = getattr(ModelCls, "model_name", "").lower()
+
+        for key in (small, mname):
+            if key and key in self.model_params:
+                cfg = self.model_params[key]
+                if isinstance(cfg, dict):
+                    overrides.update(cfg)
+
+        return overrides

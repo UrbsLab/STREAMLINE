@@ -27,14 +27,14 @@ def main():
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--models", default=None,
                     help="CSV of model ids (small_name or underscored model_name). Omit to auto-discover.")
+    # NEW: per-model JSON overrides
+    ap.add_argument(
+        "--model_params_json",
+        default=None,
+        help="JSON string mapping model ids (small_name or model_name) to dicts of attribute overrides.",
+    )
 
-    # NEW: listing modes
-    ap.add_argument("--list_models", action="store_true",
-                    help="List models for --model_type and exit.")
-    ap.add_argument("--list_models_all", action="store_true",
-                    help="List models for all types and exit.")
-
-    # calibration (handled in BaseModel.fit)
+    # calibration
     ap.add_argument("--calibrate", type=int, default=0, help="1 to enable probability calibration")
     ap.add_argument("--calibrate_method", default="sigmoid", help="sigmoid | isotonic")
     ap.add_argument("--calibrate_cv", type=int, default=5)
@@ -77,6 +77,7 @@ def main():
         instance_label=args.instance_label,
         n_splits=args.n_splits,
         models=args.models,
+        model_params_json=args.model_params_json,
 
         calibrate=bool(args.calibrate),
         calibrate_method=args.calibrate_method,
@@ -89,7 +90,7 @@ def main():
         training_subsample=args.training_subsample,
         uniform_fi=bool(args.uniform_fi),
         save_plot=bool(args.save_plot),
-        random_state=(int(args.random_state) if (args.random_state not in (None,"","None")) else None),
+        random_state=(int(args.random_state) if (args.random_state not in (None, "", "None")) else None),
 
         run_cluster=args.run_cluster,
         queue=args.queue,

@@ -16,7 +16,7 @@ class HEROSMulticlassClassifier(MulticlassClassificationModel, ABC):
 
         # Same parameter philosophy as the binary version
         self.param_grid = {
-            'iterations': [10_000, 50_000, 100_000],
+            'iterations': [10000, 50000, 100000],
             'pop_size': [500, 1000],
             'model_iterations': [100, 250, 500],
             'model_pop_size': [50, 100],
