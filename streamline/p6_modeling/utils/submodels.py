@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 from abc import ABC
 import warnings
 
 import numpy as np
 import optuna
 import pandas as pd
+from typing import Any, Dict
 from scipy.stats import pearsonr
 from sklearn import metrics
 from sklearn.exceptions import ConvergenceWarning
@@ -17,12 +16,21 @@ from sklearn.metrics import (
     median_absolute_error,
     explained_variance_score,
     brier_score_loss,
+    accuracy_score,
+    balanced_accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    confusion_matrix,
+    roc_auc_score,
+    average_precision_score,
 )
 from sklearn.model_selection import KFold
+from sklearn.preprocessing import OneHotEncoder 
 
-# Phase-6 BaseModel (with calibration + default evaluations)
+# Phase-6 BaseModel (with calibration)
 from streamline.p6_modeling.utils.basemodel import BaseModel
-from streamline.p6_modeling.utils.evaluation import class_eval, multiclass_brier_score
+from streamline.p6_modeling.utils.support import _get_probas_or_decision, multiclass_brier_score
 
 # ---------------------------------------------------------------------
 # Global warning configuration
@@ -35,24 +43,6 @@ warnings.filterwarnings(
 )
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
-
-def _get_probas_or_decision(model, x):
-    """
-    Try predict_proba, then decision_function.
-
-    Returns:
-        array-like or None if neither method is available.
-    """
-    proba_fn = getattr(model, "predict_proba", None)
-    if proba_fn is not None:
-        return proba_fn(x)
-
-    decision_fn = getattr(model, "decision_function", None)
-    if decision_fn is not None:
-        return decision_fn(x)
-
-    return None
-
 
 # ---------------------------------------------------------------------
 # BinaryClassificationModel
@@ -86,69 +76,109 @@ class BinaryClassificationModel(BaseModel, ABC):
 
     def model_evaluation(self, x_test, y_test):
         """
-        Legacy-style binary evaluation.
+        Binary evaluation returning:
+          - metrics_dict: flat dict of scalar metrics
+          - curves_dict: {
+                "roc": {"micro": {"fpr": [...], "tpr": [...], "auc": float}},
+                "prc": {"micro": {"precision": [...], "recall": [...],
+                                  "pr_auc": float, "aps": float}}
+            }
 
-        Returns:
-            metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc,
-            ave_prec, probas_
+        This is what Phase 6 will serialize to JSON.
         """
         probas_ = _get_probas_or_decision(self.model, x_test)
-
-        # If model has no proba/decision, delegate to BaseModel's predict
-        if probas_ is None:
-            return super().predict(x_test, y_test)
-
         y_pred = self.model.predict(x_test)
 
-        # Expect shape (n_samples, 2) for binary; otherwise raise
-        if hasattr(probas_, "ndim") and probas_.ndim == 1:
-            raise ValueError(
-                "Unexpected 1D probability/score array in "
-                "BinaryClassificationModel.model_evaluation"
-            )
+        # --- base metrics that don't require probabilities ---
+        cm = confusion_matrix(y_test, y_pred)
+        if cm.size == 4:
+            tn, fp, fn, tp = cm.ravel()
+        else:
+            # defensive fallback
+            tn = fp = fn = tp = 0.0
 
-        # Positive class probability assumed in column 1
+        tn = float(tn)
+        fp = float(fp)
+        fn = float(fn)
+        tp = float(tp)
+
+        specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+        npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
+        lr_plus = (tp / (tp + fn)) / (fp / (fp + tn)) if (tp + fn) > 0 and (fp + tn) > 0 and fp > 0 else 0.0
+        lr_minus = (fn / (tp + fn)) / (tn / (fp + tn)) if (tp + fn) > 0 and (fp + tn) > 0 and tn > 0 else 0.0
+
+        metrics_dict = {
+            "balanced_accuracy": float(balanced_accuracy_score(y_test, y_pred)),
+            "accuracy": float(accuracy_score(y_test, y_pred)),
+            "f1": float(f1_score(y_test, y_pred)),
+            "recall": float(recall_score(y_test, y_pred)),
+            "specificity": float(specificity),
+            "precision": float(precision_score(y_test, y_pred)),
+            "tp": tp,
+            "tn": tn,
+            "fp": fp,
+            "fn": fn,
+            "npv": float(npv),
+            "lr_plus": float(lr_plus),
+            "lr_minus": float(lr_minus),
+            # These will be filled in below if probs / scores are available
+            "brier_score": None,
+            "roc_auc": None,
+            "prc_auc": None,
+            "prc_aps": None,
+        }
+
+        curves_dict = {"roc": {}, "prc": {}}
+
+        # --- if we have probability-like scores, compute curve-based metrics ---
+        if probas is None:
+            return metrics_dict, curves_dict
+
+        probas = np.asarray(probas_)
+        # If 1D, treat as positive-class score; if 2D, assume column 1 is positive class
+        if probas.ndim == 1:
+            pos_score = probas
+        else:
+            # If shape is (n_samples, 2+) use column 1, else last column as positive class
+            if probas.shape[1] >= 2:
+                pos_score = probas[:, 1]
+            else:
+                pos_score = probas[:, -1]
+
+        # Brier score (if scores look like probabilities)
         try:
-            pos_proba = probas_[:, 1]
-            brier = brier_score_loss(y_test, pos_proba)
+            brier = brier_score_loss(y_test, pos_score)
         except Exception:
-            pos_proba = None
             brier = float("nan")
 
-        # Legacy metric list
-        metric_list = class_eval(y_test, y_pred)
-        metric_list.append(brier)  # Brier score at end
+        metrics_dict["brier_score"] = float(brier) if np.isfinite(brier) else None
 
-        # ROC curve
-        fpr, tpr, _ = metrics.roc_curve(y_test, probas_[:, 1])
-        roc_auc = auc(fpr, tpr)
+        # ROC / PRC curves
+        fpr, tpr, _ = metrics.roc_curve(y_test, pos_score)
+        roc_auc_val = roc_auc_score(y_test, pos_score)
 
-        # PR curve
-        prec, recall, thresholds = metrics.precision_recall_curve(
-            y_test, probas_[:, 1]
-        )
-        # Reverse to match previous behavior
-        prec = prec[::-1]
-        recall = recall[::-1]
-        thresholds = thresholds[::-1]
-        prec_rec_auc = auc(recall, prec)
-        ave_prec = metrics.average_precision_score(y_test, probas_[:, 1])
+        prec, rec, _ = metrics.precision_recall_curve(y_test, pos_score)
+        # AUCs on the natural orientation
+        prc_auc_val = auc(rec, prec)
+        aps_val = average_precision_score(y_test, pos_score)
 
-        # metric_list is a list (legacy); add Brier by convention if needed
-        # (kept separate so you don't break downstream consumers)
-        # You can augment metric_list or wrap this in a dict externally.
+        metrics_dict["roc_auc"] = float(roc_auc_val)
+        metrics_dict["prc_auc"] = float(prc_auc_val)
+        metrics_dict["prc_aps"] = float(aps_val)
 
-        return (
-            metric_list,
-            fpr,
-            tpr,
-            roc_auc,
-            prec,
-            recall,
-            prec_rec_auc,
-            ave_prec,
-            probas_,
-        )
+        curves_dict["roc"]["micro"] = {
+            "fpr": fpr.tolist(),
+            "tpr": tpr.tolist(),
+            "auc": float(roc_auc_val),
+        }
+        curves_dict["prc"]["micro"] = {
+            "precision": prec.tolist(),
+            "recall": rec.tolist(),
+            "pr_auc": float(prc_auc_val),
+            "aps": float(aps_val),
+        }
+
+        return metrics_dict, curves_dict
 
 
 # ---------------------------------------------------------------------
@@ -183,120 +213,171 @@ class MulticlassClassificationModel(BaseModel, ABC):
 
     def model_evaluation(self, x_test, y_test):
         """
-        Rich multiclass evaluation with per-class and micro/macro ROC/PR curves.
+        Rich multiclass evaluation.
 
         Returns:
-            metric_list, fpr, tpr, roc_auc, prec, recall,
-            prec_rec_auc, ave_prec, probas_
+            metrics_dict: flat dict of scalar metrics (macro/micro variants)
+            curves_dict: {
+              "roc": {
+                  "micro": {fpr,tpr,auc},
+                  "macro": {fpr,tpr,auc}
+              },
+              "prc": {
+                  "micro": {precision,recall,pr_auc,aps},
+                  "macro": {precision,recall,pr_auc,aps}
+              }
+            }
         """
         probas_ = _get_probas_or_decision(self.model, x_test)
-
         if probas_ is None:
-            # No probability-like scores delegate to BaseModel prediction
-            return super().predict(x_test, y_test)
+            # no probability-like scores; fall back to plain prediction metrics
+            y_pred = self.model.predict(x_test)
+            metrics_dict = {
+                "balanced_accuracy": float(balanced_accuracy_score(y_test, y_pred)),
+                "accuracy": float(accuracy_score(y_test, y_pred)),
+                "f1": float(f1_score(y_test, y_pred, average="macro")),
+                "brier_score": None,
+                "f1_macro": float(f1_score(y_test, y_pred, average="macro")),
+                "f1_micro": float(f1_score(y_test, y_pred, average="micro")),
+                "precision_macro": float(precision_score(y_test, y_pred, average="macro")),
+                "precision_micro": float(precision_score(y_test, y_pred, average="micro")),
+                "recall_macro": float(recall_score(y_test, y_pred, average="macro")),
+                "recall_micro": float(recall_score(y_test, y_pred, average="micro")),
+                "roc_auc_macro": None,
+                "roc_auc_micro": None,
+                "average_precision_macro": None,
+                "average_precision_micro": None,
+            }
+            return metrics_dict, {"roc": {}, "prc": {}}
 
-        if probas_ is None or (hasattr(probas_, "ndim") and probas_.ndim != 2):
+        probas_ = np.asarray(probas_)
+        if probas_.ndim != 2:
             raise ValueError(
-                "Unexpected probability shape in "
-                "MulticlassClassificationModel.prect_probas"
+                "Unexpected probability shape in MulticlassClassificationModel.model_evaluation"
             )
 
         y_pred = self.model.predict(x_test)
 
-        # Old metric list
-        metric_list = class_eval(y_test, y_pred)
+        # --- metrics dict (as you sketched) ---
+        metrics_dict = {
+            "balanced_accuracy": float(balanced_accuracy_score(y_test, y_pred)),
+            "accuracy": float(accuracy_score(y_test, y_pred)),
+            "f1": float(f1_score(y_test, y_pred, average="macro")),
+            "brier_score": float(multiclass_brier_score(y_test, probas_)),
+            # Additional multiclass metrics to compare
+            "f1_macro": float(f1_score(y_test, y_pred, average="macro")),
+            "f1_micro": float(f1_score(y_test, y_pred, average="micro")),
+            "precision_macro": float(precision_score(y_test, y_pred, average="macro")),
+            "precision_micro": float(precision_score(y_test, y_pred, average="micro")),
+            "recall_macro": float(recall_score(y_test, y_pred, average="macro")),
+            "recall_micro": float(recall_score(y_test, y_pred, average="micro")),
+            "roc_auc_macro": float(
+                roc_auc_score(y_test, probas_, multi_class="ovo", average="macro")
+            ),
+            "roc_auc_micro": float(
+                roc_auc_score(y_test, probas_, multi_class="ovo", average="micro")
+            ),
+            "average_precision_macro": float(
+                metrics.average_precision_score(y_test, probas_, average="macro")
+            ),
+            "average_precision_micro": float(
+                metrics.average_precision_score(y_test, probas_, average="micro")
+            ),
+        }
 
-        fpr, tpr, roc_auc = dict(), dict(), dict()
-        prec, recall, thresholds = dict(), dict(), dict()
-        prec_rec_auc, ave_prec = dict(), dict()
+        # --- per-class & micro/macro ROC / PR curves ---
+        fpr: Dict[Any, np.ndarray] = {}
+        tpr: Dict[Any, np.ndarray] = {}
+        roc_auc: Dict[Any, float] = {}
+        prec: Dict[Any, np.ndarray] = {}
+        recall: Dict[Any, np.ndarray] = {}
+        prec_rec_auc: Dict[Any, float] = {}
+        ave_prec: Dict[Any, float] = {}
 
         n_classes = len(np.unique(y_test))
         y_test_dummies = pd.get_dummies(y_test, drop_first=False).values
 
-        # Per-class ROC / PR
+        # per-class ROC/PR
         for i in range(n_classes):
-            fpr[i], tpr[i], _ = metrics.roc_curve(
+            fpr_i, tpr_i, _ = metrics.roc_curve(y_test_dummies[:, i], probas_[:, i])
+            fpr[i] = fpr_i
+            tpr[i] = tpr_i
+            roc_auc[i] = auc(fpr_i, tpr_i)
+
+            p_i, r_i, _ = metrics.precision_recall_curve(
                 y_test_dummies[:, i], probas_[:, i]
             )
-            roc_auc[i] = auc(fpr[i], tpr[i])
-
-            p_i, r_i, thr_i = metrics.precision_recall_curve(
-                y_test_dummies[:, i], probas_[:, i]
-            )
-
-            # Store *reversed* for backwards compatibility
-            prec[i] = p_i[::-1]
-            recall[i] = r_i[::-1]
-            thresholds[i] = thr_i[::-1]
-
-            # AUC and average precision computed on the "natural" curves
+            prec[i] = p_i
+            recall[i] = r_i
             prec_rec_auc[i] = auc(r_i, p_i)
             ave_prec[i] = metrics.average_precision_score(
                 y_test_dummies[:, i], probas_[:, i]
             )
 
-        # Micro ROC / PR
-        fpr["micro"], tpr["micro"], _ = metrics.roc_curve(
+        # micro ROC/PR
+        fpr_micro, tpr_micro, _ = metrics.roc_curve(
             y_test_dummies.ravel(), probas_.ravel()
         )
-        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+        roc_auc_micro = auc(fpr_micro, tpr_micro)
 
-        p_micro, r_micro, thr_micro = metrics.precision_recall_curve(
+        p_micro, r_micro, _ = metrics.precision_recall_curve(
             y_test_dummies.ravel(), probas_.ravel()
         )
-        prec["micro"] = p_micro[::-1]
-        recall["micro"] = r_micro[::-1]
-        thresholds["micro"] = thr_micro[::-1]
-        prec_rec_auc["micro"] = auc(r_micro, p_micro)
-        ave_prec["micro"] = metrics.average_precision_score(
+        pr_auc_micro = auc(r_micro, p_micro)
+        aps_micro = metrics.average_precision_score(
             y_test_dummies.ravel(), probas_.ravel()
         )
 
-        # Macro ROC via averaged TPR on a common FPR grid
+        # macro ROC via mean TPR on common grid
         fpr_grid = np.linspace(0.0, 1.0, 1000)
         mean_tpr = np.zeros_like(fpr_grid)
         for i in range(n_classes):
             mean_tpr += np.interp(fpr_grid, fpr[i], tpr[i])
         mean_tpr /= n_classes
-        fpr["macro"] = fpr_grid
-        tpr["macro"] = mean_tpr
-        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+        roc_auc_macro = auc(fpr_grid, mean_tpr)
 
-        # Macro PR via averaged precision on a common recall grid
+        # macro PR via mean precision on common recall grid
         recall_grid = np.linspace(0.0, 1.0, 1000)
         mean_prec = np.zeros_like(recall_grid)
         for i in range(n_classes):
-            # recall[i] / prec[i] are stored reversed; flip back before interp
-            r = recall[i][::-1]
-            p = prec[i][::-1]
-            mean_prec += np.interp(recall_grid, r, p)
-
+            mean_prec += np.interp(recall_grid, recall[i], prec[i])
         mean_prec /= n_classes
-        recall["macro"] = recall_grid
-        prec["macro"] = mean_prec
-
-        # AUC of macro PR curve
-        prec_rec_auc["macro"] = auc(recall["macro"], prec["macro"])
-
-        # Macro average precision (scalar, sklearn's macro definition)
-        ave_prec["macro"] = metrics.average_precision_score(
+        pr_auc_macro = auc(recall_grid, mean_prec)
+        aps_macro = metrics.average_precision_score(
             y_test_dummies, probas_, average="macro"
         )
 
-        # Brier score (multiclass)
-        metric_list.append(multiclass_brier_score(y_test, probas_))
+        curves_dict = {
+            "roc": {
+                "micro": {
+                    "fpr": fpr_micro.tolist(),
+                    "tpr": tpr_micro.tolist(),
+                    "auc": float(roc_auc_micro),
+                },
+                "macro": {
+                    "fpr": fpr_grid.tolist(),
+                    "tpr": mean_tpr.tolist(),
+                    "auc": float(roc_auc_macro),
+                },
+            },
+            "prc": {
+                "micro": {
+                    "precision": p_micro.tolist(),
+                    "recall": r_micro.tolist(),
+                    "pr_auc": float(pr_auc_micro),
+                    "aps": float(aps_micro),
+                },
+                "macro": {
+                    "precision": mean_prec.tolist(),
+                    "recall": recall_grid.tolist(),
+                    "pr_auc": float(pr_auc_macro),
+                    "aps": float(aps_macro),
+                },
+            },
+        }
 
-        return (
-            metric_list,
-            fpr,
-            tpr,
-            roc_auc,
-            prec,
-            recall,
-            prec_rec_auc,
-            ave_prec,
-            probas_,
-        )
+        return metrics_dict, curves_dict
+
 
 
 # ---------------------------------------------------------------------
@@ -334,9 +415,16 @@ class RegressionModel(BaseModel, ABC):
 
     def model_evaluation(self, x_test, y_test):
         """
-        Preserve the legacy list order for downstream compatibility:
+        Regression evaluation returning a flat metric dict:
 
-        [max_error, MAE, MSE, MdAE, explained_variance, pearson_corr]
+        {
+          "max_error": ...,
+          "mean_absolute_error": ...,
+          "mean_squared_error": ...,
+          "median_absolute_error": ...,
+          "explained_variance": ...,
+          "pearson_correlation": ...
+        }
         """
         y_pred = self.predict(x_test)
         y_true = np.asarray(y_test)
@@ -348,4 +436,12 @@ class RegressionModel(BaseModel, ABC):
         evs = explained_variance_score(y_true, y_pred)
         p_corr = pearsonr(y_true, y_pred)[0]
 
-        return [me, mae, mse, mdae, evs, p_corr]
+        return {
+            "max_error": float(me),
+            "mean_absolute_error": float(mae),
+            "mean_squared_error": float(mse),
+            "median_absolute_error": float(mdae),
+            "explained_variance": float(evs),
+            "pearson_correlation": float(p_corr),
+        }
+

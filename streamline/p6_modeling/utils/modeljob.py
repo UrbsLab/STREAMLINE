@@ -3,6 +3,7 @@ import logging
 import pickle
 import random
 import time
+import json
 import numpy as np
 import optuna
 import pandas as pd
@@ -66,19 +67,63 @@ class ModelJob:
         self.algorithm = model.small_name
         logging.info('Running ' + str(self.algorithm) + ' on ' + str(self.train_file_path))
 
+        metrics_dir = os.path.join(self.full_path, 'model_evaluation', 'metrics_by_cv')
+        curves_dir = os.path.join(self.full_path, 'model_evaluation', 'curves_by_cv')
+        os.makedirs(metrics_dir, exist_ok=True)
+        os.makedirs(curves_dir, exist_ok=True)
+
         if model.model_type != "Regression":
-            ret = self.run_model(model)
-            pickle.dump(ret, open(self.full_path
-                                  + '/model_evaluation/pickled_metrics/'
-                                  + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
+            metrics_payload, curves_payload = self.run_model(model)
+
+            # ---- JSON metrics ----
+            mpath = os.path.join(
+                metrics_dir,
+                f"{self.algorithm}_CV_{self.cv_count}.json",
+            )
+            with open(mpath, "w") as f:
+                json.dump(metrics_payload, f, indent=2)
+
+            # ---- JSON curves (ROC + PRC) ----
+            if curves_payload is not None:
+                roc = curves_payload.get("roc", {})
+                prc = curves_payload.get("prc", {})
+
+                if roc:
+                    rpath = os.path.join(
+                        curves_dir,
+                        f"{self.algorithm}_CV_{self.cv_count}_roc.json",
+                    )
+                    with open(rpath, "w") as f:
+                        json.dump(roc, f, indent=2)
+
+                if prc:
+                    ppath = os.path.join(
+                        curves_dir,
+                        f"{self.algorithm}_CV_{self.cv_count}_prc.json",
+                    )
+                    with open(ppath, "w") as f:
+                        json.dump(prc, f, indent=2)
+
         else:
-            ret, residuals = self.run_model(model)
-            pickle.dump(ret, open(self.full_path
-                                  + '/model_evaluation/pickled_metrics/'
-                                  + self.algorithm + '_CV_' + str(self.cv_count) + "_metrics.pickle", 'wb'))
-            pickle.dump(residuals, open(self.full_path
-                                        + '/model_evaluation/pickled_metrics/'
-                                        + self.algorithm + '_CV_' + str(self.cv_count) + "_residuals.pickle", 'wb'))
+            metrics_payload, residuals = self.run_model(model)
+
+            # ---- JSON metrics (regression) ----
+            mpath = os.path.join(
+                metrics_dir,
+                f"{self.algorithm}_CV_{self.cv_count}.json",
+            )
+            with open(mpath, "w") as f:
+                json.dump(metrics_payload, f, indent=2)
+
+            # ---- residuals still pickled (not metrics) ----
+            rpath = os.path.join(
+                self.full_path,
+                'model_evaluation',
+                'pickled_metrics',
+                f"{self.algorithm}_CV_{self.cv_count}_residuals.pickle",
+            )
+            with open(rpath, "wb") as f:
+                pickle.dump(residuals, f)
 
         self.save_runtime()
         logging.info(self.full_path.split('/')[-1] + " [CV_" + str(self.cv_count) + "] (" + self.algorithm
@@ -90,6 +135,7 @@ class ModelJob:
                         + '_' + str(self.cv_count) + '_' + self.algorithm + '.txt', 'w')
         job_file.write('complete')
         job_file.close()
+
 
     def run_model(self, model):
         random.seed(self.random_state)
@@ -110,8 +156,15 @@ class ModelJob:
             os.makedirs(self.full_path + '/models/')
         if not os.path.exists(self.full_path + '/models/pickledModels/'):
             os.makedirs(self.full_path + '/models/pickledModels/')
+        # keep pickled_metrics only for residuals (regression)
         if not os.path.exists(self.full_path + '/model_evaluation/pickled_metrics/'):
             os.makedirs(self.full_path + '/model_evaluation/pickled_metrics/', exist_ok=True)
+        # NEW: JSON outputs
+        if not os.path.exists(self.full_path + '/model_evaluation/metrics_by_cv/'):
+            os.makedirs(self.full_path + '/model_evaluation/metrics_by_cv/', exist_ok=True)
+        if not os.path.exists(self.full_path + '/model_evaluation/curves_by_cv/'):
+            os.makedirs(self.full_path + '/model_evaluation/curves_by_cv/', exist_ok=True)
+
 
         # Export tuned / used params
         if not model.is_single:
@@ -157,24 +210,48 @@ class ModelJob:
                 self.feature_importance = results.importances_mean
 
         # Persist model
+        # Persist model
         with open(self.full_path + '/models/pickledModels/' + self.algorithm +
                   '_' + str(self.cv_count) + '.pickle', 'wb') as file:
             pickle.dump(model.model, file)
 
         fi = self.feature_importance
+        # convert FI to plain list for JSON
+        if hasattr(fi, "tolist"):
+            fi_list = fi.tolist()
+        else:
+            fi_list = [float(x) for x in fi]
 
         # Evaluate (uses each model’s own model_evaluation)
         if model.model_type == "Regression":
-            metric_list = model.model_evaluation(x_test, y_test)
+            metric_dict = model.model_evaluation(x_test, y_test)
+
             y_train_pred = model.predict(x_train)
             y_pred = model.predict(x_test)
             residual_train = y_train - y_train_pred
             residual_test = y_test - y_pred
-            return ([metric_list, fi], [residual_train, residual_test, y_train_pred, y_pred, y_train, y_test])
+
+            metrics_payload = {
+                "metrics": metric_dict,
+                "feature_importance": fi_list,
+            }
+
+            # curves are not defined for regression
+            curves_payload = None
+
+            return metrics_payload, [residual_train, residual_test, y_train_pred, y_pred, y_train, y_test]
+
         elif model.model_type in ["Binary", "Multiclass"]:
-            metric_list, fpr, tpr, roc_auc, prec, recall, \
-                prec_rec_auc, ave_prec, probas_ = model.model_evaluation(x_test, y_test)
-            return [metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, fi, probas_]
+            metric_dict, curves_dict = model.model_evaluation(x_test, y_test)
+
+            metrics_payload = {
+                "metrics": metric_dict,
+                "feature_importance": fi_list,
+            }
+            curves_payload = curves_dict
+
+            return metrics_payload, curves_payload
+
 
     def data_prep(self):
         train = pd.read_csv(self.train_file_path)
