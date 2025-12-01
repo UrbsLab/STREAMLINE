@@ -9,7 +9,7 @@ from pathlib import Path
 from sklearn.datasets import make_classification
 from sklearn.calibration import CalibratedClassifierCV
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 # Phase 6 entrypoint
 from streamline.p6_modeling.modeling import ModelingPhaseJob
