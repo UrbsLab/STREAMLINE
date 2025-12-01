@@ -889,7 +889,7 @@ class StatisticsPhaseJob:
         for algorithm in self.algorithms:
             alg_result_table = []
 
-            s_bac, s_ac, s_f1, s_re, s_pr = [[] for _ in range(5)]
+            s_bac, s_ac, s_f1, s_re, s_pr, s_bs = [[] for _ in range(5)]
             fi_all = []
 
             tprs = []
@@ -936,16 +936,7 @@ class StatisticsPhaseJob:
                     prec_rec_auc = float(prc_m.get("pr_auc", np.nan))
                     ave_prec = float(prc_m.get("aps", np.nan))
                 else:
-                    results = master_list[cv_count][algorithm]
-                    metrics_payload = results[0]
-                    fpr = np.asarray(results[1]['micro'])
-                    tpr = np.asarray(results[2]['micro'])
-                    roc_auc = float(results[3]['micro'])
-                    prec = np.asarray(results[4]['micro'])
-                    recall = np.asarray(results[5]['micro'])
-                    prec_rec_auc = float(results[6]['micro'])
-                    ave_prec = float(results[7]['micro'])
-                    fi = results[8]
+                    raise NotImplementedError("master_list not implemented for multiclass yet")
 
                 # metrics
                 s_bac.append(metrics_payload.get("balanced_accuracy"))
@@ -953,6 +944,7 @@ class StatisticsPhaseJob:
                 s_f1.append(self._get_multiclass_avg_metric(metrics_payload, "f1"))
                 s_re.append(self._get_multiclass_avg_metric(metrics_payload, "recall"))
                 s_pr.append(self._get_multiclass_avg_metric(metrics_payload, "precision"))
+                s_bs.append(metrics_payload.get("brier_score"))
 
                 alg_result_table.append([fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec])
 
@@ -1040,6 +1032,7 @@ class StatisticsPhaseJob:
                 'F1 Score': s_f1,
                 'Sensitivity (Recall)': s_re,
                 'Precision (PPV)': s_pr,
+                'Brier Score': s_bs,
                 'ROC AUC': aucs,
                 'PRC AUC': praucs,
                 'PRC APS': aveprecs,
