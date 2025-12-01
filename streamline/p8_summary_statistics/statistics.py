@@ -226,9 +226,9 @@ class StatisticsPhaseJob:
 
         if metrics_dir.is_dir():
             for fn in os.listdir(metrics_dir):
-                if not fn.endswith("_metrics.pickle"):
+                if not fn.endswith(".json"):
                     continue
-                # Expect pattern "<ALG>_CV_<fold>_metrics.pickle"
+                # Expect pattern "<ALG>_CV_<fold>.json"
                 parts = fn.split("_CV_")
                 if len(parts) != 2:
                     continue

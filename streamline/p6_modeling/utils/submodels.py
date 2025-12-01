@@ -131,19 +131,19 @@ class BinaryClassificationModel(BaseModel, ABC):
         curves_dict = {"roc": {}, "prc": {}}
 
         # --- if we have probability-like scores, compute curve-based metrics ---
-        if probas is None:
+        if probas_ is None:
             return metrics_dict, curves_dict
 
-        probas = np.asarray(probas_)
+        probas_ = np.asarray(probas_)
         # If 1D, treat as positive-class score; if 2D, assume column 1 is positive class
-        if probas.ndim == 1:
-            pos_score = probas
+        if probas_.ndim == 1:
+            pos_score = probas_
         else:
             # If shape is (n_samples, 2+) use column 1, else last column as positive class
-            if probas.shape[1] >= 2:
-                pos_score = probas[:, 1]
+            if probas_.shape[1] >= 2:
+                pos_score = probas_[:, 1]
             else:
-                pos_score = probas[:, -1]
+                pos_score = probas_[:, -1]
 
         # Brier score (if scores look like probabilities)
         try:
