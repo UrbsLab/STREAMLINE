@@ -713,13 +713,25 @@ class StatisticsPhaseJob:
             show_plots=self.show_plots,
         )
         
-        # Old code comments for fractionated composite FI - commented out for now
+        # Code comments for fractionated composite FI - commented out for now
         # Fractionated composite FI
         # Weight the Fractionated FI scores for normalized,fractionated, and weighted compound FI plot
-        # weighted_frac_lists = self.weight_frac_fi(frac_lists,weights)
+        # weighted_frac_lists = weight_frac_fi(frac_lists,weights)
 
         # Generate Normalized, Fractionated, and Weighted Compound FI plot
-        # self.composite_fi_plot(weighted_frac_lists, algorithms, list(colors.values()),
+        # plot_composite_fi(
+        #     full_path=self.full_path,
+        #     algorithms=self.algorithms,
+        #     colors=self.colors,
+        #     fi_list=weighted_frac_lists,
+        #     all_feature_list_to_viz=all_feature_list_to_viz,
+        #     fig_name='Norm_Frac_Weight',
+        #     y_label_text='Normalized, Fractionated, and Weighted Feature Importance',
+        #     metric_ranking=metric_ranking,
+        #     metric_weighting=metric_weighting,
+        #     metric_weight_label=self.metric_weight,
+        #     show_plots=self.show_plots,
+        # )
         #                        all_feature_list_to_viz, 'Norm_Frac_Weight',
         #                        'Normalized, Fractionated, and Weighted Feature Importance')
 
@@ -1450,205 +1462,7 @@ class StatisticsPhaseJob:
                 mann_stats_df.to_csv(self.full_path +
                                      '/model_evaluation/'
                                      'statistical_comparisons/MannWhitneyU_' + metric + '.csv', index=False)
-
-
-    def prep_fi(self, metric_dict, metric_ranking, metric_weighting):
-        """
-        Organizes and prepares model feature importance
-        data for boxplot and composite feature importance figure generation.
-        """
-        # Initialize required lists
-        # algorithm feature importance dataframe list (used to generate FI boxplot for each algorithm)
-        fi_df_list = []
-        # algorithm feature importance medians list (used to generate composite FI barplots)
-        fi_med_list = []
-        # algorithm focus metric medians list (used in weighted FI viz)
-        med_metric_list = []
-        # list of pre-feature selection feature names as they appear in FI reports for each algorithm
-        all_feature_list = []
-
-        # Get necessary feature importance data and primary metric data
-        # (currently only 'balanced accuracy' can be used for this)
-        for algorithm in self.algorithms:
-            # Get relevant feature importance info
-            temp_df = pd.read_csv(self.full_path + '/model_evaluation/feature_importance/' + self.abbrev[
-                algorithm] + "_FI.csv")  # CV FI scores for all original features in dataset.
-            # Should be same for all algorithm files (i.e. all original features in standard CV dataset order)
-            if algorithm == self.algorithms[0]:
-                all_feature_list = temp_df.columns.tolist()
-            fi_df_list.append(temp_df)
-            if metric_ranking == 'mean':
-                fi_med_list.append(temp_df.mean().tolist())  # Saves mean FI scores over CV runs
-            elif metric_ranking == 'median':
-                fi_med_list.append(temp_df.median().tolist())  # Saves median FI scores over CV runs
-            else:
-                raise Exception("Error: metric_ranking selection not found (must be mean or median)")
-
-            # Get relevant metric info
-            if metric_weighting == 'mean':
-                med_ba = mean(metric_dict[algorithm][self.metric_weight])
-            elif metric_weighting == 'median':
-                med_ba = median(metric_dict[algorithm][self.metric_weight])
-            else:  # use mean as backup
-                raise Exception("Error: metric_weighting selection not found (must be mean or median)")
-            med_metric_list.append(med_ba)
-
-        # Normalize Median Feature importance scores, so they fall between (0 - 1)
-        fi_med_norm_list = []
-        for each in fi_med_list:  # each algorithm
-            norm_list = []
-            for i in range(len(each)):  # each feature (score) in original data order
-                if each[i] <= 0:  # Feature importance scores assumed to be uninformative if at or below 0
-                    norm_list.append(0)
-                else:
-                    norm_list.append((each[i]) / (max(each)))
-            fi_med_norm_list.append(norm_list)
-
-        # Identify features with non-zero medians
-        # (step towards excluding features that had zero feature importance for all algorithms)
-        alg_non_zero_fi_list = []  # stores list of feature name lists that are non-zero for each algorithm
-        for each in fi_med_list:  # each algorithm
-            temp_non_zero_list = []
-            for i in range(len(each)):  # each feature
-                if each[i] > 0.0:
-                    # add feature names with positive values (doesn't need to be normalized for this)
-                    temp_non_zero_list.append(all_feature_list[i])
-            alg_non_zero_fi_list.append(temp_non_zero_list)
-        non_zero_union_features = alg_non_zero_fi_list[0]  # grab first algorithm's list
-        # Identify union of features with non-zero averages over all algorithms
-        # (i.e. if any algorithm found a non-zero score it will be considered
-        # for inclusion in top feature visualizations)
-        for j in range(1, len(self.algorithms)):
-            non_zero_union_features = list(set(non_zero_union_features) | set(alg_non_zero_fi_list[j]))
-        non_zero_union_indexes = []
-        for i in non_zero_union_features:
-            non_zero_union_indexes.append(all_feature_list.index(i))
-        # return fi_df_list, fi_ave_list, fi_ave_norm_list, ave_metric_list,\
-        #     all_feature_list, non_zero_union_features, non_zero_union_indexes
-        return fi_df_list, fi_med_list, fi_med_norm_list, med_metric_list, \
-            all_feature_list, non_zero_union_features, non_zero_union_indexes
-
-    def select_for_composite_viz(self, non_zero_union_features,
-                                 non_zero_union_indexes,
-                                 ave_metric_list, fi_ave_norm_list):
-        """
-        Identify list of top features over all algorithms to visualize
-        (note that best features to visualize are chosen using algorithm
-        performance weighting and normalization:
-        frac plays no useful role here only for viz). All features included
-        if there are fewer than 'top_model_features'. Top features are
-        determined by the sum of performance
-        (i.e. balanced accuracy) weighted feature importance over all algorithms.
-        """
-        # Create performance weighted score sum dictionary for all features
-        score_sum_dict = {}
-        i = 0
-        for each in non_zero_union_features:  # for each non-zero feature
-            for j in range(len(self.algorithms)):  # for each algorithm
-                # grab target score from each algorithm
-                score = fi_ave_norm_list[j][non_zero_union_indexes[i]]
-                # multiply score by algorithm performance weight
-                weight = ave_metric_list[j]
-                # if weight <= .5:  # This is why this method is limited to balanced_accuracy and roc_auc
-                #     weight = 0
-                # if not weight == 0:
-                #     weight = (weight - 0.5) / 0.5
-                score = score * weight
-                if not (each in score_sum_dict):
-                    score_sum_dict[each] = score
-                else:
-                    score_sum_dict[each] += score
-            i += 1
-        # Sort features by decreasing score
-        score_sum_dict_features = sorted(score_sum_dict, key=lambda x: score_sum_dict[x], reverse=True)
-        # Keep all features if there are fewer than specified top results
-        if len(non_zero_union_features) > self.top_features:
-            features_to_viz = score_sum_dict_features[0:self.top_features]
-        else:
-            features_to_viz = score_sum_dict_features
-        return features_to_viz  # list of feature names to visualize in composite FI plots.
-
-    def get_fi_to_viz_sorted(self, features_to_viz, all_feature_list, fi_med_norm_list):
-        """
-        Takes a list of top features names for visualisation, gets their
-        indexes. In every composite FI plot features are ordered the same way
-        they are selected for visualisation (i.e. normalized and performance
-        weighted). Because of this feature bars are only perfectly ordered in
-        descending order for the normalized + performance weighted composite plot.
-        """
-        # Get original feature indexs for selected feature names
-        feature_index_to_viz = []  # indexes of top features
-        for i in features_to_viz:
-            feature_index_to_viz.append(all_feature_list.index(i))
-        # Create list of top feature importance values in original dataset feature order
-        top_fi_med_norm_list = []  # feature importance values of top features for each algorithm (list of lists)
-        for i in range(len(self.algorithms)):
-            temp_list = []
-            for j in feature_index_to_viz:  # each top feature index
-                temp_list.append(fi_med_norm_list[i][j])  # add corresponding FI value
-            top_fi_med_norm_list.append(temp_list)
-        all_feature_list_to_viz = features_to_viz
-        return top_fi_med_norm_list, all_feature_list_to_viz
-
-    @staticmethod
-    def frac_fi(top_fi_med_norm_list):
-        """
-        Transforms feature scores so that they sum to 1 over all features
-        for a given algorithm.  This way the normalized and fracionated composit bar plot
-        offers equal total bar area for every algorithm. The intuition
-        here is that if an algorithm gives the same FI scores for all top features it won't be
-        overly represented in the resulting plot (i.e. all features can
-        have the same maximum feature importance which might lead to the impression that an
-        algorithm is working better than it is.) Instead, that maximum
-        'bar-real-estate' has to be divided by the total number of features. Notably, this
-        transformation has the potential to alter total algorithm FI bar height ranking of features.
-        """
-        frac_lists = []
-        for each in top_fi_med_norm_list:  # each algorithm
-            frac_list = []
-            for i in range(len(each)):  # each feature
-                if sum(each) == 0:  # check that all feature scores are not zero to avoid zero division error
-                    frac_list.append(0)
-                else:
-                    frac_list.append((each[i] / (sum(each))))
-            frac_lists.append(frac_list)
-        return frac_lists
-
-    @staticmethod
-    def weight_fi(med_metric_list, top_fi_med_norm_list):
-        """
-        Weights the feature importance scores by algorithm performance
-        (intuitive because when interpreting feature importances we want
-        to place more weight on better performing algorithms)
-        """
-        # Prepare weights
-        weights = []
-        # replace all balanced accuraces <=.5 with 0 (i.e. these are no better than random chance)
-        for i in range(len(med_metric_list)):
-            if med_metric_list[i] <= .5:
-                med_metric_list[i] = 0
-        # normalize balanced accuracies
-        for i in range(len(med_metric_list)):
-            if med_metric_list[i] == 0:
-                weights.append(0)
-            else:
-                weights.append((med_metric_list[i] - 0.5) / 0.5)
-        # Weight normalized feature importances
-        weighted_lists = []
-        for i in range(len(top_fi_med_norm_list)):  # each algorithm
-            weight_list = np.multiply(weights[i], top_fi_med_norm_list[i]).tolist()
-            weighted_lists.append(weight_list)
-        return weighted_lists, weights
-
-    @staticmethod
-    def weight_frac_fi(frac_lists, weights):
-        """ Weight normalized and fractionated feature importances. """
-        weighted_frac_lists = []
-        for i in range(len(frac_lists)):
-            weight_list = np.multiply(weights[i], frac_lists[i]).tolist()
-            weighted_frac_lists.append(weight_list)
-        return weighted_frac_lists
-    
+                
     def ensemble_stats_summary(self):
         """
         Summarize ensembles created in Phase 7 (if any exist) and
