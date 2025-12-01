@@ -44,6 +44,7 @@ class P8Runner:
         exclude_plots: Optional[str] = None,  # CSV: "plot_ROC,plot_PRC"
         show_plots: bool = False,
         include_ensembles: bool = True,
+        multiclass_average: str = "micro",
         # execution
         run_cluster: str = "Serial",   # "Serial" | "Local" | "BashSLURM" | "BashLSF" | "<cluster>"
         queue: str = "defq",
@@ -61,6 +62,7 @@ class P8Runner:
         self.scale_data = bool(scale_data)
         self.show_plots = bool(show_plots)
         self.include_ensembles = bool(include_ensembles)
+        self.multiclass_average = multiclass_average
 
         self.run_cluster = run_cluster or "Serial"
         self.queue = queue
@@ -134,6 +136,8 @@ class P8Runner:
             exclude_plots=self.exclude_plots,
             show_plots=self.show_plots,
             include_ensembles=self.include_ensembles,
+            multiclass_average=self.multiclass_average,
+            
         ).run()
 
     def _submit_bash(self, dataset_dir: str, mode: str):
@@ -162,6 +166,7 @@ class P8Runner:
             "--exclude_plots", ",".join(self.exclude_plots) if self.exclude_plots else "",
             "--show_plots", "1" if self.show_plots else "0",
             "--include_ensembles", "1" if self.include_ensembles else "0",
+            "--multiclass_average", self.multiclass_average,
         ]
         cmd = " ".join(args)
 

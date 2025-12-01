@@ -24,6 +24,7 @@ def main():
     ap.add_argument("--exclude_plots", default="")
     ap.add_argument("--show_plots", default="0")
     ap.add_argument("--include_ensembles", default="1")
+    ap.add_argument("--multiclass_average", default="micro")
 
     args = ap.parse_args()
 
@@ -45,6 +46,7 @@ def main():
         exclude_plots=exclude_plots,
         show_plots=_b(args.show_plots),
         include_ensembles=_b(args.include_ensembles),
+        multiclass_average=args.multiclass_average,
     ).run()
 
 

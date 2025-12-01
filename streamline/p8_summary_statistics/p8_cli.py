@@ -26,6 +26,8 @@ def main():
     ap.add_argument("--show_plots", type=int, default=0)
     ap.add_argument("--include_ensembles", type=int, default=1,
                     help="1 to summarize ensembles from Phase 7 if present")
+    ap.add_argument("--multiclass_average", default="micro",
+                    help="Averaging method for multiclass metrics: micro | macro")
 
     # execution
     ap.add_argument("--run_cluster", default="Serial",
@@ -50,6 +52,7 @@ def main():
         exclude_plots=args.exclude_plots,
         show_plots=bool(args.show_plots),
         include_ensembles=bool(args.include_ensembles),
+        multiclass_average=args.multiclass_average,
         run_cluster=args.run_cluster,
         queue=args.queue,
         reserved_memory=args.reserved_memory,
