@@ -188,7 +188,8 @@ def test_p6_p7_p8_pipeline():
     # sanity check a metric file structure
     with open(metrics_files[0]) as f:
         m = json.load(f)
-    assert "Balanced Accuracy" in m and "Accuracy" in m
+    # metrics JSON now uses sklearn-style lowercase metric names
+    assert "balanced_accuracy" in m and "accuracy" in m
 
     # 4) Phase 8 – statistics summarization (base models + ensemble summaries)
     p8 = P8Runner(
@@ -203,7 +204,7 @@ def test_p6_p7_p8_pipeline():
         sig_cutoff=0.1,         # relaxed for tiny data
         metric_weight="balanced_accuracy",
         scale_data=True,
-        exclude_plots="plot_FI_box",  # make tests faster / headless-safe
+        exclude_plots=["plot_FI_box"],  # make tests faster / headless-safe
         show_plots=False,
         run_cluster="Serial",
     )
@@ -232,5 +233,3 @@ def test_p6_p7_p8_pipeline():
     # If a specific name is used (e.g. Summary_ensemble_performance_mean.csv), you can tighten this:
     # ens_summary_mean = ens_root / "Summary_ensemble_performance_mean.csv"
     # assert ens_summary_mean.is_file()
-
-
