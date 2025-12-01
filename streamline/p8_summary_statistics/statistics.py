@@ -408,12 +408,6 @@ class StatisticsPhaseJob:
         job_file.write("complete")
         job_file.close()
 
-    # ------------------------------------------------------------------
-    # Everything below is the same logic as your previous Stats job,
-    # just with class / attribute names adapted to StatsPhaseJob.
-    # (I’ve only touched parse_runtime very lightly to remove algInfo use.)
-    # ------------------------------------------------------------------
-
     def preparation(self):
         """
         Creates directory for all results files, decodes included ML modeling
@@ -423,11 +417,6 @@ class StatisticsPhaseJob:
             os.mkdir(self.full_path + "/model_evaluation")
         if not os.path.exists(self.full_path + "/model_evaluation/feature_importance/"):
             os.mkdir(self.full_path + "/model_evaluation/feature_importance/")
-
-    #-------------------------------------------------------------------------
-    # Below this line is essentially old streamline StatsJob code, lightly
-    # adapted to paths and naming.
-    # -------------------------------------------------------------------------
 
 
     def residuals_regression(self, result_file=None):
