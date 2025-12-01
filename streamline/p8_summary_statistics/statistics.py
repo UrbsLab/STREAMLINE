@@ -31,6 +31,16 @@ from streamline.p8_summary_statistics.utils.plot_fi import (
     plot_fi_histogram,
     plot_composite_fi,
 )
+from streamline.p8_summary_statistics.utils.fi_core import (
+    prep_fi,
+    select_for_composite_viz,
+    get_fi_to_viz_sorted,
+    frac_fi,
+    weight_fi,
+    weight_frac_fi,
+)
+from streamline.p8_summary_statistics.utils.plot_regression import residuals_regression
+
 
 from scipy import stats
 from scipy.stats import kruskal, wilcoxon, mannwhitneyu
@@ -308,7 +318,6 @@ class StatisticsPhaseJob:
             result_table, metric_dict = self.primary_stats_multiclass()
         elif self.outcome_type == "Continuous":
             result_table, metric_dict = self.primary_stats_regression()
-            self.residuals_regression()
         else:
             raise ValueError(f"Unknown outcome_type: {self.outcome_type}")
         
@@ -333,6 +342,16 @@ class StatisticsPhaseJob:
                     replicate=False,
                     show_plots=self.show_plots,
                 )
+        else:
+            # Regression residual plots
+            residuals_regression(
+                full_path=self.full_path,
+                algorithms=self.algorithms,
+                abbrev=self.abbrev,
+                cv_partitions=self.cv_partitions,
+                colors=self.colors,
+                show_plots=self.show_plots,
+            )
 
         # Summaries of metrics across CV folds
         metrics = list(metric_dict[self.algorithms[0]].keys())
@@ -587,15 +606,32 @@ class StatisticsPhaseJob:
 
         logging.info('Preparing for Model Feature Importance Plotting...')
 
-        fi_df_list, fi_med_list, fi_med_norm_list, med_metric_list, all_feature_list, \
-            non_zero_union_features, \
-            non_zero_union_indexes = self.prep_fi(metric_dict, metric_ranking, metric_weighting)
-
-        features_to_viz = self.select_for_composite_viz(
+        (
+            fi_df_list,
+            fi_med_list,
+            fi_med_norm_list,
+            med_metric_list,
+            all_feature_list,
             non_zero_union_features,
             non_zero_union_indexes,
-            med_metric_list,
-            fi_med_norm_list,
+        ) = prep_fi(
+            full_path=self.full_path,
+            algorithms=self.algorithms,
+            abbrev=self.abbrev,
+            metric_dict=metric_dict,
+            metric_ranking=metric_ranking,
+            metric_weighting=metric_weighting,
+            metric_weight_name=self.metric_weight,
+        )
+
+        # Select 'top' features for composite visualisation
+        features_to_viz = select_for_composite_viz(
+            non_zero_union_features=non_zero_union_features,
+            non_zero_union_indexes=non_zero_union_indexes,
+            ave_metric_list=med_metric_list,
+            fi_ave_norm_list=fi_med_norm_list,
+            algorithms=self.algorithms,
+            top_features=self.top_features,
         )
 
         # per-algorithm FI plots
@@ -621,8 +657,12 @@ class StatisticsPhaseJob:
         # composite FI
         logging.info('Generating Composite Feature Importance Plots...')
 
-        top_fi_med_norm_list, all_feature_list_to_viz = self.get_fi_to_viz_sorted(
-            features_to_viz, all_feature_list, fi_med_norm_list
+        # Take top feature names to visualize and get associated feature importance values
+        top_fi_med_norm_list, all_feature_list_to_viz = get_fi_to_viz_sorted(
+            features_to_viz=features_to_viz,
+            all_feature_list=all_feature_list,
+            fi_med_norm_list=fi_med_norm_list,
+            algorithms=self.algorithms,
         )
 
         if metric_ranking == 'mean':
@@ -647,9 +687,13 @@ class StatisticsPhaseJob:
             show_plots=self.show_plots,
         )
 
-        # weighted composite FI
-        weighted_lists, weights = self.weight_fi(med_metric_list, top_fi_med_norm_list)
+        # Weighted FI (performance-weighted)
+        weighted_lists, weights = weight_fi(
+            med_metric_list=med_metric_list,
+            top_fi_med_norm_list=top_fi_med_norm_list,
+        )
 
+        # Generate Normalized and Weighted Composite FI plot
         if metric_ranking == 'mean':
             y_label_w = 'Normalized and Weighted Mean Feature Importance'
         else:
