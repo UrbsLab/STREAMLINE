@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
-from streamline.p8_summary_statistics.utils.plots_curves import (
+from streamline.p8_summary_statistics.utils.plot_curves import (
     plot_model_roc,
     plot_model_prc,
     plot_summary_roc,
@@ -26,7 +26,7 @@ from streamline.p8_summary_statistics.utils.plots_curves import (
     plot_ensemble_roc_summary,
     plot_ensemble_prc_summary,
 )
-from streamline.p8_summary_statistics.utils.plots_fi import (
+from streamline.p8_summary_statistics.utils.plot_fi import (
     plot_fi_boxplots,
     plot_fi_histogram,
     plot_composite_fi,
@@ -304,21 +304,35 @@ class StatisticsPhaseJob:
         # Core stats for base models (phase 6)
         if self.outcome_type == "Binary":
             result_table, metric_dict = self.primary_stats_classification()
-            if self.plot_roc:
-                self.do_plot_roc(result_table)
-            if self.plot_prc:
-                self.do_plot_prc(result_table)
         elif self.outcome_type == "Multiclass":
             result_table, metric_dict = self.primary_stats_multiclass()
-            if self.plot_roc:
-                self.do_plot_roc(result_table)
-            if self.plot_prc:
-                self.do_plot_prc(result_table)
         elif self.outcome_type == "Continuous":
             result_table, metric_dict = self.primary_stats_regression()
             self.residuals_regression()
         else:
             raise ValueError(f"Unknown outcome_type: {self.outcome_type}")
+        
+        # Summary ROC / PRC across algorithms
+        if self.outcome_type in ("Binary", "Multiclass"):
+            if self.plot_roc:
+                plot_summary_roc(
+                    full_path=self.full_path,
+                    colors=self.colors,
+                    result_table=result_table,
+                    show_plots=self.show_plots,
+                )
+            if self.plot_prc:
+                plot_summary_prc(
+                    full_path=self.full_path,
+                    colors=self.colors,
+                    result_table=result_table,
+                    outcome_label=self.outcome_label,
+                    data_name=self.data_name,
+                    instance_label=self.instance_label,
+                    rep_data=None,
+                    replicate=False,
+                    show_plots=self.show_plots,
+                )
 
         # Summaries of metrics across CV folds
         metrics = list(metric_dict[self.algorithms[0]].keys())
@@ -328,7 +342,13 @@ class StatisticsPhaseJob:
         # Metric boxplots
         if self.plot_metric_boxplots:
             logging.info("Generating Metric Boxplots...")
-            self.metric_boxplots(metrics, metric_dict)
+            plot_metric_boxplots(
+                full_path=self.full_path,
+                algorithms=self.algorithms,
+                metrics=metrics,
+                metric_dict=metric_dict,
+                show_plots=self.show_plots,
+            )
 
         # Non-parametric tests (Kruskal, Wilcoxon, Mann-Whitney)
         if len(self.algorithms) > 1:
@@ -565,69 +585,92 @@ class StatisticsPhaseJob:
         metric_ranking = ave_or_median
         metric_weighting = ave_or_median
 
-        # mean or median #Ryan add a run parameter to STREAMLINE to
-        # allow user to decide plot rankings for FI using mean by default
-        # Prepare for feature importance visualizations
         logging.info('Preparing for Model Feature Importance Plotting...')
 
-        # old - 'Balanced Accuracy'
         fi_df_list, fi_med_list, fi_med_norm_list, med_metric_list, all_feature_list, \
             non_zero_union_features, \
             non_zero_union_indexes = self.prep_fi(metric_dict, metric_ranking, metric_weighting)
 
-        # Select 'top' features for composite visualisation
-        features_to_viz = self.select_for_composite_viz(non_zero_union_features, non_zero_union_indexes,
-                                                        med_metric_list, fi_med_norm_list)
+        features_to_viz = self.select_for_composite_viz(
+            non_zero_union_features,
+            non_zero_union_indexes,
+            med_metric_list,
+            fi_med_norm_list,
+        )
 
-        # Generate FI boxplots for each modeling algorithm if specified by user
+        # per-algorithm FI plots
         if self.plot_fi_box:
             logging.info('Generating Feature Importance Boxplot and Histograms...')
-            self.do_fi_boxplots(fi_df_list, fi_med_list, metric_ranking)
-            self.do_fi_histogram(fi_med_list, metric_ranking)
+            plot_fi_boxplots(
+                full_path=self.full_path,
+                algorithms=self.algorithms,
+                feature_headers=self.feature_headers,
+                fi_df_list=fi_df_list,
+                fi_med_list=fi_med_list,
+                metric_ranking=metric_ranking,
+                show_plots=self.show_plots,
+            )
+            plot_fi_histogram(
+                full_path=self.full_path,
+                algorithms=self.algorithms,
+                fi_med_list=fi_med_list,
+                metric_ranking=metric_ranking,
+                show_plots=self.show_plots,
+            )
 
-        # Visualize composite FI - Currently set up to only use Balanced Accuracy for composite FI plot visualization
+        # composite FI
         logging.info('Generating Composite Feature Importance Plots...')
-        # Take top feature names to visualize and get associated feature importance values for each algorithm,
-        # and original data ordered feature names list
-        # If we want composite FI plots to be displayed in descending total bar height order.
 
-        top_fi_med_norm_list, all_feature_list_to_viz = self.get_fi_to_viz_sorted(features_to_viz, all_feature_list,
-                                                                                  fi_med_norm_list)
-
-        # Generate Normalized composite FI plot
+        top_fi_med_norm_list, all_feature_list_to_viz = self.get_fi_to_viz_sorted(
+            features_to_viz, all_feature_list, fi_med_norm_list
+        )
 
         if metric_ranking == 'mean':
-            self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
-                                   'Normalized Mean Feature Importance', metric_ranking, metric_weighting)
+            y_label = 'Normalized Mean Feature Importance'
         elif metric_ranking == 'median':
-            self.composite_fi_plot(top_fi_med_norm_list, all_feature_list_to_viz, 'Norm',
-                                   'Normalized Median Feature Importance', metric_ranking, metric_weighting)
-        else:
-            print("Error: metric_ranking selection not found (must be mean or median)")
-
-        # # Fractionate FI scores for normalized and fractionated composite FI plot
-        # frac_lists = self.frac_fi(top_fi_med_norm_list)
-
-        # # Generate Normalized and Fractionated composite FI plot
-        # composite_fi_plot(frac_lists, algorithms, list(colors.values()),
-        #                   all_feature_list_to_viz, 'Norm_Frac',
-        #                   'Normalized and Fractionated Feature Importance')
-
-        # Weight FI scores for normalized and (model performance) weighted composite FI plot
-        weighted_lists, weights = self.weight_fi(med_metric_list, top_fi_med_norm_list)
-
-        # Generate Normalized and Weighted Compound FI plot
-        if metric_ranking == 'mean':
-            self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Mean Feature Importance', metric_ranking,
-                                   metric_weighting)
-        elif metric_ranking == 'median':
-            self.composite_fi_plot(weighted_lists, all_feature_list_to_viz,
-                                   'Norm_Weight', 'Normalized and Weighted Median Feature Importance', metric_ranking,
-                                   metric_weighting)
+            y_label = 'Normalized Median Feature Importance'
         else:
             raise Exception("Error: metric_ranking selection not found (must be mean or median)")
 
+        # normalized composite FI
+        plot_composite_fi(
+            full_path=self.full_path,
+            algorithms=self.algorithms,
+            colors=self.colors,
+            fi_list=top_fi_med_norm_list,
+            all_feature_list_to_viz=all_feature_list_to_viz,
+            fig_name='Norm',
+            y_label_text=y_label,
+            metric_ranking=metric_ranking,
+            metric_weighting=metric_weighting,
+            metric_weight_label=self.metric_weight,
+            show_plots=self.show_plots,
+        )
+
+        # weighted composite FI
+        weighted_lists, weights = self.weight_fi(med_metric_list, top_fi_med_norm_list)
+
+        if metric_ranking == 'mean':
+            y_label_w = 'Normalized and Weighted Mean Feature Importance'
+        else:
+            y_label_w = 'Normalized and Weighted Median Feature Importance'
+
+        plot_composite_fi(
+            full_path=self.full_path,
+            algorithms=self.algorithms,
+            colors=self.colors,
+            fi_list=weighted_lists,
+            all_feature_list_to_viz=all_feature_list_to_viz,
+            fig_name='Norm_Weight',
+            y_label_text=y_label_w,
+            metric_ranking=metric_ranking,
+            metric_weighting=metric_weighting,
+            metric_weight_label=self.metric_weight,
+            show_plots=self.show_plots,
+        )
+        
+        # Old code comments for fractionated composite FI - commented out for now
+        # Fractionated composite FI
         # Weight the Fractionated FI scores for normalized,fractionated, and weighted compound FI plot
         # weighted_frac_lists = self.weight_frac_fi(frac_lists,weights)
 
@@ -751,10 +794,33 @@ class StatisticsPhaseJob:
         return result_table, metric_dict
 
 
+    def _get_multiclass_avg_metric(self, metrics_payload: Dict[str, Any], base: str):
+        """
+        Helper: pick the right averaged metric for multiclass.
+
+        Preference order:
+          requested (micro/macro) -> macro -> micro -> base
+        """
+        if self.outcome_type != "Multiclass":
+            return metrics_payload.get(base)
+
+        suffix = "_" + self.multiclass_average
+        candidates = [base + suffix, base + "_macro", base + "_micro", base]
+        for key in candidates:
+            if key in metrics_payload:
+                return metrics_payload.get(key)
+        return None
+
     def primary_stats_multiclass(self, master_list=None, rep_data=None):
         """
         Multiclass classification stats using JSON metrics/curves.
-        Uses micro-averaged curves for summary plots.
+
+        Metrics:
+          - Lets you choose micro vs macro averaging for F1 / Recall / Precision
+            via self.multiclass_average ("micro" or "macro").
+        Curves:
+          - Uses the same averaging key when available (e.g. "micro" or "macro"
+            in the saved curve JSONs), otherwise falls back gracefully.
         """
         result_table = []
         metric_dict: Dict[str, Dict[str, List[float]]] = {}
@@ -762,11 +828,12 @@ class StatisticsPhaseJob:
         metrics_dir = Path(self.full_path) / "model_evaluation" / "metrics_by_cv"
         curves_dir = Path(self.full_path) / "model_evaluation" / "curves_by_cv"
 
+        avg_key = self.multiclass_average if self.outcome_type == "Multiclass" else "micro"
+
         for algorithm in self.algorithms:
             alg_result_table = []
 
             s_bac, s_ac, s_f1, s_re, s_pr = [[] for _ in range(5)]
-
             fi_all = []
 
             tprs = []
@@ -800,8 +867,9 @@ class StatisticsPhaseJob:
                     else:
                         prc_all = {}
 
-                    roc_m = roc_all.get("micro", roc_all or {})
-                    prc_m = prc_all.get("micro", prc_all or {})
+                    # curves may hold multiple averages (micro/macro) or none
+                    roc_m = roc_all.get(avg_key) or roc_all.get("micro") or roc_all.get("macro") or (roc_all or {})
+                    prc_m = prc_all.get(avg_key) or prc_all.get("micro") or prc_all.get("macro") or (prc_all or {})
 
                     fpr = np.asarray(roc_m.get("fpr", []), dtype=float)
                     tpr = np.asarray(roc_m.get("tpr", []), dtype=float)
@@ -823,13 +891,12 @@ class StatisticsPhaseJob:
                     ave_prec = float(results[7]['micro'])
                     fi = results[8]
 
-                # map JSON metric names -> legacy series for CSV
+                # metrics
                 s_bac.append(metrics_payload.get("balanced_accuracy"))
                 s_ac.append(metrics_payload.get("accuracy"))
-                # For compatibility, we still label this column as "F1 Score"
-                s_f1.append(metrics_payload.get("f1_macro"))
-                s_re.append(metrics_payload.get("recall_macro"))
-                s_pr.append(metrics_payload.get("precision_macro"))
+                s_f1.append(self._get_multiclass_avg_metric(metrics_payload, "f1"))
+                s_re.append(self._get_multiclass_avg_metric(metrics_payload, "recall"))
+                s_pr.append(self._get_multiclass_avg_metric(metrics_payload, "precision"))
 
                 alg_result_table.append([fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec])
 
@@ -863,24 +930,50 @@ class StatisticsPhaseJob:
 
             logging.info("Running stats on " + algorithm)
 
+            # mean ROC curve + per-model ROC plot
             if tprs:
                 mean_tpr = np.mean(tprs, axis=0)
                 mean_tpr[-1] = 1.0
                 mean_auc = np.mean(aucs)
                 if self.plot_roc:
-                    self.do_model_roc(algorithm, tprs, aucs, mean_fpr, alg_result_table)
+                    plot_model_roc(
+                        full_path=self.full_path,
+                        algorithm=algorithm,
+                        abbrev=self.abbrev[algorithm],
+                        color=self.colors[algorithm],
+                        cv_partitions=self.cv_partitions,
+                        mean_fpr=mean_fpr,
+                        tprs=tprs,
+                        aucs=aucs,
+                        alg_result_table=alg_result_table,
+                        show_plots=self.show_plots,
+                    )
             else:
                 mean_tpr = np.zeros_like(mean_fpr)
                 mean_auc = float("nan")
 
+            # mean PRC curve + per-model PRC plot
             if precs:
                 mean_prec = np.mean(precs, axis=0)
                 mean_pr_auc = np.mean(praucs)
                 if self.plot_prc:
-                    if master_list is None:
-                        self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table)
-                    else:
-                        self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table, rep_data, True)
+                    plot_model_prc(
+                        full_path=self.full_path,
+                        algorithm=algorithm,
+                        abbrev=self.abbrev[algorithm],
+                        color=self.colors[algorithm],
+                        cv_partitions=self.cv_partitions,
+                        mean_recall=mean_recall,
+                        precs=precs,
+                        praucs=praucs,
+                        alg_result_table=alg_result_table,
+                        outcome_label=self.outcome_label,
+                        data_name=self.data_name,
+                        instance_label=self.instance_label,
+                        rep_data=rep_data,
+                        replicate=bool(master_list is not None),
+                        show_plots=self.show_plots,
+                    )
             else:
                 mean_prec = np.zeros_like(mean_recall)
                 mean_pr_auc = float("nan")
@@ -922,10 +1015,12 @@ class StatisticsPhaseJob:
         return result_table, metric_dict
 
 
+
     def primary_stats_classification(self, master_list=None, rep_data=None):
         """
         Combine binary classification metrics and FI + ROC/PRC data across CVs.
-        Now reads:
+
+        Reads:
           metrics_by_cv/<ALG>_CV_<k>.json
           curves_by_cv/<ALG>_CV_<k>_roc.json
           curves_by_cv/<ALG>_CV_<k>_prc.json
@@ -1043,26 +1138,50 @@ class StatisticsPhaseJob:
 
             logging.info("Running stats on " + algorithm)
 
-            # mean ROC curve
+            # mean ROC curve + plot via helper
             if tprs:
                 mean_tpr = np.mean(tprs, axis=0)
                 mean_tpr[-1] = 1.0
                 mean_auc = np.mean(aucs)
                 if self.plot_roc:
-                    self.do_model_roc(algorithm, tprs, aucs, mean_fpr, alg_result_table)
+                    plot_model_roc(
+                        full_path=self.full_path,
+                        algorithm=algorithm,
+                        abbrev=self.abbrev[algorithm],
+                        color=self.colors[algorithm],
+                        cv_partitions=self.cv_partitions,
+                        mean_fpr=mean_fpr,
+                        tprs=tprs,
+                        aucs=aucs,
+                        alg_result_table=alg_result_table,
+                        show_plots=self.show_plots,
+                    )
             else:
                 mean_tpr = np.zeros_like(mean_fpr)
                 mean_auc = float("nan")
 
-            # mean PRC curve
+            # mean PRC curve + plot via helper
             if precs:
                 mean_prec = np.mean(precs, axis=0)
                 mean_pr_auc = np.mean(praucs)
                 if self.plot_prc:
-                    if master_list is None:
-                        self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table)
-                    else:
-                        self.do_model_prc(algorithm, precs, praucs, mean_recall, alg_result_table, rep_data, True)
+                    plot_model_prc(
+                        full_path=self.full_path,
+                        algorithm=algorithm,
+                        abbrev=self.abbrev[algorithm],
+                        color=self.colors[algorithm],
+                        cv_partitions=self.cv_partitions,
+                        mean_recall=mean_recall,
+                        precs=precs,
+                        praucs=praucs,
+                        alg_result_table=alg_result_table,
+                        outcome_label=self.outcome_label,
+                        data_name=self.data_name,
+                        instance_label=self.instance_label,
+                        rep_data=rep_data,
+                        replicate=bool(master_list is not None),
+                        show_plots=self.show_plots,
+                    )
             else:
                 mean_prec = np.zeros_like(mean_recall)
                 mean_pr_auc = float("nan")
@@ -1125,183 +1244,6 @@ class StatisticsPhaseJob:
         filepath = self.full_path + '/model_evaluation/feature_importance/' + algorithm + "_FI.csv"
         dr.to_csv(filepath, header=global_feature_list, index=False)
 
-    def do_model_roc(self, algorithm, tprs, aucs, mean_fpr, alg_result_table):
-
-        # Define values for the mean ROC line (mean of individual CVs)
-        mean_tpr = np.mean(tprs, axis=0)
-        mean_tpr[-1] = 1.0
-        mean_auc = np.mean(aucs)
-
-        # Generate ROC Plot (including individual CV's lines, average line, and no skill line)
-        # based on https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
-
-        if self.plot_roc:
-            # Set figure dimensions
-            plt.rcParams["figure.figsize"] = (6, 6)
-            # Plot individual CV ROC lines
-            for i in range(self.cv_partitions):
-                plt.plot(alg_result_table[i][0], alg_result_table[i][1], lw=1, alpha=0.3,
-                         label='ROC fold %d (AUC = %0.3f)' % (i, alg_result_table[i][2]))
-            # Plot no-skill line
-            plt.plot([0, 1], [0, 1],
-                     linestyle='--', lw=2, color='black', label='No-Skill', alpha=.8)
-            # Plot average line for all CVs
-            std_auc = np.std(aucs)  # AUC standard deviations across CVs
-            plt.plot(mean_fpr, mean_tpr, color=self.colors[algorithm],
-                     label=r'Mean ROC (AUC = %0.3f $\pm$ %0.3f)' % (float(mean_auc), float(std_auc)),
-                     lw=2, alpha=.8)
-
-            # Plot standard deviation grey zone of curves
-            std_tpr = np.std(tprs, axis=0)
-            tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
-            tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
-            plt.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2, label=r'$\pm$ 1 std. dev.')
-            # Specify plot axes,labels, and legend
-            plt.xlim([-0.05, 1.05])
-            plt.ylim([-0.05, 1.05])
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title(algorithm)
-            plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
-            # Export and/or show plot
-            plt.savefig(self.full_path + '/model_evaluation/' + 
-                        self.abbrev[algorithm] + "_ROC.png", bbox_inches="tight")
-            if self.show_plots:
-                plt.show()
-            else:
-                plt.close('all')
-                # plt.cla() # not required
-
-    def do_model_prc(self, algorithm, precs, praucs, mean_recall, alg_result_table, rep_data=None, replicate=False):
-        # Define values for the mean PRC line (mean of individual CVs)
-        mean_prec = np.mean(precs, axis=0)
-        mean_pr_auc = np.mean(praucs)
-
-        # Generate PRC Plot (including individual CV's lines, average line, and no skill line)
-        if self.plot_prc:
-            # Set figure dimensions
-            plt.rcParams["figure.figsize"] = (6, 6)
-            # Plot individual CV PRC lines
-            for i in range(self.cv_partitions):
-                plt.plot(alg_result_table[i][4], alg_result_table[i][3], lw=1, alpha=0.3,
-                         label='PRC fold %d (AUC = %0.3f)' % (i, alg_result_table[i][5]))
-            # Estimate no skill line based on the fraction of cases found in the first test dataset
-            # Technically there could be a unique no-skill line for each CV dataset based
-            # on final class balance (however only one is needed, and stratified CV attempts
-            # to keep partitions with similar/same class balance)
-
-            if not replicate:
-                # Estimate no skill line based on the fraction of cases found in the first test dataset
-                test = pd.read_csv(
-                    self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
-
-                test_y = test[self.outcome_label].values
-            else:
-                # logging.warning(self.outcome_label)
-                # logging.warning(rep_data.columns)
-                test_y = rep_data[self.outcome_label].values
-
-            no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
-            # Plot no-skill line
-            plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill', alpha=.8)
-            # Plot average line for all CVs
-            std_pr_auc = np.std(praucs)
-            plt.plot(mean_recall, mean_prec, color=self.colors[algorithm],
-                     label=r'Mean PRC (AUC = %0.3f $\pm$ %0.3f)' % (float(mean_pr_auc), float(std_pr_auc)),
-                     lw=2, alpha=.8)
-            # Plot standard deviation grey zone of curves
-            std_prec = np.std(precs, axis=0)
-            precs_upper = np.minimum(mean_prec + std_prec, 1)
-            precs_lower = np.maximum(mean_prec - std_prec, 0)
-            plt.fill_between(mean_recall, precs_lower, precs_upper, color='grey',
-                             alpha=.2, label=r'$\pm$ 1 std. dev.')
-            # Specify plot axes,labels, and legend
-            plt.xlim([-0.05, 1.05])
-            plt.ylim([-0.05, 1.05])
-            plt.xlabel('Recall (Sensitivity)')
-            plt.ylabel('Precision (PPV)')
-            plt.title(algorithm)
-            plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
-            # Export and/or show plot
-            plt.savefig(self.full_path + '/model_evaluation/' +
-                        self.abbrev[algorithm] + "_PRC.png", bbox_inches="tight")
-            if self.show_plots:
-                plt.show()
-            else:
-                plt.close('all')
-                # plt.cla() # not required
-
-    def do_plot_roc(self, result_table):
-        """
-        Generate ROC plot comparing average ML algorithm performance
-        (over all CV training/testing sets)
-        """
-        count = 0
-        # Plot curves for each individual ML algorithm
-        for i in result_table.index:
-            # plt.plot(result_table.loc[i]['fpr'],result_table.loc[i]['tpr'],
-            #          color=colors[i],label="{}, AUC={:.3f}".format(i, result_table.loc[i]['auc']))
-            plt.plot(result_table.loc[i]['fpr'], result_table.loc[i]['tpr'], color=self.colors[i],
-                     label="{}, AUC={:.3f}".format(i, result_table.loc[i]['auc']))
-            count += 1
-        # Set figure dimensions
-        plt.rcParams["figure.figsize"] = (6, 6)
-        # Plot no-skill line
-        plt.plot([0, 1], [0, 1], color='black', linestyle='--', label='No-Skill', alpha=.8)
-        # Specify plot axes,labels, and legend
-        plt.xticks(np.arange(0.0, 1.1, step=0.1))
-        plt.xlabel("False Positive Rate", fontsize=15)
-        plt.yticks(np.arange(0.0, 1.1, step=0.1))
-        plt.ylabel("True Positive Rate", fontsize=15)
-        plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
-        # Export and/or show plot
-        plt.savefig(self.full_path + '/model_evaluation/Summary_ROC.png', bbox_inches="tight")
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
-            # plt.cla() # not required
-
-    def do_plot_prc(self, result_table, rep_data=None, replicate=False):
-        """
-        Generate PRC plot comparing average ML algorithm performance
-        (over all CV training/testing sets)
-        """
-        count = 0
-        # Plot curves for each individual ML algorithm
-        for i in result_table.index:
-            plt.plot(result_table.loc[i]['recall'], result_table.loc[i]['prec'], color=self.colors[i],
-                     label="{}, AUC={:.3f}, APS={:.3f}".format(i, result_table.loc[i]['pr_auc'],
-                                                               result_table.loc[i]['ave_prec']))
-            count += 1
-
-        if not replicate:
-            # Estimate no skill line based on the fraction of cases found in the first test dataset
-            test = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
-            if self.instance_label is not None:
-                test = test.drop(self.instance_label, axis=1)
-            test_y = test[self.outcome_label].values
-        else:
-            test_y = rep_data[self.outcome_label].values
-
-        no_skill = len(test_y[test_y == 1]) / len(test_y)  # Fraction of cases
-
-        # Plot no-skill line
-        plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--', label='No-Skill', alpha=.8)
-        # Specify plot axes,labels, and legend
-        plt.xticks(np.arange(0.0, 1.1, step=0.1))
-        plt.xlabel("Recall (Sensitivity)", fontsize=15)
-        plt.yticks(np.arange(0.0, 1.1, step=0.1))
-        plt.ylabel("Precision (PPV)", fontsize=15)
-        plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
-        # Export and/or show plot
-        plt.savefig(self.full_path + '/model_evaluation/Summary_PRC.png', bbox_inches="tight")
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
-            # plt.cla() # not required
-
     def save_metric_stats(self, metrics, metric_dict):
         """
         Exports csv file with mean, median and std dev metric values
@@ -1353,35 +1295,6 @@ class StatisticsPhaseJob:
                 to_add.extend(astats)
                 writer.writerow(to_add)
         file.close()
-
-    def metric_boxplots(self, metrics, metric_dict):
-        """
-        Export boxplots comparing algorithm performance for each standard metric
-        """
-        if not os.path.exists(self.full_path + '/model_evaluation/metricBoxplots'):
-            os.mkdir(self.full_path + '/model_evaluation/metricBoxplots')
-        for metric in metrics:
-            temp_list = []
-            for algorithm in self.algorithms:
-                temp_list.append(metric_dict[algorithm][metric])
-            td = pd.DataFrame(temp_list)
-            td = td.transpose().astype('float')
-
-            td.columns = self.algorithms
-
-            # Generate boxplot
-            td.plot(kind='box', rot=90)
-            # Specify plot labels
-            plt.ylabel(str(metric))
-            plt.xlabel('ML Algorithm')
-            # Export and/or show plot
-            plt.savefig(self.full_path +
-                        '/model_evaluation/metricBoxplots/Compare_' + metric + '.png', bbox_inches="tight")
-            if self.show_plots:
-                plt.show()
-            else:
-                plt.close('all')
-                # plt.cla() # not required
 
     def kruskal_wallis(self, metrics, metric_dict):
         """
@@ -1611,141 +1524,6 @@ class StatisticsPhaseJob:
             features_to_viz = score_sum_dict_features
         return features_to_viz  # list of feature names to visualize in composite FI plots.
 
-    def do_fi_boxplots(self, fi_df_list, fi_med_list, metric_ranking='median'):
-        """
-        Generate individual feature importance boxplot for each algorithm
-        """
-        algorithm_counter = 0
-        for algorithm in self.algorithms:  # each algorithms
-            # Make median feature importance score dictionary
-            score_dict = {}
-            counter = 0
-            for med_score in fi_med_list[algorithm_counter]:  # each feature
-                # score_dict[self.original_headers[counter]] = med_score
-                score_dict[self.feature_headers[counter]] = med_score
-                counter += 1
-            # Sort features by decreasing score
-            score_dict_features = sorted(score_dict, key=lambda x: score_dict[x], reverse=True)
-            # Make list of feature names to visualize
-            # if len(self.original_headers) > self.top_features:
-            if len(self.feature_headers) > self.top_features:
-                features_to_viz = score_dict_features[0:self.top_features]
-            else:
-                features_to_viz = score_dict_features
-            # FI score dataframe for current algorithm
-            df = fi_df_list[algorithm_counter]
-            # Subset of dataframe (in ranked order) to visualize
-            viz_df = df[features_to_viz]
-            # Generate Boxplot
-            plt.figure(figsize=(15, 4))
-            viz_df.boxplot(rot=90)
-            plt.title(algorithm)
-            plt.ylabel('Feature Importance')
-            if metric_ranking == 'mean':
-                plt.xlabel('Features (Mean Ranking)')
-            elif metric_ranking == 'median':
-                plt.xlabel('Features (Median Ranking)')
-            else:
-                print("Error: metric_ranking selection not found (must be mean or median)")
-            plt.xticks(np.arange(1, len(features_to_viz) + 1), features_to_viz, rotation='vertical')
-            plt.savefig(self.full_path + '/model_evaluation/feature_importance/' + algorithm + '_boxplot',
-                        bbox_inches="tight")
-            if self.show_plots:
-                plt.show()
-            else:
-                plt.close('all')
-                # plt.cla() # not required
-            # Identify and sort (decreasing) features with top median FI
-            algorithm_counter += 1
-
-    def do_fi_histogram(self, fi_med_list, metric_ranking='median'):
-        """
-        Generate histogram showing distribution of median feature importance scores for each algorithm.
-        """
-        algorithm_counter = 0
-        for algorithm in self.algorithms:  # each algorithms
-            med_scores = fi_med_list[algorithm_counter]
-            # Plot a histogram of average feature importance
-            plt.hist(med_scores, bins=100)
-            if metric_ranking == 'mean':
-                plt.xlabel("Mean Feature Importance")
-            elif metric_ranking == 'median':
-                plt.xlabel("Median Feature Importance")
-            else:
-                print("Error: metric_ranking selection not found (must be mean or median)")
-            plt.ylabel("Frequency")
-            plt.title(str(algorithm))
-            plt.xticks(rotation='vertical')
-            plt.savefig(self.full_path
-                        + '/model_evaluation/'
-                          'feature_importance/' + algorithm + '_histogram', bbox_inches="tight")
-            if self.show_plots:
-                plt.show()
-            else:
-                plt.close('all')
-                # plt.cla() # not required
-
-    def composite_fi_plot(self, fi_list, all_feature_list_to_viz, fig_name,
-                          y_label_text, metric_ranking, metric_weighting):
-        """
-        Generate composite feature importance plot given list of feature names
-        and associated feature importance scores for each algorithm.
-        This is run for different transformations of the normalized feature importance scores.
-        """
-        alg_colors = [self.colors[k] for k in self.algorithms]
-        algorithms, alg_colors, fi_list = (list(t) for t in zip(*sorted(zip(self.algorithms, alg_colors, fi_list),
-                                                                        reverse=True)))
-        # Set basic plot properties
-        rc('font', weight='bold', size=16)
-        # The position of the bars on the x-axis
-        r = all_feature_list_to_viz  # feature names
-        # Set width of bars
-        bar_width = 0.75
-        # Set figure dimensions
-        plt.figure(figsize=(24, 12))
-        # Plot first algorithm FI scores (lowest) bar
-        p1 = plt.bar(r, fi_list[0], color=alg_colors[0], edgecolor='white', width=bar_width)
-        # Automatically calculate space needed to plot next bar on top of the one before it
-        bottoms = []  # list of space used by previous
-        # algorithms for each feature (so next bar can be placed directly above it)
-        bottom = None
-        for i in range(len(algorithms) - 1):
-            for j in range(i + 1):
-                if j == 0:
-                    bottom = np.array(fi_list[0]).astype('float64')
-                else:
-                    bottom += np.array(fi_list[j]).astype('float64')
-            bottoms.append(bottom)
-        if not isinstance(bottoms, list):
-            bottoms = bottoms.tolist()
-        if len(self.algorithms) > 1:
-            # Plot subsequent feature bars for each subsequent algorithm
-            ps = [p1[0]]
-            for i in range(len(algorithms) - 1):
-                p = plt.bar(r, fi_list[i + 1], bottom=bottoms[i], color=alg_colors[i + 1], edgecolor='white',
-                            width=bar_width)
-                ps.append(p[0])
-            lines = tuple(ps)
-        else:
-            ps = [p1[0]]
-            lines = tuple(ps)
-        # Specify axes info and legend
-        plt.xticks(np.arange(len(all_feature_list_to_viz)), all_feature_list_to_viz, rotation='vertical')
-        plt.xlabel("Features (ranked by sum of " + metric_ranking + " feature importance: weighted by " +
-                   metric_weighting + " model " + self.metric_weight.lower() + ")", fontsize=20)
-        plt.ylabel(y_label_text, fontsize=20)
-        plt.legend(lines[::-1], algorithms[::-1],loc="upper left", bbox_to_anchor=(1.01,1)) #legend outside plot
-        # algorithms_list, lines_list = (list(t) for t in zip(*sorted(zip(algorithms, lines))))
-        # plt.legend(lines_list, algorithms_list, loc="upper right")
-        # Export and/or show plot
-        plt.savefig(self.full_path + '/model_evaluation/feature_importance/Compare_FI_' + fig_name + '.png',
-                    bbox_inches='tight')
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
-            # plt.cla() # not required
-
     def get_fi_to_viz_sorted(self, features_to_viz, all_feature_list, fi_med_norm_list):
         """
         Takes a list of top features names for visualisation, gets their
@@ -1858,9 +1636,21 @@ class StatisticsPhaseJob:
         # curves summary & plots
         roc_summary, prc_summary = self._collect_ensemble_curves_core(curves_dir, metrics_by_ens.keys())
         if self.plot_roc and roc_summary:
-            self._plot_ensemble_roc_summary(ens_root, roc_summary)
+            plot_ensemble_roc_summary(
+                ens_root=ens_root,
+                roc_summary=roc_summary,
+                show_plots=self.show_plots,
+            )
         if self.plot_prc and prc_summary:
-            self._plot_ensemble_prc_summary(ens_root, prc_summary)
+            plot_ensemble_prc_summary(
+                ens_root=ens_root,
+                prc_summary=prc_summary,
+                full_path=self.full_path,
+                data_name=self.data_name,
+                outcome_label=self.outcome_label,
+                instance_label=self.instance_label,
+                show_plots=self.show_plots,
+            )
 
     # ------------------- ensemble core helpers -------------------------
     def _collect_ensemble_metrics_core(self, metrics_dir: Path) -> Tuple[Dict[str, Dict[str, List[float]]], List[str]]:
@@ -2019,82 +1809,6 @@ class StatisticsPhaseJob:
                 }
 
         return roc_summary, prc_summary
-
-    # ------------------- ensemble plotting helpers ---------------------
-    def _plot_ensemble_roc_summary(self, ens_root: Path, roc_summary: Dict[str, Dict[str, Any]]):
-        """
-        IO + plotting: summary ROC curves comparing ensembles.
-        """
-        if not roc_summary:
-            return
-
-        plt.figure(figsize=(6, 6))
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-        colors = {}
-        for idx, ens_id in enumerate(sorted(roc_summary.keys())):
-            c = color_cycle[idx % len(color_cycle)]
-            colors[ens_id] = c
-            d = roc_summary[ens_id]
-            plt.plot(d["fpr"], d["tpr"], color=c,
-                     label=f"{ens_id}, AUC={d['auc']:.3f}")
-
-        # no-skill
-        plt.plot([0, 1], [0, 1], color='black', linestyle='--', label='No-Skill', alpha=.8)
-        plt.xticks(np.arange(0.0, 1.1, step=0.1))
-        plt.yticks(np.arange(0.0, 1.1, step=0.1))
-        plt.xlabel("False Positive Rate", fontsize=15)
-        plt.ylabel("True Positive Rate", fontsize=15)
-        plt.legend(loc="lower right", fontsize=8)
-        plt.title("Ensemble ROC Summary")
-
-        out_path = ens_root / "Summary_ROC_ensembles.png"
-        plt.savefig(out_path, bbox_inches="tight")
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
-
-    def _plot_ensemble_prc_summary(self, ens_root: Path, prc_summary: Dict[str, Dict[str, Any]]):
-        """
-        IO + plotting: summary PRC curves comparing ensembles.
-        """
-        if not prc_summary:
-            return
-
-        # no-skill baseline from first test set (same as base models)
-        try:
-            test = pd.read_csv(self.full_path + '/CVDatasets/' + self.data_name + '_CV_0_Test.csv')
-            if self.instance_label is not None and self.instance_label in test.columns:
-                test = test.drop(self.instance_label, axis=1)
-            test_y = test[self.outcome_label].values
-            no_skill = len(test_y[test_y == 1]) / len(test_y)
-        except Exception:
-            no_skill = 0.5
-
-        plt.figure(figsize=(6, 6))
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
-        for idx, ens_id in enumerate(sorted(prc_summary.keys())):
-            c = color_cycle[idx % len(color_cycle)]
-            d = prc_summary[ens_id]
-            plt.plot(d["recall"], d["precision"], color=c,
-                     label=f"{ens_id}, AUC={d['pr_auc']:.3f}, APS={d['aps']:.3f}")
-
-        plt.plot([0, 1], [no_skill, no_skill], color='black', linestyle='--',
-                 label='No-Skill', alpha=.8)
-        plt.xticks(np.arange(0.0, 1.1, step=0.1))
-        plt.yticks(np.arange(0.0, 1.1, step=0.1))
-        plt.xlabel("Recall (Sensitivity)", fontsize=15)
-        plt.ylabel("Precision (PPV)", fontsize=15)
-        plt.legend(loc="lower left", fontsize=8)
-        plt.title("Ensemble PRC Summary")
-
-        out_path = ens_root / "Summary_PRC_ensembles.png"
-        plt.savefig(out_path, bbox_inches="tight")
-        if self.show_plots:
-            plt.show()
-        else:
-            plt.close('all')
 
     def parse_runtime(self):
         """
