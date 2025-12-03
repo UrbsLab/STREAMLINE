@@ -379,10 +379,10 @@ class StatisticsPhaseJob:
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
         # Feature-importance stats & plots
-        ave_or_median = (
-            "median" if self.outcome_type in ("Binary", "Multiclass") else "mean"
-        )
-        self.fi_stats(metric_dict, ave_or_median)
+        # ave_or_median = (
+        #     "median" if self.outcome_type in ("Binary", "Multiclass") else "mean"
+        # )
+        # self.fi_stats(metric_dict, ave_or_median)
 
         # Optional: summarize ensembles (Phase 7) if present
         if self.include_ensembles:
@@ -590,8 +590,8 @@ class StatisticsPhaseJob:
             plt.close('all')
 
     def fi_stats(self, metric_dict, ave_or_median='mean'):
-        metric_ranking = ave_or_median
-        metric_weighting = ave_or_median
+        metric_ranking = 'median' # ave_or_median   ## median #this can be changable #mean and median of the feature importance values
+        metric_weighting = 'mean' # ave_or_median   ## mean   #mean and median of the metric for weighting across algorithms cv/algo
 
         logging.info('Preparing for Model Feature Importance Plotting...')
 

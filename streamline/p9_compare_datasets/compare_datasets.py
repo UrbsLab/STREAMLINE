@@ -4,9 +4,8 @@ from __future__ import annotations
 import os
 import time
 import logging
-import pickle
+import json
 from pathlib import Path
-from statistics import mean, stdev, median
 from typing import List, Dict, Tuple, Any, Optional
 
 import numpy as np
@@ -27,9 +26,10 @@ class DatasetCompareJob:
     Phase 9: Dataset-level performance comparison across all datasets
     in an experiment.
 
-    This is a modernized version of the legacy CompareJob:
-      * no algInfo.pickle dependency
-      * algorithms discovered from Phase 8 outputs / registry
+    Modernized CompareJob that:
+      * discovers base models from Phase 6 / 8 outputs + registry
+      * **optionally includes Phase 7 ensembles** if ensemble_evaluation
+        artifacts are present in the datasets.
     """
 
     def __init__(
@@ -62,47 +62,72 @@ class DatasetCompareJob:
         self.instance_label = instance_label
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
-        
+
         self.exp_root = os.path.join(self.output_path, self.experiment_name)
         if not os.path.isdir(self.exp_root):
             raise Exception("Experiment must exist before Phase 9 can begin")
-        
+
+        # Collect dataset dirs that have CVDatasets
         datasets = [
             os.path.join(self.exp_root, name)
             for name in sorted(os.listdir(self.exp_root))
             if os.path.isdir(os.path.join(self.exp_root, name))
-            and name not in {"jobsCompleted", "jobs", "logs", "dask_logs", "runtime", "DatasetComparisons"}
+            and name
+            not in {
+                "jobsCompleted",
+                "jobs",
+                "logs",
+                "dask_logs",
+                "runtime",
+                "DatasetComparisons",
+            }
             and os.path.isdir(os.path.join(self.exp_root, name, "CVDatasets"))
         ]
         if not datasets:
             logging.warning("No datasets found for Phase 9 under %s", self.exp_root)
             return
-        
-        self.datasets: List[str] = [Path(d).name for d in datasets]
 
-        self.dataset_directory_paths: List[str] = [
-            os.path.join(self.experiment_path, d) for d in self.datasets
-        ]
+        self.datasets: List[str] = [Path(d).name for d in datasets]
+        self.dataset_directory_paths: List[str] = datasets
 
         if not self.dataset_directory_paths:
             raise RuntimeError(
                 f"No dataset folders found under experiment: {self.experiment_path}"
             )
 
-        # Discover algorithms / abbrev / colors using first dataset as anchor
+        # Discover base models from Phase 6 metrics
         (
-            self.algorithms,
-            self.abbrev,
-            self.colors,
+            base_algorithms,
+            base_abbrev,
+            base_colors,
         ) = self._discover_algorithms_from_metrics(
             Path(self.dataset_directory_paths[0]), self.outcome_type
         )
-        self.algorithms = sorted(self.algorithms)
+
+        # Discover ensembles (if any) from Phase 7 artifacts
+        (
+            ensemble_algorithms,
+            ensemble_abbrev,
+            ensemble_colors,
+        ) = self._discover_ensembles_from_metrics(Path(self.dataset_directory_paths[0]))
+
+        self.base_algorithms: List[str] = sorted(base_algorithms)
+        self.ensemble_algorithms: List[str] = sorted(ensemble_algorithms)
+
+        # merge base + ensembles into unified view
+        self.algorithms: List[str] = sorted(self.base_algorithms + self.ensemble_algorithms)
+        self.abbrev: Dict[str, str] = {}
+        self.abbrev.update(base_abbrev)
+        self.abbrev.update(ensemble_abbrev)
+
+        self.colors: Dict[str, Any] = {}
+        self.colors.update(base_colors)
+        self.colors.update(ensemble_colors)
 
         self.metrics: Optional[List[str]] = None
 
     # ------------------------------------------------------------------
-    # Algorithm discovery (similar to StatsPhaseJob)
+    # Algorithm discovery (base models, from model_evaluation/metrics_by_cv)
     # ------------------------------------------------------------------
     def _discover_algorithms_from_metrics(
         self,
@@ -110,7 +135,7 @@ class DatasetCompareJob:
         outcome_type: str,
     ) -> Tuple[List[str], Dict[str, str], Dict[str, Any]]:
         """
-        Discover modeling algorithms for dataset comparison from:
+        Discover base modeling algorithms for dataset comparison from:
             <dataset_dir>/model_evaluation/metrics_by_cv/<ALG>_CV_<k>.json
 
         Returns:
@@ -136,7 +161,8 @@ class DatasetCompareJob:
         present_set = set(present_algs)
         if not present_set:
             logger.warning(
-                "DatasetComparePhaseJob: no modeling metrics found under %s", metrics_dir
+                "DatasetComparePhaseJob: no base-model metrics found under %s",
+                metrics_dir,
             )
 
         algorithms: List[str] = []
@@ -187,7 +213,7 @@ class DatasetCompareJob:
         if algorithms:
             palette = sns.color_palette("tab10", n_colors=len(algorithms))
             for i, alg in enumerate(algorithms):
-                colors.setdefault(alg, palette[i % len(palette)])
+                colors.setdefault(alg, palette[i % len(algorithms)])
         else:
             algorithms = sorted(present_set)
             abbrev = {a: a for a in algorithms}
@@ -197,11 +223,73 @@ class DatasetCompareJob:
         return algorithms, abbrev, colors
 
     # ------------------------------------------------------------------
+    # Ensemble discovery (from ensemble_evaluation/metrics_by_cv + summaries)
+    # ------------------------------------------------------------------
+    def _discover_ensembles_from_metrics(
+        self,
+        dataset_dir: Path,
+    ) -> Tuple[List[str], Dict[str, str], Dict[str, Any]]:
+        """
+        Discover ensembles for dataset comparison.
+
+        Uses:
+          <dataset_dir>/ensemble_evaluation/metrics_by_cv/<ENS>_CV_<k>.json
+
+        and additionally the summary tables:
+          <dataset_dir>/ensemble_evaluation/Ensembles_performance_mean.csv
+          <dataset_dir>/ensemble_evaluation/Ensembles_performance_median.csv
+          <dataset_dir>/ensemble_evaluation/Ensembles_performance_std.csv
+
+        to detect presence and ensure metric names line up, but we rely on
+        metrics_by_cv for per-CV distributions.
+        """
+        ens_root = dataset_dir / "ensemble_evaluation"
+        metrics_dir = ens_root / "metrics_by_cv"
+
+        present_ens: List[str] = []
+
+        if metrics_dir.is_dir():
+            for fn in os.listdir(metrics_dir):
+                if not fn.endswith(".json"):
+                    continue
+                # Expect pattern "<ENS>_CV_<fold>.json"
+                parts = fn.split("_CV_")
+                if len(parts) != 2:
+                    continue
+                ens_id = parts[0]
+                if ens_id:
+                    present_ens.append(ens_id)
+
+        present_set = sorted(set(present_ens))
+        if not present_set:
+            # No ensembles; this is fine.
+            return [], {}, {}
+
+        algorithms: List[str] = []
+        abbrev: Dict[str, str] = {}
+        colors: Dict[str, Any] = {}
+
+        # For now, just use ensemble ID as both name and abbrev.
+        for ens_id in present_set:
+            algorithms.append(ens_id)
+            abbrev[ens_id] = ens_id
+
+        # Colors: append to existing palette after base models
+        palette = sns.color_palette("tab10", n_colors=max(len(algorithms), 1))
+        for i, ens in enumerate(algorithms):
+            colors[ens] = palette[i % len(algorithms)]
+
+        return algorithms, abbrev, colors
+
+    # ------------------------------------------------------------------
     # PUBLIC ENTRY
     # ------------------------------------------------------------------
     def run(self):
         self.job_start_time = time.time()
-        logger.info("Running dataset comparison (Phase 9) for experiment %s", self.experiment_name)
+        logger.info(
+            "Running dataset comparison (Phase 9) for experiment %s",
+            self.experiment_name,
+        )
 
         # metrics from first dataset (Summary_performance_mean)
         first_summary = (
@@ -246,14 +334,13 @@ class DatasetCompareJob:
 
         self.save_runtime()
         logger.info("Phase 9 dataset comparison complete.")
-        with open(
-            os.path.join(self.experiment_path, "jobsCompleted", "job_compare_datasets.txt"),
-            "w",
-        ) as f:
+        jobs_dir = Path(self.experiment_path) / "jobsCompleted"
+        jobs_dir.mkdir(exist_ok=True)
+        with open(jobs_dir / "job_compare_datasets.txt", "w") as f:
             f.write("complete")
 
     # ------------------------------------------------------------------
-    # Core comparison methods (ported from legacy CompareJob)
+    # Core comparison methods
     # ------------------------------------------------------------------
     def kruscall_wallis(self):
         label = ["Statistic", "P-Value", "Sig(*)"]
@@ -273,17 +360,22 @@ class DatasetCompareJob:
                 std_list = []
 
                 for dataset_path in self.dataset_directory_paths:
-                    filepath = os.path.join(
-                        dataset_path,
-                        "model_evaluation",
-                        f"{self.abbrev[algorithm]}_performance.csv",
-                    )
-                    td = pd.read_csv(filepath)
+                    td = self._load_performance_df(dataset_path, algorithm)
+                    if metric not in td.columns:
+                        # If ensemble/base is missing this metric, skip this dataset for it.
+                        continue
                     vals = td[metric].astype(float)
                     temp_array.append(vals)
                     med_list.append(vals.median())
                     mean_list.append(vals.mean())
                     std_list.append(vals.std())
+
+                if not temp_array:
+                    # nothing to compare for this metric / algorithm
+                    kruskal_summary.at[metric, "Statistic"] = "NA"
+                    kruskal_summary.at[metric, "P-Value"] = "1.0"
+                    kruskal_summary.at[metric, "Sig(*)"] = ""
+                    continue
 
                 try:
                     result = kruskal(*temp_array)
@@ -295,14 +387,22 @@ class DatasetCompareJob:
                 except TypeError:
                     kruskal_summary.at[metric, "Statistic"] = "NA"
                 kruskal_summary.at[metric, "P-Value"] = str(round(result[1], 6))
-                kruskal_summary.at[metric, "Sig(*)"] = "*" if result[1] < self.sig_cutoff else ""
+                kruskal_summary.at[metric, "Sig(*)"] = (
+                    "*" if result[1] < self.sig_cutoff else ""
+                )
 
                 for j in range(len(med_list)):
-                    kruskal_summary.at[metric, f"Median_D{j+1}"] = str(round(med_list[j], 6))
+                    kruskal_summary.at[metric, f"Median_D{j+1}"] = str(
+                        round(med_list[j], 6)
+                    )
                 for j in range(len(mean_list)):
-                    kruskal_summary.at[metric, f"Mean_D{j+1}"] = str(round(mean_list[j], 6))
+                    kruskal_summary.at[metric, f"Mean_D{j+1}"] = str(
+                        round(mean_list[j], 6)
+                    )
                 for j in range(len(std_list)):
-                    kruskal_summary.at[metric, f"Std_D{j+1}"] = str(round(std_list[j], 6))
+                    kruskal_summary.at[metric, f"Std_D{j+1}"] = str(
+                        round(std_list[j], 6)
+                    )
 
             out = dc_dir / f"KruskalWallis_{self.abbrev[algorithm]}.csv"
             kruskal_summary.to_csv(out)
@@ -358,24 +458,26 @@ class DatasetCompareJob:
                 alg_mean = []
                 alg_std = []
                 alg_data = []
+                alg_names = []
 
                 for algorithm in self.algorithms:
-                    filepath = os.path.join(
-                        dataset_path,
-                        "model_evaluation",
-                        f"{self.abbrev[algorithm]}_performance.csv",
-                    )
-                    td = pd.read_csv(filepath)
+                    td = self._load_performance_df(dataset_path, algorithm)
+                    if metric not in td.columns:
+                        continue
                     vals = td[metric].astype(float)
                     alg_med.append(vals.median())
                     alg_mean.append(vals.mean())
                     alg_std.append(vals.std())
                     alg_data.append(vals)
+                    alg_names.append(algorithm)
 
-                # pick best by mean
+                if not alg_mean:
+                    # no algorithm has this metric for this dataset
+                    continue
+
                 best_mean = max(alg_mean)
                 best_index = alg_mean.index(best_mean)
-                best_alg = self.algorithms[best_index]
+                best_alg = alg_names[best_index]
                 best_data.append(alg_data[best_index])
                 best_list.append(
                     [
@@ -388,11 +490,19 @@ class DatasetCompareJob:
 
             global_data.append([best_data, best_list])
 
+            if not best_data:
+                kruskal_summary.at[metric, "Statistic"] = str(round(np.nan, 6))
+                kruskal_summary.at[metric, "P-Value"] = str(round(np.nan, 6))
+                kruskal_summary.at[metric, "Sig(*)"] = ""
+                continue
+
             try:
                 result = kruskal(*best_data)
                 kruskal_summary.at[metric, "Statistic"] = str(round(result[0], 6))
                 kruskal_summary.at[metric, "P-Value"] = str(round(result[1], 6))
-                kruskal_summary.at[metric, "Sig(*)"] = "*" if result[1] < self.sig_cutoff else ""
+                kruskal_summary.at[metric, "Sig(*)"] = (
+                    "*" if result[1] < self.sig_cutoff else ""
+                )
             except ValueError:
                 kruskal_summary.at[metric, "Statistic"] = str(round(np.nan, 6))
                 kruskal_summary.at[metric, "P-Value"] = str(round(np.nan, 6))
@@ -419,7 +529,17 @@ class DatasetCompareJob:
         df.to_csv(out, index=False)
 
     def data_compare_bp_all(self):
-        dc_bp_dir = Path(self.experiment_path) / "DatasetComparisons" / "dataCompBoxplots"
+        """
+        For each metric, generate boxplots comparing algorithm performance across datasets.
+        Includes both base models and ensembles (if present).
+
+        Uses:
+          model_evaluation/Summary_performance_mean.csv
+          + ensemble_evaluation/Ensembles_performance_mean.csv (if present)
+        """
+        dc_bp_dir = (
+            Path(self.experiment_path) / "DatasetComparisons" / "dataCompBoxplots"
+        )
         dc_bp_dir.mkdir(parents=True, exist_ok=True)
 
         for metric in self.metrics:
@@ -429,31 +549,65 @@ class DatasetCompareJob:
 
             for each in self.dataset_directory_paths:
                 data_name_list.append(Path(each).name)
-                data = pd.read_csv(
-                    Path(each) / "model_evaluation" / "Summary_performance_mean.csv",
-                    sep=",",
-                    index_col=0,
+
+                # Base model summary
+                base_path = (
+                    Path(each)
+                    / "model_evaluation"
+                    / "Summary_performance_mean.csv"
                 )
-                col = data[metric]
+                if not base_path.is_file():
+                    continue
+                data = pd.read_csv(base_path, sep=",", index_col=0)
+
+                # Append ensemble summary if present
+                ens_path = (
+                    Path(each)
+                    / "ensemble_evaluation"
+                    / "Ensembles_performance_mean.csv"
+                )
+                if ens_path.is_file():
+                    ens_df = pd.read_csv(ens_path, sep=",")
+                    if "Ensemble" in ens_df.columns:
+                        ens_df = ens_df.set_index("Ensemble")
+                    # align on metric columns if needed
+                    if metric in ens_df.columns:
+                        data = pd.concat([data, ens_df], axis=0)
+
+                if metric not in data.columns:
+                    # no values for this metric in this dataset
+                    col = pd.Series([], dtype=float)
+                else:
+                    col = data[metric]
+
                 col_list = col.tolist()
                 rownames = list(data.index.values)
 
+                # record per-algorithm trajectories
                 for j, alg in enumerate(rownames):
-                    alg_values_dict[alg].append(col_list[j])
+                    if j < len(col_list):
+                        val = col_list[j]
+                        alg_values_dict.setdefault(alg, []).append(val)
 
                 df = pd.concat([df, col], axis=1)
+
+            if df.empty:
+                continue
 
             df.columns = data_name_list
             df.boxplot(column=data_name_list, rot=90)
 
+            # overlay algorithm trajectories
             for alg in self.algorithms:
-                if alg in alg_values_dict:
-                    plt.plot(
-                        np.arange(len(self.dataset_directory_paths)) + 1,
-                        alg_values_dict[alg],
-                        color=self.colors.get(alg, "C0"),
-                        label=alg,
-                    )
+                vals = alg_values_dict.get(alg)
+                if not vals or len(vals) != len(self.dataset_directory_paths):
+                    continue
+                plt.plot(
+                    np.arange(len(self.dataset_directory_paths)) + 1,
+                    vals,
+                    color=self.colors.get(alg, "C0"),
+                    label=alg,
+                )
 
             plt.ylabel(str(metric))
             plt.xlabel("Dataset")
@@ -466,7 +620,13 @@ class DatasetCompareJob:
                 plt.close("all")
 
     def data_compare_bp(self):
-        dc_bp_dir = Path(self.experiment_path) / "DatasetComparisons" / "dataCompBoxplots"
+        """
+        Per-algorithm boxplots comparing distributions of a target metric
+        across datasets. Works for both base models and ensembles.
+        """
+        dc_bp_dir = (
+            Path(self.experiment_path) / "DatasetComparisons" / "dataCompBoxplots"
+        )
         dc_bp_dir.mkdir(parents=True, exist_ok=True)
 
         if self.outcome_type == "Binary":
@@ -486,15 +646,16 @@ class DatasetCompareJob:
                 df = pd.DataFrame()
                 data_name_list: List[str] = []
                 for each in self.dataset_directory_paths:
-                    data_name_list.append(Path(each).name)
-                    data = pd.read_csv(
-                        Path(each)
-                        / "model_evaluation"
-                        / f"{self.abbrev[algorithm]}_performance.csv",
-                        sep=",",
-                    )
-                    col = data[metric]
+                    td = self._load_performance_df(each, algorithm)
+                    if metric not in td.columns:
+                        continue
+                    col = td[metric].astype(float)
                     df = pd.concat([df, col], axis=1)
+                    data_name_list.append(Path(each).name)
+
+                if df.empty:
+                    continue
+
                 df.columns = data_name_list
                 df.boxplot(column=data_name_list, rot=90)
                 plt.ylabel(str(metric))
@@ -515,30 +676,71 @@ class DatasetCompareJob:
             f.write(str(time.time() - self.job_start_time))
 
     # ------------------------------------------------------------------
-    # Shared helper methods (ported)
+    # Shared helper methods
     # ------------------------------------------------------------------
+    def _load_performance_df(self, dataset_path: str, algorithm: str) -> pd.DataFrame:
+        """
+        Unified loader for per-CV performance metrics for both base models
+        and ensembles.
+
+        Base models:
+          <dataset>/model_evaluation/<abbr>_performance.csv
+
+        Ensembles:
+          <dataset>/ensemble_evaluation/metrics_by_cv/<ens_id>_CV_<k>.json
+          -> converted on the fly to a DataFrame with one row per CV.
+        """
+        ds = Path(dataset_path)
+        abbr = self.abbrev[algorithm]
+
+        if algorithm in self.base_algorithms:
+            path = ds / "model_evaluation" / f"{abbr}_performance.csv"
+            if not path.is_file():
+                # fallback: empty DF
+                return pd.DataFrame()
+            return pd.read_csv(path)
+
+        # ensembles
+        metrics_dir = ds / "ensemble_evaluation" / "metrics_by_cv"
+        if not metrics_dir.is_dir():
+            return pd.DataFrame()
+
+        rows = []
+        for fn in sorted(metrics_dir.glob(f"{abbr}_CV_*.json")):
+            with fn.open("r") as f:
+                data = json.load(f)
+            # Accept both flat dicts and {"Balanced Accuracy": ..., ...}
+            # They should already be flat from Phase 7.
+            rows.append(data)
+
+        if not rows:
+            return pd.DataFrame()
+
+        df = pd.DataFrame(rows)
+        # ensure numeric where possible
+        for c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="ignore")
+        return df
+
     def inter_set_fn(self, fn, algorithm: str) -> List[List[Any]]:
         master_list: List[List[Any]] = []
         for metric in self.metrics:
             for x in range(0, len(self.dataset_directory_paths) - 1):
                 for y in range(x + 1, len(self.dataset_directory_paths)):
-                    file1 = (
-                        Path(self.dataset_directory_paths[x])
-                        / "model_evaluation"
-                        / f"{self.abbrev[algorithm]}_performance.csv"
+                    td1 = self._load_performance_df(
+                        self.dataset_directory_paths[x], algorithm
                     )
-                    td1 = pd.read_csv(file1)
+                    td2 = self._load_performance_df(
+                        self.dataset_directory_paths[y], algorithm
+                    )
+                    if metric not in td1.columns or metric not in td2.columns:
+                        continue
+
                     set1 = td1[metric].astype(float)
                     med1 = set1.median()
                     mean1 = set1.mean()
                     std1 = set1.std()
 
-                    file2 = (
-                        Path(self.dataset_directory_paths[y])
-                        / "model_evaluation"
-                        / f"{self.abbrev[algorithm]}_performance.csv"
-                    )
-                    td2 = pd.read_csv(file2)
                     set2 = td2[metric].astype(float)
                     med2 = set2.median()
                     mean2 = set2.mean()
@@ -570,6 +772,8 @@ class DatasetCompareJob:
         for j, metric in enumerate(self.metrics):
             for x in range(0, len(self.datasets) - 1):
                 for y in range(x + 1, len(self.datasets)):
+                    if not global_data[j][0]:
+                        continue
                     set1 = global_data[j][0][x]
                     med1 = global_data[j][1][x][1]
                     mean1 = global_data[j][1][x][2]
