@@ -34,3 +34,5 @@ group-lasso
 graphviz
 bokeh
 ipywidgets
+cairocffi
+weasyprint
