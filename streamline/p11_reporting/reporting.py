@@ -71,7 +71,7 @@ class ReportPhaseJob:
     # ------------------------------------------------------------------
     def run(self) -> None:
         self.job_start_time = time.time()
-        logger.info("Phase 10: building experiment report for %s", self.exp_root)
+        logger.info("Phase 11: building experiment report for %s", self.exp_root)
 
         summary = self.collect_summary()
         json_path = self.report_dir / "report_data.json"
@@ -92,6 +92,7 @@ class ReportPhaseJob:
                 HTML(filename=str(html_path)).write_pdf(str(pdf_path))
                 logger.info("Wrote PDF report to %s", pdf_path)
             except Exception as e:
+                raise e
                 logger.warning("WeasyPrint PDF generation failed: %s", e)
 
         self._save_runtime()

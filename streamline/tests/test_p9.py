@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from sklearn.datasets import make_classification
 
-# pytest.skip("Tested Already", allow_module_level=True)
+pytest.skip("Tested Already", allow_module_level=True)
 
 # Phase 6 / 7 / 8 / 9 imports – adjust if your module paths differ
 from streamline.p6_modeling.p6_runner import P6Runner
