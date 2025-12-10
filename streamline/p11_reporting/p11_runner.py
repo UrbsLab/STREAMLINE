@@ -27,10 +27,9 @@ class P11Runner:
         outcome_label: str = "Class",
         outcome_type: str = "Binary",
         instance_label: Optional[str] = None,
-        # report_title: Optional[str] = None,
-        # micro_average: str = "micro",          # "micro" or "macro", passed through to plots
-        # include_ensembles: bool = True,
-        # show_plots: bool = False,
+        make_pdf: bool = True,
+        # micro_average: str = "micro",          # "micro" or "macro", passed through to plots, all are micro by default
+        # include_ensembles: bool = True,     # Whether to include ensemble results in the report, always True for now
         run_cluster: str = "Serial",           # Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>
         queue: str = "defq",
         reserved_memory: int = 4,
@@ -48,11 +47,9 @@ class P11Runner:
             outcome_label=outcome_label,
             outcome_type=outcome_type,
             instance_label=instance_label,
-            make_pdf=True,
-            # report_title=report_title,
+            make_pdf=make_pdf,
             # micro_average=micro_average,
             # include_ensembles=bool(include_ensembles),
-            # show_plots=bool(show_plots),
         )
 
         self.run_cluster = run_cluster or "Serial"
@@ -121,10 +118,8 @@ class P11Runner:
             "--outcome_label", self.kw["outcome_label"],
             "--outcome_type", self.kw["outcome_type"],
             "--instance_label", self.kw["instance_label"] or "",
-            "--report_title", self.kw.get("report_title") or "",
-            "--micro_average", self.kw.get("micro_average", "micro"),
-            "--include_ensembles", str(int(bool(self.kw.get("include_ensembles", True)))),
-            "--show_plots", str(int(bool(self.kw["show_plots"]))),
+            # "--micro_average", self.kw.get("micro_average", "micro"),
+            # "--include_ensembles", str(int(bool(self.kw.get("include_ensembles", True)))),
         ]
         arg_str = " ".join(args)
 

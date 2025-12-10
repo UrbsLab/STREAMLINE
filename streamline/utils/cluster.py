@@ -1,3 +1,4 @@
+import dask
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster, LSFCluster, SGECluster
 from dask_jobqueue import HTCondorCluster, MoabCluster, OARCluster, PBSCluster

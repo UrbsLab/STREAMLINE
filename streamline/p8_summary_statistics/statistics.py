@@ -878,7 +878,7 @@ class StatisticsPhaseJob:
         for algorithm in self.algorithms:
             alg_result_table = []
 
-            s_bac, s_ac, s_f1, s_re, s_pr, s_bs = [[] for _ in range(5)]
+            s_bac, s_ac, s_f1, s_re, s_pr, s_bs = [[] for _ in range(6)]
             fi_all = []
 
             tprs = []

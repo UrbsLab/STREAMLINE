@@ -41,8 +41,9 @@ def main():
         instance_label=args.instance_label,
         ensembles=args.ensembles,
         base_models=args.base_models,
-        scoring_metric=args.scoring_metric,
-        metric_direction=args.metric_direction,
+        meta_train_source=args.meta_train_source,
+        # scoring_metric=args.scoring_metric,
+        # metric_direction=args.metric_direction,
         # stack_tune=bool(args.stack_tune),
         # stack_trials=args.stack_trials,
         # stack_timeout=args.stack_timeout,
@@ -53,7 +54,6 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
         random_state=(int(args.random_state) if str(args.random_state).lower() not in {"", "none"} else None),
-        n_jobs=args.n_jobs,
     ).run()
 
 if __name__ == "__main__":

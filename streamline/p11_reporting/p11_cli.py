@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 
-from streamline.p11_reporting.reporting import ReportPhaseJob
+from streamline.p11_reporting.p11_runner import P11Runner
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +29,7 @@ def main():
     ap.add_argument("--reserved_memory", type=int, default=4)
     args = ap.parse_args()
 
-    job = ReportPhaseJob(
+    job = P11Runner(
         output_path=args.output_path,
         experiment_name=args.experiment_name,
         outcome_label=args.outcome_label,

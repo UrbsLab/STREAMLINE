@@ -1,0 +1,116 @@
+# ----------------------------------------------------------
+# STREAMLINE FULL PIPELINE – RAW COMMAND LIST (PHASES 1–11)
+# Using dataset at data/DemoData
+# ----------------------------------------------------------
+
+# ----------------------
+# Phase 1 – Data Process
+# ----------------------
+python -m streamline.p1_data_process.p1_cli \
+  --data_path data/DemoData \
+  --output_path out \
+  --experiment_name DemoRun
+
+# ----------------------------
+# Phase 2 – Impute & Normalize
+# ----------------------------
+python -m streamline.p2_impute_scale.p2_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+
+# ----------------------------
+# Phase 3 – Feature Learning
+# ----------------------------
+python -m streamline.p3_feature_learning.p3_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --learner_id pca \
+  --learner_params "{n_components: 10}"
+
+# --------------------------------
+# Phase 4 – Feature Importance (FI)
+# --------------------------------
+python -m streamline.p4_feature_importance.p4_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --models "mutualinformation,multisurf"
+
+# ---------------------------------
+# Phase 5 – Feature Selection (FS)
+# ---------------------------------
+python -m streamline.p5_feature_selection.p5_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --selector_id default \
+  --n_splits 5
+## Edit to not require n_splits
+
+# ----------------------
+# Phase 6 – Modeling
+# ----------------------
+python -m streamline.p6_modeling.p6_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --model_type Multiclass \
+  --n_splits 5 \
+  --models LR,NB \
+  --calibrate 1 \
+  --calibrate_method sigmoid \
+  --calibrate_cv 5 \
+  --n_trials 20 \
+  --training_subsample 2000 \
+  --run_cluster Local
+## Edit to not require n_splits, model_type
+
+# ------------------------
+# Phase 7 – Ensembles
+# ------------------------
+python -m streamline.p7_ensembles.p7_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --n_splits 5 \
+  --ensembles hard_voting,soft_voting,stack_lr \
+  --base_models LR,NB \
+  --calibrate 0
+
+# ---------------------------
+# Phase 8 – Summary Statistics
+# ---------------------------
+python -m streamline.p8_summary_statistics.p8_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --outcome_label Class \
+  --outcome_type Multiclass \
+  --n_splits 5 \
+  --top_features 25 \
+  --sig_cutoff 0.05
+
+# ---------------------------------------
+# Phase 9 – Dataset Comparison (Cross-DS)
+# ---------------------------------------
+python -m streamline.p9_compare_datasets.p9_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --outcome_label Class \
+  --outcome_type Multiclass \
+  --sig_cutoff 0.05
+
+# -------------------------
+# Phase 10 – Replication (Phase not complete)
+# -------------------------
+# python -m streamline.p10_replication.p10_cli \
+#   --output_path out \
+#   --experiment_name DemoRun \
+#   --outcome_label Class \
+#   --outcome_type Multiclass \
+#   --replication_dataset data/DemoData
+
+# -----------------------
+# Phase 11 – Reporting (Phase not complete)
+# -----------------------
+python -m streamline.p11_reporting.p11_cli \
+  --output_path out \
+  --experiment_name DemoRun \
+  --outcome_label Class \
+  --outcome_type Multiclass \
+  --make_pdf 1

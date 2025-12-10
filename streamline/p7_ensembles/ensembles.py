@@ -143,16 +143,37 @@ class EnsemblePhaseJob:
                     except Exception:
                         metrics["ROC AUC (hard from preds)"] = None
                 else:
-                    # Soft vote & Stacking expose proba
+                    # ------- Soft-voting & stacking: expose proba / scores -------
                     proba = None
                     if hasattr(model, "predict_proba"):
-                        proba = model.predict_proba(X_test)[:, 1]
+                        # For multiclass, this is (n_samples, n_classes)
+                        proba = model.predict_proba(X_test)
                     elif hasattr(model, "decision_function"):
                         s = model.decision_function(X_test)
-                        proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                        s = np.asarray(s)
+                        # Min-max scale per column to [0,1]
+                        if s.ndim == 1:
+                            proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                        else:
+                            s_min = s.min(axis=0, keepdims=True)
+                            s_max = s.max(axis=0, keepdims=True)
+                            proba = (s - s_min) / (s_max - s_min + 1e-12)
+
                     if proba is not None:
+                        classes = getattr(model, "classes_", None)
                         roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
-                            _calc_curves_scores_from_proba(y_test, proba)
+                            _calc_curves_scores_from_proba(y_test, proba, classes=classes)
+
+                    # # Soft vote & Stacking expose proba
+                    # proba = None
+                    # if hasattr(model, "predict_proba"):
+                    #     proba = model.predict_proba(X_test)[:, 1]
+                    # elif hasattr(model, "decision_function"):
+                    #     s = model.decision_function(X_test)
+                    #     proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                    # if proba is not None:
+                    #     roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
+                    #         _calc_curves_scores_from_proba(y_test, proba)
 
                 if roc_auc_val is not None:
                     metrics["ROC AUC"] = float(roc_auc_val)
@@ -222,82 +243,323 @@ def _load_base_estimators(dataset_dir: Path, cv_idx: int, allow_list: Optional[L
     return sorted(out, key=lambda t: t[0])
 
 def _calc_basic_metrics(y_true, y_pred) -> Dict[str, float]:
-    cm = confusion_matrix(y_true, y_pred)
-    tn, fp, fn, tp = cm.ravel()
-    npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
-    lr_plus  = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    lr_minus = fn / (tn + fn) if (tn + fn) > 0 else 0.0
+    """
+    For binary classification:
+        - return Accuracy, Balanced Accuracy, F1, Precision, Recall
+        - plus confusion-matrix-derived TP, TN, FP, FN, NPV, LR+, LR-
+    For multiclass:
+        - return Accuracy, Balanced Accuracy
+        - macro-averaged F1, Precision, Recall
+        - omit TP/TN/FP/FN/NPV/LR+/- (not uniquely defined for multiclass)
+    """
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+
+    labels = np.unique(np.concatenate([np.unique(y_true), np.unique(y_pred)]))
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+
+    # Binary case: keep your original behavior
+    if labels.size == 2:
+        tn, fp, fn, tp = cm.ravel()
+        npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
+        lr_plus  = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        lr_minus = fn / (tn + fn) if (tn + fn) > 0 else 0.0
+        return {
+            "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
+            "Accuracy": accuracy_score(y_true, y_pred),
+            "F1": f1_score(y_true, y_pred),
+            "Precision": precision_score(y_true, y_pred),
+            "Recall": recall_score(y_true, y_pred),
+            "TP": float(tp), "TN": float(tn), "FP": float(fp), "FN": float(fn),
+            "NPV": npv, "LR+": lr_plus, "LR-": lr_minus,
+        }
+
+    # Multiclass case: use macro-averaged metrics
     return {
         "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
         "Accuracy": accuracy_score(y_true, y_pred),
-        "F1": f1_score(y_true, y_pred),
-        "Precision": precision_score(y_true, y_pred),
-        "Recall": recall_score(y_true, y_pred),
-        "TP": float(tp), "TN": float(tn), "FP": float(fp), "FN": float(fn),
-        "NPV": npv, "LR+": lr_plus, "LR-": lr_minus,
+        "F1": f1_score(y_true, y_pred, average="macro"),
+        "Precision": precision_score(y_true, y_pred, average="macro"),
+        "Recall": recall_score(y_true, y_pred, average="macro"),
     }
 
-def _calc_curves_scores_from_proba(y_true, y_proba):
-    fpr, tpr, _ = roc_curve(y_true, y_proba)
-    roc = auc(fpr, tpr)
-    prec, rec, _ = precision_recall_curve(y_true, y_proba)
-    # ensure ascending recall for AUC
-    sidx = np.argsort(rec)
-    prc_auc = auc(rec[sidx], prec[sidx])
-    aps = average_precision_score(y_true, y_proba)
-    return {"fpr": fpr.tolist(), "tpr": tpr.tolist()}, {"precision": prec.tolist(), "recall": rec.tolist()}, roc, prc_auc, aps
+def _calc_curves_scores_from_proba(y_true, y_proba, classes=None):
+    """
+    Binary:
+        - y_proba: 1D or 2D (n_samples, 1 or 2); returns single ROC/PRC and AUC/AP.
+    Multiclass:
+        - y_proba: 2D (n_samples, n_classes)
+        - classes: sequence of class labels aligned with columns of y_proba
+        - returns per-class ROC/PRC curves in dictionaries, plus macro-averaged AUC/AP.
+    """
+    y_true = np.asarray(y_true)
+    y_proba = np.asarray(y_proba)
+
+    n_unique = np.unique(y_true).size
+
+    # ------- Binary case -------
+    if y_proba.ndim == 1 or (y_proba.ndim == 2 and y_proba.shape[1] in (1, 2) and n_unique == 2):
+        if y_proba.ndim == 2:
+            # If 2 cols, use column 1 as "positive" class score
+            if y_proba.shape[1] == 2:
+                y_score = y_proba[:, 1]
+            else:
+                y_score = y_proba[:, 0]
+        else:
+            y_score = y_proba
+
+        fpr, tpr, _ = roc_curve(y_true, y_score)
+        roc = auc(fpr, tpr)
+        prec, rec, _ = precision_recall_curve(y_true, y_score)
+        sidx = np.argsort(rec)
+        prc_auc = auc(rec[sidx], prec[sidx])
+        aps = average_precision_score(y_true, y_score)
+        return (
+            {"fpr": fpr.tolist(), "tpr": tpr.tolist()},
+            {"precision": prec.tolist(), "recall": rec.tolist()},
+            float(roc),
+            float(prc_auc),
+            float(aps),
+        )
+
+    # ------- Multiclass case: one-vs-rest curves -------
+    if classes is None:
+        classes = np.unique(y_true)
+    classes = np.array(classes)
+    n_classes = classes.size
+
+    if y_proba.ndim != 2:
+        raise ValueError("Multiclass probabilities must be 2D (n_samples, n_classes).")
+
+    if y_proba.shape[1] != n_classes:
+        logging.warning(
+            "y_proba has %d columns but there are %d classes; "
+            "using min(n_cols, n_classes) for alignment.",
+            y_proba.shape[1],
+            n_classes,
+        )
+        n = min(y_proba.shape[1], n_classes)
+        y_proba = y_proba[:, :n]
+        classes = classes[:n]
+        n_classes = n
+
+    roc_curve_dict: Dict[str, Dict[str, List[float]]] = {}
+    prc_curve_dict: Dict[str, Dict[str, List[float]]] = {}
+    roc_aucs: List[float] = []
+    prc_aucs: List[float] = []
+    aps_list: List[float] = []
+
+    for idx, cls in enumerate(classes):
+        y_bin = (y_true == cls).astype(int)
+        y_score = y_proba[:, idx]
+
+        # ROC
+        fpr, tpr, _ = roc_curve(y_bin, y_score)
+        roc_val = auc(fpr, tpr)
+        # PRC
+        prec, rec, _ = precision_recall_curve(y_bin, y_score)
+        sidx = np.argsort(rec)
+        prc_auc_val = auc(rec[sidx], prec[sidx])
+        aps_val = average_precision_score(y_bin, y_score)
+
+        key = str(cls)
+        roc_curve_dict[key] = {"fpr": fpr.tolist(), "tpr": tpr.tolist()}
+        prc_curve_dict[key] = {"precision": prec.tolist(), "recall": rec.tolist()}
+
+        roc_aucs.append(float(roc_val))
+        prc_aucs.append(float(prc_auc_val))
+        aps_list.append(float(aps_val))
+
+    roc_macro = float(np.mean(roc_aucs)) if roc_aucs else None
+    prc_macro = float(np.mean(prc_aucs)) if prc_aucs else None
+    aps_macro = float(np.mean(aps_list)) if aps_list else None
+
+    return roc_curve_dict, prc_curve_dict, roc_macro, prc_macro, aps_macro
 
 def _hard_voting_threshold_sweep(base_estimators, X_test, y_test, thresholds=None):
     """
     Build ROC/PRC for hard-vote by thresholding each base model's probabilities then majority vote.
+
+    - Binary:
+        returns single ROC and PRC curves (same as original behavior).
+
+    - Multiclass:
+        performs one-vs-rest in a micro-averaged fashion:
+          * for each class c, and each sample i, treat (i, c) as a binary problem:
+              y_true_bin[i, c] = 1 if y_test[i] == c else 0
+              y_pred_bin[i, c] = 1 if ensemble votes for c at given threshold else 0
+          * aggregate TP/FP/FN/TN across all classes at each threshold
+          * compute one global TPR/FPR/precision/recall per threshold
+        returns a single ROC/PR curve, just like in the binary case.
     """
+    y_test = np.asarray(y_test)
+    classes = np.unique(y_test)
+    n_classes = classes.size
+
     if thresholds is None:
         thresholds = np.linspace(0.0, 1.0, 101)
-    # collect proba for positive class from bases that support predict_proba
-    base_probas = []
+
+    # Collect per-base probabilities aligned to `classes`
+    base_probas_list = []
     for _, est in base_estimators:
+        proba = None
+
         if hasattr(est, "predict_proba"):
-            base_probas.append(est.predict_proba(X_test)[:, 1])
-        else:
-            # try decision_function → map via min-max to [0,1]
-            if hasattr(est, "decision_function"):
-                s = est.decision_function(X_test)
+            proba = est.predict_proba(X_test)
+        elif hasattr(est, "decision_function"):
+            s = est.decision_function(X_test)
+            s = np.asarray(s)
+            if s.ndim == 1:
+                # Binary decision_function -> map to 2-col "probabilities"
                 s = (s - s.min()) / (s.max() - s.min() + 1e-12)
-                base_probas.append(s)
-    base_probas = np.column_stack(base_probas) if base_probas else None
+                proba = np.column_stack([1 - s, s])
+            else:
+                # Multiclass decision_function -> min-max per column
+                s_min = s.min(axis=0, keepdims=True)
+                s_max = s.max(axis=0, keepdims=True)
+                proba = (s - s_min) / (s_max - s_min + 1e-12)
 
-    tpr_list, fpr_list, prec_list, rec_list = [], [], [], []
-    if base_probas is None or base_probas.shape[1] == 0:
-        # fallback: predict hard from first estimator only (degenerate)
-        y_pred = base_estimators[0][1].predict(X_test)
-        cm = confusion_matrix(y_test, y_pred)
-        tn, fp, fn, tp = cm.ravel()
-        tpr_list = [tp / (tp + fn + 1e-12)]
-        fpr_list = [fp / (tn + fp + 1e-12)]
-        prec_list = [tp / (tp + fp + 1e-12)]
-        rec_list = [tp / (tp + fn + 1e-12)]
-    else:
+        if proba is None:
+            continue
+
+        # Align columns of proba to global `classes`
+        est_classes = getattr(est, "classes_", None)
+        if est_classes is not None:
+            est_classes = np.asarray(est_classes)
+            idx = []
+            ok = True
+            for c in classes:
+                matches = np.where(est_classes == c)[0]
+                if matches.size == 0:
+                    ok = False
+                    break
+                idx.append(matches[0])
+            if not ok:
+                logging.warning(
+                    "Skipping estimator in _hard_voting_threshold_sweep due to class mismatch."
+                )
+                continue
+            proba = proba[:, idx]
+        else:
+            # Fallback: require same number of classes and same order
+            if proba.shape[1] != n_classes:
+                logging.warning(
+                    "Estimator proba columns (%d) != n_classes (%d) and no classes_; skipping.",
+                    proba.shape[1], n_classes
+                )
+                continue
+
+        base_probas_list.append(proba)
+
+    if not base_probas_list:
+        logging.warning(
+            "No probability-capable base estimators for hard voting threshold sweep."
+        )
+        return None, None, None, None, None
+
+    # base_probas: (n_samples, n_bases, n_classes)
+    base_probas = np.stack(base_probas_list, axis=1)
+    n_samples = base_probas.shape[0]
+    n_bases = base_probas.shape[1]
+
+    # -------------------------------------------------------------------------
+    # Binary case: keep original behavior
+    # -------------------------------------------------------------------------
+    if n_classes == 2:
+        pos_cls = classes[1]
+        base_pos = base_probas[..., 1]  # (n_samples, n_bases)
+
+        tpr_list, fpr_list, prec_list, rec_list = [], [], [], []
+        y_true_bin = (y_test == pos_cls).astype(int)
+
         for th in thresholds:
-            votes = (base_probas >= th).astype(int)
-            y_pred = (votes.mean(axis=1) >= 0.5).astype(int)
-            cm = confusion_matrix(y_test, y_pred)
-            tn, fp, fn, tp = cm.ravel()
-            tpr_list.append(tp / (tp + fn + 1e-12))
-            fpr_list.append(fp / (tn + fp + 1e-12))
-            prec_list.append(tp / (tp + fp + 1e-12))
-            rec_list.append(tp / (tp + fn + 1e-12))
+            votes = (base_pos >= th).astype(int)        # (n_samples, n_bases)
+            y_pred_bin = (votes.mean(axis=1) >= 0.5).astype(int)
 
-    # ROC AUC
-    sidx = np.argsort(fpr_list)
-    roc = auc(np.array(fpr_list)[sidx], np.array(tpr_list)[sidx])
-    # PRC AUC
-    sidx2 = np.argsort(rec_list)
-    prc_auc = auc(np.array(rec_list)[sidx2], np.array(prec_list)[sidx2])
-    # APS (average precision like)
-    aps = float(np.mean(prec_list))
-    roc_curve_dict = {"fpr": list(np.array(fpr_list)[sidx]), "tpr": list(np.array(tpr_list)[sidx])}
-    prc_curve_dict = {"precision": list(np.array(prec_list)[sidx2]), "recall": list(np.array(rec_list)[sidx2])}
-    return roc_curve_dict, prc_curve_dict, roc, prc_auc, aps
+            cm = confusion_matrix(y_true_bin, y_pred_bin, labels=[0, 1])
+            tn, fp, fn, tp = cm.ravel()
+            tpr = tp / (tp + fn + 1e-12)
+            fpr = fp / (tn + fp + 1e-12)
+            prec = tp / (tp + fp + 1e-12)
+            rec = tpr
+
+            tpr_list.append(tpr)
+            fpr_list.append(fpr)
+            prec_list.append(prec)
+            rec_list.append(rec)
+
+        fpr_arr = np.array(fpr_list)
+        tpr_arr = np.array(tpr_list)
+        prec_arr = np.array(prec_list)
+        rec_arr = np.array(rec_list)
+
+        # ROC AUC
+        sidx = np.argsort(fpr_arr)
+        roc = auc(fpr_arr[sidx], tpr_arr[sidx])
+        # PRC AUC
+        sidx2 = np.argsort(rec_arr)
+        prc_auc = auc(rec_arr[sidx2], prec_arr[sidx2])
+        # APS-like
+        aps = float(np.mean(prec_arr))
+
+        roc_curve_dict = {"fpr": fpr_arr[sidx].tolist(), "tpr": tpr_arr[sidx].tolist()}
+        prc_curve_dict = {
+            "precision": prec_arr[sidx2].tolist(),
+            "recall": rec_arr[sidx2].tolist(),
+        }
+        return roc_curve_dict, prc_curve_dict, float(roc), float(prc_auc), aps
+
+    # -------------------------------------------------------------------------
+    # Multiclass case: micro-averaged one-vs-rest
+    # -------------------------------------------------------------------------
+    tpr_list, fpr_list, prec_list, rec_list = [], [], [], []
+
+    # Precompute one-vs-rest true labels for all (sample, class)
+    # y_true_bin: (n_samples, n_classes) in {0,1}
+    y_true_bin = (y_test[:, None] == classes[None, :]).astype(int)
+
+    for th in thresholds:
+        # votes: (n_samples, n_bases, n_classes) -> 0/1 per base, class, sample
+        votes = (base_probas >= th).astype(int)
+        # majority vote per class (one-vs-rest): (n_samples, n_classes)
+        y_pred_bin = (votes.mean(axis=1) >= 0.5).astype(int)
+
+        # Flatten across classes to do micro-averaging
+        y_true_flat = y_true_bin.ravel()
+        y_pred_flat = y_pred_bin.ravel()
+
+        cm = confusion_matrix(y_true_flat, y_pred_flat, labels=[0, 1])
+        tn, fp, fn, tp = cm.ravel()
+
+        tpr = tp / (tp + fn + 1e-12) if (tp + fn) > 0 else 0.0  # micro TPR (a.k.a. recall)
+        fpr = fp / (tn + fp + 1e-12) if (tn + fp) > 0 else 0.0
+        prec = tp / (tp + fp + 1e-12) if (tp + fp) > 0 else 0.0
+        rec = tpr
+
+        tpr_list.append(tpr)
+        fpr_list.append(fpr)
+        prec_list.append(prec)
+        rec_list.append(rec)
+
+    fpr_arr = np.array(fpr_list)
+    tpr_arr = np.array(tpr_list)
+    prec_arr = np.array(prec_list)
+    rec_arr = np.array(rec_list)
+
+    # ROC AUC (micro)
+    sidx = np.argsort(fpr_arr)
+    roc = auc(fpr_arr[sidx], tpr_arr[sidx])
+    # PRC AUC (micro over thresholds)
+    sidx2 = np.argsort(rec_arr)
+    prc_auc = auc(rec_arr[sidx2], prec_arr[sidx2])
+    aps = float(np.mean(prec_arr))
+
+    roc_curve_dict = {"fpr": fpr_arr[sidx].tolist(), "tpr": tpr_arr[sidx].tolist()}
+    prc_curve_dict = {
+        "precision": prec_arr[sidx2].tolist(),
+        "recall": rec_arr[sidx2].tolist(),
+    }
+    return roc_curve_dict, prc_curve_dict, float(roc), float(prc_auc), aps
 
 # Class to use if we remove stacking class from mlextend
 

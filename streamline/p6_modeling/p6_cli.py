@@ -54,6 +54,9 @@ def main():
                     help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>")
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
+    
+    ap.add_argument("--list_models_all", action="store_true")
+    ap.add_argument("--list_models", action="store_true")
 
     args = ap.parse_args()
 

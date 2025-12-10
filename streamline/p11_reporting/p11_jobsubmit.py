@@ -83,8 +83,7 @@ def main():
         outcome_type=args.outcome_type,
         instance_label=args.instance_label,
         make_pdf=bool(args.make_pdf),
-        # jobsubmit always runs on a single compute node
-        run_cluster="Serial",
+        run_cluster=args.run_cluster,
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()

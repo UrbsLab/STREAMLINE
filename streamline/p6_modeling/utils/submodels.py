@@ -272,10 +272,10 @@ class MulticlassClassificationModel(BaseModel, ABC):
             "recall_macro": float(recall_score(y_test, y_pred, average="macro")),
             "recall_micro": float(recall_score(y_test, y_pred, average="micro")),
             "roc_auc_macro": float(
-                roc_auc_score(y_test, probas_, multi_class="ovo", average="macro")
+                roc_auc_score(y_test, probas_, multi_class="ovr", average="macro")
             ),
             "roc_auc_micro": float(
-                roc_auc_score(y_test, probas_, multi_class="ovo", average="micro")
+                roc_auc_score(y_test, probas_, multi_class="ovr", average="micro")
             ),
             "average_precision_macro": float(
                 metrics.average_precision_score(y_test, probas_, average="macro")
