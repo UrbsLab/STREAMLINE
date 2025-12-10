@@ -27,10 +27,10 @@ class P11Runner:
         outcome_label: str = "Class",
         outcome_type: str = "Binary",
         instance_label: Optional[str] = None,
-        report_title: Optional[str] = None,
-        micro_average: str = "micro",          # "micro" or "macro", passed through to plots
-        include_ensembles: bool = True,
-        show_plots: bool = False,
+        # report_title: Optional[str] = None,
+        # micro_average: str = "micro",          # "micro" or "macro", passed through to plots
+        # include_ensembles: bool = True,
+        # show_plots: bool = False,
         run_cluster: str = "Serial",           # Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>
         queue: str = "defq",
         reserved_memory: int = 4,
@@ -109,7 +109,7 @@ class P11Runner:
         os.makedirs(jobs, exist_ok=True)
         os.makedirs(logs, exist_ok=True)
 
-        sh = jobs / f"P10_{job_ref}_run.sh"
+        sh = jobs / f"P11_{job_ref}_run.sh"
         launcher = "sbatch" if self.run_cluster == "BashSLURM" else "bsub <"
         script = Path(__file__).with_name("p11_jobsubmit.py")
 
