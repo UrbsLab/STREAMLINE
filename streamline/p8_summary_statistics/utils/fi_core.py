@@ -38,9 +38,9 @@ def prep_fi(
     metric_dict
         Per-algorithm metric lists, as produced by primary_stats_*.
     metric_ranking
-        'mean' or 'median' – how to summarize FI across CVs.
+        'mean' or 'median' - how to summarize FI across CVs.
     metric_weighting
-        'mean' or 'median' – how to summarize model performance for weighting FI.
+        'mean' or 'median' - how to summarize model performance for weighting FI.
     metric_weight_name
         Human-readable metric key in metric_dict to weight FI with
         (e.g. 'Balanced Accuracy', 'Explained Variance').

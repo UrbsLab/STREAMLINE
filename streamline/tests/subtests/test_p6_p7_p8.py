@@ -12,7 +12,7 @@ from sklearn.datasets import make_classification
 
 pytest.skip("Tested Already", allow_module_level=True)
 
-# Phase 6 / 7 / 8 imports – adjust if your module paths differ
+# Phase 6 / 7 / 8 imports - adjust if your module paths differ
 from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p7_ensembles.p7_runner import P7Runner
 from streamline.p8_summary_statistics.p8_runner import P8Runner
@@ -124,7 +124,7 @@ def test_p6_p7_p8_pipeline():
     dataset_name = _make_synthetic_cv_dataset(exp_root, n_splits=3, n_samples=90, random_state=42)
     ds_dir = exp_root / dataset_name
 
-    # 2) Phase 6 – run a few simple models.
+    # 2) Phase 6 - run a few simple models.
     # Adjust "NB,LR,SVM" to match registry IDs (small_name) in your p6 loader.
     p6 = P6Runner(
         output_path=str(output_path),
@@ -153,7 +153,7 @@ def test_p6_p7_p8_pipeline():
     base_pickles = [p for p in models_dir.glob("*.pickle")]
     assert base_pickles, "Expected at least one base model pickle from Phase 6"
 
-    # 3) Phase 7 – ensembles on top of the base models
+    # 3) Phase 7 - ensembles on top of the base models
     # ensembles: hard/soft voting and one stacking variant. Adjust IDs to match your get_ensemble_by_id registry.
     p7 = P7Runner(
         output_path=str(output_path),
@@ -190,7 +190,7 @@ def test_p6_p7_p8_pipeline():
         m = json.load(f)
     assert "Balanced Accuracy" in m and "Accuracy" in m
 
-    # 4) Phase 8 – statistics summarization (base models + ensemble summaries)
+    # 4) Phase 8 - statistics summarization (base models + ensemble summaries)
     p8 = P8Runner(
         output_path=str(output_path),
         experiment_name=experiment_name,
@@ -222,7 +222,7 @@ def test_p6_p7_p8_pipeline():
     assert not df_mean.empty
     assert "Balanced Accuracy" in df_mean.columns
 
-    # Ensemble summaries – file naming can be tweaked to match your implementation,
+    # Ensemble summaries - file naming can be tweaked to match your implementation,
     # here we only assert that at least one Summary*.csv exists in ensemble_evaluation.
     ensemble_summary_csvs = list(ens_root.glob("Ensembles*_performance_*.csv"))
     assert (

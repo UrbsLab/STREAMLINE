@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-# Phase runners – adjust import paths if your repo differs
+# Phase runners - adjust import paths if your repo differs
 from streamline.p1_data_process.p1_runner import P1Runner
 from streamline.p2_impute_scale.p2_runner import P2Runner
 from streamline.p3_feature_learning.p3_runner import P3Runner
@@ -269,7 +269,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     # )
     # p10.run()
 
-    # # Minimal sanity check – you can tighten this based on your P10 outputs
+    # # Minimal sanity check - you can tighten this based on your P10 outputs
     # repl_candidates = [
     #     ds_dir / "replication",
     #     ds_dir / "Replication",

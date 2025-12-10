@@ -363,7 +363,7 @@ def main():
     )
 
     st.sidebar.markdown("---")
-    st.sidebar.caption("Demo only – all numbers are synthetic.")
+    st.sidebar.caption("Demo only - all numbers are synthetic.")
 
     if section == "Summary Metrics":
         st.subheader("Summary Metrics (per model)")
@@ -429,7 +429,7 @@ def main():
             st.info("Select at least one model to view curves.")
 
     st.markdown("---")
-    st.caption("STREAMLINE Phase 8 demo – replace synthetic data with real P6/P7/P4 outputs in production.")
+    st.caption("STREAMLINE Phase 8 demo - replace synthetic data with real P6/P7/P4 outputs in production.")
 
 
 if __name__ == "__main__":

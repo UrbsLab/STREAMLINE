@@ -20,7 +20,7 @@ from streamline.p10_replication.replication import ReplicationJob
 
 class P10Runner:
     """
-    Phase 10 – Replication / External Validation
+    Phase 10 - Replication / External Validation
 
     Applies trained models from one training dataset to one or more replication datasets.
     """
@@ -72,7 +72,7 @@ class P10Runner:
 
         self.exp_root = Path(self.output_path) / self.experiment_name
         if not self.exp_root.is_dir():
-            raise Exception("Experiment must exist (from phases 1–8) before replication can begin")
+            raise Exception("Experiment must exist (from phases 1-8) before replication can begin")
 
         # load metadata
         with open(self.exp_root / "metadata.pickle", "rb") as f:

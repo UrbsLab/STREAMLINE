@@ -1,10 +1,10 @@
 # ----------------------------------------------------------
-# STREAMLINE FULL PIPELINE – RAW COMMAND LIST (PHASES 1–11)
+# STREAMLINE FULL PIPELINE - RAW COMMAND LIST (PHASES 1-11)
 # Using dataset at data/DemoData
 # ----------------------------------------------------------
 
 # ----------------------
-# Phase 1 – Data Process
+# Phase 1 - Data Process
 # ----------------------
 python -m streamline.p1_data_process.p1_cli \
   --data_path data/DemoData \
@@ -12,14 +12,14 @@ python -m streamline.p1_data_process.p1_cli \
   --experiment_name DemoRun
 
 # ----------------------------
-# Phase 2 – Impute & Normalize
+# Phase 2 - Impute & Normalize
 # ----------------------------
 python -m streamline.p2_impute_scale.p2_cli \
   --output_path out \
   --experiment_name DemoRun \
 
 # ----------------------------
-# Phase 3 – Feature Learning
+# Phase 3 - Feature Learning
 # ----------------------------
 python -m streamline.p3_feature_learning.p3_cli \
   --output_path out \
@@ -28,7 +28,7 @@ python -m streamline.p3_feature_learning.p3_cli \
   --learner_params "{n_components: 10}"
 
 # --------------------------------
-# Phase 4 – Feature Importance (FI)
+# Phase 4 - Feature Importance (FI)
 # --------------------------------
 python -m streamline.p4_feature_importance.p4_cli \
   --output_path out \
@@ -36,7 +36,7 @@ python -m streamline.p4_feature_importance.p4_cli \
   --models "mutualinformation,multisurf"
 
 # ---------------------------------
-# Phase 5 – Feature Selection (FS)
+# Phase 5 - Feature Selection (FS)
 # ---------------------------------
 python -m streamline.p5_feature_selection.p5_cli \
   --output_path out \
@@ -46,7 +46,7 @@ python -m streamline.p5_feature_selection.p5_cli \
 ## Edit to not require n_splits
 
 # ----------------------
-# Phase 6 – Modeling
+# Phase 6 - Modeling
 # ----------------------
 python -m streamline.p6_modeling.p6_cli \
   --output_path out \
@@ -63,7 +63,7 @@ python -m streamline.p6_modeling.p6_cli \
 ## Edit to not require n_splits, model_type
 
 # ------------------------
-# Phase 7 – Ensembles
+# Phase 7 - Ensembles
 # ------------------------
 python -m streamline.p7_ensembles.p7_cli \
   --output_path out \
@@ -74,7 +74,7 @@ python -m streamline.p7_ensembles.p7_cli \
   --calibrate 0
 
 # ---------------------------
-# Phase 8 – Summary Statistics
+# Phase 8 - Summary Statistics
 # ---------------------------
 python -m streamline.p8_summary_statistics.p8_cli \
   --output_path out \
@@ -86,7 +86,7 @@ python -m streamline.p8_summary_statistics.p8_cli \
   --sig_cutoff 0.05
 
 # ---------------------------------------
-# Phase 9 – Dataset Comparison (Cross-DS)
+# Phase 9 - Dataset Comparison (Cross-DS)
 # ---------------------------------------
 python -m streamline.p9_compare_datasets.p9_cli \
   --output_path out \
@@ -96,7 +96,7 @@ python -m streamline.p9_compare_datasets.p9_cli \
   --sig_cutoff 0.05
 
 # -------------------------
-# Phase 10 – Replication (Phase not complete)
+# Phase 10 - Replication (Phase not complete)
 # -------------------------
 # python -m streamline.p10_replication.p10_cli \
 #   --output_path out \
@@ -106,7 +106,7 @@ python -m streamline.p9_compare_datasets.p9_cli \
 #   --replication_dataset data/DemoData
 
 # -----------------------
-# Phase 11 – Reporting (Phase not complete)
+# Phase 11 - Reporting (Phase not complete)
 # -----------------------
 python -m streamline.p11_reporting.p11_cli \
   --output_path out \

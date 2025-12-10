@@ -297,7 +297,7 @@ class ReportPhaseJob:
         html_parts.append(f"<title>STREAMLINE Report - {exp_name}</title>")
         html_parts.append(f"<style>{css}</style></head><body>")
 
-        html_parts.append(f"<h1>STREAMLINE Report – {exp_name}</h1>")
+        html_parts.append(f"<h1>STREAMLINE Report - {exp_name}</h1>")
         html_parts.append("<p class='small-note'>"
                           "Generated from modeling, ensemble, statistics, and dataset comparison phases."
                           "</p>")
@@ -358,7 +358,7 @@ class ReportPhaseJob:
         html.append(f"<h2>Dataset: {name}</h2>")
 
         # ---- base metrics ----
-        html.append("<h3>Base models – summary metrics</h3>")
+        html.append("<h3>Base models - summary metrics</h3>")
         mean = ds.get("base_metrics_mean")
         median = ds.get("base_metrics_median")
         std = ds.get("base_metrics_std")
@@ -371,7 +371,7 @@ class ReportPhaseJob:
         # ---- ensemble metrics ----
         ens_mean = ds.get("ensemble_metrics_mean")
         if ens_mean is not None:
-            html.append("<h3>Ensembles – summary metrics</h3>")
+            html.append("<h3>Ensembles - summary metrics</h3>")
             html.append(self._render_metric_table(
                 ens_mean,
                 ds.get("ensemble_metrics_median"),
@@ -452,7 +452,7 @@ class ReportPhaseJob:
 
                 def fmt(x):
                     if x is None or (isinstance(x, float) and np.isnan(x)):
-                        return "–"
+                        return "-"
                     try:
                         return f"{float(x):.3f}"
                     except Exception:

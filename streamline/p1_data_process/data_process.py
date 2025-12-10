@@ -850,13 +850,13 @@ class DataProcess:
                         y = df.loc[df[outcome] == cls_b, feature_name].astype(float)
                         # Guard for zero-length or constant vectors (MWU will error or be meaningless)
                         if len(x) == 0 or len(y) == 0:
-                            raise ValueError("Empty group for Mann–Whitney U.")
+                            raise ValueError("Empty group for Mann-Whitney U.")
                         if x.nunique() <= 1 and y.nunique() <= 1 and float(x.iloc[0]) == float(y.iloc[0]):
                             # Completely constant and equal → non-differentiable
-                            p_val, test_stat, test_name = 1.0, 0.0, "Mann–Whitney U Test"
+                            p_val, test_stat, test_name = 1.0, 0.0, "Mann-Whitney U Test"
                         else:
                             u, p = mannwhitneyu(x, y, alternative="two-sided", method="auto")
-                            p_val, test_stat, test_name = p, u, "Mann–Whitney U Test"
+                            p_val, test_stat, test_name = p, u, "Mann-Whitney U Test"
                     else:
                         # >2 classes: one-way ANOVA (fallback to Kruskal if any group size < 2)
                         groups = [df.loc[df[outcome] == cat, feature_name].astype(float) for cat in outcome_unique]
@@ -866,7 +866,7 @@ class DataProcess:
                             raise ValueError("Need at least two non-empty groups for ANOVA.")
                         if any(len(g) < 2 for g in groups):
                             H, p = kruskal(*groups)
-                            p_val, test_stat, test_name = p, H, "Kruskal–Wallis H Test"
+                            p_val, test_stat, test_name = p, H, "Kruskal-Wallis H Test"
                         else:
                             F, p = f_oneway(*groups)
                             p_val, test_stat, test_name = p, F, "One-way ANOVA"
@@ -880,7 +880,7 @@ class DataProcess:
                         raise ValueError("Need at least two non-empty groups for ANOVA.")
                     if any(len(g) < 2 for g in groups):
                         H, p = kruskal(*groups)
-                        p_val, test_stat, test_name = p, H, "Kruskal–Wallis H Test"
+                        p_val, test_stat, test_name = p, H, "Kruskal-Wallis H Test"
                     else:
                         F, p = f_oneway(*groups)
                         p_val, test_stat, test_name = p, F, "One-way ANOVA"

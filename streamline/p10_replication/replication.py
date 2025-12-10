@@ -545,7 +545,7 @@ class ReplicationJob:
             f.write("complete")
 
     # ------------------------------------------------------------------ #
-    # Helpers (imputation / scaling / eval) – mostly old logic
+    # Helpers (imputation / scaling / eval) - mostly old logic
     # ------------------------------------------------------------------ #
 
     def impute_rep_data(
