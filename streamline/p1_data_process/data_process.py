@@ -312,22 +312,32 @@ class DataProcess:
                 headers.remove(c)
         return headers
 
-    def set_original_headers(self, phase='exploratory', initial='initial/'):
+    def set_original_headers(self, phase: str = "exploratory", initial: str = "initial/"):
         path = os.path.join(self.experiment_path, self.name, phase)
         os.makedirs(path, exist_ok=True)
+
         headers = self.get_headers()
-        with open(os.path.join(path, initial + 'OriginalFeatureNames.csv'), 'w', newline="") as f:
-            writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(headers)
+
+        # Represent headers as a single-row DataFrame to preserve original layout
+        df = pd.DataFrame([headers])
+
+        out_path = os.path.join(path, f"{initial}OriginalFeatureNames.csv")
+        df.to_csv(out_path, index=False, header=False)
+
         return headers
 
-    def set_processed_headers(self, phase='exploratory', initial=''):
+
+    def set_processed_headers(self, phase: str = "exploratory", initial: str = ""):
         path = os.path.join(self.experiment_path, self.name, phase)
         os.makedirs(path, exist_ok=True)
+
         headers = self.get_headers()
-        with open(os.path.join(path, initial + 'ProcessedFeatureNames.csv'), 'w', newline="") as f:
-            writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(headers)
+
+        df = pd.DataFrame([headers])
+
+        out_path = os.path.join(path, f"{initial}ProcessedFeatureNames.csv")
+        df.to_csv(out_path, index=False, header=False)
+
         return headers
 
     def describe_data(self, initial=''):

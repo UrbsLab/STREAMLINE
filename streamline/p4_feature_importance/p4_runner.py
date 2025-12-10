@@ -99,7 +99,7 @@ class P4Runner:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(self._run_one)(m, tr, te) for (m,tr,te) in jobs]
                     dask.compute(tasks, scheduler=client)
-        elif self.run_cluster and self.run_cluster not in ("BashSLURM","BashLSF"):
+        elif self.run_cluster and self.run_cluster != "Serial" and self.run_cluster not in ("BashSLURM","BashLSF"):
             client: Client = get_cluster(self.run_cluster, exp_root, self.queue, self.reserved_memory)
             tasks = [dask.delayed(self._run_one)(m, tr, te) for (m,tr,te) in jobs]
             dask.compute(tasks, scheduler=client)

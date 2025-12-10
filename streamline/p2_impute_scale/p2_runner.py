@@ -148,7 +148,7 @@ class P2Runner:
                     ]
                     dask.compute(tasks, scheduler=client)
 
-        elif self.run_cluster and self.run_cluster not in ("BashSLURM", "BashLSF"):
+        elif self.run_cluster and self.run_cluster != "Serial" and self.run_cluster!= "Serial" and self.run_cluster not in ("BashSLURM", "BashLSF"):
             # Modern Dask cluster (works in Jupyter)
             client: Client = get_cluster(
                 self.run_cluster,

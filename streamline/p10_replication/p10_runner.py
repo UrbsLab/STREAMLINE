@@ -18,7 +18,7 @@ from streamline.utils.runners import num_cores, runner_fn
 from streamline.p10_replication.replication import ReplicationJob
 
 
-class P10ReplicationRunner:
+class P10Runner:
     """
     Phase 10 – Replication / External Validation
 

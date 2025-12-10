@@ -39,7 +39,10 @@ class ModelJob:
 
         feature_names = pd.read_csv(self.train_file_path).columns.values.tolist()
         if self.instance_label is not None:
-            feature_names.remove(self.instance_label)
+            try:
+                feature_names.remove(self.instance_label)
+            except ValueError:
+                pass
         feature_names.remove(self.outcome_label)
         self.feature_names = feature_names
 

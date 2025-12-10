@@ -1284,55 +1284,56 @@ class StatisticsPhaseJob:
 
     def save_metric_stats(self, metrics, metric_dict):
         """
-        Exports csv file with mean, median and std dev metric values
-        (over all CVs) for each ML modeling algorithm
+        Exports csv files with mean, median and std dev metric values
+        (over all CVs) for each ML modeling algorithm.
+
+        Parameters
+        ----------
+        metrics : list[str]
+            List of metric names (e.g. ["balanced_accuracy", "f1", ...]).
+        metric_dict : dict
+            Nested dict of metric values per algorithm.
         """
-        # TODO: Clean this function up, save everything together
-        with open(self.full_path + '/model_evaluation/Summary_performance_median.csv', mode='w', newline="") as file:
-            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            e = ['']
-            e.extend(metrics)
-            writer.writerow(e)  # Write headers (balanced accuracy, etc.)
-            for algorithm in metric_dict:
-                astats = []
-                for li in list(metric_dict[algorithm].values()):
-                    li = [float(i) for i in li]
-                    mediani = median(li)
-                    astats.append(str(mediani))
-                to_add = [algorithm]
-                to_add.extend(astats)
-                writer.writerow(to_add)
-        file.close()
-        with open(self.full_path + '/model_evaluation/Summary_performance_mean.csv', mode='w', newline="") as file:
-            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            e = ['']
-            e.extend(metrics)
-            writer.writerow(e)  # Write headers (balanced accuracy, etc.)
-            for algorithm in metric_dict:
-                astats = []
-                for li in list(metric_dict[algorithm].values()):
-                    li = [float(i) for i in li]
-                    meani = mean(li)
-                    astats.append(str(meani))
-                to_add = [algorithm]
-                to_add.extend(astats)
-                writer.writerow(to_add)
-        file.close()
-        with open(self.full_path + '/model_evaluation/Summary_performance_std.csv', mode='w', newline="") as file:
-            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            e = ['']
-            e.extend(metrics)
-            writer.writerow(e)  # Write headers (balanced accuracy, etc.)
-            for algorithm in metric_dict:
-                astats = []
-                for li in list(metric_dict[algorithm].values()):
-                    li = [float(i) for i in li]
-                    std = stdev(li)
-                    astats.append(str(std))
-                to_add = [algorithm]
-                to_add.extend(astats)
-                writer.writerow(to_add)
-        file.close()
+
+        # Initialize empty DataFrames for each statistic
+        # Index: algorithm names, Columns: metrics
+        algorithms = list(metric_dict.keys())
+        df_median = pd.DataFrame(index=algorithms, columns=metrics, dtype="float64")
+        df_mean   = pd.DataFrame(index=algorithms, columns=metrics, dtype="float64")
+        df_std    = pd.DataFrame(index=algorithms, columns=metrics, dtype="float64")
+
+        for algorithm, metric_values in metric_dict.items():
+            for metric in metrics:
+                # Get list of values for this metric, default to empty list
+                values = metric_values.get(metric, [])
+
+                # Convert to numeric, coercing non-numeric (including None) to NaN
+                s = pd.to_numeric(pd.Series(values), errors="coerce")
+
+                # Drop NaNs so statistics ignore None / invalid entries
+                s = s.dropna()
+
+                if s.empty:
+                    # If no valid numeric values, leave as NaN
+                    median_val = float("nan")
+                    mean_val   = float("nan")
+                    std_val    = float("nan")
+                else:
+                    median_val = s.median()
+                    mean_val   = s.mean()
+                    # Match statistics.stdev behavior: sample std (ddof=1)
+                    std_val    = s.std(ddof=1) if len(s) > 1 else float("nan")
+
+                df_median.loc[algorithm, metric] = median_val
+                df_mean.loc[algorithm, metric]   = mean_val
+                df_std.loc[algorithm, metric]    = std_val
+
+        out_dir = os.path.join(self.full_path, "model_evaluation")
+        os.makedirs(out_dir, exist_ok=True)
+
+        df_median.to_csv(os.path.join(out_dir, "Summary_performance_median.csv"), index_label="")
+        df_mean.to_csv(os.path.join(out_dir, "Summary_performance_mean.csv"), index_label="")
+        df_std.to_csv(os.path.join(out_dir, "Summary_performance_std.csv"), index_label="")
 
     def kruskal_wallis(self, metrics, metric_dict):
         """
@@ -1354,7 +1355,7 @@ class StatisticsPhaseJob:
             try:
                 result = kruskal(*temp_array)
             except Exception:
-                result = [temp_array[0], 1]
+                result = [np.nan, 1]
             kruskal_summary.at[metric, 'Statistic'] = str(round(result[0], 6))
             kruskal_summary.at[metric, 'P-Value'] = str(round(result[1], 6))
             if result[1] < self.sig_cutoff:
@@ -1533,48 +1534,55 @@ class StatisticsPhaseJob:
     ):
         """
         IO helper: write mean/median/std summary CSVs for ensemble metrics.
+
+        Parameters
+        ----------
+        ens_root : Path
+            Directory where the summary CSVs will be written.
+        metrics_by_ens : dict
+            Nested dict of metric values per ensemble ID.
+        metric_names : list[str]
+            List of metric names to summarize (columns).
         """
-        if not ens_root.exists():
-            ens_root.mkdir(parents=True, exist_ok=True)
-        out_mean = ens_root / "Ensembles_performance_mean.csv"
+
+        ens_root.mkdir(parents=True, exist_ok=True)
+
+        out_mean   = ens_root / "Ensembles_performance_mean.csv"
         out_median = ens_root / "Ensembles_performance_median.csv"
-        out_std = ens_root / "Ensembles_performance_std.csv"
+        out_std    = ens_root / "Ensembles_performance_std.csv"
 
-        # mean
-        with out_mean.open("w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["Ensemble"] + metric_names)
-            for ens_id, md in metrics_by_ens.items():
-                row = [ens_id]
-                for m in metric_names:
-                    vals = [float(x) for x in md.get(m, [])]
-                    row.append(str(mean(vals)) if vals else "nan")
-                w.writerow(row)
+        ensemble_ids = list(metrics_by_ens.keys())
 
-        # median
-        with out_median.open("w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["Ensemble"] + metric_names)
-            for ens_id, md in metrics_by_ens.items():
-                row = [ens_id]
-                for m in metric_names:
-                    vals = [float(x) for x in md.get(m, [])]
-                    row.append(str(median(vals)) if vals else "nan")
-                w.writerow(row)
+        # DataFrames: index = ensemble IDs, columns = metrics
+        df_mean   = pd.DataFrame(index=ensemble_ids, columns=metric_names, dtype="float64")
+        df_median = pd.DataFrame(index=ensemble_ids, columns=metric_names, dtype="float64")
+        df_std    = pd.DataFrame(index=ensemble_ids, columns=metric_names, dtype="float64")
 
-        # std
-        with out_std.open("w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(["Ensemble"] + metric_names)
-            for ens_id, md in metrics_by_ens.items():
-                row = [ens_id]
-                for m in metric_names:
-                    vals = [float(x) for x in md.get(m, [])]
-                    if len(vals) > 1:
-                        row.append(str(stdev(vals)))
-                    else:
-                        row.append("nan")
-                w.writerow(row)
+        for ens_id, md in metrics_by_ens.items():
+            for m in metric_names:
+                vals = md.get(m, [])
+
+                # Convert to numeric, coercing None / bad values to NaN
+                s = pd.to_numeric(pd.Series(vals), errors="coerce").dropna()
+
+                if s.empty:
+                    mean_val = float("nan")
+                    median_val = float("nan")
+                    std_val = float("nan")
+                else:
+                    mean_val = s.mean()
+                    median_val = s.median()
+                    # Sample std (like statistics.stdev), NaN if fewer than 2 valid values
+                    std_val = s.std(ddof=1) if len(s) > 1 else float("nan")
+
+                df_mean.loc[ens_id, m] = mean_val
+                df_median.loc[ens_id, m] = median_val
+                df_std.loc[ens_id, m] = std_val
+
+        # Write CSVs, keeping "Ensemble" as the first column header and using "nan" for missing
+        df_mean.to_csv(out_mean, index_label="Ensemble", na_rep="nan")
+        df_median.to_csv(out_median, index_label="Ensemble", na_rep="nan")
+        df_std.to_csv(out_std, index_label="Ensemble", na_rep="nan")
 
     def _collect_ensemble_curves_core(
         self,
