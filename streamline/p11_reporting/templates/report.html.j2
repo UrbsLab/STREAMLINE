@@ -1,0 +1,296 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }}</title>
+
+  <style>
+    /* ---------- Page + running header/footer ---------- */
+    @page {
+      size: Letter;
+      margin: 0.8in 0.8in 0.9in 0.8in; /* extra bottom room for footer */
+
+      @top-center {
+        content: element(doc-header);
+      }
+      @bottom-left {
+        content: element(doc-footer);
+      }
+      @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+      }
+    }
+
+    html, body { padding: 0; margin: 0; }
+    body { font-family: Arial, sans-serif; font-size: 11pt; color: #111; }
+
+    h1, h2, h3, h4 { margin: 0.2em 0; }
+    .muted { color: #666; font-size: 10pt; }
+
+    .pagebreak { break-before: page; page-break-before: always; }
+    .section { margin-top: 0.4in; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35in; }
+
+    .card { border: 1px solid #ddd; border-radius: 6px; padding: 10px; }
+    .img { width: 100%; height: auto; border: 1px solid #eee; border-radius: 4px; }
+
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 6px; font-size: 9.5pt; }
+    th { background: #f6f6f6; }
+    .small { font-size: 9.5pt; }
+    .toc a { color: #111; text-decoration: none; }
+    .toc li { margin: 0.1em 0; }
+
+    /* Running elements (WeasyPrint) */
+    #doc-header { position: running(doc-header); }
+    #doc-footer { position: running(doc-footer); }
+    .headerline { border-bottom: 1px solid #ddd; padding-bottom: 6px; margin-bottom: 10px; }
+    .footerline { border-top: 1px solid #ddd; padding-top: 6px; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Running header/footer content -->
+  <div id="doc-header">
+    <div class="headerline">
+      <div style="font-size: 10pt;">
+        <strong>{{ title }}</strong>
+        <span class="muted" style="float:right;">Experiment: {{ experiment_name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="doc-footer">
+    <div class="footerline muted">
+      Generated: {{ generated_at }}
+      <span style="float:right;">{{ footer_text }}</span>
+    </div>
+  </div>
+
+  <!-- Cover -->
+  <h1>{{ title }}</h1>
+  <div class="muted">
+    Experiment: {{ experiment_name }}<br/>
+    Root: {{ experiment_root }}<br/>
+    Generated: {{ generated_at }}
+  </div>
+
+  <div class="section">
+    <h2>Contents</h2>
+    <ol class="toc">
+      <li><a href="#datasets">Datasets</a></li>
+      <li><a href="#dataset-comparisons">Dataset Comparisons</a></li>
+    </ol>
+    <ol class="toc">
+      {% for ds in datasets %}
+        <li><a href="#ds-{{ ds.dataset_name }}">{{ ds.dataset_name }}</a></li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="pagebreak"></div>
+
+  <!-- Datasets -->
+  <h2 id="datasets">Datasets</h2>
+  <div class="muted small">
+    Each dataset section summarizes key artifacts from all phases. Figures below are reused from prior phases (pre-generated PNGs).
+  </div>
+
+  {% for ds in datasets %}
+    <div class="pagebreak"></div>
+    <h2 id="ds-{{ ds.dataset_name }}">{{ ds.dataset_name }}</h2>
+    <div class="muted small">{{ ds.paths.dataset_dir }}</div>
+
+    <div class="section grid2">
+
+      <div class="card">
+        <h3>Model Performance</h3>
+
+        {% set key = 'models_mean_Balanced Accuracy' %}
+        {% if ds.figures.get(key) %}
+          <img class="img" src="{{ ds.figures[key] }}" />
+        {% elif ds.figures.get('models_mean_ROC AUC') %}
+          <img class="img" src="{{ ds.figures['models_mean_ROC AUC'] }}" />
+        {% elif ds.figures.get('models_mean_PRC AUC') %}
+          <img class="img" src="{{ ds.figures['models_mean_PRC AUC'] }}" />
+        {% elif ds.figures.get('models_mean_Accuracy') %}
+          <img class="img" src="{{ ds.figures['models_mean_Accuracy'] }}" />
+        {% else %}
+          <div class="muted small">No model summary figure available.</div>
+        {% endif %}
+
+        {% if ds.figures.get('models_cv_Balanced Accuracy') %}
+          <div style="height: 10px;"></div>
+          <img class="img" src="{{ ds.figures['models_cv_Balanced Accuracy'] }}" />
+        {% elif ds.figures.get('models_cv_ROC AUC') %}
+          <div style="height: 10px;"></div>
+          <img class="img" src="{{ ds.figures['models_cv_ROC AUC'] }}" />
+        {% elif ds.figures.get('models_cv_PRC AUC') %}
+          <div style="height: 10px;"></div>
+          <img class="img" src="{{ ds.figures['models_cv_PRC AUC'] }}" />
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h3>Ensemble Performance (if present)</h3>
+
+        {% if ds.figures.get('ensembles_mean_Balanced Accuracy') %}
+          <img class="img" src="{{ ds.figures['ensembles_mean_Balanced Accuracy'] }}" />
+        {% elif ds.figures.get('ensembles_mean_ROC AUC') %}
+          <img class="img" src="{{ ds.figures['ensembles_mean_ROC AUC'] }}" />
+        {% elif ds.figures.get('ensembles_mean_PRC AUC') %}
+          <img class="img" src="{{ ds.figures['ensembles_mean_PRC AUC'] }}" />
+        {% elif ds.figures.get('ensembles_mean_Accuracy') %}
+          <img class="img" src="{{ ds.figures['ensembles_mean_Accuracy'] }}" />
+        {% else %}
+          <div class="muted small">No ensembles detected or no ensemble summary figure available.</div>
+        {% endif %}
+
+        {% if ds.figures.get('ensembles_cv_Balanced Accuracy') %}
+          <div style="height: 10px;"></div>
+          <img class="img" src="{{ ds.figures['ensembles_cv_Balanced Accuracy'] }}" />
+        {% elif ds.figures.get('ensembles_cv_ROC AUC') %}
+          <div style="height: 10px;"></div>
+          <img class="img" src="{{ ds.figures['ensembles_cv_ROC AUC'] }}" />
+        {% elif ds.figures.get('ensembles_cv_PRC AUC') %}
+          <div style="height: 10px;"></div>
+          <img class="img" src="{{ ds.figures['ensembles_cv_PRC AUC'] }}" />
+        {% endif %}
+      </div>
+
+    </div>
+
+    <div class="section grid2">
+      <div class="card">
+        <h3>Curves</h3>
+        {% if ds.figures.get('models_roc_img') %}
+          <h4 class="small">Models ROC</h4>
+          <img class="img" src="{{ ds.figures['models_roc_img'] }}" />
+        {% endif %}
+        {% if ds.figures.get('models_prc_img') %}
+          <h4 class="small">Models PRC</h4>
+          <img class="img" src="{{ ds.figures['models_prc_img'] }}" />
+        {% endif %}
+        {% if ds.figures.get('ensembles_roc_img') %}
+          <h4 class="small">Ensembles ROC</h4>
+          <img class="img" src="{{ ds.figures['ensembles_roc_img'] }}" />
+        {% endif %}
+        {% if ds.figures.get('ensembles_prc_img') %}
+          <h4 class="small">Ensembles PRC</h4>
+          <img class="img" src="{{ ds.figures['ensembles_prc_img'] }}" />
+        {% endif %}
+        {% if not ds.figures.get('models_roc_img') and not ds.figures.get('models_prc_img')
+              and not ds.figures.get('ensembles_roc_img') and not ds.figures.get('ensembles_prc_img') %}
+          <div class="muted small">No curve plots found for models/ensembles.</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h3>Feature Importance (pre-generated)</h3>
+        {% if ds.figures.get('fi_compare_norm_weight') %}
+          <img class="img" src="{{ ds.figures['fi_compare_norm_weight'] }}" />
+        {% elif ds.figures.get('fi_top_avg_mutualinfo') or ds.figures.get('fi_top_avg_multisurf') %}
+          {% if ds.figures.get('fi_top_avg_mutualinfo') %}
+            <h4 class="small">Mutual Information</h4>
+            <img class="img" src="{{ ds.figures['fi_top_avg_mutualinfo'] }}" />
+          {% endif %}
+          {% if ds.figures.get('fi_top_avg_multisurf') %}
+            <div style="height: 10px;"></div>
+            <h4 class="small">MultiSURF</h4>
+            <img class="img" src="{{ ds.figures['fi_top_avg_multisurf'] }}" />
+          {% endif %}
+        {% else %}
+          <div class="muted small">No FI plots found.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Key Tables (pre-generated CSV)</h3>
+
+      {% if ds.tables.get('data_process_summary') %}
+        <h4 class="small">DataProcessSummary.csv</h4>
+        <table>
+          <tr>
+            {% for k in ds.tables['data_process_summary'][0].keys() %}
+              <th>{{ k }}</th>
+            {% endfor %}
+          </tr>
+          {% for row in ds.tables['data_process_summary'] %}
+            <tr>
+              {% for v in row.values() %}
+                <td>{{ v }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+
+      {% if ds.tables.get('univariate_top10') %}
+        <h4 class="small">Univariate Significance (Top 10)</h4>
+        <table>
+          <tr>
+            {% for k in ds.tables['univariate_top10'][0].keys() %}
+              <th>{{ k }}</th>
+            {% endfor %}
+          </tr>
+          {% for row in ds.tables['univariate_top10'] %}
+            <tr>
+              {% for v in row.values() %}
+                <td>{{ v }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    </div>
+
+  {% endfor %}
+
+  <!-- Dataset Comparisons -->
+  <div class="pagebreak"></div>
+  <h2 id="dataset-comparisons">Dataset Comparisons</h2>
+
+  {% if dataset_comparisons.present %}
+    <div class="muted small">{{ dataset_comparisons.path }}</div>
+
+    {% if dataset_comparisons.figures.get('compare_allmodels_roc_auc') %}
+      <div class="section card">
+        <h3>Compare ML Performance Across Datasets</h3>
+        <img class="img" src="{{ dataset_comparisons.figures['compare_allmodels_roc_auc'] }}" />
+      </div>
+    {% endif %}
+
+    {% if dataset_comparisons.figures.get('compare_allmodels_prc_auc') %}
+      <div class="section card">
+        <h3>Compare ML Performance Across Datasets (PRC AUC)</h3>
+        <img class="img" src="{{ dataset_comparisons.figures['compare_allmodels_prc_auc'] }}" />
+      </div>
+    {% endif %}
+
+    {% if dataset_comparisons.tables.get('best_kw') %}
+      <div class="section">
+        <h3>BestCompare_KruskalWallis.csv</h3>
+        <table>
+          <tr>
+            {% for k in dataset_comparisons.tables['best_kw'][0].keys() %}
+              <th>{{ k }}</th>
+            {% endfor %}
+          </tr>
+          {% for row in dataset_comparisons.tables['best_kw'] %}
+            <tr>
+              {% for v in row.values() %}
+                <td>{{ v }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="muted small">No DatasetComparisons/ folder found.</div>
+  {% endif %}
+
+</body>
+</html>
