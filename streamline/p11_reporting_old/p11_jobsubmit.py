@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from streamline.p11_reporting.p11_runner import P11Runner
+from streamline.p11_reporting_old.p11_runner import P11Runner
 
 
 def _none_if_empty(val: str | None) -> str | None:
@@ -71,6 +71,14 @@ def main():
         default="Serial",
         help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>",
     )
+    
+    ap.add_argument(
+        "--make_pdf",
+        type=int,
+        default=1,
+        help="1 = export PDF; 0 = skip PDF",
+    )
+    
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
 

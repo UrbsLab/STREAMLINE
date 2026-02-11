@@ -3,14 +3,14 @@ from __future__ import annotations
 import argparse
 import logging
 
-from streamline.p11_reporting.p11_runner import P11Runner
+from streamline.p11_reporting_old.p11_runner import P11Runner
 
 logging.basicConfig(level=logging.INFO)
 
 
 def main():
     ap = argparse.ArgumentParser(
-        "STREAMLINE Phase 11 (Reporting)",
+        "STREAMLINE Phase 10 (Reporting)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     ap.add_argument("--output_path", required=True)

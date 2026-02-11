@@ -71,6 +71,14 @@ def main():
         default="Serial",
         help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>",
     )
+    
+    ap.add_argument(
+        "--make_pdf",
+        type=int,
+        default=1,
+        help="1 = export PDF; 0 = skip PDF",
+    )
+    
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
 
