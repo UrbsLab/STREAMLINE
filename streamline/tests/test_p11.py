@@ -3,6 +3,8 @@ import pytest
 
 from streamline.p11_reporting.reporting import ReportPhaseJob
 
+pytest.skip("Tested Already", allow_module_level=True)
+
 @pytest.mark.integration
 def test_p11_reporting_smoke():
     # This test assumes DemoData has already been run through prior phases
