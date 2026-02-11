@@ -709,37 +709,76 @@ class ReportPhaseJob:
     # ============================================================
 
     def _write_pdf(self, report_data: Dict[str, Any]) -> None:
+        """
+        Render the full STREAMLINE-style PDF (FPDF).
+
+        Requirements implemented:
+        - No big "STREAMLINE Evaluation Report" header on every page:
+        * Page 1 has a cover banner + cover header block.
+        * Subsequent pages have no large header (only footer).
+        - Metadata is rendered as a boxed KV panel and preserves ALL metadata keys.
+        - Feature Importance always starts on a new page.
+        - Runtimes always starts on a new page.
+        """
         pdf = _StreamlinePDF(
-            title="STREAMLINE Evaluation Report",
+            title=f"{report_data.get('experiment_name', '')} - STREAMLINE Report",
             streamline_version=str(report_data.get("streamline_version", "")),
             float_decimals=self.float_decimals,
         )
         pdf.alias_nb_pages()
-        pdf.set_auto_page_break(auto=True, margin=14)
+
+        # -------------------------
+        # COVER PAGE
+        # -------------------------
         pdf.add_page()
 
-        pdf.card_header(
-            main_title="STREAMLINE Evaluation Report",
-            lines=[
-                f"Experiment: {report_data.get('experiment_name', '')}",
-                f"Generated at: {report_data.get('generated_at', '')}",
-                f"Report Version: {report_data.get('streamline_version', '')}",
-            ],
+        # Cover header block (boxed, reference-like)
+        pdf.cover_header_block(
+            experiment=str(report_data.get("experiment_name", "")),
+            generated_at=str(report_data.get("generated_at", "")),
+            version=str(report_data.get("streamline_version", "")),
         )
 
+        # Metadata panel (keep ALL keys)
         meta = report_data.get("metadata", {}) or {}
-        pdf.section_bar("Metadata")
-        pdf.draw_kv_table(meta)
+        if meta:
+            page_w = pdf.w - pdf.l_margin - pdf.r_margin
+            x = pdf.l_margin
+            y = pdf.get_y()
+            # Single full-width panel; clean and scalable
+            pdf.kv_panel(
+                "Metadata",
+                meta,
+                x=x,
+                y=y,
+                w=page_w,
+                key_w_ratio=0.34,  # matches your original Key/Value split
+                row_h=4.8,
+                title_h=6.0,
+                font_size=9,
+            )
+            pdf.set_y(y + 6.0 + max(1, len(meta)) * 4.8 + 4.0)
 
+        # -------------------------
+        # DATASET PAGES
+        # -------------------------
         for ds in report_data.get("datasets", []) or []:
             pdf.add_page()
-            pdf.section_bar(f"Dataset: {ds.get('dataset_name', '')}")
+
+            # Dataset title + path
+            ds_name = str(ds.get("dataset_name", ""))
+            ds_dir = str(ds.get("dataset_dir", ""))
+            pdf.panel_title(f"Dataset: {ds_name}")
             pdf.set_font("Times", "", 10)
-            pdf.multi_cell(0, 5, ds.get("dataset_dir", ""))
+            if ds_dir:
+                pdf.multi_cell(0, 5, ds_dir)
+                pdf.ln(1.5)
 
             figs = ds.get("figures", {}) or {}
+            perf = ds.get("perf", {}) or {}
 
-            pdf.section_bar("Exploratory + Performance Summary")
+            # --- Exploratory + Performance Summary (2x2)
+            pdf.panel_title("Exploratory and Performance Summary")
             pdf.figure_grid_2x2(
                 titles=[
                     "Class Balance",
@@ -758,8 +797,8 @@ class ReportPhaseJob:
                 title_h=6.0,
             )
 
-            pdf.section_bar("Model Performance")
-            perf = ds.get("perf", {}) or {}
+            # --- Model Performance tables
+            pdf.panel_title("Model Performance")
 
             ms = perf.get("models_mean_std", {}) or {}
             if ms.get("present"):
@@ -785,62 +824,102 @@ class ReportPhaseJob:
                 pdf.subheader("Median (Ensembles)")
                 pdf.draw_table(em.get("columns", []), em.get("rows", []), max_rows=100)
 
-            pdf.section_bar("Curves (Summary)")
+            # --- Curves (Summary)
+            pdf.panel_title("Curves (Summary)")
             pdf.figure_row_2(
                 titles=["Summary ROC", "Summary PRC"],
-                paths=[figs.get("models_roc_overlay") or None, figs.get("models_prc_overlay") or None],
-                h=78,
+                paths=[
+                    figs.get("models_roc_overlay") or None,
+                    figs.get("models_prc_overlay") or None,
+                ],
+                h=78.0,
                 gap=4.0,
                 title_h=6.0,
             )
 
             if figs.get("ensembles_roc") or figs.get("ensembles_prc"):
-                pdf.section_bar("Ensembles (Summary)")
+                pdf.panel_title("Ensembles (Summary)")
                 pdf.figure_row_2(
                     titles=["Ensembles ROC", "Ensembles PRC"],
-                    paths=[figs.get("ensembles_roc") or None, figs.get("ensembles_prc") or None],
-                    h=78,
+                    paths=[
+                        figs.get("ensembles_roc") or None,
+                        figs.get("ensembles_prc") or None,
+                    ],
+                    h=78.0,
                     gap=4.0,
                     title_h=6.0,
                 )
 
-            pdf.section_bar("Feature Importance")
-            pdf.figure_single("Top Scores / Importance", figs.get("fi_top20") or None, h=100, title_h=6.0)
+            # -------------------------
+            # Feature Importance: ALWAYS on new page
+            # -------------------------
+            pdf.add_page()
+            pdf.panel_title("Feature Importance")
+            pdf.figure_single(
+                "Top Scores / Importance",
+                figs.get("fi_top20") or None,
+                h=130.0,
+                title_h=6.0,
+            )
 
-            pdf.section_bar("Univariate Significance (Top 10)")
-            uni = (ds.get("tables", {}) or {}).get("univariate_top10", {}) or {}
+            # -------------------------
+            # Remaining tables
+            # -------------------------
+            tables = ds.get("tables", {}) or {}
+
+            pdf.panel_title("Univariate Significance (Top 10)")
+            uni = tables.get("univariate_top10", {}) or {}
             if uni.get("present"):
                 pdf.draw_table(uni.get("columns", []), uni.get("rows", []), max_rows=10)
             else:
                 pdf.muted("Univariate_Significance.csv not found.")
 
-            pdf.section_bar("Informative Feature Summary")
-            inf = (ds.get("tables", {}) or {}).get("informative_feature_summary", {}) or {}
+            pdf.panel_title("Informative Feature Summary")
+            inf = tables.get("informative_feature_summary", {}) or {}
             if inf.get("present"):
                 pdf.draw_table(inf.get("columns", []), inf.get("rows", []), max_rows=200)
             else:
                 pdf.muted("feature_selection/InformativeFeatureSummary.csv not found.")
 
-            pdf.section_bar("Runtime Summary (runtimes.csv)")
-            rt = (ds.get("tables", {}) or {}).get("runtimes", {}) or {}
+            # -------------------------
+            # Runtimes: ALWAYS on new page
+            # -------------------------
+            pdf.add_page()
+            pdf.panel_title("Runtime Summary (runtimes.csv)")
+            rt = tables.get("runtimes", {}) or {}
             if rt.get("present"):
-                pdf.draw_table(rt.get("columns", []), rt.get("rows", []), max_rows=200)
+                pdf.draw_table(rt.get("columns", []), rt.get("rows", []), max_rows=500)
             else:
                 pdf.muted("runtimes.csv not found.")
 
+        # -------------------------
+        # DATASET COMPARISONS
+        # -------------------------
         dc = report_data.get("dataset_comparisons", {}) or {}
         if dc.get("present"):
             pdf.add_page()
-            pdf.section_bar("Dataset Comparisons")
+            pdf.panel_title("Dataset Comparisons")
+
             overview = (dc.get("figures", {}) or {}).get("overview")
-            pdf.figure_single("Comparison Overview", overview or None, h=120, title_h=6.0)
+            pdf.figure_single("Comparison Overview", overview or None, h=120.0, title_h=6.0)
 
             kw = (dc.get("tables", {}) or {}).get("best_kw", {}) or {}
             if kw.get("present"):
-                pdf.section_bar("BestCompare_KruskalWallis.csv")
+                pdf.panel_title("BestCompare_KruskalWallis.csv")
                 pdf.draw_table(kw.get("columns", []), kw.get("rows", []), max_rows=200)
 
+            mw = (dc.get("tables", {}) or {}).get("best_mw", {}) or {}
+            if mw.get("present"):
+                pdf.panel_title("BestCompare_MannWhitney.csv")
+                pdf.draw_table(mw.get("columns", []), mw.get("rows", []), max_rows=200)
+
+            wx = (dc.get("tables", {}) or {}).get("best_wx", {}) or {}
+            if wx.get("present"):
+                pdf.panel_title("BestCompare_WilcoxonRank.csv")
+                pdf.draw_table(wx.get("columns", []), wx.get("rows", []), max_rows=200)
+
         pdf.output(str(self.paths.pdf))
+
 
     # ----------------------------
     # Runtime bookkeeping
@@ -904,28 +983,33 @@ class ReportPhaseJob:
 # ============================================================
 
 class _StreamlinePDF(FPDF):
-    """
-    Custom PDF class for STREAMLINE report with consistent styling and layout.
-    """
-
     def __init__(self, *, title: str, streamline_version: str, float_decimals: int = 3):
         super().__init__(orientation="P", unit="mm", format="A4")
         self._title = title
         self._streamline_version = streamline_version
         self._decimals = int(float_decimals)
 
-        # Page
         self.set_margins(10, 10, 10)
+        self.set_auto_page_break(auto=True, margin=14)
         self.set_line_width(0.2)
 
-        # Table layout
+        # Toggle: cover banner only on first page
+        self._cover_done = False
+
+        # Optional: small running header on non-cover pages
+        self._use_running_header = False  # set True if you want a small header line
+
+        # Table layout tuning
         self._tbl_pad_x = 1.2
         self._tbl_pad_y = 0.8
         self._tbl_line_h = 3.4
 
+        # Spacing
+        self._gap_after_cover = 4.0
+        self._gap_after_section = 2.0
         # Vertical rhythm (global)
-        self._gap_after_header = 3.0
-        self._gap_after_section = 1.6
+        # self._gap_after_header = 3.0
+        # self._gap_after_section = 1.6
         self._gap_after_subheader = 0.8
         self._gap_after_textblock = 0.8
         self._gap_after_table = 1.2
@@ -940,15 +1024,26 @@ class _StreamlinePDF(FPDF):
     # Header / Footer
     # -----------------------------
     def header(self):
-        self.set_font("Times", "B", 12)
+        # Big banner only on page 1 (cover-style)
+        if self.page_no() == 1 and not self._cover_done:
+            self._draw_cover_banner()
+            self._cover_done = True
+            return
+
+        # No big header on subsequent pages
+        if not self._use_running_header:
+            return
+
+        # Optional: small running header (thin line + short title)
+        self.set_font("Times", "", 9)
         x = self.l_margin
         y = self.t_margin
         w = self.w - self.l_margin - self.r_margin
-        h = 8
+        self.set_xy(x, y - 2)
+        self.line(x, y, x + w, y)
         self.set_xy(x, y)
-        self.rect(x, y, w, h)
-        self.cell(w, h, self._title, border=0, ln=1, align="L")
-        self.ln(self._gap_after_header)
+        self.cell(w, 4, self._title, border=0, ln=1, align="L")
+        self.ln(2)
 
     def footer(self):
         self.set_y(-10)
@@ -960,8 +1055,133 @@ class _StreamlinePDF(FPDF):
         self.set_x(self.l_margin)
         self.cell(self.w - self.l_margin - self.r_margin, 5, right, border=0, ln=0, align="R")
 
+    def _draw_cover_banner(self):
+        """
+        Mimics the reference report’s single top banner line. :contentReference[oaicite:2]{index=2}
+        """
+        x = self.l_margin
+        y = self.t_margin
+        w = self.w - self.l_margin - self.r_margin
+        h = 9
+
+        self.set_font("Times", "B", 12)
+        self.set_xy(x, y)
+        self.rect(x, y, w, h)
+        self.cell(w, h, self._title, border=0, ln=1, align="L")
+        self.ln(self._gap_after_cover)
+
     # -----------------------------
-    # Typography / Blocks
+    # Boxed panels (STREAMLINE style)
+    # -----------------------------
+    def panel_title(self, title: str, *, h: float = 6.0):
+        """
+        Draw a boxed section heading line (like the reference panels). :contentReference[oaicite:3]{index=3}
+        """
+        w = self.w - self.l_margin - self.r_margin
+        if self.get_y() + h + 2 > self.page_break_trigger:
+            self.add_page()
+
+        x = self.l_margin
+        y = self.get_y()
+        self.set_font("Times", "B", 10)
+        self.rect(x, y, w, h)
+        self.set_xy(x + 1.4, y + 1.4)
+        self.cell(w - 2.8, h - 2.8, title, border=0, ln=1, align="L")
+        self.ln(1.2)
+
+    def kv_panel(
+        self,
+        title: str,
+        mapping: Dict[str, Any],
+        *,
+        x: float,
+        y: float,
+        w: float,
+        max_rows: Optional[int] = None,
+        key_w_ratio: float = 0.55,
+        row_h: float = 4.6,
+        title_h: float = 6.0,
+        font_size: int = 9,
+    ) -> float:
+        """
+        Draw a boxed KV panel at (x,y) with a title band, returns panel height used.
+        """
+        items = [(str(k), "" if mapping.get(k) is None else str(mapping.get(k))) for k in mapping.keys()]
+        if max_rows is not None:
+            items = items[:max_rows]
+
+        key_w = w * key_w_ratio
+        val_w = w - key_w
+
+        # Estimate height (title + rows)
+        content_h = max(1, len(items)) * row_h
+        h = title_h + content_h
+
+        # Ensure fits page; if not, new page and reset y
+        if y + h > self.page_break_trigger:
+            self.add_page()
+            x = self.l_margin
+            y = self.get_y()
+        self.set_xy(x, y)
+
+        # Outer box + title band
+        self.rect(x, y, w, h)
+        self.rect(x, y, w, title_h)
+
+        self.set_font("Times", "B", 9)
+        self.set_xy(x + 1.2, y + 1.4)
+        self.cell(w - 2.4, title_h - 2.8, title, border=0, ln=0, align="L")
+
+        # Rows
+        self.set_font("Times", "", font_size)
+        cy = y + title_h
+        for k, v in items:
+            # row border
+            self.rect(x, cy, w, row_h)
+            # vertical split
+            self.line(x + key_w, cy, x + key_w, cy + row_h)
+
+            self.set_xy(x + 1.2, cy + 1.0)
+            self.cell(key_w - 2.4, row_h - 2.0, k, border=0, ln=0, align="L")
+
+            self.set_xy(x + key_w + 1.2, cy + 1.0)
+            self.cell(val_w - 2.4, row_h - 2.0, v, border=0, ln=0, align="L")
+
+            cy += row_h
+
+        return h
+
+    def cover_header_block(self, *, experiment: str, generated_at: str, version: str):
+        """
+        Second box on cover like the reference “report header block”. :contentReference[oaicite:4]{index=4}
+        """
+        w = self.w - self.l_margin - self.r_margin
+        x = self.l_margin
+        y = self.get_y()
+
+        lines = [
+            f"Experiment: {experiment}",
+            f"Generated at: {generated_at}",
+            f"Report Version: {version}",
+        ]
+
+        # height: title line + lines
+        h = 8 + len(lines) * 5 + 3
+        self.rect(x, y, w, h)
+
+        self.set_font("Times", "B", 12)
+        self.set_xy(x + 2, y + 2)
+        self.cell(w - 4, 6, "STREAMLINE Evaluation Report", ln=1)
+
+        self.set_font("Times", "", 10)
+        self.set_x(x + 2)
+        for ln_ in lines:
+            self.multi_cell(w - 4, 5, ln_)
+        self.ln(2.0)
+
+
+    # -----------------------------
+    # Blocks / Typography
     # -----------------------------
     def section_bar(self, text: str):
         w = self.w - self.l_margin - self.r_margin
@@ -975,10 +1195,8 @@ class _StreamlinePDF(FPDF):
         self.set_font("Times", "B", 10)
         self.rect(x, y, w, h)
 
-        # Better internal padding for the title
         self.set_xy(x + 1.4, y + 1.4)
         self.cell(w - 2.8, h - 2.8, text, border=0, ln=1, align="L")
-
         self.ln(self._gap_after_section)
 
     def subheader(self, text: str):
@@ -1015,6 +1233,33 @@ class _StreamlinePDF(FPDF):
         return format_number(v, decimals=self._decimals)
 
     # -----------------------------
+    # Wrapping (robust; prevents overflow artifacts)
+    # -----------------------------
+    def _split_lines(self, txt: str, width_mm: float, line_h: float) -> List[str]:
+        """
+        Get the exact wrapped lines that FPDF will use for multi_cell().
+        Uses fpdf2's split_only=True when available.
+        """
+        s = "" if txt is None else str(txt)
+        usable_w = max(1e-6, float(width_mm))
+
+        try:
+            lines = self.multi_cell(usable_w, line_h, s, border=0, align="L", split_only=True)
+            return [ln if ln is not None else "" for ln in lines] or [""]
+        except TypeError:
+            # Fallback: conservative estimate (older fpdf)
+            parts = s.splitlines() or [s]
+            out: List[str] = []
+            for part in parts:
+                sw = self.get_string_width(part) if part else 0.0
+                n = max(1, int(math.ceil(sw / usable_w)))
+                out.extend([""] * n)
+            return out or [""]
+
+    def _wrapped_line_count(self, txt: str, width_mm: float, line_h: float) -> int:
+        return len(self._split_lines(txt, width_mm, line_h))
+
+    # -----------------------------
     # Tables
     # -----------------------------
     def draw_kv_table(self, mapping: Dict[str, Any]):
@@ -1028,38 +1273,105 @@ class _StreamlinePDF(FPDF):
             font_size=9,
         )
 
+    def _col_widths_model_perf(self, columns: Sequence[str], table_w: float) -> List[float]:
+        """
+        Tuned widths for wide model-performance tables:
+
+        - Cap the first column ("Algorithm") so it doesn't steal half the page.
+        - Allocate metric columns by weighted header length (long headers get more width).
+        - Enforce a minimum metric width so mean±std values stay on one line.
+        """
+        n = len(columns)
+        if n <= 1:
+            return [table_w]
+
+        # Algorithm column: readable, but capped
+        first = min(max(38.0, 0.20 * table_w), 52.0)
+
+        metric_cols = list(columns[1:])
+        weights: List[float] = []
+        for c in metric_cols:
+            cl = c.lower()
+            w = 1.0 + min(1.2, len(c) / 18.0)  # length influence
+            if "sensitivity" in cl or "precision" in cl:
+                w *= 1.35
+            if "balanced" in cl:
+                w *= 1.15
+            if "brier" in cl:
+                w *= 1.10
+            weights.append(w)
+
+        rest = max(0.0, table_w - first)
+        sw = sum(weights) if sum(weights) > 0 else float(len(weights))
+        raw = [rest * (w / sw) for w in weights]
+
+        # Prevent very narrow metric columns
+        min_metric = 16.0
+        raw = [max(min_metric, r) for r in raw]
+
+        # Renormalize to fit `rest`
+        s2 = sum(raw)
+        scale = (rest / s2) if s2 > 0 else 1.0
+        metrics = [r * scale for r in raw]
+
+        widths = [first] + metrics
+        widths[-1] += (table_w - sum(widths))  # rounding fix
+        return widths
+
+
+    # Replace draw_mean_std_table with this version (inside _StreamlinePDF)
+
     def draw_mean_std_table(self, mean_std: Dict[str, Any]):
         cols = mean_std.get("columns", [])
         rows_out: List[List[Any]] = []
+
         for row in mean_std.get("rows", []) or []:
             out_row: List[Any] = []
             for cell in row.get("cells", []):
                 val = cell.get("value")
                 if isinstance(val, tuple) and len(val) == 2:
                     mv, sv = val
-                    out_row.append(f"{self._cell_str(mv)} ± {self._cell_str(sv)}")
+                    # Non-breaking spaces prevent wrap at " ± "
+                    out_row.append(f"{self._cell_str(mv)}\u00A0±\u00A0{self._cell_str(sv)}")
                 else:
                     out_row.append(val)
             rows_out.append(out_row)
-        self.draw_table(cols, rows_out)
 
-    def _wrap_lines_count(self, txt: str, width_mm: float) -> int:
-        if txt == "":
-            return 1
-        parts = str(txt).splitlines() or [str(txt)]
-        usable = max(1e-6, width_mm)
-        total = 0
-        for part in parts:
-            sw = self.get_string_width(part) if part else 0.0
-            total += max(1, int(math.ceil(sw / usable)))
-        return max(1, total)
+        table_w = self.w - self.l_margin - self.r_margin
 
-    def _auto_col_widths(
-        self,
-        columns: Sequence[str],
-        rows: Sequence[Sequence[str]],
-        table_w: float,
-    ) -> List[float]:
+        # Use tuned widths for performance tables
+        col_widths = self._col_widths_model_perf(cols, table_w)
+
+        # Wide table: smaller font and slightly reduced horizontal padding
+        old_pad = self._tbl_pad_x
+        self._tbl_pad_x = 0.8
+
+        ncol = len(cols)
+        font_size = 6 if ncol >= 9 else 7
+
+        self.draw_table(cols, rows_out, col_widths=col_widths, font_size=font_size)
+
+        # restore padding
+        self._tbl_pad_x = old_pad
+        
+
+    def _col_widths_wide_metrics(self, columns: Sequence[str], table_w: float) -> List[float]:
+        """
+        Wide metric tables: give first column more room, distribute rest evenly.
+        """
+        n = len(columns)
+        if n <= 1:
+            return [table_w]
+
+        first = max(48.0, table_w * 0.24)
+        rest = max(0.0, table_w - first)
+        per = rest / (n - 1)
+
+        widths = [first] + [per] * (n - 1)
+        widths[-1] += (table_w - sum(widths))
+        return widths
+
+    def _auto_col_widths(self, columns: Sequence[str], rows: Sequence[Sequence[str]], table_w: float) -> List[float]:
         n = len(columns)
         if n == 1:
             return [table_w]
@@ -1107,13 +1419,7 @@ class _StreamlinePDF(FPDF):
             formatted_rows = formatted_rows[:max_rows]
 
         if font_size is None:
-            if ncol <= 5:
-                font_size = 8
-            elif ncol <= 8:
-                font_size = 7
-            else:
-                font_size = 6
-
+            font_size = 8 if ncol <= 5 else (7 if ncol <= 8 else (6 if ncol <= 11 else 5))
         self.set_font("Times", "", font_size)
 
         if col_widths is None:
@@ -1142,15 +1448,15 @@ class _StreamlinePDF(FPDF):
                 )
                 x0 += wj
 
-            # Avoid header-to-body gap: jump to exact baseline
+            # Exact baseline; avoids header/body gaps
             self.set_xy(self.l_margin, y0 + header_h)
             self.set_font("Times", "", font_size)
 
         def row_height(cells: Sequence[str]) -> float:
-            counts = []
+            counts: List[int] = []
             for j, txt in enumerate(cells):
                 usable_w = col_widths[j] - 2 * self._tbl_pad_x
-                counts.append(self._wrap_lines_count(txt, usable_w))
+                counts.append(self._wrapped_line_count(txt, usable_w, line_h))
             return max(counts) * line_h + 2 * self._tbl_pad_y
 
         if self.get_y() + header_h + 2 > self.page_break_trigger:
@@ -1171,7 +1477,10 @@ class _StreamlinePDF(FPDF):
                 wj = col_widths[j]
                 self.rect(x0, y0, wj, rh)
                 self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
+
+                # Use the same wrapping behavior we measured
                 self.multi_cell(wj - 2 * self._tbl_pad_x, line_h, txt, border=0, align="L")
+
                 x0 += wj
                 self.set_xy(x0, y0)
 
@@ -1182,22 +1491,10 @@ class _StreamlinePDF(FPDF):
     # -----------------------------
     # Figures
     # -----------------------------
-    def _image_panel(
-        self,
-        title: str,
-        path: Optional[str],
-        *,
-        x: float,
-        y: float,
-        w: float,
-        h: float,
-        title_h: float,
-    ):
-        # Outer border + title band
+    def _image_panel(self, title: str, path: Optional[str], *, x: float, y: float, w: float, h: float, title_h: float):
         self.rect(x, y, w, h)
         self.rect(x, y, w, title_h)
 
-        # Title text with padding
         self.set_font("Times", "B", 8)
         self.set_xy(x + self._panel_title_text_pad_x, y + self._panel_title_text_pad_y)
         self.cell(
@@ -1209,7 +1506,6 @@ class _StreamlinePDF(FPDF):
             align="L",
         )
 
-        # Padded content region: ensure image doesn't touch title band or borders
         inner_x = x + self._panel_pad
         inner_y = y + title_h + self._panel_content_pad_top
         inner_w = w - 2 * self._panel_pad
