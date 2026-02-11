@@ -4,7 +4,6 @@ import json
 import logging
 import math
 import time
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -17,12 +16,15 @@ Number = Union[int, float]
 
 
 # ============================================================
-# Plot export helper (only used as fallback)
+# Plot export helper (fallback-only; prefer precomputed PNGs)
 # ============================================================
 
 def _safe_plotly_to_png(fig, out_path: Path, scale: int = 2) -> bool:
     """
-    Try to export plotly fig to PNG (kaleido). Return True if success.
+    Export a Plotly figure to PNG using kaleido.
+
+    This is a fallback path only: the report prefers precomputed PNGs
+    already present in the experiment output tree.
     """
     try:
         import plotly.io as pio  # type: ignore
@@ -42,6 +44,7 @@ def _now_iso_local() -> str:
 def _try_streamline_version() -> str:
     try:
         import importlib.metadata as im
+
         return im.version("streamline")
     except Exception:
         return "unknown"
@@ -66,7 +69,7 @@ def format_number(
     sci_decimals: int = 3,
 ) -> str:
     """
-    Central formatting for numeric table cells.
+    Canonical formatting for numeric table cells.
 
     - ints -> "42"
     - floats -> fixed decimals unless abs(x) < sci_small (and non-zero), then scientific
@@ -107,12 +110,12 @@ def format_number(
 # Paths
 # ============================================================
 
-@dataclass
 class ReportPaths:
-    reporting_dir: Path
-    data_json: Path
-    pdf: Path
-    figures_dir: Path
+    def __init__(self, reporting_dir: Path, data_json: Path, pdf: Path, figures_dir: Path):
+        self.reporting_dir = reporting_dir
+        self.data_json = data_json
+        self.pdf = pdf
+        self.figures_dir = figures_dir
 
 
 # ============================================================
@@ -124,9 +127,9 @@ class ReportPhaseJob:
     Phase 11: Reporting (FPDF)
 
     Key behavior:
-    - Prefer "original" precomputed PNGs in the experiment folder.
-    - Only fallback to replot/export to reporting/figures if originals are missing.
-    - Render a STREAMLINE-style boxed PDF (FPDF).
+    - Prefer precomputed PNGs already present in experiment outputs.
+    - Fallback to plotting/exporting into reporting/figures only if originals are missing.
+    - Produce a STREAMLINE-style boxed PDF with compact, consistent headings.
     """
 
     def __init__(
@@ -156,7 +159,9 @@ class ReportPhaseJob:
         if not self.exp_root.is_dir():
             raise FileNotFoundError(f"Experiment folder not found: {self.exp_root}")
 
-        self.title = f"{self.experiment_name} - STREAMLINE Report"
+        # Title used in cover banner and optional running header
+        self.title = f"STREAMLINE Evaluation Report - {self.experiment_name}"
+
         self.make_pdf = make_pdf
         self.job_start_time: Optional[float] = None
 
@@ -192,7 +197,7 @@ class ReportPhaseJob:
             "DatasetComparisons",
             "reporting",
         }
-        ds = []
+        ds: List[Path] = []
         for p in sorted(self.exp_root.iterdir()):
             if not p.is_dir():
                 continue
@@ -219,7 +224,7 @@ class ReportPhaseJob:
         return None
 
     # ============================================================
-    # Prefer-original figure resolution (NEW)
+    # Prefer-original figure resolution
     # ============================================================
 
     def _first_existing(self, candidates: Sequence[Path]) -> Optional[str]:
@@ -232,16 +237,13 @@ class ReportPhaseJob:
         return None
 
     def _figure_path_exploratory_class_balance(self, ds_dir: Path) -> Optional[str]:
-        # tree shows exploratory/ClassCountsBarPlot.png
         return self._first_existing([
             ds_dir / "exploratory" / "ClassCountsBarPlot.png",
             ds_dir / "exploratory" / "ClassCountsBarplot.png",
-            ds_dir / "exploratory" / "ClassCounts.png",  # sometimes people export directly
+            ds_dir / "exploratory" / "ClassCounts.png",
         ])
 
     def _figure_path_exploratory_missingness(self, ds_dir: Path) -> Optional[str]:
-        # no explicit PNG in your tree; prefer any likely existing plot if present
-        # (if none exist, we'll fallback to plotting from DataMissingness.csv)
         return self._first_existing([
             ds_dir / "exploratory" / "DataMissingness.png",
             ds_dir / "exploratory" / "Missingness.png",
@@ -249,45 +251,36 @@ class ReportPhaseJob:
         ])
 
     def _figure_path_model_summary_roc_prc(self, ds_dir: Path, kind: str) -> Optional[str]:
-        # tree shows model_evaluation/Summary_ROC.png and Summary_PRC.png
         if kind.lower() == "roc":
             return self._first_existing([ds_dir / "model_evaluation" / "Summary_ROC.png"])
         return self._first_existing([ds_dir / "model_evaluation" / "Summary_PRC.png"])
 
     def _figure_path_model_metric_boxplot(self, ds_dir: Path, preferred_metric: str) -> Optional[str]:
-        # tree shows model_evaluation/metricBoxplots/Compare_<metric>.png
-        # filenames include spaces and parentheses exactly as in CSV headers
         return self._first_existing([
             ds_dir / "model_evaluation" / "metricBoxplots" / f"Compare_{preferred_metric}.png",
         ])
 
     def _figure_path_model_curves_single(self, ds_dir: Path, alg: str, kind: str) -> Optional[str]:
-        # tree shows LR_ROC.png, LR_PRC.png etc.
         suffix = "ROC" if kind.lower() == "roc" else "PRC"
         return self._first_existing([
             ds_dir / "model_evaluation" / f"{alg}_{suffix}.png",
         ])
 
     def _figure_path_ensemble_summary(self, ds_dir: Path, kind: str) -> Optional[str]:
-        # tree shows ensemble_evaluation/Summary_ROC_ensembles.png + Summary_PRC_ensembles.png
         if kind.lower() == "roc":
             return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_ROC_ensembles.png"])
         return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_PRC_ensembles.png"])
 
     def _figure_path_fs_top_scores(self, ds_dir: Path) -> Optional[str]:
-        # tree shows dataset_root/feature_importance/<method>/TopAverageScores.png
         return self._first_existing([
             ds_dir / "feature_importance" / "multisurf" / "TopAverageScores.png",
             ds_dir / "feature_importance" / "mutualinformation" / "TopAverageScores.png",
         ])
 
     def _figure_path_model_fi_top(self, ds_dir: Path) -> Optional[str]:
-        # no explicit FI plot under model_evaluation/feature_importance, only CSVs
-        # but we can also use feature_importance/*/TopAverageScores.png which exists
         return self._figure_path_fs_top_scores(ds_dir)
 
     def _figure_path_dataset_comparisons_any(self) -> Optional[str]:
-        # choose a strong default for dataset comparisons figure
         box_dir = self.exp_root / "DatasetComparisons" / "dataCompBoxplots"
         return self._first_existing([
             box_dir / "DataCompareAllModels_Balanced Accuracy.png",
@@ -484,7 +477,7 @@ class ReportPhaseJob:
         return {"present": True, "columns": list(df2.columns), "rows": df2.values.tolist()}
 
     # ============================================================
-    # Data assembly with corrected paths + prefer originals
+    # Data assembly (corrected paths + prefer originals)
     # ============================================================
 
     def _collect_dataset_block(self, ds_dir: Path) -> Dict[str, Any]:
@@ -515,7 +508,6 @@ class ReportPhaseJob:
         # FIGURES: prefer originals, fallback to replot
         # ------------------------------------------------
 
-        # Class balance
         figs["class_balance"] = self._figure_path_exploratory_class_balance(ds_dir) or ""
         if not figs["class_balance"]:
             if class_counts is not None and not class_counts.empty:
@@ -527,19 +519,17 @@ class ReportPhaseJob:
                 except Exception as e:
                     logger.warning("Class balance plot failed for %s: %r", name, e)
 
-        # Missingness (prefer any existing PNG, else fallback)
         figs["missingness"] = self._figure_path_exploratory_missingness(ds_dir) or ""
         if not figs["missingness"]:
             if missingness is not None and not missingness.empty:
                 try:
-                    fig = self._plot_missingness(missingness, f"{name}: Missingness (Top 25)")
+                    fig = self._plot_missingness(missingness, f"{name}: Missingness (Top 25 Features)")
                     out = self.paths.figures_dir / f"{name}_missingness_top25.png"
                     if _safe_plotly_to_png(fig, out):
                         figs["missingness"] = str(out)
                 except Exception as e:
                     logger.warning("Missingness plot failed for %s: %r", name, e)
 
-        # Models ROC/PRC summary (original Summary_ROC.png / Summary_PRC.png)
         roc_sum = self._figure_path_model_summary_roc_prc(ds_dir, "roc")
         prc_sum = self._figure_path_model_summary_roc_prc(ds_dir, "prc")
         if roc_sum:
@@ -547,9 +537,6 @@ class ReportPhaseJob:
         if prc_sum:
             figs["models_prc_overlay"] = prc_sum
 
-        # Model performance mean bar:
-        # Prefer a precomputed boxplot image if available (Compare_Balanced Accuracy.png etc)
-        # Otherwise, fallback to plotly bar from Summary_performance_mean.csv
         figs["models_mean_bar"] = ""
         figs["models_cv_box"] = ""
 
@@ -561,17 +548,13 @@ class ReportPhaseJob:
                     break
 
         if chosen_metric:
-            # Prefer original boxplot for CV distribution
             box = self._figure_path_model_metric_boxplot(ds_dir, chosen_metric)
             if box:
                 figs["models_cv_box"] = box
 
-            # Prefer also using same "Compare_*" as a strong visual for "mean performance"
-            # (it’s not mean-bar, but it matches old visual reporting better)
             if box and not figs["models_mean_bar"]:
                 figs["models_mean_bar"] = box
 
-            # If still missing, fallback to plotly mean bar
             if not figs["models_mean_bar"]:
                 try:
                     fig = self._plot_model_summary_bars(
@@ -583,7 +566,6 @@ class ReportPhaseJob:
                 except Exception as e:
                     logger.warning("Model mean bar plot failed for %s (%s): %r", name, chosen_metric, e)
 
-        # Ensembles summaries (original)
         ens_roc = self._figure_path_ensemble_summary(ds_dir, "roc")
         ens_prc = self._figure_path_ensemble_summary(ds_dir, "prc")
         if ens_roc:
@@ -591,12 +573,10 @@ class ReportPhaseJob:
         if ens_prc:
             figs["ensembles_prc"] = ens_prc
 
-        # Feature importance: prefer TopAverageScores.png from feature_importance/*
         fi_img = self._figure_path_model_fi_top(ds_dir)
         if fi_img:
             figs["fi_top20"] = fi_img
         else:
-            # fallback: build from model_evaluation/feature_importance/*_FI.csv (as before)
             fi_dir = model_eval / "feature_importance"
             fi_files = sorted(fi_dir.glob("*_FI.csv")) if fi_dir.is_dir() else []
             if fi_files:
@@ -612,7 +592,7 @@ class ReportPhaseJob:
                     top = top.dropna().sort_values(icol, ascending=False).head(20)
                     fig = px.bar(
                         top.iloc[::-1], x=icol, y=fcol, orientation="h",
-                        title=f"{name}: Top 20 Feature Importance"
+                        title=f"{name}: Feature Importance (Top 20)"
                     )
                     out = self.paths.figures_dir / f"{name}_fi_top20.png"
                     if _safe_plotly_to_png(fig, out):
@@ -620,15 +600,16 @@ class ReportPhaseJob:
                 except Exception as e:
                     logger.warning("FI top20 plot failed for %s: %r", name, e)
 
-        # Tables
         models_mean_std = self._build_mean_std_table(
-            summary_mean, summary_std,
+            summary_mean,
+            summary_std,
             highlight_metric_candidates=["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"],
         )
         models_median = self._build_plain_table(summary_median, max_rows=100)
 
         ensembles_mean_std = self._build_mean_std_table(
-            ens_mean, ens_std,
+            ens_mean,
+            ens_std,
             highlight_metric_candidates=["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"],
         )
         ensembles_median = self._build_plain_table(ens_median, max_rows=100)
@@ -661,13 +642,10 @@ class ReportPhaseJob:
         best_wx = self._read_csv_if_exists(dc / "BestCompare_WilcoxonRank.csv")
 
         figs: Dict[str, str] = {}
-
-        # Prefer existing comparison plot(s)
         any_plot = self._figure_path_dataset_comparisons_any()
         if any_plot:
             figs["overview"] = any_plot
 
-        # Keep prior KW p-value plot only as fallback
         if "overview" not in figs and best_kw is not None and not best_kw.empty:
             try:
                 import plotly.express as px  # type: ignore
@@ -687,7 +665,7 @@ class ReportPhaseJob:
                     df[pcol] = pd.to_numeric(df[pcol], errors="coerce")
                     df = df.dropna().reset_index(drop=True)
                     df["Metric"] = [f"M{i+1}" for i in range(len(df))]
-                    fig = px.bar(df, x="Metric", y=pcol, title="DatasetComparison: Kruskal-Wallis P-Values")
+                    fig = px.bar(df, x="Metric", y=pcol, title="Dataset Comparison: Kruskal-Wallis P-Values")
                     out = self.paths.figures_dir / "datasetcompare_kw_pvalues.png"
                     if _safe_plotly_to_png(fig, out):
                         figs["overview"] = str(out)
@@ -712,16 +690,15 @@ class ReportPhaseJob:
         """
         Render the full STREAMLINE-style PDF (FPDF).
 
-        Requirements implemented:
-        - No big "STREAMLINE Evaluation Report" header on every page:
-        * Page 1 has a cover banner + cover header block.
-        * Subsequent pages have no large header (only footer).
+        Implemented behaviors:
+        - Cover page has a single banner and a compact report header block.
+        - Subsequent pages have no large header (footer only; optional small running header can be enabled).
         - Metadata is rendered as a boxed KV panel and preserves ALL metadata keys.
         - Feature Importance always starts on a new page.
         - Runtimes always starts on a new page.
         """
         pdf = _StreamlinePDF(
-            title=f"{report_data.get('experiment_name', '')} - STREAMLINE Report",
+            title=f"STREAMLINE Evaluation Report - {report_data.get('experiment_name', '')}",
             streamline_version=str(report_data.get("streamline_version", "")),
             float_decimals=self.float_decimals,
         )
@@ -732,27 +709,24 @@ class ReportPhaseJob:
         # -------------------------
         pdf.add_page()
 
-        # Cover header block (boxed, reference-like)
         pdf.cover_header_block(
             experiment=str(report_data.get("experiment_name", "")),
             generated_at=str(report_data.get("generated_at", "")),
             version=str(report_data.get("streamline_version", "")),
         )
 
-        # Metadata panel (keep ALL keys)
         meta = report_data.get("metadata", {}) or {}
         if meta:
             page_w = pdf.w - pdf.l_margin - pdf.r_margin
             x = pdf.l_margin
             y = pdf.get_y()
-            # Single full-width panel; clean and scalable
             pdf.kv_panel(
                 "Metadata",
                 meta,
                 x=x,
                 y=y,
                 w=page_w,
-                key_w_ratio=0.34,  # matches your original Key/Value split
+                key_w_ratio=0.34,
                 row_h=4.8,
                 title_h=6.0,
                 font_size=9,
@@ -765,9 +739,9 @@ class ReportPhaseJob:
         for ds in report_data.get("datasets", []) or []:
             pdf.add_page()
 
-            # Dataset title + path
             ds_name = str(ds.get("dataset_name", ""))
             ds_dir = str(ds.get("dataset_dir", ""))
+
             pdf.panel_title(f"Dataset: {ds_name}")
             pdf.set_font("Times", "", 10)
             if ds_dir:
@@ -777,14 +751,13 @@ class ReportPhaseJob:
             figs = ds.get("figures", {}) or {}
             perf = ds.get("perf", {}) or {}
 
-            # --- Exploratory + Performance Summary (2x2)
-            pdf.panel_title("Exploratory and Performance Summary")
+            pdf.panel_title("Exploratory and Performance Overview")
             pdf.figure_grid_2x2(
                 titles=[
                     "Class Balance",
-                    "Missingness (Top 25)",
-                    "Performance Summary / Boxplots",
-                    "Models CV Distribution",
+                    "Missingness (Top 25 Features)",
+                    "Performance (Model Comparison)",
+                    "CV Distribution (Selected Metric)",
                 ],
                 paths=[
                     figs.get("class_balance") or None,
@@ -797,37 +770,35 @@ class ReportPhaseJob:
                 title_h=6.0,
             )
 
-            # --- Model Performance tables
-            pdf.panel_title("Model Performance")
+            pdf.panel_title("Model Performance Summary")
 
             ms = perf.get("models_mean_std", {}) or {}
             if ms.get("present"):
-                pdf.subheader("Mean ± Std (Models)")
+                pdf.subheader("Models - Mean ± SD")
                 pdf.draw_mean_std_table(ms)
             else:
-                pdf.muted("Summary_performance_mean/std.csv not found.")
+                pdf.muted("Missing file: model_evaluation/Summary_performance_mean.csv and/or Summary_performance_std.csv")
 
             med = perf.get("models_median", {}) or {}
             if med.get("present"):
-                pdf.subheader("Median (Models)")
+                pdf.subheader("Models - Median")
                 pdf.draw_table(med.get("columns", []), med.get("rows", []), max_rows=100)
             else:
-                pdf.muted("Summary_performance_median.csv not found.")
+                pdf.muted("Missing file: model_evaluation/Summary_performance_median.csv")
 
             es = perf.get("ensembles_mean_std", {}) or {}
             if es.get("present"):
-                pdf.subheader("Mean ± Std (Ensembles)")
+                pdf.subheader("Ensembles - Mean ± SD")
                 pdf.draw_mean_std_table(es)
 
             em = perf.get("ensembles_median", {}) or {}
             if em.get("present"):
-                pdf.subheader("Median (Ensembles)")
+                pdf.subheader("Ensembles - Median")
                 pdf.draw_table(em.get("columns", []), em.get("rows", []), max_rows=100)
 
-            # --- Curves (Summary)
-            pdf.panel_title("Curves (Summary)")
+            pdf.panel_title("ROC/PR Curves (Summary)")
             pdf.figure_row_2(
-                titles=["Summary ROC", "Summary PRC"],
+                titles=["ROC Curves (All Models)", "PR Curves (All Models)"],
                 paths=[
                     figs.get("models_roc_overlay") or None,
                     figs.get("models_prc_overlay") or None,
@@ -838,9 +809,9 @@ class ReportPhaseJob:
             )
 
             if figs.get("ensembles_roc") or figs.get("ensembles_prc"):
-                pdf.panel_title("Ensembles (Summary)")
+                pdf.panel_title("Ensemble ROC/PR (Summary)")
                 pdf.figure_row_2(
-                    titles=["Ensembles ROC", "Ensembles PRC"],
+                    titles=["ROC Curves (Ensembles)", "PR Curves (Ensembles)"],
                     paths=[
                         figs.get("ensembles_roc") or None,
                         figs.get("ensembles_prc") or None,
@@ -850,47 +821,40 @@ class ReportPhaseJob:
                     title_h=6.0,
                 )
 
-            # -------------------------
-            # Feature Importance: ALWAYS on new page
-            # -------------------------
+            # Feature Importance: always on new page
             pdf.add_page()
-            pdf.panel_title("Feature Importance")
+            pdf.panel_title("Feature Importance (Top Features)")
             pdf.figure_single(
-                "Top Scores / Importance",
+                "Feature Importance (Top 20)",
                 figs.get("fi_top20") or None,
                 h=130.0,
                 title_h=6.0,
             )
 
-            # -------------------------
-            # Remaining tables
-            # -------------------------
             tables = ds.get("tables", {}) or {}
 
-            pdf.panel_title("Univariate Significance (Top 10)")
+            pdf.panel_title("Univariate Significance (Top 10 Features)")
             uni = tables.get("univariate_top10", {}) or {}
             if uni.get("present"):
                 pdf.draw_table(uni.get("columns", []), uni.get("rows", []), max_rows=10)
             else:
-                pdf.muted("Univariate_Significance.csv not found.")
+                pdf.muted("Missing file: exploratory/univariate_analyses/Univariate_Significance.csv")
 
             pdf.panel_title("Informative Feature Summary")
             inf = tables.get("informative_feature_summary", {}) or {}
             if inf.get("present"):
                 pdf.draw_table(inf.get("columns", []), inf.get("rows", []), max_rows=200)
             else:
-                pdf.muted("feature_selection/InformativeFeatureSummary.csv not found.")
+                pdf.muted("Missing file: feature_selection/InformativeFeatureSummary.csv")
 
-            # -------------------------
-            # Runtimes: ALWAYS on new page
-            # -------------------------
+            # Runtimes: always on new page
             pdf.add_page()
-            pdf.panel_title("Runtime Summary (runtimes.csv)")
+            pdf.panel_title("Runtime Summary")
             rt = tables.get("runtimes", {}) or {}
             if rt.get("present"):
                 pdf.draw_table(rt.get("columns", []), rt.get("rows", []), max_rows=500)
             else:
-                pdf.muted("runtimes.csv not found.")
+                pdf.muted("Missing file: runtimes.csv")
 
         # -------------------------
         # DATASET COMPARISONS
@@ -901,25 +865,24 @@ class ReportPhaseJob:
             pdf.panel_title("Dataset Comparisons")
 
             overview = (dc.get("figures", {}) or {}).get("overview")
-            pdf.figure_single("Comparison Overview", overview or None, h=120.0, title_h=6.0)
+            pdf.figure_single("Comparison Overview (All Datasets)", overview or None, h=120.0, title_h=6.0)
 
             kw = (dc.get("tables", {}) or {}).get("best_kw", {}) or {}
             if kw.get("present"):
-                pdf.panel_title("BestCompare_KruskalWallis.csv")
+                pdf.panel_title("Best Comparisons - Kruskal-Wallis")
                 pdf.draw_table(kw.get("columns", []), kw.get("rows", []), max_rows=200)
 
             mw = (dc.get("tables", {}) or {}).get("best_mw", {}) or {}
             if mw.get("present"):
-                pdf.panel_title("BestCompare_MannWhitney.csv")
+                pdf.panel_title("Best Comparisons - Mann-Whitney U")
                 pdf.draw_table(mw.get("columns", []), mw.get("rows", []), max_rows=200)
 
             wx = (dc.get("tables", {}) or {}).get("best_wx", {}) or {}
             if wx.get("present"):
-                pdf.panel_title("BestCompare_WilcoxonRank.csv")
+                pdf.panel_title("Best Comparisons - Wilcoxon Rank-Sum")
                 pdf.draw_table(wx.get("columns", []), wx.get("rows", []), max_rows=200)
 
         pdf.output(str(self.paths.pdf))
-
 
     # ----------------------------
     # Runtime bookkeeping
@@ -941,7 +904,7 @@ class ReportPhaseJob:
         dataset_blocks = [self._collect_dataset_block(ds) for ds in datasets]
         dc_block = self._collect_dataset_comparisons_block()
 
-        metadata = {
+        metadata: Dict[str, Any] = {
             "Experiment Root": str(self.exp_root),
             "Output Path": str(self.exp_root.parent),
             "Experiment Name": self.experiment_name,
@@ -993,11 +956,8 @@ class _StreamlinePDF(FPDF):
         self.set_auto_page_break(auto=True, margin=14)
         self.set_line_width(0.2)
 
-        # Toggle: cover banner only on first page
         self._cover_done = False
-
-        # Optional: small running header on non-cover pages
-        self._use_running_header = False  # set True if you want a small header line
+        self._use_running_header = False  # set True to draw a small running header on non-cover pages
 
         # Table layout tuning
         self._tbl_pad_x = 1.2
@@ -1007,9 +967,6 @@ class _StreamlinePDF(FPDF):
         # Spacing
         self._gap_after_cover = 4.0
         self._gap_after_section = 2.0
-        # Vertical rhythm (global)
-        # self._gap_after_header = 3.0
-        # self._gap_after_section = 1.6
         self._gap_after_subheader = 0.8
         self._gap_after_textblock = 0.8
         self._gap_after_table = 1.2
@@ -1018,23 +975,20 @@ class _StreamlinePDF(FPDF):
         self._panel_pad = 2.0
         self._panel_title_text_pad_x = 1.4
         self._panel_title_text_pad_y = 1.4
-        self._panel_content_pad_top = 2.2  # gap between title band and content
+        self._panel_content_pad_top = 2.2
 
     # -----------------------------
     # Header / Footer
     # -----------------------------
     def header(self):
-        # Big banner only on page 1 (cover-style)
         if self.page_no() == 1 and not self._cover_done:
             self._draw_cover_banner()
             self._cover_done = True
             return
 
-        # No big header on subsequent pages
         if not self._use_running_header:
             return
 
-        # Optional: small running header (thin line + short title)
         self.set_font("Times", "", 9)
         x = self.l_margin
         y = self.t_margin
@@ -1056,9 +1010,6 @@ class _StreamlinePDF(FPDF):
         self.cell(self.w - self.l_margin - self.r_margin, 5, right, border=0, ln=0, align="R")
 
     def _draw_cover_banner(self):
-        """
-        Mimics the reference report’s single top banner line. :contentReference[oaicite:2]{index=2}
-        """
         x = self.l_margin
         y = self.t_margin
         w = self.w - self.l_margin - self.r_margin
@@ -1071,12 +1022,9 @@ class _StreamlinePDF(FPDF):
         self.ln(self._gap_after_cover)
 
     # -----------------------------
-    # Boxed panels (STREAMLINE style)
+    # Panels
     # -----------------------------
     def panel_title(self, title: str, *, h: float = 6.0):
-        """
-        Draw a boxed section heading line (like the reference panels). :contentReference[oaicite:3]{index=3}
-        """
         w = self.w - self.l_margin - self.r_margin
         if self.get_y() + h + 2 > self.page_break_trigger:
             self.add_page()
@@ -1103,9 +1051,6 @@ class _StreamlinePDF(FPDF):
         title_h: float = 6.0,
         font_size: int = 9,
     ) -> float:
-        """
-        Draw a boxed KV panel at (x,y) with a title band, returns panel height used.
-        """
         items = [(str(k), "" if mapping.get(k) is None else str(mapping.get(k))) for k in mapping.keys()]
         if max_rows is not None:
             items = items[:max_rows]
@@ -1113,18 +1058,15 @@ class _StreamlinePDF(FPDF):
         key_w = w * key_w_ratio
         val_w = w - key_w
 
-        # Estimate height (title + rows)
         content_h = max(1, len(items)) * row_h
         h = title_h + content_h
 
-        # Ensure fits page; if not, new page and reset y
         if y + h > self.page_break_trigger:
             self.add_page()
             x = self.l_margin
             y = self.get_y()
         self.set_xy(x, y)
 
-        # Outer box + title band
         self.rect(x, y, w, h)
         self.rect(x, y, w, title_h)
 
@@ -1132,13 +1074,10 @@ class _StreamlinePDF(FPDF):
         self.set_xy(x + 1.2, y + 1.4)
         self.cell(w - 2.4, title_h - 2.8, title, border=0, ln=0, align="L")
 
-        # Rows
         self.set_font("Times", "", font_size)
         cy = y + title_h
         for k, v in items:
-            # row border
             self.rect(x, cy, w, row_h)
-            # vertical split
             self.line(x + key_w, cy, x + key_w, cy + row_h)
 
             self.set_xy(x + 1.2, cy + 1.0)
@@ -1152,20 +1091,16 @@ class _StreamlinePDF(FPDF):
         return h
 
     def cover_header_block(self, *, experiment: str, generated_at: str, version: str):
-        """
-        Second box on cover like the reference “report header block”. :contentReference[oaicite:4]{index=4}
-        """
         w = self.w - self.l_margin - self.r_margin
         x = self.l_margin
         y = self.get_y()
 
         lines = [
             f"Experiment: {experiment}",
-            f"Generated at: {generated_at}",
-            f"Report Version: {version}",
+            f"Generated: {generated_at}",
+            f"STREAMLINE Version: {version}",
         ]
 
-        # height: title line + lines
         h = 8 + len(lines) * 5 + 3
         self.rect(x, y, w, h)
 
@@ -1179,26 +1114,9 @@ class _StreamlinePDF(FPDF):
             self.multi_cell(w - 4, 5, ln_)
         self.ln(2.0)
 
-
     # -----------------------------
-    # Blocks / Typography
+    # Typography
     # -----------------------------
-    def section_bar(self, text: str):
-        w = self.w - self.l_margin - self.r_margin
-        h = 6
-        if self.get_y() + h + 2 > self.page_break_trigger:
-            self.add_page()
-
-        x = self.l_margin
-        y = self.get_y()
-
-        self.set_font("Times", "B", 10)
-        self.rect(x, y, w, h)
-
-        self.set_xy(x + 1.4, y + 1.4)
-        self.cell(w - 2.8, h - 2.8, text, border=0, ln=1, align="L")
-        self.ln(self._gap_after_section)
-
     def subheader(self, text: str):
         self.set_font("Times", "B", 10)
         self.multi_cell(0, 5, text)
@@ -1208,23 +1126,6 @@ class _StreamlinePDF(FPDF):
         self.set_font("Times", "", 9)
         self.multi_cell(0, 4.5, text)
         self.ln(self._gap_after_textblock)
-
-    def card_header(self, *, main_title: str, lines: Sequence[str]):
-        w = self.w - self.l_margin - self.r_margin
-        x = self.l_margin
-        y = self.get_y()
-        h = 8 + len(lines) * 5 + 4
-
-        self.rect(x, y, w, h)
-        self.set_font("Times", "B", 12)
-        self.set_xy(x + 2, y + 2)
-        self.cell(w - 4, 6, main_title, ln=1)
-
-        self.set_font("Times", "", 10)
-        self.set_x(x + 2)
-        for ln_ in lines:
-            self.multi_cell(w - 4, 5, ln_)
-        self.ln(2.0)
 
     # -----------------------------
     # Formatting
@@ -1236,10 +1137,6 @@ class _StreamlinePDF(FPDF):
     # Wrapping (robust; prevents overflow artifacts)
     # -----------------------------
     def _split_lines(self, txt: str, width_mm: float, line_h: float) -> List[str]:
-        """
-        Get the exact wrapped lines that FPDF will use for multi_cell().
-        Uses fpdf2's split_only=True when available.
-        """
         s = "" if txt is None else str(txt)
         usable_w = max(1e-6, float(width_mm))
 
@@ -1247,7 +1144,6 @@ class _StreamlinePDF(FPDF):
             lines = self.multi_cell(usable_w, line_h, s, border=0, align="L", split_only=True)
             return [ln if ln is not None else "" for ln in lines] or [""]
         except TypeError:
-            # Fallback: conservative estimate (older fpdf)
             parts = s.splitlines() or [s]
             out: List[str] = []
             for part in parts:
@@ -1274,25 +1170,17 @@ class _StreamlinePDF(FPDF):
         )
 
     def _col_widths_model_perf(self, columns: Sequence[str], table_w: float) -> List[float]:
-        """
-        Tuned widths for wide model-performance tables:
-
-        - Cap the first column ("Algorithm") so it doesn't steal half the page.
-        - Allocate metric columns by weighted header length (long headers get more width).
-        - Enforce a minimum metric width so mean±std values stay on one line.
-        """
         n = len(columns)
         if n <= 1:
             return [table_w]
 
-        # Algorithm column: readable, but capped
         first = min(max(38.0, 0.20 * table_w), 52.0)
 
         metric_cols = list(columns[1:])
         weights: List[float] = []
         for c in metric_cols:
             cl = c.lower()
-            w = 1.0 + min(1.2, len(c) / 18.0)  # length influence
+            w = 1.0 + min(1.2, len(c) / 18.0)
             if "sensitivity" in cl or "precision" in cl:
                 w *= 1.35
             if "balanced" in cl:
@@ -1305,21 +1193,16 @@ class _StreamlinePDF(FPDF):
         sw = sum(weights) if sum(weights) > 0 else float(len(weights))
         raw = [rest * (w / sw) for w in weights]
 
-        # Prevent very narrow metric columns
         min_metric = 16.0
         raw = [max(min_metric, r) for r in raw]
 
-        # Renormalize to fit `rest`
         s2 = sum(raw)
         scale = (rest / s2) if s2 > 0 else 1.0
         metrics = [r * scale for r in raw]
 
         widths = [first] + metrics
-        widths[-1] += (table_w - sum(widths))  # rounding fix
+        widths[-1] += (table_w - sum(widths))
         return widths
-
-
-    # Replace draw_mean_std_table with this version (inside _StreamlinePDF)
 
     def draw_mean_std_table(self, mean_std: Dict[str, Any]):
         cols = mean_std.get("columns", [])
@@ -1331,18 +1214,14 @@ class _StreamlinePDF(FPDF):
                 val = cell.get("value")
                 if isinstance(val, tuple) and len(val) == 2:
                     mv, sv = val
-                    # Non-breaking spaces prevent wrap at " ± "
                     out_row.append(f"{self._cell_str(mv)}\u00A0±\u00A0{self._cell_str(sv)}")
                 else:
                     out_row.append(val)
             rows_out.append(out_row)
 
         table_w = self.w - self.l_margin - self.r_margin
-
-        # Use tuned widths for performance tables
         col_widths = self._col_widths_model_perf(cols, table_w)
 
-        # Wide table: smaller font and slightly reduced horizontal padding
         old_pad = self._tbl_pad_x
         self._tbl_pad_x = 0.8
 
@@ -1351,25 +1230,7 @@ class _StreamlinePDF(FPDF):
 
         self.draw_table(cols, rows_out, col_widths=col_widths, font_size=font_size)
 
-        # restore padding
         self._tbl_pad_x = old_pad
-        
-
-    def _col_widths_wide_metrics(self, columns: Sequence[str], table_w: float) -> List[float]:
-        """
-        Wide metric tables: give first column more room, distribute rest evenly.
-        """
-        n = len(columns)
-        if n <= 1:
-            return [table_w]
-
-        first = max(48.0, table_w * 0.24)
-        rest = max(0.0, table_w - first)
-        per = rest / (n - 1)
-
-        widths = [first] + [per] * (n - 1)
-        widths[-1] += (table_w - sum(widths))
-        return widths
 
     def _auto_col_widths(self, columns: Sequence[str], rows: Sequence[Sequence[str]], table_w: float) -> List[float]:
         n = len(columns)
@@ -1448,7 +1309,6 @@ class _StreamlinePDF(FPDF):
                 )
                 x0 += wj
 
-            # Exact baseline; avoids header/body gaps
             self.set_xy(self.l_margin, y0 + header_h)
             self.set_font("Times", "", font_size)
 
@@ -1477,10 +1337,7 @@ class _StreamlinePDF(FPDF):
                 wj = col_widths[j]
                 self.rect(x0, y0, wj, rh)
                 self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
-
-                # Use the same wrapping behavior we measured
                 self.multi_cell(wj - 2 * self._tbl_pad_x, line_h, txt, border=0, align="L")
-
                 x0 += wj
                 self.set_xy(x0, y0)
 
@@ -1523,11 +1380,11 @@ class _StreamlinePDF(FPDF):
             except Exception:
                 self.set_font("Times", "", 8)
                 self.set_xy(inner_x, inner_y)
-                self.multi_cell(inner_w, 3.5, "Could not render image.", border=0)
+                self.multi_cell(inner_w, 3.5, "Unable to render figure (unsupported or corrupted image).", border=0)
         else:
             self.set_font("Times", "", 8)
             self.set_xy(inner_x, inner_y)
-            self.multi_cell(inner_w, 3.5, "Figure missing.", border=0)
+            self.multi_cell(inner_w, 3.5, "Figure not found.", border=0)
 
     def figure_grid_2x2(
         self,
