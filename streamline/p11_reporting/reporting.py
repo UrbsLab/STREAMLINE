@@ -159,7 +159,6 @@ class ReportPhaseJob:
         if not self.exp_root.is_dir():
             raise FileNotFoundError(f"Experiment folder not found: {self.exp_root}")
 
-        # Title used in cover banner and optional running header
         self.title = f"STREAMLINE Evaluation Report - {self.experiment_name}"
 
         self.make_pdf = make_pdf
@@ -236,6 +235,16 @@ class ReportPhaseJob:
                 continue
         return None
 
+    def _all_existing(self, candidates: Sequence[Path]) -> List[str]:
+        out: List[str] = []
+        for p in candidates:
+            try:
+                if p.is_file():
+                    out.append(str(p))
+            except Exception:
+                continue
+        return out
+
     def _figure_path_exploratory_class_balance(self, ds_dir: Path) -> Optional[str]:
         return self._first_existing([
             ds_dir / "exploratory" / "ClassCountsBarPlot.png",
@@ -260,25 +269,36 @@ class ReportPhaseJob:
             ds_dir / "model_evaluation" / "metricBoxplots" / f"Compare_{preferred_metric}.png",
         ])
 
-    def _figure_path_model_curves_single(self, ds_dir: Path, alg: str, kind: str) -> Optional[str]:
-        suffix = "ROC" if kind.lower() == "roc" else "PRC"
-        return self._first_existing([
-            ds_dir / "model_evaluation" / f"{alg}_{suffix}.png",
-        ])
-
     def _figure_path_ensemble_summary(self, ds_dir: Path, kind: str) -> Optional[str]:
         if kind.lower() == "roc":
             return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_ROC_ensembles.png"])
         return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_PRC_ensembles.png"])
 
-    def _figure_path_fs_top_scores(self, ds_dir: Path) -> Optional[str]:
-        return self._first_existing([
-            ds_dir / "feature_importance" / "multisurf" / "TopAverageScores.png",
-            ds_dir / "feature_importance" / "mutualinformation" / "TopAverageScores.png",
-        ])
+    # ---- UPDATED: collect ALL methods, not “first existing”
+    def _figure_paths_fs_top_scores(self, ds_dir: Path) -> List[Dict[str, str]]:
+        """
+        Return ALL existing TopAverageScores.png figures under feature_importance/*.
 
-    def _figure_path_model_fi_top(self, ds_dir: Path) -> Optional[str]:
-        return self._figure_path_fs_top_scores(ds_dir)
+        Output is sorted by method folder name for stable rendering:
+        [
+          {"method": "multisurf", "path": "/.../feature_importance/multisurf/TopAverageScores.png"},
+          {"method": "mutualinformation", "path": "/.../feature_importance/mutualinformation/TopAverageScores.png"},
+          ...
+        ]
+        """
+        base = ds_dir / "feature_importance"
+        if not base.is_dir():
+            return []
+
+        hits = sorted(base.glob("*/TopAverageScores.png"), key=lambda p: p.parent.name.lower())
+        out: List[Dict[str, str]] = []
+        for p in hits:
+            try:
+                if p.is_file():
+                    out.append({"method": p.parent.name, "path": str(p)})
+            except Exception:
+                continue
+        return out
 
     def _figure_path_dataset_comparisons_any(self) -> Optional[str]:
         box_dir = self.exp_root / "DatasetComparisons" / "dataCompBoxplots"
@@ -309,28 +329,6 @@ class ReportPhaseJob:
         df = df.sort_values(metric, ascending=False)
 
         fig = px.bar(df, x=name_col, y=metric, title=title)
-        fig.update_layout(xaxis_title="Model", yaxis_title=metric)
-        return fig
-
-    def _plot_cv_metric_distribution(self, metrics_by_cv_dir: Path, metric: str, title: str):
-        import plotly.express as px  # type: ignore
-
-        rows = []
-        for fn in sorted(metrics_by_cv_dir.glob("*.json")):
-            blob = self._read_json_if_exists(fn)
-            if not blob:
-                continue
-            alg = fn.name.split("_CV_")[0]
-            val = blob.get(metric)
-            if val is None:
-                continue
-            rows.append({"Model": alg, "Value": float(val)})
-
-        df = pd.DataFrame(rows)
-        if df.empty:
-            raise RuntimeError(f"No per-CV metric values found for metric={metric} under {metrics_by_cv_dir}")
-
-        fig = px.box(df, x="Model", y="Value", points="all", title=title)
         fig.update_layout(xaxis_title="Model", yaxis_title=metric)
         return fig
 
@@ -482,7 +480,7 @@ class ReportPhaseJob:
 
     def _collect_dataset_block(self, ds_dir: Path) -> Dict[str, Any]:
         name = ds_dir.name
-        figs: Dict[str, str] = {}
+        figs: Dict[str, Any] = {}
 
         explore = ds_dir / "exploratory"
         data_process_summary = self._read_csv_if_exists(explore / "DataProcessSummary.csv")
@@ -551,10 +549,8 @@ class ReportPhaseJob:
             box = self._figure_path_model_metric_boxplot(ds_dir, chosen_metric)
             if box:
                 figs["models_cv_box"] = box
-
             if box and not figs["models_mean_bar"]:
                 figs["models_mean_bar"] = box
-
             if not figs["models_mean_bar"]:
                 try:
                     fig = self._plot_model_summary_bars(
@@ -573,10 +569,15 @@ class ReportPhaseJob:
         if ens_prc:
             figs["ensembles_prc"] = ens_prc
 
-        fi_img = self._figure_path_model_fi_top(ds_dir)
-        if fi_img:
-            figs["fi_top20"] = fi_img
-        else:
+        # ---- UPDATED: include ALL FI methods
+        fi_methods = self._figure_paths_fs_top_scores(ds_dir)
+        figs["fi_top_scores"] = fi_methods  # list[{"method","path"}]
+
+        # Backward-compatible single path (first method), for old consumers / sanity
+        figs["fi_top20"] = fi_methods[0]["path"] if fi_methods else ""
+
+        # Fallback: build from model_evaluation/feature_importance/*_FI.csv if no TopAverageScores found
+        if not fi_methods:
             fi_dir = model_eval / "feature_importance"
             fi_files = sorted(fi_dir.glob("*_FI.csv")) if fi_dir.is_dir() else []
             if fi_files:
@@ -596,7 +597,9 @@ class ReportPhaseJob:
                     )
                     out = self.paths.figures_dir / f"{name}_fi_top20.png"
                     if _safe_plotly_to_png(fig, out):
+                        figs["fi_top20_fallback"] = str(out)
                         figs["fi_top20"] = str(out)
+                        figs["fi_top_scores"] = [{"method": "model_eval_fallback", "path": str(out)}]
                 except Exception as e:
                     logger.warning("FI top20 plot failed for %s: %r", name, e)
 
@@ -687,16 +690,6 @@ class ReportPhaseJob:
     # ============================================================
 
     def _write_pdf(self, report_data: Dict[str, Any]) -> None:
-        """
-        Render the full STREAMLINE-style PDF (FPDF).
-
-        Implemented behaviors:
-        - Cover page has a single banner and a compact report header block.
-        - Subsequent pages have no large header (footer only; optional small running header can be enabled).
-        - Metadata is rendered as a boxed KV panel and preserves ALL metadata keys.
-        - Feature Importance always starts on a new page.
-        - Runtimes always starts on a new page.
-        """
         pdf = _StreamlinePDF(
             title=f"STREAMLINE Evaluation Report - {report_data.get('experiment_name', '')}",
             streamline_version=str(report_data.get("streamline_version", "")),
@@ -704,11 +697,8 @@ class ReportPhaseJob:
         )
         pdf.alias_nb_pages()
 
-        # -------------------------
-        # COVER PAGE
-        # -------------------------
+        # COVER
         pdf.add_page()
-
         pdf.cover_header_block(
             experiment=str(report_data.get("experiment_name", "")),
             generated_at=str(report_data.get("generated_at", "")),
@@ -733,9 +723,7 @@ class ReportPhaseJob:
             )
             pdf.set_y(y + 6.0 + max(1, len(meta)) * 4.8 + 4.0)
 
-        # -------------------------
-        # DATASET PAGES
-        # -------------------------
+        # DATASETS
         for ds in report_data.get("datasets", []) or []:
             pdf.add_page()
 
@@ -821,16 +809,70 @@ class ReportPhaseJob:
                     title_h=6.0,
                 )
 
-            # Feature Importance: always on new page
+            # ---------------------------------------------------------
+            # Feature Importance: ALWAYS on new page, render ALL methods
+            # ---------------------------------------------------------
             pdf.add_page()
             pdf.panel_title("Feature Importance (Top Features)")
-            pdf.figure_single(
-                "Feature Importance (Top 20)",
-                figs.get("fi_top20") or None,
-                h=130.0,
-                title_h=6.0,
-            )
 
+            fi_list = figs.get("fi_top_scores") or []
+            # normalize: if older JSON has strings instead of dicts
+            norm: List[Dict[str, str]] = []
+            for item in fi_list:
+                if isinstance(item, dict) and "path" in item:
+                    method = str(item.get("method") or "method")
+                    norm.append({"method": method, "path": str(item["path"])})
+                elif isinstance(item, str):
+                    norm.append({"method": "method", "path": item})
+
+            # Backward-compat: single entry
+            if not norm and figs.get("fi_top20"):
+                norm = [{"method": "method", "path": str(figs.get("fi_top20"))}]
+
+            # Render depending on count
+            if len(norm) == 0:
+                pdf.muted("Figure not found: feature_importance/*/TopAverageScores.png")
+            elif len(norm) == 1:
+                pdf.figure_single(
+                    f"Top Scores ({norm[0]['method']})",
+                    norm[0]["path"],
+                    h=130.0,
+                    title_h=6.0,
+                )
+            elif len(norm) == 2:
+                pdf.figure_row_2(
+                    titles=[f"Top Scores ({norm[0]['method']})", f"Top Scores ({norm[1]['method']})"],
+                    paths=[norm[0]["path"], norm[1]["path"]],
+                    h=95.0,
+                    gap=4.0,
+                    title_h=6.0,
+                )
+            else:
+                # 3+ -> paginate in 2x2 grids
+                for i in range(0, len(norm), 4):
+                    chunk = norm[i : i + 4]
+                    titles = [f"Top Scores ({c['method']})" for c in chunk]
+                    paths = [c["path"] for c in chunk]
+
+                    # pad to 4 for the 2x2 grid helper
+                    while len(titles) < 4:
+                        titles.append("")
+                        paths.append(None)
+
+                    pdf.figure_grid_2x2(
+                        titles=titles,
+                        paths=paths,
+                        cell_h=66.0,
+                        gap=4.0,
+                        title_h=6.0,
+                    )
+
+                    # If more chunks remain, start a new page with the same section title
+                    if i + 4 < len(norm):
+                        pdf.add_page()
+                        pdf.panel_title("Feature Importance (Top Features)")
+
+            # Remaining tables
             tables = ds.get("tables", {}) or {}
 
             pdf.panel_title("Univariate Significance (Top 10 Features)")
@@ -856,9 +898,7 @@ class ReportPhaseJob:
             else:
                 pdf.muted("Missing file: runtimes.csv")
 
-        # -------------------------
         # DATASET COMPARISONS
-        # -------------------------
         dc = report_data.get("dataset_comparisons", {}) or {}
         if dc.get("present"):
             pdf.add_page()
@@ -957,29 +997,23 @@ class _StreamlinePDF(FPDF):
         self.set_line_width(0.2)
 
         self._cover_done = False
-        self._use_running_header = False  # set True to draw a small running header on non-cover pages
+        self._use_running_header = False
 
-        # Table layout tuning
         self._tbl_pad_x = 1.2
         self._tbl_pad_y = 0.8
         self._tbl_line_h = 3.4
 
-        # Spacing
         self._gap_after_cover = 4.0
         self._gap_after_section = 2.0
         self._gap_after_subheader = 0.8
         self._gap_after_textblock = 0.8
         self._gap_after_table = 1.2
 
-        # Figure panel padding
         self._panel_pad = 2.0
         self._panel_title_text_pad_x = 1.4
         self._panel_title_text_pad_y = 1.4
         self._panel_content_pad_top = 2.2
 
-    # -----------------------------
-    # Header / Footer
-    # -----------------------------
     def header(self):
         if self.page_no() == 1 and not self._cover_done:
             self._draw_cover_banner()
@@ -1021,9 +1055,6 @@ class _StreamlinePDF(FPDF):
         self.cell(w, h, self._title, border=0, ln=1, align="L")
         self.ln(self._gap_after_cover)
 
-    # -----------------------------
-    # Panels
-    # -----------------------------
     def panel_title(self, title: str, *, h: float = 6.0):
         w = self.w - self.l_margin - self.r_margin
         if self.get_y() + h + 2 > self.page_break_trigger:
@@ -1114,9 +1145,6 @@ class _StreamlinePDF(FPDF):
             self.multi_cell(w - 4, 5, ln_)
         self.ln(2.0)
 
-    # -----------------------------
-    # Typography
-    # -----------------------------
     def subheader(self, text: str):
         self.set_font("Times", "B", 10)
         self.multi_cell(0, 5, text)
@@ -1127,15 +1155,9 @@ class _StreamlinePDF(FPDF):
         self.multi_cell(0, 4.5, text)
         self.ln(self._gap_after_textblock)
 
-    # -----------------------------
-    # Formatting
-    # -----------------------------
     def _cell_str(self, v: Any) -> str:
         return format_number(v, decimals=self._decimals)
 
-    # -----------------------------
-    # Wrapping (robust; prevents overflow artifacts)
-    # -----------------------------
     def _split_lines(self, txt: str, width_mm: float, line_h: float) -> List[str]:
         s = "" if txt is None else str(txt)
         usable_w = max(1e-6, float(width_mm))
@@ -1154,20 +1176,6 @@ class _StreamlinePDF(FPDF):
 
     def _wrapped_line_count(self, txt: str, width_mm: float, line_h: float) -> int:
         return len(self._split_lines(txt, width_mm, line_h))
-
-    # -----------------------------
-    # Tables
-    # -----------------------------
-    def draw_kv_table(self, mapping: Dict[str, Any]):
-        cols = ["Key", "Value"]
-        rows = [[k, mapping.get(k)] for k in mapping.keys()]
-        table_w = self.w - self.l_margin - self.r_margin
-        self.draw_table(
-            cols,
-            rows,
-            col_widths=[table_w * 0.34, table_w * 0.66],
-            font_size=9,
-        )
 
     def _col_widths_model_perf(self, columns: Sequence[str], table_w: float) -> List[float]:
         n = len(columns)
