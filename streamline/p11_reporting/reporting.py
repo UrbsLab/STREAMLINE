@@ -900,25 +900,45 @@ class ReportPhaseJob:
 
 
 # ============================================================
-# PDF renderer (improved spacing + non-overflow tables)
+# PDF renderer with consistent styling and layout for STREAMLINE reports
 # ============================================================
 
 class _StreamlinePDF(FPDF):
+    """
+    Custom PDF class for STREAMLINE report with consistent styling and layout.
+    """
+
     def __init__(self, *, title: str, streamline_version: str, float_decimals: int = 3):
         super().__init__(orientation="P", unit="mm", format="A4")
         self._title = title
         self._streamline_version = streamline_version
         self._decimals = int(float_decimals)
 
+        # Page
         self.set_margins(10, 10, 10)
         self.set_line_width(0.2)
 
-        # Table layout tuning
+        # Table layout
         self._tbl_pad_x = 1.2
         self._tbl_pad_y = 0.8
         self._tbl_line_h = 3.4
 
+        # Vertical rhythm (global)
+        self._gap_after_header = 3.0
+        self._gap_after_section = 1.6
+        self._gap_after_subheader = 0.8
+        self._gap_after_textblock = 0.8
+        self._gap_after_table = 1.2
+
+        # Figure panel padding
+        self._panel_pad = 2.0
+        self._panel_title_text_pad_x = 1.4
+        self._panel_title_text_pad_y = 1.4
+        self._panel_content_pad_top = 2.2  # gap between title band and content
+
+    # -----------------------------
     # Header / Footer
+    # -----------------------------
     def header(self):
         self.set_font("Times", "B", 12)
         x = self.l_margin
@@ -928,7 +948,7 @@ class _StreamlinePDF(FPDF):
         self.set_xy(x, y)
         self.rect(x, y, w, h)
         self.cell(w, h, self._title, border=0, ln=1, align="L")
-        self.ln(2)
+        self.ln(self._gap_after_header)
 
     def footer(self):
         self.set_y(-10)
@@ -940,29 +960,36 @@ class _StreamlinePDF(FPDF):
         self.set_x(self.l_margin)
         self.cell(self.w - self.l_margin - self.r_margin, 5, right, border=0, ln=0, align="R")
 
-    # Styling helpers
+    # -----------------------------
+    # Typography / Blocks
+    # -----------------------------
     def section_bar(self, text: str):
         w = self.w - self.l_margin - self.r_margin
         h = 6
         if self.get_y() + h + 2 > self.page_break_trigger:
             self.add_page()
+
         x = self.l_margin
         y = self.get_y()
+
         self.set_font("Times", "B", 10)
         self.rect(x, y, w, h)
-        self.set_xy(x + 1, y + 1.2)
-        self.cell(w - 2, h - 2.4, text, border=0, ln=1, align="L")
-        self.ln(1.2)
+
+        # Better internal padding for the title
+        self.set_xy(x + 1.4, y + 1.4)
+        self.cell(w - 2.8, h - 2.8, text, border=0, ln=1, align="L")
+
+        self.ln(self._gap_after_section)
 
     def subheader(self, text: str):
         self.set_font("Times", "B", 10)
         self.multi_cell(0, 5, text)
-        self.ln(0.6)
+        self.ln(self._gap_after_subheader)
 
     def muted(self, text: str):
         self.set_font("Times", "", 9)
         self.multi_cell(0, 4.5, text)
-        self.ln(0.6)
+        self.ln(self._gap_after_textblock)
 
     def card_header(self, *, main_title: str, lines: Sequence[str]):
         w = self.w - self.l_margin - self.r_margin
@@ -977,15 +1004,19 @@ class _StreamlinePDF(FPDF):
 
         self.set_font("Times", "", 10)
         self.set_x(x + 2)
-        for ln in lines:
-            self.multi_cell(w - 4, 5, ln)
-        self.ln(2.5)
+        for ln_ in lines:
+            self.multi_cell(w - 4, 5, ln_)
+        self.ln(2.0)
 
+    # -----------------------------
     # Formatting
+    # -----------------------------
     def _cell_str(self, v: Any) -> str:
         return format_number(v, decimals=self._decimals)
 
+    # -----------------------------
     # Tables
+    # -----------------------------
     def draw_kv_table(self, mapping: Dict[str, Any]):
         cols = ["Key", "Value"]
         rows = [[k, mapping.get(k)] for k in mapping.keys()]
@@ -1001,7 +1032,7 @@ class _StreamlinePDF(FPDF):
         cols = mean_std.get("columns", [])
         rows_out: List[List[Any]] = []
         for row in mean_std.get("rows", []) or []:
-            out_row = []
+            out_row: List[Any] = []
             for cell in row.get("cells", []):
                 val = cell.get("value")
                 if isinstance(val, tuple) and len(val) == 2:
@@ -1013,14 +1044,15 @@ class _StreamlinePDF(FPDF):
         self.draw_table(cols, rows_out)
 
     def _wrap_lines_count(self, txt: str, width_mm: float) -> int:
-        """
-        Estimate wrapped line count based on string width.
-        """
         if txt == "":
             return 1
-        sw = self.get_string_width(txt)
+        parts = str(txt).splitlines() or [str(txt)]
         usable = max(1e-6, width_mm)
-        return max(1, int(math.ceil(sw / usable)))
+        total = 0
+        for part in parts:
+            sw = self.get_string_width(part) if part else 0.0
+            total += max(1, int(math.ceil(sw / usable)))
+        return max(1, total)
 
     def _auto_col_widths(
         self,
@@ -1028,46 +1060,30 @@ class _StreamlinePDF(FPDF):
         rows: Sequence[Sequence[str]],
         table_w: float,
     ) -> List[float]:
-        """
-        Robust width allocation to prevent overflow:
-        - give first column extra weight (often algorithm/feature name)
-        - allocate remaining width proportional to header and sample content lengths
-        - clamp min widths
-        """
         n = len(columns)
         if n == 1:
             return [table_w]
 
-        # content weights
-        weights = []
+        weights: List[float] = []
         for j, c in enumerate(columns):
-            w = max(3.0, len(str(c)))
-            # sample first ~15 rows to estimate
+            w = max(3.0, float(len(str(c))))
             for r in rows[:15]:
                 if j < len(r):
-                    w = max(w, min(40.0, len(r[j])))
-            # first col gets boost
+                    w = max(w, min(44.0, float(len(r[j]))))
             if j == 0:
                 w *= 1.8
             weights.append(w)
 
-        sw = sum(weights) if sum(weights) > 0 else n
+        sw = sum(weights) if sum(weights) > 0 else float(n)
         raw = [table_w * (w / sw) for w in weights]
 
-        # clamp
         min_w = 14.0 if n <= 4 else 10.0
         raw = [max(min_w, w) for w in raw]
 
-        # normalize back to table_w
         s2 = sum(raw)
-        if s2 <= 0:
-            return [table_w / n] * n
-        scale = table_w / s2
+        scale = (table_w / s2) if s2 > 0 else 1.0
         out = [w * scale for w in raw]
-
-        # last col absorbs tiny rounding error
-        diff = table_w - sum(out)
-        out[-1] += diff
+        out[-1] += (table_w - sum(out))
         return out
 
     def draw_table(
@@ -1086,15 +1102,10 @@ class _StreamlinePDF(FPDF):
         table_w = self.w - self.l_margin - self.r_margin
         ncol = len(columns)
 
-        # Format rows first (so width estimation uses the real rendered strings)
-        formatted_rows: List[List[str]] = []
-        for r in rows:
-            formatted_rows.append([self._cell_str(v) for v in r])
-
+        formatted_rows: List[List[str]] = [[self._cell_str(v) for v in r] for r in rows]
         if max_rows is not None:
             formatted_rows = formatted_rows[:max_rows]
 
-        # Font sizing: shrink for wide tables
         if font_size is None:
             if ncol <= 5:
                 font_size = 8
@@ -1116,28 +1127,39 @@ class _StreamlinePDF(FPDF):
             self.set_font("Times", "B", font_size)
             y0 = self.get_y()
             x0 = self.l_margin
+
             for j, col in enumerate(columns):
                 wj = col_widths[j]
                 self.rect(x0, y0, wj, header_h)
                 self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
-                self.cell(wj - 2 * self._tbl_pad_x, header_h - 2 * self._tbl_pad_y, str(col), border=0, ln=0, align="C")
+                self.cell(
+                    wj - 2 * self._tbl_pad_x,
+                    header_h - 2 * self._tbl_pad_y,
+                    str(col),
+                    border=0,
+                    ln=0,
+                    align="C",
+                )
                 x0 += wj
-            self.ln(header_h)
+
+            # Avoid header-to-body gap: jump to exact baseline
+            self.set_xy(self.l_margin, y0 + header_h)
             self.set_font("Times", "", font_size)
 
         def row_height(cells: Sequence[str]) -> float:
-            # estimate wrap count per cell
             counts = []
             for j, txt in enumerate(cells):
                 usable_w = col_widths[j] - 2 * self._tbl_pad_x
                 counts.append(self._wrap_lines_count(txt, usable_w))
             return max(counts) * line_h + 2 * self._tbl_pad_y
 
+        if self.get_y() + header_h + 2 > self.page_break_trigger:
+            self.add_page()
+
         draw_header()
 
         for cells in formatted_rows:
             rh = row_height(cells)
-
             if self.get_y() + rh > self.page_break_trigger:
                 self.add_page()
                 draw_header()
@@ -1155,31 +1177,60 @@ class _StreamlinePDF(FPDF):
 
             self.set_y(y0 + rh)
 
-        self.ln(1.0)
+        self.ln(self._gap_after_table)
 
+    # -----------------------------
     # Figures
-    def _image_panel(self, title: str, path: Optional[str], *, x: float, y: float, w: float, h: float, title_h: float):
+    # -----------------------------
+    def _image_panel(
+        self,
+        title: str,
+        path: Optional[str],
+        *,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        title_h: float,
+    ):
+        # Outer border + title band
         self.rect(x, y, w, h)
         self.rect(x, y, w, title_h)
-        self.set_font("Times", "B", 8)
-        self.set_xy(x + 1, y + 1.2)
-        self.cell(w - 2, title_h - 2.4, title, border=0, ln=0, align="L")
 
-        inner_x = x + 1
-        inner_y = y + title_h + 1
-        inner_w = w - 2
-        inner_h = h - title_h - 2
+        # Title text with padding
+        self.set_font("Times", "B", 8)
+        self.set_xy(x + self._panel_title_text_pad_x, y + self._panel_title_text_pad_y)
+        self.cell(
+            w - 2 * self._panel_title_text_pad_x,
+            title_h - 2 * self._panel_title_text_pad_y,
+            title,
+            border=0,
+            ln=0,
+            align="L",
+        )
+
+        # Padded content region: ensure image doesn't touch title band or borders
+        inner_x = x + self._panel_pad
+        inner_y = y + title_h + self._panel_content_pad_top
+        inner_w = w - 2 * self._panel_pad
+        inner_h = h - title_h - (self._panel_content_pad_top + self._panel_pad)
+
+        if inner_w < 5 or inner_h < 5:
+            self.set_font("Times", "", 8)
+            self.set_xy(x + 1, y + title_h + 1)
+            self.multi_cell(w - 2, 3.5, "Panel too small.", border=0)
+            return
 
         if path and Path(path).exists():
             try:
                 self.image(path, x=inner_x, y=inner_y, w=inner_w, h=inner_h)
             except Exception:
                 self.set_font("Times", "", 8)
-                self.set_xy(inner_x, inner_y + 1)
+                self.set_xy(inner_x, inner_y)
                 self.multi_cell(inner_w, 3.5, "Could not render image.", border=0)
         else:
             self.set_font("Times", "", 8)
-            self.set_xy(inner_x, inner_y + 1)
+            self.set_xy(inner_x, inner_y)
             self.multi_cell(inner_w, 3.5, "Figure missing.", border=0)
 
     def figure_grid_2x2(
