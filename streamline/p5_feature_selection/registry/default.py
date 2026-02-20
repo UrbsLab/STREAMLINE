@@ -38,7 +38,7 @@ class DefaultFeatureSelector:
         dataset_name: str,
         n_splits: int,
         algorithms: List[str],
-        class_label: str,
+        outcome_label: str,
         instance_label: str | None,
         max_features_to_keep: int,
         filter_poor_features: bool,
@@ -65,7 +65,7 @@ class DefaultFeatureSelector:
             selected_feature_lists, max_features_to_keep, meta_feature_ranks, algs, n_splits
         )
         self._write_info_counts(out_root, informative_counts, uninformative_counts)
-        self._write_filtered_cv(dataset_dir, dataset_name, n_splits, class_label, instance_label, cv_selected_list, overwrite_cv)
+        self._write_filtered_cv(dataset_dir, dataset_name, n_splits, outcome_label, instance_label, cv_selected_list, overwrite_cv)
 
     # ---- internals ----
     def _score_csv(self, root: str, alg: str, cv: int) -> str:
@@ -177,7 +177,7 @@ class DefaultFeatureSelector:
         dataset_dir: str,
         dataset_name: str,
         n_splits: int,
-        class_label: str,
+        outcome_label: str,
         instance_label: "str | None",
         cv_selected_list: List[List[str]],
         overwrite_cv: bool,
@@ -189,7 +189,7 @@ class DefaultFeatureSelector:
             if not (os.path.exists(tr) and os.path.exists(te)):
                 raise FileNotFoundError(f"Missing CV files for i={i}: {tr} / {te}")
             df_tr = pd.read_csv(tr, na_values="NA"); df_te = pd.read_csv(te, na_values="NA")
-            labels = [class_label] + ([instance_label] if (instance_label and instance_label in df_tr.columns) else [])
+            labels = [outcome_label] + ([instance_label] if (instance_label and instance_label in df_tr.columns) else [])
             feat_keep = [f for f in cv_selected_list[i] if f in df_tr.columns]
             td_train = df_tr.loc[:, labels + feat_keep]; td_test = df_te.loc[:, labels + feat_keep]
             if overwrite_cv:

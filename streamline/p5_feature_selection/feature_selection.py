@@ -14,7 +14,7 @@ class FeatureSelection:
         dataset_dir: str,                 # <output>/<experiment>/<dataset>
         n_splits: int,
         algorithms: "list[str] | str",
-        class_label: str = "Class",
+        outcome_label: str = "Class",
         instance_label: "str | None" = None,
         max_features_to_keep: int = 2000,
         filter_poor_features: bool = True,
@@ -31,7 +31,7 @@ class FeatureSelection:
         self.dataset_name = os.path.basename(dataset_dir.rstrip("/"))
         self.n_splits = int(n_splits)
         self.algorithms = self._csv_to_list(algorithms)
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.max_features_to_keep = int(max_features_to_keep)
         self.filter_poor_features = bool(filter_poor_features)
@@ -51,7 +51,7 @@ class FeatureSelection:
             dataset_name=self.dataset_name,
             n_splits=self.n_splits,
             algorithms=self.algorithms,
-            class_label=self.class_label,
+            outcome_label=self.outcome_label,
             instance_label=self.instance_label,
             max_features_to_keep=self.max_features_to_keep,
             filter_poor_features=self.filter_poor_features,

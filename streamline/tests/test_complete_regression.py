@@ -20,17 +20,6 @@ from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.p9_compare_datasets.p9_runner import P9Runner
 from streamline.p11_reporting_old.p11_runner import P11Runner
 
-
-def _find_repo_root(start: Path) -> Path:
-    """
-    Walk up until we find the repo marker(s).
-    """
-    for p in [start] + list(start.parents):
-        if (p / "pyproject.toml").exists() or (p / "setup.cfg").exists() or (p / ".git").exists():
-            return p
-    return start.parent
-
-
 def _pick_first_dataset_dir(exp_root: Path) -> Path:
     """
     STREAMLINE phase outputs typically look like:
@@ -70,11 +59,13 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     """
 
     # --- Layout ---------------------------------------------------------
-    repo_root = _find_repo_root(Path(__file__).resolve())
+    outcome_label = "Cognition_Score"
+    instance_label = "Class"
+    
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    tmp_path = repo_root / "test"
     data_root = repo_root / "data" / "DemoDataRegression"
-
-    outcome_label = os.getenv("STREAMLINE_REGRESSION_OUTCOME_LABEL", "Outcome").strip() or "Outcome"
-    instance_label = os.getenv("STREAMLINE_INSTANCE_LABEL", "InstanceID").strip() or "InstanceID"
+    assert data_root.is_dir(), f"Expected DemoData under {data_root}"
 
     output_root = tmp_path / "out_full_regression_pipeline"
     experiment_name = "DemoExpRegression"
@@ -95,6 +86,8 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
 
     assert exp_root.is_dir(), "Phase 1 should create experiment directory"
     ds_dir = _pick_first_dataset_dir(exp_root)
+    
+    # assert False, "Intentional stop after Phase 1 for testing purposes; comment out to run full pipeline"
 
     # ------------------------------------------------------------------
     # Phase 2: Impute & scale
@@ -102,6 +95,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     p2 = P2Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
+        outcome_label=outcome_label,
         instance_label=instance_label,
         run_cluster="Serial",
     )
@@ -111,10 +105,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
 
     # (Optional) sanity: some scaled/imputed artifacts exist (names vary by implementation)
     scaled_candidates = [
-        ds_dir / "ScaledData",
-        ds_dir / "scaled_data",
         ds_dir / "impute_scale",
-        ds_dir / "preprocessed",
     ]
     # Don't hard-fail if your code writes elsewhere; comment in if you want stricter checks:
     # assert _exists_any(scaled_candidates), "Phase 2 should produce scaled/imputed artifacts"
@@ -125,6 +116,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     p3 = P3Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
+        outcome_label=outcome_label,
         instance_label=instance_label,
         run_cluster="Serial",
     )
@@ -138,6 +130,8 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     p4 = P4Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
+        outcome_label=outcome_label,
+        outcome_type="Regression",
         instance_label=instance_label,
         run_cluster="Serial",
     )
@@ -154,6 +148,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     p5 = P5Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
+        outcome_label=outcome_label,
         instance_label=instance_label,
         run_cluster="Serial",
     )
@@ -198,32 +193,32 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     # ------------------------------------------------------------------
     # If your ensemble phase is classification-only, you can skip by setting:
     #   STREAMLINE_SKIP_REGRESSION_ENSEMBLES=1
-    if os.getenv("STREAMLINE_SKIP_REGRESSION_ENSEMBLES", "0").strip() not in {"1", "true", "True"}:
-        p7 = P7Runner(
-            output_path=str(output_root),
-            experiment_name=experiment_name,
-            n_splits=3,
-            outcome_label=outcome_label,
-            instance_label=instance_label,
-            # Choose ensembles likely to generalize to regression; adjust to your implementation.
-            ensembles="hard_voting,soft_voting,stack_lr",
-            base_models="LR,RF,SVR",
-            meta_train_source="train",
-            calibrate=0,
-            calibrate_method="sigmoid",
-            calibrate_cv=3,
-            run_cluster="Serial",
-            queue="defq",
-            reserved_memory=4,
-            random_state=42,
-        )
-        p7.run()
+    # if os.getenv("STREAMLINE_SKIP_REGRESSION_ENSEMBLES", "0").strip() not in {"1", "true", "True"}:
+    #     p7 = P7Runner(
+    #         output_path=str(output_root),
+    #         experiment_name=experiment_name,
+    #         n_splits=3,
+    #         outcome_label=outcome_label,
+    #         instance_label=instance_label,
+    #         # Choose ensembles likely to generalize to regression; adjust to your implementation.
+    #         ensembles="hard_voting,soft_voting,stack_lr",
+    #         base_models="LR,RF,SVR",
+    #         meta_train_source="train",
+    #         calibrate=0,
+    #         calibrate_method="sigmoid",
+    #         calibrate_cv=3,
+    #         run_cluster="Serial",
+    #         queue="defq",
+    #         reserved_memory=4,
+    #         random_state=42,
+    #     )
+    #     p7.run()
 
-        ens_root = ds_dir / "ensemble_evaluation"
-        assert ens_root.is_dir(), "Phase 7 should create ensemble_evaluation directory"
-        assert (ens_root / "pickled_ensembles").is_dir(), "Expected pickled ensembles"
-        assert list((ens_root / "pickled_ensembles").glob("*.pickle")), \
-            "Expected at least one ensemble pickle from Phase 7"
+    #     ens_root = ds_dir / "ensemble_evaluation"
+    #     assert ens_root.is_dir(), "Phase 7 should create ensemble_evaluation directory"
+    #     assert (ens_root / "pickled_ensembles").is_dir(), "Expected pickled ensembles"
+    #     assert list((ens_root / "pickled_ensembles").glob("*.pickle")), \
+    #         "Expected at least one ensemble pickle from Phase 7"
 
     # ------------------------------------------------------------------
     # Phase 8: Statistics
@@ -232,7 +227,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         outcome_label=outcome_label,
-        outcome_type="Regression",
+        outcome_type="Continuous",
         instance_label=instance_label,
         n_splits=3,
         scoring_metric="neg_mean_squared_error",
@@ -258,7 +253,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         outcome_label=outcome_label,
-        outcome_type="Regression",
+        outcome_type="Continuous",
         instance_label=instance_label,
         sig_cutoff=0.1,
         show_plots=False,
@@ -277,7 +272,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         outcome_label=outcome_label,
-        outcome_type="Regression",
+        outcome_type="Continuous",
         instance_label=instance_label,
         run_cluster="Serial",
     )

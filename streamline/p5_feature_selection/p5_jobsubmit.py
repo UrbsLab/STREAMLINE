@@ -46,7 +46,7 @@ def build_parser():
                     help='Comma-separated ids/names or "auto" to discover from feature_importance/*')
 
     # Labels
-    ap.add_argument("--class_label", default="Class")
+    ap.add_argument("--outcome_label", default="Class")
     ap.add_argument("--instance_label", default=None)
 
     # Selection controls
@@ -80,7 +80,7 @@ def main():
         dataset_dir=args.dataset_dir,
         n_splits=int(args.n_splits),
         algorithms=args.algorithms,  # CSV string OK
-        class_label=args.class_label,
+        outcome_label=args.outcome_label,
         instance_label=(args.instance_label if args.instance_label else None),
         max_features_to_keep=int(args.max_features_to_keep),
         filter_poor_features=_to_bool(args.filter_poor_features, True),

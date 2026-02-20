@@ -78,7 +78,7 @@ def test_p5_runner_auto_serial_creates_outputs(tmp_path):
         experiment_name="Exp",
         algorithms="auto",          # <- discover from feature_importance/*
         n_splits=2,
-        class_label="Class",
+        outcome_label="Class",
         instance_label=None,
         max_features_to_keep=5,
         filter_poor_features=True,
@@ -134,7 +134,7 @@ def test_p5_runner_auto_local_parallel(tmp_path):
         algorithms="auto",
         n_splits=2,
         run_cluster="Local",  # <- parallel via LocalCluster
-        class_label="Class",
+        outcome_label="Class",
         max_features_to_keep=5,
         filter_poor_features=True,
         overwrite_cv=True,   # exercise overwrite branch this time

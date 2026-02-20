@@ -13,7 +13,7 @@ def main():
     ap.add_argument("--algorithms", default="auto",
                     help='Comma-separated (e.g. "MI,MS") OR "auto" to discover from feature_importance/*/')
     ap.add_argument("--n_splits", required=True, type=int)
-    ap.add_argument("--class_label", default="Class")
+    ap.add_argument("--outcome_label", default="Class")
     ap.add_argument("--instance_label", default=None)
 
     ap.add_argument("--max_features_to_keep", default=2000, type=int)
@@ -52,7 +52,7 @@ def main():
         experiment_name=args.experiment_name,
         algorithms=args.algorithms,          # "auto" supported
         n_splits=args.n_splits,
-        class_label=args.class_label,
+        outcome_label=args.outcome_label,
         instance_label=args.instance_label,
         max_features_to_keep=args.max_features_to_keep,
         filter_poor_features=bool(args.filter_poor_features),

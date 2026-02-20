@@ -18,7 +18,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import StandardScaler
 
 from streamline.p1_data_process.utils.kfold_partitioning import KFoldPartitioner
-from scipy.stats import chi2_contingency, fisher_exact, mannwhitneyu, f_oneway, kruskal, spearmanr
+from scipy.stats import chi2_contingency, fisher_exact, mannwhitneyu, f_oneway, kruskal, spearmanr, skew, kurtosis
 from pandas.api.types import is_numeric_dtype
 import seaborn as sns
 import warnings
@@ -95,6 +95,7 @@ class DataProcess:
             self.outcome_type = "Multiclass"
         else:
             self.outcome_type = "Continuous"
+            self.partition_method = "Random"
 
         # keep explorations (CSV-producing analyses)
         explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
@@ -211,6 +212,10 @@ class DataProcess:
             self.match_label = None
             self.partition_method = 'Stratified'
             logging.warning("Specified 'match_label' not found; defaulting to Stratified CV.")
+            
+        if self.outcome_type == "Continuous":
+            self.partition_method = 'Random'
+            logging.warning("Continuous outcome detected; defaulting to Random CV.")
 
         self.identify_feature_types()
 

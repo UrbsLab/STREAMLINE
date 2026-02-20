@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-pytest.skip("Tested Already", allow_module_level=True)
+# pytest.skip("Tested Already", allow_module_level=True)
 
 # Phase runners - adjust import paths if your repo differs
 from streamline.p1_data_process.p1_runner import P1Runner
@@ -18,7 +18,7 @@ from streamline.p7_ensembles.p7_runner import P7Runner
 from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.p9_compare_datasets.p9_runner import P9Runner
 from streamline.p10_replication.p10_runner import P10Runner
-from streamline.p11_reporting_old.p11_runner import P11Runner
+from streamline.p11_reporting.p11_runner import P11Runner
 
 
 @pytest.mark.integration

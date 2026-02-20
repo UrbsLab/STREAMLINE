@@ -1073,7 +1073,7 @@ class StatisticsPhaseJob:
             alg_result_table = []
 
             # lists of per-CV metrics (we keep the legacy names used in CSVs)
-            s_bac, s_ac, s_f1, s_re, s_sp, s_pr = [[] for _ in range(6)]
+            s_bac, s_ac, s_f1, s_re, s_sp, s_pr, s_bs = [[] for _ in range(7)]
             s_tp, s_tn, s_fp, s_fn, s_npv, s_lrp, s_lrm = [[] for _ in range(7)]
 
             fi_all = []
@@ -1142,6 +1142,7 @@ class StatisticsPhaseJob:
                 s_npv.append(metrics_payload.get("npv"))
                 s_lrp.append(metrics_payload.get("lr_plus"))
                 s_lrm.append(metrics_payload.get("lr_minus"))
+                s_bs.append(metrics_payload.get("brier_score"))
 
                 alg_result_table.append([fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec])
 
@@ -1231,6 +1232,7 @@ class StatisticsPhaseJob:
                 'Sensitivity (Recall)': s_re,
                 'Specificity': s_sp,
                 'Precision (PPV)': s_pr,
+                'Brier Score': s_bs,
                 'TP': s_tp,
                 'TN': s_tn,
                 'FP': s_fp,
@@ -1523,7 +1525,7 @@ class StatisticsPhaseJob:
 
         # Metric names from first ensemble
         first_ens = next(iter(metrics_by_ens.keys()))
-        metric_names = sorted(metrics_by_ens[first_ens].keys())
+        metric_names = metrics_by_ens[first_ens].keys()
         return metrics_by_ens, metric_names
 
     def _write_ensemble_metric_summaries(

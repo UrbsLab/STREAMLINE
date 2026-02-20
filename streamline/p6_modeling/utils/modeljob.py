@@ -43,7 +43,8 @@ class ModelJob:
                 feature_names.remove(self.instance_label)
             except ValueError:
                 pass
-        feature_names.remove(self.outcome_label)
+        if self.outcome_label in feature_names:
+            feature_names.remove(self.outcome_label)
         self.feature_names = feature_names
 
         if not os.path.exists(self.output_path):

@@ -12,6 +12,8 @@ from sklearn.metrics import (
     confusion_matrix, roc_auc_score, precision_recall_curve, roc_curve, average_precision_score, auc
 )
 
+from sklearn.metrics import brier_score_loss
+from streamline.p6_modeling.utils.support import multiclass_brier_score
 from streamline.p7_ensembles.utils.loader import get_ensemble_by_id
 
 
@@ -133,47 +135,139 @@ class EnsemblePhaseJob:
                 roc_auc_val = None
                 prc_auc_val = None
                 aps_val = None
+                brier_val = None
 
                 if ens_id == "hard_voting":
                     roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
                         _hard_voting_threshold_sweep(base_ests, X_test, y_test)
+
+                    # --- Brier score for hard voting ---
+                    # Use mean predicted probability across base models as the ensemble probability.
+                    # Binary: use P(class=1). Multiclass: use full P over classes.
+                    try:
+                        y_true = np.asarray(y_test)
+                        classes = np.unique(y_true)
+                        n_classes = classes.size
+
+                        base_probas_list = []
+                        for _, est in base_ests:
+                            proba = None
+                            if hasattr(est, "predict_proba"):
+                                proba = est.predict_proba(X_test)
+                            elif hasattr(est, "decision_function"):
+                                s = np.asarray(est.decision_function(X_test))
+                                if s.ndim == 1:
+                                    s = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                                    proba = np.column_stack([1 - s, s])
+                                else:
+                                    s_min = s.min(axis=0, keepdims=True)
+                                    s_max = s.max(axis=0, keepdims=True)
+                                    proba = (s - s_min) / (s_max - s_min + 1e-12)
+
+                            if proba is None:
+                                continue
+
+                            proba = np.asarray(proba)
+
+                            # Align estimator proba columns to global `classes` if possible
+                            est_classes = getattr(est, "classes_", None)
+                            if est_classes is not None:
+                                est_classes = np.asarray(est_classes)
+                                idx = []
+                                ok = True
+                                for c in classes:
+                                    m = np.where(est_classes == c)[0]
+                                    if m.size == 0:
+                                        ok = False
+                                        break
+                                    idx.append(int(m[0]))
+                                if not ok:
+                                    continue
+                                proba = proba[:, idx]
+                            else:
+                                # If no classes_, require same column count
+                                if proba.ndim != 2 or proba.shape[1] != n_classes:
+                                    continue
+
+                            base_probas_list.append(proba)
+
+                        if base_probas_list:
+                            mean_proba = np.mean(np.stack(base_probas_list, axis=2), axis=2)  # (n, n_classes)
+
+                            if n_classes == 2:
+                                # Brier score (binary) on positive class probability
+                                brier_val = brier_score_loss(y_true, mean_proba[:, 1])
+                            else:
+                                # Multiclass brier (use your Phase-6 helper)
+                                brier_val = multiclass_brier_score(y_true, mean_proba)
+                    except Exception as e:
+                        logging.warning("Failed to compute Brier Score for hard voting; setting to None.")
+                        logging.warning(str(e))
+                        brier_val = None
+
                     # For reporting parity, also compute "naive" AUC using y_pred
                     try:
                         metrics["ROC AUC (hard from preds)"] = roc_auc_score(y_test, y_pred)
-                    except Exception:
+                    except Exception as e:
+                        logging.warning("Failed to compute ROC AUC from hard predictions; setting to None.")
+                        logging.warning(str(e))
                         metrics["ROC AUC (hard from preds)"] = None
+
                 else:
                     # ------- Soft-voting & stacking: expose proba / scores -------
                     proba = None
                     if hasattr(model, "predict_proba"):
                         # For multiclass, this is (n_samples, n_classes)
-                        proba = model.predict_proba(X_test)
+                        try:
+                            proba = model.predict_proba(X_test)
+                        except Exception as e:
+                            logging.warning("predict_proba failed; setting proba=None.")
+                            logging.warning(str(e))
+                            proba = None
                     elif hasattr(model, "decision_function"):
-                        s = model.decision_function(X_test)
-                        s = np.asarray(s)
-                        # Min-max scale per column to [0,1]
-                        if s.ndim == 1:
-                            proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
-                        else:
-                            s_min = s.min(axis=0, keepdims=True)
-                            s_max = s.max(axis=0, keepdims=True)
-                            proba = (s - s_min) / (s_max - s_min + 1e-12)
+                        try:
+                            s = model.decision_function(X_test)
+                            s = np.asarray(s)
+                            # Min-max scale per column to [0,1]
+                            if s.ndim == 1:
+                                proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
+                            else:
+                                s_min = s.min(axis=0, keepdims=True)
+                                s_max = s.max(axis=0, keepdims=True)
+                                proba = (s - s_min) / (s_max - s_min + 1e-12)
+                        except Exception as e:
+                            logging.warning("decision_function failed; setting proba=None.")
+                            logging.warning(str(e))
+                            proba = None
 
                     if proba is not None:
                         classes = getattr(model, "classes_", None)
                         roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
                             _calc_curves_scores_from_proba(y_test, proba, classes=classes)
 
-                    # # Soft vote & Stacking expose proba
-                    # proba = None
-                    # if hasattr(model, "predict_proba"):
-                    #     proba = model.predict_proba(X_test)[:, 1]
-                    # elif hasattr(model, "decision_function"):
-                    #     s = model.decision_function(X_test)
-                    #     proba = (s - s.min()) / (s.max() - s.min() + 1e-12)
-                    # if proba is not None:
-                    #     roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = \
-                    #         _calc_curves_scores_from_proba(y_test, proba)
+                        # --- Brier score for soft/stacking ---
+                        try:
+                            y_true = np.asarray(y_test)
+                            proba_arr = np.asarray(proba)
+                            n_classes = np.unique(y_true).size
+
+                            if proba_arr.ndim == 1 and n_classes == 2:
+                                # decision_function scaled to [0,1] as "pos prob"
+                                brier_val = brier_score_loss(y_true, proba_arr)
+                            elif proba_arr.ndim == 2 and n_classes == 2 and proba_arr.shape[1] >= 2:
+                                brier_val = brier_score_loss(y_true, proba_arr[:, 1])
+                            elif proba_arr.ndim == 2 and n_classes > 2:
+                                brier_val = multiclass_brier_score(y_true, proba_arr)
+                            else:
+                                brier_val = None
+                        except Exception as e:
+                            logging.warning("Failed to compute Brier Score; setting to None.")
+                            logging.warning(str(e))
+                            brier_val = None
+
+                # --- write metrics fields ---
+                if brier_val is not None:
+                    metrics["Brier Score"] = float(brier_val)
 
                 if roc_auc_val is not None:
                     metrics["ROC AUC"] = float(roc_auc_val)
@@ -181,7 +275,6 @@ class EnsemblePhaseJob:
                     metrics["PRC AUC"] = float(prc_auc_val)
                 if aps_val is not None:
                     metrics["PRC APS"] = float(aps_val)
-
                 # Save metrics (per CV per ensemble)
                 mpath = self.out_root / "metrics_by_cv" / f"{ens_small}_CV_{cv}.json"
                 with open(mpath, "w") as f:
@@ -242,45 +335,190 @@ def _load_base_estimators(dataset_dir: Path, cv_idx: int, allow_list: Optional[L
         out.append((small, est))
     return sorted(out, key=lambda t: t[0])
 
-def _calc_basic_metrics(y_true, y_pred) -> Dict[str, float]:
+# def _calc_basic_metrics(y_true, y_pred) -> Dict[str, float]:
+#     """
+#     For binary classification:
+#         - return Accuracy, Balanced Accuracy, F1, Precision, Recall
+#         - plus confusion-matrix-derived TP, TN, FP, FN, NPV, LR+, LR-
+#     For multiclass:
+#         - return Accuracy, Balanced Accuracy
+#         - macro-averaged F1, Precision, Recall
+#         - omit TP/TN/FP/FN/NPV/LR+/- (not uniquely defined for multiclass)
+#     """
+#     y_true = np.asarray(y_true)
+#     y_pred = np.asarray(y_pred)
+
+#     labels = np.unique(np.concatenate([np.unique(y_true), np.unique(y_pred)]))
+#     cm = confusion_matrix(y_true, y_pred, labels=labels)
+
+#     # Binary case: keep your original behavior
+#     if labels.size == 2:
+#         tn, fp, fn, tp = cm.ravel()
+#         npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
+#         lr_plus  = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+#         lr_minus = fn / (tn + fn) if (tn + fn) > 0 else 0.0
+#         return {
+#             "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
+#             "Accuracy": accuracy_score(y_true, y_pred),
+#             "F1": f1_score(y_true, y_pred),
+#             "Precision": precision_score(y_true, y_pred),
+#             "Recall": recall_score(y_true, y_pred),
+#             "TP": float(tp), "TN": float(tn), "FP": float(fp), "FN": float(fn),
+#             "NPV": npv, "LR+": lr_plus, "LR-": lr_minus,
+#         }
+
+#     # Multiclass case: use macro-averaged metrics
+#     return {
+#         "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
+#         "Accuracy": accuracy_score(y_true, y_pred),
+#         "F1": f1_score(y_true, y_pred, average="macro"),
+#         "Precision": precision_score(y_true, y_pred, average="macro"),
+#         "Recall": recall_score(y_true, y_pred, average="macro"),
+#     }
+
+def _calc_basic_metrics(y_true, y_pred) -> Dict[str, Any]:
     """
-    For binary classification:
-        - return Accuracy, Balanced Accuracy, F1, Precision, Recall
-        - plus confusion-matrix-derived TP, TN, FP, FN, NPV, LR+, LR-
-    For multiclass:
-        - return Accuracy, Balanced Accuracy
-        - macro-averaged F1, Precision, Recall
-        - omit TP/TN/FP/FN/NPV/LR+/- (not uniquely defined for multiclass)
+    Phase-7 basic metrics with Phase-7 (legacy) naming.
+
+    Multiclass results keys:
+      'Balanced Accuracy', 'Accuracy', 'F1 Score', 'Sensitivity (Recall)',
+      'Precision (PPV)'
+
+    Binary results keys (adds):
+      'Specificity', 'TP','TN','FP','FN','NPV','LR+','LR-'
+
+    Notes:
+      - Computes discrete metrics from y_true/y_pred.
+      - Brier/AUC/PRC metrics require probability-like scores; set to None here
+        (fill later if you have proba). If you pass proba elsewhere, compute there.
+      - Any computation error returns None for that field.
     """
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
 
-    labels = np.unique(np.concatenate([np.unique(y_true), np.unique(y_pred)]))
-    cm = confusion_matrix(y_true, y_pred, labels=labels)
+    def _safe(fn, *args, **kwargs):
+        try:
+            v = fn(*args, **kwargs)
+        except Exception:
+            return None
+        if v is None:
+            return None
+        try:
+            v = float(v)
+            if not np.isfinite(v):
+                return None
+            return v
+        except Exception:
+            return None
 
-    # Binary case: keep your original behavior
-    if labels.size == 2:
-        tn, fp, fn, tp = cm.ravel()
-        npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
-        lr_plus  = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-        lr_minus = fn / (tn + fn) if (tn + fn) > 0 else 0.0
+    # Base (shared) discrete stats
+    s_bac = _safe(balanced_accuracy_score, y_true, y_pred)
+    s_ac = _safe(accuracy_score, y_true, y_pred)
+    # F1/Recall/Precision: binary uses default, multiclass uses macro
+    labels = np.unique(np.concatenate([np.unique(y_true), np.unique(y_pred)]))
+    is_binary = labels.size == 2
+
+    if is_binary:
+        s_f1 = _safe(f1_score, y_true, y_pred)
+        s_re = _safe(recall_score, y_true, y_pred)            # sensitivity
+        s_pr = _safe(precision_score, y_true, y_pred)         # PPV
+    else:
+        s_f1 = _safe(f1_score, y_true, y_pred, average="macro")
+        s_re = _safe(recall_score, y_true, y_pred, average="macro")
+        s_pr = _safe(precision_score, y_true, y_pred, average="macro")
+
+    # Probabilistic metrics placeholders here (compute later from proba if available)
+    s_bs = None
+
+    # -----------------------
+    # Multiclass
+    # -----------------------
+    if not is_binary:
         return {
-            "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
-            "Accuracy": accuracy_score(y_true, y_pred),
-            "F1": f1_score(y_true, y_pred),
-            "Precision": precision_score(y_true, y_pred),
-            "Recall": recall_score(y_true, y_pred),
-            "TP": float(tp), "TN": float(tn), "FP": float(fp), "FN": float(fn),
-            "NPV": npv, "LR+": lr_plus, "LR-": lr_minus,
+            "Balanced Accuracy": s_bac,
+            "Accuracy": s_ac,
+            "F1 Score": s_f1,
+            "Sensitivity (Recall)": s_re,
+            "Precision (PPV)": s_pr,
+            "Brier Score": s_bs,
         }
 
-    # Multiclass case: use macro-averaged metrics
+    # -----------------------
+    # Binary
+    # -----------------------
+    # Use confusion matrix in the same way your earlier code does (ravel)
+    cm = _safe(confusion_matrix, y_true, y_pred, labels=labels)
+    if cm is None:
+        # Can happen if something pathological; return best-effort with None extras
+        return {
+            "Balanced Accuracy": s_bac,
+            "Accuracy": s_ac,
+            "F1 Score": s_f1,
+            "Sensitivity (Recall)": s_re,
+            "Specificity": None,
+            "Precision (PPV)": s_pr,
+            "Brier Score": s_bs,
+            "TP": None,
+            "TN": None,
+            "FP": None,
+            "FN": None,
+            "NPV": None,
+            "LR+": None,
+            "LR-": None,
+        }
+
+    try:
+        tn, fp, fn, tp = cm.ravel()
+        tn = float(tn); fp = float(fp); fn = float(fn); tp = float(tp)
+    except Exception:
+        tn = fp = fn = tp = None
+
+    # Specificity and NPV
+    if tn is not None and fp is not None and (tn + fp) > 0:
+        s_sp = float(tn / (tn + fp))
+    else:
+        s_sp = None
+
+    if tn is not None and fn is not None and (tn + fn) > 0:
+        s_npv = float(tn / (tn + fn))
+    else:
+        s_npv = None
+
+    # LR+/LR- using your Phase-6-style definitions (from your BinaryClassificationModel)
+    # LR+ = (TPR) / (FPR)
+    if tp is not None and fn is not None and fp is not None and tn is not None:
+        if (tp + fn) > 0 and (fp + tn) > 0 and fp > 0:
+            tpr = tp / (tp + fn)
+            fpr = fp / (fp + tn)
+            s_lrp = float(tpr / fpr) if fpr > 0 else None
+        else:
+            s_lrp = 0.0
+        # LR- = (FNR) / (TNR)
+        if (tp + fn) > 0 and (fp + tn) > 0 and tn > 0:
+            fnr = fn / (tp + fn)
+            tnr = tn / (fp + tn)
+            s_lrm = float(fnr / tnr) if tnr > 0 else None
+        else:
+            s_lrm = 0.0
+    else:
+        s_lrp = None
+        s_lrm = None
+
     return {
-        "Balanced Accuracy": balanced_accuracy_score(y_true, y_pred),
-        "Accuracy": accuracy_score(y_true, y_pred),
-        "F1": f1_score(y_true, y_pred, average="macro"),
-        "Precision": precision_score(y_true, y_pred, average="macro"),
-        "Recall": recall_score(y_true, y_pred, average="macro"),
+        "Balanced Accuracy": s_bac,
+        "Accuracy": s_ac,
+        "F1 Score": s_f1,
+        "Sensitivity (Recall)": s_re,
+        "Specificity": s_sp,
+        "Precision (PPV)": s_pr,
+        "Brier Score": s_bs,
+        "TP": tp,
+        "TN": tn,
+        "FP": fp,
+        "FN": fn,
+        "NPV": s_npv,
+        "LR+": s_lrp,
+        "LR-": s_lrm,
     }
 
 def _calc_curves_scores_from_proba(y_true, y_proba, classes=None):

@@ -35,7 +35,7 @@ class P5Runner:
         *,
         algorithms: "List[str] | str | None" = "auto",   # <-- default auto
         n_splits: int = 10,
-        class_label: str = "Class",
+        outcome_label: str = "Class",
         instance_label: Optional[str] = None,
         max_features_to_keep: int = 2000,
         filter_poor_features: bool = True,
@@ -58,7 +58,7 @@ class P5Runner:
         self.experiment_name = experiment_name
         self._algorithms_raw = algorithms  # keep raw for "auto"
         self.n_splits = int(n_splits)
-        self.class_label = class_label
+        self.outcome_label = outcome_label
         self.instance_label = instance_label
         self.max_features_to_keep = int(max_features_to_keep)
         self.filter_poor_features = bool(filter_poor_features)
@@ -151,7 +151,7 @@ class P5Runner:
             dataset_dir=dataset_dir,
             n_splits=self.n_splits,
             algorithms=algs,  # pass concrete list
-            class_label=self.class_label,
+            outcome_label=self.outcome_label,
             instance_label=self.instance_label,
             max_features_to_keep=self.max_features_to_keep,
             filter_poor_features=self.filter_poor_features,
@@ -175,7 +175,7 @@ class P5Runner:
             "--dataset_dir", dataset_dir,
             "--n_splits", str(self.n_splits),
             "--algorithms", ",".join(algorithms_for_ds),
-            "--class_label", self.class_label or "Class",
+            "--outcome_label", self.outcome_label or "Class",
             "--instance_label", self.instance_label or "",
             "--max_features_to_keep", str(self.max_features_to_keep),
             "--filter_poor_features", "1" if self.filter_poor_features else "0",

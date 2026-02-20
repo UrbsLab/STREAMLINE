@@ -129,27 +129,19 @@ class ReportPhaseJob:
     """
     Phase 11: Reporting (FPDF)
 
-    Layout rules:
-      - Cover page: legacy-style two-column parameter boxes.
-      - Metadata also written to reporting/metadata.txt (plain text).
-
+    Layout changes (per your request):
+      - Cover page looks like the legacy report (two-column parameter boxes).
+      - Metadata is also written as a plain text file (reporting/metadata.txt).
       - Per-dataset order:
-          1) EDA - Page 1
-             - Univariate (only if informative)
-             - Class Balance + Missingness (grid)
-             - Cleaning (C) and Engineering (E) Elements (text box)
-          1b) Correlation Matrix (full page, if present)
-          2) Feature Learning (all FI methods)
-          3) Performance (combined models + ensembles; ensemble rows renamed with suffix; no wrap)
-          4) Evaluation Results (summary ROC/PRC only; no per-algorithm ROC/PRC pages)
-          5) Runtime Summary
+          1) EDA page (Page 1 for the dataset): class balance, missingness, (optional) univariate
+          2) Feature learning page: feature importance/selection (all methods) + informative features table
+          3) Performance page: combined model + ensemble performance tables (no wrapping; widths + truncation)
+          4) Evaluation results page: ROC/PRC summary with original aspect ratio + (optional) per-model curves
+      - Univariate appears in EDA; automatically omitted if not informative.
 
-    Rendering rules:
-      - Prefer precomputed PNGs in the experiment output tree.
-      - Fallback to plotting into reporting/figures only if originals are missing.
-      - Keep Times / Times New Roman core fonts; sanitize text to ASCII-safe equivalents.
-      - Do not render any placeholder panels for missing figures (skip silently).
-      - No em-dashes and no ellipsis in outputs.
+    Data rules:
+      - Prefer precomputed PNGs already present in experiment outputs.
+      - Fallback to plotting/exporting into reporting/figures only if originals are missing.
     """
 
     def __init__(
@@ -179,6 +171,7 @@ class ReportPhaseJob:
         if not self.exp_root.is_dir():
             raise FileNotFoundError(f"Experiment folder not found: {self.exp_root}")
 
+        # Match legacy cover title style
         self.title = f"STREAMLINE Testing Data Evaluation Report: {_now_iso_local()}"
 
         self.make_pdf = make_pdf
@@ -311,6 +304,7 @@ class ReportPhaseJob:
         s = k.lower()
         if any(x in s for x in ["generated_at", "generated at", "epoch", "timestamp", "time stamp"]):
             return True
+        # e.g., 2023-09-26 12:57:00.921630 or ISO-ish fragments in keys
         if re.search(r"\b20\d{2}[-_/]\d{2}[-_/]\d{2}\b", s):
             return True
         if re.search(r"\b\d{2}:\d{2}:\d{2}\b", s):
@@ -318,17 +312,33 @@ class ReportPhaseJob:
         return False
 
     def _pretty_cover_key(self, k: str) -> str:
+        """
+        Remove identifier-like prefixes and flatten separators for the cover page.
+
+        - Drops leading "run_params ·" / "metadata ·" segments by taking last segment.
+        - Replaces underscores with spaces.
+        - Strips common "identifier_code"/"identifier" style keys.
+        """
         parts = [p.strip() for p in str(k).split("·")]
         last = parts[-1] if parts else str(k)
-        last = last.strip().replace("_", " ")
+        last = last.strip()
+        last = last.replace("_", " ")
         last = re.sub(r"\s+", " ", last).strip()
         return last
 
     def _should_drop_identifier_code(self, k: str) -> bool:
         s = k.lower()
-        return any(x in s for x in ["identifier code", "identifier_code", "run id", "run_id", "uuid", "guid", "hash", "job id", "job_id"])
+        # user: "remove the identifier code (code like variable name)"
+        # heuristics: keys that look like internal IDs / hashes / uid fields
+        if any(x in s for x in ["identifier code", "identifier_code", "run id", "run_id", "uuid", "guid", "hash", "job id", "job_id"]):
+            return True
+        # If key itself looks like a variable name but value looks like a hash/uid
+        return False
 
     def _write_metadata_text(self, *, cover_boxes: Dict[str, List[Tuple[str, str]]], enriched_meta: Dict[str, Any]) -> None:
+        """
+        Write a plain text metadata file for easy grepping/logging.
+        """
         lines: List[str] = []
         lines.append(self.title)
         lines.append(f"Experiment Root: {self.exp_root}")
@@ -400,17 +410,6 @@ class ReportPhaseJob:
             ds_dir / "exploratory" / "MissingnessTop25.png",
         ])
 
-    def _figure_path_exploratory_correlation_matrix(self, ds_dir: Path) -> Optional[str]:
-        return self._first_existing([
-            ds_dir / "exploratory" / "FeatureCorrelationMatrix.png",
-            ds_dir / "exploratory" / "FeatureCorrelation.png",
-            ds_dir / "exploratory" / "CorrelationMatrix.png",
-            ds_dir / "exploratory" / "CorrelationHeatmap.png",
-            ds_dir / "exploratory" / "feature_correlation" / "CorrelationMatrix.png",
-            ds_dir / "exploratory" / "feature_correlation" / "FeatureCorrelationMatrix.png",
-            ds_dir / "exploratory" / "FeatureCorrelation" / "CorrelationMatrix.png",
-        ])
-
     def _figure_path_model_summary_roc_prc(self, ds_dir: Path, kind: str) -> Optional[str]:
         if kind.lower() == "roc":
             return self._first_existing([ds_dir / "model_evaluation" / "Summary_ROC.png"])
@@ -427,6 +426,9 @@ class ReportPhaseJob:
         return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_PRC_ensembles.png"])
 
     def _figure_paths_fs_top_scores(self, ds_dir: Path) -> List[Dict[str, str]]:
+        """
+        Return ALL existing TopAverageScores.png figures under feature_importance/*.
+        """
         base = ds_dir / "feature_importance"
         if not base.is_dir():
             return []
@@ -438,6 +440,27 @@ class ReportPhaseJob:
                     out.append({"method": p.parent.name, "path": str(p)})
             except Exception:
                 continue
+        return out
+
+    def _figure_paths_model_curves(self, ds_dir: Path) -> Dict[str, List[str]]:
+        """
+        Collect per-model ROC/PRC curves if present, e.g. LR_ROC.png, LR_PRC.png.
+        """
+        out: Dict[str, List[str]] = {"roc": [], "prc": []}
+        me = ds_dir / "model_evaluation"
+        if not me.is_dir():
+            return out
+
+        for p in sorted(me.glob("*_ROC.png")):
+            if p.name.lower().startswith("summary_"):
+                continue
+            out["roc"].append(str(p))
+
+        for p in sorted(me.glob("*_PRC.png")):
+            if p.name.lower().startswith("summary_"):
+                continue
+            out["prc"].append(str(p))
+
         return out
 
     def _figure_path_dataset_comparisons_any(self) -> Optional[str]:
@@ -452,6 +475,25 @@ class ReportPhaseJob:
     # ============================================================
     # Plot builders (fallback only)
     # ============================================================
+
+    def _plot_model_summary_bars(self, summary_mean: pd.DataFrame, metric: str, title: str):
+        import plotly.express as px  # type: ignore
+
+        df = summary_mean.copy()
+        if df.columns[0].lower() not in {"unnamed: 0", "model", "algorithm", "ml algorithm", "ml_algorithm"}:
+            if df.index.name is not None:
+                df = df.reset_index()
+        name_col = df.columns[0]
+
+        if metric not in df.columns:
+            raise KeyError(metric)
+
+        df = df[[name_col, metric]].dropna()
+        df = df.sort_values(metric, ascending=False)
+
+        fig = px.bar(df, x=name_col, y=metric, title=title)
+        fig.update_layout(xaxis_title="Model", yaxis_title=metric)
+        return fig
 
     def _plot_class_counts(self, class_counts: pd.DataFrame, title: str):
         import plotly.express as px  # type: ignore
@@ -507,19 +549,6 @@ class ReportPhaseJob:
 
         fig = px.bar(df.iloc[::-1], x=val_col, y=fcol, orientation="h", title=title)
         fig.update_layout(xaxis_title=val_col, yaxis_title="Feature")
-        return fig
-
-    def _plot_correlation_matrix_from_csv(self, corr_df: pd.DataFrame, title: str):
-        import plotly.express as px  # type: ignore
-
-        df = corr_df.copy()
-        if df.shape[1] > 1 and str(df.columns[0]).lower() in {"unnamed: 0", "feature", "var", "variable"}:
-            df = df.set_index(df.columns[0])
-        df = df.apply(pd.to_numeric, errors="coerce")
-        df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
-
-        fig = px.imshow(df, aspect="auto", title=title, color_continuous_scale="RdBu", zmin=-1, zmax=1)
-        fig.update_layout(margin=dict(l=10, r=10, t=40, b=10))
         return fig
 
     # ============================================================
@@ -609,6 +638,12 @@ class ReportPhaseJob:
         return {"present": True, "columns": list(df2.columns), "rows": df2.values.tolist()}
 
     def _univariate_is_informative(self, uni: Optional[pd.DataFrame]) -> bool:
+        """
+        Drop univariate if it doesn't add much:
+          - missing/empty -> False
+          - <3 rows -> False
+          - if a p-value column exists, require at least one p < 0.10
+        """
         if uni is None or uni.empty:
             return False
         if len(uni) < 3:
@@ -621,6 +656,7 @@ class ReportPhaseJob:
                 pcol = low[cand]
                 break
         if pcol is None:
+            # If no p-values, still consider it useful if it has at least 2+ columns and non-trivial rows
             return uni.shape[1] >= 2 and len(uni) >= 5
 
         try:
@@ -632,210 +668,7 @@ class ReportPhaseJob:
             return False
 
     # ============================================================
-    # Combine model + ensemble performance (Mean +/- SD)
-    #   - NO new column
-    #   - ensemble rows renamed: "<Algorithm> - Ensemble"
-    # ============================================================
-
-    def _combine_model_and_ensemble_perf(
-        self,
-        models_mean_std: Dict[str, Any],
-        ensembles_mean_std: Dict[str, Any],
-        *,
-        drop_if_needed: Sequence[str] = ("Brier Score",),
-        ensemble_suffix: str = " - Ensemble",
-    ) -> Dict[str, Any]:
-        ms = models_mean_std or {}
-        es = ensembles_mean_std or {}
-
-        if not ms.get("present") and not es.get("present"):
-            return {"present": False}
-
-        ms_cols = list(ms.get("columns") or []) if ms.get("present") else []
-        es_cols = list(es.get("columns") or []) if es.get("present") else []
-
-        ms_metrics = [c for c in ms_cols if c != "Algorithm"]
-        es_metrics = [c for c in es_cols if c != "Algorithm"]
-
-        metrics: List[str] = []
-        for c in ms_metrics + es_metrics:
-            if c not in metrics:
-                metrics.append(c)
-
-        # Too wide? columns are Algorithm + metrics
-        too_wide = (1 + len(metrics)) >= 11
-        if too_wide:
-            for drop_col in drop_if_needed:
-                if drop_col in metrics:
-                    metrics.remove(drop_col)
-                    break
-
-        def _row_map(mean_std_tbl: Dict[str, Any]) -> Dict[str, Dict[str, Tuple[Any, Any]]]:
-            out: Dict[str, Dict[str, Tuple[Any, Any]]] = {}
-            if not mean_std_tbl.get("present"):
-                return out
-            cols = list(mean_std_tbl.get("columns") or [])
-            for row in mean_std_tbl.get("rows") or []:
-                cells = row.get("cells") or []
-                if not cells:
-                    continue
-                alg = str((cells[0] or {}).get("value", "")).strip()
-                if not alg:
-                    continue
-                m: Dict[str, Tuple[Any, Any]] = {}
-                for j, col in enumerate(cols):
-                    if col == "Algorithm":
-                        continue
-                    if j >= len(cells):
-                        continue
-                    v = (cells[j] or {}).get("value")
-                    if isinstance(v, tuple) and len(v) == 2:
-                        m[col] = (v[0], v[1])
-                out[alg] = m
-            return out
-
-        ms_map = _row_map(ms)
-        es_map = _row_map(es)
-
-        columns = ["Algorithm"] + metrics
-        rows: List[Dict[str, Any]] = []
-
-        # Models
-        for alg in sorted(ms_map.keys(), key=lambda s: s.lower()):
-            metric_map = ms_map[alg]
-            cells: List[Dict[str, Any]] = [{"value": alg, "best": False}]
-            for met in metrics:
-                if met in metric_map:
-                    mv, sv = metric_map[met]
-                    cells.append({"value": (mv, sv), "best": False})
-                else:
-                    cells.append({"value": ("", ""), "best": False})
-            rows.append({"cells": cells})
-
-        # Ensembles (renamed)
-        for alg in sorted(es_map.keys(), key=lambda s: s.lower()):
-            alg2 = f"{alg}{ensemble_suffix}"
-            metric_map = es_map[alg]
-            cells = [{"value": alg2, "best": False}]
-            for met in metrics:
-                if met in metric_map:
-                    mv, sv = metric_map[met]
-                    cells.append({"value": (mv, sv), "best": False})
-                else:
-                    cells.append({"value": ("", ""), "best": False})
-            rows.append({"cells": cells})
-
-        highlight_metric = None
-        for cand in ["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"]:
-            if cand in metrics:
-                highlight_metric = cand
-                break
-
-        return {
-            "present": True,
-            "columns": columns,
-            "rows": rows,
-            "highlight_metric": highlight_metric,
-            "best_algorithm": None,
-        }
-
-    # ============================================================
-    # Combine model + ensemble medians (same renaming)
-    # ============================================================
-
-    def _combine_model_and_ensemble_median(
-        self,
-        models_median: Dict[str, Any],
-        ensembles_median: Dict[str, Any],
-        *,
-        drop_if_needed: Sequence[str] = ("Brier Score",),
-        ensemble_suffix: str = " - Ensemble",
-    ) -> Dict[str, Any]:
-        mm = models_median or {}
-        em = ensembles_median or {}
-
-        if not mm.get("present") and not em.get("present"):
-            return {"present": False}
-
-        mm_cols = list(mm.get("columns") or []) if mm.get("present") else []
-        em_cols = list(em.get("columns") or []) if em.get("present") else []
-
-        if not mm_cols and not em_cols:
-            return {"present": False}
-
-        def infer_alg_col(columns: List[str]) -> str:
-            low = {c.lower(): c for c in columns}
-            for key in ["ml algorithm", "ml_algorithm", "algorithm", "model"]:
-                if key in low:
-                    return low[key]
-            return columns[0] if columns else "Algorithm"
-
-        mm_alg = infer_alg_col(mm_cols) if mm_cols else "Algorithm"
-        em_alg = infer_alg_col(em_cols) if em_cols else "Algorithm"
-
-        mm_metrics = [c for c in mm_cols if c != mm_alg]
-        em_metrics = [c for c in em_cols if c != em_alg]
-
-        metrics: List[str] = []
-        for c in mm_metrics + em_metrics:
-            if c not in metrics:
-                metrics.append(c)
-
-        too_wide = (1 + len(metrics)) >= 11
-        if too_wide:
-            for drop_col in drop_if_needed:
-                if drop_col in metrics:
-                    metrics.remove(drop_col)
-                    break
-
-        def to_map(tbl: Dict[str, Any], alg_col: str) -> Dict[str, Dict[str, Any]]:
-            out: Dict[str, Dict[str, Any]] = {}
-            if not tbl.get("present"):
-                return out
-            cols = list(tbl.get("columns") or [])
-            rows = list(tbl.get("rows") or [])
-            if not cols or not rows:
-                return out
-            idx = {c: i for i, c in enumerate(cols)}
-            alg_i = idx.get(alg_col, 0)
-
-            for r in rows:
-                if r is None:
-                    continue
-                rr = list(r)
-                if alg_i >= len(rr):
-                    continue
-                alg = str(rr[alg_i]).strip()
-                if not alg:
-                    continue
-                m: Dict[str, Any] = {}
-                for met in metrics:
-                    j = idx.get(met)
-                    if j is None or j >= len(rr):
-                        continue
-                    m[met] = rr[j]
-                out[alg] = m
-            return out
-
-        mm_map = to_map(mm, mm_alg)
-        em_map = to_map(em, em_alg)
-
-        columns = ["Algorithm"] + metrics
-        out_rows: List[List[Any]] = []
-
-        for alg in sorted(mm_map.keys(), key=lambda s: s.lower()):
-            m = mm_map[alg]
-            out_rows.append([alg] + [m.get(met, "") for met in metrics])
-
-        for alg in sorted(em_map.keys(), key=lambda s: s.lower()):
-            alg2 = f"{alg}{ensemble_suffix}"
-            m = em_map[alg]
-            out_rows.append([alg2] + [m.get(met, "") for met in metrics])
-
-        return {"present": True, "columns": columns, "rows": out_rows}
-
-    # ============================================================
-    # Cover page grouping (legacy categories)
+    # Cover page grouping (match legacy report categories)
     # ============================================================
 
     def _categorize_cover_items(
@@ -845,25 +678,36 @@ class ReportPhaseJob:
         *,
         exp_root: Path,
     ) -> Dict[str, List[Tuple[str, str]]]:
+        """
+        Create the cover page boxes in the same spirit as the legacy report,
+        while removing duplicate timestamped params and identifier-code-ish fields.
+        """
         combined = self._merge_union_dicts(run_params_flat or {}, meta_pickle_flat or {})
 
         def add(cat: str, k: str, v: Any):
+            # Clean and filter keys
             if self._is_timestampy_key(k):
                 return
             if self._should_drop_identifier_code(k):
                 return
+
             pretty_k = self._pretty_cover_key(k)
+
+            # If key is still ugly variable-ish, keep it but at least space it.
             if pretty_k.strip() == "":
                 return
+
             out.setdefault(cat, []).append((pretty_k, self._as_compact_str(v)))
 
         out: Dict[str, List[Tuple[str, str]]] = {}
 
+        # --- Target Dataset(s): infer from folder structure if not present
         ds_names = [p.name for p in self._list_datasets()]
         if ds_names:
             items = [(f"D{i+1}", nm) for i, nm in enumerate(ds_names)]
             out["Target Dataset(s):"] = [(f"{k}", f"= {v}") for k, v in items]
 
+        # --- Target Data Settings (paths/labels)
         for key in [
             "data path", "input path", "dataset path",
             "output path",
@@ -879,6 +723,7 @@ class ReportPhaseJob:
                 if str(kk).strip().lower() == key:
                     add("Target Data Settings:", kk, combined[kk])
 
+        # --- General Pipeline Settings
         for kk, vv in combined.items():
             k = str(kk).lower()
             if any(x in k for x in ["cv", "partition", "seed", "random", "categorical cutoff", "statistical", "significance", "notebook"]):
@@ -886,6 +731,7 @@ class ReportPhaseJob:
                     continue
                 add("General Pipeline Settings:", kk, vv)
 
+        # --- EDA and Processing Settings
         for kk, vv in combined.items():
             k = str(kk).lower()
             if any(x in k for x in ["missing", "imput", "scale", "correlation", "describe", "univariate", "eda", "processing", "clean"]):
@@ -893,11 +739,13 @@ class ReportPhaseJob:
                     continue
                 add("EDA and Processing Settings:", kk, vv)
 
+        # --- Feature Importance/Selection Settings
         for kk, vv in combined.items():
             k = str(kk).lower()
             if any(x in k for x in ["feature importance", "feature selection", "multisurf", "mutual", "turf", "max features", "top features", "filter poor"]):
                 add("Feature Importance/Selection Settings:", kk, vv)
 
+        # --- ML Modeling Algorithms (boolean toggles)
         algo_items: List[Tuple[str, str]] = []
         algo_keys = [
             "logistic", "naive", "bayes", "random forest", "svm", "support vector",
@@ -916,21 +764,25 @@ class ReportPhaseJob:
             algo_items.sort(key=lambda t: (t[1] != "True", t[0].lower()))
             out["ML Modeling Algorithms:"] = algo_items
 
+        # --- Modeling Settings
         for kk, vv in combined.items():
             k = str(kk).lower()
             if any(x in k for x in ["primary metric", "hyperparameter", "trials", "timeout", "subsample", "uniform feature importance"]):
                 add("Modeling Settings:", kk, vv)
 
+        # --- LCS Settings
         for kk, vv in combined.items():
             k = str(kk).lower()
             if any(x in k for x in ["lcs", "xcs", "elcs", "exstracs", "rule population", "training iterations", "nu"]):
                 add("LCS Settings (eLCS, XCS, ExSTraCS):", kk, vv)
 
+        # --- Stats and Figure Settings
         for kk, vv in combined.items():
             k = str(kk).lower()
             if any(x in k for x in ["export", "roc", "prc", "boxplot", "figure", "plot", "correlation", "top model features", "metric weighting"]):
                 add("Stats and Figure Settings:", kk, vv)
 
+        # Deduplicate by key within sections (keep first)
         for cat, items in list(out.items()):
             seen = set()
             dedup: List[Tuple[str, str]] = []
@@ -941,6 +793,7 @@ class ReportPhaseJob:
                 dedup.append((k, v))
             out[cat] = dedup
 
+        # Ensure legacy order
         ordered = [
             "General Pipeline Settings:",
             "EDA and Processing Settings:",
@@ -970,36 +823,15 @@ class ReportPhaseJob:
         figs: Dict[str, Any] = {}
 
         explore = ds_dir / "exploratory"
+        data_process_summary = self._read_csv_if_exists(explore / "DataProcessSummary.csv")
         class_counts = self._read_csv_if_exists(explore / "ClassCounts.csv")
         missingness = self._read_csv_if_exists(explore / "DataMissingness.csv")
         univariate = self._read_csv_if_exists(explore / "univariate_analyses" / "Univariate_Significance.csv")
 
-        # Correlation matrix
-        corr_png = self._figure_path_exploratory_correlation_matrix(ds_dir) or ""
-        if not corr_png:
-            corr_csv = self._first_existing([
-                explore / "FeatureCorrelationMatrix.csv",
-                explore / "CorrelationMatrix.csv",
-                explore / "FeatureCorrelation.csv",
-                explore / "feature_correlation" / "CorrelationMatrix.csv",
-                explore / "FeatureCorrelation" / "CorrelationMatrix.csv",
-            ])
-            if corr_csv:
-                try:
-                    corr_df = pd.read_csv(corr_csv)
-                    fig = self._plot_correlation_matrix_from_csv(corr_df, f"{name}: Feature Correlation Matrix")
-                    out = self.paths.figures_dir / f"{name}_corr_matrix.png"
-                    if _safe_plotly_to_png(fig, out):
-                        corr_png = str(out)
-                except Exception as e:
-                    logger.warning("Correlation matrix fallback plot failed for %s: %r", name, e)
-        figs["correlation_matrix"] = corr_png
-
-        # Univariate (optional)
+        # Univariate: keep only if informative; show Top 10
         uni_use = self._univariate_is_informative(univariate)
         univariate_top10 = univariate.head(10) if (uni_use and univariate is not None and not univariate.empty) else None
 
-        # Performance tables
         model_eval = ds_dir / "model_evaluation"
         summary_mean = self._read_csv_if_exists(model_eval / "Summary_performance_mean.csv")
         summary_std = self._read_csv_if_exists(model_eval / "Summary_performance_std.csv")
@@ -1010,11 +842,10 @@ class ReportPhaseJob:
         ens_std = self._read_csv_if_exists(ens_eval / "Ensembles_performance_std.csv")
         ens_median = self._read_csv_if_exists(ens_eval / "Ensembles_performance_median.csv")
 
-        # Feature learning / selection tables
         feat_sel = self._read_csv_if_exists(ds_dir / "feature_selection" / "InformativeFeatureSummary.csv")
         runtimes = self._read_csv_if_exists(ds_dir / "runtimes.csv")
 
-        # Figures (EDA)
+        # Figures: EDA (prefer originals)
         figs["class_balance"] = self._figure_path_exploratory_class_balance(ds_dir) or ""
         if not figs["class_balance"] and class_counts is not None and not class_counts.empty:
             try:
@@ -1035,66 +866,74 @@ class ReportPhaseJob:
             except Exception as e:
                 logger.warning("Missingness plot failed for %s: %r", name, e)
 
-        # CV distribution boxplot
+        # Performance: prefer summary/boxplots
+        figs["models_mean_bar"] = ""
         figs["models_cv_box"] = ""
+
         chosen_metric = None
         if summary_mean is not None and not summary_mean.empty:
             for preferred in ["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"]:
                 if preferred in summary_mean.columns:
                     chosen_metric = preferred
                     break
+
         if chosen_metric:
             box = self._figure_path_model_metric_boxplot(ds_dir, chosen_metric)
             if box:
                 figs["models_cv_box"] = box
+            if box and not figs["models_mean_bar"]:
+                figs["models_mean_bar"] = box
+            if not figs["models_mean_bar"]:
+                try:
+                    fig = self._plot_model_summary_bars(summary_mean, chosen_metric, f"{name}: Mean {chosen_metric} (Models)")
+                    out = self.paths.figures_dir / f"{name}_models_mean_{chosen_metric.replace(' ', '_')}.png"
+                    if _safe_plotly_to_png(fig, out):
+                        figs["models_mean_bar"] = str(out)
+                except Exception as e:
+                    logger.warning("Model mean bar plot failed for %s (%s): %r", name, chosen_metric, e)
 
-        # Summary curves only
+        # Evaluation results: ROC/PRC summaries (and per-model curves)
         figs["models_roc_overlay"] = self._figure_path_model_summary_roc_prc(ds_dir, "roc") or ""
         figs["models_prc_overlay"] = self._figure_path_model_summary_roc_prc(ds_dir, "prc") or ""
+
         figs["ensembles_roc"] = self._figure_path_ensemble_summary(ds_dir, "roc") or ""
         figs["ensembles_prc"] = self._figure_path_ensemble_summary(ds_dir, "prc") or ""
 
-        # Feature learning figures (all methods)
-        figs["fi_top_scores"] = self._figure_paths_fs_top_scores(ds_dir)
+        figs["model_curves"] = self._figure_paths_model_curves(ds_dir)  # {"roc":[...], "prc":[...]}
 
-        # Tables (mean/std + median)
+        # Feature learning: ALL FI methods
+        fi_methods = self._figure_paths_fs_top_scores(ds_dir)
+        figs["fi_top_scores"] = fi_methods
+
+        # Tables
         models_mean_std = self._build_mean_std_table(
             summary_mean,
             summary_std,
             highlight_metric_candidates=["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"],
         )
+        models_median = self._build_plain_table(summary_median, max_rows=100)
+
         ensembles_mean_std = self._build_mean_std_table(
             ens_mean,
             ens_std,
             highlight_metric_candidates=["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"],
         )
-        combined_mean_std = self._combine_model_and_ensemble_perf(
-            models_mean_std,
-            ensembles_mean_std,
-            drop_if_needed=("Brier Score",),
-            ensemble_suffix=" - Ensemble",
-        )
-
-        models_median = self._build_plain_table(summary_median, max_rows=200)
-        ensembles_median = self._build_plain_table(ens_median, max_rows=200)
-        combined_median = self._combine_model_and_ensemble_median(
-            models_median,
-            ensembles_median,
-            drop_if_needed=("Brier Score",),
-            ensemble_suffix=" - Ensemble",
-        )
+        ensembles_median = self._build_plain_table(ens_median, max_rows=100)
 
         return {
             "dataset_name": name,
             "dataset_dir": str(ds_dir),
             "tables": {
+                "data_process_summary": self._build_plain_table(data_process_summary, max_rows=50),
                 "univariate_top10": self._build_plain_table(univariate_top10, max_rows=10),
                 "informative_feature_summary": self._build_plain_table(feat_sel, max_rows=200),
                 "runtimes": self._build_plain_table(runtimes, max_rows=500),
             },
             "perf": {
-                "combined_mean_std": combined_mean_std,
-                "combined_median": combined_median,
+                "models_mean_std": models_mean_std,
+                "models_median": models_median,
+                "ensembles_mean_std": ensembles_mean_std,
+                "ensembles_median": ensembles_median,
             },
             "figures": figs,
         }
@@ -1135,12 +974,12 @@ class ReportPhaseJob:
         )
         pdf.alias_nb_pages()
 
-        # COVER
+        # COVER (legacy-like)
         pdf.add_page()
         pdf.cover_banner_title(str(report_data.get("title", "")))
         pdf.cover_two_column_boxes(report_data.get("cover_boxes", {}) or {})
 
-        # DATASETS
+        # DATASETS (per-dataset page order you requested)
         for ds in report_data.get("datasets", []) or []:
             ds_name = str(ds.get("dataset_name", ""))
             ds_dir = str(ds.get("dataset_dir", ""))
@@ -1150,53 +989,35 @@ class ReportPhaseJob:
             perf = ds.get("perf", {}) or {}
 
             # -------------------------
-            # EDA - PAGE 1
+            # EDA - PAGE 1 (per dataset)
             # -------------------------
             pdf.add_page()
             pdf.panel_title(f"Dataset: {ds_name}")
             pdf.set_font("Times", "", 10)
             if ds_dir:
-                pdf.multi_cell(0, 5, pdf.s(ds_dir))
+                pdf.multi_cell(0, 5, ds_dir)
                 pdf.ln(1.0)
 
             pdf.panel_title("EDA")
-
-            # Univariate (optional)
-            uni = tables.get("univariate_top10", {}) or {}
-            if uni.get("present"):
-                pdf.subheader("Univariate Analysis (Top 10)")
-                pdf.draw_table(uni.get("columns", []), uni.get("rows", []), max_rows=10, no_wrap=True)
-
-            # EDA grid (skip missing panels silently)
-            pdf.figure_grid_2x2(
-                titles=["Class Balance", "Missingness (Top 25 Features)", "", ""],
-                paths=[figs.get("class_balance") or None, figs.get("missingness") or None, None, None],
-                cell_h=66.0,
+            pdf.figure_row_2(
+                titles=["Class Balance", "Missingness (Top 25 Features)"],
+                paths=[figs.get("class_balance") or None, figs.get("missingness") or None],
+                h=82.0,
                 gap=4.0,
                 title_h=6.0,
-                keep_aspect=True,
             )
 
-            # Cleaning/Engineering elements
-            pdf.panel_title("Cleaning (C) and Engineering (E) Elements")
-            pdf.cleaning_engineering_box(
-                [
-                    "C1 - Remove instances with no outcome and features to ignore",
-                    "E1 - Add missingness features",
-                    "C2 - Remove features with invariance or high missingness",
-                    "C3 - Remove instances with high missingness",
-                    "E2 - Add one-hot-encoding of categorical features",
-                    "C4 - Remove highly correlated features",
-                ]
-            )
+            # Univariate first (and drop if not useful; already filtered)
+            uni = tables.get("univariate_top10", {}) or {}
+            if uni.get("present"):
+                pdf.panel_title("Univariate Analysis (Top 10)")
+                pdf.draw_table(uni.get("columns", []), uni.get("rows", []), max_rows=10)
 
-            # Correlation matrix full page (if present)
-            corr = figs.get("correlation_matrix") or ""
-            if corr and Path(corr).exists():
-                pdf.add_page()
-                pdf.panel_title(f"Dataset: {ds_name}")
-                pdf.panel_title("Feature Correlation Matrix")
-                pdf.figure_single("", corr, h=175.0, title_h=0.0, keep_aspect=True)
+            # Optional: data process summary fits naturally under EDA
+            dps = tables.get("data_process_summary", {}) or {}
+            if dps.get("present"):
+                pdf.panel_title("Data Processing Summary")
+                pdf.draw_table(dps.get("columns", []), dps.get("rows", []), max_rows=50)
 
             # -------------------------
             # Feature Learning
@@ -1208,114 +1029,157 @@ class ReportPhaseJob:
             fi_list = figs.get("fi_top_scores") or []
             norm: List[Dict[str, str]] = []
             for item in fi_list:
-                if isinstance(item, dict) and "path" in item and item.get("path"):
-                    p = str(item["path"])
-                    if Path(p).exists():
-                        norm.append({"method": str(item.get("method") or "method"), "path": p})
+                if isinstance(item, dict) and "path" in item:
+                    norm.append({"method": str(item.get("method") or "method"), "path": str(item["path"])})
+                elif isinstance(item, str):
+                    norm.append({"method": "method", "path": item})
 
-            if norm:
-                if len(norm) == 1:
-                    pdf.figure_single(
-                        f"Top Scores ({norm[0]['method']})", norm[0]["path"], h=130.0, title_h=6.0, keep_aspect=True
-                    )
-                elif len(norm) == 2:
-                    pdf.figure_row_2(
-                        titles=[f"Top Scores ({norm[0]['method']})", f"Top Scores ({norm[1]['method']})"],
-                        paths=[norm[0]["path"], norm[1]["path"]],
-                        h=95.0,
-                        gap=4.0,
-                        title_h=6.0,
-                        keep_aspect=True,
-                    )
-                else:
-                    for i in range(0, len(norm), 4):
-                        chunk = norm[i : i + 4]
-                        titles = [f"Top Scores ({c['method']})" for c in chunk]
-                        paths = [c["path"] for c in chunk]
-                        while len(titles) < 4:
-                            titles.append("")
-                            paths.append(None)
-                        pdf.figure_grid_2x2(
-                            titles=titles,
-                            paths=paths,
-                            cell_h=66.0,
-                            gap=4.0,
-                            title_h=6.0,
-                            keep_aspect=True,
-                        )
-                        if i + 4 < len(norm):
-                            pdf.add_page()
-                            pdf.panel_title(f"Dataset: {ds_name}")
-                            pdf.panel_title("Feature Learning")
+            if not norm:
+                pdf.muted("Missing: feature_importance/*/TopAverageScores.png")
+            elif len(norm) == 1:
+                pdf.figure_single(f"Top Scores ({norm[0]['method']})", norm[0]["path"], h=130.0, title_h=6.0)
+            elif len(norm) == 2:
+                pdf.figure_row_2(
+                    titles=[f"Top Scores ({norm[0]['method']})", f"Top Scores ({norm[1]['method']})"],
+                    paths=[norm[0]["path"], norm[1]["path"]],
+                    h=95.0,
+                    gap=4.0,
+                    title_h=6.0,
+                )
+            else:
+                # 2x2 pages for many methods
+                for i in range(0, len(norm), 4):
+                    chunk = norm[i: i + 4]
+                    titles = [f"Top Scores ({c['method']})" for c in chunk]
+                    paths = [c["path"] for c in chunk]
+                    while len(titles) < 4:
+                        titles.append("")
+                        paths.append(None)
+                    pdf.figure_grid_2x2(titles=titles, paths=paths, cell_h=66.0, gap=4.0, title_h=6.0)
+                    if i + 4 < len(norm):
+                        pdf.add_page()
+                        pdf.panel_title(f"Dataset: {ds_name}")
+                        pdf.panel_title("Feature Learning")
 
+            # Informative feature summary (selection output)
             inf = tables.get("informative_feature_summary", {}) or {}
             if inf.get("present"):
                 pdf.panel_title("Informative Feature Summary")
-                pdf.draw_table(inf.get("columns", []), inf.get("rows", []), max_rows=200, no_wrap=True)
+                pdf.draw_table(inf.get("columns", []), inf.get("rows", []), max_rows=200)
+            else:
+                pdf.muted("Missing: feature_selection/InformativeFeatureSummary.csv")
 
             # -------------------------
-            # Performance (combined mean/std + combined median)
+            # Performance (CV-based): combine model + ensemble tables
+            # - no wrapping (truncate)
+            # - column widths driven by tuned allocation
             # -------------------------
             pdf.add_page()
             pdf.panel_title(f"Dataset: {ds_name}")
             pdf.panel_title("Performance (Cross-Validation)")
 
-            cmb = perf.get("combined_mean_std", {}) or {}
-            if cmb.get("present"):
-                pdf.subheader("Model and Ensemble Performance (Mean plus SD)")
-                pdf.draw_mean_std_table(cmb, no_wrap=True)
+            ms = perf.get("models_mean_std", {}) or {}
+            es = perf.get("ensembles_mean_std", {}) or {}
+            mm = perf.get("models_median", {}) or {}
+            em = perf.get("ensembles_median", {}) or {}
 
-            med = perf.get("combined_median", {}) or {}
-            if med.get("present"):
-                pdf.subheader("Median (Combined)")
-                pdf.draw_table(med.get("columns", []), med.get("rows", []), max_rows=200, no_wrap=True)
+            pdf.subheader("Model + Ensemble Performance (Mean ± SD)")
+            if ms.get("present"):
+                pdf.draw_mean_std_table(ms, no_wrap=True)
+            else:
+                pdf.muted("Missing: model_evaluation/Summary_performance_mean.csv and/or Summary_performance_std.csv")
 
-            cv_box = figs.get("models_cv_box") or ""
-            if cv_box and Path(cv_box).exists():
-                pdf.panel_title("Performance Distribution")
-                pdf.figure_single("Model Comparison", cv_box, h=110.0, title_h=6.0, keep_aspect=True)
+            if es.get("present"):
+                pdf.draw_mean_std_table(es, no_wrap=True)
+
+            # Optional: median tables (often redundant). Keep only if present and not huge.
+            if mm.get("present") or em.get("present"):
+                pdf.subheader("Median (optional)")
+                if mm.get("present"):
+                    pdf.draw_table(mm.get("columns", []), mm.get("rows", []), max_rows=80, no_wrap=True)
+                if em.get("present"):
+                    pdf.draw_table(em.get("columns", []), em.get("rows", []), max_rows=80, no_wrap=True)
+
+            # If a boxplot exists, show it here as the “distribution” companion
+            if figs.get("models_cv_box") or figs.get("models_mean_bar"):
+                pdf.panel_title("Performance Distribution / Comparison Plot")
+                pdf.figure_single(
+                    "Model Comparison / Boxplot",
+                    figs.get("models_cv_box") or figs.get("models_mean_bar") or None,
+                    h=110.0,
+                    title_h=6.0,
+                    keep_aspect=True,
+                )
 
             # -------------------------
-            # Evaluation results (summary only)
+            # Evaluation results (post-CV): ROC/PRC summary + per-model curves
+            # Use original aspect ratio where possible.
             # -------------------------
             pdf.add_page()
             pdf.panel_title(f"Dataset: {ds_name}")
             pdf.panel_title("Evaluation Results (Curves)")
 
-            roc = figs.get("models_roc_overlay") or ""
-            prc = figs.get("models_prc_overlay") or ""
-            eroc = figs.get("ensembles_roc") or ""
-            eprc = figs.get("ensembles_prc") or ""
+            pdf.figure_row_2(
+                titles=["Summary ROC", "Summary PRC"],
+                paths=[figs.get("models_roc_overlay") or None, figs.get("models_prc_overlay") or None],
+                h=85.0,
+                gap=4.0,
+                title_h=6.0,
+                keep_aspect=True,
+            )
 
-            if (roc and Path(roc).exists()) or (prc and Path(prc).exists()):
-                pdf.figure_row_2(
-                    titles=["Summary ROC", "Summary PRC"],
-                    paths=[
-                        roc if (roc and Path(roc).exists()) else None,
-                        prc if (prc and Path(prc).exists()) else None,
-                    ],
-                    h=85.0,
-                    gap=4.0,
-                    title_h=6.0,
-                    keep_aspect=True,
-                )
-
-            if (eroc and Path(eroc).exists()) or (eprc and Path(eprc).exists()):
+            if figs.get("ensembles_roc") or figs.get("ensembles_prc"):
                 pdf.panel_title("Ensembles (Summary Curves)")
                 pdf.figure_row_2(
                     titles=["Ensembles ROC", "Ensembles PRC"],
-                    paths=[
-                        eroc if (eroc and Path(eroc).exists()) else None,
-                        eprc if (eprc and Path(eprc).exists()) else None,
-                    ],
+                    paths=[figs.get("ensembles_roc") or None, figs.get("ensembles_prc") or None],
                     h=85.0,
                     gap=4.0,
                     title_h=6.0,
                     keep_aspect=True,
                 )
 
+            # Per-model ROC/PRC (show a compact selection)
+            curves = figs.get("model_curves") or {}
+            roc_list = list(curves.get("roc") or [])
+            prc_list = list(curves.get("prc") or [])
+            if roc_list or prc_list:
+                # Show up to 4 ROC + 4 PRC over pages
+                def take_chunks(xs: List[str], n: int) -> List[List[str]]:
+                    return [xs[i:i + n] for i in range(0, len(xs), n)]
+
+                roc_chunks = take_chunks(roc_list[:8], 4)
+                prc_chunks = take_chunks(prc_list[:8], 4)
+
+                # Interleave ROC then PRC pages
+                for chunk in roc_chunks:
+                    pdf.panel_title("Per-Model ROC Curves (sample)")
+                    titles = [Path(p).stem for p in chunk]
+                    paths = chunk
+                    while len(titles) < 4:
+                        titles.append("")
+                        paths.append(None)
+                    pdf.figure_grid_2x2(titles=titles, paths=paths, cell_h=66.0, gap=4.0, title_h=6.0, keep_aspect=True)
+                    if chunk is not roc_chunks[-1] or prc_chunks:
+                        pdf.add_page()
+                        pdf.panel_title(f"Dataset: {ds_name}")
+                        pdf.panel_title("Evaluation Results (Curves)")
+
+                for chunk in prc_chunks:
+                    pdf.panel_title("Per-Model PRC Curves (sample)")
+                    titles = [Path(p).stem for p in chunk]
+                    paths = chunk
+                    while len(titles) < 4:
+                        titles.append("")
+                        paths.append(None)
+                    pdf.figure_grid_2x2(titles=titles, paths=paths, cell_h=66.0, gap=4.0, title_h=6.0, keep_aspect=True)
+                    if chunk is not prc_chunks[-1]:
+                        pdf.add_page()
+                        pdf.panel_title(f"Dataset: {ds_name}")
+                        pdf.panel_title("Evaluation Results (Curves)")
+
             # -------------------------
-            # Runtimes
+            # Runtimes (still its own page)
             # -------------------------
             pdf.add_page()
             pdf.panel_title(f"Dataset: {ds_name}")
@@ -1323,16 +1187,17 @@ class ReportPhaseJob:
             rt = tables.get("runtimes", {}) or {}
             if rt.get("present"):
                 pdf.draw_table(rt.get("columns", []), rt.get("rows", []), max_rows=500, no_wrap=True)
+            else:
+                pdf.muted("Missing: runtimes.csv")
 
-        # DATASET COMPARISONS
+        # DATASET COMPARISONS (global)
         dc = report_data.get("dataset_comparisons", {}) or {}
         if dc.get("present"):
             pdf.add_page()
             pdf.panel_title("Dataset Comparisons")
 
-            overview = (dc.get("figures", {}) or {}).get("overview") or ""
-            if overview and Path(overview).exists():
-                pdf.figure_single("Comparison Overview (All Datasets)", overview, h=120.0, title_h=6.0, keep_aspect=True)
+            overview = (dc.get("figures", {}) or {}).get("overview")
+            pdf.figure_single("Comparison Overview (All Datasets)", overview or None, h=120.0, title_h=6.0, keep_aspect=True)
 
             kw = (dc.get("tables", {}) or {}).get("best_kw", {}) or {}
             if kw.get("present"):
@@ -1369,15 +1234,12 @@ class ReportPhaseJob:
         dataset_blocks = [self._collect_dataset_block(ds) for ds in datasets]
         dc_block = self._collect_dataset_comparisons_block()
 
+        # Pickles for cover metadata/params
         meta_pickle_obj = self._read_pickle_if_exists(self.exp_root / "metadata.pickle")
         run_params_obj = self._read_pickle_if_exists(self.exp_root / "run_params.pickle")
 
-        meta_pickle_dict: Dict[str, Any] = meta_pickle_obj if isinstance(meta_pickle_obj, dict) else (
-            {"metadata.pickle": str(meta_pickle_obj)} if meta_pickle_obj is not None else {}
-        )
-        run_params_dict: Dict[str, Any] = run_params_obj if isinstance(run_params_obj, dict) else (
-            {"run_params.pickle": str(run_params_obj)} if run_params_obj is not None else {}
-        )
+        meta_pickle_dict: Dict[str, Any] = meta_pickle_obj if isinstance(meta_pickle_obj, dict) else ({"metadata.pickle": str(meta_pickle_obj)} if meta_pickle_obj is not None else {})
+        run_params_dict: Dict[str, Any] = run_params_obj if isinstance(run_params_obj, dict) else ({"run_params.pickle": str(run_params_obj)} if run_params_obj is not None else {})
 
         meta_flat = self._flatten_mapping(meta_pickle_dict, sep=" · ", max_depth=6) if meta_pickle_dict else {}
         params_flat = self._flatten_mapping(run_params_dict, sep=" · ", max_depth=6) if run_params_dict else {}
@@ -1415,7 +1277,10 @@ class ReportPhaseJob:
             "dataset_comparisons": dc_block,
         }
 
+        # JSON for downstream debugging (kept)
         self.paths.data_json.write_text(json.dumps(report_data, indent=2))
+
+        # Metadata as text file (requested)
         self._write_metadata_text(cover_boxes=cover_boxes, enriched_meta=enriched_meta)
 
         if self.make_pdf:
@@ -1430,19 +1295,10 @@ class ReportPhaseJob:
 
 
 # ============================================================
-# PDF renderer (Times; ASCII sanitization; skip missing figures)
+# PDF renderer (legacy-like cover + boxed sections)
 # ============================================================
 
 class _StreamlinePDF(FPDF):
-    """
-    Keep core Times font, but sanitize smart punctuation to ASCII-safe equivalents.
-
-    Also:
-      - Do not draw placeholder panels for missing figures (skip silently).
-      - No em-dashes and no ellipsis in rendered strings.
-      - Performance tables: no wrapping; use truncation and tuned column widths.
-    """
-
     def __init__(self, *, title: str, streamline_version: str, float_decimals: int = 3):
         super().__init__(orientation="P", unit="mm", format="A4")
         self._title = title
@@ -1467,38 +1323,6 @@ class _StreamlinePDF(FPDF):
         self._panel_title_text_pad_y = 1.4
         self._panel_content_pad_top = 2.2
 
-        self.set_font("Times", "", 10)
-
-    # -----------------------------
-    # Sanitization (no smart punctuation, no em-dash, no ellipsis)
-    # -----------------------------
-    def s(self, txt: Any) -> str:
-        if txt is None:
-            return ""
-        t = str(txt)
-
-        repl = {
-            "\u201c": '"',
-            "\u201d": '"',
-            "\u2018": "'",
-            "\u2019": "'",
-            "\u2013": "-",
-            "\u2014": "-",
-            "\u2022": "-",
-            "\u00A0": " ",
-            "\u2026": "",
-        }
-        for k, v in repl.items():
-            t = t.replace(k, v)
-
-        t = t.encode("latin-1", "ignore").decode("latin-1")
-        t = re.sub(r"[ \t]+", " ", t)
-        t = re.sub(r"\s+\n", "\n", t)
-        return t.strip()
-
-    # -----------------------------
-    # Header / Footer
-    # -----------------------------
     def header(self):
         if not self._use_running_header:
             return
@@ -1509,21 +1333,21 @@ class _StreamlinePDF(FPDF):
         self.set_xy(x, y - 2)
         self.line(x, y, x + w, y)
         self.set_xy(x, y)
-        self.cell(w, 4, self.s(self._title), border=0, ln=1, align="L")
+        self.cell(w, 4, self._title, border=0, ln=1, align="L")
         self.ln(2)
 
     def footer(self):
         self.set_y(-10)
         self.set_font("Times", "I", 8)
-        left = self.s(f"Generated with STREAMLINE ({self._streamline_version})")
-        right = self.s(f"Page {self.page_no()}/{{nb}}")
+        left = f"Generated with STREAMLINE ({self._streamline_version})"
+        right = f"Page {self.page_no()}/{{nb}}"
         self.set_x(self.l_margin)
         self.cell(0, 5, left, border=0, ln=0, align="L")
         self.set_x(self.l_margin)
         self.cell(self.w - self.l_margin - self.r_margin, 5, right, border=0, ln=0, align="R")
 
     # -----------------------------
-    # Cover
+    # Legacy-like cover
     # -----------------------------
     def cover_banner_title(self, title: str):
         x = self.l_margin
@@ -1535,7 +1359,7 @@ class _StreamlinePDF(FPDF):
         self.set_xy(x, y)
         self.rect(x, y, w, h)
         self.set_xy(x + 2, y + 3.2)
-        self.cell(w - 4, 6, self.s(title), border=0, ln=1, align="L")
+        self.cell(w - 4, 6, title, border=0, ln=1, align="L")
         self.ln(3)
 
     def _cover_section_box(
@@ -1566,12 +1390,12 @@ class _StreamlinePDF(FPDF):
 
         self.set_font("Times", "B", 11)
         self.set_xy(x + 1.6, y + 1.6)
-        self.cell(w - 3.2, title_h - 3.2, self.s(title), border=0, ln=0, align="L")
+        self.cell(w - 3.2, title_h - 3.2, title, border=0, ln=0, align="L")
 
         self.set_font("Times", "", font_size)
         cy = y + title_h + 0.6
         for k, v in items:
-            line = self.s(f"{k}: {v}")
+            line = f"{k}: {v}"
             self.set_xy(x + 1.8, cy)
             self.multi_cell(w - 3.6, row_h, line, border=0)
             cy += row_h
@@ -1635,85 +1459,70 @@ class _StreamlinePDF(FPDF):
         self.set_font("Times", "B", 10)
         self.rect(x, y, w, h)
         self.set_xy(x + 1.4, y + 1.4)
-        self.cell(w - 2.8, h - 2.8, self.s(title), border=0, ln=1, align="L")
+        self.cell(w - 2.8, h - 2.8, title, border=0, ln=1, align="L")
         self.ln(1.2)
 
     def subheader(self, text: str):
         self.set_font("Times", "B", 10)
-        self.multi_cell(0, 5, self.s(text))
+        self.multi_cell(0, 5, text)
         self.ln(0.8)
 
-    def cleaning_engineering_box(self, lines: Sequence[str]):
-        w = self.w - self.l_margin - self.r_margin
-        x = self.l_margin
-        y = self.get_y()
+    def muted(self, text: str):
+        self.set_font("Times", "", 9)
+        self.multi_cell(0, 4.5, text)
+        self.ln(0.8)
 
-        line_h = 5.0
-        pad = 2.0
-        h = pad + len(lines) * line_h + pad
-
-        if y + h > self.page_break_trigger:
-            self.add_page()
-            x = self.l_margin
-            y = self.get_y()
-
-        self.rect(x, y, w, h)
-        self.set_font("Times", "", 10)
-        cy = y + pad
-        for ln in lines:
-            self.set_xy(x + pad, cy)
-            self.multi_cell(w - 2 * pad, line_h, self.s(ln), border=0)
-            cy += line_h
-        self.ln(2.0)
-
-    # -----------------------------
-    # Formatting helpers
-    # -----------------------------
     def _cell_str(self, v: Any) -> str:
-        return self.s(format_number(v, decimals=self._decimals))
+        return format_number(v, decimals=self._decimals)
 
+    # -----------------------------
+    # No-wrap table rendering (truncate to fit)
+    # -----------------------------
     def _truncate_to_width(self, s: str, w_mm: float) -> str:
+        """
+        Truncate string to fit inside width (mm) using current font metrics.
+        """
         if s is None:
             return ""
-        s = self.s(s)
+        s = str(s)
         if self.get_string_width(s) <= w_mm:
             return s
-        if w_mm <= 0:
+        if w_mm <= self.get_string_width("..."):
             return ""
+        # binary-ish shrink
+        ell = "..."
         lo, hi = 0, len(s)
         best = ""
         while lo <= hi:
             mid = (lo + hi) // 2
-            cand = s[:mid]
+            cand = s[:mid] + ell
             if self.get_string_width(cand) <= w_mm:
                 best = cand
                 lo = mid + 1
             else:
                 hi = mid - 1
-        return best
+        return best or ell
 
     # -----------------------------
     # Tables
     # -----------------------------
     def _col_widths_model_perf(self, columns: Sequence[str], table_w: float) -> List[float]:
         """
-        Widths for wide performance tables with:
-          columns = ["Algorithm", metric1, metric2, ...]
-        No wrapping: we rely on truncation to fit each cell.
+        Performance tables: prioritize metric columns to reduce need for wrapping.
         """
         n = len(columns)
         if n <= 1:
             return [table_w]
 
-        alg_w = min(max(36.0, 0.20 * table_w), 52.0)
-        rest = max(0.0, table_w - alg_w)
+        # shrink Algorithm column more than before
+        first = min(max(32.0, 0.16 * table_w), 46.0)
 
         metric_cols = list(columns[1:])
         weights: List[float] = []
         for c in metric_cols:
-            cl = str(c).lower()
-            w = 1.0 + min(1.6, len(str(c)) / 16.0)
-            if any(x in cl for x in ["sensitivity", "precision", "specificity"]):
+            cl = c.lower()
+            w = 1.0 + min(1.6, len(c) / 16.0)
+            if "sensitivity" in cl or "precision" in cl or "specificity" in cl:
                 w *= 1.25
             if "balanced" in cl:
                 w *= 1.10
@@ -1721,9 +1530,11 @@ class _StreamlinePDF(FPDF):
                 w *= 1.10
             weights.append(w)
 
-        sw = sum(weights) if sum(weights) > 0 else float(max(1, len(weights)))
+        rest = max(0.0, table_w - first)
+        sw = sum(weights) if sum(weights) > 0 else float(len(weights))
         raw = [rest * (w / sw) for w in weights]
 
+        # enforce larger minimum metric width to avoid wraps
         min_metric = 18.0
         raw = [max(min_metric, r) for r in raw]
 
@@ -1731,7 +1542,7 @@ class _StreamlinePDF(FPDF):
         scale = (rest / s2) if s2 > 0 else 1.0
         metrics = [r * scale for r in raw]
 
-        widths = [alg_w] + metrics
+        widths = [first] + metrics
         widths[-1] += (table_w - sum(widths))
         return widths
 
@@ -1745,16 +1556,16 @@ class _StreamlinePDF(FPDF):
                 val = cell.get("value")
                 if isinstance(val, tuple) and len(val) == 2:
                     mv, sv = val
-                    out_row.append(self.s(f"{format_number(mv, decimals=self._decimals)} +/- {format_number(sv, decimals=self._decimals)}"))
+                    out_row.append(f"{self._cell_str(mv)} ± {self._cell_str(sv)}")
                 else:
-                    out_row.append(self.s(val))
+                    out_row.append(val)
             rows_out.append(out_row)
 
         table_w = self.w - self.l_margin - self.r_margin
         col_widths = self._col_widths_model_perf(cols, table_w)
 
         ncol = len(cols)
-        font_size = 6 if ncol >= 10 else 7
+        font_size = 6 if ncol >= 9 else 7
 
         self.draw_table(cols, rows_out, col_widths=col_widths, font_size=font_size, no_wrap=no_wrap)
 
@@ -1765,10 +1576,10 @@ class _StreamlinePDF(FPDF):
 
         weights: List[float] = []
         for j, c in enumerate(columns):
-            w = max(3.0, float(len(self.s(c))))
+            w = max(3.0, float(len(str(c))))
             for r in rows[:15]:
                 if j < len(r):
-                    w = max(w, min(44.0, float(len(self.s(r[j])))))
+                    w = max(w, min(44.0, float(len(r[j]))))
             if j == 0:
                 w *= 1.6
             weights.append(w)
@@ -1796,6 +1607,7 @@ class _StreamlinePDF(FPDF):
         no_wrap: bool = False,
     ):
         if not columns:
+            self.muted("No table columns.")
             return
 
         table_w = self.w - self.l_margin - self.r_margin
@@ -1824,7 +1636,7 @@ class _StreamlinePDF(FPDF):
                 wj = col_widths[j]
                 self.rect(x0, y0, wj, header_h)
                 self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
-                txt = self._truncate_to_width(str(col), wj - 2 * self._tbl_pad_x) if no_wrap else self.s(col)
+                txt = self._truncate_to_width(str(col), wj - 2 * self._tbl_pad_x) if no_wrap else str(col)
                 self.cell(wj - 2 * self._tbl_pad_x, header_h - 2 * self._tbl_pad_y, txt, border=0, ln=0, align="C")
                 x0 += wj
             self.set_xy(self.l_margin, y0 + header_h)
@@ -1832,29 +1644,78 @@ class _StreamlinePDF(FPDF):
 
         if self.get_y() + header_h + 2 > self.page_break_trigger:
             self.add_page()
+
         draw_header()
 
-        row_h = max(4.4, line_h + 2 * self._tbl_pad_y)
+        if no_wrap:
+            # Fixed row height (single line)
+            row_h = max(4.4, line_h + 2 * self._tbl_pad_y)
+
+            for cells in formatted_rows:
+                if self.get_y() + row_h > self.page_break_trigger:
+                    self.add_page()
+                    draw_header()
+
+                y0 = self.get_y()
+                x0 = self.l_margin
+                for j, txt in enumerate(cells):
+                    wj = col_widths[j]
+                    self.rect(x0, y0, wj, row_h)
+                    self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
+                    t = self._truncate_to_width(txt, wj - 2 * self._tbl_pad_x)
+                    self.cell(wj - 2 * self._tbl_pad_x, line_h, t, border=0, ln=0, align="L")
+                    x0 += wj
+                self.set_y(y0 + row_h)
+
+            self.ln(self._gap_after_table)
+            return
+
+        # Wrapping version (kept for non-performance tables)
+        def split_lines(txt: str, width_mm: float) -> List[str]:
+            s = "" if txt is None else str(txt)
+            usable_w = max(1e-6, float(width_mm))
+            try:
+                lines = self.multi_cell(usable_w, line_h, s, border=0, align="L", split_only=True)
+                return [ln if ln is not None else "" for ln in lines] or [""]
+            except TypeError:
+                parts = s.splitlines() or [s]
+                out: List[str] = []
+                for part in parts:
+                    sw = self.get_string_width(part) if part else 0.0
+                    n = max(1, int(math.ceil(sw / usable_w)))
+                    out.extend([""] * n)
+                return out or [""]
+
+        def row_height(cells: Sequence[str]) -> float:
+            counts: List[int] = []
+            for j, txt in enumerate(cells):
+                usable_w = col_widths[j] - 2 * self._tbl_pad_x
+                counts.append(len(split_lines(txt, usable_w)))
+            return max(counts) * line_h + 2 * self._tbl_pad_y
+
         for cells in formatted_rows:
-            if self.get_y() + row_h > self.page_break_trigger:
+            rh = row_height(cells)
+            if self.get_y() + rh > self.page_break_trigger:
                 self.add_page()
                 draw_header()
 
             y0 = self.get_y()
             x0 = self.l_margin
+
             for j, txt in enumerate(cells):
                 wj = col_widths[j]
-                self.rect(x0, y0, wj, row_h)
+                self.rect(x0, y0, wj, rh)
                 self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
-                t = self._truncate_to_width(txt, wj - 2 * self._tbl_pad_x) if no_wrap else self.s(txt)
-                self.cell(wj - 2 * self._tbl_pad_x, line_h, t, border=0, ln=0, align="L")
+                self.multi_cell(wj - 2 * self._tbl_pad_x, line_h, txt, border=0, align="L")
                 x0 += wj
-            self.set_y(y0 + row_h)
+                self.set_xy(x0, y0)
+
+            self.set_y(y0 + rh)
 
         self.ln(self._gap_after_table)
 
     # -----------------------------
-    # Figures (skip missing entirely; keep aspect if supported)
+    # Figures (aspect ratio control)
     # -----------------------------
     def _image_panel(
         self,
@@ -1866,45 +1727,52 @@ class _StreamlinePDF(FPDF):
         w: float,
         h: float,
         title_h: float,
-        keep_aspect: bool = True,
-    ) -> bool:
-        if not path:
-            return False
-        p = Path(path)
-        if not p.exists():
-            return False
-
+        keep_aspect: bool = False,
+    ):
         self.rect(x, y, w, h)
-        if title_h > 0:
-            self.rect(x, y, w, title_h)
-            self.set_font("Times", "B", 8)
-            self.set_xy(x + self._panel_title_text_pad_x, y + self._panel_title_text_pad_y)
-            self.cell(
-                w - 2 * self._panel_title_text_pad_x,
-                title_h - 2 * self._panel_title_text_pad_y,
-                self.s(title),
-                border=0,
-                ln=0,
-                align="L",
-            )
+        self.rect(x, y, w, title_h)
+
+        self.set_font("Times", "B", 8)
+        self.set_xy(x + self._panel_title_text_pad_x, y + self._panel_title_text_pad_y)
+        self.cell(
+            w - 2 * self._panel_title_text_pad_x,
+            title_h - 2 * self._panel_title_text_pad_y,
+            title,
+            border=0,
+            ln=0,
+            align="L",
+        )
 
         inner_x = x + self._panel_pad
-        inner_y = y + title_h + (self._panel_content_pad_top if title_h > 0 else self._panel_pad)
+        inner_y = y + title_h + self._panel_content_pad_top
         inner_w = w - 2 * self._panel_pad
-        inner_h = h - title_h - ((self._panel_content_pad_top if title_h > 0 else 0) + self._panel_pad)
+        inner_h = h - title_h - (self._panel_content_pad_top + self._panel_pad)
 
-        try:
-            if keep_aspect:
-                try:
-                    self.image(str(p), x=inner_x, y=inner_y, w=inner_w, h=inner_h, keep_aspect_ratio=True)  # type: ignore
-                except TypeError:
-                    self.image(str(p), x=inner_x, y=inner_y, w=inner_w, h=inner_h)
-            else:
-                self.image(str(p), x=inner_x, y=inner_y, w=inner_w, h=inner_h)
-        except Exception:
-            return False
+        if inner_w < 5 or inner_h < 5:
+            self.set_font("Times", "", 8)
+            self.set_xy(x + 1, y + title_h + 1)
+            self.multi_cell(w - 2, 3.5, "Panel too small.", border=0)
+            return
 
-        return True
+        if path and Path(path).exists():
+            try:
+                # Prefer keeping aspect ratio (fpdf2 supports keep_aspect_ratio in image()).
+                if keep_aspect:
+                    try:
+                        self.image(path, x=inner_x, y=inner_y, w=inner_w, h=inner_h, keep_aspect_ratio=True)  # type: ignore
+                    except TypeError:
+                        # fallback: let FPDF decide; still uses both w/h
+                        self.image(path, x=inner_x, y=inner_y, w=inner_w, h=inner_h)
+                else:
+                    self.image(path, x=inner_x, y=inner_y, w=inner_w, h=inner_h)
+            except Exception:
+                self.set_font("Times", "", 8)
+                self.set_xy(inner_x, inner_y)
+                self.multi_cell(inner_w, 3.5, "Unable to render figure.", border=0)
+        else:
+            self.set_font("Times", "", 8)
+            self.set_xy(inner_x, inner_y)
+            self.multi_cell(inner_w, 3.5, "Figure not found.", border=0)
 
     def figure_grid_2x2(
         self,
@@ -1914,7 +1782,7 @@ class _StreamlinePDF(FPDF):
         cell_h: float = 66.0,
         gap: float = 4.0,
         title_h: float = 6.0,
-        keep_aspect: bool = True,
+        keep_aspect: bool = False,
     ):
         page_w = self.w - self.l_margin - self.r_margin
         cell_w = (page_w - gap) / 2.0
@@ -1944,7 +1812,7 @@ class _StreamlinePDF(FPDF):
         h: float = 80.0,
         gap: float = 4.0,
         title_h: float = 6.0,
-        keep_aspect: bool = True,
+        keep_aspect: bool = False,
     ):
         page_w = self.w - self.l_margin - self.r_margin
         cell_w = (page_w - gap) / 2.0
@@ -1958,26 +1826,11 @@ class _StreamlinePDF(FPDF):
         self._image_panel(titles[1], paths[1] if len(paths) > 1 else None, x=x0 + cell_w + gap, y=y0, w=cell_w, h=h, title_h=title_h, keep_aspect=keep_aspect)
         self.set_y(y0 + h + 2)
 
-    def figure_single(
-        self,
-        title: str,
-        path: Optional[str],
-        *,
-        h: float = 90.0,
-        title_h: float = 6.0,
-        keep_aspect: bool = True,
-    ):
-        if not path:
-            return
-        p = Path(path)
-        if not p.exists():
-            return
-
+    def figure_single(self, title: str, path: Optional[str], *, h: float = 90.0, title_h: float = 6.0, keep_aspect: bool = False):
         page_w = self.w - self.l_margin - self.r_margin
         y0 = self.get_y()
         if y0 + h + 2 > self.page_break_trigger:
             self.add_page()
             y0 = self.get_y()
-
-        self._image_panel(title, str(p), x=self.l_margin, y=y0, w=page_w, h=h, title_h=title_h, keep_aspect=keep_aspect)
+        self._image_panel(title, path, x=self.l_margin, y=y0, w=page_w, h=h, title_h=title_h, keep_aspect=keep_aspect)
         self.set_y(y0 + h + 2)
