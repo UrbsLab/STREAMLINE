@@ -1,7 +1,8 @@
-# streamline/p10_reporting/p10_runner.py
+# streamline/p11_reporting/p11_runner.py
 from __future__ import annotations
 
 import os
+import shlex
 import time
 from pathlib import Path
 from typing import Optional
@@ -9,65 +10,78 @@ from typing import Optional
 import dask
 from dask.distributed import Client, LocalCluster
 
+from streamline.p11_reporting.reporting import ReportPhaseJob
 from streamline.utils.cluster import get_cluster
 from streamline.utils.runners import num_cores
-from streamline.p11_reporting.reporting import ReportPhaseJob
 
 
 class P11Runner:
     """
-    Phase 10 Runner: experiment-level HTML/PDF reporting (all datasets, models, ensembles).
-    This is a single job per experiment (not per dataset), similar to P9Runner.
+    Phase 11 runner for experiment-level report generation.
+
+    Supports both path styles:
+    - experiment_path
+    - output_path + experiment_name
     """
 
     def __init__(
         self,
-        output_path: str,
-        experiment_name: str,
-        outcome_label: str = "Class",
-        outcome_type: str = "Binary",
+        output_path: Optional[str] = None,
+        experiment_name: Optional[str] = None,
+        experiment_path: Optional[str] = None,
+        reporting_dir: Optional[str] = None,
+        outcome_label: Optional[str] = "Class",
+        outcome_type: Optional[str] = "Binary",
         instance_label: Optional[str] = None,
         make_pdf: bool = True,
-        # micro_average: str = "micro",          # "micro" or "macro", passed through to plots, all are micro by default
-        # include_ensembles: bool = True,     # Whether to include ensemble results in the report, always True for now
-        run_cluster: str = "Serial",           # Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>
+        enable_plots: bool = True,
+        reuse_existing_figures: bool = True,
+        run_cluster: str = "Serial",  # Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>
         queue: str = "defq",
         reserved_memory: int = 4,
     ):
-        self.output_path = output_path
-        self.experiment_name = experiment_name
-        self.exp_root = Path(output_path) / experiment_name
-        if not self.exp_root.is_dir():
-            raise Exception(f"Experiment folder not found: {self.exp_root}")
+        if experiment_path:
+            self.exp_root = Path(experiment_path).resolve()
+            if output_path is None:
+                output_path = str(self.exp_root.parent)
+            if experiment_name is None:
+                experiment_name = self.exp_root.name
+        else:
+            if not output_path or not experiment_name:
+                raise ValueError("Provide experiment_path OR (output_path and experiment_name).")
+            self.exp_root = (Path(output_path) / experiment_name).resolve()
 
-        # kwargs handed directly to ReportingPhaseJob
+        if not self.exp_root.is_dir():
+            raise FileNotFoundError(f"Experiment folder not found: {self.exp_root}")
+
+        self.output_path = str(output_path) if output_path else str(self.exp_root.parent)
+        self.experiment_name = str(experiment_name) if experiment_name else self.exp_root.name
+
+        # kwargs handed directly to ReportPhaseJob
         self.kw = dict(
-            output_path=output_path,
-            experiment_name=experiment_name,
+            output_path=self.output_path,
+            experiment_name=self.experiment_name,
+            experiment_path=str(self.exp_root),
+            reporting_dir=reporting_dir,
             outcome_label=outcome_label,
             outcome_type=outcome_type,
             instance_label=instance_label,
-            make_pdf=make_pdf,
-            # micro_average=micro_average,
-            # include_ensembles=bool(include_ensembles),
+            make_pdf=bool(make_pdf),
+            enable_plots=bool(enable_plots),
+            reuse_existing_figures=bool(reuse_existing_figures),
         )
 
         self.run_cluster = run_cluster or "Serial"
         self.queue = queue
         self.reserved_memory = int(reserved_memory)
 
-    # ------------------------------------------------------------------
-    # Public entry
-    # ------------------------------------------------------------------
     def run(self):
-        """
-        Phase 10 is a single experiment-level job (like Phase 9).
-        """
+        """Phase 11 is a single experiment-level job."""
         if self.run_cluster == "Serial":
             self._run_one()
 
         elif self.run_cluster == "Local":
-            # Local dask (mainly for dev on multi-core machines)
+            # Local dask (mainly for development on multi-core machines)
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     dask.compute(
@@ -76,7 +90,6 @@ class P11Runner:
                     )
 
         elif self.run_cluster in ("BashSLURM", "BashLSF"):
-            # Legacy-style bash script submission for SLURM / LSF
             self._submit_bash()
 
         else:
@@ -89,16 +102,12 @@ class P11Runner:
                 scheduler=client,
             )
 
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
     def _run_one(self):
         ReportPhaseJob(**self.kw).run()
 
     def _submit_bash(self):
         """
-        Submit a single experiment-level job via SLURM or LSF, using p10_jobsubmit.py.
-        Mirrors P9Runner._submit_bash.
+        Submit a single experiment-level job via SLURM or LSF using p11_jobsubmit.py.
         """
         job_ref = str(time.time())
         jobs = self.exp_root / "jobs"
@@ -113,32 +122,48 @@ class P11Runner:
         args = [
             "python",
             str(script),
-            "--output_path", self.output_path,
-            "--experiment_name", self.experiment_name,
-            "--outcome_label", self.kw["outcome_label"],
-            "--outcome_type", self.kw["outcome_type"],
-            "--instance_label", self.kw["instance_label"] or "",
-            # "--micro_average", self.kw.get("micro_average", "micro"),
-            # "--include_ensembles", str(int(bool(self.kw.get("include_ensembles", True)))),
+            "--experiment_path",
+            str(self.exp_root),
+            "--outcome_label",
+            str(self.kw.get("outcome_label") or ""),
+            "--outcome_type",
+            str(self.kw.get("outcome_type") or ""),
+            "--instance_label",
+            str(self.kw.get("instance_label") or ""),
+            "--make_pdf",
+            str(int(bool(self.kw.get("make_pdf", True)))),
+            "--enable_plots",
+            str(int(bool(self.kw.get("enable_plots", True)))),
+            "--reuse_existing_figures",
+            str(int(bool(self.kw.get("reuse_existing_figures", True)))),
+            "--queue",
+            str(self.queue),
+            "--reserved_memory",
+            str(int(self.reserved_memory)),
         ]
-        arg_str = " ".join(args)
 
-        with open(sh, "w") as f:
+        reporting_dir = self.kw.get("reporting_dir")
+        if reporting_dir:
+            args.extend(["--reporting_dir", str(reporting_dir)])
+
+        arg_str = " ".join(shlex.quote(a) for a in args)
+
+        with sh.open("w", encoding="utf-8") as f:
             f.write("#!/bin/bash\n")
             if self.run_cluster == "BashSLURM":
                 f.write(f"#SBATCH -p {self.queue}\n")
                 f.write(f"#SBATCH --job-name={job_ref}\n")
                 f.write(f"#SBATCH --mem={self.reserved_memory}G\n")
-                f.write(f"#SBATCH -o {logs}/P10_{job_ref}.o\n")
-                f.write(f"#SBATCH -e {logs}/P10_{job_ref}.e\n")
+                f.write(f"#SBATCH -o {logs}/P11_{job_ref}.o\n")
+                f.write(f"#SBATCH -e {logs}/P11_{job_ref}.e\n")
                 f.write(f"srun {arg_str}\n")
             else:  # BashLSF
                 f.write(f"#BSUB -q {self.queue}\n")
                 f.write(f"#BSUB -J {job_ref}\n")
                 f.write(f"#BSUB -R \"rusage[mem={self.reserved_memory}G]\"\n")
                 f.write(f"#BSUB -M {self.reserved_memory}GB\n")
-                f.write(f"#BSUB -o {logs}/P10_{job_ref}.o\n")
-                f.write(f"#BSUB -e {logs}/P10_{job_ref}.e\n")
+                f.write(f"#BSUB -o {logs}/P11_{job_ref}.o\n")
+                f.write(f"#BSUB -e {logs}/P11_{job_ref}.e\n")
                 f.write(f"{arg_str}\n")
 
         os.system(f"{launcher} {sh}")

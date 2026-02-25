@@ -1,42 +1,94 @@
 from __future__ import annotations
 
+import argparse
+import csv
+import importlib.metadata
 import json
 import logging
 import math
+import os
 import pickle
 import re
+import statistics
 import time
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
-
-import pandas as pd
-from fpdf import FPDF
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
-Number = Union[int, float]
+
+try:
+    from fpdf import FPDF  # type: ignore
+except Exception:  # pragma: no cover
+    FPDF = None  # type: ignore
 
 
-# ============================================================
-# Plot export helper (fallback-only; prefer precomputed PNGs)
-# ============================================================
+PHASE_LABELS = {
+    "1": "EDA / Exploratory Analysis",
+    "2": "Scale and Impute",
+    "3": "Feature Learning",
+    "4": "Feature Selection",
+    "5": "Modeling",
+    "8": "Stats Summary",
+}
 
-def _safe_plotly_to_png(fig, out_path: Path, scale: int = 2) -> bool:
-    """
-    Export a Plotly figure to PNG using kaleido.
+CLASSIFICATION_METRICS = [
+    "Balanced Accuracy",
+    "Accuracy",
+    "F1 Score",
+    "Sensitivity (Recall)",
+    "Precision (PPV)",
+    "Brier Score",
+    "ROC AUC",
+    "PRC AUC",
+    "PRC APS",
+]
 
-    This is a fallback path only: the report prefers precomputed PNGs
-    already present in the experiment output tree.
-    """
-    try:
-        import plotly.io as pio  # type: ignore
+REGRESSION_METRICS = [
+    "Explained Variance",
+    "Pearson Correlation",
+    "Mean Absolute Error",
+    "Mean Squared Error",
+    "Median Absolute Error",
+    "Max Error",
+]
 
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        pio.write_image(fig, str(out_path), format="png", scale=scale)
-        return True
-    except Exception as e:
-        logger.warning("Plotly export failed for %s: %r", out_path, e)
-        return False
+METRIC_DIRECTION_HIGHER_IS_BETTER = {
+    "Balanced Accuracy": True,
+    "Accuracy": True,
+    "F1 Score": True,
+    "Sensitivity (Recall)": True,
+    "Precision (PPV)": True,
+    "ROC AUC": True,
+    "PRC AUC": True,
+    "PRC APS": True,
+    "Brier Score": False,
+    "Explained Variance": True,
+    "Pearson Correlation": True,
+    "Mean Absolute Error": False,
+    "Mean Squared Error": False,
+    "Median Absolute Error": False,
+    "Max Error": False,
+}
+
+METRIC_JSON_KEYS = {
+    "Balanced Accuracy": "balanced_accuracy",
+    "Accuracy": "accuracy",
+    "F1 Score": "f1",
+    "Sensitivity (Recall)": "recall_macro",
+    "Precision (PPV)": "precision_macro",
+    "Brier Score": "brier_score",
+    "ROC AUC": "roc_auc_macro",
+    "PRC AUC": "average_precision_macro",
+    "PRC APS": "average_precision_macro",
+    "Explained Variance": "explained_variance",
+    "Pearson Correlation": "pearson_correlation",
+    "Mean Absolute Error": "mean_absolute_error",
+    "Mean Squared Error": "mean_squared_error",
+    "Median Absolute Error": "median_absolute_error",
+    "Max Error": "max_error",
+}
 
 
 def _now_iso_local() -> str:
@@ -45,111 +97,160 @@ def _now_iso_local() -> str:
 
 def _try_streamline_version() -> str:
     try:
-        import importlib.metadata as im
-
-        return im.version("streamline")
+        return importlib.metadata.version("streamline")
     except Exception:
         return "unknown"
 
 
-# ============================================================
-# Precision formatting
-# ============================================================
+def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
+    for p in paths:
+        if p.is_file():
+            return p
+    return None
 
-def _is_nan(x: Any) -> bool:
+
+def _safe_float(value: Any) -> Optional[float]:
     try:
-        return isinstance(x, float) and math.isnan(x)
+        if value is None:
+            return None
+        text = str(value).strip()
+        if text == "":
+            return None
+        return float(text)
+    except Exception:
+        return None
+
+
+def _format_number(value: Any, *, is_pvalue: bool = False) -> str:
+    f = _safe_float(value)
+    if f is None:
+        return str(value) if value is not None else ""
+    if is_pvalue and abs(f) < 0.001 and f != 0:
+        return f"{f:.2e}"
+    rounded = round(f, 3)
+    if abs(rounded) < 0.0005:
+        return "0"
+    if abs(rounded - round(rounded)) < 1e-12:
+        return str(int(round(rounded)))
+    text = f"{rounded:.3f}".rstrip("0").rstrip(".")
+    if text == "-0":
+        return "0"
+    return text
+
+
+def _is_pvalue_col(name: str) -> bool:
+    n = name.strip().lower()
+    return n in {"p", "p-value", "p_value", "pvalue"} or "p-value" in n
+
+
+def _is_numeric_text(value: str) -> bool:
+    try:
+        float(value)
+        return True
     except Exception:
         return False
 
 
-def format_number(
-    x: Any,
-    *,
-    decimals: int = 3,
-    sci_small: float = 1e-3,
-    sci_decimals: int = 3,
-) -> str:
-    """
-    Canonical formatting for numeric table cells.
-
-    - ints -> "42"
-    - floats -> fixed decimals unless abs(x) < sci_small (and non-zero), then scientific
-    - numeric strings -> parsed & formatted
-    - other strings -> unchanged
-    """
-    if x is None or _is_nan(x):
-        return ""
-
-    if isinstance(x, bool):
-        return "True" if x else "False"
-
-    if isinstance(x, int):
-        return str(x)
-
-    if isinstance(x, float):
-        if x == 0.0:
-            return f"{0:.{decimals}f}"
-        ax = abs(x)
-        if ax < sci_small:
-            return f"{x:.{sci_decimals}e}"
-        return f"{x:.{decimals}f}"
-
-    if isinstance(x, str):
-        s = x.strip()
-        if s == "":
-            return ""
-        try:
-            f = float(s)
-            return format_number(f, decimals=decimals, sci_small=sci_small, sci_decimals=sci_decimals)
-        except Exception:
-            return x
-
-    return str(x)
+def _shorten(text: str, width: int = 46) -> str:
+    if len(text) <= width:
+        return text
+    return text[: max(0, width - 3)] + "..."
 
 
-# ============================================================
-# Paths
-# ============================================================
+def _linspace(start: float, end: float, num: int) -> List[float]:
+    if num <= 1:
+        return [start]
+    step = (end - start) / float(num - 1)
+    return [start + i * step for i in range(num)]
 
+
+def _auc_trapezoid(x: Sequence[float], y: Sequence[float]) -> float:
+    if len(x) < 2 or len(y) < 2 or len(x) != len(y):
+        return 0.0
+    total = 0.0
+    for i in range(1, len(x)):
+        dx = x[i] - x[i - 1]
+        total += dx * (y[i] + y[i - 1]) * 0.5
+    return total
+
+
+def _interp_sorted(x: Sequence[float], y: Sequence[float], x_new: Sequence[float]) -> List[float]:
+    if not x or not y or len(x) != len(y):
+        return [0.0 for _ in x_new]
+
+    pairs = sorted(zip(x, y), key=lambda t: t[0])
+    xs = [pairs[0][0]]
+    ys = [pairs[0][1]]
+    for px, py in pairs[1:]:
+        if px == xs[-1]:
+            ys[-1] = py
+        else:
+            xs.append(px)
+            ys.append(py)
+
+    out: List[float] = []
+    j = 0
+    n = len(xs)
+    for xv in x_new:
+        if xv <= xs[0]:
+            out.append(ys[0])
+            continue
+        if xv >= xs[-1]:
+            out.append(ys[-1])
+            continue
+        while j + 1 < n and xs[j + 1] < xv:
+            j += 1
+        x0, x1 = xs[j], xs[j + 1]
+        y0, y1 = ys[j], ys[j + 1]
+        if x1 == x0:
+            out.append(y1)
+        else:
+            t = (xv - x0) / (x1 - x0)
+            out.append(y0 + t * (y1 - y0))
+    return out
+
+
+@dataclass
 class ReportPaths:
-    def __init__(self, reporting_dir: Path, data_json: Path, pdf: Path, figures_dir: Path, metadata_txt: Path):
-        self.reporting_dir = reporting_dir
-        self.data_json = data_json
-        self.pdf = pdf
-        self.figures_dir = figures_dir
-        self.metadata_txt = metadata_txt
+    reporting_dir: Path
+    data_json: Path
+    pdf: Path
+    figures_dir: Path
 
 
-# ============================================================
-# Main job
-# ============================================================
+@dataclass
+class TableData:
+    columns: List[str]
+    rows: List[Dict[str, str]]
+
+
+if FPDF is not None:
+
+    class _StreamlinePDF(FPDF):  # type: ignore[misc]
+        def __init__(self, footer_text: str):
+            super().__init__(orientation="P", unit="mm", format="A4")
+            self.footer_text = footer_text
+
+        def footer(self):
+            self.set_y(-10)
+            self.set_font("Times", "I", 7)
+            self.cell(0, 4, self.footer_text, border=0, ln=0, align="L")
+            self.set_font("Times", "", 8)
+            self.cell(0, 4, f"Page {self.page_no()}/{{nb}}", border=0, ln=0, align="R")
+
+else:
+
+    class _StreamlinePDF:  # pragma: no cover
+        def __init__(self, *_args, **_kwargs):
+            raise ImportError("fpdf2 is required for PDF rendering. Install `fpdf2`.")
+
 
 class ReportPhaseJob:
     """
-    Phase 11: Reporting (FPDF)
+    STREAMLINE Testing Data Evaluation Report generator.
 
-    Layout rules:
-      - Cover page: legacy-style two-column parameter boxes.
-      - Metadata also written to reporting/metadata.txt (plain text).
-
-      - Per-dataset order:
-          1) EDA - Page 1
-             - Univariate (only if informative)
-             - Class Balance + Missingness (grid)
-             - Cleaning (C) and Engineering (E) Elements (text box)
-          1b) Correlation Matrix (full page, if present)
-          2) Feature Learning (all FI methods)
-          3) Performance (combined models + ensembles; ensemble rows renamed with suffix; no wrap)
-          4) Evaluation Results (summary ROC/PRC only; no per-algorithm ROC/PRC pages)
-          5) Runtime Summary
-
-    Rendering rules:
-      - Prefer precomputed PNGs in the experiment output tree.
-      - Fallback to plotting into reporting/figures only if originals are missing.
-      - Keep Times / Times New Roman core fonts; sanitize text to ASCII-safe equivalents.
-      - Do not render any placeholder panels for missing figures (skip silently).
-      - No em-dashes and no ellipsis in outputs.
+    This implementation covers binary/multiclass/regression outputs and
+    follows the master reporting specification provided by the user.
     """
 
     def __init__(
@@ -157,42 +258,44 @@ class ReportPhaseJob:
         output_path: Optional[str] = None,
         experiment_name: Optional[str] = None,
         experiment_path: Optional[str] = None,
+        reporting_dir: Optional[str] = None,
         outcome_label: Optional[str] = None,
         outcome_type: Optional[str] = None,
         instance_label: Optional[str] = None,
         make_pdf: bool = True,
-        float_decimals: int = 3,
+        enable_plots: bool = True,
+        reuse_existing_figures: bool = True,
     ):
         assert (output_path and experiment_name) or experiment_path, (
             "Provide (output_path, experiment_name) or experiment_path."
         )
 
         if experiment_path:
-            self.exp_root = Path(experiment_path)
+            self.exp_root = Path(experiment_path).resolve()
             self.output_path = str(self.exp_root.parent)
             self.experiment_name = self.exp_root.name
         else:
             self.output_path = str(output_path)
             self.experiment_name = str(experiment_name)
-            self.exp_root = Path(self.output_path) / self.experiment_name
+            self.exp_root = (Path(self.output_path) / self.experiment_name).resolve()
 
         if not self.exp_root.is_dir():
             raise FileNotFoundError(f"Experiment folder not found: {self.exp_root}")
 
-        self.title = f"STREAMLINE Testing Data Evaluation Report: {_now_iso_local()}"
-
-        self.make_pdf = make_pdf
-        self.job_start_time: Optional[float] = None
-
         self.outcome_label = outcome_label
         self.outcome_type = outcome_type
         self.instance_label = instance_label
-
-        self.float_decimals = int(float_decimals)
+        self.make_pdf = make_pdf
+        self.enable_plots = enable_plots
+        self.reuse_existing_figures = reuse_existing_figures
+        self.job_start_time: Optional[float] = None
+        self.reporting_dir_override = Path(reporting_dir).resolve() if reporting_dir else None
         self.paths = self._init_paths()
 
+        self._mpl_ready: Optional[bool] = None
+
     def _init_paths(self) -> ReportPaths:
-        reporting_dir = self.exp_root / "reporting"
+        reporting_dir = self.reporting_dir_override if self.reporting_dir_override else (self.exp_root / "reporting")
         figures_dir = reporting_dir / "figures"
         reporting_dir.mkdir(exist_ok=True)
         figures_dir.mkdir(parents=True, exist_ok=True)
@@ -201,1783 +304,2641 @@ class ReportPhaseJob:
             data_json=reporting_dir / "report_data.json",
             pdf=reporting_dir / "report.pdf",
             figures_dir=figures_dir,
-            metadata_txt=reporting_dir / "metadata.txt",
         )
 
-    # ----------------------------
-    # File readers
-    # ----------------------------
-    def _read_csv_if_exists(self, path: Path) -> Optional[pd.DataFrame]:
+    def _read_pickle_if_exists(self, path: Path) -> Optional[Dict[str, Any]]:
         try:
             if path.is_file():
-                return pd.read_csv(path)
-        except Exception as e:
-            logger.warning("Failed reading CSV %s: %r", path, e)
+                blob = pickle.load(path.open("rb"))
+                if isinstance(blob, dict):
+                    return blob
+        except Exception as exc:
+            logger.warning("Failed reading pickle %s: %r", path, exc)
         return None
 
-    def _read_json_if_exists(self, path: Path) -> Optional[Dict[str, Any]]:
+    def _latest_run_params(self, run_params: Dict[str, Any]) -> Dict[str, Any]:
+        if not run_params:
+            return {}
         try:
-            if path.is_file():
-                return json.loads(path.read_text())
-        except Exception as e:
-            logger.warning("Failed reading JSON %s: %r", path, e)
-        return None
+            key = sorted(run_params.keys())[-1]
+            val = run_params.get(key)
+            if isinstance(val, dict):
+                return val
+        except Exception:
+            pass
+        return {}
 
-    def _read_pickle_if_exists(self, path: Path) -> Optional[Any]:
+    def _read_csv_table(self, path: Path) -> Optional[TableData]:
+        if not path.is_file():
+            return None
         try:
-            if path.is_file():
-                with path.open("rb") as f:
-                    return pickle.load(f)
-        except Exception as e:
-            logger.warning("Failed reading pickle %s: %r", path, e)
-        return None
+            with path.open("r", newline="", encoding="utf-8-sig") as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                if not header:
+                    return None
+                columns = [(h or "").strip() for h in header]
+                if columns and columns[0] == "":
+                    columns[0] = "Algorithm"
+                rows: List[Dict[str, str]] = []
+                for raw in reader:
+                    if not raw:
+                        continue
+                    if len(raw) < len(columns):
+                        raw = raw + [""] * (len(columns) - len(raw))
+                    row = {columns[i]: (raw[i] if i < len(raw) else "").strip() for i in range(len(columns))}
+                    rows.append(row)
+                return TableData(columns=columns, rows=rows)
+        except Exception as exc:
+            logger.warning("Failed reading csv %s: %r", path, exc)
+            return None
 
-    # ----------------------------
-    # Utilities: normalize/flatten/merge/pretty print
-    # ----------------------------
-    def _flatten_mapping(
-        self,
-        obj: Any,
-        *,
-        prefix: str = "",
-        sep: str = " · ",
-        max_depth: int = 5,
-        _depth: int = 0,
-    ) -> Dict[str, Any]:
-        out: Dict[str, Any] = {}
-        if _depth > max_depth:
-            if prefix:
-                out[prefix] = str(obj)
-            return out
+    def _read_json(self, path: Path) -> Optional[Dict[str, Any]]:
+        if not path.is_file():
+            return None
+        try:
+            return json.loads(path.read_text())
+        except Exception:
+            return None
 
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                kk = str(k)
-                new_prefix = f"{prefix}{sep}{kk}" if prefix else kk
-                out.update(self._flatten_mapping(v, prefix=new_prefix, sep=sep, max_depth=max_depth, _depth=_depth + 1))
-            return out
-
-        if isinstance(obj, (list, tuple)):
-            if prefix:
-                out[prefix] = ", ".join(str(x) for x in obj)
-            return out
-
-        if prefix:
-            out[prefix] = obj
-        return out
-
-    def _merge_union_dicts(self, *dicts: Dict[str, Any]) -> Dict[str, Any]:
-        out: Dict[str, Any] = {}
-        for d in dicts:
-            for k, v in (d or {}).items():
-                if k not in out:
-                    out[k] = v
-                else:
-                    if str(out[k]) != str(v):
-                        alt_k = f"{k} (alt)"
-                        i = 2
-                        while alt_k in out:
-                            alt_k = f"{k} (alt {i})"
-                            i += 1
-                        out[alt_k] = v
-        return out
-
-    def _normalize_bool(self, v: Any) -> Optional[bool]:
-        if isinstance(v, bool):
-            return v
-        if isinstance(v, (int, float)) and v in (0, 1):
-            return bool(v)
-        if isinstance(v, str):
-            s = v.strip().lower()
-            if s in {"true", "t", "yes", "y", "1"}:
-                return True
-            if s in {"false", "f", "no", "n", "0"}:
-                return False
-        return None
-
-    def _as_compact_str(self, v: Any) -> str:
-        if v is None:
-            return "None"
-        b = self._normalize_bool(v)
-        if b is not None:
-            return "True" if b else "False"
-        if isinstance(v, (int, float)):
-            return format_number(v, decimals=self.float_decimals)
-        if isinstance(v, (list, tuple)):
-            return "[" + ", ".join(str(x) for x in v) + "]"
-        return str(v)
-
-    def _is_timestampy_key(self, k: str) -> bool:
-        s = k.lower()
-        if any(x in s for x in ["generated_at", "generated at", "epoch", "timestamp", "time stamp"]):
-            return True
-        if re.search(r"\b20\d{2}[-_/]\d{2}[-_/]\d{2}\b", s):
-            return True
-        if re.search(r"\b\d{2}:\d{2}:\d{2}\b", s):
-            return True
-        return False
-
-    def _pretty_cover_key(self, k: str) -> str:
-        parts = [p.strip() for p in str(k).split("·")]
-        last = parts[-1] if parts else str(k)
-        last = last.strip().replace("_", " ")
-        last = re.sub(r"\s+", " ", last).strip()
-        return last
-
-    def _should_drop_identifier_code(self, k: str) -> bool:
-        s = k.lower()
-        return any(x in s for x in ["identifier code", "identifier_code", "run id", "run_id", "uuid", "guid", "hash", "job id", "job_id"])
-
-    def _write_metadata_text(self, *, cover_boxes: Dict[str, List[Tuple[str, str]]], enriched_meta: Dict[str, Any]) -> None:
-        lines: List[str] = []
-        lines.append(self.title)
-        lines.append(f"Experiment Root: {self.exp_root}")
-        lines.append(f"Experiment Name: {self.experiment_name}")
-        lines.append(f"Generated At: {_now_iso_local()}")
-        lines.append(f"STREAMLINE Version: {_try_streamline_version()}")
-        lines.append("")
-
-        lines.append("=== COVER PARAMETERS (grouped) ===")
-        for section, items in (cover_boxes or {}).items():
-            lines.append(f"[{section}]")
-            for k, v in items:
-                lines.append(f"- {k}: {v}")
-            lines.append("")
-
-        lines.append("=== FULL METADATA UNION (flattened) ===")
-        for k in sorted(enriched_meta.keys(), key=lambda s: str(s).lower()):
-            lines.append(f"{k}: {self._as_compact_str(enriched_meta.get(k))}")
-
-        self.paths.metadata_txt.write_text("\n".join(lines))
-
-    # ----------------------------
-    # Dataset discovery
-    # ----------------------------
     def _list_datasets(self) -> List[Path]:
-        ignore = {
-            "jobs",
-            "logs",
-            "jobsCompleted",
-            "dask_logs",
-            "runtime",
-            "DatasetComparisons",
-            "reporting",
-        }
-        ds: List[Path] = []
+        datasets: List[Path] = []
+        ignore = {"jobs", "logs", "jobsCompleted", "dask_logs", "runtime", "DatasetComparisons", "reporting"}
         for p in sorted(self.exp_root.iterdir()):
             if not p.is_dir():
                 continue
             if p.name in ignore:
                 continue
-            if (p / "CVDatasets").is_dir():
-                ds.append(p)
-        return ds
+            if (p / "exploratory").is_dir() and (p / "model_evaluation").is_dir():
+                datasets.append(p)
+        return datasets
 
-    # ============================================================
-    # Prefer-original figure resolution
-    # ============================================================
+    def _is_regression_from_values(self, values: Sequence[str]) -> bool:
+        cleaned = [v for v in values if str(v).strip() != ""]
+        if not cleaned:
+            return False
+        numeric = []
+        for v in cleaned:
+            fv = _safe_float(v)
+            if fv is None:
+                return False
+            numeric.append(fv)
+        unique = len(set(numeric))
+        unique_fraction = unique / float(len(numeric))
+        return unique > 20 or unique_fraction > 0.2
 
-    def _first_existing(self, candidates: Sequence[Path]) -> Optional[str]:
-        for p in candidates:
-            try:
-                if p.is_file():
-                    return str(p)
-            except Exception:
+    def _find_target_column(self, header: Sequence[str], metadata: Dict[str, Any]) -> str:
+        cols = [str(c).strip() for c in header if str(c).strip() != ""]
+        if not cols:
+            return header[0] if header else ""
+
+        low_map = {c.lower(): c for c in cols}
+
+        def _match_col(name: Any) -> Optional[str]:
+            txt = str(name or "").strip()
+            if txt == "":
+                return None
+            if txt in cols:
+                return txt
+            return low_map.get(txt.lower())
+
+        instance_col = _match_col(self.instance_label) or _match_col(metadata.get("Instance Label"))
+        outcome_col = _match_col(self.outcome_label) or _match_col(metadata.get("Outcome Label"))
+        outcome_type = str(self.outcome_type or metadata.get("Outcome Type") or "").strip().lower()
+
+        # Use explicit outcome label only when it does not collide with instance id.
+        if outcome_col and (not instance_col or outcome_col.lower() != instance_col.lower()):
+            return outcome_col
+
+        is_regression_like = outcome_type in {"continuous", "regression", "numeric", "real", "float"}
+        if is_regression_like:
+            semantic_tokens = ("target", "outcome", "score", "response", "phenotype", "label", "y")
+            id_like_names = {"class", "id", "instanceid", "instance_id", "sampleid", "sample_id"}
+
+            for col in cols:
+                cl = col.lower()
+                if instance_col and cl == instance_col.lower():
+                    continue
+                if cl in id_like_names:
+                    continue
+                if any(tok in cl for tok in semantic_tokens):
+                    return col
+
+            for col in cols:
+                cl = col.lower()
+                if instance_col and cl == instance_col.lower():
+                    continue
+                if cl in id_like_names:
+                    continue
+                if cl.endswith("_id") or cl.endswith("id") or "instance" in cl:
+                    continue
+                return col
+
+        class_col = _match_col("Class")
+        if class_col:
+            return class_col
+
+        if outcome_col:
+            return outcome_col
+
+        if instance_col:
+            for col in cols:
+                if col.lower() != instance_col.lower():
+                    return col
+
+        return cols[0]
+
+    def _detect_task_from_train(self, ds_dir: Path, metadata: Dict[str, Any]) -> str:
+        cv_dir = ds_dir / "CVDatasets"
+        train_files = sorted(cv_dir.glob("*_Train.csv"))
+        if not train_files:
+            return "Binary Classification"
+        train = train_files[0]
+        try:
+            with train.open("r", newline="", encoding="utf-8-sig") as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                if not header:
+                    return "Binary Classification"
+                target = self._find_target_column(header, metadata)
+                try:
+                    idx = list(header).index(target)
+                except ValueError:
+                    idx = 0
+                values: List[str] = []
+                for row in reader:
+                    if idx < len(row):
+                        values.append(row[idx].strip())
+                    if len(values) >= 5000:
+                        break
+                unique_vals = sorted(set([v for v in values if v != ""]))
+                unique = len(unique_vals)
+                if self._is_regression_from_values(values):
+                    return "Regression"
+                if unique == 2:
+                    return "Binary Classification"
+                if unique > 2:
+                    return "Multiclass Classification"
+        except Exception as exc:
+            logger.warning("Task detection fallback failed for %s: %r", ds_dir, exc)
+        return "Binary Classification"
+
+    def _detect_task_type(self, ds_dir: Path, metadata: Dict[str, Any]) -> str:
+        # Rule priority:
+        # 1) ClassCounts.csv if clearly binary.
+        # 2) ClassCounts with high-cardinality numeric labels can indicate regression.
+        # 3) Otherwise infer from *_Train.csv target values.
+        cc = self._read_csv_table(ds_dir / "exploratory" / "ClassCounts.csv")
+        if cc and cc.rows:
+            label_col = cc.columns[0]
+            labels = [row.get(label_col, "") for row in cc.rows if row.get(label_col, "").strip() != ""]
+            unique = len(set(labels))
+            if unique == 2:
+                return "Binary Classification"
+            if unique > 2:
+                # Keep ClassCounts-driven behavior aligned with classification first.
+                # Only treat as regression here when cardinality is clearly continuous-like.
+                if len(set(labels)) > 20 and all(_safe_float(v) is not None for v in labels):
+                    return "Regression"
+                return "Multiclass Classification"
+        return self._detect_task_from_train(ds_dir, metadata)
+
+    def _metric_list_for_task(self, task_type: str) -> List[str]:
+        if task_type == "Regression":
+            return REGRESSION_METRICS[:]
+        return CLASSIFICATION_METRICS[:]
+
+    def _metric_default_distribution(self, task_type: str, columns: Sequence[str]) -> Optional[str]:
+        if task_type == "Regression":
+            if "Pearson Correlation" in columns:
+                return "Pearson Correlation"
+            if "Mean Absolute Error" in columns:
+                return "Mean Absolute Error"
+            return columns[0] if columns else None
+        if "Balanced Accuracy" in columns:
+            return "Balanced Accuracy"
+        if "Accuracy" in columns:
+            return "Accuracy"
+        return columns[0] if columns else None
+
+    def _find_algorithm_col(self, columns: Sequence[str]) -> str:
+        preferred = {"algorithm", "ml algorithm", "model", "ensemble"}
+        for c in columns:
+            if c.strip().lower() in preferred:
+                return c
+        return columns[0] if columns else "Algorithm"
+
+    def _extract_class_count_info(self, class_counts: Optional[TableData]) -> Tuple[List[str], List[float]]:
+        if not class_counts or not class_counts.rows:
+            return [], []
+        label_col = class_counts.columns[0]
+        count_col = class_counts.columns[1] if len(class_counts.columns) > 1 else class_counts.columns[0]
+        labels: List[str] = []
+        counts: List[float] = []
+        for row in class_counts.rows:
+            label = row.get(label_col, "")
+            count = _safe_float(row.get(count_col, ""))
+            if label.strip() == "" or count is None:
                 continue
+            labels.append(label)
+            counts.append(count)
+        return labels, counts
+
+    def _classification_no_skill(self, class_counts: Optional[TableData]) -> float:
+        labels, counts = self._extract_class_count_info(class_counts)
+        if not counts:
+            return 0.5
+        total = sum(counts)
+        if total <= 0:
+            return 0.5
+        if len(labels) == 2:
+            # Prefer class label "1" if available, else second class.
+            if "1" in labels:
+                idx = labels.index("1")
+                return max(1e-6, min(1.0, counts[idx] / total))
+            return max(1e-6, min(1.0, counts[1] / total))
+        return max(1e-6, min(1.0, 1.0 / float(len(labels))))
+
+    def _mpl_ok(self) -> bool:
+        if not self.enable_plots:
+            return False
+        if self._mpl_ready is not None:
+            return self._mpl_ready
+        try:
+            mpl_cfg = self.paths.reporting_dir / ".mplconfig"
+            mpl_cfg.mkdir(parents=True, exist_ok=True)
+            mpl_cache = self.paths.reporting_dir / ".cache"
+            mpl_cache.mkdir(parents=True, exist_ok=True)
+            os.environ.setdefault("MPLCONFIGDIR", str(mpl_cfg))
+            os.environ.setdefault("XDG_CACHE_HOME", str(mpl_cache))
+            import matplotlib  # type: ignore
+
+            matplotlib.use("Agg")
+            matplotlib.rcParams.update(
+                {
+                    "font.family": "sans-serif",
+                    "font.sans-serif": ["DejaVu Sans", "Arial", "Helvetica"],
+                    "axes.titlesize": 10,
+                    "axes.titleweight": "normal",
+                    "axes.labelsize": 9,
+                    "xtick.labelsize": 8,
+                    "ytick.labelsize": 8,
+                    "legend.fontsize": 8,
+                }
+            )
+            self._mpl_ready = True
+        except Exception as exc:
+            logger.warning("Matplotlib not available. Figure auto-generation disabled: %r", exc)
+            self._mpl_ready = False
+        return self._mpl_ready
+
+    def _save_simple_placeholder(self, out: Path, title: str, body: str) -> Optional[str]:
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(7.5, 4.0))
+                ax.axis("off")
+                ax.text(0.5, 0.50, body, ha="center", va="center", fontsize=10)
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Matplotlib placeholder figure failed for %s: %r", out, exc)
         return None
 
-    def _figure_path_exploratory_class_balance(self, ds_dir: Path) -> Optional[str]:
-        return self._first_existing([
-            ds_dir / "exploratory" / "ClassCountsBarPlot.png",
-            ds_dir / "exploratory" / "ClassCountsBarplot.png",
-            ds_dir / "exploratory" / "ClassCounts.png",
-        ])
+    def _plot_missingness_top25(self, table: Optional[TableData], out: Path, title: str) -> Optional[str]:
+        if not table or not table.rows:
+            return None
+        low = {c.lower(): c for c in table.columns}
+        feature_col = low.get("feature") or low.get("variable") or table.columns[0]
+        value_col = low.get("count") or low.get("missing_count") or low.get("missingcount") or table.columns[-1]
+        rows: List[Tuple[str, float]] = []
+        for row in table.rows:
+            feat = row.get(feature_col, "")
+            val = _safe_float(row.get(value_col, ""))
+            if feat and val is not None:
+                rows.append((feat, val))
+        if not rows:
+            return None
+        rows = sorted(rows, key=lambda x: x[1], reverse=True)[:25]
+        labels = [x[0] for x in rows][::-1]
+        vals = [x[1] for x in rows][::-1]
 
-    def _figure_path_exploratory_missingness(self, ds_dir: Path) -> Optional[str]:
-        return self._first_existing([
-            ds_dir / "exploratory" / "DataMissingness.png",
-            ds_dir / "exploratory" / "Missingness.png",
-            ds_dir / "exploratory" / "MissingnessTop25.png",
-        ])
-
-    def _figure_path_exploratory_correlation_matrix(self, ds_dir: Path) -> Optional[str]:
-        return self._first_existing([
-            ds_dir / "exploratory" / "FeatureCorrelationMatrix.png",
-            ds_dir / "exploratory" / "FeatureCorrelation.png",
-            ds_dir / "exploratory" / "CorrelationMatrix.png",
-            ds_dir / "exploratory" / "CorrelationHeatmap.png",
-            ds_dir / "exploratory" / "feature_correlation" / "CorrelationMatrix.png",
-            ds_dir / "exploratory" / "feature_correlation" / "FeatureCorrelationMatrix.png",
-            ds_dir / "exploratory" / "FeatureCorrelation" / "CorrelationMatrix.png",
-        ])
-
-    def _figure_path_model_summary_roc_prc(self, ds_dir: Path, kind: str) -> Optional[str]:
-        if kind.lower() == "roc":
-            return self._first_existing([ds_dir / "model_evaluation" / "Summary_ROC.png"])
-        return self._first_existing([ds_dir / "model_evaluation" / "Summary_PRC.png"])
-
-    def _figure_path_model_metric_boxplot(self, ds_dir: Path, preferred_metric: str) -> Optional[str]:
-        return self._first_existing([
-            ds_dir / "model_evaluation" / "metricBoxplots" / f"Compare_{preferred_metric}.png",
-        ])
-
-    def _figure_path_ensemble_summary(self, ds_dir: Path, kind: str) -> Optional[str]:
-        if kind.lower() == "roc":
-            return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_ROC_ensembles.png"])
-        return self._first_existing([ds_dir / "ensemble_evaluation" / "Summary_PRC_ensembles.png"])
-
-    def _figure_paths_fs_top_scores(self, ds_dir: Path) -> List[Dict[str, str]]:
-        base = ds_dir / "feature_importance"
-        if not base.is_dir():
-            return []
-        hits = sorted(base.glob("*/TopAverageScores.png"), key=lambda p: p.parent.name.lower())
-        out: List[Dict[str, str]] = []
-        for p in hits:
+        if self._mpl_ok():
             try:
-                if p.is_file():
-                    out.append({"method": p.parent.name, "path": str(p)})
-            except Exception:
-                continue
-        return out
+                import matplotlib.pyplot as plt  # type: ignore
 
-    def _figure_path_dataset_comparisons_any(self) -> Optional[str]:
-        box_dir = self.exp_root / "DatasetComparisons" / "dataCompBoxplots"
-        return self._first_existing([
-            box_dir / "DataCompareAllModels_Balanced Accuracy.png",
-            box_dir / "DataCompareAllModels_ROC AUC.png",
-            box_dir / "DataCompareAllModels_PRC AUC.png",
-            box_dir / "DataCompareAllModels_Accuracy.png",
-        ])
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig_h = max(4.0, 0.18 * len(labels))
+                fig, ax = plt.subplots(figsize=(8.0, fig_h))
+                ax.barh(labels, vals, color="#4C78A8")
+                ax.set_xlabel(value_col)
+                ax.set_ylabel("Feature")
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Missingness plot generation failed with matplotlib: %r", exc)
+        return None
 
-    # ============================================================
-    # Plot builders (fallback only)
-    # ============================================================
+    def _plot_class_balance(self, table: Optional[TableData], out: Path, title: str) -> Optional[str]:
+        if not table or not table.rows:
+            return None
+        labels, counts = self._extract_class_count_info(table)
+        if not counts:
+            return None
 
-    def _plot_class_counts(self, class_counts: pd.DataFrame, title: str):
-        import plotly.express as px  # type: ignore
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
 
-        df = class_counts.copy()
-        low = {c.lower(): c for c in df.columns}
-        label_col = None
-        count_col = None
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(7.2, 4.4))
+                ax.bar(labels, counts, color="#59A14F")
+                ax.set_xlabel("Class")
+                ax.set_ylabel("Count")
+                for tick in ax.get_xticklabels():
+                    tick.set_rotation(35)
+                    tick.set_ha("right")
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Class balance plot generation failed with matplotlib: %r", exc)
+        return None
 
-        for cand in ["class", "label", "outcome", "y", "group"]:
-            if cand in low:
-                label_col = low[cand]
-                break
-        for cand in ["count", "n", "num", "frequency", "freq"]:
-            if cand in low:
-                count_col = low[cand]
-                break
+    def _plot_target_distribution(self, ds_dir: Path, metadata: Dict[str, Any], out: Path, title: str) -> Optional[str]:
+        cv_dir = ds_dir / "CVDatasets"
+        train_files = sorted(cv_dir.glob("*_Train.csv"))
+        if not train_files:
+            return None
+        try:
+            with train_files[0].open("r", newline="", encoding="utf-8-sig") as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                if not header:
+                    return None
+                target = self._find_target_column(header, metadata)
+                idx = list(header).index(target) if target in header else 0
+                vals: List[float] = []
+                for row in reader:
+                    if idx < len(row):
+                        fv = _safe_float(row[idx].strip())
+                        if fv is not None:
+                            vals.append(fv)
+                if not vals:
+                    return None
+            if self._mpl_ok():
+                import matplotlib.pyplot as plt  # type: ignore
 
-        if label_col is None:
-            label_col = df.columns[0]
-        if count_col is None:
-            count_col = df.columns[1] if len(df.columns) > 1 else df.columns[0]
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(7.2, 4.4))
+                bins = min(40, max(12, int(round(math.sqrt(len(vals))))))
+                ax.hist(vals, bins=bins, histtype="bar", color="#E15759", alpha=0.9, edgecolor="#FFFFFF", linewidth=0.6)
+                ax.set_xlabel("Target value")
+                ax.set_ylabel("Frequency")
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+        except Exception as exc:
+            logger.warning("Target distribution plot generation failed with matplotlib path: %r", exc)
+        return None
 
-        df = df[[label_col, count_col]].dropna()
-        df[count_col] = pd.to_numeric(df[count_col], errors="coerce")
-        df = df.dropna()
-        fig = px.bar(df, x=label_col, y=count_col, title=title)
-        fig.update_layout(xaxis_title="Class", yaxis_title="Count")
-        return fig
-
-    def _plot_missingness(self, missingness: pd.DataFrame, title: str):
-        import plotly.express as px  # type: ignore
-
-        df = missingness.copy()
-        low = {c.lower(): c for c in df.columns}
-        fcol = low.get("feature", df.columns[0])
-
-        pcol = None
-        for cand in ["missingpercent", "missing_percent", "percentmissing", "pct_missing", "missingpct"]:
-            if cand in low:
-                pcol = low[cand]
-                break
-        ccol = None
-        for cand in ["missingcount", "missing_count", "countmissing", "n_missing"]:
-            if cand in low:
-                ccol = low[cand]
-                break
-
-        val_col = pcol or ccol or df.columns[-1]
-        df = df[[fcol, val_col]].dropna()
-        df[val_col] = pd.to_numeric(df[val_col], errors="coerce")
-        df = df.dropna().sort_values(val_col, ascending=False).head(25)
-
-        fig = px.bar(df.iloc[::-1], x=val_col, y=fcol, orientation="h", title=title)
-        fig.update_layout(xaxis_title=val_col, yaxis_title="Feature")
-        return fig
-
-    def _plot_correlation_matrix_from_csv(self, corr_df: pd.DataFrame, title: str):
-        import plotly.express as px  # type: ignore
-
-        df = corr_df.copy()
-        if df.shape[1] > 1 and str(df.columns[0]).lower() in {"unnamed: 0", "feature", "var", "variable"}:
-            df = df.set_index(df.columns[0])
-        df = df.apply(pd.to_numeric, errors="coerce")
-        df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
-
-        fig = px.imshow(df, aspect="auto", title=title, color_continuous_scale="RdBu", zmin=-1, zmax=1)
-        fig.update_layout(margin=dict(l=10, r=10, t=40, b=10))
-        return fig
-
-    # ============================================================
-    # Table building
-    # ============================================================
-
-    def _infer_alg_col(self, df: pd.DataFrame) -> str:
-        low = {c.lower(): c for c in df.columns}
-        for key in ["ml algorithm", "ml_algorithm", "algorithm", "model"]:
-            if key in low:
-                return low[key]
-        return df.columns[0]
-
-    def _build_mean_std_table(
-        self,
-        mean_df: Optional[pd.DataFrame],
-        std_df: Optional[pd.DataFrame],
-        highlight_metric_candidates: List[str],
-        max_rows: int = 50,
-    ) -> Dict[str, Any]:
-        if mean_df is None or mean_df.empty or std_df is None or std_df.empty:
-            return {"present": False}
-
-        m = mean_df.copy()
-        s = std_df.copy()
-
-        alg_col_m = self._infer_alg_col(m)
-        alg_col_s = self._infer_alg_col(s)
-        if alg_col_m != "Algorithm":
-            m = m.rename(columns={alg_col_m: "Algorithm"})
-        if alg_col_s != "Algorithm":
-            s = s.rename(columns={alg_col_s: "Algorithm"})
-
-        highlight_metric = None
-        for cand in highlight_metric_candidates:
-            if cand in m.columns:
-                highlight_metric = cand
-                break
-
-        common_metrics = [c for c in m.columns if c != "Algorithm" and c in s.columns]
-        if not common_metrics:
-            return {"present": False}
-
-        merged = m[["Algorithm"] + common_metrics].merge(
-            s[["Algorithm"] + common_metrics],
-            on="Algorithm",
-            how="inner",
-            suffixes=("_mean", "_std"),
+    def _figure_path_exploratory_correlation_matrix(self, ds_dir: Path) -> Optional[Path]:
+        return _first_existing(
+            [
+                ds_dir / "exploratory" / "FeatureCorrelationMatrix.png",
+                ds_dir / "exploratory" / "FeatureCorrelation.png",
+                ds_dir / "exploratory" / "CorrelationMatrix.png",
+                ds_dir / "exploratory" / "CorrelationHeatmap.png",
+                ds_dir / "exploratory" / "feature_correlation" / "CorrelationMatrix.png",
+                ds_dir / "exploratory" / "feature_correlation" / "FeatureCorrelationMatrix.png",
+                ds_dir / "exploratory" / "FeatureCorrelation" / "CorrelationMatrix.png",
+                self.paths.figures_dir / f"{ds_dir.name}_corr_matrix.png",
+            ]
         )
 
-        columns = ["Algorithm"] + common_metrics
+    def _find_exploratory_correlation_csv(self, ds_dir: Path) -> Optional[Path]:
+        return _first_existing(
+            [
+                ds_dir / "exploratory" / "FeatureCorrelations.csv",
+                ds_dir / "exploratory" / "FeatureCorrelationMatrix.csv",
+                ds_dir / "exploratory" / "CorrelationMatrix.csv",
+                ds_dir / "exploratory" / "FeatureCorrelation.csv",
+                ds_dir / "exploratory" / "feature_correlation" / "CorrelationMatrix.csv",
+                ds_dir / "exploratory" / "FeatureCorrelation" / "CorrelationMatrix.csv",
+                ds_dir / "exploratory" / "initial" / "FeatureCorrelations.csv",
+            ]
+        )
 
-        best_alg = None
-        if highlight_metric and f"{highlight_metric}_mean" in merged.columns:
-            try:
-                best_idx = merged[f"{highlight_metric}_mean"].astype(float).idxmax()
-                best_alg = str(merged.loc[best_idx, "Algorithm"])
-            except Exception:
-                best_alg = None
-
-        rows = []
-        for _, r in merged.head(max_rows).iterrows():
-            cells = []
-            for c in columns:
-                if c == "Algorithm":
-                    alg = str(r["Algorithm"])
-                    cells.append({"value": alg, "best": bool(best_alg and alg == best_alg)})
-                else:
-                    mv = r.get(f"{c}_mean", None)
-                    sv = r.get(f"{c}_std", None)
-                    cells.append({"value": (mv, sv), "best": False})
-            rows.append({"cells": cells})
-
-        return {
-            "present": True,
-            "columns": columns,
-            "rows": rows,
-            "highlight_metric": highlight_metric,
-            "best_algorithm": best_alg,
-        }
-
-    def _build_plain_table(self, df: Optional[pd.DataFrame], max_rows: int = 100) -> Dict[str, Any]:
-        if df is None or df.empty:
-            return {"present": False}
-        df2 = df.head(max_rows).copy()
-        df2 = df2.where(pd.notnull(df2), None)
-        return {"present": True, "columns": list(df2.columns), "rows": df2.values.tolist()}
-
-    def _univariate_is_informative(self, uni: Optional[pd.DataFrame]) -> bool:
-        if uni is None or uni.empty:
-            return False
-        if len(uni) < 3:
-            return False
-
-        low = {c.lower(): c for c in uni.columns}
-        pcol = None
-        for cand in ["p", "p-value", "p_value", "pvalue", "pval"]:
-            if cand in low:
-                pcol = low[cand]
-                break
-        if pcol is None:
-            return uni.shape[1] >= 2 and len(uni) >= 5
-
+    def _read_correlation_matrix_csv(self, path: Path) -> Tuple[List[str], List[List[float]]]:
+        labels: List[str] = []
+        matrix: List[List[float]] = []
         try:
-            pv = pd.to_numeric(uni[pcol], errors="coerce").dropna()
-            if pv.empty:
-                return False
-            return bool((pv < 0.10).any())
+            with path.open("r", newline="", encoding="utf-8-sig") as f:
+                rows = list(csv.reader(f))
+            if not rows:
+                return labels, matrix
+
+            header = rows[0]
+            has_row_label_col = bool(header) and (header[0].strip() == "" or header[0].strip().lower() in {"feature", "variable", "var", "unnamed: 0"})
+            col_labels = [h.strip() for h in (header[1:] if has_row_label_col else header)]
+            if not col_labels:
+                return labels, matrix
+
+            for idx, row in enumerate(rows[1:]):
+                if not row:
+                    continue
+                if has_row_label_col and len(row) >= 2:
+                    row_label = row[0].strip() or f"R{idx+1}"
+                    vals_raw = row[1:]
+                else:
+                    row_label = col_labels[idx] if idx < len(col_labels) else f"R{idx+1}"
+                    vals_raw = row
+                vals: List[float] = []
+                for j, v in enumerate(vals_raw):
+                    fv = _safe_float(v)
+                    if fv is None or math.isnan(fv):
+                        # Keep matrix dense for plotting.
+                        if row_label in col_labels and j < len(col_labels) and col_labels[j] == row_label:
+                            fv = 1.0
+                        else:
+                            fv = 0.0
+                    vals.append(float(fv))
+                if vals:
+                    matrix.append(vals)
+                    labels.append(row_label)
+
+            if not matrix:
+                return [], []
+
+            # Make matrix rectangular and then square by clipping/padding.
+            max_cols = max(len(r) for r in matrix)
+            for r in matrix:
+                if len(r) < max_cols:
+                    r.extend([0.0] * (max_cols - len(r)))
+
+            n = min(len(matrix), max_cols, len(col_labels))
+            matrix = [row[:n] for row in matrix[:n]]
+            labels = col_labels[:n] if len(col_labels) >= n else labels[:n]
+            return labels, matrix
+        except Exception as exc:
+            logger.warning("Could not read correlation matrix CSV %s: %r", path, exc)
+            return [], []
+
+    def _plot_correlation_matrix_from_csv(self, csv_path: Path, out: Path, title: str) -> Optional[str]:
+        labels, matrix = self._read_correlation_matrix_csv(csv_path)
+        if not labels or not matrix:
+            return None
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                n = len(labels)
+                fig_size = min(11.0, max(5.8, 0.18 * n))
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(fig_size, fig_size))
+                img = ax.imshow(matrix, cmap="coolwarm", vmin=-1.0, vmax=1.0, aspect="equal", interpolation="nearest")
+                if n <= 30:
+                    ax.set_xticks(list(range(n)))
+                    ax.set_yticks(list(range(n)))
+                    ax.set_xticklabels(labels, fontsize=6, rotation=90)
+                    ax.set_yticklabels(labels, fontsize=6)
+                else:
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                ax.tick_params(length=0)
+                cbar = fig.colorbar(img, ax=ax, fraction=0.046, pad=0.04)
+                cbar.ax.tick_params(labelsize=7)
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Correlation matrix plot generation failed with matplotlib for %s: %r", csv_path, exc)
+        return None
+
+    def _parse_mutual_info_scores(self, ds_dir: Path) -> List[Tuple[str, float]]:
+        candidates = [
+            ds_dir / "feature_importance" / "mutualinformation",
+            ds_dir / "feature_importance" / "mutual_information",
+            ds_dir / "feature_selection" / "mutualinformation",
+            ds_dir / "feature_selection" / "mutual_information",
+        ]
+        score_map: Dict[str, List[float]] = {}
+        for base in candidates:
+            if not base.is_dir():
+                continue
+            for path in sorted(base.glob("mutualinformation_scores_cv_*.csv")):
+                table = self._read_csv_table(path)
+                if not table or not table.rows:
+                    continue
+                low = {c.lower(): c for c in table.columns}
+                fcol = low.get("feature") or table.columns[0]
+                scol = low.get("score") or table.columns[-1]
+                for row in table.rows:
+                    feat = row.get(fcol, "").strip()
+                    score = _safe_float(row.get(scol, ""))
+                    if feat and score is not None:
+                        score_map.setdefault(feat, []).append(score)
+        medians: List[Tuple[str, float]] = []
+        for feat, vals in score_map.items():
+            if vals:
+                medians.append((feat, statistics.median(vals)))
+        medians.sort(key=lambda t: t[1], reverse=True)
+        return medians
+
+    def _plot_mutual_info_top(self, ds_dir: Path, out: Path, top_n: int = 20) -> Optional[str]:
+        data = self._parse_mutual_info_scores(ds_dir)
+        if not data:
+            return None
+        data = data[:top_n]
+        labels = [d[0] for d in data][::-1]
+        vals = [d[1] for d in data][::-1]
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig_h = max(4.2, 0.25 * len(labels))
+                fig, ax = plt.subplots(figsize=(8.5, fig_h))
+                ax.barh(labels, vals, color="#4E79A7")
+                ax.set_xlabel("Median score across CV folds")
+                ax.set_ylabel("Feature")
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Mutual information plot generation failed with matplotlib: %r", exc)
+        return None
+
+    def _load_metrics_by_cv(self, metrics_dir: Path, metric_name: str) -> Dict[str, List[float]]:
+        key = METRIC_JSON_KEYS.get(metric_name, metric_name)
+        out: Dict[str, List[float]] = {}
+        if not metrics_dir.is_dir():
+            return out
+        for path in sorted(metrics_dir.glob("*.json")):
+            blob = self._read_json(path)
+            if not blob:
+                continue
+            alg = path.name.split("_CV_")[0]
+            metrics = blob.get("metrics")
+            val = None
+            if isinstance(metrics, dict):
+                if key in metrics:
+                    val = _safe_float(metrics.get(key))
+                else:
+                    # Compatibility fallbacks
+                    for alt in [key.lower(), key.upper(), metric_name, metric_name.lower()]:
+                        if alt in metrics:
+                            val = _safe_float(metrics.get(alt))
+                            break
+            elif key in blob:
+                val = _safe_float(blob.get(key))
+            if val is not None:
+                out.setdefault(alg, []).append(val)
+        return out
+
+    def _plot_metric_distribution(self, metrics_dir: Path, metric_name: str, out: Path, title: str) -> Optional[str]:
+        data = self._load_metrics_by_cv(metrics_dir, metric_name)
+        if not data:
+            return None
+        labels = sorted(data.keys())
+        series = [data[k] for k in labels]
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(8.6, 4.8))
+                ax.boxplot(series, tick_labels=labels, vert=True, patch_artist=True)
+                ax.set_ylabel(metric_name)
+                for tick in ax.get_xticklabels():
+                    tick.set_rotation(35)
+                    tick.set_ha("right")
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Metric distribution plot generation failed with matplotlib: %r", exc)
+        return None
+
+    def _extract_cv_index(self, filename: str) -> Optional[int]:
+        m = re.search(r"_CV_([0-9]+)", filename)
+        if not m:
+            return None
+        try:
+            return int(m.group(1))
+        except Exception:
+            return None
+
+    def _load_metric_values_by_cv(self, metrics_dir: Path, metric_name: str) -> Dict[int, List[float]]:
+        key = METRIC_JSON_KEYS.get(metric_name, metric_name)
+        out: Dict[int, List[float]] = {}
+        if not metrics_dir.is_dir():
+            return out
+        for path in sorted(metrics_dir.glob("*.json")):
+            blob = self._read_json(path)
+            if not blob:
+                continue
+            metrics = blob.get("metrics")
+            val = None
+            if isinstance(metrics, dict):
+                if key in metrics:
+                    val = _safe_float(metrics.get(key))
+                else:
+                    for alt in [key.lower(), key.upper(), metric_name, metric_name.lower()]:
+                        if alt in metrics:
+                            val = _safe_float(metrics.get(alt))
+                            break
+            elif key in blob:
+                val = _safe_float(blob.get(key))
+            if val is None:
+                continue
+            cv_idx = self._extract_cv_index(path.stem)
+            if cv_idx is None:
+                cv_idx = len(out)
+            out.setdefault(cv_idx, []).append(val)
+        return out
+
+    def _dataset_metric_series_for_overview(self, ds_dir: Path, metric_name: str) -> List[float]:
+        by_cv: Dict[int, List[float]] = {}
+        for metrics_dir in [
+            ds_dir / "model_evaluation" / "metrics_by_cv",
+            ds_dir / "ensemble_evaluation" / "metrics_by_cv",
+        ]:
+            cv_map = self._load_metric_values_by_cv(metrics_dir, metric_name)
+            for cv_idx, values in cv_map.items():
+                by_cv.setdefault(cv_idx, []).extend(values)
+        if not by_cv:
+            return []
+
+        higher = METRIC_DIRECTION_HIGHER_IS_BETTER.get(metric_name, True)
+        series: List[float] = []
+        for cv_idx in sorted(by_cv.keys()):
+            values = [v for v in by_cv[cv_idx] if v is not None]
+            if not values:
+                continue
+            series.append(max(values) if higher else min(values))
+        return series
+
+    def _plot_dataset_comparison_overview(
+        self,
+        dataset_blocks: Sequence[Dict[str, Any]],
+        metric_name: str,
+        out: Path,
+    ) -> Optional[str]:
+        labels: List[str] = []
+        series: List[List[float]] = []
+        for ds in dataset_blocks:
+            ds_id = str(ds.get("dataset_id", ""))
+            ds_path = Path(str(ds.get("dataset_path", "")))
+            if not ds_id or not ds_path.is_dir():
+                continue
+            vals = self._dataset_metric_series_for_overview(ds_path, metric_name)
+            if vals:
+                labels.append(ds_id)
+                series.append(vals)
+
+        if not labels or not series:
+            return None
+
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(8.6, 4.8))
+                ax.boxplot(series, tick_labels=labels, vert=True, patch_artist=True)
+                ax.set_xlabel("Dataset")
+                ax.set_ylabel(metric_name)
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning(
+                    "Dataset comparison overview generation failed with matplotlib for %s: %r",
+                    metric_name,
+                    exc,
+                )
+        return None
+
+    def _extract_curve_xy(self, blob: Dict[str, Any], curve_kind: str) -> Tuple[Optional[List[float]], Optional[List[float]], Optional[str]]:
+        if curve_kind == "roc":
+            keys = ("fpr", "tpr")
+        else:
+            keys = ("recall", "precision")
+
+        if keys[0] in blob and keys[1] in blob:
+            try:
+                x = [float(v) for v in blob[keys[0]]]
+                y = [float(v) for v in blob[keys[1]]]
+                return x, y, None
+            except Exception:
+                pass
+
+        preferred = ["micro", "macro"]
+        for key in preferred + list(blob.keys()):
+            sub = blob.get(key)
+            if isinstance(sub, dict) and keys[0] in sub and keys[1] in sub:
+                try:
+                    x = [float(v) for v in sub[keys[0]]]
+                    y = [float(v) for v in sub[keys[1]]]
+                    return x, y, str(key)
+                except Exception:
+                    continue
+        return None, None, None
+
+    def _curve_alg_from_filename(self, filename: str, curve_kind: str) -> str:
+        # Parse algorithm name using the *last* _CV_<idx>_<kind>.json pattern.
+        # This avoids collapsing names that may themselves contain "_CV_".
+        pat = re.compile(rf"^(.*)_CV_[0-9]+_{re.escape(curve_kind)}\.json$", re.IGNORECASE)
+        m = pat.match(filename)
+        if m:
+            return m.group(1)
+        suffix = f"_{curve_kind}.json"
+        if filename.lower().endswith(suffix):
+            return filename[: -len(suffix)]
+        return Path(filename).stem
+
+    def _is_class_like_key(self, key: str) -> bool:
+        k = str(key).strip()
+        if k == "":
+            return False
+        if k.isdigit():
+            return True
+        try:
+            float(k)
+            return True
         except Exception:
             return False
 
-    # ============================================================
-    # Combine model + ensemble performance (Mean +/- SD)
-    #   - NO new column
-    #   - ensemble rows renamed: "<Algorithm> - Ensemble"
-    # ============================================================
-
-    def _combine_model_and_ensemble_perf(
+    def _extract_curve_entries(
         self,
-        models_mean_std: Dict[str, Any],
-        ensembles_mean_std: Dict[str, Any],
+        blob: Dict[str, Any],
+        curve_kind: str,
+        default_alg: str,
+    ) -> List[Tuple[str, List[float], List[float], Optional[str]]]:
+        # 1) Direct or micro/macro-compatible payload.
+        x, y, tag = self._extract_curve_xy(blob, curve_kind)
+        if x and y and len(x) == len(y) and len(x) > 1:
+            return [(default_alg, x, y, tag)]
+
+        # 2) One-level nested payload.
+        one_level: List[Tuple[str, List[float], List[float], Optional[str]]] = []
+        for key, sub in blob.items():
+            if not isinstance(sub, dict):
+                continue
+            sx, sy, stag = self._extract_curve_xy(sub, curve_kind)
+            if sx and sy and len(sx) == len(sy) and len(sx) > 1:
+                one_level.append((str(key), sx, sy, stag))
+
+        if one_level:
+            keys = [k for k, _, _, _ in one_level]
+            if all(self._is_class_like_key(k) for k in keys):
+                # Class-wise nested curves for one algorithm.
+                # Aggregate to a single representative (macro-like) curve.
+                x_grid = _linspace(0.0, 1.0, 250)
+                interpolated: List[List[float]] = []
+                for _, sx, sy, _ in one_level:
+                    yi = _interp_sorted(sx, sy, x_grid)
+                    yi = [max(0.0, min(1.0, v)) for v in yi]
+                    interpolated.append(yi)
+                if interpolated:
+                    mean_y = [
+                        sum(vals[i] for vals in interpolated) / float(len(interpolated))
+                        for i in range(len(x_grid))
+                    ]
+                    return [(default_alg, x_grid, mean_y, "macro")]
+                return []
+
+            # Treat keys as algorithm names in combined files.
+            entries: List[Tuple[str, List[float], List[float], Optional[str]]] = []
+            for key, sx, sy, stag in one_level:
+                alg = key.strip() or default_alg
+                entries.append((alg, sx, sy, stag))
+            return entries
+
+        # 3) Two-level nested payload (algorithm -> class -> curve)
+        entries: List[Tuple[str, List[float], List[float], Optional[str]]] = []
+        for outer_key, outer_val in blob.items():
+            if not isinstance(outer_val, dict):
+                continue
+            nested: List[Tuple[str, List[float], List[float], Optional[str]]] = []
+            for inner_key, inner_val in outer_val.items():
+                if not isinstance(inner_val, dict):
+                    continue
+                sx, sy, stag = self._extract_curve_xy(inner_val, curve_kind)
+                if sx and sy and len(sx) == len(sy) and len(sx) > 1:
+                    nested.append((str(inner_key), sx, sy, stag))
+            if not nested:
+                continue
+
+            inner_keys = [k for k, _, _, _ in nested]
+            alg_name = str(outer_key).strip() or default_alg
+            if all(self._is_class_like_key(k) for k in inner_keys):
+                x_grid = _linspace(0.0, 1.0, 250)
+                interpolated: List[List[float]] = []
+                for _, sx, sy, _ in nested:
+                    yi = _interp_sorted(sx, sy, x_grid)
+                    yi = [max(0.0, min(1.0, v)) for v in yi]
+                    interpolated.append(yi)
+                if interpolated:
+                    mean_y = [
+                        sum(vals[i] for vals in interpolated) / float(len(interpolated))
+                        for i in range(len(x_grid))
+                    ]
+                    entries.append((alg_name, x_grid, mean_y, "macro"))
+            else:
+                for inner_name, sx, sy, stag in nested:
+                    name = inner_name.strip() or alg_name
+                    entries.append((name, sx, sy, stag))
+        return entries
+
+    def _load_curves_grouped(self, curves_dir: Path, curve_kind: str) -> Dict[str, List[Tuple[List[float], List[float], Optional[str]]]]:
+        groups: Dict[str, List[Tuple[List[float], List[float], Optional[str]]]] = {}
+        if not curves_dir.is_dir():
+            return groups
+        for path in sorted(curves_dir.glob(f"*_{curve_kind}.json")):
+            blob = self._read_json(path)
+            if not blob:
+                continue
+            default_alg = self._curve_alg_from_filename(path.name, curve_kind)
+            entries = self._extract_curve_entries(blob, curve_kind, default_alg)
+            for alg, x, y, tag in entries:
+                if x and y and len(x) == len(y) and len(x) > 1:
+                    groups.setdefault(alg, []).append((x, y, tag))
+        return groups
+
+    def _plot_curve_summary(
+        self,
+        curves_dir: Path,
+        out: Path,
         *,
-        drop_if_needed: Sequence[str] = ("Brier Score",),
-        ensemble_suffix: str = " - Ensemble",
-    ) -> Dict[str, Any]:
-        ms = models_mean_std or {}
-        es = ensembles_mean_std or {}
+        curve_kind: str,
+        title: str,
+        no_skill: float = 0.5,
+    ) -> Optional[str]:
+        groups = self._load_curves_grouped(curves_dir, curve_kind)
+        if not groups:
+            return None
+        x_grid = _linspace(0.0, 1.0, 250)
+        plot_lines: List[Tuple[str, List[float], Optional[str], float]] = []
+        for alg in sorted(groups.keys()):
+            curves = groups[alg]
+            interpolated: List[List[float]] = []
+            tags: List[str] = []
+            for x, y, tag in curves:
+                yi = _interp_sorted(x, y, x_grid)
+                yi = [max(0.0, min(1.0, v)) for v in yi]
+                interpolated.append(yi)
+                if tag:
+                    tags.append(tag)
+            if not interpolated:
+                continue
+            mean_y = [
+                sum(vals[i] for vals in interpolated) / float(len(interpolated))
+                for i in range(len(x_grid))
+            ]
+            auc_val = _auc_trapezoid(x_grid, mean_y)
+            label_suffix = ""
+            if tags:
+                if "micro" in tags:
+                    label_suffix = " (micro)"
+                elif "macro" in tags:
+                    label_suffix = " (macro)"
+            label = f"{alg}{label_suffix} (AUC={_format_number(auc_val)})"
+            plot_lines.append((label, mean_y, label_suffix or None, auc_val))
 
-        if not ms.get("present") and not es.get("present"):
-            return {"present": False}
+        if not plot_lines:
+            return None
 
-        ms_cols = list(ms.get("columns") or []) if ms.get("present") else []
-        es_cols = list(es.get("columns") or []) if es.get("present") else []
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
 
-        ms_metrics = [c for c in ms_cols if c != "Algorithm"]
-        es_metrics = [c for c in es_cols if c != "Algorithm"]
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig, ax = plt.subplots(figsize=(7.6, 5.4))
+                for label, mean_y, _tag, _auc in plot_lines:
+                    ax.plot(x_grid, mean_y, linewidth=1.6, label=label)
 
-        metrics: List[str] = []
-        for c in ms_metrics + es_metrics:
-            if c not in metrics:
-                metrics.append(c)
+                if curve_kind == "roc":
+                    ax.plot(
+                        [0.0, 1.0],
+                        [0.0, 1.0],
+                        linestyle="--",
+                        color="black",
+                        linewidth=1.0,
+                        label="No Skill (AUC=0.500)",
+                    )
+                    ax.set_xlabel("False Positive Rate")
+                    ax.set_ylabel("True Positive Rate")
+                else:
+                    y_base = max(0.0, min(1.0, no_skill))
+                    ax.plot(
+                        [0.0, 1.0],
+                        [y_base, y_base],
+                        linestyle="--",
+                        color="black",
+                        linewidth=1.0,
+                        label=f"No Skill (AUC={_format_number(y_base)})",
+                    )
+                    ax.set_xlabel("Recall")
+                    ax.set_ylabel("Precision")
+                ax.set_xlim(0.0, 1.0)
+                ax.set_ylim(0.0, 1.02)
+                ax.legend(loc="lower right", fontsize=8)
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Curve summary generation failed with matplotlib (%s): %r", curve_kind, exc)
+        return None
 
-        # Too wide? columns are Algorithm + metrics
-        too_wide = (1 + len(metrics)) >= 11
-        if too_wide:
-            for drop_col in drop_if_needed:
-                if drop_col in metrics:
-                    metrics.remove(drop_col)
-                    break
-
-        def _row_map(mean_std_tbl: Dict[str, Any]) -> Dict[str, Dict[str, Tuple[Any, Any]]]:
-            out: Dict[str, Dict[str, Tuple[Any, Any]]] = {}
-            if not mean_std_tbl.get("present"):
-                return out
-            cols = list(mean_std_tbl.get("columns") or [])
-            for row in mean_std_tbl.get("rows") or []:
-                cells = row.get("cells") or []
-                if not cells:
-                    continue
-                alg = str((cells[0] or {}).get("value", "")).strip()
-                if not alg:
-                    continue
-                m: Dict[str, Tuple[Any, Any]] = {}
-                for j, col in enumerate(cols):
-                    if col == "Algorithm":
-                        continue
-                    if j >= len(cells):
-                        continue
-                    v = (cells[j] or {}).get("value")
-                    if isinstance(v, tuple) and len(v) == 2:
-                        m[col] = (v[0], v[1])
-                out[alg] = m
+    def _plot_regression_residual_fallbacks(self, ds_dir: Path, dataset_name: str) -> Dict[str, Optional[str]]:
+        out: Dict[str, Optional[str]] = {
+            "actual_vs_predicted": None,
+            "residual_distribution": None,
+            "test_residual": None,
+        }
+        test = self._read_csv_table(ds_dir / "model_evaluation" / "residual_test.csv")
+        if not test:
             return out
 
-        ms_map = _row_map(ms)
-        es_map = _row_map(es)
+        def residuals_from(table: Optional[TableData]) -> List[float]:
+            if not table:
+                return []
+            low = {c.lower(): c for c in table.columns}
+            rcol = low.get("residual") or (table.columns[1] if len(table.columns) > 1 else table.columns[0])
+            vals: List[float] = []
+            for row in table.rows:
+                rv = _safe_float(row.get(rcol, ""))
+                if rv is not None:
+                    vals.append(rv)
+            return vals
 
-        columns = ["Algorithm"] + metrics
-        rows: List[Dict[str, Any]] = []
+        test_vals = residuals_from(test)
 
-        # Models
-        for alg in sorted(ms_map.keys(), key=lambda s: s.lower()):
-            metric_map = ms_map[alg]
-            cells: List[Dict[str, Any]] = [{"value": alg, "best": False}]
-            for met in metrics:
-                if met in metric_map:
-                    mv, sv = metric_map[met]
-                    cells.append({"value": (mv, sv), "best": False})
+        def actual_pred_from(table: Optional[TableData]) -> Tuple[List[float], List[float], List[str]]:
+            if not table:
+                return [], [], []
+            low = {c.lower(): c for c in table.columns}
+            pred_col = low.get("predicted") or low.get("prediction") or low.get("pred") or low.get("y_pred")
+            actual_col = low.get("actual") or low.get("outcome") or low.get("observed") or low.get("y_test")
+            alg_col = low.get("algorithm") or low.get("model")
+            if not pred_col or not actual_col:
+                return [], [], []
+            preds: List[float] = []
+            actuals: List[float] = []
+            algs: List[str] = []
+            for row in table.rows:
+                pv = _safe_float(row.get(pred_col, ""))
+                av = _safe_float(row.get(actual_col, ""))
+                if pv is None or av is None:
+                    continue
+                preds.append(pv)
+                actuals.append(av)
+                algs.append(row.get(alg_col, "").strip() if alg_col else "")
+            return preds, actuals, algs
+
+        preds, actuals, pred_algs = actual_pred_from(test)
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                if test_vals:
+                    dist_out = self.paths.figures_dir / f"{dataset_name}_residual_distribution_fallback.png"
+                    fig, ax = plt.subplots(figsize=(7.2, 4.2))
+                    ax.hist(test_vals, bins=35, alpha=0.85, color="#E15759")
+                    ax.set_xlabel("Residual")
+                    ax.set_ylabel("Frequency")
+                    fig.tight_layout()
+                    fig.savefig(dist_out, dpi=180)
+                    plt.close(fig)
+                    out["residual_distribution"] = str(dist_out)
+
+                if test_vals:
+                    test_out = self.paths.figures_dir / f"{dataset_name}_test_residual_fallback.png"
+                    fig, ax = plt.subplots(figsize=(7.2, 4.2))
+                    vals_sorted = sorted(test_vals)
+                    n = len(vals_sorted)
+                    if n > 1:
+                        theo = [statistics.NormalDist().inv_cdf((i + 0.5) / n) for i in range(n)]
+                        ax.scatter(theo, vals_sorted, s=8, alpha=0.6, color="#E15759")
+                    else:
+                        ax.scatter([0.0], vals_sorted, s=8, alpha=0.6, color="#E15759")
+                    ax.set_xlabel("Theoretical Quantiles")
+                    ax.set_ylabel("Ordered Residual")
+                    fig.tight_layout()
+                    fig.savefig(test_out, dpi=180)
+                    plt.close(fig)
+                    out["test_residual"] = str(test_out)
+
+                if preds and actuals:
+                    avp_out = self.paths.figures_dir / f"{dataset_name}_actual_vs_predicted_fallback.png"
+                    fig, ax = plt.subplots(figsize=(7.2, 4.2))
+                    if pred_algs and any(a for a in pred_algs):
+                        for alg in sorted(set([a for a in pred_algs if a])):
+                            idxs = [i for i, a in enumerate(pred_algs) if a == alg]
+                            xvals = [preds[i] for i in idxs]
+                            yvals = [actuals[i] for i in idxs]
+                            ax.scatter(xvals, yvals, s=10, alpha=0.45, label=alg)
+                        ax.legend(loc="upper right", fontsize=7)
+                    else:
+                        ax.scatter(preds, actuals, s=10, alpha=0.45)
+                    ax.set_xlabel("Predicted Outcome")
+                    ax.set_ylabel("Actual Outcome")
+                    fig.tight_layout()
+                    fig.savefig(avp_out, dpi=180)
+                    plt.close(fig)
+                    out["actual_vs_predicted"] = str(avp_out)
+            except Exception as exc:
+                logger.warning("Regression fallback plot generation failed with matplotlib for %s: %r", ds_dir, exc)
+
+        if out["actual_vs_predicted"] is None:
+            out["actual_vs_predicted"] = self._save_simple_placeholder(
+                self.paths.figures_dir / f"{dataset_name}_actual_vs_predicted_fallback.png",
+                "Actual vs Predicted",
+                "Predictions not found in exported CSVs.",
+            )
+        return out
+
+    def _format_rows_for_display(self, table: Optional[TableData]) -> Optional[TableData]:
+        if not table:
+            return None
+        rows: List[Dict[str, str]] = []
+        for row in table.rows:
+            clean: Dict[str, str] = {}
+            for col in table.columns:
+                val = row.get(col, "")
+                fv = _safe_float(val)
+                if fv is not None:
+                    clean[col] = _format_number(fv, is_pvalue=_is_pvalue_col(col))
                 else:
-                    cells.append({"value": ("", ""), "best": False})
-            rows.append({"cells": cells})
+                    clean[col] = val
+            rows.append(clean)
+        return TableData(columns=table.columns[:], rows=rows)
 
-        # Ensembles (renamed)
-        for alg in sorted(es_map.keys(), key=lambda s: s.lower()):
-            alg2 = f"{alg}{ensemble_suffix}"
-            metric_map = es_map[alg]
-            cells = [{"value": alg2, "best": False}]
-            for met in metrics:
-                if met in metric_map:
-                    mv, sv = metric_map[met]
-                    cells.append({"value": (mv, sv), "best": False})
+    def _univariate_top10(self, table: Optional[TableData]) -> Optional[TableData]:
+        if not table or not table.rows:
+            return None
+        low = {c.lower(): c for c in table.columns}
+        pcol = low.get("p-value") or low.get("p_value") or "p-value"
+        stat_col = low.get("test-statistic") or low.get("test_statistic")
+
+        rows = table.rows[:]
+        rows.sort(key=lambda r: (_safe_float(r.get(pcol, "")) if _safe_float(r.get(pcol, "")) is not None else 999.0))
+        top = rows[:10]
+
+        formatted: List[Dict[str, str]] = []
+        for row in top:
+            out = {}
+            for col in table.columns:
+                val = row.get(col, "")
+                if col == pcol:
+                    out[col] = _format_number(val, is_pvalue=True)
+                elif stat_col and col == stat_col:
+                    out[col] = _format_number(val)
                 else:
-                    cells.append({"value": ("", ""), "best": False})
-            rows.append({"cells": cells})
+                    fv = _safe_float(val)
+                    out[col] = _format_number(fv) if fv is not None else val
+            formatted.append(out)
+        return TableData(columns=table.columns[:], rows=formatted)
 
-        highlight_metric = None
-        for cand in ["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"]:
-            if cand in metrics:
-                highlight_metric = cand
-                break
+    def _combine_perf_tables(
+        self,
+        task_type: str,
+        models_mean: Optional[TableData],
+        models_std: Optional[TableData],
+        models_median: Optional[TableData],
+        ens_mean: Optional[TableData],
+        ens_std: Optional[TableData],
+        ens_median: Optional[TableData],
+    ) -> Dict[str, Any]:
+        metrics = self._metric_list_for_task(task_type)
+
+        def as_map(table: Optional[TableData], alg_label_hint: str) -> Tuple[str, Dict[str, Dict[str, str]]]:
+            if not table:
+                return alg_label_hint, {}
+            alg_col = self._find_algorithm_col(table.columns)
+            mapping: Dict[str, Dict[str, str]] = {}
+            for row in table.rows:
+                alg = row.get(alg_col, "").strip()
+                if alg:
+                    mapping[alg] = row
+            return alg_col, mapping
+
+        _, m_map = as_map(models_mean, "Algorithm")
+        _, s_map = as_map(models_std, "Algorithm")
+        _, md_map = as_map(models_median, "Algorithm")
+
+        _, em_map = as_map(ens_mean, "Ensemble")
+        _, es_map = as_map(ens_std, "Ensemble")
+        _, ed_map = as_map(ens_median, "Ensemble")
+
+        ordered_algs = list(m_map.keys())
+        ordered_ens = list(em_map.keys())
+
+        available_metrics: List[str] = []
+        for metric in metrics:
+            present = False
+            for row in list(m_map.values()) + list(em_map.values()):
+                if metric in row:
+                    present = True
+                    break
+            if present:
+                available_metrics.append(metric)
+
+        # Build mean/std combined rows
+        mean_rows: List[List[str]] = []
+        raw_means: Dict[str, Dict[str, float]] = {}
+        for alg in ordered_algs:
+            row = [alg]
+            raw_means[alg] = {}
+            for metric in available_metrics:
+                mval = _safe_float(m_map.get(alg, {}).get(metric, ""))
+                sval = _safe_float(s_map.get(alg, {}).get(metric, ""))
+                if mval is None:
+                    row.append("")
+                    continue
+                raw_means[alg][metric] = mval
+                if sval is None:
+                    row.append(_format_number(mval))
+                else:
+                    row.append(f"{_format_number(mval)} +/- {_format_number(sval)}")
+            mean_rows.append(row)
+
+        for ens in ordered_ens:
+            label = ens if ens.endswith("- Ensemble") else f"{ens} - Ensemble"
+            row = [label]
+            raw_means[label] = {}
+            for metric in available_metrics:
+                mval = _safe_float(em_map.get(ens, {}).get(metric, ""))
+                sval = _safe_float(es_map.get(ens, {}).get(metric, ""))
+                if mval is None:
+                    row.append("")
+                    continue
+                raw_means[label][metric] = mval
+                if sval is None:
+                    row.append(_format_number(mval))
+                else:
+                    row.append(f"{_format_number(mval)} +/- {_format_number(sval)}")
+            mean_rows.append(row)
+
+        mean_columns = ["Algorithm"] + available_metrics
+
+        # Bold best mean per metric with tie handling at 3 decimals.
+        mean_bold_cells: Set[Tuple[int, int]] = set()
+        for c_idx, metric in enumerate(available_metrics, start=1):
+            scored: List[Tuple[int, float]] = []
+            for r_idx, row in enumerate(mean_rows, start=1):
+                raw_name = row[0]
+                val = raw_means.get(raw_name, {}).get(metric)
+                if val is not None:
+                    scored.append((r_idx, round(val, 3)))
+            if not scored:
+                continue
+            higher = METRIC_DIRECTION_HIGHER_IS_BETTER.get(metric, True)
+            best_val = max(v for _, v in scored) if higher else min(v for _, v in scored)
+            for r_idx, v in scored:
+                if v == best_val:
+                    mean_bold_cells.add((r_idx, c_idx))
+
+        # Combined median rows.
+        median_rows: List[List[str]] = []
+        median_raw: Dict[str, Dict[str, float]] = {}
+        for alg in ordered_algs:
+            row = [alg]
+            median_raw[alg] = {}
+            for metric in available_metrics:
+                val = _safe_float(md_map.get(alg, {}).get(metric, ""))
+                if val is None:
+                    row.append("")
+                else:
+                    row.append(_format_number(val))
+                    median_raw[alg][metric] = val
+            median_rows.append(row)
+        for ens in ordered_ens:
+            label = ens if ens.endswith("- Ensemble") else f"{ens} - Ensemble"
+            row = [label]
+            median_raw[label] = {}
+            for metric in available_metrics:
+                val = _safe_float(ed_map.get(ens, {}).get(metric, ""))
+                if val is None:
+                    row.append("")
+                else:
+                    row.append(_format_number(val))
+                    median_raw[label][metric] = val
+            median_rows.append(row)
+
+        median_columns = ["Algorithm"] + available_metrics
+        median_bold_cells: Set[Tuple[int, int]] = set()
+        for c_idx, metric in enumerate(available_metrics, start=1):
+            scored: List[Tuple[int, float]] = []
+            for r_idx, row in enumerate(median_rows, start=1):
+                raw_name = row[0]
+                val = median_raw.get(raw_name, {}).get(metric)
+                if val is not None:
+                    scored.append((r_idx, round(val, 3)))
+            if not scored:
+                continue
+            higher = METRIC_DIRECTION_HIGHER_IS_BETTER.get(metric, True)
+            best_val = max(v for _, v in scored) if higher else min(v for _, v in scored)
+            for r_idx, v in scored:
+                if v == best_val:
+                    median_bold_cells.add((r_idx, c_idx))
 
         return {
-            "present": True,
-            "columns": columns,
-            "rows": rows,
-            "highlight_metric": highlight_metric,
-            "best_algorithm": None,
+            "mean_columns": mean_columns,
+            "mean_rows": mean_rows,
+            "mean_bold_cells": [(r, c) for r, c in sorted(mean_bold_cells)],
+            "median_columns": median_columns,
+            "median_rows": median_rows,
+            "median_bold_cells": [(r, c) for r, c in sorted(median_bold_cells)],
         }
 
-    # ============================================================
-    # Combine model + ensemble medians (same renaming)
-    # ============================================================
-
-    def _combine_model_and_ensemble_median(
+    def _resolve_dataset_images(
         self,
-        models_median: Dict[str, Any],
-        ensembles_median: Dict[str, Any],
-        *,
-        drop_if_needed: Sequence[str] = ("Brier Score",),
-        ensemble_suffix: str = " - Ensemble",
+        ds_dir: Path,
+        dataset_name: str,
+        task_type: str,
+        metadata: Dict[str, Any],
+        class_counts: Optional[TableData],
+        missingness_table: Optional[TableData],
+        perf_metric_default: Optional[str],
+    ) -> Dict[str, Optional[str]]:
+        figs: Dict[str, Optional[str]] = {}
+
+        # Missingness top 25
+        figs["missingness_top25"] = None
+        existing_missing = _first_existing(
+            [
+                ds_dir / "exploratory" / "DataMissingness.png",
+                ds_dir / "exploratory" / "Missingness.png",
+                ds_dir / "exploratory" / "MissingnessTop25.png",
+                self.paths.figures_dir / f"{dataset_name}_missingness_top25.png",
+                ds_dir / "reporting" / "figures" / f"{dataset_name}_missingness_top25.png",
+            ]
+        )
+        if self.reuse_existing_figures and existing_missing:
+            figs["missingness_top25"] = str(existing_missing)
+        elif self.enable_plots:
+            out = self.paths.figures_dir / f"{dataset_name}_missingness_top25.png"
+            figs["missingness_top25"] = self._plot_missingness_top25(
+                missingness_table, out, f"{dataset_name}: Missingness Top 25 Features"
+            )
+
+        # Correlation matrix (prefer existing exploratory PNG; generate from CSV if missing)
+        figs["correlation_matrix"] = None
+        corr_png = self._figure_path_exploratory_correlation_matrix(ds_dir)
+        if self.reuse_existing_figures and corr_png is not None:
+            figs["correlation_matrix"] = str(corr_png)
+        else:
+            corr_csv = self._find_exploratory_correlation_csv(ds_dir)
+            if corr_csv is not None:
+                figs["correlation_matrix"] = self._plot_correlation_matrix_from_csv(
+                    corr_csv,
+                    self.paths.figures_dir / f"{dataset_name}_corr_matrix.png",
+                    f"{dataset_name}: Feature Correlation Matrix",
+                )
+            if figs["correlation_matrix"] is None and corr_png is not None:
+                figs["correlation_matrix"] = str(corr_png)
+
+        # Class balance or target distribution
+        if task_type == "Regression":
+            out_path = self.paths.figures_dir / f"{dataset_name}_target_distribution.png"
+            # Prefer a freshly generated histogram for regression target distribution.
+            if self.enable_plots:
+                figs["target_distribution"] = self._plot_target_distribution(
+                    ds_dir,
+                    metadata,
+                    out_path,
+                    f"{dataset_name}: Target Distribution Histogram",
+                )
+            else:
+                figs["target_distribution"] = None
+            if figs["target_distribution"] is None:
+                existing = _first_existing(
+                    [
+                        out_path,
+                        ds_dir / "exploratory" / "TargetDistribution.png",
+                        ds_dir / "exploratory" / "target_distribution.png",
+                        ds_dir / "reporting" / "figures" / f"{dataset_name}_target_distribution.png",
+                    ]
+                )
+                figs["target_distribution"] = str(existing) if existing else None
+            figs["class_balance"] = None
+        else:
+            existing = _first_existing(
+                [
+                    ds_dir / "exploratory" / "ClassCountsBarPlot.png",
+                    ds_dir / "exploratory" / "ClassCountsBarplot.png",
+                    ds_dir / "exploratory" / "ClassCounts.png",
+                    self.paths.figures_dir / f"{dataset_name}_class_balance.png",
+                ]
+            )
+            if self.reuse_existing_figures and existing:
+                figs["class_balance"] = str(existing)
+            else:
+                figs["class_balance"] = self._plot_class_balance(
+                    class_counts,
+                    self.paths.figures_dir / f"{dataset_name}_class_balance.png",
+                    f"{dataset_name}: Class Balance",
+                )
+            figs["target_distribution"] = None
+
+        # Feature learning mutual information
+        mi_existing = _first_existing(
+            [
+                ds_dir / "feature_importance" / "mutualinformation" / "TopAverageScores.png",
+                ds_dir / "feature_importance" / "mutual_information" / "TopAverageScores.png",
+                ds_dir / "feature_selection" / "mutualinformation" / "TopAverageScores.png",
+                ds_dir / "feature_selection" / "mutual_information" / "TopAverageScores.png",
+            ]
+        )
+        if mi_existing:
+            figs["mutual_info"] = str(mi_existing)
+        else:
+            figs["mutual_info"] = self._plot_mutual_info_top(
+                ds_dir, self.paths.figures_dir / f"{dataset_name}_fi_top20.png", top_n=20
+            )
+
+        # Performance distribution
+        figs["performance_distribution"] = None
+        if perf_metric_default:
+            existing_box = _first_existing(
+                [ds_dir / "model_evaluation" / "metricBoxplots" / f"Compare_{perf_metric_default}.png"]
+            )
+            if existing_box and self.reuse_existing_figures:
+                figs["performance_distribution"] = str(existing_box)
+            else:
+                figs["performance_distribution"] = self._plot_metric_distribution(
+                    ds_dir / "model_evaluation" / "metrics_by_cv",
+                    perf_metric_default,
+                    self.paths.figures_dir / f"{dataset_name}_distribution_{perf_metric_default.replace(' ', '_')}.png",
+                    f"{dataset_name}: {perf_metric_default} Distribution",
+                )
+
+        # Classification curve pages
+        if task_type != "Regression":
+            # Model curves: reuse summary if present, else generate.
+            mroc = _first_existing([ds_dir / "model_evaluation" / "Summary_ROC.png"])
+            mprc = _first_existing([ds_dir / "model_evaluation" / "Summary_PRC.png"])
+            no_skill = self._classification_no_skill(class_counts)
+
+            if mroc and self.reuse_existing_figures:
+                figs["models_roc"] = str(mroc)
+            else:
+                figs["models_roc"] = self._plot_curve_summary(
+                    ds_dir / "model_evaluation" / "curves_by_cv",
+                    self.paths.figures_dir / f"{dataset_name}_models_roc_summary.png",
+                    curve_kind="roc",
+                    title=f"{dataset_name}: Summary ROC (Models)",
+                    no_skill=no_skill,
+                )
+                if figs["models_roc"] is None and mroc:
+                    figs["models_roc"] = str(mroc)
+
+            if mprc and self.reuse_existing_figures:
+                figs["models_prc"] = str(mprc)
+            else:
+                figs["models_prc"] = self._plot_curve_summary(
+                    ds_dir / "model_evaluation" / "curves_by_cv",
+                    self.paths.figures_dir / f"{dataset_name}_models_prc_summary.png",
+                    curve_kind="prc",
+                    title=f"{dataset_name}: Summary PRC (Models)",
+                    no_skill=no_skill,
+                )
+                if figs["models_prc"] is None and mprc:
+                    figs["models_prc"] = str(mprc)
+
+            # Ensemble curves: prefer generating even if png exists.
+            figs["ensembles_roc"] = self._plot_curve_summary(
+                ds_dir / "ensemble_evaluation" / "curves_by_cv",
+                self.paths.figures_dir / f"{dataset_name}_ensembles_roc_summary.png",
+                curve_kind="roc",
+                title=f"{dataset_name}: Summary ROC (Ensembles)",
+                no_skill=no_skill,
+            )
+            figs["ensembles_prc"] = self._plot_curve_summary(
+                ds_dir / "ensemble_evaluation" / "curves_by_cv",
+                self.paths.figures_dir / f"{dataset_name}_ensembles_prc_summary.png",
+                curve_kind="prc",
+                title=f"{dataset_name}: Summary PRC (Ensembles)",
+                no_skill=no_skill,
+            )
+            if figs["ensembles_roc"] is None:
+                fallback = _first_existing([ds_dir / "ensemble_evaluation" / "Summary_ROC_ensembles.png"])
+                figs["ensembles_roc"] = str(fallback) if fallback else None
+            if figs["ensembles_prc"] is None:
+                fallback = _first_existing([ds_dir / "ensemble_evaluation" / "Summary_PRC_ensembles.png"])
+                figs["ensembles_prc"] = str(fallback) if fallback else None
+        else:
+            # Regression eval plots
+            figs["reg_actual_vs_pred"] = None
+            figs["reg_residual_dist"] = None
+            figs["reg_test_resid"] = None
+            eval_dir = ds_dir / "model_evaluation" / "evalPlots"
+            figs["reg_actual_vs_pred"] = str(eval_dir / "actual_vs_predict_all_algorithms.png") if (eval_dir / "actual_vs_predict_all_algorithms.png").is_file() else None
+            figs["reg_residual_dist"] = str(eval_dir / "residual_distrib_all_algorithms.png") if (eval_dir / "residual_distrib_all_algorithms.png").is_file() else None
+            figs["reg_test_resid"] = str(eval_dir / "probability_test_residual_all_algorithms.png") if (eval_dir / "probability_test_residual_all_algorithms.png").is_file() else None
+            if not all([figs["reg_actual_vs_pred"], figs["reg_residual_dist"], figs["reg_test_resid"]]):
+                fb = self._plot_regression_residual_fallbacks(ds_dir, dataset_name)
+                if figs["reg_actual_vs_pred"] is None:
+                    figs["reg_actual_vs_pred"] = fb.get("actual_vs_predicted")
+                if figs["reg_residual_dist"] is None:
+                    figs["reg_residual_dist"] = fb.get("residual_distribution")
+                if figs["reg_test_resid"] is None:
+                    figs["reg_test_resid"] = fb.get("test_residual")
+
+        # Composite feature score plot: reuse only, never auto-generate.
+        composite = _first_existing([ds_dir / "model_evaluation" / "feature_importance" / "Compare_FI_Norm_Weight.png"])
+        figs["composite_feature_scores"] = str(composite) if composite else None
+
+        return figs
+
+    def _format_runtime_table(self, runtimes: Optional[TableData]) -> Optional[TableData]:
+        if not runtimes or not runtimes.rows:
+            return None
+        cols = runtimes.columns[:]
+        phase_col = None
+        for c in cols:
+            if c.strip().lower() == "phase":
+                phase_col = c
+                break
+        if phase_col is None:
+            return self._format_rows_for_display(runtimes)
+        rows = runtimes.rows[:]
+        rows.sort(key=lambda r: (_safe_float(r.get(phase_col, "")) if _safe_float(r.get(phase_col, "")) is not None else 999.0))
+
+        formatted: List[Dict[str, str]] = []
+        for row in rows:
+            out: Dict[str, str] = {}
+            for c in cols:
+                if c == phase_col:
+                    phase_raw = row.get(c, "")
+                    phase_key = str(int(_safe_float(phase_raw))) if _safe_float(phase_raw) is not None else str(phase_raw)
+                    label = PHASE_LABELS.get(phase_key)
+                    out[c] = f"{phase_key} - {label}" if label else phase_key
+                elif _is_numeric_text(row.get(c, "")):
+                    out[c] = _format_number(row.get(c, ""))
+                else:
+                    out[c] = row.get(c, "")
+            formatted.append(out)
+        return TableData(columns=cols, rows=formatted)
+
+    def _collect_dataset_block(
+        self,
+        ds_dir: Path,
+        dataset_id: str,
+        metadata: Dict[str, Any],
     ) -> Dict[str, Any]:
-        mm = models_median or {}
-        em = ensembles_median or {}
-
-        if not mm.get("present") and not em.get("present"):
-            return {"present": False}
-
-        mm_cols = list(mm.get("columns") or []) if mm.get("present") else []
-        em_cols = list(em.get("columns") or []) if em.get("present") else []
-
-        if not mm_cols and not em_cols:
-            return {"present": False}
-
-        def infer_alg_col(columns: List[str]) -> str:
-            low = {c.lower(): c for c in columns}
-            for key in ["ml algorithm", "ml_algorithm", "algorithm", "model"]:
-                if key in low:
-                    return low[key]
-            return columns[0] if columns else "Algorithm"
-
-        mm_alg = infer_alg_col(mm_cols) if mm_cols else "Algorithm"
-        em_alg = infer_alg_col(em_cols) if em_cols else "Algorithm"
-
-        mm_metrics = [c for c in mm_cols if c != mm_alg]
-        em_metrics = [c for c in em_cols if c != em_alg]
-
-        metrics: List[str] = []
-        for c in mm_metrics + em_metrics:
-            if c not in metrics:
-                metrics.append(c)
-
-        too_wide = (1 + len(metrics)) >= 11
-        if too_wide:
-            for drop_col in drop_if_needed:
-                if drop_col in metrics:
-                    metrics.remove(drop_col)
-                    break
-
-        def to_map(tbl: Dict[str, Any], alg_col: str) -> Dict[str, Dict[str, Any]]:
-            out: Dict[str, Dict[str, Any]] = {}
-            if not tbl.get("present"):
-                return out
-            cols = list(tbl.get("columns") or [])
-            rows = list(tbl.get("rows") or [])
-            if not cols or not rows:
-                return out
-            idx = {c: i for i, c in enumerate(cols)}
-            alg_i = idx.get(alg_col, 0)
-
-            for r in rows:
-                if r is None:
-                    continue
-                rr = list(r)
-                if alg_i >= len(rr):
-                    continue
-                alg = str(rr[alg_i]).strip()
-                if not alg:
-                    continue
-                m: Dict[str, Any] = {}
-                for met in metrics:
-                    j = idx.get(met)
-                    if j is None or j >= len(rr):
-                        continue
-                    m[met] = rr[j]
-                out[alg] = m
-            return out
-
-        mm_map = to_map(mm, mm_alg)
-        em_map = to_map(em, em_alg)
-
-        columns = ["Algorithm"] + metrics
-        out_rows: List[List[Any]] = []
-
-        for alg in sorted(mm_map.keys(), key=lambda s: s.lower()):
-            m = mm_map[alg]
-            out_rows.append([alg] + [m.get(met, "") for met in metrics])
-
-        for alg in sorted(em_map.keys(), key=lambda s: s.lower()):
-            alg2 = f"{alg}{ensemble_suffix}"
-            m = em_map[alg]
-            out_rows.append([alg2] + [m.get(met, "") for met in metrics])
-
-        return {"present": True, "columns": columns, "rows": out_rows}
-
-    # ============================================================
-    # Cover page grouping (legacy categories)
-    # ============================================================
-
-    def _categorize_cover_items(
-        self,
-        meta_pickle_flat: Dict[str, Any],
-        run_params_flat: Dict[str, Any],
-        *,
-        exp_root: Path,
-    ) -> Dict[str, List[Tuple[str, str]]]:
-        combined = self._merge_union_dicts(run_params_flat or {}, meta_pickle_flat or {})
-
-        def add(cat: str, k: str, v: Any):
-            if self._is_timestampy_key(k):
-                return
-            if self._should_drop_identifier_code(k):
-                return
-            pretty_k = self._pretty_cover_key(k)
-            if pretty_k.strip() == "":
-                return
-            out.setdefault(cat, []).append((pretty_k, self._as_compact_str(v)))
-
-        out: Dict[str, List[Tuple[str, str]]] = {}
-
-        ds_names = [p.name for p in self._list_datasets()]
-        if ds_names:
-            items = [(f"D{i+1}", nm) for i, nm in enumerate(ds_names)]
-            out["Target Dataset(s):"] = [(f"{k}", f"= {v}") for k, v in items]
-
-        for key in [
-            "data path", "input path", "dataset path",
-            "output path",
-            "experiment name",
-            "class label",
-            "instance label",
-            "match label",
-            "ignored features",
-            "specified categorical features",
-            "specified quantitative features",
-        ]:
-            for kk in list(combined.keys()):
-                if str(kk).strip().lower() == key:
-                    add("Target Data Settings:", kk, combined[kk])
-
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(x in k for x in ["cv", "partition", "seed", "random", "categorical cutoff", "statistical", "significance", "notebook"]):
-                if any(x in k for x in ["plot", "export", "roc", "prc", "figure", "boxplot"]):
-                    continue
-                add("General Pipeline Settings:", kk, vv)
-
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(x in k for x in ["missing", "imput", "scale", "correlation", "describe", "univariate", "eda", "processing", "clean"]):
-                if any(x in k for x in ["feature importance", "feature_selection", "feature selection", "multisurf", "mutual", "turf"]):
-                    continue
-                add("EDA and Processing Settings:", kk, vv)
-
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(x in k for x in ["feature importance", "feature selection", "multisurf", "mutual", "turf", "max features", "top features", "filter poor"]):
-                add("Feature Importance/Selection Settings:", kk, vv)
-
-        algo_items: List[Tuple[str, str]] = []
-        algo_keys = [
-            "logistic", "naive", "bayes", "random forest", "svm", "support vector",
-            "xgboost", "gradient boosting", "lightgbm", "catboost",
-            "decision tree", "elastic", "knn", "k-nearest",
-            "ann", "neural", "exstracs", "xcs", "elcs", "genetic programming",
-        ]
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(a in k for a in algo_keys):
-                b = self._normalize_bool(vv)
-                if b is None:
-                    continue
-                algo_items.append((self._pretty_cover_key(kk), "True" if b else "False"))
-        if algo_items:
-            algo_items.sort(key=lambda t: (t[1] != "True", t[0].lower()))
-            out["ML Modeling Algorithms:"] = algo_items
-
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(x in k for x in ["primary metric", "hyperparameter", "trials", "timeout", "subsample", "uniform feature importance"]):
-                add("Modeling Settings:", kk, vv)
-
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(x in k for x in ["lcs", "xcs", "elcs", "exstracs", "rule population", "training iterations", "nu"]):
-                add("LCS Settings (eLCS, XCS, ExSTraCS):", kk, vv)
-
-        for kk, vv in combined.items():
-            k = str(kk).lower()
-            if any(x in k for x in ["export", "roc", "prc", "boxplot", "figure", "plot", "correlation", "top model features", "metric weighting"]):
-                add("Stats and Figure Settings:", kk, vv)
-
-        for cat, items in list(out.items()):
-            seen = set()
-            dedup: List[Tuple[str, str]] = []
-            for k, v in items:
-                if k in seen:
-                    continue
-                seen.add(k)
-                dedup.append((k, v))
-            out[cat] = dedup
-
-        ordered = [
-            "General Pipeline Settings:",
-            "EDA and Processing Settings:",
-            "Feature Importance/Selection Settings:",
-            "ML Modeling Algorithms:",
-            "Modeling Settings:",
-            "LCS Settings (eLCS, XCS, ExSTraCS):",
-            "Stats and Figure Settings:",
-            "Target Dataset(s):",
-            "Target Data Settings:",
-        ]
-        out2: Dict[str, List[Tuple[str, str]]] = {}
-        for cat in ordered:
-            if cat in out and out[cat]:
-                out2[cat] = out[cat]
-        for cat, items in out.items():
-            if cat not in out2 and items:
-                out2[cat] = items
-        return out2
-
-    # ============================================================
-    # Data assembly (tables + figs)
-    # ============================================================
-
-    def _collect_dataset_block(self, ds_dir: Path) -> Dict[str, Any]:
-        name = ds_dir.name
-        figs: Dict[str, Any] = {}
+        dataset_name = ds_dir.name
+        task_type = self._detect_task_type(ds_dir, metadata)
 
         explore = ds_dir / "exploratory"
-        class_counts = self._read_csv_if_exists(explore / "ClassCounts.csv")
-        missingness = self._read_csv_if_exists(explore / "DataMissingness.csv")
-        univariate = self._read_csv_if_exists(explore / "univariate_analyses" / "Univariate_Significance.csv")
+        univariate = self._read_csv_table(explore / "univariate_analyses" / "Univariate_Significance.csv")
+        univariate_top10 = self._univariate_top10(univariate)
+        class_counts = self._read_csv_table(explore / "ClassCounts.csv")
+        missingness_table = self._format_rows_for_display(self._read_csv_table(explore / "DataMissingness.csv"))
+        informative_summary = self._format_rows_for_display(self._read_csv_table(ds_dir / "feature_selection" / "InformativeFeatureSummary.csv"))
+        data_process_summary = self._format_rows_for_display(self._read_csv_table(explore / "DataProcessSummary.csv"))
+        runtimes = self._format_runtime_table(self._read_csv_table(ds_dir / "runtimes.csv"))
 
-        # Correlation matrix
-        corr_png = self._figure_path_exploratory_correlation_matrix(ds_dir) or ""
-        if not corr_png:
-            corr_csv = self._first_existing([
-                explore / "FeatureCorrelationMatrix.csv",
-                explore / "CorrelationMatrix.csv",
-                explore / "FeatureCorrelation.csv",
-                explore / "feature_correlation" / "CorrelationMatrix.csv",
-                explore / "FeatureCorrelation" / "CorrelationMatrix.csv",
-            ])
-            if corr_csv:
-                try:
-                    corr_df = pd.read_csv(corr_csv)
-                    fig = self._plot_correlation_matrix_from_csv(corr_df, f"{name}: Feature Correlation Matrix")
-                    out = self.paths.figures_dir / f"{name}_corr_matrix.png"
-                    if _safe_plotly_to_png(fig, out):
-                        corr_png = str(out)
-                except Exception as e:
-                    logger.warning("Correlation matrix fallback plot failed for %s: %r", name, e)
-        figs["correlation_matrix"] = corr_png
-
-        # Univariate (optional)
-        uni_use = self._univariate_is_informative(univariate)
-        univariate_top10 = univariate.head(10) if (uni_use and univariate is not None and not univariate.empty) else None
-
-        # Performance tables
         model_eval = ds_dir / "model_evaluation"
-        summary_mean = self._read_csv_if_exists(model_eval / "Summary_performance_mean.csv")
-        summary_std = self._read_csv_if_exists(model_eval / "Summary_performance_std.csv")
-        summary_median = self._read_csv_if_exists(model_eval / "Summary_performance_median.csv")
+        summary_mean = self._read_csv_table(model_eval / "Summary_performance_mean.csv")
+        summary_std = self._read_csv_table(model_eval / "Summary_performance_std.csv")
+        summary_median = self._read_csv_table(model_eval / "Summary_performance_median.csv")
 
         ens_eval = ds_dir / "ensemble_evaluation"
-        ens_mean = self._read_csv_if_exists(ens_eval / "Ensembles_performance_mean.csv")
-        ens_std = self._read_csv_if_exists(ens_eval / "Ensembles_performance_std.csv")
-        ens_median = self._read_csv_if_exists(ens_eval / "Ensembles_performance_median.csv")
+        ens_mean = self._read_csv_table(ens_eval / "Ensembles_performance_mean.csv")
+        ens_std = self._read_csv_table(ens_eval / "Ensembles_performance_std.csv")
+        ens_median = self._read_csv_table(ens_eval / "Ensembles_performance_median.csv")
 
-        # Feature learning / selection tables
-        feat_sel = self._read_csv_if_exists(ds_dir / "feature_selection" / "InformativeFeatureSummary.csv")
-        runtimes = self._read_csv_if_exists(ds_dir / "runtimes.csv")
-
-        # Figures (EDA)
-        figs["class_balance"] = self._figure_path_exploratory_class_balance(ds_dir) or ""
-        if not figs["class_balance"] and class_counts is not None and not class_counts.empty:
-            try:
-                fig = self._plot_class_counts(class_counts, f"{name}: Class Balance")
-                out = self.paths.figures_dir / f"{name}_class_balance.png"
-                if _safe_plotly_to_png(fig, out):
-                    figs["class_balance"] = str(out)
-            except Exception as e:
-                logger.warning("Class balance plot failed for %s: %r", name, e)
-
-        figs["missingness"] = self._figure_path_exploratory_missingness(ds_dir) or ""
-        if not figs["missingness"] and missingness is not None and not missingness.empty:
-            try:
-                fig = self._plot_missingness(missingness, f"{name}: Missingness (Top 25 Features)")
-                out = self.paths.figures_dir / f"{name}_missingness_top25.png"
-                if _safe_plotly_to_png(fig, out):
-                    figs["missingness"] = str(out)
-            except Exception as e:
-                logger.warning("Missingness plot failed for %s: %r", name, e)
-
-        # CV distribution boxplot
-        figs["models_cv_box"] = ""
-        chosen_metric = None
-        if summary_mean is not None and not summary_mean.empty:
-            for preferred in ["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"]:
-                if preferred in summary_mean.columns:
-                    chosen_metric = preferred
-                    break
-        if chosen_metric:
-            box = self._figure_path_model_metric_boxplot(ds_dir, chosen_metric)
-            if box:
-                figs["models_cv_box"] = box
-
-        # Summary curves only
-        figs["models_roc_overlay"] = self._figure_path_model_summary_roc_prc(ds_dir, "roc") or ""
-        figs["models_prc_overlay"] = self._figure_path_model_summary_roc_prc(ds_dir, "prc") or ""
-        figs["ensembles_roc"] = self._figure_path_ensemble_summary(ds_dir, "roc") or ""
-        figs["ensembles_prc"] = self._figure_path_ensemble_summary(ds_dir, "prc") or ""
-
-        # Feature learning figures (all methods)
-        figs["fi_top_scores"] = self._figure_paths_fs_top_scores(ds_dir)
-
-        # Tables (mean/std + median)
-        models_mean_std = self._build_mean_std_table(
-            summary_mean,
-            summary_std,
-            highlight_metric_candidates=["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"],
-        )
-        ensembles_mean_std = self._build_mean_std_table(
-            ens_mean,
-            ens_std,
-            highlight_metric_candidates=["Balanced Accuracy", "ROC AUC", "PRC AUC", "Accuracy"],
-        )
-        combined_mean_std = self._combine_model_and_ensemble_perf(
-            models_mean_std,
-            ensembles_mean_std,
-            drop_if_needed=("Brier Score",),
-            ensemble_suffix=" - Ensemble",
+        perf_combined = self._combine_perf_tables(
+            task_type=task_type,
+            models_mean=summary_mean,
+            models_std=summary_std,
+            models_median=summary_median,
+            ens_mean=ens_mean,
+            ens_std=ens_std,
+            ens_median=ens_median,
         )
 
-        models_median = self._build_plain_table(summary_median, max_rows=200)
-        ensembles_median = self._build_plain_table(ens_median, max_rows=200)
-        combined_median = self._combine_model_and_ensemble_median(
-            models_median,
-            ensembles_median,
-            drop_if_needed=("Brier Score",),
-            ensemble_suffix=" - Ensemble",
+        perf_metric_default = self._metric_default_distribution(task_type, perf_combined.get("mean_columns", [])[1:])
+        figures = self._resolve_dataset_images(
+            ds_dir=ds_dir,
+            dataset_name=dataset_name,
+            task_type=task_type,
+            metadata=metadata,
+            class_counts=class_counts,
+            missingness_table=missingness_table,
+            perf_metric_default=perf_metric_default,
         )
 
-        return {
-            "dataset_name": name,
-            "dataset_dir": str(ds_dir),
-            "tables": {
-                "univariate_top10": self._build_plain_table(univariate_top10, max_rows=10),
-                "informative_feature_summary": self._build_plain_table(feat_sel, max_rows=200),
-                "runtimes": self._build_plain_table(runtimes, max_rows=500),
+        tables = {
+            "univariate_top10": {
+                "columns": univariate_top10.columns if univariate_top10 else [],
+                "rows": [[row.get(c, "") for c in univariate_top10.columns] for row in (univariate_top10.rows if univariate_top10 else [])],
             },
-            "perf": {
-                "combined_mean_std": combined_mean_std,
-                "combined_median": combined_median,
+            "informative_feature_summary": {
+                "columns": informative_summary.columns if informative_summary else [],
+                "rows": [[row.get(c, "") for c in informative_summary.columns] for row in (informative_summary.rows if informative_summary else [])],
             },
-            "figures": figs,
+            "data_process_summary": {
+                "columns": data_process_summary.columns if data_process_summary else [],
+                "rows": [[row.get(c, "") for c in data_process_summary.columns] for row in (data_process_summary.rows if data_process_summary else [])],
+            },
+            "runtime": {
+                "columns": runtimes.columns if runtimes else [],
+                "rows": [[row.get(c, "") for c in runtimes.columns] for row in (runtimes.rows if runtimes else [])],
+            },
         }
 
-    def _collect_dataset_comparisons_block(self) -> Dict[str, Any]:
+        return {
+            "dataset_id": dataset_id,
+            "dataset_name": dataset_name,
+            "dataset_path": str(ds_dir.resolve()),
+            "task_type": task_type,
+            "figures": figures,
+            "tables": tables,
+            "performance": perf_combined,
+            "performance_distribution_metric": perf_metric_default,
+        }
+
+    def _resolve_dataset_comparison_images(
+        self,
+        task_type: str,
+        dataset_blocks: Sequence[Dict[str, Any]],
+    ) -> Dict[str, Optional[str]]:
+        dc_dir = self.exp_root / "DatasetComparisons" / "dataCompBoxplots"
+        figs: Dict[str, Optional[str]] = {}
+        if task_type == "Regression":
+            metrics = [
+                "Pearson Correlation",
+                "Explained Variance",
+                "Mean Absolute Error",
+                "Mean Squared Error",
+                "Median Absolute Error",
+                "Max Error",
+            ]
+        else:
+            metrics = [
+                "Balanced Accuracy",
+                "ROC AUC",
+                "PRC AUC",
+                "F1 Score",
+            ]
+        for metric in metrics:
+            key = f"overview_{metric}"
+            existing = _first_existing(
+                [
+                    dc_dir / f"DataCompareAllModels_{metric}.png",
+                    self.paths.figures_dir / f"DataCompareAllModels_{metric}.png",
+                ]
+            )
+            if existing is not None and self.reuse_existing_figures:
+                figs[key] = str(existing)
+                continue
+            generated = self._plot_dataset_comparison_overview(
+                dataset_blocks,
+                metric,
+                self.paths.figures_dir / f"DataCompareAllModels_{metric}.png",
+            )
+            figs[key] = generated if generated is not None else (str(existing) if existing is not None else None)
+        return figs
+
+    def _format_comparison_table(self, table: Optional[TableData]) -> Dict[str, Any]:
+        if not table or not table.rows:
+            return {"columns": [], "rows": [], "bold_cells": []}
+        rows_out: List[List[str]] = []
+        bold_cells: Set[Tuple[int, int]] = set()
+        p_idx = None
+        sig_idx = None
+        for i, c in enumerate(table.columns):
+            cl = c.strip().lower()
+            if p_idx is None and (cl == "p-value" or cl == "p_value" or cl == "pvalue"):
+                p_idx = i
+            if sig_idx is None and "sig" in cl:
+                sig_idx = i
+
+        for r_i, row in enumerate(table.rows, start=1):
+            out_row: List[str] = []
+            p_val = None
+            for c_i, col in enumerate(table.columns):
+                raw = row.get(col, "")
+                fv = _safe_float(raw)
+                if fv is not None:
+                    text = _format_number(fv, is_pvalue=_is_pvalue_col(col))
+                else:
+                    text = raw
+                out_row.append(text)
+                if c_i == p_idx:
+                    p_val = _safe_float(raw)
+            if p_val is not None and p_val < 0.05:
+                if p_idx is not None:
+                    bold_cells.add((r_i, p_idx))
+                if sig_idx is not None:
+                    bold_cells.add((r_i, sig_idx))
+            rows_out.append(out_row)
+
+        return {
+            "columns": table.columns[:],
+            "rows": rows_out,
+            "bold_cells": [(r, c) for r, c in sorted(bold_cells)],
+        }
+
+    def _collect_dataset_comparisons(
+        self,
+        task_type: str,
+        dataset_blocks: Sequence[Dict[str, Any]],
+    ) -> Dict[str, Any]:
         dc = self.exp_root / "DatasetComparisons"
         if not dc.is_dir():
             return {"present": False}
+        kw = self._read_csv_table(dc / "BestCompare_KruskalWallis.csv")
+        mw = self._read_csv_table(dc / "BestCompare_MannWhitney.csv")
+        wx = self._read_csv_table(dc / "BestCompare_WilcoxonRank.csv")
 
-        best_kw = self._read_csv_if_exists(dc / "BestCompare_KruskalWallis.csv")
-        best_mw = self._read_csv_if_exists(dc / "BestCompare_MannWhitney.csv")
-        best_wx = self._read_csv_if_exists(dc / "BestCompare_WilcoxonRank.csv")
-
-        figs: Dict[str, str] = {}
-        any_plot = self._figure_path_dataset_comparisons_any()
-        if any_plot:
-            figs["overview"] = any_plot
-
-        return {
+        out = {
             "present": True,
+            "figures": self._resolve_dataset_comparison_images(task_type, dataset_blocks),
             "tables": {
-                "best_kw": self._build_plain_table(best_kw, max_rows=200),
-                "best_mw": self._build_plain_table(best_mw, max_rows=200),
-                "best_wx": self._build_plain_table(best_wx, max_rows=200),
+                "kw": self._format_comparison_table(kw),
+                "mw": self._format_comparison_table(mw),
+                "wx": self._format_comparison_table(wx),
             },
-            "figures": figs,
         }
 
-    # ============================================================
-    # PDF render
-    # ============================================================
+        # Optional KW p-value visualization
+        kw_table = out["tables"]["kw"]
+        if kw_table["columns"] and kw_table["rows"] and self.enable_plots:
+            cols = kw_table["columns"]
+            rows = kw_table["rows"]
+            p_idx = None
+            metric_idx = 0
+            for i, c in enumerate(cols):
+                if _is_pvalue_col(c):
+                    p_idx = i
+                    break
+            if p_idx is not None:
+                vals: List[float] = []
+                labels: List[str] = []
+                for row in rows:
+                    pv = _safe_float(row[p_idx])
+                    if pv is None:
+                        continue
+                    labels.append(row[metric_idx] if metric_idx < len(row) else f"M{len(labels)+1}")
+                    vals.append(pv)
+                if labels and vals:
+                    pfig = self.paths.figures_dir / "datasetcompare_kw_pvalues.png"
+                    generated = False
+                    if self._mpl_ok():
+                        try:
+                            import matplotlib.pyplot as plt  # type: ignore
 
-    def _write_pdf(self, report_data: Dict[str, Any]) -> None:
-        pdf = _StreamlinePDF(
-            title=str(report_data.get("title", "")),
-            streamline_version=str(report_data.get("streamline_version", "")),
-            float_decimals=self.float_decimals,
-        )
-        pdf.alias_nb_pages()
+                            fig, ax = plt.subplots(figsize=(8.2, 4.5))
+                            ax.bar(labels, vals, color="#4E79A7")
+                            ax.axhline(0.05, linestyle="--", color="red", linewidth=1.0)
+                            ax.set_ylabel("P-Value")
+                            for tick in ax.get_xticklabels():
+                                tick.set_rotation(35)
+                                tick.set_ha("right")
+                            fig.tight_layout()
+                            fig.savefig(pfig, dpi=180)
+                            plt.close(fig)
+                            generated = True
+                        except Exception as exc:
+                            logger.warning("Could not generate KW p-value visualization with matplotlib: %r", exc)
 
-        # COVER
-        pdf.add_page()
-        pdf.cover_banner_title(str(report_data.get("title", "")))
-        pdf.cover_two_column_boxes(report_data.get("cover_boxes", {}) or {})
+                    if generated:
+                        out["figures"]["kw_pvalues"] = str(pfig)
+        return out
 
-        # DATASETS
-        for ds in report_data.get("datasets", []) or []:
-            ds_name = str(ds.get("dataset_name", ""))
-            ds_dir = str(ds.get("dataset_dir", ""))
+    def _image_dimensions_px(self, path: Path) -> Optional[Tuple[int, int]]:
+        try:
+            with path.open("rb") as f:
+                head = f.read(32)
+            if len(head) >= 24 and head.startswith(b"\x89PNG\r\n\x1a\n"):
+                w = int.from_bytes(head[16:20], "big")
+                h = int.from_bytes(head[20:24], "big")
+                if w > 0 and h > 0:
+                    return (w, h)
+        except Exception:
+            pass
 
-            figs = ds.get("figures", {}) or {}
-            tables = ds.get("tables", {}) or {}
-            perf = ds.get("perf", {}) or {}
+        try:
+            with path.open("rb") as f:
+                head = f.read(10)
+            if len(head) >= 10 and (head[:6] in {b"GIF87a", b"GIF89a"}):
+                w = int.from_bytes(head[6:8], "little")
+                h = int.from_bytes(head[8:10], "little")
+                if w > 0 and h > 0:
+                    return (w, h)
+        except Exception:
+            pass
 
-            # -------------------------
-            # EDA - PAGE 1
-            # -------------------------
-            pdf.add_page()
-            pdf.panel_title(f"Dataset: {ds_name}")
-            pdf.set_font("Times", "", 10)
-            if ds_dir:
-                pdf.multi_cell(0, 5, pdf.s(ds_dir))
-                pdf.ln(1.0)
+        try:
+            with path.open("rb") as f:
+                if f.read(2) != b"\xff\xd8":
+                    return None
+                sof_markers = {
+                    b"\xc0",
+                    b"\xc1",
+                    b"\xc2",
+                    b"\xc3",
+                    b"\xc5",
+                    b"\xc6",
+                    b"\xc7",
+                    b"\xc9",
+                    b"\xca",
+                    b"\xcb",
+                    b"\xcd",
+                    b"\xce",
+                    b"\xcf",
+                }
+                while True:
+                    b = f.read(1)
+                    if not b:
+                        break
+                    if b != b"\xff":
+                        continue
+                    marker = f.read(1)
+                    while marker == b"\xff":
+                        marker = f.read(1)
+                    if not marker:
+                        break
+                    if marker in {b"\xd8", b"\xd9"}:
+                        continue
+                    seg_len_raw = f.read(2)
+                    if len(seg_len_raw) != 2:
+                        break
+                    seg_len = int.from_bytes(seg_len_raw, "big")
+                    if seg_len < 2:
+                        break
+                    if marker in sof_markers:
+                        data = f.read(5)
+                        if len(data) != 5:
+                            break
+                        h = int.from_bytes(data[1:3], "big")
+                        w = int.from_bytes(data[3:5], "big")
+                        if w > 0 and h > 0:
+                            return (w, h)
+                        break
+                    f.seek(seg_len - 2, 1)
+        except Exception:
+            pass
 
-            pdf.panel_title("EDA")
+        return None
 
-            # Univariate (optional)
-            uni = tables.get("univariate_top10", {}) or {}
-            if uni.get("present"):
-                pdf.subheader("Univariate Analysis (Top 10)")
-                pdf.draw_table(uni.get("columns", []), uni.get("rows", []), max_rows=10, no_wrap=True)
+    def _fit_image_in_box(
+        self,
+        img_w_px: int,
+        img_h_px: int,
+        box_x: float,
+        box_y: float,
+        box_w: float,
+        box_h: float,
+    ) -> Tuple[float, float, float, float]:
+        ratio = float(img_w_px) / float(img_h_px)
+        box_ratio = box_w / box_h
+        if ratio >= box_ratio:
+            draw_w = box_w
+            draw_h = box_w / ratio
+        else:
+            draw_h = box_h
+            draw_w = box_h * ratio
+        draw_x = box_x + (box_w - draw_w) * 0.5
+        draw_y = box_y + (box_h - draw_h) * 0.5
+        return draw_x, draw_y, draw_w, draw_h
 
-            # EDA grid (skip missing panels silently)
-            pdf.figure_grid_2x2(
-                titles=["Class Balance", "Missingness (Top 25 Features)", "", ""],
-                paths=[figs.get("class_balance") or None, figs.get("missingness") or None, None, None],
-                cell_h=66.0,
-                gap=4.0,
-                title_h=6.0,
-                keep_aspect=True,
-            )
+    def _render_table(
+        self,
+        pdf: _StreamlinePDF,
+        *,
+        x: float,
+        y: float,
+        width: float,
+        columns: List[str],
+        rows: List[List[str]],
+        font_size: float = 6.0,
+        row_h: float = 3.8,
+        bold_cells: Optional[Set[Tuple[int, int]]] = None,
+        max_first_col_width: float = 42.0,
+    ) -> float:
+        if not columns:
+            return y
+        n = len(columns)
+        bold = bold_cells or set()
 
-            # Cleaning/Engineering elements
-            pdf.panel_title("Cleaning (C) and Engineering (E) Elements")
-            pdf.cleaning_engineering_box(
-                [
-                    "C1 - Remove instances with no outcome and features to ignore",
-                    "E1 - Add missingness features",
-                    "C2 - Remove features with invariance or high missingness",
-                    "C3 - Remove instances with high missingness",
-                    "E2 - Add one-hot-encoding of categorical features",
-                    "C4 - Remove highly correlated features",
-                ]
-            )
+        if n == 1:
+            col_widths = [width]
+        else:
+            if n <= 3:
+                first_frac = 0.38
+            elif n <= 6:
+                first_frac = 0.31
+            else:
+                first_frac = 0.22
+            first_w = min(max_first_col_width, width * first_frac)
+            rest_w = max(1.0, width - first_w)
 
-            # Correlation matrix full page (if present)
-            corr = figs.get("correlation_matrix") or ""
-            if corr and Path(corr).exists():
+            weights: List[float] = []
+            sample_rows = rows[: min(len(rows), 40)]
+            for c_i in range(1, n):
+                max_len = len(str(columns[c_i]))
+                for row in sample_rows:
+                    if c_i < len(row):
+                        max_len = max(max_len, len(str(row[c_i])))
+                weights.append(float(max(6, min(max_len, 28))))
+            w_sum = sum(weights) if weights else 1.0
+            col_widths = [first_w] + [rest_w * (w / w_sum) for w in weights]
+
+        def _cell_numeric(v: Any) -> bool:
+            txt = str(v).strip()
+            if txt == "":
+                return False
+            if "+/-" in txt:
+                txt = txt.split("+/-", 1)[0].strip()
+            return _safe_float(txt) is not None
+
+        numeric_cols: Set[int] = set()
+        for c_i in range(1, n):
+            non_empty = 0
+            numeric = 0
+            for row in rows:
+                if c_i >= len(row):
+                    continue
+                text = str(row[c_i]).strip()
+                if text == "":
+                    continue
+                non_empty += 1
+                if _cell_numeric(text):
+                    numeric += 1
+            if non_empty > 0 and (numeric / float(non_empty)) >= 0.80:
+                numeric_cols.add(c_i)
+
+        def draw_row(r_i: int, row: Sequence[Any]):
+            pdf.set_x(x)
+            for c_i in range(n):
+                txt = row[c_i] if c_i < len(row) else ""
+                max_chars = max(8, int(col_widths[c_i] * 2.2))
+                txt = _shorten(str(txt), width=max_chars)
+                style = "B" if r_i == 0 or (r_i, c_i) in bold else ""
+                align = "R" if (r_i > 0 and c_i in numeric_cols) else "L"
+                pdf.set_font("Times", style, font_size)
+                pdf.cell(col_widths[c_i], row_h, txt, border=1, ln=0, align=align)
+            pdf.ln(row_h)
+
+        # Paginate long tables and repeat header on each new page.
+        page_bottom = pdf.h - pdf.b_margin
+        pdf.set_xy(x, y)
+        draw_row(0, columns)
+        for idx, row in enumerate(rows, start=1):
+            if pdf.get_y() + row_h > page_bottom:
                 pdf.add_page()
-                pdf.panel_title(f"Dataset: {ds_name}")
-                pdf.panel_title("Feature Correlation Matrix")
-                pdf.figure_single("", corr, h=175.0, title_h=0.0, keep_aspect=True)
+                pdf.set_xy(x, 20)
+                draw_row(0, columns)
+            draw_row(idx, row)
+        return pdf.get_y()
 
-            # -------------------------
-            # Feature Learning
-            # -------------------------
-            pdf.add_page()
-            pdf.panel_title(f"Dataset: {ds_name}")
-            pdf.panel_title("Feature Learning")
+    def _render_box(self, pdf: _StreamlinePDF, *, x: float, y: float, w: float, title: str, lines: List[str]) -> float:
+        pdf.set_xy(x, y)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(w, 5, title, border=1, ln=1, align="L")
+        pdf.set_x(x)
+        pdf.set_font("Times", "", 7)
+        body = "\n".join(lines) if lines else "Not available"
+        pdf.multi_cell(w, 3.7, body, border=1, align="L")
+        return pdf.get_y()
 
-            fi_list = figs.get("fi_top_scores") or []
-            norm: List[Dict[str, str]] = []
-            for item in fi_list:
-                if isinstance(item, dict) and "path" in item and item.get("path"):
-                    p = str(item["path"])
-                    if Path(p).exists():
-                        norm.append({"method": str(item.get("method") or "method"), "path": p})
+    def _draw_image_panel(
+        self,
+        pdf: _StreamlinePDF,
+        *,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        title: str,
+        img_path: Optional[str],
+    ) -> float:
+        pdf.set_xy(x, y)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(w, 5, title, border=1, ln=1, align="L")
+        body_y = pdf.get_y()
+        pdf.set_xy(x, body_y)
+        pdf.cell(w, h, "", border=1, ln=0)
 
-            if norm:
-                if len(norm) == 1:
-                    pdf.figure_single(
-                        f"Top Scores ({norm[0]['method']})", norm[0]["path"], h=130.0, title_h=6.0, keep_aspect=True
-                    )
-                elif len(norm) == 2:
-                    pdf.figure_row_2(
-                        titles=[f"Top Scores ({norm[0]['method']})", f"Top Scores ({norm[1]['method']})"],
-                        paths=[norm[0]["path"], norm[1]["path"]],
-                        h=95.0,
-                        gap=4.0,
-                        title_h=6.0,
-                        keep_aspect=True,
-                    )
-                else:
-                    for i in range(0, len(norm), 4):
-                        chunk = norm[i : i + 4]
-                        titles = [f"Top Scores ({c['method']})" for c in chunk]
-                        paths = [c["path"] for c in chunk]
-                        while len(titles) < 4:
-                            titles.append("")
-                            paths.append(None)
-                        pdf.figure_grid_2x2(
-                            titles=titles,
-                            paths=paths,
-                            cell_h=66.0,
-                            gap=4.0,
-                            title_h=6.0,
-                            keep_aspect=True,
+        if img_path:
+            p = Path(img_path)
+            if not p.is_absolute():
+                p = (self.paths.reporting_dir / p).resolve()
+            if p.is_file():
+                try:
+                    inner_x = x + 1.2
+                    inner_y = body_y + 1.2
+                    inner_w = w - 2.4
+                    inner_h = h - 2.4
+
+                    # Keep original figure aspect ratio and center inside panel.
+                    dims = self._image_dimensions_px(p)
+                    if dims is not None:
+                        draw_x, draw_y, draw_w, draw_h = self._fit_image_in_box(
+                            dims[0], dims[1], inner_x, inner_y, inner_w, inner_h
                         )
-                        if i + 4 < len(norm):
-                            pdf.add_page()
-                            pdf.panel_title(f"Dataset: {ds_name}")
-                            pdf.panel_title("Feature Learning")
+                        pdf.image(str(p), x=draw_x, y=draw_y, w=draw_w, h=draw_h)
+                    else:
+                        # fpdf2 can preserve aspect if available.
+                        try:
+                            pdf.image(
+                                str(p),
+                                x=inner_x,
+                                y=inner_y,
+                                w=inner_w,
+                                h=inner_h,
+                                keep_aspect_ratio=True,
+                            )
+                        except TypeError:
+                            # Last-resort fallback preserves aspect by fixing width only.
+                            pdf.image(str(p), x=inner_x, y=inner_y, w=inner_w)
+                    return body_y + h
+                except Exception as exc:
+                    logger.warning("Could not render image %s: %r", p, exc)
+        pdf.set_xy(x + 1.5, body_y + 2.0)
+        pdf.set_font("Times", "", 7)
+        pdf.multi_cell(w - 3.0, 3.6, "Figure not available", border=0, align="L")
+        return body_y + h
 
-            inf = tables.get("informative_feature_summary", {}) or {}
-            if inf.get("present"):
-                pdf.panel_title("Informative Feature Summary")
-                pdf.draw_table(inf.get("columns", []), inf.get("rows", []), max_rows=200, no_wrap=True)
+    def _render_global_summary(self, pdf: _StreamlinePDF, report_data: Dict[str, Any]):
+        metadata = report_data.get("metadata_pickle", {}) or {}
+        run_params = report_data.get("run_params", {}) or {}
+        datasets = report_data.get("datasets", [])
 
-            # -------------------------
-            # Performance (combined mean/std + combined median)
-            # -------------------------
-            pdf.add_page()
-            pdf.panel_title(f"Dataset: {ds_name}")
-            pdf.panel_title("Performance (Cross-Validation)")
+        pdf.add_page()
+        pdf.set_font("Times", "B", 12)
+        pdf.cell(
+            190,
+            8,
+            f"STREAMLINE Testing Data Evaluation Report: {report_data.get('generated_at')}",
+            border=1,
+            ln=1,
+            align="L",
+        )
+        pdf.ln(1)
 
-            cmb = perf.get("combined_mean_std", {}) or {}
-            if cmb.get("present"):
-                pdf.subheader("Model and Ensemble Performance (Mean plus SD)")
-                pdf.draw_mean_std_table(cmb, no_wrap=True)
+        def kv_lines(keys: Sequence[str], src_a: Dict[str, Any], src_b: Dict[str, Any]) -> List[str]:
+            out: List[str] = []
+            for key in keys:
+                val = src_a.get(key, src_b.get(key, ""))
+                if isinstance(val, list):
+                    val = ", ".join([str(v) for v in val])
+                out.append(f"{key}: {val}")
+            return out
 
-            med = perf.get("combined_median", {}) or {}
-            if med.get("present"):
-                pdf.subheader("Median (Combined)")
-                pdf.draw_table(med.get("columns", []), med.get("rows", []), max_rows=200, no_wrap=True)
+        general = kv_lines(
+            [
+                "CV Partitions",
+                "Partition Method",
+                "Categorical Cutoff",
+                "Statistical Significance Cutoff",
+                "Random Seed",
+                "Run From Notebook",
+            ],
+            metadata,
+            run_params,
+        )
+        stats = kv_lines(
+            [
+                "Export ROC Plot",
+                "Export PRC Plot",
+                "Export Metric Boxplot",
+                "Export Feature Importance Boxplots",
+                "Top Model Features to Display",
+                "Export Feature Correlations",
+            ],
+            metadata,
+            run_params,
+        )
+        process = kv_lines(
+            [
+                "Engineering Missingness Cutoff",
+                "Cleaning Missingness Cutoff",
+                "Correlation Removal Threshold",
+                "Use Data Scaling",
+                "Use Data Imputation",
+                "Use Multivariate Imputation",
+                "Overwrite CV Datasets",
+            ],
+            metadata,
+            run_params,
+        )
+        target_data = kv_lines(
+            [
+                "Data Path",
+                "Output Path",
+                "Experiment Name",
+                "Outcome Label",
+                "Outcome Type",
+                "Instance Label",
+                "Match Label",
+                "Ignored Features",
+                "Specified Categorical Features",
+                "Specified Quantitative Features",
+            ],
+            metadata,
+            report_data.get("metadata", {}),
+        )
+        target_sets = [f"{ds.get('dataset_id')} = {ds.get('dataset_name')}" for ds in datasets]
 
-            cv_box = figs.get("models_cv_box") or ""
-            if cv_box and Path(cv_box).exists():
-                pdf.panel_title("Performance Distribution")
-                pdf.figure_single("Model Comparison", cv_box, h=110.0, title_h=6.0, keep_aspect=True)
+        left_x, left_w = 10.0, 92.0
+        right_x, right_w = 108.0, 92.0
+        y0 = pdf.get_y()
+        y_left = y0
+        y_right = y0
 
-            # -------------------------
-            # Evaluation results (summary only)
-            # -------------------------
-            pdf.add_page()
-            pdf.panel_title(f"Dataset: {ds_name}")
-            pdf.panel_title("Evaluation Results (Curves)")
+        y_left = self._render_box(pdf, x=left_x, y=y_left, w=left_w, title="General Pipeline Settings", lines=general) + 1
+        y_left = self._render_box(pdf, x=left_x, y=y_left, w=left_w, title="Stats and Figure Settings", lines=stats) + 1
+        y_right = self._render_box(pdf, x=right_x, y=y_right, w=right_w, title="EDA and Processing Settings", lines=process) + 1
+        y_right = self._render_box(pdf, x=right_x, y=y_right, w=right_w, title="Target Dataset(s)", lines=target_sets) + 1
+        self._render_box(pdf, x=right_x, y=y_right, w=right_w, title="Target Data Settings", lines=target_data)
 
-            roc = figs.get("models_roc_overlay") or ""
-            prc = figs.get("models_prc_overlay") or ""
-            eroc = figs.get("ensembles_roc") or ""
-            eprc = figs.get("ensembles_prc") or ""
+    def _render_dataset_header(self, pdf: _StreamlinePDF, ds: Dict[str, Any], section_title: str):
+        pdf.add_page()
+        pdf.set_font("Times", "B", 11)
+        pdf.cell(190, 6, section_title, border=1, ln=1, align="L")
+        pdf.set_font("Times", "", 8)
+        pdf.cell(190, 5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, ln=1, align="L")
+        pdf.cell(190, 5, f"Dataset Path: {ds.get('dataset_path')}", border=1, ln=1, align="L")
+        pdf.cell(190, 5, f"Task Type: {ds.get('task_type')}", border=1, ln=1, align="L")
 
-            if (roc and Path(roc).exists()) or (prc and Path(prc).exists()):
-                pdf.figure_row_2(
-                    titles=["Summary ROC", "Summary PRC"],
-                    paths=[
-                        roc if (roc and Path(roc).exists()) else None,
-                        prc if (prc and Path(prc).exists()) else None,
-                    ],
-                    h=85.0,
-                    gap=4.0,
-                    title_h=6.0,
-                    keep_aspect=True,
-                )
+    def _render_dataset_eda_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        self._render_dataset_header(pdf, ds, "EDA")
+        y_start = 34.0
 
-            if (eroc and Path(eroc).exists()) or (eprc and Path(eprc).exists()):
-                pdf.panel_title("Ensembles (Summary Curves)")
-                pdf.figure_row_2(
-                    titles=["Ensembles ROC", "Ensembles PRC"],
-                    paths=[
-                        eroc if (eroc and Path(eroc).exists()) else None,
-                        eprc if (eprc and Path(eprc).exists()) else None,
-                    ],
-                    h=85.0,
-                    gap=4.0,
-                    title_h=6.0,
-                    keep_aspect=True,
-                )
+        uv = ds.get("tables", {}).get("univariate_top10", {})
+        uv_cols = uv.get("columns", [])
+        uv_rows = uv.get("rows", [])
+        pdf.set_xy(10, y_start)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(190, 5, "Univariate Analysis (Top 10)", border=1, ln=1, align="L")
+        y_after = self._render_table(
+            pdf,
+            x=10,
+            y=pdf.get_y(),
+            width=190,
+            columns=uv_cols,
+            rows=uv_rows,
+            font_size=6.0,
+            row_h=3.6,
+            max_first_col_width=58.0,
+        )
 
-            # -------------------------
-            # Runtimes
-            # -------------------------
-            pdf.add_page()
-            pdf.panel_title(f"Dataset: {ds_name}")
-            pdf.panel_title("Runtime Summary")
-            rt = tables.get("runtimes", {}) or {}
-            if rt.get("present"):
-                pdf.draw_table(rt.get("columns", []), rt.get("rows", []), max_rows=500, no_wrap=True)
+        figs = ds.get("figures", {})
+        left_bottom = self._draw_image_panel(
+            pdf,
+            x=10,
+            y=y_after + 1,
+            w=94,
+            h=74,
+            title="Missingness Overview (Top 25 Features)",
+            img_path=figs.get("missingness_top25"),
+        )
+        if ds.get("task_type") == "Regression":
+            right_title = "Target Distribution (Histogram)"
+            right_img = figs.get("target_distribution")
+        else:
+            right_title = "Class Balance (Observed)"
+            right_img = figs.get("class_balance")
+        right_bottom = self._draw_image_panel(
+            pdf,
+            x=106,
+            y=y_after + 1,
+            w=94,
+            h=74,
+            title=right_title,
+            img_path=right_img,
+        )
 
-        # DATASET COMPARISONS
-        dc = report_data.get("dataset_comparisons", {}) or {}
-        if dc.get("present"):
-            pdf.add_page()
-            pdf.panel_title("Dataset Comparisons")
+        y_next = max(left_bottom, right_bottom) + 1
 
-            overview = (dc.get("figures", {}) or {}).get("overview") or ""
-            if overview and Path(overview).exists():
-                pdf.figure_single("Comparison Overview (All Datasets)", overview, h=120.0, title_h=6.0, keep_aspect=True)
+        corr_bottom = self._draw_image_panel(
+            pdf,
+            x=10,
+            y=y_next,
+            w=190,
+            h=72,
+            title="Feature Correlation Matrix (Pearson Coefficients)",
+            img_path=figs.get("correlation_matrix"),
+        )
+        y_next = corr_bottom + 1
 
-            kw = (dc.get("tables", {}) or {}).get("best_kw", {}) or {}
-            if kw.get("present"):
-                pdf.panel_title("Best Comparisons - Kruskal-Wallis")
-                pdf.draw_table(kw.get("columns", []), kw.get("rows", []), max_rows=200, no_wrap=True)
+        dps = ds.get("tables", {}).get("data_process_summary", {})
+        dps_cols = dps.get("columns", [])
+        dps_rows = dps.get("rows", [])
 
-            mw = (dc.get("tables", {}) or {}).get("best_mw", {}) or {}
-            if mw.get("present"):
-                pdf.panel_title("Best Comparisons - Mann-Whitney U")
-                pdf.draw_table(mw.get("columns", []), mw.get("rows", []), max_rows=200, no_wrap=True)
+        ce_lines = [
+            "C1 - Remove instances with no outcome and features to ignore",
+            "E1 - Add missingness features",
+            "C2 - Remove features with invariance or high missingness",
+            "C3 - Remove instances with high missingness",
+            "E2 - Add one-hot-encoding of categorical features",
+            "C4 - Remove highly correlated features",
+        ]
 
-            wx = (dc.get("tables", {}) or {}).get("best_wx", {}) or {}
-            if wx.get("present"):
-                pdf.panel_title("Best Comparisons - Wilcoxon Rank-Sum")
-                pdf.draw_table(wx.get("columns", []), wx.get("rows", []), max_rows=200, no_wrap=True)
+        # Keep the DataProcessSummary + legend together and avoid overlap.
+        est_table_h = 5.0 + 3.4 * float(max(2, len(dps_rows) + 1))
+        est_legend_h = 5.0 + 3.7 * float(max(2, len(ce_lines)))
+        if y_next + est_table_h + est_legend_h > 270:
+            self._render_dataset_header(pdf, ds, "EDA (continued)")
+            y_next = 34.0
+
+        pdf.set_xy(10, y_next)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(190, 5, "Data Process Summary", border=1, ln=1, align="L")
+        if dps_cols:
+            y_next = self._render_table(
+                pdf,
+                x=10,
+                y=pdf.get_y(),
+                width=190,
+                columns=dps_cols,
+                rows=dps_rows,
+                font_size=5.4,
+                row_h=3.4,
+                max_first_col_width=30.0,
+            )
+        else:
+            pdf.set_x(10)
+            pdf.set_font("Times", "", 7)
+            pdf.multi_cell(190, 3.6, "DataProcessSummary.csv not found.", border=1, align="L")
+            y_next = pdf.get_y()
+
+        legend_title = "DataProcessSummary Step Key (C/E)"
+        self._render_box(
+            pdf,
+            x=10,
+            y=y_next + 2,
+            w=190,
+            title=legend_title,
+            lines=ce_lines,
+        )
+
+    def _render_feature_learning_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        self._render_dataset_header(pdf, ds, "Feature Learning")
+        figs = ds.get("figures", {})
+        mi_path = figs.get("mutual_info")
+        composite_path = figs.get("composite_feature_scores")
+        if mi_path and composite_path:
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=34,
+                w=94,
+                h=106,
+                title="Mutual Information Scores (Top Features)",
+                img_path=mi_path,
+            )
+            self._draw_image_panel(
+                pdf,
+                x=106,
+                y=34,
+                w=94,
+                h=106,
+                title="Composite Feature Importance (Normalized Weighted)",
+                img_path=composite_path,
+            )
+        elif mi_path:
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=34,
+                w=190,
+                h=106,
+                title="Mutual Information Scores (Top Features)",
+                img_path=mi_path,
+            )
+        else:
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=34,
+                w=190,
+                h=106,
+                title="Composite Feature Importance (Normalized Weighted)",
+                img_path=composite_path,
+            )
+
+        t = ds.get("tables", {}).get("informative_feature_summary", {})
+        cols = t.get("columns", [])
+        rows = t.get("rows", [])
+        pdf.set_xy(10, 145)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(190, 5, "Informative Feature Summary", border=1, ln=1, align="L")
+        self._render_table(
+            pdf,
+            x=10,
+            y=pdf.get_y(),
+            width=190,
+            columns=cols,
+            rows=rows,
+            font_size=6.5,
+            row_h=4.0,
+            max_first_col_width=62.0,
+        )
+
+    def _render_performance_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        self._render_dataset_header(pdf, ds, "Performance (Cross-Validation)")
+        perf = ds.get("performance", {})
+        mean_cols = perf.get("mean_columns", [])
+        mean_rows = perf.get("mean_rows", [])
+        mean_bold = set((int(r), int(c)) for r, c in perf.get("mean_bold_cells", []))
+        med_cols = perf.get("median_columns", [])
+        med_rows = perf.get("median_rows", [])
+        med_bold = set((int(r), int(c)) for r, c in perf.get("median_bold_cells", []))
+
+        y = 34.0
+        pdf.set_xy(10, y)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(190, 5, "Model and Ensemble Performance (Mean +/- SD)", border=1, ln=1, align="L")
+        y = self._render_table(
+            pdf,
+            x=10,
+            y=pdf.get_y(),
+            width=190,
+            columns=mean_cols,
+            rows=mean_rows,
+            font_size=5.5,
+            row_h=3.4,
+            bold_cells=mean_bold,
+            max_first_col_width=46.0,
+        )
+
+        y += 2
+        pdf.set_xy(10, y)
+        pdf.set_font("Times", "B", 9)
+        pdf.cell(190, 5, "Model and Ensemble Performance (Median)", border=1, ln=1, align="L")
+        y = self._render_table(
+            pdf,
+            x=10,
+            y=pdf.get_y(),
+            width=190,
+            columns=med_cols,
+            rows=med_rows,
+            font_size=5.5,
+            row_h=3.4,
+            bold_cells=med_bold,
+            max_first_col_width=46.0,
+        )
+
+        y = max(y + 2, 178)
+        metric = ds.get("performance_distribution_metric") or ""
+        self._draw_image_panel(
+            pdf,
+            x=10,
+            y=y,
+            w=190,
+            h=78,
+            title=f"{metric} Distribution by Algorithm" if metric else "Performance Distribution by Algorithm",
+            img_path=ds.get("figures", {}).get("performance_distribution"),
+        )
+
+    def _render_evaluation_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        if ds.get("task_type") == "Regression":
+            self._render_dataset_header(pdf, ds, "Evaluation Results")
+            figs = ds.get("figures", {})
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=34,
+                w=94,
+                h=104,
+                title="Actual vs Predicted (Test Set)",
+                img_path=figs.get("reg_actual_vs_pred"),
+            )
+            self._draw_image_panel(
+                pdf,
+                x=106,
+                y=34,
+                w=94,
+                h=104,
+                title="Test Residual Q-Q Plot",
+                img_path=figs.get("reg_test_resid"),
+            )
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=142,
+                w=190,
+                h=104,
+                title="Residual Distribution (Test Set)",
+                img_path=figs.get("reg_residual_dist"),
+            )
+            return
+
+        self._render_dataset_header(pdf, ds, "Evaluation Results (Curves)")
+        figs = ds.get("figures", {})
+        self._draw_image_panel(
+            pdf,
+            x=10,
+            y=34,
+            w=94,
+            h=104,
+            title="ROC Summary (Base Models)",
+            img_path=figs.get("models_roc"),
+        )
+        self._draw_image_panel(
+            pdf,
+            x=106,
+            y=34,
+            w=94,
+            h=104,
+            title="PRC Summary (Base Models)",
+            img_path=figs.get("models_prc"),
+        )
+        self._draw_image_panel(
+            pdf,
+            x=10,
+            y=142,
+            w=94,
+            h=104,
+            title="ROC Summary (Ensembles)",
+            img_path=figs.get("ensembles_roc"),
+        )
+        self._draw_image_panel(
+            pdf,
+            x=106,
+            y=142,
+            w=94,
+            h=104,
+            title="PRC Summary (Ensembles)",
+            img_path=figs.get("ensembles_prc"),
+        )
+
+    def _render_runtime_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        self._render_dataset_header(pdf, ds, "Runtime Summary")
+        rt = ds.get("tables", {}).get("runtime", {})
+        cols = rt.get("columns", [])
+        rows = rt.get("rows", [])
+        self._render_table(
+            pdf,
+            x=10,
+            y=34,
+            width=190,
+            columns=cols,
+            rows=rows,
+            font_size=6.5,
+            row_h=4.0,
+            max_first_col_width=72.0,
+        )
+
+    def _render_dataset_comparison_pages(self, pdf: _StreamlinePDF, block: Dict[str, Any], task_type: str):
+        if not block.get("present"):
+            return
+
+        pdf.add_page()
+        pdf.set_font("Times", "B", 11)
+        pdf.cell(190, 6, "Dataset Comparisons", border=1, ln=1, align="L")
+        pdf.set_font("Times", "", 9)
+        pdf.cell(190, 5, "Comparison Overview (All Datasets)", border=1, ln=1, align="L")
+
+        figs = block.get("figures", {})
+        if task_type == "Regression":
+            keys = [
+                "overview_Pearson Correlation",
+                "overview_Explained Variance",
+                "overview_Mean Absolute Error",
+                "overview_Mean Squared Error",
+            ]
+        else:
+            keys = [
+                "overview_Balanced Accuracy",
+                "overview_ROC AUC",
+                "overview_PRC AUC",
+                "overview_F1 Score",
+            ]
+
+        # Compact overview layout so DatasetComparisons consumes fewer pages.
+        panels = [
+            (10, 34, 94, 82, keys[0], "Overview 1"),
+            (106, 34, 94, 82, keys[1], "Overview 2"),
+            (10, 120, 94, 82, keys[2], "Overview 3"),
+            (106, 120, 94, 82, keys[3], "Overview 4"),
+        ]
+        for x, y, w, h, key, fallback_title in panels:
+            if key.startswith("overview_"):
+                metric_label = key.replace("overview_", "")
+                title = f"Across Datasets: {metric_label}"
+            else:
+                title = fallback_title
+            self._draw_image_panel(pdf, x=x, y=y, w=w, h=h, title=title, img_path=figs.get(key))
+
+        if figs.get("kw_pvalues"):
+            pdf.set_xy(10, 206)
+            pdf.set_font("Times", "B", 9)
+            pdf.cell(190, 5, "Dataset Comparisons: Kruskal-Wallis P-Values", border=1, ln=1, align="L")
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=211,
+                w=190,
+                h=48,
+                title="Kruskal-Wallis P-Value Overview",
+                img_path=figs.get("kw_pvalues"),
+            )
+
+        table_specs = [
+            ("Best Comparisons - Kruskal-Wallis", "kw"),
+            ("Best Comparisons - Mann-Whitney U", "mw"),
+            ("Best Comparisons - Wilcoxon Rank-Sum", "wx"),
+        ]
+        # Render all stats tables across as few pages as possible.
+        pdf.add_page()
+        y = 24.0
+        for title, key in table_specs:
+            t = block.get("tables", {}).get(key, {})
+            cols = t.get("columns", [])
+            rows = t.get("rows", [])
+            if not cols:
+                continue
+            bold = set((int(r), int(c)) for r, c in t.get("bold_cells", []))
+            est_h = 5.0 + 3.2 * float(max(2, len(rows) + 1))
+            if y + est_h > 274:
+                pdf.add_page()
+                y = 24.0
+            pdf.set_xy(10, y)
+            pdf.set_font("Times", "B", 11)
+            pdf.cell(190, 6, title, border=1, ln=1, align="L")
+            y = self._render_table(
+                pdf,
+                x=10,
+                y=pdf.get_y(),
+                width=190,
+                columns=cols,
+                rows=rows,
+                font_size=5.0,
+                row_h=3.2,
+                bold_cells=bold,
+                max_first_col_width=28.0,
+            )
+            y += 3.0
+
+    def _render_pdf(self, report_data: Dict[str, Any]):
+        if FPDF is None:
+            raise ImportError("fpdf2 is required for PDF rendering. Install `fpdf2`.")
+        footer_text = (
+            f"Generated with STREAMLINE ({report_data.get('streamline_version', 'unknown')}): "
+            "(https://github.com/UrbsLab/STREAMLINE)"
+        )
+        pdf = _StreamlinePDF(footer_text=footer_text)
+        pdf.alias_nb_pages()
+        pdf.set_auto_page_break(auto=True, margin=12)
+        pdf.set_margins(10, 8, 10)
+
+        self._render_global_summary(pdf, report_data)
+
+        datasets = report_data.get("datasets", [])
+        for ds in datasets:
+            self._render_dataset_eda_page(pdf, ds)
+            self._render_feature_learning_page(pdf, ds)
+            self._render_performance_page(pdf, ds)
+            self._render_evaluation_page(pdf, ds)
+            self._render_runtime_page(pdf, ds)
+
+        dc = report_data.get("dataset_comparisons", {})
+        task_type = datasets[0].get("task_type", "Multiclass Classification") if datasets else "Multiclass Classification"
+        self._render_dataset_comparison_pages(pdf, dc, task_type)
 
         pdf.output(str(self.paths.pdf))
 
-    # ----------------------------
-    # Runtime bookkeeping
-    # ----------------------------
     def save_runtime(self):
         rt_dir = self.exp_root / "runtime"
-        rt_dir.mkdir(exist_ok=True)
-        (rt_dir / "runtime_report.txt").write_text(str(time.time() - (self.job_start_time or time.time())))
+        try:
+            rt_dir.mkdir(exist_ok=True)
+            elapsed = time.time() - (self.job_start_time or time.time())
+            (rt_dir / "runtime_report.txt").write_text(str(elapsed))
+        except PermissionError:
+            logger.warning("Could not write runtime_report.txt under %s (permission denied).", rt_dir)
 
     def run(self):
         self.job_start_time = time.time()
 
         datasets = self._list_datasets()
         if not datasets:
-            raise RuntimeError(f"No dataset folders (with CVDatasets/) found under: {self.exp_root}")
+            raise RuntimeError(
+                "No dataset folders found. Expected subdirectories containing exploratory/ and model_evaluation/."
+            )
 
-        dataset_blocks = [self._collect_dataset_block(ds) for ds in datasets]
-        dc_block = self._collect_dataset_comparisons_block()
+        metadata_pickle = self._read_pickle_if_exists(self.exp_root / "metadata.pickle") or {}
+        alg_info = self._read_pickle_if_exists(self.exp_root / "algInfo.pickle") or {}
+        run_params_all = self._read_pickle_if_exists(self.exp_root / "run_params.pickle") or {}
+        run_params = self._latest_run_params(run_params_all)
 
-        meta_pickle_obj = self._read_pickle_if_exists(self.exp_root / "metadata.pickle")
-        run_params_obj = self._read_pickle_if_exists(self.exp_root / "run_params.pickle")
-
-        meta_pickle_dict: Dict[str, Any] = meta_pickle_obj if isinstance(meta_pickle_obj, dict) else (
-            {"metadata.pickle": str(meta_pickle_obj)} if meta_pickle_obj is not None else {}
-        )
-        run_params_dict: Dict[str, Any] = run_params_obj if isinstance(run_params_obj, dict) else (
-            {"run_params.pickle": str(run_params_obj)} if run_params_obj is not None else {}
-        )
-
-        meta_flat = self._flatten_mapping(meta_pickle_dict, sep=" · ", max_depth=6) if meta_pickle_dict else {}
-        params_flat = self._flatten_mapping(run_params_dict, sep=" · ", max_depth=6) if run_params_dict else {}
-
-        cover_boxes = self._categorize_cover_items(meta_flat, params_flat, exp_root=self.exp_root)
-
-        base_meta: Dict[str, Any] = {
+        # Optional metadata fallback to constructor values.
+        metadata = {
             "Experiment Root": str(self.exp_root),
             "Output Path": str(self.exp_root.parent),
             "Experiment Name": self.experiment_name,
-            "Datasets Found": len(datasets),
-            "Generated At": _now_iso_local(),
+            "Outcome Label": self.outcome_label or metadata_pickle.get("Outcome Label", ""),
+            "Outcome Type": self.outcome_type or metadata_pickle.get("Outcome Type", ""),
+            "Instance Label": self.instance_label or metadata_pickle.get("Instance Label", ""),
         }
-        if self.outcome_label:
-            base_meta["Outcome Label"] = self.outcome_label
-        if self.instance_label:
-            base_meta["Instance Label"] = self.instance_label
-        if self.outcome_type:
-            base_meta["Outcome Type"] = self.outcome_type
 
-        enriched_meta = self._merge_union_dicts(base_meta, meta_flat, params_flat)
+        dataset_blocks: List[Dict[str, Any]] = []
+        for idx, ds_dir in enumerate(datasets, start=1):
+            dataset_id = f"D{idx}"
+            dataset_blocks.append(self._collect_dataset_block(ds_dir, dataset_id, metadata_pickle))
+
+        primary_task = dataset_blocks[0].get("task_type", "Multiclass Classification")
+        dc_block = (
+            self._collect_dataset_comparisons(primary_task, dataset_blocks)
+            if len(dataset_blocks) > 1
+            else {"present": False}
+        )
 
         report_data: Dict[str, Any] = {
-            "title": self.title,
-            "experiment_name": self.experiment_name,
-            "experiment_root": str(self.exp_root),
+            "title": "STREAMLINE Testing Data Evaluation Report",
             "generated_at": _now_iso_local(),
             "generated_at_epoch": int(time.time()),
             "streamline_version": _try_streamline_version(),
-            "metadata": enriched_meta,
-            "metadata_pickle_flat": meta_flat,
-            "run_params_flat": params_flat,
-            "cover_boxes": cover_boxes,
+            "experiment_name": self.experiment_name,
+            "experiment_root": str(self.exp_root),
+            "metadata": metadata,
+            "metadata_pickle": metadata_pickle,
+            "alg_info": alg_info,
+            "run_params": run_params,
             "datasets": dataset_blocks,
             "dataset_comparisons": dc_block,
         }
 
         self.paths.data_json.write_text(json.dumps(report_data, indent=2))
-        self._write_metadata_text(cover_boxes=cover_boxes, enriched_meta=enriched_meta)
 
         if self.make_pdf:
-            self._write_pdf(report_data)
+            self._render_pdf(report_data)
 
-        jc = self.exp_root / "jobsCompleted"
-        jc.mkdir(exist_ok=True)
-        (jc / "job_reporting.txt").write_text("complete")
-
-        self.save_runtime()
-        logger.info("Phase 11 reporting complete: %s", self.paths.pdf)
-
-
-# ============================================================
-# PDF renderer (Times; ASCII sanitization; skip missing figures)
-# ============================================================
-
-class _StreamlinePDF(FPDF):
-    """
-    Keep core Times font, but sanitize smart punctuation to ASCII-safe equivalents.
-
-    Also:
-      - Do not draw placeholder panels for missing figures (skip silently).
-      - No em-dashes and no ellipsis in rendered strings.
-      - Performance tables: no wrapping; use truncation and tuned column widths.
-    """
-
-    def __init__(self, *, title: str, streamline_version: str, float_decimals: int = 3):
-        super().__init__(orientation="P", unit="mm", format="A4")
-        self._title = title
-        self._streamline_version = streamline_version
-        self._decimals = int(float_decimals)
-
-        self.set_margins(10, 10, 10)
-        self.set_auto_page_break(auto=True, margin=14)
-        self.set_line_width(0.2)
-
-        self._use_running_header = False
-
-        # table layout
-        self._tbl_pad_x = 1.2
-        self._tbl_pad_y = 0.8
-        self._tbl_line_h = 3.4
-        self._gap_after_table = 1.2
-
-        # figure panel padding
-        self._panel_pad = 2.0
-        self._panel_title_text_pad_x = 1.4
-        self._panel_title_text_pad_y = 1.4
-        self._panel_content_pad_top = 2.2
-
-        self.set_font("Times", "", 10)
-
-    # -----------------------------
-    # Sanitization (no smart punctuation, no em-dash, no ellipsis)
-    # -----------------------------
-    def s(self, txt: Any) -> str:
-        if txt is None:
-            return ""
-        t = str(txt)
-
-        repl = {
-            "\u201c": '"',
-            "\u201d": '"',
-            "\u2018": "'",
-            "\u2019": "'",
-            "\u2013": "-",
-            "\u2014": "-",
-            "\u2022": "-",
-            "\u00A0": " ",
-            "\u2026": "",
-        }
-        for k, v in repl.items():
-            t = t.replace(k, v)
-
-        t = t.encode("latin-1", "ignore").decode("latin-1")
-        t = re.sub(r"[ \t]+", " ", t)
-        t = re.sub(r"\s+\n", "\n", t)
-        return t.strip()
-
-    # -----------------------------
-    # Header / Footer
-    # -----------------------------
-    def header(self):
-        if not self._use_running_header:
-            return
-        self.set_font("Times", "", 9)
-        x = self.l_margin
-        y = self.t_margin
-        w = self.w - self.l_margin - self.r_margin
-        self.set_xy(x, y - 2)
-        self.line(x, y, x + w, y)
-        self.set_xy(x, y)
-        self.cell(w, 4, self.s(self._title), border=0, ln=1, align="L")
-        self.ln(2)
-
-    def footer(self):
-        self.set_y(-10)
-        self.set_font("Times", "I", 8)
-        left = self.s(f"Generated with STREAMLINE ({self._streamline_version})")
-        right = self.s(f"Page {self.page_no()}/{{nb}}")
-        self.set_x(self.l_margin)
-        self.cell(0, 5, left, border=0, ln=0, align="L")
-        self.set_x(self.l_margin)
-        self.cell(self.w - self.l_margin - self.r_margin, 5, right, border=0, ln=0, align="R")
-
-    # -----------------------------
-    # Cover
-    # -----------------------------
-    def cover_banner_title(self, title: str):
-        x = self.l_margin
-        y = self.t_margin
-        w = self.w - self.l_margin - self.r_margin
-        h = 12
-
-        self.set_font("Times", "B", 14)
-        self.set_xy(x, y)
-        self.rect(x, y, w, h)
-        self.set_xy(x + 2, y + 3.2)
-        self.cell(w - 4, 6, self.s(title), border=0, ln=1, align="L")
-        self.ln(3)
-
-    def _cover_section_box(
-        self,
-        title: str,
-        items: Sequence[Tuple[str, str]],
-        *,
-        x: float,
-        y: float,
-        w: float,
-        max_items: Optional[int] = None,
-        title_h: float = 6.0,
-        row_h: float = 4.6,
-        font_size: int = 9,
-    ) -> float:
-        if max_items is not None:
-            items = items[:max_items]
-
-        content_h = max(1, len(items)) * row_h
-        h = title_h + content_h + 1.4
-
-        if y + h > (self.h - self.b_margin - 2):
-            self.add_page()
-            y = self.get_y()
-
-        self.rect(x, y, w, h)
-        self.rect(x, y, w, title_h)
-
-        self.set_font("Times", "B", 11)
-        self.set_xy(x + 1.6, y + 1.6)
-        self.cell(w - 3.2, title_h - 3.2, self.s(title), border=0, ln=0, align="L")
-
-        self.set_font("Times", "", font_size)
-        cy = y + title_h + 0.6
-        for k, v in items:
-            line = self.s(f"{k}: {v}")
-            self.set_xy(x + 1.8, cy)
-            self.multi_cell(w - 3.6, row_h, line, border=0)
-            cy += row_h
-
-        return h
-
-    def cover_two_column_boxes(self, boxes: Dict[str, List[Tuple[str, str]]]):
-        page_w = self.w - self.l_margin - self.r_margin
-        gap = 4.0
-        col_w = (page_w - gap) / 2.0
-
-        xL = self.l_margin
-        xR = self.l_margin + col_w + gap
-
-        left_order = [
-            "General Pipeline Settings:",
-            "Feature Importance/Selection Settings:",
-            "ML Modeling Algorithms:",
-            "Modeling Settings:",
-            "LCS Settings (eLCS, XCS, ExSTraCS):",
-            "Stats and Figure Settings:",
-        ]
-        right_order = [
-            "EDA and Processing Settings:",
-            "Target Dataset(s):",
-            "Target Data Settings:",
-        ]
-
-        y_start = self.get_y()
-        yL = y_start
-        yR = y_start
-
-        for title in left_order:
-            items = boxes.get(title) or []
-            if not items:
-                continue
-            h = self._cover_section_box(title, items, x=xL, y=yL, w=col_w, title_h=6.0, row_h=4.6, font_size=9)
-            yL += h + 2.0
-
-        for title in right_order:
-            items = boxes.get(title) or []
-            if not items:
-                continue
-            font_size = 8 if title in {"EDA and Processing Settings:", "Target Data Settings:"} else 9
-            row_h = 4.4 if font_size == 8 else 4.6
-            h = self._cover_section_box(title, items, x=xR, y=yR, w=col_w, title_h=6.0, row_h=row_h, font_size=font_size)
-            yR += h + 2.0
-
-        self.set_y(max(yL, yR) + 1.0)
-
-    # -----------------------------
-    # Section typography
-    # -----------------------------
-    def panel_title(self, title: str, *, h: float = 6.0):
-        w = self.w - self.l_margin - self.r_margin
-        if self.get_y() + h + 2 > self.page_break_trigger:
-            self.add_page()
-
-        x = self.l_margin
-        y = self.get_y()
-        self.set_font("Times", "B", 10)
-        self.rect(x, y, w, h)
-        self.set_xy(x + 1.4, y + 1.4)
-        self.cell(w - 2.8, h - 2.8, self.s(title), border=0, ln=1, align="L")
-        self.ln(1.2)
-
-    def subheader(self, text: str):
-        self.set_font("Times", "B", 10)
-        self.multi_cell(0, 5, self.s(text))
-        self.ln(0.8)
-
-    def cleaning_engineering_box(self, lines: Sequence[str]):
-        w = self.w - self.l_margin - self.r_margin
-        x = self.l_margin
-        y = self.get_y()
-
-        line_h = 5.0
-        pad = 2.0
-        h = pad + len(lines) * line_h + pad
-
-        if y + h > self.page_break_trigger:
-            self.add_page()
-            x = self.l_margin
-            y = self.get_y()
-
-        self.rect(x, y, w, h)
-        self.set_font("Times", "", 10)
-        cy = y + pad
-        for ln in lines:
-            self.set_xy(x + pad, cy)
-            self.multi_cell(w - 2 * pad, line_h, self.s(ln), border=0)
-            cy += line_h
-        self.ln(2.0)
-
-    # -----------------------------
-    # Formatting helpers
-    # -----------------------------
-    def _cell_str(self, v: Any) -> str:
-        return self.s(format_number(v, decimals=self._decimals))
-
-    def _truncate_to_width(self, s: str, w_mm: float) -> str:
-        if s is None:
-            return ""
-        s = self.s(s)
-        if self.get_string_width(s) <= w_mm:
-            return s
-        if w_mm <= 0:
-            return ""
-        lo, hi = 0, len(s)
-        best = ""
-        while lo <= hi:
-            mid = (lo + hi) // 2
-            cand = s[:mid]
-            if self.get_string_width(cand) <= w_mm:
-                best = cand
-                lo = mid + 1
-            else:
-                hi = mid - 1
-        return best
-
-    # -----------------------------
-    # Tables
-    # -----------------------------
-    def _col_widths_model_perf(self, columns: Sequence[str], table_w: float) -> List[float]:
-        """
-        Widths for wide performance tables with:
-          columns = ["Algorithm", metric1, metric2, ...]
-        No wrapping: we rely on truncation to fit each cell.
-        """
-        n = len(columns)
-        if n <= 1:
-            return [table_w]
-
-        alg_w = min(max(36.0, 0.20 * table_w), 52.0)
-        rest = max(0.0, table_w - alg_w)
-
-        metric_cols = list(columns[1:])
-        weights: List[float] = []
-        for c in metric_cols:
-            cl = str(c).lower()
-            w = 1.0 + min(1.6, len(str(c)) / 16.0)
-            if any(x in cl for x in ["sensitivity", "precision", "specificity"]):
-                w *= 1.25
-            if "balanced" in cl:
-                w *= 1.10
-            if "roc" in cl or "prc" in cl:
-                w *= 1.10
-            weights.append(w)
-
-        sw = sum(weights) if sum(weights) > 0 else float(max(1, len(weights)))
-        raw = [rest * (w / sw) for w in weights]
-
-        min_metric = 18.0
-        raw = [max(min_metric, r) for r in raw]
-
-        s2 = sum(raw)
-        scale = (rest / s2) if s2 > 0 else 1.0
-        metrics = [r * scale for r in raw]
-
-        widths = [alg_w] + metrics
-        widths[-1] += (table_w - sum(widths))
-        return widths
-
-    def draw_mean_std_table(self, mean_std: Dict[str, Any], *, no_wrap: bool = True):
-        cols = mean_std.get("columns", [])
-        rows_out: List[List[Any]] = []
-
-        for row in mean_std.get("rows", []) or []:
-            out_row: List[Any] = []
-            for cell in row.get("cells", []):
-                val = cell.get("value")
-                if isinstance(val, tuple) and len(val) == 2:
-                    mv, sv = val
-                    out_row.append(self.s(f"{format_number(mv, decimals=self._decimals)} +/- {format_number(sv, decimals=self._decimals)}"))
-                else:
-                    out_row.append(self.s(val))
-            rows_out.append(out_row)
-
-        table_w = self.w - self.l_margin - self.r_margin
-        col_widths = self._col_widths_model_perf(cols, table_w)
-
-        ncol = len(cols)
-        font_size = 6 if ncol >= 10 else 7
-
-        self.draw_table(cols, rows_out, col_widths=col_widths, font_size=font_size, no_wrap=no_wrap)
-
-    def _auto_col_widths(self, columns: Sequence[str], rows: Sequence[Sequence[str]], table_w: float) -> List[float]:
-        n = len(columns)
-        if n == 1:
-            return [table_w]
-
-        weights: List[float] = []
-        for j, c in enumerate(columns):
-            w = max(3.0, float(len(self.s(c))))
-            for r in rows[:15]:
-                if j < len(r):
-                    w = max(w, min(44.0, float(len(self.s(r[j])))))
-            if j == 0:
-                w *= 1.6
-            weights.append(w)
-
-        sw = sum(weights) if sum(weights) > 0 else float(n)
-        raw = [table_w * (w / sw) for w in weights]
-
-        min_w = 14.0 if n <= 4 else 10.0
-        raw = [max(min_w, w) for w in raw]
-
-        s2 = sum(raw)
-        scale = (table_w / s2) if s2 > 0 else 1.0
-        out = [w * scale for w in raw]
-        out[-1] += (table_w - sum(out))
-        return out
-
-    def draw_table(
-        self,
-        columns: Sequence[str],
-        rows: Sequence[Sequence[Any]],
-        *,
-        col_widths: Optional[Sequence[float]] = None,
-        max_rows: Optional[int] = None,
-        font_size: Optional[int] = None,
-        no_wrap: bool = False,
-    ):
-        if not columns:
-            return
-
-        table_w = self.w - self.l_margin - self.r_margin
-        ncol = len(columns)
-
-        formatted_rows: List[List[str]] = [[self._cell_str(v) for v in r] for r in rows]
-        if max_rows is not None:
-            formatted_rows = formatted_rows[:max_rows]
-
-        if font_size is None:
-            font_size = 8 if ncol <= 5 else (7 if ncol <= 8 else (6 if ncol <= 11 else 5))
-        self.set_font("Times", "", font_size)
-
-        if col_widths is None:
-            col_widths = self._auto_col_widths(columns, formatted_rows, table_w)
-        col_widths = list(col_widths)
-
-        header_h = 5.0
-        line_h = self._tbl_line_h
-
-        def draw_header():
-            self.set_font("Times", "B", font_size)
-            y0 = self.get_y()
-            x0 = self.l_margin
-            for j, col in enumerate(columns):
-                wj = col_widths[j]
-                self.rect(x0, y0, wj, header_h)
-                self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
-                txt = self._truncate_to_width(str(col), wj - 2 * self._tbl_pad_x) if no_wrap else self.s(col)
-                self.cell(wj - 2 * self._tbl_pad_x, header_h - 2 * self._tbl_pad_y, txt, border=0, ln=0, align="C")
-                x0 += wj
-            self.set_xy(self.l_margin, y0 + header_h)
-            self.set_font("Times", "", font_size)
-
-        if self.get_y() + header_h + 2 > self.page_break_trigger:
-            self.add_page()
-        draw_header()
-
-        row_h = max(4.4, line_h + 2 * self._tbl_pad_y)
-        for cells in formatted_rows:
-            if self.get_y() + row_h > self.page_break_trigger:
-                self.add_page()
-                draw_header()
-
-            y0 = self.get_y()
-            x0 = self.l_margin
-            for j, txt in enumerate(cells):
-                wj = col_widths[j]
-                self.rect(x0, y0, wj, row_h)
-                self.set_xy(x0 + self._tbl_pad_x, y0 + self._tbl_pad_y)
-                t = self._truncate_to_width(txt, wj - 2 * self._tbl_pad_x) if no_wrap else self.s(txt)
-                self.cell(wj - 2 * self._tbl_pad_x, line_h, t, border=0, ln=0, align="L")
-                x0 += wj
-            self.set_y(y0 + row_h)
-
-        self.ln(self._gap_after_table)
-
-    # -----------------------------
-    # Figures (skip missing entirely; keep aspect if supported)
-    # -----------------------------
-    def _image_panel(
-        self,
-        title: str,
-        path: Optional[str],
-        *,
-        x: float,
-        y: float,
-        w: float,
-        h: float,
-        title_h: float,
-        keep_aspect: bool = True,
-    ) -> bool:
-        if not path:
-            return False
-        p = Path(path)
-        if not p.exists():
-            return False
-
-        self.rect(x, y, w, h)
-        if title_h > 0:
-            self.rect(x, y, w, title_h)
-            self.set_font("Times", "B", 8)
-            self.set_xy(x + self._panel_title_text_pad_x, y + self._panel_title_text_pad_y)
-            self.cell(
-                w - 2 * self._panel_title_text_pad_x,
-                title_h - 2 * self._panel_title_text_pad_y,
-                self.s(title),
-                border=0,
-                ln=0,
-                align="L",
-            )
-
-        inner_x = x + self._panel_pad
-        inner_y = y + title_h + (self._panel_content_pad_top if title_h > 0 else self._panel_pad)
-        inner_w = w - 2 * self._panel_pad
-        inner_h = h - title_h - ((self._panel_content_pad_top if title_h > 0 else 0) + self._panel_pad)
-
+        jobs_completed = self.exp_root / "jobsCompleted"
         try:
-            if keep_aspect:
-                try:
-                    self.image(str(p), x=inner_x, y=inner_y, w=inner_w, h=inner_h, keep_aspect_ratio=True)  # type: ignore
-                except TypeError:
-                    self.image(str(p), x=inner_x, y=inner_y, w=inner_w, h=inner_h)
-            else:
-                self.image(str(p), x=inner_x, y=inner_y, w=inner_w, h=inner_h)
-        except Exception:
-            return False
+            jobs_completed.mkdir(exist_ok=True)
+            (jobs_completed / "job_reporting.txt").write_text("complete")
+        except PermissionError:
+            logger.warning("Could not write job completion marker under %s (permission denied).", jobs_completed)
+        self.save_runtime()
+        logger.info("Reporting phase complete: %s", self.paths.pdf)
 
-        return True
 
-    def figure_grid_2x2(
-        self,
-        titles: Sequence[str],
-        paths: Sequence[Optional[str]],
-        *,
-        cell_h: float = 66.0,
-        gap: float = 4.0,
-        title_h: float = 6.0,
-        keep_aspect: bool = True,
-    ):
-        page_w = self.w - self.l_margin - self.r_margin
-        cell_w = (page_w - gap) / 2.0
+ReportPhaseJobPdfFlow = ReportPhaseJob
 
-        x0 = self.l_margin
-        y0 = self.get_y()
 
-        needed_h = cell_h * 2 + gap + 2
-        if y0 + needed_h > self.page_break_trigger:
-            self.add_page()
-            y0 = self.get_y()
+def _build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Generate STREAMLINE Testing Data Evaluation PDF report.")
+    parser.add_argument("--experiment-path", help="Path to experiment output directory.")
+    parser.add_argument("--output-path", help="Parent output path containing experiment directory.")
+    parser.add_argument("--experiment-name", help="Experiment folder name.")
+    parser.add_argument(
+        "--reporting-dir",
+        default=None,
+        help="Optional output directory for report artifacts (report_data.json, report.pdf, figures).",
+    )
+    parser.add_argument("--outcome-label", default=None)
+    parser.add_argument("--outcome-type", default=None)
+    parser.add_argument("--instance-label", default=None)
+    parser.add_argument("--no-pdf", action="store_true", help="Skip PDF generation and only build report_data.json.")
+    parser.add_argument("--no-plots", action="store_true", help="Disable on-the-fly figure generation.")
+    parser.add_argument(
+        "--no-reuse-figures",
+        action="store_true",
+        help="Do not reuse existing PNGs from report/figure locations before generation.",
+    )
+    return parser
 
-        self._image_panel(titles[0], paths[0] if len(paths) > 0 else None, x=x0, y=y0, w=cell_w, h=cell_h, title_h=title_h, keep_aspect=keep_aspect)
-        self._image_panel(titles[1], paths[1] if len(paths) > 1 else None, x=x0 + cell_w + gap, y=y0, w=cell_w, h=cell_h, title_h=title_h, keep_aspect=keep_aspect)
 
-        y1 = y0 + cell_h + gap
-        self._image_panel(titles[2], paths[2] if len(paths) > 2 else None, x=x0, y=y1, w=cell_w, h=cell_h, title_h=title_h, keep_aspect=keep_aspect)
-        self._image_panel(titles[3], paths[3] if len(paths) > 3 else None, x=x0 + cell_w + gap, y=y1, w=cell_w, h=cell_h, title_h=title_h, keep_aspect=keep_aspect)
+def main():
+    parser = _build_arg_parser()
+    args = parser.parse_args()
+    job = ReportPhaseJob(
+        output_path=args.output_path,
+        experiment_name=args.experiment_name,
+        experiment_path=args.experiment_path,
+        reporting_dir=args.reporting_dir,
+        outcome_label=args.outcome_label,
+        outcome_type=args.outcome_type,
+        instance_label=args.instance_label,
+        make_pdf=not args.no_pdf,
+        enable_plots=not args.no_plots,
+        reuse_existing_figures=not args.no_reuse_figures,
+    )
+    job.run()
 
-        self.set_y(y1 + cell_h + 2)
 
-    def figure_row_2(
-        self,
-        titles: Sequence[str],
-        paths: Sequence[Optional[str]],
-        *,
-        h: float = 80.0,
-        gap: float = 4.0,
-        title_h: float = 6.0,
-        keep_aspect: bool = True,
-    ):
-        page_w = self.w - self.l_margin - self.r_margin
-        cell_w = (page_w - gap) / 2.0
-        y0 = self.get_y()
-        if y0 + h + 2 > self.page_break_trigger:
-            self.add_page()
-            y0 = self.get_y()
-
-        x0 = self.l_margin
-        self._image_panel(titles[0], paths[0] if len(paths) > 0 else None, x=x0, y=y0, w=cell_w, h=h, title_h=title_h, keep_aspect=keep_aspect)
-        self._image_panel(titles[1], paths[1] if len(paths) > 1 else None, x=x0 + cell_w + gap, y=y0, w=cell_w, h=h, title_h=title_h, keep_aspect=keep_aspect)
-        self.set_y(y0 + h + 2)
-
-    def figure_single(
-        self,
-        title: str,
-        path: Optional[str],
-        *,
-        h: float = 90.0,
-        title_h: float = 6.0,
-        keep_aspect: bool = True,
-    ):
-        if not path:
-            return
-        p = Path(path)
-        if not p.exists():
-            return
-
-        page_w = self.w - self.l_margin - self.r_margin
-        y0 = self.get_y()
-        if y0 + h + 2 > self.page_break_trigger:
-            self.add_page()
-            y0 = self.get_y()
-
-        self._image_panel(title, str(p), x=self.l_margin, y=y0, w=page_w, h=h, title_h=title_h, keep_aspect=keep_aspect)
-        self.set_y(y0 + h + 2)
+if __name__ == "__main__":
+    main()

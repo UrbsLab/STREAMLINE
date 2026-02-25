@@ -201,19 +201,22 @@ class ModelJob:
                 logging.warning(f"Calibration failed for {self.algorithm}: {e}")
 
         # Feature importance
+        perm_scoring_metric = self.scoring_metric
+        if self.scoring_metric.startswith('mean_'):
+            perm_scoring_metric = 'neg_'+self.scoring_metric
+        
         if self.uniform_fi:
             results = permutation_importance(model.model, x_train, y_train, n_repeats=10,
-                                             random_state=self.random_state, scoring=self.scoring_metric)
+                                             random_state=self.random_state, scoring=perm_scoring_metric)
             self.feature_importance = results.importances_mean
         else:
             try:
                 self.feature_importance = model.model.feature_importances_
             except AttributeError:
                 results = permutation_importance(model.model, x_train, y_train, n_repeats=10,
-                                                 random_state=self.random_state, scoring=self.scoring_metric)
+                                                 random_state=self.random_state, scoring=perm_scoring_metric)
                 self.feature_importance = results.importances_mean
 
-        # Persist model
         # Persist model
         with open(self.full_path + '/models/pickledModels/' + self.algorithm +
                   '_' + str(self.cv_count) + '.pickle', 'wb') as file:

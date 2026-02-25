@@ -6,9 +6,6 @@ from streamline.p11_reporting.p11_runner import P11Runner
 
 
 def _none_if_empty(val: str | None) -> str | None:
-    """
-    Normalize 'empty-ish' CLI values back to None.
-    """
     if val is None:
         return None
     val_str = str(val).strip()
@@ -19,79 +16,59 @@ def _none_if_empty(val: str | None) -> str | None:
 
 def main():
     """
-    Entry point for Phase 10 reporting when launched on a compute node
-    via a SLURM/LSF bash wrapper.
+    Entry point for Phase 11 reporting when launched on a compute node via
+    a SLURM/LSF bash wrapper.
 
-    This script intentionally forces run_cluster="Serial"; the parallelism is
-    handled by the scheduler that launched this process.
+    This script intentionally forces run_cluster="Serial"; scheduler-level
+    parallelism is handled outside this process.
     """
     ap = argparse.ArgumentParser(
-        "STREAMLINE Phase 10 (Reporting)",
+        "STREAMLINE Phase 11 (Reporting)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    ap.add_argument("--output_path", required=True, help="Top-level output directory")
-    ap.add_argument("--experiment_name", required=True, help="Experiment folder name")
-
-    ap.add_argument("--outcome_label", default="Class")
+    ap.add_argument("--experiment_path", default=None, help="Path to experiment output directory")
+    ap.add_argument("--output_path", default=None, help="Parent output directory")
+    ap.add_argument("--experiment_name", default=None, help="Experiment folder name")
     ap.add_argument(
-        "--outcome_type",
-        default="Binary",
-        choices=["Binary", "Multiclass", "Continuous"],
-        help="Outcome type to drive metric/plot selection in the report",
-    )
-    ap.add_argument(
-        "--instance_label",
+        "--reporting_dir",
         default=None,
-        help="Optional instance ID column used in earlier phases",
+        help="Optional output directory for report artifacts (report_data.json, report.pdf, figures)",
     )
 
-    ap.add_argument(
-        "--report_name",
-        default="STREAMLINE_Report",
-        help="Base name for the generated report (HTML/PDF)",
-    )
+    ap.add_argument("--outcome_label", default=None)
+    ap.add_argument("--outcome_type", default=None)
+    ap.add_argument("--instance_label", default=None)
 
+    ap.add_argument("--make_pdf", type=int, default=1, help="1 = export PDF; 0 = skip PDF")
+    ap.add_argument("--enable_plots", type=int, default=1, help="1 = generate missing plots; 0 = disable plot generation")
     ap.add_argument(
-        "--sig_cutoff",
-        type=float,
-        default=0.05,
-        help="Significance cutoff used when annotating stats in the report",
-    )
-
-    ap.add_argument(
-        "--show_plots",
-        type=int,
-        default=0,
-        help="1 = keep Streamlit UI open / debug locally; 0 = non-interactive export only",
-    )
-    
-    ap.add_argument(
-        "--run_cluster",
-        default="Serial",
-        help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>",
-    )
-    
-    ap.add_argument(
-        "--make_pdf",
+        "--reuse_existing_figures",
         type=int,
         default=1,
-        help="1 = export PDF; 0 = skip PDF",
+        help="1 = reuse existing report PNGs when present; 0 = regenerate",
     )
-    
+
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
 
     args = ap.parse_args()
 
+    if not args.experiment_path and not (args.output_path and args.experiment_name):
+        ap.error("Provide --experiment_path OR both --output_path and --experiment_name")
+
     P11Runner(
-        output_path=args.output_path,
-        experiment_name=args.experiment_name,
-        outcome_label=args.outcome_label,
-        outcome_type=args.outcome_type,
-        instance_label=args.instance_label,
+        output_path=_none_if_empty(args.output_path),
+        experiment_name=_none_if_empty(args.experiment_name),
+        experiment_path=_none_if_empty(args.experiment_path),
+        reporting_dir=_none_if_empty(args.reporting_dir),
+        outcome_label=_none_if_empty(args.outcome_label),
+        outcome_type=_none_if_empty(args.outcome_type),
+        instance_label=_none_if_empty(args.instance_label),
         make_pdf=bool(args.make_pdf),
-        run_cluster=args.run_cluster,
+        enable_plots=bool(args.enable_plots),
+        reuse_existing_figures=bool(args.reuse_existing_figures),
+        run_cluster="Serial",
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()

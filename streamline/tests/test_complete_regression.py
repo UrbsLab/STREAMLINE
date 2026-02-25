@@ -18,7 +18,7 @@ from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p7_ensembles.p7_runner import P7Runner
 from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.p9_compare_datasets.p9_runner import P9Runner
-from streamline.p11_reporting_old.p11_runner import P11Runner
+from streamline.p11_reporting.p11_runner import P11Runner
 
 def _pick_first_dataset_dir(exp_root: Path) -> Path:
     """
@@ -131,7 +131,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         outcome_label=outcome_label,
-        outcome_type="Regression",
+        outcome_type="Continuous",
         instance_label=instance_label,
         run_cluster="Serial",
     )
@@ -172,8 +172,8 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         n_splits=3,
         models="LR,RF,SVR",
         calibrate=False,  # usually not relevant for regression; harmless if ignored
-        scoring_metric="neg_mean_squared_error",
-        metric_direction="maximize",  # neg MSE: higher is better
+        scoring_metric="neg_mean_squared_error", # prefix with 'neg_' if using sklearn convention, don't change direction
+        metric_direction="maximize",
         n_trials=2,
         timeout=15,
         training_subsample=0,
@@ -230,12 +230,12 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         outcome_type="Continuous",
         instance_label=instance_label,
         n_splits=3,
-        scoring_metric="neg_mean_squared_error",
+        scoring_metric="mean_squared_error",
         top_features=10,
         sig_cutoff=0.1,
-        metric_weight="neg_mean_squared_error",
+        metric_weight="mean_squared_error",
         scale_data=True,
-        exclude_plots="plot_FI_box",
+        exclude_plots=None,
         show_plots=False,
         run_cluster="Serial",
     )

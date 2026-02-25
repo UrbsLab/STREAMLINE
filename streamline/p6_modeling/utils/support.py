@@ -30,6 +30,7 @@ def multiclass_brier_score(y_true, y_prob):
     """
     y_true: (n_samples,) integer labels
     y_prob: (n_samples, n_classes) predicted probabilities
+    https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
     """
     # One-hot encode labels
     enc = OneHotEncoder(sparse_output=False)

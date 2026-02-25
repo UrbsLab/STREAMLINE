@@ -379,10 +379,10 @@ class StatisticsPhaseJob:
             self.mann_whitney_u(metrics, metric_dict, kruskal_summary)
 
         # Feature-importance stats & plots
-        # ave_or_median = (
-        #     "median" if self.outcome_type in ("Binary", "Multiclass") else "mean"
-        # )
-        # self.fi_stats(metric_dict, ave_or_median)
+        ave_or_median = (
+            "median" if self.outcome_type in ("Binary", "Multiclass") else "mean"
+        )
+        self.fi_stats(metric_dict, ave_or_median)
 
         # Optional: summarize ensembles (Phase 7) if present
         if self.include_ensembles:

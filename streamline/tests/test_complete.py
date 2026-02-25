@@ -226,7 +226,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
         sig_cutoff=0.1,
         metric_weight="balanced_accuracy",
         scale_data=True,
-        exclude_plots="plot_FI_box",
+        exclude_plots=None,
         show_plots=False,
         run_cluster="Serial",
     )
