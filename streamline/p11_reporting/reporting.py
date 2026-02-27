@@ -90,6 +90,27 @@ METRIC_JSON_KEYS = {
     "Max Error": "max_error",
 }
 
+FEATURE_LEARNING_METHODS: List[Dict[str, Any]] = [
+    {
+        "key": "mutual_info",
+        "label": "Mutual Information",
+        "dir_aliases": ["mutualinformation", "mutual_information"],
+        "score_patterns": ["mutualinformation_scores_cv_*.csv", "mutual_information_scores_cv_*.csv"],
+    },
+    {
+        "key": "multisurf",
+        "label": "MultiSURF",
+        "dir_aliases": ["multisurf", "multi_surf"],
+        "score_patterns": ["multisurf_scores_cv_*.csv", "multi_surf_scores_cv_*.csv"],
+    },
+    {
+        "key": "multisurfstar",
+        "label": "MultiSURFstar",
+        "dir_aliases": ["multisurfstar", "multisurf_star", "multi_surfstar", "multi_surf_star"],
+        "score_patterns": ["multisurfstar_scores_cv_*.csv", "multisurf_star_scores_cv_*.csv"],
+    },
+]
+
 
 def _now_iso_local() -> str:
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -879,6 +900,118 @@ class ReportPhaseJob:
                 logger.warning("Mutual information plot generation failed with matplotlib: %r", exc)
         return None
 
+    def _parse_feature_scores_method(
+        self,
+        ds_dir: Path,
+        *,
+        dir_aliases: Sequence[str],
+        score_patterns: Sequence[str],
+    ) -> List[Tuple[str, float]]:
+        score_map: Dict[str, List[float]] = {}
+        for root_name in ("feature_importance", "feature_selection"):
+            root = ds_dir / root_name
+            if not root.is_dir():
+                continue
+            for alias in dir_aliases:
+                method_dir = root / alias
+                if not method_dir.is_dir():
+                    continue
+                files: List[Path] = []
+                for pattern in score_patterns:
+                    files.extend(sorted(method_dir.glob(pattern)))
+                if not files:
+                    files.extend(sorted(method_dir.glob("*scores_cv_*.csv")))
+
+                for path in files:
+                    table = self._read_csv_table(path)
+                    if not table or not table.rows:
+                        continue
+                    low = {c.lower(): c for c in table.columns}
+                    fcol = low.get("feature") or table.columns[0]
+                    scol = low.get("score") or low.get("importance") or table.columns[-1]
+                    for row in table.rows:
+                        feat = row.get(fcol, "").strip()
+                        score = _safe_float(row.get(scol, ""))
+                        if feat and score is not None:
+                            score_map.setdefault(feat, []).append(score)
+
+        medians: List[Tuple[str, float]] = []
+        for feat, vals in score_map.items():
+            if vals:
+                medians.append((feat, statistics.median(vals)))
+        medians.sort(key=lambda t: t[1], reverse=True)
+        return medians
+
+    def _plot_feature_scores_method_top(
+        self,
+        ds_dir: Path,
+        out: Path,
+        *,
+        dir_aliases: Sequence[str],
+        score_patterns: Sequence[str],
+        top_n: int = 20,
+    ) -> Optional[str]:
+        data = self._parse_feature_scores_method(
+            ds_dir,
+            dir_aliases=dir_aliases,
+            score_patterns=score_patterns,
+        )
+        if not data:
+            return None
+        data = data[:top_n]
+        labels = [d[0] for d in data][::-1]
+        vals = [d[1] for d in data][::-1]
+        if self._mpl_ok():
+            try:
+                import matplotlib.pyplot as plt  # type: ignore
+
+                out.parent.mkdir(parents=True, exist_ok=True)
+                fig_h = max(4.2, 0.25 * len(labels))
+                fig, ax = plt.subplots(figsize=(8.5, fig_h))
+                ax.barh(labels, vals, color="#4E79A7")
+                ax.set_xlabel("Median score across CV folds")
+                ax.set_ylabel("Feature")
+                fig.tight_layout()
+                fig.savefig(out, dpi=180)
+                plt.close(fig)
+                return str(out)
+            except Exception as exc:
+                logger.warning("Feature score plot generation failed with matplotlib: %r", exc)
+        return None
+
+    def _resolve_feature_learning_panels(self, ds_dir: Path, dataset_name: str) -> List[Dict[str, str]]:
+        panels: List[Dict[str, str]] = []
+        for spec in FEATURE_LEARNING_METHODS:
+            method_key = str(spec.get("key", "")).strip()
+            if method_key == "":
+                continue
+            label = str(spec.get("label", method_key)).strip()
+            dir_aliases = [str(x) for x in spec.get("dir_aliases", [])]
+            score_patterns = [str(x) for x in spec.get("score_patterns", [])]
+            out = self.paths.figures_dir / f"{dataset_name}_{method_key}_top20.png"
+
+            fig_path: Optional[str] = None
+            if self.reuse_existing_figures and out.is_file():
+                fig_path = str(out)
+            elif self.enable_plots:
+                if method_key == "mutual_info":
+                    fig_path = self._plot_mutual_info_top(ds_dir, out, top_n=20)
+                else:
+                    fig_path = self._plot_feature_scores_method_top(
+                        ds_dir,
+                        out,
+                        dir_aliases=dir_aliases,
+                        score_patterns=score_patterns,
+                        top_n=20,
+                    )
+            elif out.is_file():
+                fig_path = str(out)
+
+            if fig_path:
+                panels.append({"key": method_key, "title": f"Top Scores ({label})", "path": fig_path})
+
+        return panels
+
     def _load_metrics_by_cv(self, metrics_dir: Path, metric_name: str) -> Dict[str, List[float]]:
         key = METRIC_JSON_KEYS.get(metric_name, metric_name)
         out: Dict[str, List[float]] = {}
@@ -1576,8 +1709,8 @@ class ReportPhaseJob:
         class_counts: Optional[TableData],
         missingness_table: Optional[TableData],
         perf_metric_default: Optional[str],
-    ) -> Dict[str, Optional[str]]:
-        figs: Dict[str, Optional[str]] = {}
+    ) -> Dict[str, Any]:
+        figs: Dict[str, Any] = {}
 
         # Missingness top 25
         figs["missingness_top25"] = None
@@ -1657,21 +1790,14 @@ class ReportPhaseJob:
                 )
             figs["target_distribution"] = None
 
-        # Feature learning mutual information
-        mi_existing = _first_existing(
-            [
-                ds_dir / "feature_importance" / "mutualinformation" / "TopAverageScores.png",
-                ds_dir / "feature_importance" / "mutual_information" / "TopAverageScores.png",
-                ds_dir / "feature_selection" / "mutualinformation" / "TopAverageScores.png",
-                ds_dir / "feature_selection" / "mutual_information" / "TopAverageScores.png",
-            ]
-        )
-        if mi_existing:
-            figs["mutual_info"] = str(mi_existing)
-        else:
-            figs["mutual_info"] = self._plot_mutual_info_top(
-                ds_dir, self.paths.figures_dir / f"{dataset_name}_fi_top20.png", top_n=20
-            )
+        # Feature learning FI methods: deterministic report outputs per method.
+        fi_panels = self._resolve_feature_learning_panels(ds_dir, dataset_name)
+        figs["feature_learning_panels"] = fi_panels
+        figs["mutual_info"] = None
+        for panel in fi_panels:
+            if panel.get("key") == "mutual_info":
+                figs["mutual_info"] = panel.get("path")
+                break
 
         # Performance distribution
         figs["performance_distribution"] = None
@@ -2497,17 +2623,17 @@ class ReportPhaseJob:
     def _render_feature_learning_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         self._render_dataset_header(pdf, ds, "Feature Learning")
         figs = ds.get("figures", {})
-        mi_path = figs.get("mutual_info")
-        composite_path = figs.get("composite_feature_scores")
-        if mi_path and composite_path:
+        panels = [p for p in (figs.get("feature_learning_panels") or []) if isinstance(p, dict) and p.get("path")]
+
+        if len(panels) >= 2:
             self._draw_image_panel(
                 pdf,
                 x=10,
                 y=34,
                 w=94,
                 h=106,
-                title="Mutual Information Scores (Top Features)",
-                img_path=mi_path,
+                title=str(panels[0].get("title") or "Top Scores (Method 1)"),
+                img_path=str(panels[0].get("path") or ""),
             )
             self._draw_image_panel(
                 pdf,
@@ -2515,18 +2641,18 @@ class ReportPhaseJob:
                 y=34,
                 w=94,
                 h=106,
-                title="Composite Feature Importance (Normalized Weighted)",
-                img_path=composite_path,
+                title=str(panels[1].get("title") or "Top Scores (Method 2)"),
+                img_path=str(panels[1].get("path") or ""),
             )
-        elif mi_path:
+        elif len(panels) == 1:
             self._draw_image_panel(
                 pdf,
                 x=10,
                 y=34,
                 w=190,
                 h=106,
-                title="Mutual Information Scores (Top Features)",
-                img_path=mi_path,
+                title=str(panels[0].get("title") or "Top Scores"),
+                img_path=str(panels[0].get("path") or ""),
             )
         else:
             self._draw_image_panel(
@@ -2535,8 +2661,8 @@ class ReportPhaseJob:
                 y=34,
                 w=190,
                 h=106,
-                title="Composite Feature Importance (Normalized Weighted)",
-                img_path=composite_path,
+                title="Top Scores (Feature Learning)",
+                img_path=figs.get("mutual_info"),
             )
 
         t = ds.get("tables", {}).get("informative_feature_summary", {})
@@ -2557,9 +2683,28 @@ class ReportPhaseJob:
             max_first_col_width=62.0,
         )
 
+        # Render additional FI method panels on continuation pages when present.
+        if len(panels) > 2:
+            remaining = panels[2:]
+            slots = [(10, 34), (106, 34), (10, 142), (106, 142)]
+            for i in range(0, len(remaining), 4):
+                self._render_dataset_header(pdf, ds, "Feature Learning (continued)")
+                chunk = remaining[i : i + 4]
+                for panel, (x, y) in zip(chunk, slots):
+                    self._draw_image_panel(
+                        pdf,
+                        x=x,
+                        y=y,
+                        w=94,
+                        h=104,
+                        title=str(panel.get("title") or "Top Scores"),
+                        img_path=str(panel.get("path") or ""),
+                    )
+
     def _render_performance_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         self._render_dataset_header(pdf, ds, "Performance (Cross-Validation)")
         perf = ds.get("performance", {})
+        figs = ds.get("figures", {})
         mean_cols = perf.get("mean_columns", [])
         mean_rows = perf.get("mean_rows", [])
         mean_bold = set((int(r), int(c)) for r, c in perf.get("mean_bold_cells", []))
@@ -2603,15 +2748,49 @@ class ReportPhaseJob:
 
         y = max(y + 2, 178)
         metric = ds.get("performance_distribution_metric") or ""
-        self._draw_image_panel(
-            pdf,
-            x=10,
-            y=y,
-            w=190,
-            h=78,
-            title=f"{metric} Distribution by Algorithm" if metric else "Performance Distribution by Algorithm",
-            img_path=ds.get("figures", {}).get("performance_distribution"),
-        )
+        distribution_title = f"{metric} Distribution by Algorithm" if metric else "Performance Distribution by Algorithm"
+        composite_path = figs.get("composite_feature_scores")
+        distribution_path = figs.get("performance_distribution")
+
+        if composite_path and distribution_path:
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=y,
+                w=94,
+                h=78,
+                title="Permutation Feature Importance (Composite)",
+                img_path=composite_path,
+            )
+            self._draw_image_panel(
+                pdf,
+                x=106,
+                y=y,
+                w=94,
+                h=78,
+                title=distribution_title,
+                img_path=distribution_path,
+            )
+        elif composite_path:
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=y,
+                w=190,
+                h=78,
+                title="Permutation Feature Importance (Composite)",
+                img_path=composite_path,
+            )
+        else:
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=y,
+                w=190,
+                h=78,
+                title=distribution_title,
+                img_path=distribution_path,
+            )
 
     def _render_evaluation_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         if ds.get("task_type") == "Regression":

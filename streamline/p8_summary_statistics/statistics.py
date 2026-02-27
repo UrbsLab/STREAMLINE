@@ -589,9 +589,12 @@ class StatisticsPhaseJob:
         else:
             plt.close('all')
 
-    def fi_stats(self, metric_dict, ave_or_median='mean'):
-        metric_ranking = 'median' # ave_or_median   ## median #this can be changable #mean and median of the feature importance values
-        metric_weighting = 'mean' # ave_or_median   ## mean   #mean and median of the metric for weighting across algorithms cv/algo
+    def fi_stats(self, metric_dict, ave_or_median='median'):
+        # metric_ranking = 'median' # ave_or_median   ## median #this can be changable #mean and median of the feature importance values
+        # metric_weighting = 'median' # ave_or_median   ## mean   #mean and median of the metric for weighting across algorithms cv/algo
+        
+        metric_ranking = ave_or_median
+        metric_weighting = ave_or_median
 
         logging.info('Preparing for Model Feature Importance Plotting...')
 

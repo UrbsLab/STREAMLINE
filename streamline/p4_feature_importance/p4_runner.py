@@ -46,7 +46,7 @@ class P4Runner:
         # defaults
         models = self._csv_to_list(models)
         meta = self._load_metadata()
-        self.models = models or meta.get("P4 Models", ["mutualinformation"])
+        self.models = models or meta.get("P4 Models", ["mutualinformation","multisurf",])  # default to these 3 if not specified
         # if metadata also stores CSV, normalize that too
         if isinstance(self.models, str):
             self.models = self._csv_to_list(self.models)
