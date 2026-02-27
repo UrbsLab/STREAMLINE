@@ -138,11 +138,25 @@ class StatisticsPhaseJob:
 
         # Map metric_weight from sklearn name to human-friendly text used in plots
         if self.outcome_type == "Continuous" and (
-            self.scoring_metric == "balanced_accuracy"
-            or self.metric_weight == "balanced_accuracy"
+            self.scoring_metric != "explained_variance"
+            or self.metric_weight != "explained_variance"
         ):
+            logging.warning(
+                "Unsupported scoring_metric %s or metric_weight %s for Continuous outcome; defaulting both to explained_variance",
+                self.scoring_metric,
+                self.metric_weight,
+            )  
             self.metric_weight = "explained_variance"
             self.scoring_metric = "explained_variance"
+        elif self.outcome_type in ("Binary", "Multiclass") and self.metric_weight not in (
+            "balanced_accuracy", "accuracy", "f1", "recall", "precision", "roc_auc"):
+            logging.warning(
+                "Unsupported metric_weight %s for outcome_type %s; defaulting to balanced_accuracy",
+                self.metric_weight,
+                self.outcome_type,
+            )
+            self.metric_weight = "balanced_accuracy"
+            self.scoring_metric = "balanced_accuracy"
 
         if self.outcome_type == "Binary":
             metric_term_dict = {
@@ -680,9 +694,14 @@ class StatisticsPhaseJob:
         )
 
         # Weighted FI (performance-weighted)
+        fi_weight_mode = "balanced_accuracy"
+        if self.outcome_type == "Continuous" and self.metric_weight == "Explained Variance":
+            fi_weight_mode = "explained_variance"
+
         weighted_lists, weights = weight_fi(
             med_metric_list=med_metric_list,
             top_fi_med_norm_list=top_fi_med_norm_list,
+            weight_mode=fi_weight_mode,
         )
 
         # Generate Normalized and Weighted Composite FI plot

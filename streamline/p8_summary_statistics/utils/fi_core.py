@@ -230,26 +230,40 @@ def frac_fi(top_fi_med_norm_list: List[List[float]]) -> List[List[float]]:
 def weight_fi(
     med_metric_list: List[float],
     top_fi_med_norm_list: List[List[float]],
+    weight_mode: str = "balanced_accuracy",
 ) -> Tuple[List[List[float]], List[float]]:
     """
     Weight normalized FI scores by algorithm performance.
 
-    - Any med_metric <= 0.5 is treated as 0 (no better than chance).
-    - Remaining metrics are linearly scaled from [0.5, 1] -> [0, 1].
+    Supported modes:
+    - balanced_accuracy: any metric <= 0.5 is treated as 0; remaining values
+      are linearly scaled from [0.5, 1] -> [0, 1].
+    - explained_variance: any metric <= 0 is treated as 0; positive values are
+      used directly and clipped to [0, 1].
     """
     # Prepare weights
     metrics = list(med_metric_list)  # copy so we don't mutate caller's list
     weights: List[float] = []
 
-    for i, v in enumerate(metrics):
-        if v <= 0.5:
-            metrics[i] = 0.0
+    if weight_mode == "explained_variance":
+        for v in metrics:
+            if v <= 0.0:
+                weights.append(0.0)
+            elif v >= 1.0:
+                weights.append(1.0)
+            else:
+                weights.append(v)
+    else:
+        # Legacy/default behavior for balanced_accuracy-style weighting.
+        for i, v in enumerate(metrics):
+            if v <= 0.5:
+                metrics[i] = 0.0
 
-    for v in metrics:
-        if v == 0:
-            weights.append(0.0)
-        else:
-            weights.append((v - 0.5) / 0.5)
+        for v in metrics:
+            if v == 0:
+                weights.append(0.0)
+            else:
+                weights.append((v - 0.5) / 0.5)
 
     # Weight normalized FI
     weighted_lists: List[List[float]] = []
