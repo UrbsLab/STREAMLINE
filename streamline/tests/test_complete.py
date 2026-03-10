@@ -264,21 +264,28 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     # ------------------------------------------------------------------
     # Phase 10: Replication (whatever semantics you defined)
     # ------------------------------------------------------------------
-    # p10 = P10Runner(
-    #     output_path=str(output_root),
-    #     experiment_name=experiment_name,
-    #     run_cluster="Serial",
-    # )
-    # p10.run()
+    rep_data_root = repo_root / "data" / "DemoRepData"
+    assert rep_data_root.is_dir(), f"Expected DemoRepData under {rep_data_root}"
 
-    # # Minimal sanity check - you can tighten this based on your P10 outputs
-    # repl_candidates = [
-    #     ds_dir / "replication",
-    #     ds_dir / "Replication",
-    #     exp_root / "ReplicationSummary.csv",
-    # ]
-    # assert any(p.exists() for p in repl_candidates), \
-    #     "Phase 10 should create some replication artifacts"
+    dataset_for_rep = data_root / "hcc_data_custom.csv"
+    assert dataset_for_rep.is_file(), f"Expected training dataset file at {dataset_for_rep}"
+
+    p10 = P10Runner(
+        rep_data_path=str(rep_data_root),
+        dataset_for_rep=str(dataset_for_rep),
+        output_path=str(output_root),
+        experiment_name=experiment_name,
+        run_cluster="Serial",
+        show_plots=False,
+    )
+    p10.run()
+
+    rep_root = exp_root / dataset_for_rep.stem / "replication"
+    rep_ds_dir = rep_root / "hcc_data_custom_rep"
+    assert rep_root.is_dir(), "Phase 10 should create replication directory under training dataset"
+    assert rep_ds_dir.is_dir(), "Phase 10 should create replication dataset directory"
+    assert (rep_ds_dir / "model_evaluation" / "Summary_performance_mean.csv").is_file(), \
+        "Phase 10 should produce replication model evaluation summary"
 
     # ------------------------------------------------------------------
     # Phase 11: Reporting (Streamlit-based report rendered via WeasyPrint)

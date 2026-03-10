@@ -1,40 +1,105 @@
-# streamline/p10_replication/replication.py
-
 from __future__ import annotations
-import csv
-import glob
+
+import json
 import logging
 import os
 import pickle
+import re
+import shutil
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
+from sklearn.metrics import brier_score_loss
 
 from streamline.p1_data_process.data_process import DataProcess
-
-
 from streamline.p6_modeling.utils.submodels import (
     BinaryClassificationModel,
     MulticlassClassificationModel,
-    RegressionModel
+    RegressionModel,
 )
+from streamline.p6_modeling.utils.support import multiclass_brier_score
+from streamline.p7_ensembles.ensembles import (
+    _calc_basic_metrics,
+    _calc_curves_scores_from_proba,
+)
+from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
 
-from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob as StatsJob
+
+logger = logging.getLogger(__name__)
+
+
+def _normalize_outcome_type(outcome_type: str) -> str:
+    """Normalize multiple aliases to STREAMLINE internal outcome type labels."""
+    value = (outcome_type or "").strip().lower()
+    if value in {"binary", "bin", "classification_binary"}:
+        return "Binary"
+    if value in {"multiclass", "multi", "classification_multiclass"}:
+        return "Multiclass"
+    if value in {"continuous", "regression", "numeric"}:
+        return "Continuous"
+    return outcome_type
+
+
+def _read_table(file_path: str) -> pd.DataFrame:
+    """Read CSV/TSV/TXT input consistently with phase-1 behavior."""
+    ext = Path(file_path).suffix.lower()
+    if ext == ".csv":
+        return pd.read_csv(file_path, na_values="NA", sep=",")
+    if ext == ".tsv":
+        return pd.read_csv(file_path, na_values="NA", sep="\t")
+    if ext == ".txt":
+        return pd.read_csv(file_path, na_values="NA", delim_whitespace=True)
+    raise ValueError(f"Unsupported replication file extension: {ext}")
+
+
+def _safe_pickle_load(path: Path, default: Any) -> Any:
+    if not path.exists():
+        return default
+    with path.open("rb") as f:
+        return pickle.load(f)
+
+
+def _jsonify(value: Any) -> Any:
+    """Convert numpy/pandas scalar containers to JSON-safe python values."""
+    if isinstance(value, dict):
+        return {str(k): _jsonify(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonify(v) for v in value]
+    if isinstance(value, np.ndarray):
+        return [_jsonify(v) for v in value.tolist()]
+    if isinstance(value, (np.integer,)):
+        return int(value)
+    if isinstance(value, (np.floating,)):
+        if np.isnan(value) or np.isinf(value):
+            return None
+        return float(value)
+    if isinstance(value, pd.Series):
+        return [_jsonify(v) for v in value.tolist()]
+    if isinstance(value, pd.DataFrame):
+        return _jsonify(value.to_dict(orient="records"))
+    if isinstance(value, float):
+        if np.isnan(value) or np.isinf(value):
+            return None
+        return value
+    return value
 
 
 class ReplicationJob:
     """
     Phase 10 replication job.
 
-    Applies all trained models from a single training dataset to a *replication* dataset:
-      - Replays the full preprocessing / feature engineering pipeline
-      - Replays scaling / imputation per CV partition
-      - Applies models for each CV partition to the replication data
-      - Runs the Phase 8-style statistics summary on replication results
+    For one replication dataset, this job:
+    1. Replays the p1 data-processing decisions learned on the train dataset.
+    2. Replays p2 imputation/scaling per CV split.
+    3. Applies p6 trained base models and writes p8-compatible metrics/curves artifacts.
+    4. Applies p7 trained ensembles (classification only) and writes ensemble artifacts.
+    5. Runs p8 statistics on replication outputs.
 
-    This is essentially the modernized version of the legacy ReplicateJob.
+    The produced tree is rooted at:
+      <train_dataset_dir>/replication/<replication_dataset_name>/
     """
 
     def __init__(
@@ -51,6 +116,8 @@ class ReplicationJob:
         exclude_plots: Optional[List[str]] = None,
         categorical_cutoff: int = 10,
         sig_cutoff: float = 0.05,
+        featureeng_missingness: float = 0.5,
+        cleaning_missingness: float = 0.5,
         scale_data: bool = True,
         impute_data: bool = True,
         multi_impute: bool = True,
@@ -58,743 +125,1236 @@ class ReplicationJob:
         scoring_metric: str = "balanced_accuracy",
         random_state: Optional[int] = None,
     ):
-        super().__init__()
         self.dataset_filename = dataset_filename
         self.dataset_for_rep = dataset_for_rep
-        self.full_path = full_path  # <output>/<experiment>/<train_dataset>
+        self.train_root = Path(full_path)
+        self.experiment_root = self.train_root.parent
+
         self.outcome_label = outcome_label
-        self.outcome_type = outcome_type
+        self.outcome_type = _normalize_outcome_type(outcome_type)
         self.instance_label = instance_label
         self.match_label = match_label
 
-        partial_path = str(Path(full_path).parent)
-        with open(os.path.join(partial_path, "algInfo.pickle"), "rb") as f:
-            alg_info = pickle.load(f)
-
-        algorithms = []
-        abbrev: Dict[str, str] = {}
-        colors: Dict[str, str] = {}
-        for algorithm, (use_flag, short_name, color) in alg_info.items():
-            if use_flag:
-                algorithms.append(algorithm)
-                abbrev[algorithm] = short_name
-                colors[algorithm] = color
-
-        self.algorithms = algorithms
-        self.abbrev = abbrev
-        self.colors = colors
-
-        known_exclude_options = [
-            "plot_ROC",
-            "plot_PRC",
-            "plot_metric_boxplots",
-            "feature_correlations",
-        ]
-        if exclude_plots is not None:
-            for x in exclude_plots:
-                if x not in known_exclude_options:
-                    logging.warning("Unknown exclusion option %s", x)
-        else:
-            exclude_plots = []
-
-        self.plot_roc = "plot_ROC" not in exclude_plots
-        self.plot_prc = "plot_PRC" not in exclude_plots
-        self.plot_metric_boxplots = "plot_metric_boxplots" not in exclude_plots
-        self.exclude_plots = exclude_plots
-
-        self.export_feature_correlations = "feature_correlations" not in exclude_plots
-        self.show_plots = show_plots
-        self.cv_partitions = cv_partitions
-
-        self.categorical_cutoff = categorical_cutoff
-        self.sig_cutoff = sig_cutoff
-        self.scale_data = scale_data
-        self.impute_data = impute_data
-        self.scoring_metric = scoring_metric
-        self.multi_impute = multi_impute
         self.ignore_features = ignore_features or []
+        self.cv_partitions = int(cv_partitions)
+        self.exclude_plots = exclude_plots or []
+        self.categorical_cutoff = int(categorical_cutoff)
+        self.sig_cutoff = float(sig_cutoff)
+        self.featureeng_missingness = float(featureeng_missingness)
+        self.cleaning_missingness = float(cleaning_missingness)
+        self.scale_data = bool(scale_data)
+        self.impute_data = bool(impute_data)
+        self.multi_impute = bool(multi_impute)
+        self.show_plots = bool(show_plots)
+        self.scoring_metric = scoring_metric
         self.random_state = random_state
 
-        self.train_name = Path(self.full_path).name
-        self.experiment_path = str(Path(self.full_path).parent)
-        self.apply_name = Path(self.dataset_filename).stem  # replication dataset name
+        self.train_name = self.train_root.name
+        self.apply_name = Path(self.dataset_filename).stem
+        self.rep_root = self.train_root / "replication" / self.apply_name
 
-    # ------------------------------------------------------------------ #
-    # Main run
-    # ------------------------------------------------------------------ #
+        self.exploratory_dir = self.rep_root / "exploratory"
+        self.cv_dir = self.rep_root / "CVDatasets"
+        self.model_eval_dir = self.rep_root / "model_evaluation"
+        self.model_metrics_dir = self.model_eval_dir / "metrics_by_cv"
+        self.model_curves_dir = self.model_eval_dir / "curves_by_cv"
+        self.model_pickled_metrics_dir = self.model_eval_dir / "pickled_metrics"
+        self.ensemble_root = self.rep_root / "ensemble_evaluation"
+        self.ensemble_metrics_dir = self.ensemble_root / "metrics_by_cv"
+        self.ensemble_curves_dir = self.ensemble_root / "curves_by_cv"
+        self.ensemble_pickled_dir = self.ensemble_root / "pickled_ensembles"
 
-    def run(self):
-        # Load replication dataset
-        rep_data = Dataset(
-            self.dataset_filename,
-            self.outcome_label,
-            self.match_label,
-            self.instance_label,
-        )
-        rep_feature_list = list(rep_data.data.columns)
-        rep_feature_list.remove(self.outcome_label)
-        if self.match_label is not None and self.match_label in rep_feature_list:
-            rep_feature_list.remove(self.match_label)
-        if self.instance_label is not None and self.instance_label in rep_feature_list:
-            rep_feature_list.remove(self.instance_label)
+        self.algorithms, self.abbrev = self._load_algorithms()
 
-        # Load original training dataset (used to enforce feature alignment)
-        train_data = Dataset(
-            self.dataset_for_rep,
-            self.outcome_label,
-            self.match_label,
-            self.instance_label,
-        )
-        all_train_feature_list = list(train_data.data.columns)
-        all_train_feature_list.remove(self.outcome_label)
-        if self.match_label is not None and self.match_label in all_train_feature_list:
-            all_train_feature_list.remove(self.match_label)
-        if self.instance_label is not None and self.instance_label in all_train_feature_list:
-            all_train_feature_list.remove(self.instance_label)
+    # ------------------------------------------------------------------
+    # Public entry
+    # ------------------------------------------------------------------
 
-        # Check feature coverage
-        if not set(all_train_feature_list).issubset(rep_feature_list):
+    def run(self) -> None:
+        self._prepare_dirs()
+        self._auto_correct_labels_from_training_cv()
+
+        rep_raw = _read_table(self.dataset_filename)
+        rep_raw.columns = rep_raw.columns.str.strip()
+
+        raw_train_columns = self._load_training_raw_columns()
+        missing_cols = [c for c in raw_train_columns if c not in rep_raw.columns]
+        if missing_cols:
             raise Exception(
-                "Error: One or more features in training dataset did not appear in replication dataset!"
+                "Replication dataset is missing one or more training columns: "
+                + ", ".join(missing_cols)
             )
+        rep_raw = rep_raw[raw_train_columns].copy()
 
-        # Order replication columns to match training columns exactly
-        rep_data.data = rep_data.data[train_data.data.columns]
+        if self.instance_label and self.instance_label not in rep_raw.columns:
+            logger.warning("Instance label '%s' not in replication dataset; ignoring.", self.instance_label)
+            self.instance_label = None
+        if self.match_label and self.match_label not in rep_raw.columns:
+            logger.warning("Match label '%s' not in replication dataset; ignoring.", self.match_label)
+            self.match_label = None
 
-        # Create basic folder hierarchy for replication outputs
-        rep_root = Path(self.full_path) / "replication" / self.apply_name
-        exploratory_dir = rep_root / "exploratory" / "initial"
-        model_eval_dir = rep_root / "model_evaluation" / "pickled_metrics"
-        exploratory_dir.mkdir(parents=True, exist_ok=True)
-        model_eval_dir.mkdir(parents=True, exist_ok=True)
+        if self.outcome_label not in rep_raw.columns:
+            raise Exception(f"Outcome label '{self.outcome_label}' is missing in replication dataset")
 
-        # Load categorical / quantitative lists from training
-        with open(
-            os.path.join(self.full_path, "exploratory", "initial", "initial_categorical_features.pickle"),
-            "rb",
-        ) as f:
-            categorical_variables = pickle.load(f)
-        with open(
-            os.path.join(self.full_path, "exploratory", "initial", "initial_quantitative_features.pickle"),
-            "rb",
-        ) as f:
-            quantitative_variables = pickle.load(f)
+        processed, cat_features, quant_features, transition_df = self._replay_data_processing(rep_raw)
 
-        rep_data.categorical_variables = categorical_variables
-        rep_data.quantitative_variables = quantitative_variables
+        self._write_processed_dataset(processed, cat_features, quant_features, transition_df)
+        self._write_eda_artifacts(processed, cat_features, quant_features)
 
-        # EDA / data process, reusing training decisions
+        fold_map = self._resolve_fold_map()
+        if not fold_map:
+            raise Exception("No CV train folds found in training dataset; cannot run replication")
+
+        self._evaluate_models(processed, cat_features, quant_features, fold_map)
+
+        if self.outcome_type in {"Binary", "Multiclass"}:
+            self._evaluate_ensembles(processed, fold_map)
+
+        self._run_statistics(cv_partitions=len(fold_map))
+
+        logger.info("Replication complete for %s", self.apply_name)
+        jobs_completed = self.experiment_root / "jobsCompleted"
+        jobs_completed.mkdir(parents=True, exist_ok=True)
+        with (jobs_completed / f"job_apply_{self.apply_name}.txt").open("w") as f:
+            f.write("complete")
+
+    # ------------------------------------------------------------------
+    # Setup and discovery
+    # ------------------------------------------------------------------
+
+    def _prepare_dirs(self) -> None:
+        self.exploratory_dir.mkdir(parents=True, exist_ok=True)
+        self.cv_dir.mkdir(parents=True, exist_ok=True)
+        self.model_metrics_dir.mkdir(parents=True, exist_ok=True)
+        self.model_curves_dir.mkdir(parents=True, exist_ok=True)
+        self.model_pickled_metrics_dir.mkdir(parents=True, exist_ok=True)
+
+
+    def _auto_correct_labels_from_training_cv(self) -> None:
+        """
+        Guard against stale metadata labels by inferring labels from training CV files.
+
+        - Outcome label is expected to be the first column in CV train files.
+        - Instance label must be highly unique; otherwise treat it as a feature.
+        """
+        cv_train_files = sorted((self.train_root / "CVDatasets").glob(f"{self.train_name}_CV_*_Train.csv"))
+        if not cv_train_files:
+            return
+
+        train_df = pd.read_csv(cv_train_files[0], nrows=500, na_values="NA", sep=",")
+        if train_df.empty:
+            return
+
+        first_col = str(train_df.columns[0])
+        if first_col and self.outcome_label != first_col:
+            logger.warning(
+                "Outcome label '%s' does not match training CV schema; using '%s' for replication.",
+                self.outcome_label,
+                first_col,
+            )
+            self.outcome_label = first_col
+
+        if self.instance_label:
+            if self.instance_label == self.outcome_label:
+                logger.warning(
+                    "Instance label '%s' equals outcome label; ignoring instance label for replication.",
+                    self.instance_label,
+                )
+                self.instance_label = None
+            elif self.instance_label in train_df.columns:
+                uniq = train_df[self.instance_label].nunique(dropna=True)
+                ratio = float(uniq) / float(max(1, len(train_df)))
+                if ratio < 0.95:
+                    logger.warning(
+                        "Instance label '%s' is not near-unique in training CV data; treating it as a regular feature.",
+                        self.instance_label,
+                    )
+                    self.instance_label = None
+            else:
+                logger.warning(
+                    "Instance label '%s' not found in training CV schema; ignoring.",
+                    self.instance_label,
+                )
+                self.instance_label = None
+
+        if self.match_label and self.match_label not in train_df.columns:
+            logger.warning("Match label '%s' not found in training CV schema; ignoring.", self.match_label)
+            self.match_label = None
+
+        if self.outcome_type == "Continuous":
+            valid_regression_metrics = {
+                "explained_variance",
+                "max_error",
+                "mean_absolute_error",
+                "mean_squared_error",
+                "median_absolute_error",
+                "pearson_correlation",
+            }
+            metric_name = str(self.scoring_metric).strip().lower() if self.scoring_metric is not None else ""
+            if metric_name not in valid_regression_metrics:
+                self.scoring_metric = "explained_variance"
+
+    def _load_algorithms(self) -> Tuple[List[str], Dict[str, str]]:
+        """
+        Discover active base algorithms and their short names.
+
+        Priority:
+          1) experiment-level algInfo.pickle
+          2) model pickle filenames under train dataset
+        """
+        alg_info_path = self.experiment_root / "algInfo.pickle"
+        algorithms: List[str] = []
+        abbrev: Dict[str, str] = {}
+
+        if alg_info_path.exists():
+            with alg_info_path.open("rb") as f:
+                alg_info = pickle.load(f)
+            for algorithm, payload in alg_info.items():
+                if not isinstance(payload, (list, tuple)) or len(payload) == 0:
+                    continue
+                use_flag = bool(payload[0])
+                short_name = payload[1] if len(payload) > 1 and payload[1] else algorithm
+                if use_flag:
+                    algorithms.append(algorithm)
+                    abbrev[algorithm] = short_name
+
+        if algorithms:
+            return algorithms, abbrev
+
+        model_dir = self.train_root / "models" / "pickledModels"
+        if model_dir.exists():
+            shorts = sorted(
+                {
+                    m.group(1)
+                    for fn in model_dir.glob("*.pickle")
+                    for m in [re.match(r"(.+?)_\d+\.pickle$", fn.name)]
+                    if m
+                }
+            )
+            algorithms = shorts
+            abbrev = {s: s for s in shorts}
+
+        return algorithms, abbrev
+
+    def _load_training_raw_columns(self) -> List[str]:
+        """Recover training raw-column order, including labels."""
+        train_file = Path(self.dataset_for_rep)
+        if train_file.exists():
+            train_df = _read_table(str(train_file))
+            train_df.columns = train_df.columns.str.strip()
+            return list(train_df.columns)
+
+        # Fallback to p1 artifact if original raw file path is not available.
+        original_names = self.train_root / "exploratory" / "initial" / "OriginalFeatureNames.csv"
+        if original_names.exists():
+            row = pd.read_csv(original_names, header=None).iloc[0].dropna().tolist()
+            cols = [str(x) for x in row]
+            for lbl in (self.outcome_label, self.instance_label, self.match_label):
+                if lbl and lbl not in cols:
+                    cols.append(lbl)
+            return cols
+
+        raise Exception(
+            "Could not determine training raw columns. "
+            "Provide dataset_for_rep as the original training dataset file path."
+        )
+
+    def _resolve_fold_map(self) -> List[Tuple[int, int]]:
+        """
+        Map contiguous replication fold ids to source training fold ids.
+
+        Returns list of tuples: (replication_cv_id, source_training_cv_id)
+        """
+        cv_files = sorted((self.train_root / "CVDatasets").glob(f"{self.train_name}_CV_*_Train.csv"))
+        source_ids = []
+        for path in cv_files:
+            match = re.search(r"_CV_(\d+)_Train\.csv$", path.name)
+            if match:
+                source_ids.append(int(match.group(1)))
+
+        source_ids = sorted(set(source_ids))
+        if not source_ids:
+            return []
+
+        # Keep only folds that actually have trained base-model pickles.
+        model_dir = self.train_root / "models" / "pickledModels"
+        if model_dir.exists() and self.algorithms:
+            model_id_sets: List[set] = []
+            for algorithm in self.algorithms:
+                small = self.abbrev.get(algorithm, algorithm)
+                ids = {
+                    int(m.group(1))
+                    for p in model_dir.glob(f"{small}_*.pickle")
+                    for m in [re.match(r".+?_(\d+)\.pickle$", p.name)]
+                    if m
+                }
+                if ids:
+                    model_id_sets.append(ids)
+
+            if model_id_sets:
+                common_ids = sorted(set.intersection(*model_id_sets))
+                if common_ids:
+                    source_ids = [cv for cv in source_ids if cv in common_ids]
+                    if not source_ids:
+                        source_ids = common_ids
+
+        # Respect explicit metadata cv_partitions only after filtering available folds.
+        if self.cv_partitions > 0:
+            source_ids = source_ids[: self.cv_partitions]
+
+        return [(idx, source_cv) for idx, source_cv in enumerate(source_ids)]
+
+    # ------------------------------------------------------------------
+    # p1 replay on replication data
+    # ------------------------------------------------------------------
+
+    def _replay_data_processing(
+        self,
+        raw_df: pd.DataFrame,
+    ) -> Tuple[pd.DataFrame, List[str], List[str], pd.DataFrame]:
+        data = raw_df.copy()
+
+        initial_cat = _safe_pickle_load(
+            self.train_root / "exploratory" / "initial" / "initial_categorical_features.pickle",
+            [],
+        )
+        initial_quant = _safe_pickle_load(
+            self.train_root / "exploratory" / "initial" / "initial_quantitative_features.pickle",
+            [],
+        )
+
+        categorical_features = [f for f in initial_cat if f in data.columns and f != self.outcome_label]
+        quantitative_features = [f for f in initial_quant if f in data.columns and f != self.outcome_label]
+
+        class_count = self._load_training_class_count(default=data[self.outcome_label].nunique(dropna=True))
+        transition_columns = self._build_transition_columns(class_count)
+        transition_df = pd.DataFrame(columns=transition_columns)
+
+        transition_df.loc["Original"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        # C1 - label alignment, remove ignored and missing outcome rows
+        data = self._apply_ordinal_encoding(data)
+        self._apply_binary_consistency(data)
+        data = self._drop_ignored_and_missing_outcome(data)
+        categorical_features, quantitative_features = self._sync_feature_lists(
+            data, categorical_features, quantitative_features
+        )
+        transition_df.loc["C1"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        # E1 - engineered missingness indicators from training
+        data, categorical_features = self._apply_engineered_missingness(data, categorical_features)
+        transition_df.loc["E1"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        # C2 - invariant + training-removed features
+        data, categorical_features, quantitative_features = self._drop_invariant_features(
+            data, categorical_features, quantitative_features
+        )
+        data, categorical_features, quantitative_features = self._drop_training_removed_features(
+            data, categorical_features, quantitative_features
+        )
+        transition_df.loc["C2"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        # C3 - remove high-missingness rows
+        data = self._drop_high_missing_rows(data)
+        transition_df.loc["C3"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        # E2 - one hot encode multi-level categoricals
+        data, categorical_features = self._apply_one_hot_encoding(data, categorical_features)
+        categorical_features, quantitative_features = self._sync_feature_lists(
+            data, categorical_features, quantitative_features
+        )
+        transition_df.loc["E2"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        # C4 - remove correlated features from training + final feature alignment
+        data, categorical_features, quantitative_features = self._drop_training_correlated_features(
+            data, categorical_features, quantitative_features
+        )
+        data, categorical_features, quantitative_features = self._align_to_training_processed_features(
+            data, categorical_features, quantitative_features
+        )
+        transition_df.loc["C4"] = self._counts_summary_row(
+            data, categorical_features, quantitative_features, class_count
+        )
+
+        return data, categorical_features, quantitative_features, transition_df
+
+    def _load_training_class_count(self, default: int) -> int:
+        class_counts_path = self.train_root / "exploratory" / "ClassCounts.csv"
+        if not class_counts_path.exists():
+            return max(2, int(default)) if self.outcome_type == "Multiclass" else int(default)
+        try:
+            class_counts = pd.read_csv(class_counts_path)
+            if class_counts.shape[0] > 0:
+                return int(class_counts.shape[0])
+        except Exception:
+            pass
+        return max(2, int(default)) if self.outcome_type == "Multiclass" else int(default)
+
+    def _build_transition_columns(self, class_count: int) -> List[str]:
+        base = [
+            "Instances",
+            "Total Features",
+            "Categorical Features",
+            "Quantitative Features",
+            "Missing Values",
+            "Missing Percent",
+        ]
+        if self.outcome_type == "Binary":
+            return base + ["Class 0", "Class 1"]
+        if self.outcome_type == "Multiclass":
+            n_classes = max(2, int(class_count))
+            return base + [f"Class {i}" for i in range(n_classes)]
+        return base
+
+    def _counts_summary_row(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+        class_count: int,
+    ) -> List[float]:
+        feature_count = data.shape[1] - 1
+        if self.instance_label and self.instance_label in data.columns:
+            feature_count -= 1
+        if self.match_label and self.match_label in data.columns:
+            feature_count -= 1
+
+        total_missing = int(data.isnull().sum().sum())
+        denom = max(1, data.shape[0] * max(1, feature_count))
+        missing_percent = total_missing / float(denom)
+
+        row: List[float] = [
+            int(data.shape[0]),
+            int(max(0, feature_count)),
+            int(len(categorical_features)),
+            int(len(quantitative_features)),
+            int(total_missing),
+            float(round(missing_percent, 5)),
+        ]
+
+        if self.outcome_type == "Binary":
+            vc = data[self.outcome_label].value_counts(dropna=False)
+            row.extend([int(vc.get(0, 0)), int(vc.get(1, 0))])
+        elif self.outcome_type == "Multiclass":
+            counts = data[self.outcome_label].value_counts(dropna=False).sort_index().tolist()
+            n_classes = max(2, int(class_count))
+            row.extend([int(counts[i]) if i < len(counts) else 0 for i in range(n_classes)])
+
+        return row
+
+    def _sync_feature_lists(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> Tuple[List[str], List[str]]:
+        labels = {self.outcome_label, self.instance_label, self.match_label}
+        labels = {x for x in labels if x}
+
+        cat = [f for f in categorical_features if f in data.columns and f not in labels]
+        quant = [f for f in quantitative_features if f in data.columns and f not in labels and f not in cat]
+
+        # Any remaining numeric feature not already listed should be treated as quantitative.
+        for col in data.columns:
+            if col in labels or col in cat or col in quant:
+                continue
+            if is_numeric_dtype(data[col]):
+                quant.append(col)
+            else:
+                cat.append(col)
+
+        return cat, quant
+
+    def _apply_ordinal_encoding(self, data: pd.DataFrame) -> pd.DataFrame:
+        ord_map_path = self.train_root / "exploratory" / "ordinal_encoding.pickle"
+        if not ord_map_path.exists():
+            return data
+
+        ord_map = _safe_pickle_load(ord_map_path, pd.DataFrame())
+        if not isinstance(ord_map, pd.DataFrame) or ord_map.empty:
+            return data
+
+        for feat in ord_map.index:
+            if feat not in data.columns:
+                continue
+
+            categories = ord_map.loc[feat, "Category"]
+            encodings = ord_map.loc[feat, "Encoding"]
+            if not isinstance(categories, (list, tuple)) or not isinstance(encodings, (list, tuple)):
+                continue
+
+            values = data[feat].dropna()
+            if values.empty:
+                continue
+
+            # Skip if already encoded numerically with the same coding range.
+            if is_numeric_dtype(values):
+                try:
+                    enc_set = {int(x) for x in encodings if x is not None}
+                    val_set = {int(x) for x in values.astype(float).tolist()}
+                    if val_set.issubset(enc_set):
+                        continue
+                except Exception:
+                    pass
+
+            mapping = {cat: enc for cat, enc in zip(categories, encodings)}
+            before_non_na = int(data[feat].notna().sum())
+            data[feat] = data[feat].map(mapping)
+            after_non_na = int(data[feat].notna().sum())
+
+            if after_non_na < before_non_na:
+                logger.warning(
+                    "Replication feature '%s' contained unseen labels; mapped to NaN for %d rows",
+                    feat,
+                    before_non_na - after_non_na,
+                )
+
+        return data
+
+    def _apply_binary_consistency(self, data: pd.DataFrame) -> None:
+        binary_map_path = self.train_root / "exploratory" / "binary_categorical_dict.pickle"
+        binary_map = _safe_pickle_load(binary_map_path, {})
+        if not isinstance(binary_map, dict):
+            return
+
+        for feat, train_values in binary_map.items():
+            if feat not in data.columns:
+                continue
+            if not isinstance(train_values, (list, tuple, set)):
+                continue
+            train_set = set(train_values)
+            observed = set(data[feat].dropna().unique().tolist())
+            new_values = observed - train_set
+            if new_values:
+                logger.warning(
+                    "Replication binary feature '%s' has unseen values; replacing with NaN: %s",
+                    feat,
+                    sorted(new_values),
+                )
+                data.loc[data[feat].isin(list(new_values)), feat] = np.nan
+
+    def _drop_ignored_and_missing_outcome(self, data: pd.DataFrame) -> pd.DataFrame:
+        cleaned = data.dropna(axis=0, how="any", subset=[self.outcome_label]).reset_index(drop=True)
+        if self.ignore_features:
+            cleaned = cleaned.drop(columns=[f for f in self.ignore_features if f in cleaned.columns], errors="ignore")
+
+        # Match p1 behavior: cast classification outcome to int when possible.
+        if self.outcome_type in {"Binary", "Multiclass"}:
+            try:
+                cleaned[self.outcome_label] = cleaned[self.outcome_label].astype("int64")
+            except Exception:
+                pass
+
+        return cleaned
+
+    def _apply_engineered_missingness(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+    ) -> Tuple[pd.DataFrame, List[str]]:
+        train_engineered = _safe_pickle_load(
+            self.train_root / "exploratory" / "engineered_features.pickle",
+            [],
+        )
+        if not isinstance(train_engineered, (list, tuple)):
+            return data, list(categorical_features)
+
+        cat = list(categorical_features)
+        for source_feat in train_engineered:
+            if source_feat in data.columns:
+                miss_feat = f"Miss_{source_feat}"
+                data[miss_feat] = data[source_feat].isnull().astype(int)
+                if miss_feat not in cat:
+                    cat.append(miss_feat)
+
+        return data, cat
+
+    def _drop_invariant_features(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> Tuple[pd.DataFrame, List[str], List[str]]:
+        invariant = [c for c in data.columns if data[c].nunique(dropna=True) <= 1 and c != self.outcome_label]
+        if invariant:
+            data = data.drop(columns=invariant, errors="ignore")
+        cat = [c for c in categorical_features if c not in invariant]
+        quant = [c for c in quantitative_features if c not in invariant]
+        return data, cat, quant
+
+    def _drop_training_removed_features(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> Tuple[pd.DataFrame, List[str], List[str]]:
+        removed = _safe_pickle_load(self.train_root / "exploratory" / "removed_features.pickle", [])
+        if not isinstance(removed, (list, tuple)):
+            removed = []
+
+        removed_set = set(removed)
+        data = data.drop(columns=[c for c in removed if c in data.columns], errors="ignore")
+        cat = [c for c in categorical_features if c not in removed_set]
+        quant = [c for c in quantitative_features if c not in removed_set]
+        return data, cat, quant
+
+    def _drop_high_missing_rows(self, data: pd.DataFrame) -> pd.DataFrame:
+        feature_count = data.shape[1] - 1
+        if self.instance_label and self.instance_label in data.columns:
+            feature_count -= 1
+        if self.match_label and self.match_label in data.columns:
+            feature_count -= 1
+
+        threshold = int(self.cleaning_missingness * max(1, feature_count))
+        if threshold <= 0:
+            return data
+        return data[data.isnull().sum(axis=1) < threshold].reset_index(drop=True)
+
+    def _apply_one_hot_encoding(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+    ) -> Tuple[pd.DataFrame, List[str]]:
+        non_binary = [
+            c
+            for c in categorical_features
+            if c in data.columns and data[c].nunique(dropna=True) > 2
+        ]
+
+        cat = list(categorical_features)
+        if not non_binary:
+            return data, cat
+
+        one_hot_df = pd.get_dummies(data[non_binary], columns=non_binary)
+        data = data.drop(columns=non_binary, errors="ignore")
+        data = pd.concat([data, one_hot_df], axis=1)
+
+        cat = [c for c in cat if c not in non_binary]
+        cat.extend(list(one_hot_df.columns))
+        return data, cat
+
+    def _drop_training_correlated_features(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> Tuple[pd.DataFrame, List[str], List[str]]:
+        correlated = _safe_pickle_load(
+            self.train_root / "exploratory" / "correlated_features.pickle",
+            [],
+        )
+        if not isinstance(correlated, (list, tuple)):
+            correlated = []
+
+        correlated_set = set(correlated)
+        data = data.drop(columns=[c for c in correlated if c in data.columns], errors="ignore")
+        cat = [c for c in categorical_features if c not in correlated_set]
+        quant = [c for c in quantitative_features if c not in correlated_set]
+        return data, cat, quant
+
+    def _align_to_training_processed_features(
+        self,
+        data: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> Tuple[pd.DataFrame, List[str], List[str]]:
+        post_processed = _safe_pickle_load(
+            self.train_root / "exploratory" / "post_processed_features.pickle",
+            [],
+        )
+
+        if not isinstance(post_processed, (list, tuple)) or len(post_processed) == 0:
+            post_processed = list(data.columns)
+
+        # Ensure labels are present in final schema.
+        for lbl in (self.outcome_label, self.instance_label, self.match_label):
+            if lbl and lbl not in post_processed:
+                post_processed = [lbl] + list(post_processed)
+
+        for feat in post_processed:
+            if feat not in data.columns:
+                data[feat] = 0
+
+        data = data[[c for c in post_processed if c in data.columns]].copy()
+
+        cat, quant = self._sync_feature_lists(data, categorical_features, quantitative_features)
+        return data, cat, quant
+
+    # ------------------------------------------------------------------
+    # Artifact writing for exploratory outputs
+    # ------------------------------------------------------------------
+
+    def _write_processed_dataset(
+        self,
+        processed: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+        transition_df: pd.DataFrame,
+    ) -> None:
+        self.exploratory_dir.mkdir(parents=True, exist_ok=True)
+        (self.exploratory_dir / "initial").mkdir(parents=True, exist_ok=True)
+
+        transition_df.to_csv(self.exploratory_dir / "DataProcessSummary.csv", index=True)
+
+        with (self.exploratory_dir / "categorical_features.pickle").open("wb") as f:
+            pickle.dump(list(categorical_features), f)
+
+        with (self.exploratory_dir / "post_processed_features.pickle").open("wb") as f:
+            pickle.dump(list(processed.columns), f)
+
+        # p1 format: one-row CSV with feature names only (no labels).
+        feature_headers = [c for c in processed.columns if c not in self._label_columns(processed)]
+        pd.DataFrame([feature_headers]).to_csv(
+            self.exploratory_dir / "ProcessedFeatureNames.csv",
+            index=False,
+            header=False,
+        )
+
+        processed.to_csv(self.rep_root / f"{self.apply_name}_Processed.csv", index=False)
+
+        # Preserve initial feature-type artifacts for compatibility.
+        initial_cat = _safe_pickle_load(
+            self.train_root / "exploratory" / "initial" / "initial_categorical_features.pickle",
+            [],
+        )
+        initial_quant = _safe_pickle_load(
+            self.train_root / "exploratory" / "initial" / "initial_quantitative_features.pickle",
+            [],
+        )
+        with (self.exploratory_dir / "initial" / "initial_categorical_features.pickle").open("wb") as f:
+            pickle.dump([c for c in initial_cat if c in processed.columns], f)
+        with (self.exploratory_dir / "initial" / "initial_quantitative_features.pickle").open("wb") as f:
+            pickle.dump([c for c in initial_quant if c in processed.columns], f)
+
+    def _write_eda_artifacts(
+        self,
+        processed: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> None:
+        """Generate p1-style exploratory CSV outputs used downstream by reporting."""
+        experiment_path = str(self.train_root / "replication")
+
         eda = DataProcess(
-            rep_data,
-            self.full_path,
-            ignore_features=self.ignore_features,
-            categorical_features=categorical_variables,
-            quantitative_features=quantitative_variables,
-            exclude_eda_output=None,
+            data=processed.copy(),
+            experiment_path=experiment_path,
+            outcome_label=self.outcome_label,
+            match_label=self.match_label,
+            instance_label=self.instance_label,
             categorical_cutoff=self.categorical_cutoff,
             sig_cutoff=self.sig_cutoff,
             random_state=self.random_state,
             show_plots=self.show_plots,
+            dataset_name=self.apply_name,
+            enable_plots=False,
         )
-        eda.dataset.name = f"replication/{self.apply_name}"
+        eda.outcome_type = self.outcome_type
+        eda.categorical_features = list(categorical_features)
+        eda.quantitative_features = list(quantitative_features)
+        eda.make_log_folders()
 
-        eda.identify_feature_types()
-        n_class = len(eda.counts_summary(save=False)) - 6
+        eda.describe_data()
+        total_missing = eda.missingness_counts()
+        eda.counts_summary(total_missing=total_missing, save=True, replicate=True)
 
-        if self.outcome_type == "Binary":
-            transition_cols = [
-                "Instances",
-                "Total Features",
-                "Categorical Features",
-                "Quantitative Features",
-                "Missing Values",
-                "Missing Percent",
-                "Class 0",
-                "Class 1",
-            ]
-        elif self.outcome_type == "Multiclass":
-            transition_cols = [
-                "Instances",
-                "Total Features",
-                "Categorical Features",
-                "Quantitative Features",
-                "Missing Values",
-                "Missing Percent",
-            ] + [f"Class {i}" for i in range(n_class)]
-        else:  # Continuous
-            transition_cols = [
-                "Instances",
-                "Total Features",
-                "Categorical Features",
-                "Quantitative Features",
-                "Missing Values",
-                "Missing Percent",
-            ]
+        if "feature_correlations" not in self.exclude_plots:
+            try:
+                eda.feature_correlation(x_data=eda.feature_only_data())
+            except Exception as exc:
+                logger.warning("Failed to compute feature correlation for replication set: %s", exc)
 
-        transition_df = pd.DataFrame(columns=transition_cols)
-        transition_df.loc["Original"] = eda.counts_summary(save=False)
+        try:
+            eda.univariate_analysis(top_features=20)
+        except Exception as exc:
+            logger.warning("Failed to compute univariate analysis for replication set: %s", exc)
 
-        # Binary categorical consistency check
-        with open(
-            os.path.join(self.full_path, "exploratory", "binary_categorical_dict.pickle"), "rb"
-        ) as f:
-            binary_categorical_dict = dict(pickle.load(f))
+    # ------------------------------------------------------------------
+    # p2/p6 replay and p7 replication evaluation
+    # ------------------------------------------------------------------
 
-        for key, train_vals in binary_categorical_dict.items():
-            if key not in eda.dataset.data.columns:
+    def _evaluate_models(
+        self,
+        processed: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+        fold_map: Sequence[Tuple[int, int]],
+    ) -> None:
+        if not self.algorithms:
+            raise Exception("No trained algorithms found to evaluate on replication dataset")
+
+        for rep_cv_idx, source_cv_idx in fold_map:
+            train_cv_path = self.train_root / "CVDatasets" / f"{self.train_name}_CV_{source_cv_idx}_Train.csv"
+            if not train_cv_path.exists():
+                logger.warning("Missing train fold %s; skipping", train_cv_path)
                 continue
-            unique_vals = [x for x in eda.dataset.data[key].unique() if not pd.isnull(x)]
-            if sorted(unique_vals) != sorted(train_vals):
-                new_values = list(set(unique_vals) - set(train_vals))
-                logging.warning(
-                    "New Value found in Binary Categorical Variable %s, replacing with NaN", key
-                )
-                for feat in new_values:
-                    logging.warning("\t%s", feat)
-                eda.dataset.data[key].replace(new_values, np.nan, inplace=True)
 
-        # Ordinal encoding alignment with training
-        self._apply_ordinal_encoding(eda)
+            train_cv_df = pd.read_csv(train_cv_path, na_values="NA", sep=",")
+            rep_cv_df = processed.copy()
 
-        # Baseline clean-up
-        eda.drop_ignored_rowcols()
-        transition_df.loc["C1"] = eda.counts_summary(save=False)
+            feature_columns = [
+                c
+                for c in train_cv_df.columns
+                if c not in self._label_columns(train_cv_df)
+            ]
 
-        eda.dataset.initial_eda(os.path.join(self.experiment_path, self.train_name))
-
-        # ------------------------------------------------------------------
-        # Feature engineering & post-processing replay
-        # ------------------------------------------------------------------
-
-        # engineered_features: usually training-phase engineered features (e.g., missingness, etc.)
-        try:
-            with open(
-                os.path.join(self.full_path, "exploratory", "engineered_features.pickle"), "rb"
-            ) as f:
-                eda.engineered_features = pickle.load(f)
-        except FileNotFoundError:
-            eda.engineered_features = []
-
-        # Recreate missingness features
-        for feat in eda.engineered_features:
-            if feat in eda.dataset.data.columns:
-                eda.dataset.data["Miss_" + feat] = eda.dataset.data[feat].isnull().astype(int)
-                eda.categorical_features.append("Miss_" + feat)
-        eda.engineered_features = ["Miss_" + feat for feat in eda.engineered_features]
-
-        # Remove features that were dropped in training
-        try:
-            with open(
-                os.path.join(self.full_path, "exploratory", "removed_features.pickle"),
-                "rb",
-            ) as f:
-                removed_features = list(pickle.load(f))
-            for feat in removed_features:
-                if feat in eda.categorical_features:
-                    eda.categorical_features.remove(feat)
-                if feat in eda.quantitative_features:
-                    eda.quantitative_features.remove(feat)
-                if feat in eda.dataset.data.columns:
-                    eda.dataset.data.drop(feat, axis=1, inplace=True)
-        except FileNotFoundError:
-            removed_features = []
-
-        # Load post-processed variable list (final train variables)
-        with open(
-            os.path.join(self.full_path, "exploratory", "post_processed_features.pickle"),
-            "rb",
-        ) as f:
-            post_processed_vars = pickle.load(f)
-
-        # One-hot encode multi-level categoricals
-        non_binary_categorical = [
-            feat
-            for feat in eda.categorical_features
-            if feat in eda.dataset.data.columns and eda.dataset.data[feat].nunique() > 2
-        ]
-        if non_binary_categorical:
-            one_hot_df = pd.get_dummies(
-                eda.dataset.data[non_binary_categorical],
-                columns=non_binary_categorical,
-            )
-            eda.one_hot_features = list(one_hot_df.columns)
-            eda.dataset.data.drop(non_binary_categorical, axis=1, inplace=True)
-            eda.dataset.data = pd.concat([eda.dataset.data, one_hot_df], axis=1)
-        else:
-            eda.one_hot_features = []
-
-        # Ensure all one-hot features from training are present
-        for feat in post_processed_vars:
-            if feat not in eda.dataset.data.columns:
-                eda.dataset.data[feat] = 0
-                eda.one_hot_features.append(feat)
-
-        eda.categorical_features += eda.one_hot_features
-
-        # Load correlated features that were removed
-        try:
-            with open(
-                os.path.join(self.full_path, "exploratory", "correlated_features.pickle"),
-                "rb",
-            ) as f:
-                correlated_features = list(pickle.load(f))
-        except FileNotFoundError:
-            correlated_features = []
-
-        # Drop any extra features not in final train variable set or correlated features
-        for feat in list(eda.dataset.data.columns):
-            if feat not in post_processed_vars and feat not in correlated_features:
-                eda.drop_ignored_rowcols([feat])
-
-        # Remove correlated features
-        for feat in correlated_features:
-            if feat in eda.categorical_features:
-                eda.categorical_features.remove(feat)
-            if feat in eda.quantitative_features:
-                eda.quantitative_features.remove(feat)
-            if feat in eda.dataset.data.columns:
-                eda.dataset.data.drop(feat, axis=1, inplace=True)
-
-        eda.categorical_features = list(set(post_processed_vars).intersection(eda.categorical_features))
-        eda.quantitative_features = list(set(post_processed_vars).intersection(eda.quantitative_features))
-
-        # Final alignment with train post-processed vars
-        eda.dataset.data = eda.dataset.data[post_processed_vars]
-        transition_df.loc["R1"] = eda.counts_summary(save=False)
-
-        rep_exploratory = rep_root / "exploratory"
-        rep_exploratory.mkdir(exist_ok=True)
-        transition_df.to_csv(
-            rep_exploratory / "DataProcessSummary.csv",
-            index=True,
-        )
-
-        # Persist categorical + post-processed features for replication dataset
-        with open(rep_exploratory / "categorical_features.pickle", "wb") as f:
-            pickle.dump(eda.categorical_features, f)
-
-        with open(rep_exploratory / "post_processed_features.pickle", "wb") as f:
-            pickle.dump(list(eda.dataset.data.columns), f)
-
-        with open(rep_exploratory / "ProcessedFeatureNames.csv", "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(list(eda.dataset.data.columns))
-
-        # Save processed replication dataset (used by notebooks / predictions)
-        eda.dataset.data.to_csv(
-            rep_root / f"{self.apply_name}_Processed.csv", index=False
-        )
-
-        # EDA outputs (describe, missingness, correlation)
-        eda.dataset.describe_data(os.path.join(self.experiment_path, self.train_name))
-        total_missing = eda.dataset.missingness_counts(os.path.join(self.experiment_path, self.train_name))
-        eda.counts_summary(total_missing, plot=True, replicate=True)
-
-        x_rep_data = eda.dataset.feature_only_data()
-        if self.export_feature_correlations:
-            eda.dataset.feature_correlation(
-                os.path.join(self.experiment_path, self.train_name),
-                x_rep_data,
-                show_plots=False,
-            )
-        del x_rep_data
-
-        # ------------------------------------------------------------------
-        # Apply CV-specific pipeline: Imputation, Scaling, Feature selection
-        # ------------------------------------------------------------------
-        master_list: List[Dict[str, Any]] = []
-        cv_dataset_paths = glob.glob(os.path.join(self.full_path, "CVDatasets", "*_CV_*Train.csv"))
-        cv_dataset_paths = [str(Path(p)) for p in cv_dataset_paths]
-        cv_partitions = len(cv_dataset_paths)
-
-        for cv_count in range(cv_partitions):
-            cv_train_path = os.path.join(
-                self.full_path,
-                "CVDatasets",
-                f"{self.train_name}_CV_{cv_count}_Train.csv",
-            )
-            cv_train_data = pd.read_csv(cv_train_path, sep=",", na_values="NA")
-
-            train_feature_list = list(cv_train_data.columns)
-            train_feature_list.remove(self.outcome_label)
-            if self.instance_label is not None and self.instance_label in train_feature_list:
-                train_feature_list.remove(self.instance_label)
-            if self.match_label is not None and self.match_label in train_feature_list:
-                train_feature_list.remove(self.match_label)
-
-            cv_rep_data = rep_data.data.copy()
-
-            feature_name_list = list(post_processed_vars)
-            if self.outcome_label in feature_name_list:
-                feature_name_list.remove(self.outcome_label)
-            if self.instance_label and self.instance_label in feature_name_list:
-                feature_name_list.remove(self.instance_label)
-            if self.match_label and self.match_label in feature_name_list:
-                feature_name_list.remove(self.match_label)
-
-            # Impute
             if self.impute_data:
-                try:
-                    cv_rep_data = self.impute_rep_data(
-                        cv_count,
-                        cv_rep_data,
-                        feature_name_list,
-                        eda.categorical_features,
-                        eda.quantitative_features,
-                    )
-                except Exception as e:
-                    logging.warning("Unknown Exception in Imputation for %s", self.apply_name)
-                    logging.warning(e)
-
-            # Scale
-            if self.scale_data:
-                try:
-                    cv_rep_data = self.scale_rep_data(cv_count, cv_rep_data, feature_name_list)
-                except Exception as e:
-                    logging.warning(
-                        "Notice: Scaling was not conducted for training dataset for %s, "
-                        "so scaling was not applied to replication data.",
-                        self.apply_name,
-                    )
-                    logging.debug("Scaling error: %s", e)
-
-            # Feature selection: keep only training CV columns
-            cv_rep_data = cv_rep_data[cv_train_data.columns]
-            del cv_train_data
-
-            if self.instance_label is not None and self.instance_label in cv_rep_data.columns:
-                cv_rep_data = cv_rep_data.drop(self.instance_label, axis=1)
-
-            x_test = cv_rep_data.drop(self.outcome_label, axis=1).values
-            y_test = cv_rep_data[self.outcome_label].values
-
-            eval_dict: Dict[str, Any] = {}
-            for algorithm in self.algorithms:
-                if self.outcome_type in ("Binary", "Multiclass"):
-                    ret = self.eval_model(algorithm, cv_count, x_test, y_test)
-                else:
-                    ret, residuals = self.eval_model(algorithm, cv_count, x_test, y_test)
-                eval_dict[algorithm] = ret
-
-                out_pkl = (
-                    model_eval_dir
-                    / f"{self.abbrev[algorithm]}_CV_{cv_count}_metrics.pickle"
+                rep_cv_df = self._apply_imputation(
+                    rep_cv_df,
+                    feature_columns,
+                    source_cv_idx,
+                    train_cv_df,
+                    categorical_features,
+                    quantitative_features,
                 )
-                with open(out_pkl, "wb") as f:
-                    pickle.dump(ret, f)
 
-            master_list.append(eval_dict)
+            if self.scale_data:
+                rep_cv_df = self._apply_scaling(rep_cv_df, feature_columns, source_cv_idx, train_cv_df)
 
-        # ------------------------------------------------------------------
-        # Phase 8-style statistics on replication data
-        # ------------------------------------------------------------------
-        stats = StatsJob(
-            str(rep_root),
-            self.outcome_label,
-            self.instance_label,
-            self.scoring_metric,
-            cv_partitions=self.cv_partitions,
+            # Align exactly to training fold columns.
+            missing_cols = [col for col in train_cv_df.columns if col not in rep_cv_df.columns]
+            if missing_cols:
+                filler = pd.DataFrame(0, index=rep_cv_df.index, columns=missing_cols)
+                rep_cv_df = pd.concat([rep_cv_df, filler], axis=1)
+            rep_cv_df = rep_cv_df[list(train_cv_df.columns)].copy()
+
+            # Persist CV artifacts in replication dataset namespace.
+            rep_test_path = self.cv_dir / f"{self.apply_name}_CV_{rep_cv_idx}_Test.csv"
+            rep_train_path = self.cv_dir / f"{self.apply_name}_CV_{rep_cv_idx}_Train.csv"
+            rep_cv_df.to_csv(rep_test_path, index=False)
+            shutil.copy2(train_cv_path, rep_train_path)
+
+            eval_df = rep_cv_df.copy()
+            if self.instance_label and self.instance_label in eval_df.columns:
+                eval_df = eval_df.drop(columns=[self.instance_label])
+
+            if self.outcome_label not in eval_df.columns:
+                logger.warning("Outcome label missing in replication fold %s, skipping fold", rep_cv_idx)
+                continue
+
+            x_test = eval_df.drop(columns=[self.outcome_label]).values
+            y_test = eval_df[self.outcome_label].values
+
+            for algorithm in self.algorithms:
+                small = self.abbrev.get(algorithm, algorithm)
+                model_path_candidates = [
+                    self.train_root / "models" / "pickledModels" / f"{small}_{source_cv_idx}.pickle",
+                    self.train_root / "models" / "pickledModels" / f"{algorithm}_{source_cv_idx}.pickle",
+                ]
+                model_path = next((p for p in model_path_candidates if p.exists()), None)
+                if model_path is None:
+                    logger.warning(
+                        "Missing trained model pickle for algorithm=%s, source_cv=%s",
+                        algorithm,
+                        source_cv_idx,
+                    )
+                    continue
+
+                with model_path.open("rb") as f:
+                    model = pickle.load(f)
+
+                fi_list = self._load_training_feature_importance(
+                    small_name=small,
+                    source_cv_idx=source_cv_idx,
+                    expected_len=x_test.shape[1],
+                )
+
+                if self.outcome_type == "Binary":
+                    evaluator = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
+                    evaluator.model = model
+                    metrics_dict, curves_dict = evaluator.model_evaluation(x_test, y_test)
+                    self._write_base_outputs(rep_cv_idx, small, metrics_dict, curves_dict, fi_list)
+                elif self.outcome_type == "Multiclass":
+                    evaluator = MulticlassClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
+                    evaluator.model = model
+                    metrics_dict, curves_dict = evaluator.model_evaluation(x_test, y_test)
+                    self._write_base_outputs(rep_cv_idx, small, metrics_dict, curves_dict, fi_list)
+                else:
+                    evaluator = RegressionModel(None, algorithm, scoring_metric=self.scoring_metric)
+                    evaluator.model = model
+                    metrics_dict = evaluator.model_evaluation(x_test, y_test)
+                    y_pred = evaluator.predict(x_test)
+                    residual_test = y_test - y_pred
+                    self._write_base_outputs(
+                        rep_cv_idx,
+                        small,
+                        metrics_dict,
+                        None,
+                        fi_list,
+                        residual_test=residual_test,
+                        y_pred=y_pred,
+                        y_true=y_test,
+                    )
+
+    def _label_columns(self, df: pd.DataFrame) -> List[str]:
+        labels = [self.outcome_label]
+        if self.instance_label and self.instance_label in df.columns:
+            labels.append(self.instance_label)
+        if self.match_label and self.match_label in df.columns:
+            labels.append(self.match_label)
+        return labels
+
+    def _apply_imputation(
+        self,
+        data: pd.DataFrame,
+        feature_columns: Sequence[str],
+        source_cv_idx: int,
+        train_cv_df: pd.DataFrame,
+        categorical_features: Sequence[str],
+        quantitative_features: Sequence[str],
+    ) -> pd.DataFrame:
+        active_features = [c for c in feature_columns if c in data.columns and c in train_cv_df.columns]
+        if not active_features:
+            return data
+
+        # 1) Categorical mode imputer from p2
+        cat_path = self.train_root / "impute_scale" / f"categorical_imputer_cv{source_cv_idx}.pickle"
+        cat_imputer = _safe_pickle_load(cat_path, {})
+        if isinstance(cat_imputer, dict):
+            for c, fill_val in cat_imputer.items():
+                if c in active_features:
+                    data[c] = data[c].fillna(fill_val)
+
+        # 2) Numeric imputer from p2
+        ord_path = self.train_root / "impute_scale" / f"ordinal_imputer_cv{source_cv_idx}.pickle"
+        ord_imputer = _safe_pickle_load(ord_path, None)
+
+        transformed = False
+        if ord_imputer is not None and hasattr(ord_imputer, "transform"):
+            try:
+                x = data[active_features].copy()
+                expected_features = getattr(ord_imputer, "feature_names_in_", None)
+                if expected_features is not None:
+                    expected_features = list(expected_features)
+                    missing_expected = [c for c in expected_features if c not in x.columns]
+                    if missing_expected:
+                        raise ValueError(
+                            f"Missing {len(missing_expected)} imputer-fit features (fallback imputation will be used)"
+                        )
+                    x = x[expected_features]
+
+                xt = ord_imputer.transform(x)
+                if isinstance(xt, pd.DataFrame):
+                    for col in xt.columns:
+                        if col in data.columns:
+                            data[col] = xt[col].values
+                else:
+                    xt_df = pd.DataFrame(xt, columns=list(x.columns), index=data.index)
+                    for col in xt_df.columns:
+                        if col in data.columns:
+                            data[col] = xt_df[col].values
+                transformed = True
+            except Exception as exc:
+                logger.warning(
+                    "Failed to apply ordinal imputer transform on replication CV %s: %s",
+                    source_cv_idx,
+                    exc,
+                )
+
+        if not transformed and isinstance(ord_imputer, dict):
+            # Legacy median-dict style: {feature: value}
+            if "id" not in ord_imputer:
+                for c, fill_val in ord_imputer.items():
+                    if c in active_features:
+                        data[c] = data[c].fillna(fill_val)
+                transformed = True
+
+        # Fallback for remaining NaNs in active feature columns.
+        if data[active_features].isnull().sum().sum() > 0:
+            train_num = train_cv_df[active_features].copy()
+            for col in active_features:
+                if data[col].isnull().sum() == 0:
+                    continue
+                if col in categorical_features:
+                    mode = train_num[col].mode(dropna=True)
+                    if not mode.empty:
+                        data[col] = data[col].fillna(mode.iloc[0])
+                elif col in quantitative_features or is_numeric_dtype(train_num[col]):
+                    data[col] = data[col].fillna(train_num[col].median())
+                else:
+                    mode = train_num[col].mode(dropna=True)
+                    if not mode.empty:
+                        data[col] = data[col].fillna(mode.iloc[0])
+
+        return data
+
+    def _apply_scaling(
+        self,
+        data: pd.DataFrame,
+        feature_columns: Sequence[str],
+        source_cv_idx: int,
+        train_cv_df: pd.DataFrame,
+    ) -> pd.DataFrame:
+        active_features = [c for c in feature_columns if c in data.columns and c in train_cv_df.columns]
+        if not active_features:
+            return data
+
+        scale_path = self.train_root / "impute_scale" / f"scaler_cv{source_cv_idx}.pickle"
+        scaler = _safe_pickle_load(scale_path, None)
+
+        if scaler is not None and hasattr(scaler, "transform"):
+            try:
+                x = data[active_features].copy()
+                expected_features = getattr(scaler, "feature_names_in_", None)
+                if expected_features is not None:
+                    expected_features = list(expected_features)
+                    missing_expected = [c for c in expected_features if c not in x.columns]
+                    if missing_expected:
+                        raise ValueError(
+                            f"Missing {len(missing_expected)} scaler-fit features (fallback scaling will be used)"
+                        )
+                    x = x[expected_features]
+
+                xt = scaler.transform(x)
+                if isinstance(xt, pd.DataFrame):
+                    for col in xt.columns:
+                        if col in data.columns:
+                            data[col] = xt[col].values
+                else:
+                    xt_df = pd.DataFrame(xt, columns=list(x.columns), index=data.index)
+                    for col in xt_df.columns:
+                        if col in data.columns:
+                            data[col] = xt_df[col].values
+                return data
+            except Exception as exc:
+                logger.warning(
+                    "Failed to apply scaler transform on replication CV %s: %s",
+                    source_cv_idx,
+                    exc,
+                )
+
+        # Fallback: if scaler object was not serializable with fit-state, use train-fold z-score.
+        train_x = train_cv_df[active_features].copy()
+        for col in active_features:
+            if not is_numeric_dtype(train_x[col]):
+                continue
+            mean = pd.to_numeric(train_x[col], errors="coerce").mean()
+            std = pd.to_numeric(train_x[col], errors="coerce").std(ddof=0)
+            if std is None or np.isnan(std) or std == 0:
+                continue
+            data[col] = (pd.to_numeric(data[col], errors="coerce") - mean) / std
+
+        return data
+
+    def _load_training_feature_importance(
+
+        self,
+        small_name: str,
+        source_cv_idx: int,
+        expected_len: int,
+    ) -> List[float]:
+        metrics_path = self.train_root / "model_evaluation" / "metrics_by_cv" / f"{small_name}_CV_{source_cv_idx}.json"
+        if not metrics_path.exists():
+            return [0.0] * int(expected_len)
+
+        try:
+            with metrics_path.open("r") as f:
+                payload = json.load(f)
+            fi = payload.get("feature_importance", [])
+            fi = [float(x) for x in fi]
+        except Exception:
+            fi = [0.0] * int(expected_len)
+
+        if len(fi) < expected_len:
+            fi = fi + [0.0] * (expected_len - len(fi))
+        elif len(fi) > expected_len:
+            fi = fi[:expected_len]
+
+        return fi
+
+    def _write_base_outputs(
+        self,
+        rep_cv_idx: int,
+        small_name: str,
+        metrics_dict: Dict[str, Any],
+        curves_dict: Optional[Dict[str, Any]],
+        fi_list: Sequence[float],
+        residual_test: Optional[np.ndarray] = None,
+        y_pred: Optional[np.ndarray] = None,
+        y_true: Optional[np.ndarray] = None,
+    ) -> None:
+        payload = {
+            "metrics": _jsonify(metrics_dict),
+            "feature_importance": _jsonify(list(fi_list)),
+        }
+        with (self.model_metrics_dir / f"{small_name}_CV_{rep_cv_idx}.json").open("w") as f:
+            json.dump(payload, f, indent=2)
+
+        if curves_dict:
+            roc = curves_dict.get("roc", {})
+            prc = curves_dict.get("prc", {})
+            with (self.model_curves_dir / f"{small_name}_CV_{rep_cv_idx}_roc.json").open("w") as f:
+                json.dump(_jsonify(roc), f, indent=2)
+            with (self.model_curves_dir / f"{small_name}_CV_{rep_cv_idx}_prc.json").open("w") as f:
+                json.dump(_jsonify(prc), f, indent=2)
+
+        if self.outcome_type == "Continuous" and residual_test is not None and y_pred is not None and y_true is not None:
+            # Keep p6 payload shape for compatibility with p8 residual plotting.
+            residual_payload = [
+                np.array([], dtype=float),           # train residual (not available in replication)
+                np.asarray(residual_test, dtype=float),
+                np.array([], dtype=float),           # train predictions (not available)
+                np.asarray(y_pred, dtype=float),
+                np.array([], dtype=float),           # y_train (not available)
+                np.asarray(y_true, dtype=float),
+            ]
+            with (self.model_pickled_metrics_dir / f"{small_name}_CV_{rep_cv_idx}_residuals.pickle").open("wb") as f:
+                pickle.dump(residual_payload, f)
+
+    def _evaluate_ensembles(
+        self,
+        processed: pd.DataFrame,
+        fold_map: Sequence[Tuple[int, int]],
+    ) -> None:
+        src_pickled = self.train_root / "ensemble_evaluation" / "pickled_ensembles"
+        if not src_pickled.exists():
+            return
+
+        self.ensemble_metrics_dir.mkdir(parents=True, exist_ok=True)
+        self.ensemble_curves_dir.mkdir(parents=True, exist_ok=True)
+        self.ensemble_pickled_dir.mkdir(parents=True, exist_ok=True)
+
+        for rep_cv_idx, source_cv_idx in fold_map:
+            rep_test_path = self.cv_dir / f"{self.apply_name}_CV_{rep_cv_idx}_Test.csv"
+            if not rep_test_path.exists():
+                continue
+
+            test_df = pd.read_csv(rep_test_path, na_values="NA", sep=",")
+            eval_df = test_df.copy()
+            if self.instance_label and self.instance_label in eval_df.columns:
+                eval_df = eval_df.drop(columns=[self.instance_label])
+
+            if self.outcome_label not in eval_df.columns:
+                continue
+
+            x_test = eval_df.drop(columns=[self.outcome_label]).values
+            y_test = eval_df[self.outcome_label].values
+
+            for ens_pickle in sorted(src_pickled.glob(f"*_{source_cv_idx}.pickle")):
+                match = re.match(r"(.+?)_\d+\.pickle$", ens_pickle.name)
+                if not match:
+                    continue
+                ens_id = match.group(1)
+
+                with ens_pickle.open("rb") as f:
+                    model = pickle.load(f)
+
+                # Keep a copy of ensemble pickle for traceability in replication outputs.
+                dst_pickle = self.ensemble_pickled_dir / f"{ens_id}_{rep_cv_idx}.pickle"
+                with dst_pickle.open("wb") as f:
+                    pickle.dump(model, f)
+
+                y_pred = model.predict(x_test)
+                metrics = _calc_basic_metrics(y_test, y_pred)
+
+                roc_curve_dict = None
+                prc_curve_dict = None
+                roc_auc_val = None
+                prc_auc_val = None
+                aps_val = None
+                brier_val = None
+
+                proba = None
+                if hasattr(model, "predict_proba"):
+                    try:
+                        proba = model.predict_proba(x_test)
+                    except Exception as exc:
+                        logger.warning("predict_proba failed for ensemble %s: %s", ens_id, exc)
+                        proba = None
+                elif hasattr(model, "decision_function"):
+                    try:
+                        score = np.asarray(model.decision_function(x_test))
+                        if score.ndim == 1:
+                            score = (score - score.min()) / (score.max() - score.min() + 1e-12)
+                            proba = np.column_stack([1.0 - score, score])
+                        else:
+                            s_min = score.min(axis=0, keepdims=True)
+                            s_max = score.max(axis=0, keepdims=True)
+                            proba = (score - s_min) / (s_max - s_min + 1e-12)
+                    except Exception as exc:
+                        logger.warning("decision_function failed for ensemble %s: %s", ens_id, exc)
+                        proba = None
+
+                if proba is not None:
+                    classes = getattr(model, "classes_", None)
+                    roc_curve_dict, prc_curve_dict, roc_auc_val, prc_auc_val, aps_val = _calc_curves_scores_from_proba(
+                        y_test,
+                        proba,
+                        classes=classes,
+                    )
+
+                    try:
+                        proba_arr = np.asarray(proba)
+                        unique_classes = np.unique(y_test)
+                        if proba_arr.ndim == 1 and len(unique_classes) == 2:
+                            brier_val = brier_score_loss(y_test, proba_arr)
+                        elif proba_arr.ndim == 2 and len(unique_classes) == 2 and proba_arr.shape[1] >= 2:
+                            brier_val = brier_score_loss(y_test, proba_arr[:, 1])
+                        elif proba_arr.ndim == 2 and len(unique_classes) > 2:
+                            brier_val = multiclass_brier_score(y_test, proba_arr)
+                    except Exception:
+                        brier_val = None
+
+                if roc_auc_val is not None:
+                    metrics["ROC AUC"] = float(roc_auc_val)
+                if prc_auc_val is not None:
+                    metrics["PRC AUC"] = float(prc_auc_val)
+                if aps_val is not None:
+                    metrics["PRC APS"] = float(aps_val)
+                if brier_val is not None:
+                    metrics["Brier Score"] = float(brier_val)
+
+                with (self.ensemble_metrics_dir / f"{ens_id}_CV_{rep_cv_idx}.json").open("w") as f:
+                    json.dump(_jsonify(metrics), f, indent=2)
+
+                if roc_curve_dict:
+                    with (self.ensemble_curves_dir / f"{ens_id}_CV_{rep_cv_idx}_roc.json").open("w") as f:
+                        json.dump(_jsonify(roc_curve_dict), f, indent=2)
+                if prc_curve_dict:
+                    with (self.ensemble_curves_dir / f"{ens_id}_CV_{rep_cv_idx}_prc.json").open("w") as f:
+                        json.dump(_jsonify(prc_curve_dict), f, indent=2)
+
+    # ------------------------------------------------------------------
+    # p8 on replication outputs
+    # ------------------------------------------------------------------
+
+    def _run_statistics(self, cv_partitions: int) -> None:
+        if self.outcome_type == "Continuous":
+            metric_weight = "explained_variance"
+        else:
+            metric_weight = "balanced_accuracy"
+
+        # StatisticsPhaseJob writes completion flags under <dataset_parent>/jobsCompleted.
+        (self.rep_root.parent / "jobsCompleted").mkdir(parents=True, exist_ok=True)
+
+        scoring_metric = self.scoring_metric
+        if self.outcome_type == "Continuous":
+            scoring_metric = "explained_variance"
+
+        stats = StatisticsPhaseJob(
+            full_path=str(self.rep_root),
+            outcome_label=self.outcome_label,
+            outcome_type=self.outcome_type,
+            instance_label=self.instance_label,
+            scoring_metric=scoring_metric,
+            cv_partitions=cv_partitions,
             top_features=40,
             sig_cutoff=self.sig_cutoff,
-            metric_weight="balanced_accuracy",
+            metric_weight=metric_weight,
             scale_data=self.scale_data,
             exclude_plots=self.exclude_plots,
             show_plots=self.show_plots,
+            include_ensembles=self.outcome_type in {"Binary", "Multiclass"},
         )
-
-        if self.outcome_type == "Binary":
-            result_table, metric_dict = stats.primary_stats_classification(
-                master_list, rep_data.data
-            )
-            if self.plot_roc:
-                stats.do_plot_roc(result_table)
-            if self.plot_prc:
-                stats.do_plot_prc(result_table, rep_data.data, True)
-        elif self.outcome_type == "Multiclass":
-            result_table, metric_dict = stats.primary_stats_multiclass(
-                master_list, rep_data.data
-            )
-            if self.plot_roc:
-                stats.do_plot_roc(result_table)
-            if self.plot_prc:
-                stats.do_plot_prc(result_table, rep_data.data, True)
-        else:  # Continuous
-            result_table, metric_dict = stats.primary_stats_regression(master_list)
-            # TODO: if you have new residuals / regression plots in p8, call them here
-
-        metrics = list(metric_dict[self.algorithms[0]].keys())
-        stats.save_metric_stats(metrics, metric_dict)
-
-        if self.plot_metric_boxplots:
-            stats.metric_boxplots(metrics, metric_dict)
-
-        # Inter-algorithm non-parametric tests if >1 algorithm
-        if len(self.algorithms) > 1:
-            kruskal_summary = stats.kruskal_wallis(metrics, metric_dict)
-            stats.mann_whitney_u(metrics, metric_dict, kruskal_summary)
-            stats.wilcoxon_rank(metrics, metric_dict, kruskal_summary)
-
-        # TODO: if your new P8 summary supports ensembles on replication sets,
-        #       this is where you’d extend master_list / metric_dict, or run
-        #       a separate ensemble StatsJob.
-
-        logging.info("%s replication phase complete", self.apply_name)
-        jobs_completed_dir = Path(self.experiment_path) / "jobsCompleted"
-        jobs_completed_dir.mkdir(exist_ok=True)
-        with open(jobs_completed_dir / f"job_apply_{self.apply_name}.txt", "w") as f:
-            f.write("complete")
-
-    # ------------------------------------------------------------------ #
-    # Helpers (imputation / scaling / eval) - mostly old logic
-    # ------------------------------------------------------------------ #
-
-    def impute_rep_data(
-        self,
-        cv_count: int,
-        cv_rep_data: pd.DataFrame,
-        all_train_feature_list: List[str],
-        cat_features: List[str],
-        quant_features: List[str],
-    ) -> pd.DataFrame:
-        # Categorical imputation
-        try:
-            impute_cat_info = os.path.join(
-                self.full_path, "scale_impute", f"categorical_imputer_cv{cv_count}.pickle"
-            )
-            with open(impute_cat_info, "rb") as f:
-                mode_dict = pickle.load(f)
-            for c in cv_rep_data.columns:
-                if c in mode_dict:
-                    cv_rep_data[c].fillna(mode_dict[c], inplace=True)
-        except Exception:
-            if cv_rep_data.isna().sum().sum() > 0:
-                logging.warning(
-                    "Categorical imputation pickle missing; imputing medians for %s",
-                    self.apply_name,
-                )
-                for feat in cat_features:
-                    if feat in cv_rep_data.columns and cv_rep_data[feat].isnull().sum() > 0:
-                        cv_rep_data[feat].fillna(cv_rep_data[feat].median(), inplace=True)
-
-        impute_rep_df: Optional[pd.DataFrame] = None
-
-        try:
-            impute_ordinal_info = os.path.join(
-                self.full_path, "scale_impute", f"ordinal_imputer_cv{cv_count}.pickle"
-            )
-            if self.multi_impute:
-                with open(impute_ordinal_info, "rb") as f:
-                    imputer = pickle.load(f)
-
-                if self.instance_label is None or self.instance_label == "None":
-                    x_rep = cv_rep_data.drop([self.outcome_label], axis=1).values
-                    inst_rep = None
-                else:
-                    x_rep = cv_rep_data.drop(
-                        [self.outcome_label, self.instance_label], axis=1
-                    ).values
-                    inst_rep = cv_rep_data[self.instance_label].values
-
-                y_rep = cv_rep_data[self.outcome_label].values
-                x_rep_impute = imputer.transform(x_rep)
-
-                if self.instance_label is None or self.instance_label == "None":
-                    impute_rep_df = pd.concat(
-                        [
-                            pd.DataFrame(y_rep, columns=[self.outcome_label]),
-                            pd.DataFrame(x_rep_impute, columns=all_train_feature_list),
-                        ],
-                        axis=1,
-                        sort=False,
-                    )
-                else:
-                    impute_rep_df = pd.concat(
-                        [
-                            pd.DataFrame(y_rep, columns=[self.outcome_label]),
-                            pd.DataFrame(inst_rep, columns=[self.instance_label]),
-                            pd.DataFrame(x_rep_impute, columns=all_train_feature_list),
-                        ],
-                        axis=1,
-                        sort=False,
-                    )
-            else:
-                with open(impute_ordinal_info, "rb") as f:
-                    median_dict = pickle.load(f)
-                for c in cv_rep_data.columns:
-                    if c in median_dict:
-                        cv_rep_data[c].fillna(median_dict[c], inplace=True)
-        except FileNotFoundError:
-            if cv_rep_data.isna().sum().sum() > 0:
-                logging.warning(
-                    "Quantitative imputation pickle missing; imputing means for %s",
-                    self.apply_name,
-                )
-                for feat in quant_features:
-                    if feat in cv_rep_data.columns and cv_rep_data[feat].isnull().sum() > 0:
-                        cv_rep_data[feat].fillna(cv_rep_data[feat].mean(), inplace=True)
-            impute_rep_df = cv_rep_data
-
-        return impute_rep_df
-
-    def scale_rep_data(
-        self,
-        cv_count: int,
-        cv_rep_data: pd.DataFrame,
-        all_train_feature_list: List[str],
-    ) -> pd.DataFrame:
-        scale_info = os.path.join(
-            self.full_path, "scale_impute", f"scaler_cv{cv_count}.pickle"
-        )
-        with open(scale_info, "rb") as f:
-            scaler = pickle.load(f)
-        decimal_places = 7
-
-        if self.instance_label is None or self.instance_label == "None":
-            x_rep = cv_rep_data.drop([self.outcome_label], axis=1)
-            inst_rep = None
-        else:
-            x_rep = cv_rep_data.drop([self.outcome_label, self.instance_label], axis=1)
-            inst_rep = cv_rep_data[self.instance_label]
-
-        y_rep = cv_rep_data[self.outcome_label]
-        x_rep_scaled = pd.DataFrame(
-            scaler.transform(x_rep).round(decimal_places),
-            columns=x_rep.columns,
-        )
-
-        if self.instance_label is None or self.instance_label == "None":
-            scale_rep_df = pd.concat(
-                [
-                    pd.DataFrame(y_rep, columns=[self.outcome_label]),
-                    pd.DataFrame(x_rep_scaled, columns=all_train_feature_list),
-                ],
-                axis=1,
-                sort=False,
-            )
-        else:
-            scale_rep_df = pd.concat(
-                [
-                    pd.DataFrame(y_rep, columns=[self.outcome_label]),
-                    pd.DataFrame(inst_rep, columns=[self.instance_label]),
-                    pd.DataFrame(x_rep_scaled, columns=all_train_feature_list),
-                ],
-                axis=1,
-                sort=False,
-            )
-        return scale_rep_df
-
-    def eval_model(
-        self,
-        algorithm: str,
-        cv_count: int,
-        x_test: np.ndarray,
-        y_test: np.ndarray,
-    ):
-        model_info = os.path.join(
-            self.full_path,
-            "models",
-            "pickledModels",
-            f"{self.abbrev[algorithm]}_{cv_count}.pickle",
-        )
-        with open(model_info, "rb") as f:
-            model = pickle.load(f)
-
-        if self.outcome_type == "Binary":
-            m = BinaryClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
-        elif self.outcome_type == "Multiclass":
-            m = MulticlassClassificationModel(None, algorithm, scoring_metric=self.scoring_metric)
-        else:
-            m = RegressionModel(None, algorithm, scoring_metric=self.scoring_metric)
-
-        m.model = model
-        m.model_name = algorithm
-        m.small_name = self.abbrev[algorithm]
-
-        if self.outcome_type == "Continuous":
-            metric_list = m.model_evaluation(x_test, y_test)
-            y_pred = m.predict(x_test)
-            residual_test = y_test - y_pred
-            return ([metric_list, None], [residual_test, y_pred, y_test])
-        else:
-            metric_list, fpr, tpr, roc_auc, prec, recall, prec_rec_auc, ave_prec, probas_ = m.model_evaluation(
-                x_test, y_test
-            )
-            return [
-                metric_list,
-                fpr,
-                tpr,
-                roc_auc,
-                prec,
-                recall,
-                prec_rec_auc,
-                ave_prec,
-                None,
-                probas_,
-            ]
-
-    # ------------------------------------------------------------------ #
-    # Internal helpers
-    # ------------------------------------------------------------------ #
-
-    def _apply_ordinal_encoding(self, eda: DataProcess) -> None:
-        """
-        Replays the ordinal encoding learned during training onto the replication dataset,
-        including handling of new levels.
-        """
-        try:
-            ord_path = os.path.join(
-                self.full_path,
-                "exploratory",
-                "ordinal_encoding.pickle",
-            )
-            with open(ord_path, "rb") as f:
-                ord_labels = pickle.load(f)
-
-            for feat in ord_labels.index:
-                if feat not in eda.dataset.data.columns:
-                    continue
-                temp_y, labels = pd.factorize(eda.dataset.data[feat])
-
-                if set(ord_labels.loc[feat]["Category"]) == set(labels):
-                    eda.dataset.data[feat] = temp_y
-                elif len(ord_labels.loc[feat]["Category"]) == 2:
-                    new_labels = list(set(labels) - set(ord_labels.loc[feat]["Category"]))
-                    labels = ord_labels.loc[feat]["Category"]
-                    rename_dict = dict(enumerate(labels))
-                    for lab in new_labels:
-                        rename_dict[None] = lab
-                    rename_dict = {v: k for k, v in rename_dict.items()}
-                    eda.dataset.data.replace({feat: rename_dict}, inplace=True)
-                    ord_labels.loc[feat]["Category"] = list(labels) + new_labels
-                    ord_labels.loc[feat]["Encoding"] = list(range(len(labels))) + [None] * len(
-                        new_labels
-                    )
-                    logging.warning(
-                        "New Value found in Textual Binary Categorical Variable %s; replaced with None encoding",
-                        feat,
-                    )
-                    for x in new_labels:
-                        logging.warning("\t%s", x)
-                else:
-                    new_labels = list(set(labels) - set(ord_labels.loc[feat]["Category"]))
-                    labels = ord_labels.loc[feat]["Category"]
-                    rename_dict = dict(enumerate(list(labels) + new_labels))
-                    rename_dict = {v: k for k, v in rename_dict.items()}
-                    eda.dataset.data.replace({feat: rename_dict}, inplace=True)
-                    ord_labels.loc[feat]["Category"] = list(labels) + new_labels
-                    ord_labels.loc[feat]["Encoding"] = list(
-                        range(len(list(labels) + new_labels))
-                    )
-
-            rep_exploratory = (
-                Path(self.full_path) / "replication" / self.apply_name / "exploratory"
-            )
-            rep_exploratory.mkdir(parents=True, exist_ok=True)
-            with open(rep_exploratory / "apply_ordinal_encoding.pickle", "wb") as f:
-                pickle.dump(ord_labels, f)
-            ord_labels.to_csv(
-                rep_exploratory / "Numerical_Encoding_Map.csv",
-            )
-        except FileNotFoundError:
-            # No ordinal encoding used in training
-            return
+        stats.run()

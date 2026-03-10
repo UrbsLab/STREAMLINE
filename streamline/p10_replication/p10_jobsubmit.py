@@ -1,69 +1,57 @@
-# streamline/p10_replication/p10_jobsubmit.py
-
 from __future__ import annotations
+
 import argparse
-import os
 import pickle
 from pathlib import Path
 
 from streamline.p10_replication.replication import ReplicationJob
 
 
-def main():
-    ap = argparse.ArgumentParser("STREAMLINE Phase 10 Replication JobSubmit")
-    ap.add_argument("--dataset_filename", required=True)
-    ap.add_argument("--dataset_for_rep", required=True)
-    ap.add_argument("--output_path", required=True)
-    ap.add_argument("--experiment_name", required=True)
-    ap.add_argument("--outcome_label", default=None)
-    ap.add_argument("--instance_label", default=None)
-    ap.add_argument("--match_label", default=None)
-    ap.add_argument("--exclude_plots", default="")
-    ap.add_argument("--show_plots", type=int, default=0)
-    args = ap.parse_args()
+def main() -> None:
+    parser = argparse.ArgumentParser("STREAMLINE Phase 10 Replication JobSubmit")
+    parser.add_argument("--dataset_filename", required=True)
+    parser.add_argument("--dataset_for_rep", required=True)
+    parser.add_argument("--output_path", required=True)
+    parser.add_argument("--experiment_name", required=True)
+    parser.add_argument("--outcome_label", default=None)
+    parser.add_argument("--instance_label", default=None)
+    parser.add_argument("--match_label", default=None)
+    parser.add_argument("--exclude_plots", default="")
+    parser.add_argument("--show_plots", type=int, default=0)
+    args = parser.parse_args()
 
     exp_root = Path(args.output_path) / args.experiment_name
-    with open(exp_root / "metadata.pickle", "rb") as f:
+    with (exp_root / "metadata.pickle").open("rb") as f:
         metadata = pickle.load(f)
 
     outcome_label = args.outcome_label or metadata["Outcome Label"]
+    instance_label = args.instance_label or metadata.get("Instance Label")
     outcome_type = metadata["Outcome Type"]
-    instance_label = args.instance_label or metadata["Instance Label"]
 
-    ignore_features = metadata.get("Ignored Features", [])
-    categorical_cutoff = metadata["Categorical Cutoff"]
-    sig_cutoff = metadata["Statistical Significance Cutoff"]
-    cv_partitions = metadata["CV Partitions"]
-    scale_data = metadata["Use Data Scaling"]
-    impute_data = metadata["Use Data Imputation"]
-    multi_impute = metadata["Use Multivariate Imputation"]
-    scoring_metric = metadata["Primary Metric"]
-    random_state = metadata["Random Seed"]
-
-    exclude_plots = [s for s in args.exclude_plots.split(",") if s]
-
-    data_name = Path(args.dataset_for_rep).stem
-    full_path = str(exp_root / data_name)
+    train_name = Path(args.dataset_for_rep).stem
+    train_dataset_root = exp_root / train_name
 
     job = ReplicationJob(
         dataset_filename=args.dataset_filename,
         dataset_for_rep=args.dataset_for_rep,
-        full_path=full_path,
+        full_path=str(train_dataset_root),
         outcome_label=outcome_label,
         outcome_type=outcome_type,
         instance_label=instance_label,
         match_label=args.match_label,
-        ignore_features=ignore_features,
-        cv_partitions=cv_partitions,
-        exclude_plots=exclude_plots,
-        categorical_cutoff=categorical_cutoff,
-        sig_cutoff=sig_cutoff,
-        scale_data=scale_data,
-        impute_data=impute_data,
-        multi_impute=multi_impute,
+        ignore_features=metadata.get("Ignored Features", []),
+        cv_partitions=metadata.get("CV Partitions", 5),
+        exclude_plots=[x.strip() for x in args.exclude_plots.split(",") if x.strip()],
+        categorical_cutoff=metadata.get("Categorical Cutoff", 10),
+        sig_cutoff=metadata.get("Statistical Significance Cutoff", 0.05),
+        featureeng_missingness=metadata.get("Engineering Missingness Cutoff", 0.5),
+        cleaning_missingness=metadata.get("Cleaning Missingness Cutoff", 0.5),
+        scale_data=metadata.get("Use Data Scaling", True),
+        impute_data=metadata.get("Use Data Imputation", True),
+        multi_impute=metadata.get("Use Multivariate Imputation", False),
         show_plots=bool(args.show_plots),
-        scoring_metric=scoring_metric,
-        random_state=random_state,
+        scoring_metric=metadata.get("Primary Metric", "balanced_accuracy"),
+        random_state=metadata.get("Random Seed"),
     )
     job.run()
 

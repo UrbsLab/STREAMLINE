@@ -18,6 +18,7 @@ from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p7_ensembles.p7_runner import P7Runner
 from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.p9_compare_datasets.p9_runner import P9Runner
+from streamline.p10_replication.p10_runner import P10Runner
 from streamline.p11_reporting.p11_runner import P11Runner
 
 def _pick_first_dataset_dir(exp_root: Path) -> Path:
@@ -51,6 +52,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     P7: ensembles (Regression-capable)
     P8: statistics
     P9: dataset comparison
+    P10: replication
     P11: reporting (pdf)
 
     Notes:
@@ -264,6 +266,32 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     dc_root = exp_root / "DatasetComparisons"
     assert dc_root.is_dir(), "Phase 9 should create DatasetComparisons directory"
     assert any(dc_root.glob("*.csv")), "Expected at least one dataset comparison CSV"
+
+    # ------------------------------------------------------------------
+    # Phase 10: Replication
+    # ------------------------------------------------------------------
+    rep_data_root = repo_root / "data" / "DemoRepDataRegression"
+    assert rep_data_root.is_dir(), f"Expected DemoRepDataRegression under {rep_data_root}"
+
+    dataset_for_rep = data_root / "simulation_data.csv"
+    assert dataset_for_rep.is_file(), f"Expected training dataset file at {dataset_for_rep}"
+
+    p10 = P10Runner(
+        rep_data_path=str(rep_data_root),
+        dataset_for_rep=str(dataset_for_rep),
+        output_path=str(output_root),
+        experiment_name=experiment_name,
+        run_cluster="Serial",
+        show_plots=False,
+    )
+    p10.run()
+
+    rep_root = exp_root / dataset_for_rep.stem / "replication"
+    rep_ds_dir = rep_root / "simulation_data_rep"
+    assert rep_root.is_dir(), "Phase 10 should create replication directory under training dataset"
+    assert rep_ds_dir.is_dir(), "Phase 10 should create replication dataset directory"
+    assert (rep_ds_dir / "model_evaluation" / "Summary_performance_mean.csv").is_file(), \
+        "Phase 10 should produce replication model evaluation summary"
 
     # ------------------------------------------------------------------
     # Phase 11: Reporting
