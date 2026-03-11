@@ -8,6 +8,8 @@ from typing import Iterable, Optional
 
 import pytest
 
+# pytest.skip("Tested Already", allow_module_level=True)
+
 # Phase runners - adjust import paths if your repo differs
 from streamline.p1_data_process.p1_runner import P1Runner
 from streamline.p2_impute_scale.p2_runner import P2Runner
@@ -71,6 +73,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
 
     output_root = tmp_path / "out_full_regression_pipeline"
     experiment_name = "DemoExpRegression"
+    cv_splits = 3
     output_root.mkdir(parents=True, exist_ok=True)
     exp_root = output_root / experiment_name
 
@@ -82,6 +85,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         instance_label=instance_label,
+        n_splits=cv_splits,
         force=True,
     )
     p1.run()
@@ -152,6 +156,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         experiment_name=experiment_name,
         outcome_label=outcome_label,
         instance_label=instance_label,
+        n_splits=cv_splits,
         run_cluster="Serial",
     )
     p5.run()
@@ -171,7 +176,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         outcome_label=outcome_label,
         model_type="Regression",
         instance_label=instance_label,
-        n_splits=3,
+        n_splits=cv_splits,
         models="LR,RF,SVR",
         calibrate=False,  # usually not relevant for regression; harmless if ignored
         scoring_metric="neg_mean_squared_error", # prefix with 'neg_' if using sklearn convention, don't change direction
@@ -199,7 +204,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     #     p7 = P7Runner(
     #         output_path=str(output_root),
     #         experiment_name=experiment_name,
-    #         n_splits=3,
+    #         n_splits=cv_splits,
     #         outcome_label=outcome_label,
     #         instance_label=instance_label,
     #         # Choose ensembles likely to generalize to regression; adjust to your implementation.
@@ -231,7 +236,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         outcome_label=outcome_label,
         outcome_type="Continuous",
         instance_label=instance_label,
-        n_splits=3,
+        n_splits=cv_splits,
         scoring_metric="mean_squared_error",
         top_features=10,
         sig_cutoff=0.1,

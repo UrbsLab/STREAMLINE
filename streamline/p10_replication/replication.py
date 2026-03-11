@@ -361,7 +361,7 @@ class ReplicationJob:
 
     def _resolve_fold_map(self) -> List[Tuple[int, int]]:
         """
-        Map contiguous replication fold ids to source training fold ids.
+        Map contiguous replication fold ids to source training fold ids with strict parity.
 
         Returns list of tuples: (replication_cv_id, source_training_cv_id)
         """
@@ -376,31 +376,38 @@ class ReplicationJob:
         if not source_ids:
             return []
 
-        # Keep only folds that actually have trained base-model pickles.
+        # Strictly align expected folds to metadata-defined CV partitions when available.
+        if self.cv_partitions > 0:
+            expected_source_ids = list(range(self.cv_partitions))
+            missing_cv_files = [cv for cv in expected_source_ids if cv not in source_ids]
+            if missing_cv_files:
+                raise Exception(
+                    "Strict fold parity failed: missing training CV files for folds "
+                    + ", ".join(str(cv) for cv in missing_cv_files)
+                )
+            source_ids = expected_source_ids
+
+        # Strictly require all expected folds for every active base algorithm.
         model_dir = self.train_root / "models" / "pickledModels"
-        if model_dir.exists() and self.algorithms:
-            model_id_sets: List[set] = []
+        if not model_dir.exists():
+            raise Exception("Strict fold parity failed: models/pickledModels directory is missing")
+
+        if self.algorithms:
             for algorithm in self.algorithms:
                 small = self.abbrev.get(algorithm, algorithm)
                 ids = {
                     int(m.group(1))
-                    for p in model_dir.glob(f"{small}_*.pickle")
+                    for pattern in (f"{small}_*.pickle", f"{algorithm}_*.pickle")
+                    for p in model_dir.glob(pattern)
                     for m in [re.match(r".+?_(\d+)\.pickle$", p.name)]
                     if m
                 }
-                if ids:
-                    model_id_sets.append(ids)
-
-            if model_id_sets:
-                common_ids = sorted(set.intersection(*model_id_sets))
-                if common_ids:
-                    source_ids = [cv for cv in source_ids if cv in common_ids]
-                    if not source_ids:
-                        source_ids = common_ids
-
-        # Respect explicit metadata cv_partitions only after filtering available folds.
-        if self.cv_partitions > 0:
-            source_ids = source_ids[: self.cv_partitions]
+                missing_model_folds = [cv for cv in source_ids if cv not in ids]
+                if missing_model_folds:
+                    raise Exception(
+                        "Strict fold parity failed: missing trained model pickles for "
+                        f"algorithm={algorithm}, folds={missing_model_folds}"
+                    )
 
         return [(idx, source_cv) for idx, source_cv in enumerate(source_ids)]
 
@@ -897,8 +904,10 @@ class ReplicationJob:
         for rep_cv_idx, source_cv_idx in fold_map:
             train_cv_path = self.train_root / "CVDatasets" / f"{self.train_name}_CV_{source_cv_idx}_Train.csv"
             if not train_cv_path.exists():
-                logger.warning("Missing train fold %s; skipping", train_cv_path)
-                continue
+                raise Exception(
+                    "Strict fold parity failed: missing training CV fold file "
+                    f"{train_cv_path}"
+                )
 
             train_cv_df = pd.read_csv(train_cv_path, na_values="NA", sep=",")
             rep_cv_df = processed.copy()
@@ -940,8 +949,10 @@ class ReplicationJob:
                 eval_df = eval_df.drop(columns=[self.instance_label])
 
             if self.outcome_label not in eval_df.columns:
-                logger.warning("Outcome label missing in replication fold %s, skipping fold", rep_cv_idx)
-                continue
+                raise Exception(
+                    "Strict fold parity failed: outcome label "
+                    f"'{self.outcome_label}' missing in replication fold {rep_cv_idx}"
+                )
 
             x_test = eval_df.drop(columns=[self.outcome_label]).values
             y_test = eval_df[self.outcome_label].values
@@ -954,12 +965,10 @@ class ReplicationJob:
                 ]
                 model_path = next((p for p in model_path_candidates if p.exists()), None)
                 if model_path is None:
-                    logger.warning(
-                        "Missing trained model pickle for algorithm=%s, source_cv=%s",
-                        algorithm,
-                        source_cv_idx,
+                    raise Exception(
+                        "Strict fold parity failed: missing trained model pickle for "
+                        f"algorithm={algorithm}, source_cv={source_cv_idx}"
                     )
-                    continue
 
                 with model_path.open("rb") as f:
                     model = pickle.load(f)
@@ -1221,6 +1230,25 @@ class ReplicationJob:
         if not src_pickled.exists():
             return
 
+        source_fold_ids = [source_cv for _, source_cv in fold_map]
+        ensemble_fold_map: Dict[str, set] = {}
+        for ens_pickle in sorted(src_pickled.glob("*.pickle")):
+            match = re.match(r"(.+?)_(\d+)\.pickle$", ens_pickle.name)
+            if not match:
+                continue
+            ens_id = match.group(1)
+            fold_id = int(match.group(2))
+            ensemble_fold_map.setdefault(ens_id, set()).add(fold_id)
+
+        # If ensemble pickles are present, enforce strict fold parity for each ensemble id.
+        for ens_id, folds in ensemble_fold_map.items():
+            missing_folds = [cv for cv in source_fold_ids if cv not in folds]
+            if missing_folds:
+                raise Exception(
+                    "Strict fold parity failed: missing ensemble pickles for "
+                    f"ensemble={ens_id}, folds={missing_folds}"
+                )
+
         self.ensemble_metrics_dir.mkdir(parents=True, exist_ok=True)
         self.ensemble_curves_dir.mkdir(parents=True, exist_ok=True)
         self.ensemble_pickled_dir.mkdir(parents=True, exist_ok=True)
@@ -1228,7 +1256,10 @@ class ReplicationJob:
         for rep_cv_idx, source_cv_idx in fold_map:
             rep_test_path = self.cv_dir / f"{self.apply_name}_CV_{rep_cv_idx}_Test.csv"
             if not rep_test_path.exists():
-                continue
+                raise Exception(
+                    "Strict fold parity failed: missing replication CV test file "
+                    f"{rep_test_path}"
+                )
 
             test_df = pd.read_csv(rep_test_path, na_values="NA", sep=",")
             eval_df = test_df.copy()
@@ -1236,16 +1267,21 @@ class ReplicationJob:
                 eval_df = eval_df.drop(columns=[self.instance_label])
 
             if self.outcome_label not in eval_df.columns:
-                continue
+                raise Exception(
+                    "Strict fold parity failed: outcome label "
+                    f"'{self.outcome_label}' missing in replication fold {rep_cv_idx}"
+                )
 
             x_test = eval_df.drop(columns=[self.outcome_label]).values
             y_test = eval_df[self.outcome_label].values
 
-            for ens_pickle in sorted(src_pickled.glob(f"*_{source_cv_idx}.pickle")):
-                match = re.match(r"(.+?)_\d+\.pickle$", ens_pickle.name)
-                if not match:
-                    continue
-                ens_id = match.group(1)
+            for ens_id in sorted(ensemble_fold_map.keys()):
+                ens_pickle = src_pickled / f"{ens_id}_{source_cv_idx}.pickle"
+                if not ens_pickle.exists():
+                    raise Exception(
+                        "Strict fold parity failed: missing ensemble pickle "
+                        f"{ens_pickle}"
+                    )
 
                 with ens_pickle.open("rb") as f:
                     model = pickle.load(f)

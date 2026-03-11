@@ -50,6 +50,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
 
     output_root = tmp_path / "out_full_pipeline"
     experiment_name = "DemoExp"
+    cv_splits = 3
 
     # P1 may create experiment folder itself; ensure parent exists
     output_root.mkdir(parents=True, exist_ok=True)
@@ -65,6 +66,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         instance_label="InstanceID",
+        n_splits=cv_splits,
         force=True
         # any other args you normally pass can be added here
     )
@@ -143,6 +145,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         instance_label="InstanceID",
+        n_splits=cv_splits,
         run_cluster="Serial",
     )
     p5.run()
@@ -164,7 +167,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
         outcome_label="Class",
         model_type="Multiclass",
         instance_label="InstanceID",
-        n_splits=3,
+        n_splits=cv_splits,
         models="NB,LR,SVM",
         calibrate=False,
         scoring_metric="balanced_accuracy",
@@ -189,7 +192,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     p7 = P7Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
-        n_splits=3,
+        n_splits=cv_splits,
         outcome_label="Class",
         instance_label="InstanceID",
         ensembles="hard_voting,soft_voting,stack_lr",
@@ -220,7 +223,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
         outcome_label="Class",
         outcome_type="Multiclass",
         instance_label="InstanceID",
-        n_splits=3,
+        n_splits=cv_splits,
         scoring_metric="balanced_accuracy",
         top_features=10,
         sig_cutoff=0.1,
