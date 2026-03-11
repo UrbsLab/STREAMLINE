@@ -5,7 +5,7 @@ import os
 from abc import ABC
 from typing import Any, Dict
 
-from streamline.p6_modeling.utils.submodels import MultiClassificationModel
+from streamline.p6_modeling.utils.submodels import MulticlassClassificationModel
 
 try:
     # Local OSS package (not tabpfn-client)
@@ -30,7 +30,7 @@ def _supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in kwargs.items() if k in allowed}
 
 
-class TabPFNMultiClassClassifier(MultiClassificationModel, ABC):
+class TabPFNMultiClassClassifier(MulticlassClassificationModel, ABC):
     """
     TabPFN Multiclass Classifier (CPU-only).
 
@@ -39,8 +39,8 @@ class TabPFNMultiClassClassifier(MultiClassificationModel, ABC):
       - If allow_cpu_large_dataset=True, sets TABPFN_ALLOW_CPU_LARGE_DATASET=true (can be very slow).
     """
 
-    model_name = "TabPFN (Multiclass)"
-    small_name = "TabPFN-MC"
+    model_name = "TabPFN"
+    small_name = "TabPFN"
     color = "purple"
 
     def __init__(

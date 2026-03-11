@@ -125,6 +125,13 @@ class EnsemblePhaseJob:
 
                 # Predictions
                 y_pred = model.predict(X_test)
+                
+                try:
+                    y_pred_proba = model.predict_proba(X_test)
+                except Exception as e:
+                    # logging.warning("predict_proba failed; setting y_pred_proba=None.")
+                    # logging.warning(str(e))
+                    y_pred_proba = None
 
                 # Metrics (discrete)
                 metrics = _calc_basic_metrics(y_test, y_pred)
@@ -207,7 +214,7 @@ class EnsemblePhaseJob:
 
                     # For reporting parity, also compute "naive" AUC using y_pred
                     try:
-                        metrics["ROC AUC (hard from preds)"] = roc_auc_score(y_test, y_pred)
+                        metrics["ROC AUC (hard from preds)"] = roc_auc_score(y_test, y_pred_proba, multi_class='ovr')
                     except Exception as e:
                         logging.warning("Failed to compute ROC AUC from hard predictions; setting to None.")
                         logging.warning(str(e))

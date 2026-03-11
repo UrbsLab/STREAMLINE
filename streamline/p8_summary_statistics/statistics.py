@@ -266,7 +266,10 @@ class StatisticsPhaseJob:
             try:
                 registry_entries = list_models(self.outcome_type)
             except Exception as e:
-                logging.warning("StatsPhaseJob: list_all_models() failed: %r", e)
+                if self.outcome_type in ("Continuous"):
+                    registry_entries = list_models("Regression")
+                else:
+                    logging.warning("StatsPhaseJob: list_models() failed for outcome_type %s: %r", self.outcome_type, e)
 
         # Build a quick lookup: small_name -> (model_type, entry)
         entries_by_small = {}

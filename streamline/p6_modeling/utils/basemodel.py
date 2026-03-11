@@ -145,6 +145,8 @@ class BaseModel:
             model = model_class(**self.params)
             if self.scoring_metric.startswith('mean_'):
                 cv_scoring_metric = 'neg_'+self.scoring_metric
+            else:
+                cv_scoring_metric = self.scoring_metric
             mean_cv_score = cross_val_score(model, self.x_train, self.y_train,
                                             scoring=cv_scoring_metric,
                                             cv=self.cv, n_jobs=self.n_jobs).mean()
