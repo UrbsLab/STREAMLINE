@@ -23,6 +23,8 @@ from streamline.p9_compare_datasets.p9_runner import P9Runner
 from streamline.p10_replication.p10_runner import P10Runner
 from streamline.p11_reporting.p11_runner import P11Runner
 
+SKIP_TILL_MODELING_PHASES = True  # Set to False to run full pipeline; True to skip directly to Phase 8+ for faster testing of later phases
+
 def _pick_first_dataset_dir(exp_root: Path) -> Path:
     """
     STREAMLINE phase outputs typically look like:
@@ -55,7 +57,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     P8: statistics
     P9: dataset comparison
     P10: replication
-    P11: reporting (pdf)
+    P11: reporting (standard + replication mode)
 
     Notes:
       - You can override the demo-data root with STREAMLINE_REGRESSION_DATA_ROOT.
@@ -76,160 +78,193 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     cv_splits = 3
     output_root.mkdir(parents=True, exist_ok=True)
     exp_root = output_root / experiment_name
-
-    # ------------------------------------------------------------------
-    # Phase 1: Data processing
-    # ------------------------------------------------------------------
-    p1 = P1Runner(
-        data_path=str(data_root),
-        output_path=str(output_root),
-        experiment_name=experiment_name,
-        instance_label=instance_label,
-        n_splits=cv_splits,
-        force=True,
-    )
-    p1.run()
-
-    assert exp_root.is_dir(), "Phase 1 should create experiment directory"
-    ds_dir = _pick_first_dataset_dir(exp_root)
     
-    # assert False, "Intentional stop after Phase 1 for testing purposes; comment out to run full pipeline"
+    if not SKIP_TILL_MODELING_PHASES:
 
-    # ------------------------------------------------------------------
-    # Phase 2: Impute & scale
-    # ------------------------------------------------------------------
-    p2 = P2Runner(
-        output_path=str(output_root),
-        experiment_name=experiment_name,
-        outcome_label=outcome_label,
-        instance_label=instance_label,
-        run_cluster="Serial",
-    )
-    p2.run()
+        # ------------------------------------------------------------------
+        # Phase 1: Data processing
+        # ------------------------------------------------------------------
+        p1 = P1Runner(
+            data_path=str(data_root),
+            output_path=str(output_root),
+            experiment_name=experiment_name,
+            instance_label=instance_label,
+            n_splits=cv_splits,
+            force=True,
+        )
+        p1.run()
 
-    ds_dir = _pick_first_dataset_dir(exp_root)
+        assert exp_root.is_dir(), "Phase 1 should create experiment directory"
+        ds_dir = _pick_first_dataset_dir(exp_root)
+        
+        # assert False, "Intentional stop after Phase 1 for testing purposes; comment out to run full pipeline"
 
-    # (Optional) sanity: some scaled/imputed artifacts exist (names vary by implementation)
-    scaled_candidates = [
-        ds_dir / "impute_scale",
-    ]
-    # Don't hard-fail if your code writes elsewhere; comment in if you want stricter checks:
-    # assert _exists_any(scaled_candidates), "Phase 2 should produce scaled/imputed artifacts"
+        # ------------------------------------------------------------------
+        # Phase 2: Impute & scale
+        # ------------------------------------------------------------------
+        p2 = P2Runner(
+            output_path=str(output_root),
+            experiment_name=experiment_name,
+            outcome_label=outcome_label,
+            instance_label=instance_label,
+            run_cluster="Serial",
+        )
+        p2.run()
 
-    # ------------------------------------------------------------------
-    # Phase 3: Feature learning
-    # ------------------------------------------------------------------
-    p3 = P3Runner(
-        output_path=str(output_root),
-        experiment_name=experiment_name,
-        outcome_label=outcome_label,
-        instance_label=instance_label,
-        run_cluster="Serial",
-    )
-    p3.run()
+        ds_dir = _pick_first_dataset_dir(exp_root)
 
-    assert _exists_any([ds_dir / "feature_learning"]), "Phase 3 should produce feature learning outputs"
+        # (Optional) sanity: some scaled/imputed artifacts exist (names vary by implementation)
+        scaled_candidates = [
+            ds_dir / "impute_scale",
+        ]
+        # Don't hard-fail if your code writes elsewhere; comment in if you want stricter checks:
+        # assert _exists_any(scaled_candidates), "Phase 2 should produce scaled/imputed artifacts"
 
-    # ------------------------------------------------------------------
-    # Phase 4: Feature importance
-    # ------------------------------------------------------------------
-    p4 = P4Runner(
-        output_path=str(output_root),
-        experiment_name=experiment_name,
-        outcome_label=outcome_label,
-        outcome_type="Continuous",
-        instance_label=instance_label,
-        run_cluster="Serial",
-    )
-    p4.run()
+        # ------------------------------------------------------------------
+        # Phase 3: Feature learning
+        # ------------------------------------------------------------------
+        p3 = P3Runner(
+            output_path=str(output_root),
+            experiment_name=experiment_name,
+            outcome_label=outcome_label,
+            instance_label=instance_label,
+            run_cluster="Serial",
+        )
+        p3.run()
 
-    assert _exists_any([
-        ds_dir / "feature_importance",
-        ds_dir / "model_evaluation" / "feature_importance",
-    ]), "Phase 4 should write feature importance artifacts"
+        assert _exists_any([ds_dir / "feature_learning"]), "Phase 3 should produce feature learning outputs"
 
-    # ------------------------------------------------------------------
-    # Phase 5: Feature selection
-    # ------------------------------------------------------------------
-    p5 = P5Runner(
-        output_path=str(output_root),
-        experiment_name=experiment_name,
-        outcome_label=outcome_label,
-        instance_label=instance_label,
-        n_splits=cv_splits,
-        run_cluster="Serial",
-    )
-    p5.run()
+        # ------------------------------------------------------------------
+        # Phase 4: Feature importance
+        # ------------------------------------------------------------------
+        p4 = P4Runner(
+            output_path=str(output_root),
+            experiment_name=experiment_name,
+            outcome_label=outcome_label,
+            outcome_type="Continuous",
+            instance_label=instance_label,
+            run_cluster="Serial",
+        )
+        p4.run()
 
-    assert _exists_any([ds_dir / "feature_selection"]), "Phase 5 should write feature selection artifacts"
+        assert _exists_any([
+            ds_dir / "feature_importance",
+            ds_dir / "model_evaluation" / "feature_importance",
+        ]), "Phase 4 should write feature importance artifacts"
 
-    # ------------------------------------------------------------------
-    # Phase 6: Modeling (Regression)
-    # ------------------------------------------------------------------
-    # Keep runtime tiny: small model set + tiny Optuna search
-    #
-    # Adjust 'models=' to whatever your regression registry supports.
-    # Common STREAMLINE abbreviations often include: LR, RF, SVR, EN (ElasticNet), LASSO, RIDGE, XGB, etc.
-    p6 = P6Runner(
-        output_path=str(output_root),
-        experiment_name=experiment_name,
-        outcome_label=outcome_label,
-        model_type="Regression",
-        instance_label=instance_label,
-        n_splits=cv_splits,
-        models="LR,RF,SVR",
-        calibrate=False,  # usually not relevant for regression; harmless if ignored
-        scoring_metric="neg_mean_squared_error", # prefix with 'neg_' if using sklearn convention, don't change direction
-        metric_direction="maximize",
-        n_trials=2,
-        timeout=15,
-        training_subsample=0,
-        uniform_fi=False,
-        save_plot=False,
-        random_state=42,
-        run_cluster="Serial",
-    )
-    p6.run()
+        # ------------------------------------------------------------------
+        # Phase 5: Feature selection
+        # ------------------------------------------------------------------
+        p5 = P5Runner(
+            output_path=str(output_root),
+            experiment_name=experiment_name,
+            outcome_label=outcome_label,
+            instance_label=instance_label,
+            n_splits=cv_splits,
+            run_cluster="Serial",
+        )
+        p5.run()
 
-    models_dir = ds_dir / "models" / "pickledModels"
-    assert models_dir.is_dir(), "Phase 6 should create pickled base models"
-    assert list(models_dir.glob("*.pickle")), "Expected base model pickles"
+        assert _exists_any([ds_dir / "feature_selection"]), "Phase 5 should write feature selection artifacts"
 
-    # ------------------------------------------------------------------
-    # Phase 7: Ensembles (Regression)
-    # ------------------------------------------------------------------
-    # If your ensemble phase is classification-only, you can skip by setting:
-    #   STREAMLINE_SKIP_REGRESSION_ENSEMBLES=1
-    # if os.getenv("STREAMLINE_SKIP_REGRESSION_ENSEMBLES", "0").strip() not in {"1", "true", "True"}:
-    #     p7 = P7Runner(
-    #         output_path=str(output_root),
-    #         experiment_name=experiment_name,
-    #         n_splits=cv_splits,
-    #         outcome_label=outcome_label,
-    #         instance_label=instance_label,
-    #         # Choose ensembles likely to generalize to regression; adjust to your implementation.
-    #         ensembles="hard_voting,soft_voting,stack_lr",
-    #         base_models="LR,RF,SVR",
-    #         meta_train_source="train",
-    #         calibrate=0,
-    #         calibrate_method="sigmoid",
-    #         calibrate_cv=3,
-    #         run_cluster="Serial",
-    #         queue="defq",
-    #         reserved_memory=4,
-    #         random_state=42,
-    #     )
-    #     p7.run()
+        # ------------------------------------------------------------------
+        # Phase 6: Modeling (Regression)
+        # ------------------------------------------------------------------
+        # Keep runtime tiny: small model set + tiny Optuna search
+        #
+        # Adjust 'models=' to whatever your regression registry supports.
+        # Common STREAMLINE abbreviations often include: LR, RF, SVR, EN (ElasticNet), LASSO, RIDGE, XGB, etc.
+        p6 = P6Runner(
+            output_path=str(output_root),
+            experiment_name=experiment_name,
+            outcome_label=outcome_label,
+            model_type="Regression",
+            instance_label=instance_label,
+            n_splits=cv_splits,
+            models="LR,RF,SVR",
+            calibrate=False,  # usually not relevant for regression; harmless if ignored
+            scoring_metric="neg_mean_squared_error", # prefix with 'neg_' if using sklearn convention, don't change direction
+            metric_direction="maximize",
+            n_trials=2,
+            timeout=15,
+            training_subsample=0,
+            uniform_fi=False,
+            save_plot=False,
+            random_state=42,
+            run_cluster="Serial",
+        )
+        p6.run()
 
-    #     ens_root = ds_dir / "ensemble_evaluation"
-    #     assert ens_root.is_dir(), "Phase 7 should create ensemble_evaluation directory"
-    #     assert (ens_root / "pickled_ensembles").is_dir(), "Expected pickled ensembles"
-    #     assert list((ens_root / "pickled_ensembles").glob("*.pickle")), \
-    #         "Expected at least one ensemble pickle from Phase 7"
+        models_dir = ds_dir / "models" / "pickledModels"
+        assert models_dir.is_dir(), "Phase 6 should create pickled base models"
+        assert list(models_dir.glob("*.pickle")), "Expected base model pickles"
+
+        # ------------------------------------------------------------------
+        # Phase 7: Ensembles (Regression)
+        # ------------------------------------------------------------------
+        # If your ensemble phase is classification-only, you can skip by setting:
+        #   STREAMLINE_SKIP_REGRESSION_ENSEMBLES=1
+        # if os.getenv("STREAMLINE_SKIP_REGRESSION_ENSEMBLES", "0").strip() not in {"1", "true", "True"}:
+        #     p7 = P7Runner(
+        #         output_path=str(output_root),
+        #         experiment_name=experiment_name,
+        #         n_splits=cv_splits,
+        #         outcome_label=outcome_label,
+        #         instance_label=instance_label,
+        #         # Choose ensembles likely to generalize to regression; adjust to your implementation.
+        #         ensembles="hard_voting,soft_voting,stack_lr",
+        #         base_models="LR,RF,SVR",
+        #         meta_train_source="train",
+        #         calibrate=0,
+        #         calibrate_method="sigmoid",
+        #         calibrate_cv=3,
+        #         run_cluster="Serial",
+        #         queue="defq",
+        #         reserved_memory=4,
+        #         random_state=42,
+        #     )
+        #     p7.run()
+
+        #     ens_root = ds_dir / "ensemble_evaluation"
+        #     assert ens_root.is_dir(), "Phase 7 should create ensemble_evaluation directory"
+        #     assert (ens_root / "pickled_ensembles").is_dir(), "Expected pickled ensembles"
+        #     assert list((ens_root / "pickled_ensembles").glob("*.pickle")), \
+        #         "Expected at least one ensemble pickle from Phase 7"
+    else:
+        print("Skipping directly to Phase 8+ for faster testing of later phases")
+        assert exp_root.is_dir(), "Phase 1 should create experiment directory"
+        ds_dir = _pick_first_dataset_dir(exp_root)
+        
+        # (Optional) sanity: some scaled/imputed artifacts exist (names vary by implementation)
+        scaled_candidates = [
+            ds_dir / "impute_scale",
+        ]
+        # Don't hard-fail if your code writes elsewhere; comment in if you want stricter checks:
+        # assert _exists_any(scaled_candidates), "Phase 2 should produce scaled/imputed artifacts"
+
+        assert _exists_any([ds_dir / "feature_learning"]), "Phase 3 should produce feature learning outputs"
+        
+        assert _exists_any([
+            ds_dir / "feature_importance",
+            ds_dir / "model_evaluation" / "feature_importance",
+        ]), "Phase 4 should write feature importance artifacts"
+        
+        assert _exists_any([ds_dir / "feature_selection"]), "Phase 5 should write feature selection artifacts"
+        
+        models_dir = ds_dir / "models" / "pickledModels"
+        assert models_dir.is_dir(), "Phase 6 should create pickled base models"
+        assert list(models_dir.glob("*.pickle")), "Expected base model pickles"
+        
+        # ens_root = ds_dir / "ensemble_evaluation"
+        # assert ens_root.is_dir(), "Phase 7 should create ensemble_evaluation directory"
+        # assert (ens_root / "pickled_ensembles").is_dir(), "Expected pickled ensembles"
+        # assert list((ens_root / "pickled_ensembles").glob("*.pickle")), \
+        #     "Expected at least one ensemble pickle from Phase 7"
 
     # ------------------------------------------------------------------
     # Phase 8: Statistics
     # ------------------------------------------------------------------
+        
     p8 = P8Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
@@ -313,3 +348,20 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
 
     pdf_candidates = list(exp_root.glob("**/*.pdf"))
     assert pdf_candidates, "Phase 11 should produce at least one PDF report"
+
+    # Replication reporting mode (Phase 11)
+    p11_rep = P11Runner(
+        output_path=str(output_root),
+        experiment_name=experiment_name,
+        report_mode="replication",
+        outcome_label=outcome_label,
+        outcome_type="Continuous",
+        instance_label=instance_label,
+        run_cluster="Serial",
+    )
+    p11_rep.run()
+
+    rep_report_json = exp_root / "reporting_replication" / "report_data.json"
+    rep_report_pdf = exp_root / "reporting_replication" / "report.pdf"
+    assert rep_report_json.is_file(), "Phase 11 replication mode should produce report_data.json"
+    assert rep_report_pdf.is_file(), "Phase 11 replication mode should produce report.pdf"

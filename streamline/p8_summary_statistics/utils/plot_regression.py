@@ -110,7 +110,7 @@ def residuals_regression(
         )
     test_df = pd.concat(test_df_parts, ignore_index=True)
     test_df["Residual"] = pd.to_numeric(test_df["Residual"], errors="raise")
-    test_df = test_df[np.isfinite(test_df["Residual"])].reset_index(drop=True)
+    # test_df = test_df[np.isfinite(test_df["Residual"])].reset_index(drop=True)
 
     # Keep only testing outputs for regression evaluation artifacts.
     test_df.to_csv(

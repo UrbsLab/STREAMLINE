@@ -31,6 +31,12 @@ def main():
         default=None,
         help="Optional output directory for report artifacts (report_data.json, report.pdf, figures)",
     )
+    ap.add_argument(
+        "--report_mode",
+        default="standard",
+        choices=["standard", "replication"],
+        help="Reporting scope: standard (training datasets) or replication (datasets under replication folders)",
+    )
 
     ap.add_argument("--outcome_label", default=None)
     ap.add_argument("--outcome_type", default=None)
@@ -63,6 +69,7 @@ def main():
         experiment_name=_none_if_empty(args.experiment_name),
         experiment_path=_none_if_empty(args.experiment_path),
         reporting_dir=_none_if_empty(args.reporting_dir),
+        report_mode=args.report_mode,
         outcome_label=_none_if_empty(args.outcome_label),
         outcome_type=_none_if_empty(args.outcome_type),
         instance_label=_none_if_empty(args.instance_label),

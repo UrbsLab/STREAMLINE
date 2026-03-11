@@ -36,7 +36,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     P8: statistics
     P9: dataset comparison
     P10: replication
-    P11: reporting (html/pdf generation)
+    P11: reporting (standard + replication mode)
 
     This test intentionally keeps hyperparameters tiny / defaults where possible
     to keep runtime reasonable and only asserts for the presence of key artifacts.
@@ -306,3 +306,20 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     # Expect at least a PDF under the experiment root
     pdf_candidates = list(exp_root.glob("**/*.pdf"))
     assert pdf_candidates, "Phase 11 should produce at least one PDF report"
+
+    # Replication reporting mode (Phase 11)
+    p11_rep = P11Runner(
+        output_path=str(output_root),
+        experiment_name=experiment_name,
+        report_mode="replication",
+        outcome_label="Class",
+        outcome_type="Multiclass",
+        instance_label="InstanceID",
+        run_cluster="Serial",
+    )
+    p11_rep.run()
+
+    rep_report_json = exp_root / "reporting_replication" / "report_data.json"
+    rep_report_pdf = exp_root / "reporting_replication" / "report.pdf"
+    assert rep_report_json.is_file(), "Phase 11 replication mode should produce report_data.json"
+    assert rep_report_pdf.is_file(), "Phase 11 replication mode should produce report.pdf"

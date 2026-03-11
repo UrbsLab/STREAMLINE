@@ -30,6 +30,7 @@ class P11Runner:
         experiment_name: Optional[str] = None,
         experiment_path: Optional[str] = None,
         reporting_dir: Optional[str] = None,
+        report_mode: str = "standard",  # standard | replication
         outcome_label: Optional[str] = "Class",
         outcome_type: Optional[str] = "Binary",
         instance_label: Optional[str] = None,
@@ -57,12 +58,17 @@ class P11Runner:
         self.output_path = str(output_path) if output_path else str(self.exp_root.parent)
         self.experiment_name = str(experiment_name) if experiment_name else self.exp_root.name
 
+        report_mode_norm = str(report_mode or "standard").strip().lower()
+        if report_mode_norm not in {"standard", "replication"}:
+            raise ValueError("report_mode must be one of: standard, replication")
+
         # kwargs handed directly to ReportPhaseJob
         self.kw = dict(
             output_path=self.output_path,
             experiment_name=self.experiment_name,
             experiment_path=str(self.exp_root),
             reporting_dir=reporting_dir,
+            report_mode=report_mode_norm,
             outcome_label=outcome_label,
             outcome_type=outcome_type,
             instance_label=instance_label,
@@ -145,6 +151,7 @@ class P11Runner:
         reporting_dir = self.kw.get("reporting_dir")
         if reporting_dir:
             args.extend(["--reporting_dir", str(reporting_dir)])
+        args.extend(["--report_mode", str(self.kw.get("report_mode") or "standard")])
 
         arg_str = " ".join(shlex.quote(a) for a in args)
 
