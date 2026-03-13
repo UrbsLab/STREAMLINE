@@ -912,7 +912,7 @@ class DataProcess:
         for name, pval in sorted_p_list:
             if pval == 'None' or pval > self.sig_cutoff:
                 continue
-            if self.outcome_type == "Binary":
+            if self.outcome_type == "Binary" or self.outcome_type == "Multiclass":
                 if name in self.categorical_features:
                     table = pd.crosstab(self.data[name], self.data[self.outcome_label])
                     table.plot(kind='bar'); plt.ylabel('Contingency Table Count')

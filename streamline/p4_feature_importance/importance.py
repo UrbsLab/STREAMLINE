@@ -1,6 +1,6 @@
 # streamline/p4_feature_importance/importance.py
 from __future__ import annotations
-import os, time, json, pickle, random
+import os, time, json, pickle, random, logging
 from typing import Optional, Dict, Any, Tuple
 import numpy as np
 import pandas as pd
@@ -55,6 +55,7 @@ class FeatureImportance:
     def run(self):
         random.seed(self.random_state); np.random.seed(self.random_state)
         tr, te = self._load_data()
+        logging.info("Prepared Train and Test for: %s_CV_%s", self.dataset_name, self.cv_count)
 
         y_tr = tr[self.outcome_label]; y_te = te[self.outcome_label]
         if self.instance_label and self.instance_label in tr.columns:
@@ -78,9 +79,11 @@ class FeatureImportance:
         if self.model_id == "mutualinformation" and self.outcome_type and "outcome_type" not in params:
             params["outcome_type"] = self.outcome_type
 
+        logging.info("Running %s...", self.model_id)
         model = load_importance(self.model_id, **params).fit(X_fit, y_fit)
 
         # write scores CSV for this model
+        logging.info("Sort and pickle feature importance scores...")
         self._write_scores_csv(model, Xtr.columns)
 
         # optionally reduce CV CSVs using selection
@@ -110,11 +113,19 @@ class FeatureImportance:
 
         self._save_runtime()
         self._complete_flag(model)
+        logging.info(
+            "%s CV%s phase 4 %s evaluation complete",
+            self.dataset_name,
+            self.cv_count,
+            self.model_id,
+        )
 
     # ---- helpers ----
     def _load_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         self.dataset_name = self.cv_train_path.split('/')[-3]
         self.cv_count = self.cv_train_path.split('/')[-1].split("_")[-2]
+        logging.info("-------------------------------------------------------")
+        logging.info("Loading Dataset: %s_CV_%s_Train", self.dataset_name, self.cv_count)
         tr = pd.read_csv(self.cv_train_path, na_values='NA', sep=',')
         te = pd.read_csv(self.cv_test_path, na_values='NA', sep=',')
         return tr, te

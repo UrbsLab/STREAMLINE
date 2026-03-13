@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import logging
 from typing import Dict, List, Tuple, Optional
 import pandas as pd
 import numpy as np
@@ -56,11 +57,16 @@ class DefaultFeatureSelector:
             selected_feature_lists[alg] = keep_per_cv
             meta_feature_ranks[alg] = ranks_per_cv
             if self.export_scores and med_table is not None:
+                logging.info("Plotting Feature Importance Scores for %s...", alg)
+                logging.info("%s", med_table.head(10).to_string(index=False))
                 self._plot_top_medians(fs_root, alg, med_table)
+                logging.info("Saved Feature Importance Plots at")
+                logging.info("%s", os.path.join(fs_root, alg, "TopAverageScores.png"))
 
         if not filter_poor_features or not algs:
             return  # nothing else to do
 
+        logging.info("Applying collective feature selection...")
         cv_selected_list, informative_counts, uninformative_counts = self._select_union_cap(
             selected_feature_lists, max_features_to_keep, meta_feature_ranks, algs, n_splits
         )

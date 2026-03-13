@@ -68,6 +68,11 @@ class P4Runner:
     def run(self):
         exp_root = os.path.join(self.output_path, self.experiment_name)
         jobs: List[Tuple[str,str,str]] = []  # (model_id, tr, te)
+        logging.info(
+            "Phase 4 starting for experiment '%s' with models: %s",
+            self.experiment_name,
+            ", ".join(self.models) if self.models else "(none)",
+        )
 
         # discover CV pairs
         pairs: List[Tuple[str,str]] = []
@@ -81,6 +86,7 @@ class P4Runner:
 
         if not pairs: raise Exception("No CV Train/Test pairs found for Phase 4.")
         if not self.models: raise Exception("No feature-importance models specified.")
+        logging.info("Phase 4 discovered %d CV train/test pairs.", len(pairs))
 
         # ensure model ids exist
         available = list_importances()
@@ -94,6 +100,7 @@ class P4Runner:
                 jobs.append((m, tr, te))
 
         mode = str(self.run_cluster) if self.run_cluster else "Serial"
+        logging.info("Phase 4 submitting %d jobs in mode '%s'.", len(jobs), mode)
         if mode == "Local":
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
@@ -109,9 +116,14 @@ class P4Runner:
             for m,tr,te in jobs: self._run_one(m, tr, te)
 
         self._save_run_params(mode)
+        logging.info("Phase 4 completed: %d jobs finished.", len(jobs))
 
     def _run_one(self, model_id: str, tr: str, te: str):
         exp_root = os.path.join(self.output_path, self.experiment_name)
+        train_path = Path(tr)
+        dataset_name = train_path.parents[1].name if len(train_path.parents) > 1 else "unknown_dataset"
+        cv_label = train_path.stem.replace("_Train", "")
+        logging.info("Phase 4 running model '%s' on %s [%s].", model_id, dataset_name, cv_label)
         FeatureImportance(
             cv_train_path=tr,
             cv_test_path=te,
@@ -128,6 +140,7 @@ class P4Runner:
             random_state=self.random_state,
             instance_subset=self.instance_subset,
         ).run()
+        logging.info("Phase 4 completed model '%s' on %s [%s].", model_id, dataset_name, cv_label)
 
     def _load_metadata(self):
         path = os.path.join(self.output_path, self.experiment_name, "metadata.pickle")
@@ -199,6 +212,7 @@ class P4Runner:
                 sh.write(self._bash_cmd(model_id, tr, te) + "\n")
 
         os.system(f"{launcher} {job_name}")
+        logging.info("Phase 4 submitted cluster job script: %s", job_name)
 
     def _bash_cmd(self, model_id: str, tr: str, te: str) -> str:
         script_path = str(Path(__file__).parent / "p4_jobsubmit.py")

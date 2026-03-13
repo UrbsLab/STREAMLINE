@@ -7,8 +7,6 @@ from typing import Optional, List
 import dask
 from dask.distributed import Client, LocalCluster
 import logging
-logger = logging.getLogger("distributed.worker")
-logger.setLevel(logging.WARNING)
 
 from streamline.utils.runners import num_cores
 from streamline.utils.cluster import get_cluster
@@ -86,6 +84,7 @@ class P5Runner:
     # Main
     # ----------------------------
     def run(self):
+        logging.info("Phase 5 starting for experiment '%s'.", self.experiment_name)
         datasets = [
             os.path.join(self.exp_root, name)
             for name in sorted(os.listdir(self.exp_root))
@@ -96,6 +95,7 @@ class P5Runner:
         if not datasets:
             logging.warning("No datasets found for Phase 5 under %s", self.exp_root)
             return
+        logging.info("Phase 5 discovered %d dataset(s).", len(datasets))
 
         mode = str(self.run_cluster)
         if mode == "Serial":
@@ -124,6 +124,7 @@ class P5Runner:
             )
             tasks = [dask.delayed(self._run_one)(ds_dir) for ds_dir in datasets]
             dask.compute(tasks, scheduler=client)
+        logging.info("Phase 5 completed for experiment '%s'.", self.experiment_name)
 
     # ----------------------------
     # Helpers
@@ -146,6 +147,12 @@ class P5Runner:
         if not algs:
             logging.warning("No algorithms to run in dataset %s; skipping.", dataset_dir)
             return
+        dataset_name = os.path.basename(dataset_dir)
+        logging.info(
+            "Phase 5 running on dataset %s with algorithms: %s",
+            dataset_name,
+            ", ".join(algs),
+        )
 
         FeatureSelection(
             dataset_dir=dataset_dir,
@@ -162,6 +169,7 @@ class P5Runner:
             top_features=self.top_features,
             show_plots=self.show_plots,
         ).run()
+        logging.info("Phase 5 completed for dataset %s.", dataset_name)
 
     def _submit_bash_job(self, dataset_dir: str, mode: str, algorithms_for_ds: List[str]):
         job_ref = str(time.time())
@@ -207,3 +215,4 @@ class P5Runner:
                 sh.write(cmd + "\n")
 
         os.system(f"{launcher} {job_name}")
+        logging.info("Phase 5 submitted cluster job script: %s", job_name)

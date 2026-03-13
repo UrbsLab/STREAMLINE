@@ -53,6 +53,13 @@ class P3Runner:
     def run(self):
         exp_root = os.path.join(self.output_path, self.experiment_name)
         jobs: List[Tuple[str, str]] = []
+        logging.info(
+            "Phase 3 starting for experiment '%s' with learner '%s' and namespace '%s'.",
+            self.experiment_name,
+            self.learner_id,
+            self.feature_namespace,
+        )
+        dataset_names = set()
 
         # discover CV pairs
         for name in os.listdir(exp_root):
@@ -62,10 +69,19 @@ class P3Runner:
             os.makedirs(os.path.join(ds_dir, "feature_learning"), exist_ok=True)
             for tr in sorted(glob.glob(os.path.join(ds_dir, "CVDatasets/*Train.csv"))):
                 te = tr.replace("Train.csv", "Test.csv")
-                if os.path.exists(te): jobs.append((tr, te))
+                if os.path.exists(te):
+                    jobs.append((tr, te))
+                    dataset_names.add(name)
         if not jobs: raise Exception("No CV Train/Test CSV pairs found for Phase 3.")
+        logging.info(
+            "Phase 3 discovered %d CV train/test pairs across %d dataset(s): %s",
+            len(jobs),
+            len(dataset_names),
+            ", ".join(sorted(dataset_names)),
+        )
 
         mode = str(self.run_cluster) if self.run_cluster else "Serial"
+        logging.info("Phase 3 submitting %d jobs in mode '%s'.", len(jobs), mode)
         if mode == "Local":
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
@@ -81,6 +97,7 @@ class P3Runner:
             for tr, te in jobs: self._run_one(tr, te)
 
         self._save_run_params(mode)
+        logging.info("Phase 3 completed: %d jobs finished.", len(jobs))
 
     # ---- helpers ----
     def _run_one(self, tr: str, te: str):
@@ -165,6 +182,7 @@ class P3Runner:
                 sh.write(cmd + "\n")
 
         os.system(f"{launcher} {job_name}")
+        logging.info("Phase 3 submitted cluster job script: %s", job_name)
 
     def _bash_submit_command(self, tr: str, te: str) -> str:
         script_path = str(Path(__file__).parent / "p3_jobsubmit.py")

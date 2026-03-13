@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os, time
+import logging
 from streamline.p5_feature_selection.utils.fs_loader import load_strategy
 
 class FeatureSelection:
@@ -45,6 +46,12 @@ class FeatureSelection:
         self.job_start_time = time.time()
 
     def run(self):
+        logging.info(
+            "Phase 5 running selector '%s' for dataset '%s' with algorithms: %s",
+            self.selector_id,
+            self.dataset_name,
+            ", ".join(self.algorithms) if self.algorithms else "(none)",
+        )
         strat = load_strategy(self.selector_id, **self.selector_params)
         strat.select(
             dataset_dir=self.dataset_dir,
@@ -58,6 +65,7 @@ class FeatureSelection:
             overwrite_cv=self.overwrite_cv,
         )
         self._save_runtime(); self._complete_flag()
+        logging.info("%s Phase 5 complete", self.dataset_name)
 
     # ---- helpers ----
     def _save_runtime(self):
