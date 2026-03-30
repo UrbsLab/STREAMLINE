@@ -1,7 +1,69 @@
 # ----------------------------------------------------------
-# STREAMLINE FULL PIPELINE - RAW COMMAND LIST (PHASES 1-11)
-# Using dataset at data/DemoData
+# STREAMLINE SAMPLE RUN COMMANDS
 # ----------------------------------------------------------
+#
+# This file gives example command-line workflows for the current
+# refactored STREAMLINE pipeline (P1-P11).
+#
+# Notes:
+# - Commands below are examples, not the only valid configuration.
+# - Replace `out` and experiment names with your own paths as needed.
+# - Some phases accept metadata defaults when labels / types are omitted.
+# - Reporting can be run in standard mode or replication mode.
+# - Replication requires that phases 1-9 have already completed.
+#
+# Demo data included in this repository:
+# - Classification: data/DemoData
+# - Regression:     data/DemoDataRegression
+# - Replication:    data/DemoRepData and data/DemoRepDataRegression
+# ----------------------------------------------------------
+
+
+# ==========================================================
+# 0. Optional discovery commands
+# ==========================================================
+
+python -m streamline.p2_impute_scale.p2_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --list-imputers
+
+python -m streamline.p2_impute_scale.p2_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --list-scalers
+
+python -m streamline.p3_feature_learning.p3_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --list-learners
+
+python -m streamline.p4_feature_importance.p4_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --list-models
+
+python -m streamline.p6_modeling.p6_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --model_type Binary \
+  --list_models
+
+python -m streamline.p7_ensembles.p7_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --n_splits 5 \
+  --list_ensembles
+
+
+# ==========================================================
+# 1. Classification workflow example
+# ==========================================================
+# Demo input folder:
+#   data/DemoData
+# Example experiment output:
+#   out/DemoBinary
+
 
 # ----------------------
 # Phase 1 - Data Process
@@ -9,108 +71,340 @@
 python -m streamline.p1_data_process.p1_cli \
   --data_path data/DemoData \
   --output_path out \
-  --experiment_name DemoRun
+  --experiment_name DemoBinary \
+  --outcome_label Class \
+  --instance_label InstanceID \
+  --n_splits 5 \
+  --top_features 20 \
+  --sig_cutoff 0.05 \
+  --force true
+
 
 # ----------------------------
-# Phase 2 - Impute & Normalize
+# Phase 2 - Impute and Scale
 # ----------------------------
 python -m streamline.p2_impute_scale.p2_cli \
   --output_path out \
-  --experiment_name DemoRun \
+  --experiment_name DemoBinary \
+  --random_state 42
+
 
 # ----------------------------
 # Phase 3 - Feature Learning
 # ----------------------------
 python -m streamline.p3_feature_learning.p3_cli \
   --output_path out \
-  --experiment_name DemoRun \
+  --experiment_name DemoBinary \
   --learner_id pca \
-  --learner_params "{n_components: 10}"
+  --learner_params '{"n_components": 10}' \
+  --keep_original_features true \
+  --random_state 42
+
 
 # --------------------------------
-# Phase 4 - Feature Importance (FI)
+# Phase 4 - Feature Importance
 # --------------------------------
 python -m streamline.p4_feature_importance.p4_cli \
   --output_path out \
-  --experiment_name DemoRun \
-  --models "mutualinformation,multisurf"
+  --experiment_name DemoBinary \
+  --models "mutualinformation,multisurf,multisurfstar" \
+  --models_params '{"mutualinformation":{"outcome_type":"Binary"},"multisurf":{"n_jobs":4},"multisurfstar":{"n_jobs":4}}' \
+  --random_state 42
+
 
 # ---------------------------------
-# Phase 5 - Feature Selection (FS)
+# Phase 5 - Feature Selection
 # ---------------------------------
 python -m streamline.p5_feature_selection.p5_cli \
   --output_path out \
-  --experiment_name DemoRun \
+  --experiment_name DemoBinary \
+  --algorithms auto \
+  --n_splits 5 \
   --selector_id default \
-  --n_splits 5
-## Edit to not require n_splits
+  --top_features 20 \
+  --show_plots 0
+
 
 # ----------------------
 # Phase 6 - Modeling
 # ----------------------
 python -m streamline.p6_modeling.p6_cli \
   --output_path out \
-  --experiment_name DemoRun \
-  --model_type Multiclass \
+  --experiment_name DemoBinary \
+  --outcome_label Class \
+  --model_type Binary \
+  --instance_label InstanceID \
   --n_splits 5 \
-  --models LR,NB \
+  --models LR,RF,XGB \
   --calibrate 1 \
   --calibrate_method sigmoid \
   --calibrate_cv 5 \
+  --scoring_metric balanced_accuracy \
+  --metric_direction maximize \
   --n_trials 20 \
-  --training_subsample 2000 \
-  --run_cluster Local
-## Edit to not require n_splits, model_type
+  --timeout 120 \
+  --training_subsample 0 \
+  --uniform_fi 0 \
+  --save_plot 0 \
+  --random_state 42 \
+  --run_cluster Serial
+
 
 # ------------------------
 # Phase 7 - Ensembles
 # ------------------------
 python -m streamline.p7_ensembles.p7_cli \
   --output_path out \
-  --experiment_name DemoRun \
+  --experiment_name DemoBinary \
   --n_splits 5 \
+  --outcome_label Class \
+  --instance_label InstanceID \
   --ensembles hard_voting,soft_voting,stack_lr \
-  --base_models LR,NB \
-  --calibrate 0
+  --base_models LR,RF,XGB \
+  --meta_train_source train \
+  --calibrate 0 \
+  --random_state 42
+
 
 # ---------------------------
 # Phase 8 - Summary Statistics
 # ---------------------------
 python -m streamline.p8_summary_statistics.p8_cli \
   --output_path out \
-  --experiment_name DemoRun \
+  --experiment_name DemoBinary \
   --outcome_label Class \
-  --outcome_type Multiclass \
+  --outcome_type Binary \
+  --instance_label InstanceID \
   --n_splits 5 \
+  --scoring_metric balanced_accuracy \
+  --metric_weight balanced_accuracy \
   --top_features 25 \
-  --sig_cutoff 0.05
+  --sig_cutoff 0.05 \
+  --scale_data 1 \
+  --show_plots 0 \
+  --include_ensembles 1
+
 
 # ---------------------------------------
-# Phase 9 - Dataset Comparison (Cross-DS)
+# Phase 9 - Dataset Comparison
 # ---------------------------------------
 python -m streamline.p9_compare_datasets.p9_cli \
   --output_path out \
-  --experiment_name DemoRun \
+  --experiment_name DemoBinary \
   --outcome_label Class \
-  --outcome_type Multiclass \
-  --sig_cutoff 0.05
+  --outcome_type Binary \
+  --instance_label InstanceID \
+  --sig_cutoff 0.05 \
+  --show_plots 0
 
-# -------------------------
-# Phase 10 - Replication (Phase not complete)
-# -------------------------
-# python -m streamline.p10_replication.p10_cli \
-#   --output_path out \
-#   --experiment_name DemoRun \
-#   --outcome_label Class \
-#   --outcome_type Multiclass \
-#   --replication_dataset data/DemoData
 
-# -----------------------
-# Phase 11 - Reporting (Phase not complete)
-# -----------------------
-python -m streamline.p11_reporting.p11_cli \
+# ---------------------------------------
+# Phase 10 - Replication / External Validation
+# ---------------------------------------
+# Reuses the trained workflow from:
+#   data/DemoData/hcc_data_custom.csv
+# Applies it to replication datasets under:
+#   data/DemoRepData
+python -m streamline.p10_replication.p10_cli \
+  --rep_data_path data/DemoRepData \
+  --dataset_for_rep data/DemoData/hcc_data_custom.csv \
   --output_path out \
-  --experiment_name DemoRun \
-  --outcome_label Class \
-  --outcome_type Multiclass \
-  --make_pdf 1
+  --experiment_name DemoBinary \
+  --show_plots 0
+
+
+# ---------------------------------------
+# Phase 11 - Reporting (standard datasets)
+# ---------------------------------------
+python -m streamline.p11_reporting.p11_cli \
+  --experiment_path out/DemoBinary \
+  --report_mode standard \
+  --make_pdf 1 \
+  --enable_plots 1 \
+  --reuse_existing_figures 1
+
+
+# ---------------------------------------
+# Phase 11 - Reporting (replication datasets)
+# ---------------------------------------
+python -m streamline.p11_reporting.p11_cli \
+  --experiment_path out/DemoBinary \
+  --report_mode replication \
+  --make_pdf 1 \
+  --enable_plots 1 \
+  --reuse_existing_figures 1
+
+
+# ==========================================================
+# 2. Regression workflow example
+# ==========================================================
+# Demo input folder:
+#   data/DemoDataRegression
+# Example experiment output:
+#   out/DemoRegression
+
+
+# ----------------------
+# Phase 1 - Data Process
+# ----------------------
+python -m streamline.p1_data_process.p1_cli \
+  --data_path data/DemoDataRegression \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --outcome_label Cognition_Score \
+  --outcome_type Continuous \
+  --instance_label Class \
+  --n_splits 5 \
+  --partition_method Random \
+  --top_features 20 \
+  --sig_cutoff 0.05 \
+  --force true
+
+
+# ----------------------------
+# Phase 2 - Impute and Scale
+# ----------------------------
+python -m streamline.p2_impute_scale.p2_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --random_state 42
+
+
+# ----------------------------
+# Phase 3 - Feature Learning
+# ----------------------------
+python -m streamline.p3_feature_learning.p3_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --learner_id pca \
+  --learner_params '{"n_components": 10}' \
+  --keep_original_features true \
+  --random_state 42
+
+
+# --------------------------------
+# Phase 4 - Feature Importance
+# --------------------------------
+python -m streamline.p4_feature_importance.p4_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --models "mutualinformation,multisurf,multisurfstar" \
+  --models_params '{"mutualinformation":{"outcome_type":"Continuous"},"multisurf":{"n_jobs":4},"multisurfstar":{"n_jobs":4}}' \
+  --outcome_type Continuous \
+  --random_state 42
+
+
+# ---------------------------------
+# Phase 5 - Feature Selection
+# ---------------------------------
+python -m streamline.p5_feature_selection.p5_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --algorithms auto \
+  --n_splits 5 \
+  --selector_id default \
+  --top_features 20 \
+  --show_plots 0
+
+
+# ----------------------
+# Phase 6 - Modeling
+# ----------------------
+python -m streamline.p6_modeling.p6_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --outcome_label Cognition_Score \
+  --model_type Regression \
+  --instance_label Class \
+  --n_splits 5 \
+  --models LR,RF,SVR \
+  --scoring_metric explained_variance \
+  --metric_direction maximize \
+  --n_trials 20 \
+  --timeout 120 \
+  --training_subsample 0 \
+  --uniform_fi 0 \
+  --save_plot 0 \
+  --random_state 42 \
+  --run_cluster Serial
+
+
+# ------------------------
+# Phase 7 - Ensembles
+# ------------------------
+python -m streamline.p7_ensembles.p7_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --n_splits 5 \
+  --outcome_label Cognition_Score \
+  --instance_label Class \
+  --ensembles hard_voting,soft_voting,stack_lr \
+  --base_models LR,RF,SVR \
+  --meta_train_source train \
+  --calibrate 0 \
+  --random_state 42
+
+
+# ---------------------------
+# Phase 8 - Summary Statistics
+# ---------------------------
+python -m streamline.p8_summary_statistics.p8_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --outcome_label Cognition_Score \
+  --outcome_type Continuous \
+  --instance_label Class \
+  --n_splits 5 \
+  --scoring_metric explained_variance \
+  --metric_weight explained_variance \
+  --top_features 25 \
+  --sig_cutoff 0.05 \
+  --scale_data 1 \
+  --show_plots 0 \
+  --include_ensembles 1
+
+
+# ---------------------------------------
+# Phase 9 - Dataset Comparison
+# ---------------------------------------
+python -m streamline.p9_compare_datasets.p9_cli \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --outcome_label Cognition_Score \
+  --outcome_type Continuous \
+  --instance_label Class \
+  --sig_cutoff 0.05 \
+  --show_plots 0
+
+
+# ---------------------------------------
+# Phase 10 - Replication / External Validation
+# ---------------------------------------
+python -m streamline.p10_replication.p10_cli \
+  --rep_data_path data/DemoRepDataRegression \
+  --dataset_for_rep data/DemoDataRegression/simulation_data.csv \
+  --output_path out \
+  --experiment_name DemoRegression \
+  --show_plots 0
+
+
+# ---------------------------------------
+# Phase 11 - Reporting (standard datasets)
+# ---------------------------------------
+python -m streamline.p11_reporting.p11_cli \
+  --experiment_path out/DemoRegression \
+  --report_mode standard \
+  --make_pdf 1 \
+  --enable_plots 1 \
+  --reuse_existing_figures 1
+
+
+# ---------------------------------------
+# Phase 11 - Reporting (replication datasets)
+# ---------------------------------------
+python -m streamline.p11_reporting.p11_cli \
+  --experiment_path out/DemoRegression \
+  --report_mode replication \
+  --make_pdf 1 \
+  --enable_plots 1 \
+  --reuse_existing_figures 1

@@ -1,83 +1,170 @@
-git ![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_Logo_Full.png?raw=true)
-# Overview
+![STREAMLINE Logo](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_Logo_Full.png?raw=true)
 
-STREAMLINE is an end-to-end automated machine learning (AutoML) pipeline
-that empowers anyone to easily train, interpret, and apply a variety of predictive models as
-part of a rigorous and optionally customizable data mining analysis. It is programmed in
-Python 3 using many common libraries including [Pandas](https://pandas.pydata.org/)
-and [scikit-learn](https://scikit-learn.org/stable/).
+# STREAMLINE
 
-The schematic below summarizes the automated STREAMLINE analysis pipeline with individual elements organized into 9 phases.
+STREAMLINE is an end-to-end automated machine learning pipeline for tabular biomedical and general supervised learning workflows. The current codebase supports binary classification, multiclass classification, and regression, with integrated feature learning, feature importance, feature selection, base-model training, ensembles, summary statistics, dataset comparison, replication, and PDF reporting.
 
-![alttext](https://github.com/UrbsLab/STREAMLINE/blob/main/docs/source/pictures/STREAMLINE_paper_new_lightcolor.png?raw=true)
+This repository is the most up-to-date starting point for the current refactored STREAMLINE pipeline. The older documentation site remains useful for background and historical context, but the README and notebooks in this repository best reflect the current 11-phase implementation.
 
-* Detailed documentation of STREAMLINE is available [here](https://urbslab.github.io/STREAMLINE/index.html).
+## What Is Included In This Version
 
-* A simple demonstration of STREAMLINE on example biomedical data in our ready-to-run Google Colab Notebook [here](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing).
+- Unified support for binary classification, multiclass classification, and regression
+- Phase-first architecture spanning P1 through P11
+- Registry-backed extension points for multiple phases
+- Feature learning with PCA and related outputs
+- Feature importance methods including mutual information, MultiSURF, and MultiSURFstar
+- Modeling with base learners, calibration support for classification, and composite feature importance from modeling
+- Ensemble evaluation
+- Summary statistics and cross-dataset comparison
+- Replication / external validation as a dedicated phase
+- Automated reporting for both standard experiment outputs and replication outputs
+- Updated Google Colab and Jupyter notebook workflows
 
-### Pipeline Design
-The goal of STREAMLINE is to provide an easy and transparent framework
-to reliably learn predictive associations from tabular data with a particular focus on the needs of biomedical data applications. 
-The design of this pipeline is meant to not only pick a best performing algorithm/model for a given dataset,
-but to leverage the different algorithm perspectives (i.e. biases, strengths,
-and weaknesses) to gain a broader understanding of the associations in that data.
+## Pipeline Overview
 
-The overall development of this pipeline focused on:
-   1. Automation and ease of use
-   2. Optimizing modeling performance
-   3. Capturing complex associations in data (e.g. feature interactions)
-   4. Enhancing interpretability of output throughout the analysis
-   5. Avoiding and detecting common sources of bias
-   6. Reproducibility (see STREAMLINE parameter settings)
-   7. Run mode flexibility (accomodates users with different levels of expertise)
-   8. More advanced users can easily add their own scikit-learn compatible modeling algorithms to STREAMLINE
+The current pipeline is organized into 11 phases:
 
-See the [About (FAQs)](https://urbslab.github.io/STREAMLINE/about.html) to gain a deeper understanding of STREAMLINE with respect to it's overall design, what it includes, what it can be used for, and implementation highlights that differentiate it from other AutoML tools.
+| Phase | Name | Purpose |
+| --- | --- | --- |
+| P1 | Data Process | Load datasets, define CV partitions, run exploratory analysis, and prepare dataset-specific metadata |
+| P2 | Impute and Scale | Apply preprocessing, imputation, and scaling |
+| P3 | Feature Learning | Learn transformed features such as PCA-derived components and write feature-learning artifacts |
+| P4 | Feature Importance | Score features with filter-style feature importance methods |
+| P5 | Feature Selection | Select and persist reduced feature sets |
+| P6 | Modeling | Train and evaluate base models |
+| P7 | Ensembles | Train and evaluate ensembles on top of base models |
+| P8 | Summary Statistics | Aggregate CV metrics, generate plots, and summarize feature/model behavior |
+| P9 | Compare Datasets | Compare results across datasets within an experiment |
+| P10 | Replication | Apply the trained workflow to external replication datasets |
+| P11 | Reporting | Build publication-style PDF reports for standard or replication outputs |
 
-### Current Limitations
-* At present, STREAMLINE is limited to supervised learning on tabular,
-binary classification data. We are currently expanding STREAMLINE to multi-class
-and regression outcome data. 
+## Supported Learning Tasks
 
-* STREAMLINE also does not automate feature extraction from unstructured data (e.g. text, images, video, time-series data), or handle more advanced aspects of data cleaning or feature engineering that would likely require domain expertise for a given dataset. 
+### Binary Classification
 
-* As STREAMLINE is currently in its 'beta' release, we recommend users first check that they have downloaded the
-most recent release of STREAMLINE before use. We are actively updating this software as feedback is received.
+- Standard classification metrics such as balanced accuracy, accuracy, F1, recall, precision, ROC AUC, PRC AUC, PRC APS, and Brier score
+- ROC and PR curve outputs
+- Calibration-aware outputs and decision-threshold workflows
 
-### Publications and Citations
-The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to
-simulated benchmark data can be found [here](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9).
+### Multiclass Classification
 
-This paper is also available as a preprint on arxiv, [here](https://arxiv.org/abs/2206.12002?fbclid=IwAR1toW5AtDJQcna0_9Sj73T9kJvuB-x-swnQETBGQ8lSwBB0z2N1TByEwlw).
+- Macro and micro metric support where appropriate
+- Multiclass ROC/PR curve summaries
+- Multiclass Brier score and one-vs-rest evaluation logic
+- Report outputs and summary statistics tailored to multiclass evaluation
 
-See [citations](https://urbslab.github.io/STREAMLINE/citation.html) for more information on citing STREAMLINE, as well as publications applying STREAMLINE and publications on algorithms developed in our research group and incorporated into STREAMLINE.
+### Regression
 
-***
-# Installation and Use
-STREAMLINE can be run using a variety of modes balancing ease of use and efficiency.
-* Google Colab Notebook: runs serially on Google Cloud (best for beginners)
-* Jupyter Notebook: runs serially/locally
-* Command Line: runs serially or locally
-   * Locally, serially
-   * Locally, cpu core in parallel
-   * CPU Computing Cluster (HPC), in parallel (best for efficiency)
-      * All phases can be run from a single command (with a job monitor/submitter running on the head node until completion)
-      * Each phase can be run separately in sequence
+- Regression metrics such as explained variance, Pearson correlation, MAE, MSE, median absolute error, and max error
+- Actual-versus-predicted and residual diagnostics
+- Replication and reporting flows adapted for regression outputs
 
-See the [documentation](https://urbslab.github.io/STREAMLINE/index.html) for requirements, installation, and use details for each.
+## Repository Layout
 
-Basic installation instructions for use on Google Colab, and local runs are given below.
+Top-level items you will use most often:
+
+- [`STREAMLINE_GoogleColab.ipynb`](STREAMLINE_GoogleColab.ipynb): primary Colab-oriented notebook
+- [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb): local Jupyter notebook workflow
+- [`data/`](data): demo training and replication datasets
+- [`streamline/`](streamline): source code organized by phase
+- [`usefulnotebooks/`](usefulnotebooks): focused post hoc analysis and visualization notebooks
+- [`requirements.txt`](requirements.txt): local dependency list
+
+Key source directories:
+
+- `streamline/p1_data_process`
+- `streamline/p2_impute_scale`
+- `streamline/p3_feature_learning`
+- `streamline/p4_feature_importance`
+- `streamline/p5_feature_selection`
+- `streamline/p6_modeling`
+- `streamline/p7_ensembles`
+- `streamline/p8_summary_statistics`
+- `streamline/p9_compare_datasets`
+- `streamline/p10_replication`
+- `streamline/p11_reporting`
+
+## Run Modes
+
+STREAMLINE can be used in several ways depending on user preference and compute environment:
+
+- Google Colab notebook
+- Local Jupyter notebook
+- Local command line
+- Local parallel execution
+- HPC / cluster execution using the phase CLIs and job submission helpers
+
+The current codebase includes CLI and runner modules for every phase from P1 through P11.
+
+## Getting Started
 
 ### Google Colab
-There is no local installation or additional steps required to run
-STREAMLINE on Google Colab.
 
-Just have a Google Account and open this Colab link to run the demo (takes ~ 6-7 min):
-[https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing](https://colab.research.google.com/drive/14AEfQ5hUPihm9JB2g730Fu3LiQ15Hhj2?usp=sharing)
+Use the current Colab notebook here:
 
+[Open the STREAMLINE Colab notebook](https://colab.research.google.com/drive/1ByQuU805GzDGAAGzbUYz8wahnOTUuzvg?usp=sharing)
 
-### Local
-Install STREAMLINE for local use with the following command line commands:
+The updated Colab workflow is designed to support:
+
+- classification and regression in the same notebook
+- demo runs and custom runs through configuration flags
+- richer explanatory markdown and visible phase outputs
+
+### Local Jupyter
+
+For local notebook use, start from:
+
+- [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb)
+- [`STREAMLINE_GoogleColab.ipynb`](STREAMLINE_GoogleColab.ipynb) if you want the same parameter-driven flow locally
+
+### Local CLI
+
+Each phase can be run independently with its CLI entry point. For example:
+
+```bash
+python -m streamline.p1_data_process.p1_cli --data_path data/DemoData --output_path out --experiment_name DemoRun
+python -m streamline.p2_impute_scale.p2_cli --output_path out --experiment_name DemoRun
+python -m streamline.p3_feature_learning.p3_cli --output_path out --experiment_name DemoRun
+python -m streamline.p4_feature_importance.p4_cli --output_path out --experiment_name DemoRun
+python -m streamline.p5_feature_selection.p5_cli --output_path out --experiment_name DemoRun
+python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoRun
+python -m streamline.p7_ensembles.p7_cli --output_path out --experiment_name DemoRun
+python -m streamline.p8_summary_statistics.p8_cli --output_path out --experiment_name DemoRun
+python -m streamline.p9_compare_datasets.p9_cli --output_path out --experiment_name DemoRun
+python -m streamline.p11_reporting.p11_cli --experiment_path out/DemoRun --report_mode standard
+```
+
+For a longer command cookbook covering classification, regression, replication, and reporting examples, see [`sample_runcommands.txt`](sample_runcommands.txt).
+
+Replication and replication reporting are available through:
+
+```bash
+python -m streamline.p10_replication.p10_cli \
+  --rep_data_path data/DemoRepData \
+  --dataset_for_rep data/DemoData/hcc_data_custom.csv \
+  --output_path out \
+  --experiment_name DemoRun
+
+python -m streamline.p11_reporting.p11_cli \
+  --experiment_path out/DemoRun \
+  --report_mode replication
+```
+
+## Local Installation
+
+For a reproducible local setup, create a dedicated environment and install the repository requirements.
+
+Example with conda:
+
+```bash
+git clone --single-branch https://github.com/UrbsLab/STREAMLINE.git
+cd STREAMLINE
+conda create -n streamline python=3.11 pip
+conda activate streamline
+pip install -r requirements.txt
+```
+
+Example with `venv`:
 
 ```
 git clone --single-branch https://github.com/UrbsLab/STREAMLINE
@@ -85,42 +172,144 @@ cd STREAMLINE
 pip install -r requirements.txt
 ```
 
-Now your STREAMLINE package is ready to use from the `STREAMLINE` folder either
-from the included [Jupyter Notebook](https://github.com/UrbsLab/STREAMLINE/blob/main/STREAMLINE_Notebook.ipynb) file or the command line.
+Notes:
 
-***
-# Other Information
-## Demonstration Data
-Included with this pipeline is a folder named `DemoData` including [two small datasets](https://urbslab.github.io/STREAMLINE/data.html#demonstration-data) used as a demonstration of
-pipeline efficacy. New users can easily test/run STREAMLINE in all run modes set up to run automatically on these datasets.
+- The pinned requirements are the best starting point for local reproducibility.
+- If you intentionally install the latest unpinned package versions, expect to do some compatibility testing because the upstream scientific Python stack changes frequently.
+- Some optional packages depend on compiled libraries or environment-specific binaries.
 
-## List of Run Parameters
-A complete list of STREAMLINE Parameters can be found [here](https://urbslab.github.io/STREAMLINE/parameters.html).
+## Demo Data And Demo Paths
 
-***
-## Disclaimer
-We make no claim that this is the best or only viable way to assemble an ML analysis pipeline for a given
-classification problem, nor that the included ML modeling algorithms will yield the best performance possible.
-We intend many expansions/improvements to this pipeline in the future. We welcome feedback, suggestions, and contributions for improvement.
+Included demo datasets:
 
-***
-# Contact
-We welcome ideas, suggestions on improving the pipeline, [code-contributions](https://https://urbslab.github.io/STREAMLINE/contributing.html), and collaborations!
+- `data/DemoData/hcc_data.csv`
+- `data/DemoData/hcc_data_custom.csv`
+- `data/DemoDataRegression/simulation_data.csv`
+- `data/DemoRepData/hcc_data_custom_rep.csv`
+- `data/DemoRepDataRegression/simulation_data_rep.csv`
+- `data/DemoFeatureTypes/` for categorical and quantitative feature-type examples
 
-* For general questions, or to discuss potential collaborations (applying, or extending STREAMLINE); contact Ryan Urbanowicz at ryan.urbanowicz@cshs.org.
+These datasets are used by the notebooks and test suite to exercise both classification and regression workflows.
 
-* For questions on the code-base, installing/running STREAMLINE, report bugs, or discuss other troubleshooting issues; contact Harsh Bandhey at harsh.bandhey@cshs.org.
+## Output Structure
 
-***
-# Acknowledgements
+STREAMLINE writes experiment outputs under:
+
+```text
+<output_path>/<experiment_name>/
+```
+
+Within an experiment, common directories include:
+
+- `<dataset>/exploratory`
+- `<dataset>/CVDatasets`
+- `<dataset>/feature_learning`
+- `<dataset>/feature_importance`
+- `<dataset>/feature_selection`
+- `<dataset>/models`
+- `<dataset>/model_evaluation`
+- `<dataset>/ensemble_evaluation`
+- `<dataset>/runtime`
+- `<dataset>/replication/<rep_dataset>/...`
+- `DatasetComparisons/`
+- `reporting/`
+- `reporting_replication/`
+- `jobsCompleted/`
+
+Standard reports are written to:
+
+- `<experiment>/reporting/report.pdf`
+
+Replication reports are written to:
+
+- `<experiment>/reporting_replication/report.pdf`
+
+## Reporting
+
+The reporting phase can:
+
+- discover datasets dynamically
+- handle binary, multiclass, and regression outputs
+- generate missing figures when possible
+- reuse existing figures when available
+- generate standard experiment reports
+- generate replication-focused reports from replication folders
+
+Reporting entry point:
+
+```bash
+python -m streamline.p11_reporting.p11_cli --experiment_path out/DemoRun --report_mode standard
+python -m streamline.p11_reporting.p11_cli --experiment_path out/DemoRun --report_mode replication
+```
+
+## Useful Notebooks
+
+The `usefulnotebooks/` directory contains focused notebooks for downstream analysis and visualization, including:
+
+- decision-threshold analysis
+- ROC and PR curve generation
+- composite feature-importance visualization
+- feature-importance heatmaps
+- model visualization
+- test-set probability access
+- replication probability analysis
+
+These notebooks are intended for users who want to inspect outputs after a pipeline run rather than drive the entire workflow from a single notebook.
+
+## Extending STREAMLINE
+
+The refactored codebase uses registry-driven discovery across multiple phases. This makes it easier to add new methods without rewriting pipeline orchestration for every new component.
+
+Relevant extension points include:
+
+- `streamline/p2_impute_scale/registry`
+- `streamline/p3_feature_learning/registry`
+- `streamline/p4_feature_importance/registry`
+- `streamline/p5_feature_selection/registry`
+- `streamline/p6_modeling/models`
+- `streamline/p7_ensembles/registry`
+
+In practice, this means new preprocessing, feature-learning, feature-importance, feature-selection, modeling, and ensemble components can be added in a more modular way than in older versions of STREAMLINE.
+
+## Current Notes And Limitations
+
+- STREAMLINE is designed for supervised learning on tabular data.
+- Unstructured data pipelines such as image, text, audio, and raw time-series feature extraction are not automated here.
+- Some documentation pages on the public docs site still describe older pipeline versions or older terminology.
+- As with any ML pipeline assembled on top of evolving third-party libraries, latest-version local environments may expose compatibility issues that require updates.
+
+## Publications And Citation
+
+The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to simulated benchmark data is available here:
+
+[Springer chapter](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9)
+
+The paper is also available as a preprint:
+
+[arXiv preprint](https://arxiv.org/abs/2206.12002)
+
+Additional citation information and related publications:
+
+[STREAMLINE citations](https://urbslab.github.io/STREAMLINE/citation.html)
+
+## Additional Resources
+
+- Historical documentation site: [https://urbslab.github.io/STREAMLINE/index.html](https://urbslab.github.io/STREAMLINE/index.html)
+- FAQ / background page: [https://urbslab.github.io/STREAMLINE/about.html](https://urbslab.github.io/STREAMLINE/about.html)
+
+## Contact
+
+We welcome ideas, suggestions, bug reports, code contributions, and collaborations.
+
+- General questions and collaboration inquiries: Ryan Urbanowicz at `ryan.urbanowicz@cshs.org`
+- Codebase, installation, running, troubleshooting, and implementation questions: Harsh Bandhey at `harsh.bandhey@cshs.org`
+
+## Acknowledgements
+
 The development of STREAMLINE benefited from feedback across multiple biomedical research collaborators at the University of Pennsylvania, Fox Chase Cancer Center, Cedars Sinai Medical Center, and the University of Kansas Medical Center.
 
-The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang, and Harsh Bandhey. Special thanks to
-Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang,
-and Pedro Ribeiro for their code contributions and feedback.  
+The bulk of the coding was completed by Ryan Urbanowicz, Robert Zhang, and Harsh Bandhey. Special thanks to Yuhan Cui, Pranshu Suri, Patryk Orzechowski, Trang Le, Sy Hwang, Richard Zhang, Wilson Zhang, and Pedro Ribeiro for their code contributions and feedback.
 
-We also thank the following collaborators for their feedback on application
-of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon,
-Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and Diego Mazzotti.
+We also thank the following collaborators for their feedback on application of the pipeline during development: Shannon Lynch, Rachael Stolzenberg-Solomon, Ulysses Magalang, Allan Pack, Brendan Keenan, Danielle Mowery, Jason Moore, and Diego Mazzotti.
 
 Funding supporting this work comes from NIH grants: R01 AI173095, U01 AG066833, and P01 HL160471.
