@@ -5,6 +5,11 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
 
+from streamline.p4_feature_importance.utils.input_normalization import (
+    normalize_feature_matrix,
+    normalize_target_vector,
+)
+
 class MutualInformation:
     id = "mutualinformation"
     model_name = "Mutual Information"
@@ -23,10 +28,22 @@ class MutualInformation:
         self._cols = X.columns.tolist()
         Xn = X.select_dtypes(include=["number"])
         cols = Xn.columns.tolist()
+        _, X_array = normalize_feature_matrix(Xn)
+        y_array = normalize_target_vector(y)
         if self.outcome_type in ("Binary", "Multiclass"):
-            scores = mutual_info_classif(Xn.values, y.values, n_neighbors=self.n_neighbors, random_state=self.random_state)
+            scores = mutual_info_classif(
+                X_array,
+                y_array,
+                n_neighbors=self.n_neighbors,
+                random_state=self.random_state,
+            )
         else:
-            scores = mutual_info_regression(Xn.values, y.values, n_neighbors=self.n_neighbors, random_state=self.random_state)
+            scores = mutual_info_regression(
+                X_array,
+                y_array,
+                n_neighbors=self.n_neighbors,
+                random_state=self.random_state,
+            )
         self._scores = {c: float(s) for c, s in zip(cols, scores)}
         for c in self._cols:
             self._scores.setdefault(c, 0.0)

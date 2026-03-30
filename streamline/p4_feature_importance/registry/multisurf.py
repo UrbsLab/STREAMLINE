@@ -4,6 +4,11 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 
+from streamline.p4_feature_importance.utils.input_normalization import (
+    normalize_feature_matrix,
+    normalize_target_vector,
+)
+
 class MultiSURF:
     id = "multisurf"
     model_name = "MultiSURF"
@@ -24,15 +29,17 @@ class MultiSURF:
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
         self._cols = X.columns.tolist()
+        _, X_array = normalize_feature_matrix(X)
+        y_array = normalize_target_vector(y)
         try:
             from skrebate import MultiSURF as _MultiSURF
             if self.use_turf:
                 from skrebate import TURF as _TURF
                 base = _MultiSURF(n_jobs=self.n_jobs, **self.kwargs)
-                self._impl = _TURF(base, pct=self.turf_pct).fit(X.values, y.values)
+                self._impl = _TURF(base, pct=self.turf_pct).fit(X_array, y_array)
                 importances = getattr(self._impl, "feature_importances_", None)
             else:
-                self._impl = _MultiSURF( n_jobs=self.n_jobs, **self.kwargs).fit(X.values, y.values)
+                self._impl = _MultiSURF(n_jobs=self.n_jobs, **self.kwargs).fit(X_array, y_array)
                 importances = getattr(self._impl, "feature_importances_", None)
         except ModuleNotFoundError as e:
             raise Exception("MultiSURF requires the 'skrebate' package (pip install skrebate).") from e

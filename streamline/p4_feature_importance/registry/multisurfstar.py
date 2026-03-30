@@ -4,6 +4,11 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 
+from streamline.p4_feature_importance.utils.input_normalization import (
+    normalize_feature_matrix,
+    normalize_target_vector,
+)
+
 class MultiSURFStar:
     id = "multisurfstar"
     model_name = "MultiSURF*"
@@ -20,9 +25,11 @@ class MultiSURFStar:
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
         self._cols = X.columns.tolist()
+        _, X_array = normalize_feature_matrix(X)
+        y_array = normalize_target_vector(y)
         try:
             from skrebate import MultiSURFstar as _MultiSURFStar
-            self._impl = _MultiSURFStar(n_jobs=self.n_jobs, **self.kwargs).fit(X.values, y.values)
+            self._impl = _MultiSURFStar(n_jobs=self.n_jobs, **self.kwargs).fit(X_array, y_array)
             importances = getattr(self._impl, "feature_importances_", None)
         except ModuleNotFoundError as e:
             raise Exception("MultiSURF* requires the 'skrebate' package (pip install skrebate).") from e
