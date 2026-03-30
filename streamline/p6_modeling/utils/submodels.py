@@ -26,7 +26,7 @@ from sklearn.metrics import (
     average_precision_score,
 )
 from sklearn.model_selection import KFold
-from sklearn.preprocessing import OneHotEncoder 
+from sklearn.preprocessing import label_binarize
 
 # Phase-6 BaseModel (with calibration)
 from streamline.p6_modeling.utils.basemodel import BaseModel
@@ -257,13 +257,27 @@ class MulticlassClassificationModel(BaseModel, ABC):
             )
 
         y_pred = self.model.predict(x_test)
+        classes = np.asarray(getattr(self.model, "classes_", np.unique(y_test)))
+        if classes.size != probas_.shape[1]:
+            inferred_classes = np.unique(y_test)
+            if inferred_classes.size == probas_.shape[1]:
+                classes = inferred_classes
+            else:
+                raise ValueError(
+                    "Multiclass probability columns do not align with class labels in "
+                    "MulticlassClassificationModel.model_evaluation"
+                )
+
+        y_test_bin = label_binarize(np.asarray(y_test), classes=classes)
+        if y_test_bin.ndim == 1:
+            y_test_bin = np.column_stack([1 - y_test_bin, y_test_bin])
 
         # --- metrics dict (as you sketched) ---
         metrics_dict = {
             "balanced_accuracy": float(balanced_accuracy_score(y_test, y_pred)),
             "accuracy": float(accuracy_score(y_test, y_pred)),
             "f1": float(f1_score(y_test, y_pred, average="macro")),
-            "brier_score": float(multiclass_brier_score(y_test, probas_)),
+            "brier_score": float(multiclass_brier_score(y_test, probas_, classes=classes)),
             # Additional multiclass metrics to compare
             "f1_macro": float(f1_score(y_test, y_pred, average="macro")),
             "f1_micro": float(f1_score(y_test, y_pred, average="micro")),
@@ -271,18 +285,10 @@ class MulticlassClassificationModel(BaseModel, ABC):
             "precision_micro": float(precision_score(y_test, y_pred, average="micro")),
             "recall_macro": float(recall_score(y_test, y_pred, average="macro")),
             "recall_micro": float(recall_score(y_test, y_pred, average="micro")),
-            "roc_auc_macro": float(
-                roc_auc_score(y_test, probas_, multi_class="ovr", average="macro")
-            ),
-            "roc_auc_micro": float(
-                roc_auc_score(y_test, probas_, multi_class="ovr", average="micro")
-            ),
-            "average_precision_macro": float(
-                metrics.average_precision_score(y_test, probas_, average="macro")
-            ),
-            "average_precision_micro": float(
-                metrics.average_precision_score(y_test, probas_, average="micro")
-            ),
+            "roc_auc_macro": None,
+            "roc_auc_micro": None,
+            "average_precision_macro": None,
+            "average_precision_micro": None,
         }
 
         # --- per-class & micro/macro ROC / PR curves ---
@@ -294,38 +300,37 @@ class MulticlassClassificationModel(BaseModel, ABC):
         prec_rec_auc: Dict[Any, float] = {}
         ave_prec: Dict[Any, float] = {}
 
-        n_classes = len(np.unique(y_test))
-        y_test_dummies = pd.get_dummies(y_test, drop_first=False).values
+        n_classes = len(classes)
 
         # per-class ROC/PR
         for i in range(n_classes):
-            fpr_i, tpr_i, _ = metrics.roc_curve(y_test_dummies[:, i], probas_[:, i])
+            fpr_i, tpr_i, _ = metrics.roc_curve(y_test_bin[:, i], probas_[:, i])
             fpr[i] = fpr_i
             tpr[i] = tpr_i
             roc_auc[i] = auc(fpr_i, tpr_i)
 
             p_i, r_i, _ = metrics.precision_recall_curve(
-                y_test_dummies[:, i], probas_[:, i]
+                y_test_bin[:, i], probas_[:, i]
             )
             prec[i] = p_i
             recall[i] = r_i
             prec_rec_auc[i] = auc(r_i, p_i)
             ave_prec[i] = metrics.average_precision_score(
-                y_test_dummies[:, i], probas_[:, i]
+                y_test_bin[:, i], probas_[:, i]
             )
 
         # micro ROC/PR
         fpr_micro, tpr_micro, _ = metrics.roc_curve(
-            y_test_dummies.ravel(), probas_.ravel()
+            y_test_bin.ravel(), probas_.ravel()
         )
         roc_auc_micro = auc(fpr_micro, tpr_micro)
 
         p_micro, r_micro, _ = metrics.precision_recall_curve(
-            y_test_dummies.ravel(), probas_.ravel()
+            y_test_bin.ravel(), probas_.ravel()
         )
         pr_auc_micro = auc(r_micro, p_micro)
         aps_micro = metrics.average_precision_score(
-            y_test_dummies.ravel(), probas_.ravel()
+            y_test_bin, probas_, average="micro"
         )
 
         # macro ROC via mean TPR on common grid
@@ -344,8 +349,13 @@ class MulticlassClassificationModel(BaseModel, ABC):
         mean_prec /= n_classes
         pr_auc_macro = auc(recall_grid, mean_prec)
         aps_macro = metrics.average_precision_score(
-            y_test_dummies, probas_, average="macro"
+            y_test_bin, probas_, average="macro"
         )
+
+        metrics_dict["roc_auc_macro"] = float(roc_auc_macro)
+        metrics_dict["roc_auc_micro"] = float(roc_auc_micro)
+        metrics_dict["average_precision_macro"] = float(aps_macro)
+        metrics_dict["average_precision_micro"] = float(aps_micro)
 
         curves_dict = {
             "roc": {
@@ -444,4 +454,3 @@ class RegressionModel(BaseModel, ABC):
             "explained_variance": float(evs),
             "pearson_correlation": float(p_corr),
         }
-
