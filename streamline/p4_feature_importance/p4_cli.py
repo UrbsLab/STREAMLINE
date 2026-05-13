@@ -2,6 +2,12 @@
 import argparse, json
 from streamline.p4_feature_importance.p4_runner import P4Runner
 from streamline.p4_feature_importance.utils.fi_loader import list_importances
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 def _parse_models_csv(s: str):
     if not s: return []
@@ -48,8 +54,11 @@ def main():
     ap.add_argument("--reserved_memory", default=4, type=int)
 
     ap.add_argument("--list-models", action="store_true")
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p4_feature_importance")
+    run_command_args = snapshot_args(args)
 
     if args.list_models:
         models = list_importances()
@@ -79,6 +88,7 @@ def main():
         reserved_memory=args.reserved_memory,
     )
     runner.run()
+    save_run_command_from_args(args, "p4_feature_importance", run_command_args)
 
 if __name__ == "__main__":
     # # run three models (comma-separated), pass params to only multisurf via JSON

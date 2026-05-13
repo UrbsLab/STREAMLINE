@@ -1,6 +1,13 @@
 import argparse
 from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p6_modeling.utils.loader import list_models, list_all_models
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    require_args,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 def _print_models(entries, title: str):
     print(f"\n{title}")
@@ -24,7 +31,7 @@ def main():
     ap.add_argument("--model_type", default="Binary",
                     help="Binary | Multiclass | Regression")
     ap.add_argument("--instance_label", default=None)
-    ap.add_argument("--n_splits", type=int, required=True)
+    ap.add_argument("--n_splits", type=int, default=None)
     ap.add_argument("--models", default=None,
                     help="CSV of model ids (small_name or underscored model_name). Omit to auto-discover.")
     # NEW: per-model JSON overrides
@@ -57,8 +64,11 @@ def main():
     
     ap.add_argument("--list_models_all", action="store_true")
     ap.add_argument("--list_models", action="store_true")
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p6_modeling")
+    run_command_args = snapshot_args(args)
 
     # ---- NEW: handle listing and exit ----
     if args.list_models_all:
@@ -70,6 +80,8 @@ def main():
         entries = list_models(args.model_type)
         _print_models(entries, title=f"Available models ({args.model_type}):")
         return
+
+    require_args(ap, args, ["n_splits"])
 
     # ---- normal run ----
     P6Runner(
@@ -99,6 +111,7 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()
+    save_run_command_from_args(args, "p6_modeling", run_command_args)
 
 if __name__ == "__main__":
     main()

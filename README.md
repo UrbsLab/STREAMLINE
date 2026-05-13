@@ -97,6 +97,10 @@ STREAMLINE can be used in several ways depending on user preference and compute 
 
 The current codebase includes CLI and runner modules for every phase from P1 through P11.
 
+## Saved Run Commands
+
+Each phase CLI records its resolved arguments in `<output_path>/<experiment_name>/run_commands.pickle` after a successful run. On later runs, the same phase will reuse saved arguments for options you omit, while command-line values you provide override and update the saved entry. Use `--ignore_saved_run_command` for a fresh run or `--no_update_saved_run_command` to avoid updating the pickle.
+
 ## Getting Started
 
 ### Google Colab

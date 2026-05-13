@@ -4,6 +4,12 @@ from __future__ import annotations
 import argparse
 
 from streamline.p9_compare_datasets.p9_runner import P9Runner
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 
 def main():
@@ -48,8 +54,11 @@ def main():
     )
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p9_compare_datasets")
+    run_command_args = snapshot_args(args)
 
     P9Runner(
         output_path=args.output_path,
@@ -63,6 +72,7 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()
+    save_run_command_from_args(args, "p9_compare_datasets", run_command_args)
 
 
 if __name__ == "__main__":

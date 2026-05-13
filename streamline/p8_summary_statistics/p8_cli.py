@@ -1,5 +1,12 @@
 import argparse
 from streamline.p8_summary_statistics.p8_runner import P8Runner
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    require_args,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 
 def main():
@@ -13,7 +20,7 @@ def main():
                     help="Binary | Multiclass | Continuous; "
                          "if omitted, loaded from experiment metadata.pickle")
     ap.add_argument("--instance_label", default=None)
-    ap.add_argument("--n_splits", type=int, required=True)
+    ap.add_argument("--n_splits", type=int, default=None)
 
     ap.add_argument("--scoring_metric", default="balanced_accuracy")
     ap.add_argument("--metric_weight", default="balanced_accuracy",
@@ -34,8 +41,12 @@ def main():
                     help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>")
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p8_summary_statistics")
+    require_args(ap, args, ["n_splits"])
+    run_command_args = snapshot_args(args)
 
     P8Runner(
         output_path=args.output_path,
@@ -57,6 +68,7 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()
+    save_run_command_from_args(args, "p8_summary_statistics", run_command_args)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,13 @@ from __future__ import annotations
 import argparse
 
 from streamline.p10_replication.p10_runner import P10Runner
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    require_args,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 
 def main() -> None:
@@ -13,12 +20,12 @@ def main() -> None:
 
     parser.add_argument(
         "--rep_data_path",
-        required=True,
+        default=None,
         help="Directory containing replication datasets (.csv/.tsv/.txt)",
     )
     parser.add_argument(
         "--dataset_for_rep",
-        required=True,
+        default=None,
         help="Path to the original training dataset file whose trained pipeline is reused",
     )
     parser.add_argument("--output_path", required=True, help="STREAMLINE output root")
@@ -45,8 +52,12 @@ def main() -> None:
     parser.add_argument("--queue", default="defq")
     parser.add_argument("--reserved_memory", type=int, default=4)
     parser.add_argument("--show_plots", type=int, default=0)
+    add_run_command_args(parser)
 
     args = parser.parse_args()
+    args = apply_saved_run_command(parser, args, "p10_replication")
+    require_args(parser, args, ["rep_data_path", "dataset_for_rep"])
+    run_command_args = snapshot_args(args)
 
     exclude_plots = [x.strip() for x in args.exclude_plots.split(",") if x.strip()]
 
@@ -65,6 +76,7 @@ def main() -> None:
         show_plots=bool(args.show_plots),
     )
     runner.run()
+    save_run_command_from_args(args, "p10_replication", run_command_args)
 
 
 if __name__ == "__main__":

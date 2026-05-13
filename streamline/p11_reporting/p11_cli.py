@@ -4,6 +4,12 @@ import argparse
 import logging
 
 from streamline.p11_reporting.p11_runner import P11Runner
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,8 +64,11 @@ def main():
     )
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p11_reporting")
+    run_command_args = snapshot_args(args)
 
     if not args.experiment_path and not (args.output_path and args.experiment_name):
         ap.error("Provide --experiment_path OR both --output_path and --experiment_name")
@@ -81,6 +90,7 @@ def main():
         reserved_memory=args.reserved_memory,
     )
     job.run()
+    save_run_command_from_args(args, "p11_reporting", run_command_args)
 
 
 if __name__ == "__main__":

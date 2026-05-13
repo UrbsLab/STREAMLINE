@@ -1,6 +1,13 @@
 import argparse
 from streamline.p7_ensembles.p7_runner import P7Runner
 from streamline.p7_ensembles.utils.loader import list_ensembles
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    require_args,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 def _print_ens():
     print("\nAvailable ensembles:")
@@ -12,7 +19,7 @@ def main():
     ap = argparse.ArgumentParser("STREAMLINE Phase 7 (Ensembles)", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     ap.add_argument("--output_path", required=True)
     ap.add_argument("--experiment_name", required=True)
-    ap.add_argument("--n_splits", type=int, required=True)
+    ap.add_argument("--n_splits", type=int, default=None)
     ap.add_argument("--outcome_label", default="Class")
     ap.add_argument("--outcome_type", default=None, help="Binary | Multiclass | Continuous; defaults to metadata, Continuous is rejected")
     ap.add_argument("--instance_label", default=None)
@@ -28,11 +35,16 @@ def main():
     ap.add_argument("--reserved_memory", type=int, default=4)
     ap.add_argument("--random_state", default=0)
     ap.add_argument("--list_ensembles", action="store_true")
+    add_run_command_args(ap)
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p7_ensembles")
+    run_command_args = snapshot_args(args)
 
     if args.list_ensembles:
         _print_ens()
         return
+
+    require_args(ap, args, ["n_splits"])
 
     P7Runner(
         output_path=args.output_path,
@@ -57,6 +69,7 @@ def main():
         reserved_memory=args.reserved_memory,
         random_state=(int(args.random_state) if str(args.random_state).lower() not in {"", "none"} else None),
     ).run()
+    save_run_command_from_args(args, "p7_ensembles", run_command_args)
 
 if __name__ == "__main__":
     

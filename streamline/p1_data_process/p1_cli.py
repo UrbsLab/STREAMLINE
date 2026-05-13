@@ -4,6 +4,12 @@ import json
 from typing import List, Optional
 
 from streamline.p1_data_process.p1_runner import P1Runner
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 
 def _csv_or_list(v: Optional[str]) -> Optional[List[str]]:
@@ -92,8 +98,11 @@ def main():
     ap.add_argument("--plot_univariate", default="false")
     ap.add_argument("--univariate_top_k", default=20, type=int)
     ap.add_argument("--plot_anomalies", default="false")
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p1_data_process")
+    run_command_args = snapshot_args(args)
 
     runner = P1Runner(
         data_path=args.data_path,
@@ -135,6 +144,7 @@ def main():
     )
 
     runner.run()
+    save_run_command_from_args(args, "p1_data_process", run_command_args)
 
 
 if __name__ == "__main__":

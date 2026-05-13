@@ -6,6 +6,12 @@ from typing import Optional, Dict, Any
 from streamline.p2_impute_scale.p2_runner import P2Runner
 from streamline.p2_impute_scale.utils.impute_loader import list_imputers
 from streamline.p2_impute_scale.utils.scale_loader import list_scalers
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 
 def _maybe_json(v: Optional[str]) -> Dict[str, Any]:
@@ -61,8 +67,11 @@ def main():
     # Discovery-only flags
     ap.add_argument("--list-imputers", action="store_true", help="List dynamically discovered imputers and exit")
     ap.add_argument("--list-scalers", action="store_true", help="List dynamically discovered scalers and exit")
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p2_impute_scale")
+    run_command_args = snapshot_args(args)
 
     if args.list_imputers:
         imps = list_imputers()
@@ -100,6 +109,7 @@ def main():
         reserved_memory=args.reserved_memory,
     )
     runner.run()
+    save_run_command_from_args(args, "p2_impute_scale", run_command_args)
 
 
 if __name__ == "__main__":

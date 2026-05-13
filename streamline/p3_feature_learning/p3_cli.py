@@ -2,6 +2,12 @@
 import argparse, json
 from streamline.p3_feature_learning.p3_runner import P3Runner
 from streamline.p3_feature_learning.utils.fl_loader import list_learners
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 def _maybe_json(s: str):
     try: return json.loads(s or "{}")
@@ -34,8 +40,11 @@ def main():
     ap.add_argument("--reserved_memory", default=4, type=int)
 
     ap.add_argument("--list-learners", action="store_true")
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p3_feature_learning")
+    run_command_args = snapshot_args(args)
 
     if args.list_learners:
         learners = list_learners()
@@ -60,6 +69,7 @@ def main():
         reserved_memory=args.reserved_memory,
     )
     runner.run()
+    save_run_command_from_args(args, "p3_feature_learning", run_command_args)
 
 if __name__ == "__main__":
     main()

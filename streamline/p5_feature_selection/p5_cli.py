@@ -2,6 +2,13 @@
 import argparse, json, os
 from streamline.p5_feature_selection.p5_runner import P5Runner
 from streamline.p5_feature_selection.utils.fi_resolver import _discover_algorithms
+from streamline.utils.run_commands import (
+    add_run_command_args,
+    apply_saved_run_command,
+    require_args,
+    save_run_command_from_args,
+    snapshot_args,
+)
 
 def main():
     ap = argparse.ArgumentParser("STREAMLINE Phase 5 (Feature Selection) CLI",
@@ -12,7 +19,7 @@ def main():
     # default now "auto"
     ap.add_argument("--algorithms", default="auto",
                     help='Comma-separated (e.g. "MI,MS") OR "auto" to discover from feature_importance/*/')
-    ap.add_argument("--n_splits", required=True, type=int)
+    ap.add_argument("--n_splits", default=None, type=int)
     ap.add_argument("--outcome_label", default="Class")
     ap.add_argument("--instance_label", default=None)
 
@@ -34,8 +41,12 @@ def main():
     # Convenience: print discovered algorithms and exit
     ap.add_argument("--list-algorithms", action="store_true",
                     help="List discovered algorithms per dataset (ignores --run_cluster)")
+    add_run_command_args(ap)
 
     args = ap.parse_args()
+    args = apply_saved_run_command(ap, args, "p5_feature_selection")
+    require_args(ap, args, ["n_splits"])
+    run_command_args = snapshot_args(args)
 
     if args.list_algorithms:
         exp_root = os.path.join(args.output_path, args.experiment_name)
@@ -66,6 +77,7 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
     ).run()
+    save_run_command_from_args(args, "p5_feature_selection", run_command_args)
 
 
 if __name__ == "__main__":
