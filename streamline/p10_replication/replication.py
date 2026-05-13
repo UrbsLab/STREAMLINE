@@ -858,6 +858,7 @@ class ReplicationJob:
             data=processed.copy(),
             experiment_path=experiment_path,
             outcome_label=self.outcome_label,
+            outcome_type=self.outcome_type,
             match_label=self.match_label,
             instance_label=self.instance_label,
             categorical_cutoff=self.categorical_cutoff,
@@ -912,16 +913,16 @@ class ReplicationJob:
             train_cv_df = pd.read_csv(train_cv_path, na_values="NA", sep=",")
             rep_cv_df = processed.copy()
 
-            feature_columns = [
+            base_feature_columns = [
                 c
-                for c in train_cv_df.columns
-                if c not in self._label_columns(train_cv_df)
+                for c in rep_cv_df.columns
+                if c not in self._label_columns(rep_cv_df)
             ]
 
             if self.impute_data:
                 rep_cv_df = self._apply_imputation(
                     rep_cv_df,
-                    feature_columns,
+                    base_feature_columns,
                     source_cv_idx,
                     train_cv_df,
                     categorical_features,
@@ -929,11 +930,20 @@ class ReplicationJob:
                 )
 
             if self.scale_data:
-                rep_cv_df = self._apply_scaling(rep_cv_df, feature_columns, source_cv_idx, train_cv_df)
+                rep_cv_df = self._apply_scaling(rep_cv_df, base_feature_columns, source_cv_idx, train_cv_df)
+
+            rep_cv_df = self._apply_feature_learning(rep_cv_df, source_cv_idx, train_cv_df)
 
             # Align exactly to training fold columns.
             missing_cols = [col for col in train_cv_df.columns if col not in rep_cv_df.columns]
             if missing_cols:
+                learned_cols = set(self._read_feature_learning_outputs(source_cv_idx))
+                missing_learned = [c for c in missing_cols if c in learned_cols]
+                if missing_learned:
+                    raise Exception(
+                        "Cannot align replication fold because learned Phase 3 features are missing after replay: "
+                        + ", ".join(missing_learned[:20])
+                    )
                 filler = pd.DataFrame(0, index=rep_cv_df.index, columns=missing_cols)
                 rep_cv_df = pd.concat([rep_cv_df, filler], axis=1)
             rep_cv_df = rep_cv_df[list(train_cv_df.columns)].copy()
@@ -1014,6 +1024,89 @@ class ReplicationJob:
             labels.append(self.match_label)
         return labels
 
+    def _read_feature_learning_manifest(self, source_cv_idx: int) -> Dict[str, Any]:
+        manifest_path = self.train_root / "feature_learning" / f"feature_manifest_cv{source_cv_idx}.json"
+        if not manifest_path.exists():
+            return {}
+        try:
+            with manifest_path.open("r") as f:
+                payload = json.load(f)
+            return payload if isinstance(payload, dict) else {}
+        except Exception as exc:
+            logger.warning("Failed to read feature-learning manifest for CV %s: %s", source_cv_idx, exc)
+            return {}
+
+    def _read_feature_learning_outputs(self, source_cv_idx: int) -> List[str]:
+        manifest = self._read_feature_learning_manifest(source_cv_idx)
+        outputs = manifest.get("output_features")
+        if isinstance(outputs, list):
+            return [str(c) for c in outputs]
+
+        features_path = self.train_root / "feature_learning" / f"features_cv{source_cv_idx}.txt"
+        if not features_path.exists():
+            return []
+        return [line.strip() for line in features_path.read_text().splitlines() if line.strip()]
+
+    def _apply_feature_learning(
+        self,
+        data: pd.DataFrame,
+        source_cv_idx: int,
+        train_cv_df: pd.DataFrame,
+    ) -> pd.DataFrame:
+        fl_dir = self.train_root / "feature_learning"
+        if not fl_dir.exists():
+            return data
+
+        learned_cols = self._read_feature_learning_outputs(source_cv_idx)
+        fitted_path = fl_dir / f"fitted_learner_cv{source_cv_idx}.pickle"
+        if not fitted_path.exists():
+            missing_learned = [c for c in learned_cols if c in train_cv_df.columns and c not in data.columns]
+            if missing_learned:
+                raise Exception(
+                    "Cannot replay Phase 3 feature learning for replication: fitted learner artifact is missing "
+                    f"for CV {source_cv_idx}. Re-run Phase 3 with fitted_learner artifacts before replication."
+                )
+            return data
+
+        learner = _safe_pickle_load(fitted_path, None)
+        if learner is None or not hasattr(learner, "transform"):
+            raise Exception(f"Invalid fitted feature-learning artifact: {fitted_path}")
+
+        labels = self._label_columns(data)
+        x_data = data.drop(columns=[c for c in labels if c in data.columns], errors="ignore")
+        manifest = self._read_feature_learning_manifest(source_cv_idx)
+        input_features = manifest.get("input_features")
+        if isinstance(input_features, list) and input_features:
+            missing_inputs = [c for c in input_features if c not in x_data.columns]
+            if missing_inputs:
+                raise Exception(
+                    "Replication data is missing Phase 3 input features for "
+                    f"CV {source_cv_idx}: {', '.join(map(str, missing_inputs[:20]))}"
+                )
+            x_for_transform = x_data[input_features].copy()
+        else:
+            x_for_transform = x_data.copy()
+
+        z = learner.transform(x_for_transform)
+        if not isinstance(z, pd.DataFrame):
+            z = pd.DataFrame(z, index=data.index)
+        z = z.reset_index(drop=True)
+
+        out_cols = learned_cols
+        if len(out_cols) != z.shape[1]:
+            namespace = str(manifest.get("namespace", "FL"))
+            out_cols = [f"{namespace}_PC{i + 1}" for i in range(z.shape[1])]
+        z.columns = out_cols
+
+        keep_original = bool(manifest.get("keep_original_features", True))
+        if keep_original:
+            x_out = pd.concat([x_data.reset_index(drop=True), z], axis=1)
+        else:
+            x_out = z
+
+        label_df = data[[c for c in labels if c in data.columns]].reset_index(drop=True)
+        return pd.concat([label_df, x_out], axis=1)
+
     def _apply_imputation(
         self,
         data: pd.DataFrame,
@@ -1023,7 +1116,7 @@ class ReplicationJob:
         categorical_features: Sequence[str],
         quantitative_features: Sequence[str],
     ) -> pd.DataFrame:
-        active_features = [c for c in feature_columns if c in data.columns and c in train_cv_df.columns]
+        active_features = [c for c in feature_columns if c in data.columns]
         if not active_features:
             return data
 
@@ -1081,18 +1174,22 @@ class ReplicationJob:
 
         # Fallback for remaining NaNs in active feature columns.
         if data[active_features].isnull().sum().sum() > 0:
-            train_num = train_cv_df[active_features].copy()
+            train_features = [c for c in active_features if c in train_cv_df.columns]
+            train_num = train_cv_df[train_features].copy() if train_features else pd.DataFrame(index=train_cv_df.index)
             for col in active_features:
                 if data[col].isnull().sum() == 0:
                     continue
                 if col in categorical_features:
-                    mode = train_num[col].mode(dropna=True)
+                    source = train_num[col] if col in train_num.columns else data[col]
+                    mode = source.mode(dropna=True)
                     if not mode.empty:
                         data[col] = data[col].fillna(mode.iloc[0])
-                elif col in quantitative_features or is_numeric_dtype(train_num[col]):
-                    data[col] = data[col].fillna(train_num[col].median())
+                elif col in quantitative_features or (col in train_num.columns and is_numeric_dtype(train_num[col])):
+                    source = train_num[col] if col in train_num.columns else data[col]
+                    data[col] = data[col].fillna(source.median())
                 else:
-                    mode = train_num[col].mode(dropna=True)
+                    source = train_num[col] if col in train_num.columns else data[col]
+                    mode = source.mode(dropna=True)
                     if not mode.empty:
                         data[col] = data[col].fillna(mode.iloc[0])
 
@@ -1105,7 +1202,7 @@ class ReplicationJob:
         source_cv_idx: int,
         train_cv_df: pd.DataFrame,
     ) -> pd.DataFrame:
-        active_features = [c for c in feature_columns if c in data.columns and c in train_cv_df.columns]
+        active_features = [c for c in feature_columns if c in data.columns]
         if not active_features:
             return data
 
@@ -1144,9 +1241,10 @@ class ReplicationJob:
                 )
 
         # Fallback: if scaler object was not serializable with fit-state, use train-fold z-score.
-        train_x = train_cv_df[active_features].copy()
+        train_features = [c for c in active_features if c in train_cv_df.columns]
+        train_x = train_cv_df[train_features].copy() if train_features else pd.DataFrame(index=train_cv_df.index)
         for col in active_features:
-            if not is_numeric_dtype(train_x[col]):
+            if col not in train_x.columns or not is_numeric_dtype(train_x[col]):
                 continue
             mean = pd.to_numeric(train_x[col], errors="coerce").mean()
             std = pd.to_numeric(train_x[col], errors="coerce").std(ddof=0)

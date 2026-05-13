@@ -1,5 +1,5 @@
 from __future__ import annotations
-import os, time, logging
+import os, time, logging, pickle
 from pathlib import Path
 import dask
 from dask.distributed import Client, LocalCluster
@@ -10,7 +10,7 @@ from streamline.p7_ensembles.ensembles import EnsemblePhaseJob
 class P7Runner:
     def __init__(
         self, output_path, experiment_name, n_splits,
-        outcome_label="Class", instance_label=None,
+        outcome_label="Class", outcome_type=None, instance_label=None,
         ensembles="hard_voting,soft_voting,stack_lr", base_models=None,
         meta_train_source="train",
         calibrate=0, calibrate_method="sigmoid", calibrate_cv=5,
@@ -20,9 +20,15 @@ class P7Runner:
         self.exp_root = Path(output_path) / experiment_name
         if not self.exp_root.is_dir():
             raise Exception("Experiment folder not found.")
+        self.output_path = output_path
+        self.experiment_name = experiment_name
+        metadata = self._load_metadata()
+        resolved_outcome_type = outcome_type if outcome_type is not None else metadata.get("Outcome Type")
         self.kw = dict(
             n_splits=int(n_splits),
-            outcome_label=outcome_label, instance_label=instance_label,
+            outcome_label=outcome_label,
+            outcome_type=resolved_outcome_type,
+            instance_label=instance_label,
             ensembles=ensembles, base_models=base_models,
             meta_train_source=meta_train_source,
             calibrate=bool(calibrate), calibrate_method=calibrate_method, calibrate_cv=int(calibrate_cv),
@@ -50,6 +56,16 @@ class P7Runner:
     def _run_one(self, ds):
         EnsemblePhaseJob(dataset_dir=str(ds), **self.kw).run()
 
+    def _load_metadata(self):
+        meta_path = self.exp_root / "metadata.pickle"
+        if not meta_path.exists():
+            return {}
+        try:
+            with meta_path.open("rb") as f:
+                return pickle.load(f) or {}
+        except Exception:
+            return {}
+
     def _submit_bash(self, ds):
         job_ref = str(time.time()); jobs = self.exp_root / "jobs"; logs = self.exp_root / "logs"
         os.makedirs(jobs, exist_ok=True); os.makedirs(logs, exist_ok=True)
@@ -61,6 +77,7 @@ class P7Runner:
             "--dataset_dir", str(ds),
             "--n_splits", str(self.kw["n_splits"]),
             "--outcome_label", self.kw["outcome_label"],
+            "--outcome_type", self.kw["outcome_type"] or "",
             "--instance_label", self.kw["instance_label"] or "",
             "--ensembles", self.kw["ensembles"] or "",
             "--base_models", self.kw["base_models"] or "",
@@ -68,8 +85,8 @@ class P7Runner:
             "--calibrate", str(int(self.kw["calibrate"])),
             "--calibrate_method", self.kw["calibrate_method"],
             "--calibrate_cv", str(self.kw["calibrate_cv"]), 
-            "--output_path", self.kw["output_path"],
-            "--experiment_name", self.kw["experiment_name"],
+            "--output_path", self.output_path,
+            "--experiment_name", self.experiment_name,
         ])
         with open(sh, "w") as f:
             f.write("#!/bin/bash\n")

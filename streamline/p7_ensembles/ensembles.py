@@ -29,6 +29,7 @@ class EnsemblePhaseJob:
         dataset_dir: str,                 # <output>/<exp>/<dataset>
         n_splits: int,
         outcome_label: str = "Class",
+        outcome_type: Optional[str] = None,
         instance_label: Optional[str] = None,
         # ensembles: CSV of ids (hard_voting,soft_voting,stack_lr,stack_dt,stack_rf)
         ensembles: Optional[str] = "hard_voting,soft_voting,stack_lr",
@@ -43,6 +44,12 @@ class EnsemblePhaseJob:
         self.dataset_name = self.ds_dir.name
         self.n_splits = int(n_splits)
         self.outcome_label = outcome_label
+        self.outcome_type = _normalize_outcome_type(outcome_type)
+        if self.outcome_type == "Continuous":
+            raise NotImplementedError(
+                "Phase 7 ensembles currently support binary and multiclass classification only. "
+                "Regression ensembles are not implemented."
+            )
         self.instance_label = instance_label
         self.ensemble_ids = [e.strip() for e in (ensembles or "").split(",") if e.strip()]
         self.base_filter = [s.strip() for s in (base_models or "").split(",") if s.strip()] or None
@@ -312,6 +319,18 @@ def _drop_instance(df: pd.DataFrame, instance_label: Optional[str]):
         return df.drop(columns=[instance_label])
     return df
 
+def _normalize_outcome_type(value: Optional[str]) -> Optional[str]:
+    if value is None or str(value).strip() == "":
+        return None
+    text = str(value).strip().lower()
+    if text in {"binary", "bin", "classification_binary"}:
+        return "Binary"
+    if text in {"multiclass", "multi", "classification_multiclass"}:
+        return "Multiclass"
+    if text in {"continuous", "regression", "numeric"}:
+        return "Continuous"
+    return str(value)
+
 def _prep_xy(df: pd.DataFrame, outcome_label: str):
     X = df.drop(columns=[outcome_label]).values
     y = df[outcome_label].values
@@ -454,7 +473,10 @@ def _calc_basic_metrics(y_true, y_pred) -> Dict[str, Any]:
     # Binary
     # -----------------------
     # Use confusion matrix in the same way your earlier code does (ravel)
-    cm = _safe(confusion_matrix, y_true, y_pred, labels=labels)
+    try:
+        cm = confusion_matrix(y_true, y_pred, labels=labels)
+    except Exception:
+        cm = None
     if cm is None:
         # Can happen if something pathological; return best-effort with None extras
         return {

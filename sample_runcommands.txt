@@ -11,6 +11,7 @@
 # - Some phases accept metadata defaults when labels / types are omitted.
 # - Reporting can be run in standard mode or replication mode.
 # - Replication requires that phases 1-9 have already completed.
+# - Phase 7 ensembles are classification-only; skip Phase 7 for regression.
 #
 # Demo data included in this repository:
 # - Classification: data/DemoData
@@ -329,20 +330,8 @@ python -m streamline.p6_modeling.p6_cli \
   --run_cluster Serial
 
 
-# ------------------------
-# Phase 7 - Ensembles
-# ------------------------
-python -m streamline.p7_ensembles.p7_cli \
-  --output_path out \
-  --experiment_name DemoRegression \
-  --n_splits 5 \
-  --outcome_label Cognition_Score \
-  --instance_label Class \
-  --ensembles hard_voting,soft_voting,stack_lr \
-  --base_models LR,RF,SVR \
-  --meta_train_source train \
-  --calibrate 0 \
-  --random_state 42
+# Phase 7 is intentionally skipped for regression because ensembles are
+# currently classification-only.
 
 
 # ---------------------------
@@ -361,7 +350,7 @@ python -m streamline.p8_summary_statistics.p8_cli \
   --sig_cutoff 0.05 \
   --scale_data 1 \
   --show_plots 0 \
-  --include_ensembles 1
+  --include_ensembles 0
 
 
 # ---------------------------------------

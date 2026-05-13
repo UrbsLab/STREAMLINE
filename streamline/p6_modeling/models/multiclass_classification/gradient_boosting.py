@@ -48,7 +48,7 @@ class XGBClassifier(MulticlassClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(XGB, "Extreme Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = {'booster': ['gbtree'], 'objective': ['binary:logistic'], 'verbosity': [0],
+        self.param_grid = {'booster': ['gbtree'], 'objective': ['multi:softprob'], 'eval_metric': ['mlogloss'], 'verbosity': [0],
                            'reg_lambda': [1e-08, 1.0], 'alpha': [1e-08, 1.0], 'eta': [1e-08, 1.0],
                            'gamma': [1e-08, 1.0], 'max_depth': [1, 30], 'grow_policy': ['depthwise', 'lossguide'],
                            'n_estimators': [10, 1000], 'min_samples_split': [2, 50], 'min_samples_leaf': [1, 50],
@@ -59,10 +59,10 @@ class XGBClassifier(MulticlassClassificationModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        class_weight = params['class_weight']
         param_grid = self.param_grid
         self.params = {'booster': trial.suggest_categorical('booster', param_grid['booster']),
                        'objective': trial.suggest_categorical('objective', param_grid['objective']),
+                       'eval_metric': trial.suggest_categorical('eval_metric', param_grid['eval_metric']),
                        'verbosity': trial.suggest_categorical('verbosity', param_grid['verbosity']),
                        'reg_lambda': trial.suggest_float('reg_lambda', param_grid['reg_lambda'][0],
                                                          param_grid['reg_lambda'][1], log=True),
@@ -85,7 +85,6 @@ class XGBClassifier(MulticlassClassificationModel, ABC):
                                                                param_grid['min_child_weight'][1], log=True),
                        'colsample_bytree': trial.suggest_uniform('colsample_bytree', param_grid['colsample_bytree'][0],
                                                                  param_grid['colsample_bytree'][1]),
-                       'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
                        'nthread': trial.suggest_categorical('nthread', param_grid['nthread']),
                        'random_state': trial.suggest_categorical('random_state', param_grid['random_state']), }
 
@@ -101,7 +100,7 @@ class LGBClassifier(MulticlassClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LGB, "Light Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = {'objective': ['binary'], 'metric': ['binary_logloss'], 'verbosity': [-1],
+        self.param_grid = {'objective': ['multiclass'], 'metric': ['multi_logloss'], 'verbosity': [-1],
                            'boosting_type': ['gbdt'], 'num_leaves': [2, 256], 'max_depth': [1, 30],
                            'reg_alpha': [1e-08, 10.0], 'reg_lambda': [1e-08, 10.0], 'colsample_bytree': [0.4, 1.0],
                            'subsample': [0.4, 1.0], 'subsample_freq': [1, 7], 'min_child_samples': [5, 100],
@@ -111,7 +110,6 @@ class LGBClassifier(MulticlassClassificationModel, ABC):
         self.n_jobs = n_jobs
 
     def objective(self, trial, params=None):
-        class_weight = params['class_weight']
         param_grid = self.param_grid
         self.params = {'objective': trial.suggest_categorical('objective', param_grid['objective']),
                        'metric': trial.suggest_categorical('metric', param_grid['metric']),
@@ -135,7 +133,6 @@ class LGBClassifier(MulticlassClassificationModel, ABC):
                                                               param_grid['min_child_samples'][1]),
                        'n_estimators': trial.suggest_int('n_estimators', param_grid['n_estimators'][0],
                                                          param_grid['n_estimators'][1]),
-                       'scale_pos_weight': trial.suggest_categorical('scale_pos_weight', [1.0, class_weight]),
                        'random_state': trial.suggest_categorical('random_state', param_grid['random_state']),
                        }
         # print(self.model.get_params())

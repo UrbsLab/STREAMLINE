@@ -13,7 +13,8 @@ def _maybe_list(s):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--dataset_path', required=True)
+    ap.add_argument('--dataset_path', default='')
+    ap.add_argument('--dataset_name', default='')
     ap.add_argument('--output_path', required=True)
     ap.add_argument('--experiment_name', required=True)
     ap.add_argument('--exclude', default='')
@@ -50,28 +51,40 @@ def main():
     ap.add_argument('--plot_univariate', type=int, default=0)
     ap.add_argument('--univariate_top_k', type=int, default=20)
     ap.add_argument('--plot_anomalies', type=int, default=0)
-    ap.add_argument('--force', type=int, default=0)
-
-
     args = ap.parse_args()
 
-    # load data
-    ext = args.dataset_path.split('.')[-1].lower()
-    if ext == 'csv':
-        df = pd.read_csv(args.dataset_path, na_values='NA', sep=',')
-    elif ext == 'tsv':
-        df = pd.read_csv(args.dataset_path, na_values='NA', sep='\t')
+    if args.dataset_path:
+        ext = args.dataset_path.split('.')[-1].lower()
+        if ext == 'csv':
+            df = pd.read_csv(args.dataset_path, na_values='NA', sep=',')
+        elif ext == 'tsv':
+            df = pd.read_csv(args.dataset_path, na_values='NA', sep='\t')
+        else:
+            df = pd.read_csv(args.dataset_path, na_values='NA', delim_whitespace=True)
+        dataset_name = args.dataset_name or os.path.basename(args.dataset_path).split('.')[0]
     else:
-        df = pd.read_csv(args.dataset_path, na_values='NA', delim_whitespace=True)
+        if not args.cv_provided or not args.cv_input_root:
+            raise ValueError("dataset_path is required unless cv_provided=1 and cv_input_root is set")
+        cv_dir = os.path.join(args.cv_input_root, "CVDatasets")
+        if not os.path.isdir(cv_dir):
+            raise ValueError(f"Expected CVDatasets/ under cv_input_root: {args.cv_input_root}")
+        train_files = sorted(
+            f for f in os.listdir(cv_dir)
+            if f.endswith("_Train.csv") and "_CV_" in f
+        )
+        if not train_files:
+            raise ValueError(f"No Train split CSVs found under {cv_dir}")
+        df = pd.read_csv(os.path.join(cv_dir, train_files[0]), na_values='NA', sep=',')
+        dataset_name = args.dataset_name or os.path.basename(args.cv_input_root.rstrip(os.sep))
     df.columns = df.columns.str.strip()
 
-    dataset_name = os.path.basename(args.dataset_path).split('.')[0]
     experiment_path = os.path.join(args.output_path, args.experiment_name)
 
     dp = DataProcess(
         data=df,
         experiment_path=experiment_path,
         outcome_label=args.outcome_label,
+        outcome_type=(args.outcome_type or None),
         match_label=(args.match_label if args.match_label in df.columns else None) or None,
         instance_label=(args.instance_label if args.instance_label in df.columns else None) or None,
         ignore_features=_maybe_list(args.ignore_features),
@@ -101,9 +114,6 @@ def main():
         plot_univariate=bool(args.plot_univariate),
         univariate_top_k=int(args.univariate_top_k),
         plot_anomalies=bool(args.plot_anomalies),
-
-        # force
-        force=bool(args.force)
     )
 
     dp.run(top_features=int(args.top_features))

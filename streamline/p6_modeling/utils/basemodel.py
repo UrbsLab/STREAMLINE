@@ -94,7 +94,7 @@ class BaseModel:
 
         if not self.is_single:
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
-            if self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
+            if self.model_type == "Binary" and self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
                 pos_inst = sum(y_train)
                 neg_inst = len(y_train) - pos_inst
                 class_weight = neg_inst / float(pos_inst)

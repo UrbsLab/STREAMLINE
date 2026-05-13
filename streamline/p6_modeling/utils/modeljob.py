@@ -145,7 +145,6 @@ class ModelJob:
         random.seed(self.random_state)
         np.random.seed(self.random_state)
         x_train, y_train, x_test, y_test = self.data_prep()
-        model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
 
         # optional training subsample for certain models
         if 0 < self.training_subsample < x_train.shape[0] and model.small_name in ['XGB', 'SVM', 'ANN', 'KNN']:
@@ -155,6 +154,8 @@ class ModelJob:
                 y_train = y_train[train_index]
             logging.warning('For ' + model.small_name
                             + ', training sample reduced to ' + str(x_train.shape[0]) + ' instances')
+
+        model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
 
         if not os.path.exists(self.full_path + '/models/'):
             os.makedirs(self.full_path + '/models/')

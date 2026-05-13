@@ -43,6 +43,7 @@ class DataProcess:
         data: pd.DataFrame,
         experiment_path: str,
         outcome_label: str,
+        outcome_type: "str | None" = None,
         match_label: "str | None" = None,
         instance_label: "str | None" = None,
         ignore_features=None,
@@ -87,15 +88,18 @@ class DataProcess:
         self.match_label = match_label if (match_label in self.data.columns) else None
         self.instance_label = instance_label if (instance_label in self.data.columns) else None
 
-        # outcome type
-        n_unique = self.data[self.outcome_label].nunique()
-        if n_unique == 2:
-            self.outcome_type = "Binary"
-        elif 2 < n_unique <= categorical_cutoff:
-            self.outcome_type = "Multiclass"
+        # outcome type: respect an explicit user/config override, otherwise infer.
+        explicit_outcome_type = self._normalize_outcome_type(outcome_type)
+        if explicit_outcome_type is not None:
+            self.outcome_type = explicit_outcome_type
         else:
-            self.outcome_type = "Continuous"
-            self.partition_method = "Random"
+            n_unique = self.data[self.outcome_label].nunique()
+            if n_unique == 2:
+                self.outcome_type = "Binary"
+            elif 2 < n_unique <= categorical_cutoff:
+                self.outcome_type = "Multiclass"
+            else:
+                self.outcome_type = "Continuous"
 
         # keep explorations (CSV-producing analyses)
         explorations_list = ["Describe", "Univariate Analysis", "Feature Correlation"]
@@ -171,6 +175,8 @@ class DataProcess:
         # CV config
         self.cv_partitioner = None
         self.partition_method = partition_method
+        if self.outcome_type == "Continuous":
+            self.partition_method = "Random"
         self.n_splits = int(n_splits)
         self.one_hot_encoding = bool(one_hot_encoding)
         self.cv_provided = bool(cv_provided)
@@ -178,6 +184,29 @@ class DataProcess:
 
         self.random_state = random_state
         self.job_start_time = None  # runtime
+
+    @staticmethod
+    def _normalize_outcome_type(value):
+        if value is None or str(value).strip() == "":
+            return None
+        normalized = str(value).strip().lower()
+        aliases = {
+            "binary": "Binary",
+            "bin": "Binary",
+            "classification_binary": "Binary",
+            "multiclass": "Multiclass",
+            "multi": "Multiclass",
+            "classification_multiclass": "Multiclass",
+            "continuous": "Continuous",
+            "regression": "Continuous",
+            "numeric": "Continuous",
+        }
+        if normalized not in aliases:
+            raise ValueError(
+                "outcome_type must be one of Binary, Multiclass, Continuous, "
+                f"or a supported alias; got {value!r}"
+            )
+        return aliases[normalized]
 
     # ----------------------------
     # Main flow

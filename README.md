@@ -2,7 +2,7 @@
 
 # STREAMLINE
 
-STREAMLINE is an end-to-end automated machine learning pipeline for tabular biomedical and general supervised learning workflows. The current codebase supports binary classification, multiclass classification, and regression, with integrated feature learning, feature importance, feature selection, base-model training, ensembles, summary statistics, dataset comparison, replication, and PDF reporting.
+STREAMLINE is an end-to-end automated machine learning pipeline for tabular biomedical and general supervised learning workflows. The current codebase supports binary classification, multiclass classification, and regression, with integrated feature learning, feature importance, feature selection, base-model training, classification ensembles, summary statistics, dataset comparison, replication, and PDF reporting.
 
 This repository is the most up-to-date starting point for the current refactored STREAMLINE pipeline. The older documentation site remains useful for background and historical context, but the README and notebooks in this repository best reflect the current 11-phase implementation.
 
@@ -14,7 +14,7 @@ This repository is the most up-to-date starting point for the current refactored
 - Feature learning with PCA and related outputs
 - Feature importance methods including mutual information, MultiSURF, and MultiSURFstar
 - Modeling with base learners, calibration support for classification, and composite feature importance from modeling
-- Ensemble evaluation
+- Classification ensemble evaluation
 - Summary statistics and cross-dataset comparison
 - Replication / external validation as a dedicated phase
 - Automated reporting for both standard experiment outputs and replication outputs
@@ -32,7 +32,7 @@ The current pipeline is organized into 11 phases:
 | P4 | Feature Importance | Score features with filter-style feature importance methods |
 | P5 | Feature Selection | Select and persist reduced feature sets |
 | P6 | Modeling | Train and evaluate base models |
-| P7 | Ensembles | Train and evaluate ensembles on top of base models |
+| P7 | Ensembles | Train and evaluate classification ensembles on top of base models |
 | P8 | Summary Statistics | Aggregate CV metrics, generate plots, and summarize feature/model behavior |
 | P9 | Compare Datasets | Compare results across datasets within an experiment |
 | P10 | Replication | Apply the trained workflow to external replication datasets |
@@ -58,6 +58,7 @@ The current pipeline is organized into 11 phases:
 - Regression metrics such as explained variance, Pearson correlation, MAE, MSE, median absolute error, and max error
 - Actual-versus-predicted and residual diagnostics
 - Replication and reporting flows adapted for regression outputs
+- Phase 7 ensembles are currently classification-only; regression runs should proceed from Phase 6 directly to Phase 8.
 
 ## Repository Layout
 

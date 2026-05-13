@@ -14,6 +14,7 @@ def main():
     ap.add_argument("--experiment_name", required=True)
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--outcome_label", default="Class")
+    ap.add_argument("--outcome_type", default=None, help="Binary | Multiclass | Continuous; defaults to metadata, Continuous is rejected")
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--ensembles", default="hard_voting,soft_voting,stack_lr")
     ap.add_argument("--base_models", default=None)
@@ -38,6 +39,7 @@ def main():
         experiment_name=args.experiment_name,
         n_splits=args.n_splits,
         outcome_label=args.outcome_label,
+        outcome_type=args.outcome_type,
         instance_label=args.instance_label,
         ensembles=args.ensembles,
         base_models=args.base_models,
@@ -60,22 +62,22 @@ if __name__ == "__main__":
     
     ## List available ensembles
 
-    # python -m streamline.p7_ensemble.p7_cli \
+    # python -m streamline.p7_ensembles.p7_cli \
     # --output_path test --experiment_name data/DemoData --n_splits 5 --list_ensembles
 
 
     ## Plain (no tuning), include calibration
 
-    # python -m streamline.p7_ensemble.p7_cli \
+    # python -m streamline.p7_ensembles.p7_cli \
     # --output_path test --experiment_name data/DemoData --n_splits 5 \
-    # --ensembles vote_hard,vote_soft,stack_lr \
+    # --ensembles hard_voting,soft_voting,stack_lr \
     # --base_models LR,SVM,NB \
     # --calibrate 1 --calibrate_method sigmoid --calibrate_cv 5
 
 
     ## Tune stacking meta-LR (30 trials / 10 min)
 
-    # python -m streamline.p7_ensemble.p7_cli \
+    # python -m streamline.p7_ensembles.p7_cli \
     # --output_path test --experiment_name data/DemoData --n_splits 5 \
     # --ensembles stack_lr \
     # --base_models LR,SVM,NB \

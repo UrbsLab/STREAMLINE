@@ -107,6 +107,7 @@ class FeatureLearn:
         self._write_artifacts(
             learner,
             out_cols,
+            X_train.columns.tolist(),
             X_train.shape[1],
             Z_train.shape[1],
             train_out.shape,
@@ -153,17 +154,21 @@ class FeatureLearn:
         data_train.to_csv(self.cv_train_path, index=False)
         data_test.to_csv(self.cv_test_path, index=False)
 
-    def _write_artifacts(self, learner, out_cols, in_feat_count, eng_feat_count, train_shape, test_shape):
+    def _write_artifacts(self, learner, out_cols, input_cols, in_feat_count, eng_feat_count, train_shape, test_shape):
         base = os.path.join(self.experiment_path, self.dataset_name, "feature_learning")
         os.makedirs(base, exist_ok=True)
 
         # Save learner as id+params (registry flavor)
         with open(os.path.join(base, f"learner_cv{self.cv_count}.pickle"), "wb") as f:
             pickle.dump({"id": self.learner_id, "params": learner.get_params()}, f)
+        with open(os.path.join(base, f"fitted_learner_cv{self.cv_count}.pickle"), "wb") as f:
+            pickle.dump(learner, f)
 
         # Feature names
         with open(os.path.join(base, f"features_cv{self.cv_count}.txt"), "w") as f:
             f.write("\n".join(out_cols))
+        with open(os.path.join(base, f"input_features_cv{self.cv_count}.txt"), "w") as f:
+            f.write("\n".join(input_cols))
 
         manifest = {
             "dataset": self.dataset_name,
@@ -171,6 +176,8 @@ class FeatureLearn:
             "namespace": self.feature_namespace,
             "keep_original_features": bool(self.keep_original_features),
             "learner": {"id": self.learner_id, "params": learner.get_params()},
+            "input_features": list(input_cols),
+            "output_features": list(out_cols),
             "input_feature_count": int(in_feat_count),
             "engineered_feature_count": int(eng_feat_count),
             "principal_components_added": int(eng_feat_count),

@@ -82,7 +82,7 @@ class P1Runner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
-        self.outcome_type = outcome_type
+        self.outcome_type = DataProcess._normalize_outcome_type(outcome_type) if outcome_type else None
         self.instance_label = instance_label
         self.match_label = match_label
         self.ignore_features = ignore_features
@@ -115,6 +115,8 @@ class P1Runner:
 
         self.n_splits = n_splits
         self.partition_method = partition_method
+        if self.outcome_type == "Continuous":
+            self.partition_method = "Random"
         self.run_cluster = run_cluster  # see modes above
         self.queue = queue
         self.reserved_memory = reserved_memory
@@ -177,6 +179,8 @@ class P1Runner:
             if self.outcome_type is None and self.outcome_label in df.columns:
                 nunique = df[self.outcome_label].nunique()
                 self.outcome_type = "Binary" if nunique == 2 else ("Multiclass" if 2 < nunique <= self.categorical_cutoff else "Continuous")
+                if self.outcome_type == "Continuous":
+                    self.partition_method = "Random"
                 self.save_metadata()
 
             if self.run_cluster in ("BashSLURM", "BashLSF"):
@@ -220,10 +224,16 @@ class P1Runner:
                 if self.outcome_type is None and self.outcome_label in df.columns:
                     nunique = df[self.outcome_label].nunique()
                     self.outcome_type = "Binary" if nunique == 2 else ("Multiclass" if 2 < nunique <= self.categorical_cutoff else "Continuous")
+                    if self.outcome_type == "Continuous":
+                        self.partition_method = "Random"
                     self.save_metadata()
 
                 if self.run_cluster in ("BashSLURM", "BashLSF"):
-                    self._submit_bash_job(dataset_path)
+                    self._submit_bash_job(
+                        dataset_path=None,
+                        dataset_name=ds_name,
+                        cv_input_root=ds_dir,
+                    )
                     continue
 
                 dp = self._build_dataprocess(df, ds_name, cv_path=ds_dir, force_import_only=True)
@@ -264,6 +274,7 @@ class P1Runner:
             data=df,
             experiment_path=os.path.join(self.output_path, self.experiment_name),
             outcome_label=self.outcome_label,
+            outcome_type=self.outcome_type,
             match_label=self.match_label if (self.match_label in df.columns) else None,
             instance_label=self.instance_label if (self.instance_label in df.columns) else None,
             ignore_features=self.ignore_features,
@@ -402,7 +413,7 @@ class P1Runner:
     # ----------------------------
     # Bash submission (uses p1_jobsubmit.py)
     # ----------------------------
-    def _submit_bash_job(self, dataset_path):
+    def _submit_bash_job(self, dataset_path, dataset_name=None, cv_input_root=None):
         job_ref = str(time.time())
         run_dir = self.output_path + '/' + self.experiment_name
         os.makedirs(run_dir + '/jobs', exist_ok=True)
@@ -425,7 +436,7 @@ class P1Runner:
                 sh.write('#SBATCH --mem=' + str(self.reserved_memory) + 'G' + '\n')
                 sh.write('#SBATCH -o ' + run_dir + f'/logs/P1_{job_ref}.o\n')
                 sh.write('#SBATCH -e ' + run_dir + f'/logs/P1_{job_ref}.e\n')
-                cmd = self._bash_submit_command(dataset_path)
+                cmd = self._bash_submit_command(dataset_path, dataset_name=dataset_name, cv_input_root=cv_input_root)
                 sh.write('srun ' + cmd + '\n')
             else:
                 sh.write('#!/bin/bash\n')
@@ -435,20 +446,21 @@ class P1Runner:
                 sh.write('#BSUB -M ' + str(self.reserved_memory) + 'GB' + '\n')
                 sh.write('#BSUB -o ' + run_dir + f'/logs/P1_{job_ref}.o\n')
                 sh.write('#BSUB -e ' + run_dir + f'/logs/P1_{job_ref}.e\n')
-                cmd = self._bash_submit_command(dataset_path)
+                cmd = self._bash_submit_command(dataset_path, dataset_name=dataset_name, cv_input_root=cv_input_root)
                 sh.write(cmd + '\n')
 
         os.system(f'{launcher} {job_name}')
 
-    def _bash_submit_command(self, dataset_path):
+    def _bash_submit_command(self, dataset_path, dataset_name=None, cv_input_root=None):
         """
         Build command to run a single-dataset job via p1_jobsubmit.py (bash path).
         p1_jobsubmit.py must parse args and run DataProcess once.
         """
-        script_path = str(Path(__file__).parent) + "p1_jobsubmit.py"
+        script_path = str(Path(__file__).parent / "p1_jobsubmit.py")
         args = [
             'python', script_path,
-            '--dataset_path', dataset_path,
+            '--dataset_path', dataset_path or '',
+            '--dataset_name', dataset_name or '',
             '--output_path', self.output_path,
             '--experiment_name', self.experiment_name,
             '--exclude', ','.join(self.exclude_eda_output) if self.exclude_eda_output else '',
@@ -470,7 +482,7 @@ class P1Runner:
             '--random_state', str(self.random_state) if self.random_state is not None else '',
             '--one_hot_encoding', str(int(self.one_hot_encoding)),
             '--cv_provided', str(int(self.cv_provided)),
-            '--cv_input_root', self.cv_input_root or '',
+            '--cv_input_root', cv_input_root or self.cv_input_root or '',
             # plotting flags
             '--enable_plots', str(int(self.enable_plots)),
             '--plot_missingness', str(int(self.plot_missingness)),
@@ -480,7 +492,5 @@ class P1Runner:
             '--plot_univariate', str(int(self.plot_univariate)),
             '--univariate_top_k', str(int(self.univariate_top_k)),
             '--plot_anomalies', str(int(self.plot_anomalies)),
-            '--force', str(int(self.force)),
-
         ]
         return ' '.join(args)

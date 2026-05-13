@@ -13,7 +13,7 @@ class FeatureImportance:
       - feature_importance/<path_name>/<path_name>_scores_cv_<k>.csv
       - feature_importance/<path_name>/selector_cv<k>.pickle ({id, params})
       - jobsCompleted flag
-    Optionally rewrites CV CSVs with selected columns if top_k/threshold supplied.
+    Optionally writes model-specific selected CV copies if top_k/threshold supplied.
     """
     def __init__(
         self,
@@ -86,30 +86,30 @@ class FeatureImportance:
         logging.info("Sort and pickle feature importance scores...")
         self._write_scores_csv(model, Xtr.columns)
 
-        # optionally reduce CV CSVs using selection
-        Xtr_sel = model.transform(Xtr, top_k=self.top_k, threshold=self.threshold)
-        Xte_sel = Xte.loc[:, Xtr_sel.columns]
-        if self.keep_original_features:
-            Xtr_out = pd.concat([Xtr.reset_index(drop=True), Xtr_sel.reset_index(drop=True)], axis=1)
-            Xte_out = pd.concat([Xte.reset_index(drop=True), Xte_sel.reset_index(drop=True)], axis=1)
-        else:
-            Xtr_out, Xte_out = Xtr_sel, Xte_sel
-
-        if inst_tr is None:
-            train_out = pd.concat([y_tr.reset_index(drop=True), Xtr_out], axis=1)
-            test_out  = pd.concat([y_te.reset_index(drop=True), Xte_out], axis=1)
-        else:
-            train_out = pd.concat([y_tr.reset_index(drop=True), inst_tr.reset_index(drop=True), Xtr_out], axis=1)
-            test_out  = pd.concat([y_te.reset_index(drop=True), inst_te.reset_index(drop=True), Xte_out], axis=1)
-
-        self._write_cv_files(train_out, test_out)
-
         # save params artifact
         base = self._model_dir(model)
         with open(os.path.join(base, f"selector_cv{self.cv_count}.pickle"), "wb") as f:
             pickle.dump({"id": self.model_id, "params": model.get_params(),
                          "model_name": getattr(model, "model_name", self.model_id),
                          "small_name": getattr(model, "small_name", self.model_id)}, f)
+
+        if self.top_k is not None or self.threshold is not None:
+            Xtr_sel = model.transform(Xtr, top_k=self.top_k, threshold=self.threshold)
+            Xte_sel = Xte.loc[:, Xtr_sel.columns]
+            if self.keep_original_features:
+                Xtr_out = pd.concat([Xtr.reset_index(drop=True), Xtr_sel.reset_index(drop=True)], axis=1)
+                Xte_out = pd.concat([Xte.reset_index(drop=True), Xte_sel.reset_index(drop=True)], axis=1)
+            else:
+                Xtr_out, Xte_out = Xtr_sel, Xte_sel
+
+            if inst_tr is None:
+                train_out = pd.concat([y_tr.reset_index(drop=True), Xtr_out], axis=1)
+                test_out  = pd.concat([y_te.reset_index(drop=True), Xte_out], axis=1)
+            else:
+                train_out = pd.concat([y_tr.reset_index(drop=True), inst_tr.reset_index(drop=True), Xtr_out], axis=1)
+                test_out  = pd.concat([y_te.reset_index(drop=True), inst_te.reset_index(drop=True), Xte_out], axis=1)
+
+            self._write_selected_cv_files(model, train_out, test_out)
 
         self._save_runtime()
         self._complete_flag(model)
@@ -157,6 +157,19 @@ class FeatureImportance:
             os.rename(self.cv_test_path,  os.path.join(cvdir, f"{self.dataset_name}_CVOnly_{self.cv_count}_Test.csv"))
         train.to_csv(self.cv_train_path, index=False)
         test.to_csv(self.cv_test_path, index=False)
+
+    def _write_selected_cv_files(self, model, train: pd.DataFrame, test: pd.DataFrame):
+        path_name = getattr(model, "path_name", self.model_id)
+        out_dir = os.path.join(
+            self.experiment_path,
+            self.dataset_name,
+            "feature_importance",
+            path_name,
+            "selected_cv",
+        )
+        os.makedirs(out_dir, exist_ok=True)
+        train.to_csv(os.path.join(out_dir, f"{self.dataset_name}_CV_{self.cv_count}_Train.csv"), index=False)
+        test.to_csv(os.path.join(out_dir, f"{self.dataset_name}_CV_{self.cv_count}_Test.csv"), index=False)
 
     def _save_runtime(self):
         rt = os.path.join(self.experiment_path, self.dataset_name, "runtime")
