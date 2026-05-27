@@ -671,7 +671,94 @@ class ReportPhaseJob:
             counts.append(count)
         return labels, counts
 
-    def _classification_no_skill(self, class_counts: Optional[TableData]) -> float:
+    @staticmethod
+    def positive_label_text(values: Sequence[str]) -> str:
+        cleaned = [str(v).strip() for v in values if str(v).strip() != ""]
+        if not cleaned:
+            return "1"
+        if "1" in cleaned:
+            return "1"
+        if "True" in cleaned:
+            return "True"
+        if "true" in cleaned:
+            return "true"
+        try:
+            return sorted(set(cleaned), key=lambda x: float(x))[-1]
+        except Exception:
+            return sorted(set(cleaned))[-1]
+
+    def no_skill_from_outcome_folds(
+        self,
+        folds: Sequence[Sequence[str]],
+        task_type: Optional[str] = None,
+        class_count_labels: Optional[Sequence[str]] = None,
+    ) -> Optional[float]:
+        non_empty = [
+            [str(v).strip() for v in fold if str(v).strip() != ""]
+            for fold in folds
+        ]
+        non_empty = [fold for fold in non_empty if fold]
+        if not non_empty:
+            return None
+
+        all_values = [value for fold in non_empty for value in fold]
+        labels = sorted(set(all_values))
+        if "multiclass" in str(task_type or "").lower() or len(labels) > 2:
+            class_count = max(len(labels), len(class_count_labels or []), 1)
+            return max(1e-6, min(1.0, 1.0 / float(class_count)))
+
+        positive = self.positive_label_text(all_values)
+        fold_rates = [
+            sum(1 for value in fold if value == positive) / float(len(fold))
+            for fold in non_empty
+        ]
+        if not fold_rates:
+            return None
+        return max(1e-6, min(1.0, sum(fold_rates) / float(len(fold_rates))))
+
+    def cv_test_outcome_folds(self, ds_dir: Optional[Path], outcome_label: str) -> List[List[str]]:
+        if ds_dir is None:
+            return []
+        cv_dir = ds_dir / "CVDatasets"
+        if not cv_dir.is_dir():
+            return []
+
+        folds: List[List[str]] = []
+        for path in sorted(cv_dir.glob(f"{ds_dir.name}_CV_*_Test.csv")):
+            try:
+                with path.open("r", newline="", encoding="utf-8-sig") as f:
+                    reader = csv.DictReader(f)
+                    fieldnames = reader.fieldnames or []
+                    low = {name.lower(): name for name in fieldnames}
+                    target = outcome_label if outcome_label in fieldnames else low.get(outcome_label.lower())
+                    if not target:
+                        continue
+                    values = [
+                        str(row.get(target, "")).strip()
+                        for row in reader
+                        if str(row.get(target, "")).strip() != ""
+                    ]
+                    if values:
+                        folds.append(values)
+            except Exception as exc:
+                logger.warning("Could not read CV outcomes for no-skill baseline from %s: %r", path, exc)
+        return folds
+
+    def _classification_no_skill(
+        self,
+        class_counts: Optional[TableData],
+        ds_dir: Optional[Path] = None,
+        outcome_label: str = "Class",
+        task_type: Optional[str] = None,
+    ) -> float:
+        cv_baseline = self.no_skill_from_outcome_folds(
+            self.cv_test_outcome_folds(ds_dir, outcome_label),
+            task_type=task_type,
+            class_count_labels=self._extract_class_count_info(class_counts)[0],
+        )
+        if cv_baseline is not None:
+            return cv_baseline
+
         labels, counts = self._extract_class_count_info(class_counts)
         if not counts:
             return 0.5
@@ -1484,7 +1571,7 @@ class ReportPhaseJob:
                         linestyle="--",
                         color="black",
                         linewidth=1.0,
-                        label="No Skill (AUC=0.500)",
+                        label="No Skill (AUROC=0.500)",
                     )
                     ax.set_xlabel("False Positive Rate")
                     ax.set_ylabel("True Positive Rate")
@@ -1496,7 +1583,7 @@ class ReportPhaseJob:
                         linestyle="--",
                         color="black",
                         linewidth=1.0,
-                        label=f"No Skill (AUC={_format_number(y_base)})",
+                        label=f"No Skill (AUPRC={_format_number(y_base)})",
                     )
                     ax.set_xlabel("Recall")
                     ax.set_ylabel("Precision")
@@ -1955,7 +2042,18 @@ class ReportPhaseJob:
             # Model curves: reuse summary if present, else generate.
             mroc = _first_existing([ds_dir / "model_evaluation" / "Summary_ROC.png"])
             mprc = _first_existing([ds_dir / "model_evaluation" / "Summary_PRC.png"])
-            no_skill = self._classification_no_skill(class_counts)
+            outcome_label = str(
+                self.outcome_label
+                or metadata.get("Outcome Label")
+                or metadata.get("outcome_label")
+                or "Class"
+            )
+            no_skill = self._classification_no_skill(
+                class_counts,
+                ds_dir=ds_dir,
+                outcome_label=outcome_label,
+                task_type=task_type,
+            )
 
             reused_models_roc = self._reuse_generated_report_figure(
                 f"{dataset_name}_models_roc_summary.png",

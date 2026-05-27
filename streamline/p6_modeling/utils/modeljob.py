@@ -10,12 +10,22 @@ import pandas as pd
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.calibration import CalibratedClassifierCV
+from pandas.api.types import is_object_dtype, is_string_dtype
+
+from streamline.p6_modeling.utils.categorical import (
+    FeatureTypeModelWrapper,
+    cast_native_categoricals,
+    normalize_model_id,
+    one_hot_align,
+    parse_model_id_csv,
+)
 
 
 class ModelJob:
     def __init__(self, full_path, output_path, experiment_name, cv_count, outcome_label="Class",
                  instance_label=None, scoring_metric='balanced_accuracy', metric_direction='maximize', n_trials=200,
                  timeout=900, training_subsample=0, uniform_fi=False, save_plot=False, random_state=None,
+                 bypass_one_hot_for_native_models=True, native_categorical_models=None,
                  # NEW: calibration controls (classification only)
                  calibrate=False, calibrate_method="sigmoid", calibrate_cv=5):
         """
@@ -60,6 +70,16 @@ class ModelJob:
         self.feature_importance = None
         self.save_plot = save_plot
         self.param_grid = None
+        self.bypass_one_hot_for_native_models = bool(bypass_one_hot_for_native_models)
+        self.native_categorical_models = parse_model_id_csv(
+            native_categorical_models,
+            default=("CGB", "Category Gradient Boosting"),
+        )
+        self.raw_feature_names = list(self.feature_names)
+        self.raw_categorical_feature_names = []
+        self.categorical_feature_names = []
+        self.categorical_encoding_mode = "none"
+        self.encoded_feature_names = list(self.feature_names)
 
         # calibration
         self.calibrate = bool(calibrate)
@@ -144,18 +164,36 @@ class ModelJob:
     def run_model(self, model):
         random.seed(self.random_state)
         np.random.seed(self.random_state)
-        x_train, y_train, x_test, y_test = self.data_prep()
+        x_train, y_train, x_test, y_test = self.data_prep(model)
+        self._configure_native_categorical_model(model)
 
         # optional training subsample for certain models
         if 0 < self.training_subsample < x_train.shape[0] and model.small_name in ['XGB', 'SVM', 'ANN', 'KNN']:
             sss = StratifiedShuffleSplit(n_splits=1, train_size=self.training_subsample, random_state=self.random_state)
             for train_index, _ in sss.split(x_train, y_train):
-                x_train = x_train[train_index]
+                x_train = self._take_rows(x_train, train_index)
                 y_train = y_train[train_index]
             logging.warning('For ' + model.small_name
                             + ', training sample reduced to ' + str(x_train.shape[0]) + ' instances')
 
-        model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
+        try:
+            model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
+        except Exception:
+            if (
+                self.categorical_encoding_mode == "native"
+                and self.bypass_one_hot_for_native_models
+                and not self._p1_one_hot_disabled()
+            ):
+                logging.warning(
+                    "Native categorical fit failed for %s; retrying with one-hot encoded categoricals.",
+                    model.small_name,
+                    exc_info=True,
+                )
+                x_train, y_train, x_test, y_test = self.data_prep(model, force_one_hot=True)
+                self._configure_native_categorical_model(model)
+                model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
+            else:
+                raise
 
         if not os.path.exists(self.full_path + '/models/'):
             os.makedirs(self.full_path + '/models/')
@@ -170,6 +208,7 @@ class ModelJob:
         if not os.path.exists(self.full_path + '/model_evaluation/curves_by_cv/'):
             os.makedirs(self.full_path + '/model_evaluation/curves_by_cv/', exist_ok=True)
 
+        self.export_optuna_report(model)
 
         # Export tuned / used params
         if not model.is_single:
@@ -217,11 +256,13 @@ class ModelJob:
                 results = permutation_importance(model.model, x_train, y_train, n_repeats=10,
                                                  random_state=self.random_state, scoring=perm_scoring_metric)
                 self.feature_importance = results.importances_mean
+        self.feature_importance = self._feature_importance_for_report(self.feature_importance)
 
         # Persist model
+        persisted_model = self._wrap_model_if_needed(model.model)
         with open(self.full_path + '/models/pickledModels/' + self.algorithm +
                   '_' + str(self.cv_count) + '.pickle', 'wb') as file:
-            pickle.dump(model.model, file)
+            pickle.dump(persisted_model, file)
 
         fi = self.feature_importance
         # convert FI to plain list for JSON
@@ -242,6 +283,8 @@ class ModelJob:
             metrics_payload = {
                 "metrics": metric_dict,
                 "feature_importance": fi_list,
+                "optuna": self._json_safe(getattr(model, "optuna_report", {})),
+                "categorical_feature_handling": self._categorical_report(),
             }
 
             # curves are not defined for regression
@@ -255,24 +298,254 @@ class ModelJob:
             metrics_payload = {
                 "metrics": metric_dict,
                 "feature_importance": fi_list,
+                "optuna": self._json_safe(getattr(model, "optuna_report", {})),
+                "categorical_feature_handling": self._categorical_report(),
             }
             curves_payload = curves_dict
 
             return metrics_payload, curves_payload
 
 
-    def data_prep(self):
+    def data_prep(self, model=None, force_one_hot=False):
         train = pd.read_csv(self.train_file_path)
         test = pd.read_csv(self.test_file_path)
         if self.instance_label is not None:
             train = train.drop(self.instance_label, axis=1)
             test = test.drop(self.instance_label, axis=1)
-        x_train = train.drop(self.outcome_label, axis=1).values
+        x_train = train.drop(self.outcome_label, axis=1)
         y_train = train[self.outcome_label].values
-        x_test = test.drop(self.outcome_label, axis=1).values
+        x_test = test.drop(self.outcome_label, axis=1)
         y_test = test[self.outcome_label].values
+        self.raw_feature_names = list(x_train.columns)
+
+        categorical_cols = self._categorical_columns(x_train, x_test)
+        self.raw_categorical_feature_names = list(categorical_cols)
+
+        use_native = (
+            bool(categorical_cols)
+            and not force_one_hot
+            and self.bypass_one_hot_for_native_models
+            and model is not None
+            and self._model_allows_native_categorical(model)
+        )
+
+        if use_native:
+            x_train = cast_native_categoricals(x_train, categorical_cols)
+            x_test = cast_native_categoricals(x_test, categorical_cols)
+            self.feature_names = list(x_train.columns)
+            self.encoded_feature_names = list(x_train.columns)
+            self.categorical_feature_names = list(categorical_cols)
+            self.categorical_encoding_mode = "native"
+            del train; del test
+            return x_train, y_train, x_test, y_test
+
+        if categorical_cols and self._p1_one_hot_disabled():
+            model_name = self._model_label(model)
+            raise ValueError(
+                "P1 feature metadata shows one_hot_encoding=False, so Phase 6 cannot "
+                f"one-hot encode raw categorical columns for {model_name}. "
+                "Only models listed in --native_categorical_models may run in this mode. "
+                "Native categorical model ids: "
+                + ", ".join(sorted(self.native_categorical_models))
+            )
+
+        if categorical_cols:
+            x_train = one_hot_align(x_train, categorical_cols)
+            x_test = one_hot_align(x_test, categorical_cols, list(x_train.columns))
+            self.feature_names = list(x_train.columns)
+            self.encoded_feature_names = list(x_train.columns)
+            self.categorical_feature_names = []
+            self.categorical_encoding_mode = "one_hot"
+            del train; del test
+            return x_train.values, y_train, x_test.values, y_test
+
+        self.feature_names = list(x_train.columns)
+        self.encoded_feature_names = list(x_train.columns)
+        self.categorical_feature_names = []
+        self.categorical_encoding_mode = "none"
         del train; del test
-        return x_train, y_train, x_test, y_test
+        return x_train.values, y_train, x_test.values, y_test
+
+    @staticmethod
+    def _take_rows(x, indices):
+        if hasattr(x, "iloc"):
+            return x.iloc[indices].reset_index(drop=True)
+        return x[indices]
+
+    def _load_feature_meta(self):
+        meta_pickle = os.path.join(self.full_path, "exploratory", "feature_meta.pickle")
+        meta_json = os.path.join(self.full_path, "exploratory", "feature_meta.json")
+        try:
+            if os.path.exists(meta_pickle):
+                with open(meta_pickle, "rb") as f:
+                    return pickle.load(f)
+            if os.path.exists(meta_json):
+                with open(meta_json, "r") as f:
+                    return json.load(f)
+        except Exception as exc:
+            logging.warning("Could not load feature metadata for categorical handling: %s", exc)
+        return {}
+
+    def _p1_one_hot_disabled(self):
+        meta = self._load_feature_meta()
+        if "one_hot" not in meta:
+            return False
+        value = meta.get("one_hot")
+        if isinstance(value, bool):
+            return not value
+        return str(value).strip().lower() in {"0", "false", "f", "no", "n"}
+
+    @staticmethod
+    def _model_label(model):
+        if model is None:
+            return "this model"
+        small = getattr(model, "small_name", "")
+        name = getattr(model, "model_name", "")
+        if small and name:
+            return f"{small} ({name})"
+        return small or name or "this model"
+
+    def _metadata_categorical_columns(self, feature_columns):
+        meta = self._load_feature_meta()
+        names = meta.get("feature_names", [])
+        mask = meta.get("categorical_mask", [])
+        one_hot_features = set(meta.get("one_hot_features", []))
+        declared_features = meta.get("categorical_features", [])
+        if isinstance(declared_features, str):
+            declared_features = [declared_features]
+        categorical = {
+            name
+            for name, is_categorical in zip(names, mask)
+            if is_categorical and name not in one_hot_features
+        }
+        categorical.update(declared_features)
+        return [col for col in feature_columns if col in categorical]
+
+    @staticmethod
+    def _dtype_categorical_columns(df):
+        cols = []
+        for col in df.columns:
+            dtype = df[col].dtype
+            if is_object_dtype(dtype) or is_string_dtype(dtype) or isinstance(dtype, pd.CategoricalDtype):
+                cols.append(col)
+        return cols
+
+    def _categorical_columns(self, x_train, x_test):
+        feature_columns = list(x_train.columns)
+        categorical = set(self._metadata_categorical_columns(feature_columns))
+        categorical.update(self._dtype_categorical_columns(x_train))
+        categorical.update(self._dtype_categorical_columns(x_test))
+        return [col for col in feature_columns if col in categorical]
+
+    def _model_allows_native_categorical(self, model):
+        ids = {
+            normalize_model_id(getattr(model, "small_name", "")),
+            normalize_model_id(getattr(model, "model_name", "")),
+        }
+        return bool(ids.intersection(self.native_categorical_models))
+
+    def _configure_native_categorical_model(self, model):
+        estimator = getattr(model, "model", None)
+        if estimator is None or not hasattr(estimator, "set_params"):
+            return
+
+        try:
+            params = estimator.get_params()
+        except Exception:
+            params = {}
+
+        module = estimator.__class__.__module__.lower()
+        name = estimator.__class__.__name__.lower()
+        supports_cat_features = "cat_features" in params or "catboost" in module or "catboost" in name
+        if not supports_cat_features:
+            return
+
+        cat_features = list(self.categorical_feature_names)
+        try:
+            estimator.set_params(cat_features=cat_features)
+        except Exception as exc:
+            logging.warning("Could not set cat_features on %s: %s", model.small_name, exc)
+
+    def _wrap_model_if_needed(self, estimator):
+        if self.categorical_encoding_mode not in {"one_hot", "native"}:
+            return estimator
+        return FeatureTypeModelWrapper(
+            estimator,
+            mode=self.categorical_encoding_mode,
+            raw_feature_names=self.raw_feature_names,
+            categorical_columns=self.raw_categorical_feature_names,
+            encoded_feature_names=self.encoded_feature_names,
+        )
+
+    def _categorical_report(self):
+        return {
+            "mode": self.categorical_encoding_mode,
+            "raw_feature_count": len(self.raw_feature_names),
+            "encoded_feature_count": len(self.encoded_feature_names),
+            "categorical_features": list(self.raw_categorical_feature_names),
+            "native_categorical_models": sorted(self.native_categorical_models),
+            "bypass_one_hot_for_native_models": bool(self.bypass_one_hot_for_native_models),
+        }
+
+    def _feature_importance_for_report(self, fi):
+        if self.categorical_encoding_mode != "one_hot":
+            return fi
+        if len(fi) != len(self.encoded_feature_names):
+            return fi
+
+        fi_by_encoded = pd.Series(fi, index=self.encoded_feature_names, dtype="float64")
+        raw_values = []
+        categorical = set(self.raw_categorical_feature_names)
+        for raw_name in self.raw_feature_names:
+            if raw_name in categorical:
+                prefix = raw_name + "_"
+                encoded_cols = [c for c in self.encoded_feature_names if c.startswith(prefix)]
+                raw_values.append(float(fi_by_encoded.loc[encoded_cols].sum()) if encoded_cols else 0.0)
+            elif raw_name in fi_by_encoded.index:
+                raw_values.append(float(fi_by_encoded.loc[raw_name]))
+            else:
+                raw_values.append(0.0)
+        return np.asarray(raw_values)
+
+    @staticmethod
+    def _json_safe(value):
+        if isinstance(value, dict):
+            return {str(k): ModelJob._json_safe(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple, set)):
+            return [ModelJob._json_safe(v) for v in value]
+        if isinstance(value, np.generic):
+            return value.item()
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        return value
+
+    def export_optuna_report(self, model):
+        report = self._json_safe(getattr(model, "optuna_report", {}))
+        if not report:
+            return
+        out_dir = os.path.join(self.full_path, "models", "optuna_trials")
+        os.makedirs(out_dir, exist_ok=True)
+        row = {
+            "algorithm": self.algorithm,
+            "model_name": getattr(model, "model_name", self.algorithm),
+            "cv": self.cv_count,
+            **report,
+        }
+        for key, value in list(row.items()):
+            if isinstance(value, (dict, list, tuple, set)):
+                row[key] = json.dumps(self._json_safe(value), sort_keys=True)
+        out_path = os.path.join(out_dir, f"{self.algorithm}_optuna_trials{self.cv_count}.csv")
+        pd.DataFrame([row]).to_csv(out_path, index=False)
+        if report.get("optuna_used"):
+            logging.info(
+                "%s CV_%s Optuna trials: %s run, %s complete, requested=%s, timeout=%s",
+                self.algorithm,
+                self.cv_count,
+                report.get("trials_run"),
+                report.get("trials_complete"),
+                report.get("requested_trials"),
+                report.get("timeout_seconds"),
+            )
 
     def save_runtime(self):
         os.makedirs(self.full_path + '/runtime/models/' , exist_ok=True)

@@ -49,6 +49,8 @@ class P6Runner:
         uniform_fi: bool = False,
         save_plot: bool = False,
         random_state: Optional[int] = None,
+        bypass_one_hot_for_native_models: bool = True,
+        native_categorical_models: str | List[str] | None = "CGB",
 
         # execution
         run_cluster: str = "Serial",   # "Serial" | "Local" | "BashSLURM" | "BashLSF" | "<cluster>"
@@ -77,6 +79,8 @@ class P6Runner:
         self.uniform_fi = bool(uniform_fi)
         self.save_plot = bool(save_plot)
         self.random_state = random_state
+        self.bypass_one_hot_for_native_models = bool(bypass_one_hot_for_native_models)
+        self.native_categorical_models = native_categorical_models
 
         self.run_cluster = run_cluster or "Serial"
         self.queue = queue
@@ -143,6 +147,8 @@ class P6Runner:
             uniform_fi=self.uniform_fi,
             save_plot=self.save_plot,
             random_state=self.random_state,
+            bypass_one_hot_for_native_models=self.bypass_one_hot_for_native_models,
+            native_categorical_models=self.native_categorical_models,
         ).run()
 
     def _submit_bash(self, dataset_dir: str, mode: str):
@@ -177,6 +183,12 @@ class P6Runner:
             "--uniform_fi", "1" if self.uniform_fi else "0",
             "--save_plot", "1" if self.save_plot else "0",
             "--random_state", str(self.random_state) if self.random_state is not None else "",
+            "--bypass_one_hot_for_native_models", "1" if self.bypass_one_hot_for_native_models else "0",
+            "--native_categorical_models", (
+                ",".join(self.native_categorical_models)
+                if isinstance(self.native_categorical_models, list)
+                else (self.native_categorical_models or "")
+            ),
         ]
         if self.model_params_json:
             json_arg = self.model_params_json.replace('"', '\\"')

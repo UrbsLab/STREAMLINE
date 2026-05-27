@@ -36,6 +36,8 @@ def main():
     ap.add_argument("--uniform_fi", default="0")
     ap.add_argument("--save_plot", default="0")
     ap.add_argument("--random_state", default=None)
+    ap.add_argument("--bypass_one_hot_for_native_models", default="1")
+    ap.add_argument("--native_categorical_models", default="CGB")
 
     args = ap.parse_args()
 
@@ -62,6 +64,8 @@ def main():
         uniform_fi=_b(args.uniform_fi),
         save_plot=_b(args.save_plot),
         random_state=(int(args.random_state) if (args.random_state not in (None, "", "None")) else None),
+        bypass_one_hot_for_native_models=_b(args.bypass_one_hot_for_native_models),
+        native_categorical_models=args.native_categorical_models,
     ).run()
 
 if __name__ == "__main__":

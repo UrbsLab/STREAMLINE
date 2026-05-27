@@ -357,6 +357,8 @@ class StatisticsPhaseJob:
                     instance_label=self.instance_label,
                     rep_data=None,
                     replicate=False,
+                    outcome_type=self.outcome_type,
+                    cv_partitions=self.cv_partitions,
                     show_plots=self.show_plots,
                 )
         else:
@@ -1034,6 +1036,7 @@ class StatisticsPhaseJob:
                         instance_label=self.instance_label,
                         rep_data=rep_data,
                         replicate=bool(master_list is not None),
+                        outcome_type=self.outcome_type,
                         show_plots=self.show_plots,
                     )
             else:
@@ -1244,6 +1247,7 @@ class StatisticsPhaseJob:
                         instance_label=self.instance_label,
                         rep_data=rep_data,
                         replicate=bool(master_list is not None),
+                        outcome_type=self.outcome_type,
                         show_plots=self.show_plots,
                     )
             else:
@@ -1517,6 +1521,8 @@ class StatisticsPhaseJob:
                 data_name=self.data_name,
                 outcome_label=self.outcome_label,
                 instance_label=self.instance_label,
+                outcome_type=self.outcome_type,
+                cv_partitions=self.cv_partitions,
                 show_plots=self.show_plots,
             )
 

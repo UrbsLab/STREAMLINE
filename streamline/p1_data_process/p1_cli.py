@@ -64,6 +64,11 @@ def main():
     ap.add_argument("--categorical_features", default=None)
     ap.add_argument("--quantitative_features", default=None)
     ap.add_argument("--categorical_cutoff", default=10, type=int)
+    ap.add_argument(
+        "--one_hot_encoding",
+        default="true",
+        help="Set false/0 to keep non-binary categorical features unexpanded for model-stage handling.",
+    )
 
     # CV
     ap.add_argument("--n_splits", default=10, type=int)
@@ -129,7 +134,7 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
         show_plots=_bool(args.show_plots, False),
-        one_hot_encoding=True,  # preserve default
+        one_hot_encoding=_bool(args.one_hot_encoding, True),
         cv_provided=_bool(args.cv_provided, False),
         cv_input_root=args.cv_input_root,
         enable_plots=_bool(args.enable_plots, False),

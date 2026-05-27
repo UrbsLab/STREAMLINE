@@ -101,6 +101,14 @@ The current codebase includes CLI and runner modules for every phase from P1 thr
 
 Each phase CLI records its resolved arguments in `<output_path>/<experiment_name>/run_commands.pickle` after a successful run. On later runs, the same phase will reuse saved arguments for options you omit, while command-line values you provide override and update the saved entry. Use `--ignore_saved_run_command` for a fresh run or `--no_update_saved_run_command` to avoid updating the pickle.
 
+## Feature Type Handling
+
+Phase 1 exposes `--one_hot_encoding`. The default keeps historical behavior and expands non-binary categorical features during data processing. Set `--one_hot_encoding 0` when you want Phase 6 to handle raw categorical columns per model.
+
+Phase 6 then uses `--bypass_one_hot_for_native_models` and `--native_categorical_models` to decide how raw categoricals are prepared. If Phase 1 metadata shows `one_hot_encoding=False`, Phase 6 only runs models listed in `--native_categorical_models` by default. Auto-discovered models are filtered to that native-capable list, and explicitly requested unsupported models raise an error instead of being silently one-hot encoded. With the default settings, this means CGB/CatBoost is the native categorical model.
+
+Phase 6 also writes Optuna trial accounting to `<dataset>/models/optuna_trials/*_optuna_trials*.csv` and includes the same trial summary in each per-CV metrics JSON. This records how many trials actually ran and completed within the requested `--n_trials` and `--timeout` budget.
+
 ## Getting Started
 
 ### Google Colab

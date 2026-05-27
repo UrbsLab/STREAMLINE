@@ -70,6 +70,7 @@ class BaseModel:
         self.study = None
         optuna.logging.set_verbosity(optuna.logging.WARNING)
         self.n_jobs = n_jobs
+        self.optuna_report = {}
 
         # Calibration config
         # self.calibrate = bool(calibrate)
@@ -87,12 +88,14 @@ class BaseModel:
     def optimize(self, x_train, y_train, n_trails, timeout, feature_names=None):
         self.x_train = x_train
         self.y_train = y_train
+        self.optuna_report = self._initial_optuna_report(n_trails, timeout)
         for key, value in self.param_grid.items():
             if len(value) > 1 and key != 'expert_knowledge':
                 self.is_single = False
                 break
 
         if not self.is_single:
+            self.optuna_report["optuna_used"] = True
             self.study = optuna.create_study(direction=self.metric_direction, sampler=self.sampler)
             if self.model_type == "Binary" and self.model_name in ["Extreme Gradient Boosting", "Light Gradient Boosting"]:
                 pos_inst = sum(y_train)
@@ -107,6 +110,7 @@ class BaseModel:
                 self.study.optimize(lambda trial: self.objective(trial),
                                     n_trials=n_trails, timeout=timeout, catch=(ValueError,))
 
+            self._finalize_optuna_report()
             logging.info('Best trial:')
             best_trial = self.study.best_trial
             logging.info('  Value: ' + str(best_trial.value))
@@ -122,12 +126,58 @@ class BaseModel:
                 best_trial.params['hidden_layer_sizes'] = tuple(layers)
                 del best_trial.params['n_layers']
             self.params = best_trial.params
+            self.optuna_report["best_params"] = dict(self.params)
             self.model = copy.deepcopy(self.model).set_params(**best_trial.params)
         else:
+            self.optuna_report["optuna_used"] = False
             self.params = copy.deepcopy(self.param_grid)
             for key, value in self.param_grid.items():
                 self.params[key] = value[0]
             self.model = copy.deepcopy(self.model).set_params(**self.params)
+
+    @staticmethod
+    def _initial_optuna_report(n_trials, timeout):
+        return {
+            "optuna_used": False,
+            "requested_trials": n_trials,
+            "timeout_seconds": timeout,
+            "trials_run": 0,
+            "trials_complete": 0,
+            "trials_pruned": 0,
+            "trials_failed": 0,
+            "trial_state_counts": {},
+            "best_trial_number": None,
+            "best_value": None,
+            "best_params": {},
+        }
+
+    def _finalize_optuna_report(self):
+        if self.study is None:
+            return
+        trials = list(self.study.trials)
+        state_counts = {}
+        for trial in trials:
+            state = getattr(trial, "state", None)
+            state_name = getattr(state, "name", str(state))
+            state_counts[state_name] = state_counts.get(state_name, 0) + 1
+
+        self.optuna_report.update({
+            "trials_run": len(trials),
+            "trials_complete": state_counts.get("COMPLETE", 0),
+            "trials_pruned": state_counts.get("PRUNED", 0),
+            "trials_failed": state_counts.get("FAIL", 0),
+            "trial_state_counts": state_counts,
+        })
+
+        try:
+            best_trial = self.study.best_trial
+            self.optuna_report.update({
+                "best_trial_number": best_trial.number,
+                "best_value": best_trial.value,
+                "best_params": dict(best_trial.params),
+            })
+        except Exception:
+            pass
 
     # ----- shared utilities -----
     def hyper_eval(self):

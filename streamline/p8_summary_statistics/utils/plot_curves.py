@@ -12,6 +12,121 @@ import seaborn as sns
 sns.set_theme()
 
 
+def positive_label(values: np.ndarray):
+    non_missing = pd.Series(values).dropna()
+    uniques = list(pd.unique(non_missing))
+    if not uniques:
+        return 1
+    for preferred in (1, "1", True):
+        for value in uniques:
+            if value == preferred or str(value) == str(preferred):
+                return value
+    try:
+        return sorted(uniques)[-1]
+    except Exception:
+        return uniques[-1]
+
+
+def binary_prevalence(values: np.ndarray) -> float:
+    if len(values) == 0:
+        return float("nan")
+    positive = positive_label(values)
+    return float(np.mean([value == positive or str(value) == str(positive) for value in values]))
+
+
+def cv_test_outcomes(
+    full_path: str,
+    data_name: str,
+    outcome_label: str,
+    cv_partitions: int | None = None,
+    rep_data: pd.DataFrame | None = None,
+    replicate: bool = False,
+) -> List[np.ndarray]:
+    if replicate and rep_data is not None and outcome_label in rep_data.columns:
+        return [rep_data[outcome_label].dropna().to_numpy()]
+
+    cv_dir = Path(full_path) / "CVDatasets"
+    if cv_partitions is None:
+        paths = sorted(cv_dir.glob(f"{data_name}_CV_*_Test.csv"))
+    else:
+        paths = [
+            cv_dir / f"{data_name}_CV_{cv_idx}_Test.csv"
+            for cv_idx in range(cv_partitions)
+        ]
+
+    outcomes: List[np.ndarray] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        try:
+            test = pd.read_csv(path)
+        except Exception:
+            continue
+        if outcome_label in test.columns:
+            outcomes.append(test[outcome_label].dropna().to_numpy())
+    return outcomes
+
+
+def class_count_labels(full_path: str) -> List[Any]:
+    path = Path(full_path) / "exploratory" / "ClassCounts.csv"
+    if not path.exists():
+        return []
+    try:
+        counts = pd.read_csv(path)
+    except Exception:
+        return []
+    if counts.empty:
+        return []
+    label_col = counts.columns[0]
+    return [value for value in counts[label_col].dropna().to_list() if str(value).strip() != ""]
+
+
+def prc_no_skill_baseline(
+    full_path: str,
+    data_name: str,
+    outcome_label: str,
+    *,
+    cv_partitions: int | None = None,
+    outcome_type: str | None = None,
+    rep_data: pd.DataFrame | None = None,
+    replicate: bool = False,
+) -> float:
+    fold_outcomes = cv_test_outcomes(
+        full_path=full_path,
+        data_name=data_name,
+        outcome_label=outcome_label,
+        cv_partitions=cv_partitions,
+        rep_data=rep_data,
+        replicate=replicate,
+    )
+    if not fold_outcomes:
+        return 0.5
+
+    non_empty = [y for y in fold_outcomes if len(y) > 0]
+    if not non_empty:
+        return 0.5
+
+    combined = np.concatenate(non_empty)
+    if combined.size == 0:
+        return 0.5
+
+    unique_classes = pd.unique(pd.Series(combined).dropna())
+    is_multiclass = "multiclass" in str(outcome_type or "").strip().lower()
+    if is_multiclass or len(unique_classes) > 2:
+        class_count = max(len(unique_classes), len(class_count_labels(full_path)), 1)
+        return float(1.0 / class_count)
+
+    fold_rates = [
+        binary_prevalence(y)
+        for y in fold_outcomes
+        if len(y) > 0
+    ]
+    fold_rates = [rate for rate in fold_rates if np.isfinite(rate)]
+    if not fold_rates:
+        return 0.5
+    return float(np.mean(fold_rates))
+
+
 def plot_model_roc(
     full_path: str,
     algorithm: str,
@@ -34,17 +149,25 @@ def plot_model_roc(
 
     plt.rcParams["figure.figsize"] = (6, 6)
 
-    for i in range(cv_partitions):
+    for i, row in enumerate(alg_result_table):
         plt.plot(
-            alg_result_table[i][0],
-            alg_result_table[i][1],
+            row[0],
+            row[1],
             lw=1,
             alpha=0.3,
-            label="ROC fold %d (AUC = %0.3f)" % (i, alg_result_table[i][2]),
+            label="ROC fold %d (AUC = %0.3f)" % (i, row[2]),
         )
 
     # No-skill line
-    plt.plot([0, 1], [0, 1], linestyle="--", lw=2, color="black", label="No-Skill", alpha=0.8)
+    plt.plot(
+        [0, 1],
+        [0, 1],
+        linestyle="--",
+        lw=2,
+        color="black",
+        label="No-Skill (AUROC = 0.500)",
+        alpha=0.8,
+    )
 
     # Mean ROC
     std_auc = np.std(aucs)
@@ -92,6 +215,7 @@ def plot_model_prc(
     instance_label: str | None = None,
     rep_data: pd.DataFrame | None = None,
     replicate: bool = False,
+    outcome_type: str | None = None,
     show_plots: bool = False,
 ):
     """
@@ -102,28 +226,32 @@ def plot_model_prc(
 
     plt.rcParams["figure.figsize"] = (6, 6)
 
-    for i in range(cv_partitions):
+    for i, row in enumerate(alg_result_table):
         plt.plot(
-            alg_result_table[i][4],
-            alg_result_table[i][3],
+            row[4],
+            row[3],
             lw=1,
             alpha=0.3,
-            label="PRC fold %d (AUC = %0.3f)" % (i, alg_result_table[i][5]),
+            label="PRC fold %d (AUC = %0.3f)" % (i, row[5]),
         )
 
-    # no-skill line
-    if not replicate:
-        test = pd.read_csv(
-            Path(full_path) / "CVDatasets" / f"{data_name}_CV_0_Test.csv"
-        )
-        if instance_label is not None and instance_label in test.columns:
-            test = test.drop(instance_label, axis=1)
-        test_y = test[outcome_label].values
-    else:
-        test_y = rep_data[outcome_label].values
-
-    no_skill = len(test_y[test_y == 1]) / len(test_y)
-    plt.plot([0, 1], [no_skill, no_skill], color="black", linestyle="--", label="No-Skill", alpha=0.8)
+    no_skill = prc_no_skill_baseline(
+        full_path=full_path,
+        data_name=data_name,
+        outcome_label=outcome_label,
+        cv_partitions=cv_partitions,
+        outcome_type=outcome_type,
+        rep_data=rep_data,
+        replicate=replicate,
+    )
+    plt.plot(
+        [0, 1],
+        [no_skill, no_skill],
+        color="black",
+        linestyle="--",
+        label=f"No-Skill (AUPRC = {float(no_skill):0.3f})",
+        alpha=0.8,
+    )
 
     std_pr_auc = np.std(praucs)
     plt.plot(
@@ -180,7 +308,14 @@ def plot_summary_roc(
         )
 
     plt.rcParams["figure.figsize"] = (6, 6)
-    plt.plot([0, 1], [0, 1], color="black", linestyle="--", label="No-Skill", alpha=0.8)
+    plt.plot(
+        [0, 1],
+        [0, 1],
+        color="black",
+        linestyle="--",
+        label="No-Skill (AUROC = 0.500)",
+        alpha=0.8,
+    )
     plt.xticks(np.arange(0.0, 1.1, step=0.1))
     plt.xlabel("False Positive Rate", fontsize=15)
     plt.yticks(np.arange(0.0, 1.1, step=0.1))
@@ -204,6 +339,8 @@ def plot_summary_prc(
     instance_label: str | None = None,
     rep_data: pd.DataFrame | None = None,
     replicate: bool = False,
+    outcome_type: str | None = None,
+    cv_partitions: int | None = None,
     show_plots: bool = False,
 ):
     """
@@ -219,18 +356,23 @@ def plot_summary_prc(
             ),
         )
 
-    if not replicate:
-        test = pd.read_csv(
-            Path(full_path) / "CVDatasets" / f"{data_name}_CV_0_Test.csv"
-        )
-        if instance_label is not None and instance_label in test.columns:
-            test = test.drop(instance_label, axis=1)
-        test_y = test[outcome_label].values
-    else:
-        test_y = rep_data[outcome_label].values
-
-    no_skill = len(test_y[test_y == 1]) / len(test_y)
-    plt.plot([0, 1], [no_skill, no_skill], color="black", linestyle="--", label="No-Skill", alpha=0.8)
+    no_skill = prc_no_skill_baseline(
+        full_path=full_path,
+        data_name=data_name,
+        outcome_label=outcome_label,
+        cv_partitions=cv_partitions,
+        outcome_type=outcome_type,
+        rep_data=rep_data,
+        replicate=replicate,
+    )
+    plt.plot(
+        [0, 1],
+        [no_skill, no_skill],
+        color="black",
+        linestyle="--",
+        label=f"No-Skill (AUPRC = {float(no_skill):0.3f})",
+        alpha=0.8,
+    )
 
     plt.xticks(np.arange(0.0, 1.1, step=0.1))
     plt.xlabel("Recall (Sensitivity)", fontsize=15)
@@ -300,7 +442,14 @@ def plot_ensemble_roc_summary(
             label=f"{ens_id}, AUC={d['auc']:.3f}",
         )
 
-    plt.plot([0, 1], [0, 1], color="black", linestyle="--", label="No-Skill", alpha=0.8)
+    plt.plot(
+        [0, 1],
+        [0, 1],
+        color="black",
+        linestyle="--",
+        label="No-Skill (AUROC = 0.500)",
+        alpha=0.8,
+    )
     plt.xticks(np.arange(0.0, 1.1, step=0.1))
     plt.yticks(np.arange(0.0, 1.1, step=0.1))
     plt.xlabel("False Positive Rate", fontsize=15)
@@ -323,22 +472,20 @@ def plot_ensemble_prc_summary(
     data_name: str,
     outcome_label: str,
     instance_label: str | None = None,
+    outcome_type: str | None = None,
+    cv_partitions: int | None = None,
     show_plots: bool = False,
 ):
     if not prc_summary:
         return
 
-    # no-skill baseline from first test set
-    try:
-        test = pd.read_csv(
-            Path(full_path) / "CVDatasets" / f"{data_name}_CV_0_Test.csv"
-        )
-        if instance_label is not None and instance_label in test.columns:
-            test = test.drop(instance_label, axis=1)
-        test_y = test[outcome_label].values
-        no_skill = len(test_y[test_y == 1]) / len(test_y)
-    except Exception:
-        no_skill = 0.5
+    no_skill = prc_no_skill_baseline(
+        full_path=full_path,
+        data_name=data_name,
+        outcome_label=outcome_label,
+        cv_partitions=cv_partitions,
+        outcome_type=outcome_type,
+    )
 
     plt.figure(figsize=(6, 6))
     color_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
@@ -353,7 +500,14 @@ def plot_ensemble_prc_summary(
             label=f"{ens_id}, AUC={d['pr_auc']:.3f}, APS={d['aps']:.3f}",
         )
 
-    plt.plot([0, 1], [no_skill, no_skill], color="black", linestyle="--", label="No-Skill", alpha=0.8)
+    plt.plot(
+        [0, 1],
+        [no_skill, no_skill],
+        color="black",
+        linestyle="--",
+        label=f"No-Skill (AUPRC = {float(no_skill):0.3f})",
+        alpha=0.8,
+    )
     plt.xticks(np.arange(0.0, 1.1, step=0.1))
     plt.yticks(np.arange(0.0, 1.1, step=0.1))
     plt.xlabel("Recall (Sensitivity)", fontsize=15)

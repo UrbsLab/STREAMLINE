@@ -55,6 +55,17 @@ def main():
     ap.add_argument("--uniform_fi", type=int, default=0)
     ap.add_argument("--save_plot", type=int, default=0)
     ap.add_argument("--random_state", default=None)
+    ap.add_argument(
+        "--bypass_one_hot_for_native_models",
+        type=int,
+        default=1,
+        help="1 allows native categorical models to consume raw categoricals when P1 one_hot_encoding is false.",
+    )
+    ap.add_argument(
+        "--native_categorical_models",
+        default="CGB",
+        help="CSV of model ids allowed to run when P1 one_hot_encoding is false.",
+    )
 
     # execution
     ap.add_argument("--run_cluster", default="Serial",
@@ -106,6 +117,8 @@ def main():
         uniform_fi=bool(args.uniform_fi),
         save_plot=bool(args.save_plot),
         random_state=(int(args.random_state) if (args.random_state not in (None, "", "None")) else None),
+        bypass_one_hot_for_native_models=bool(args.bypass_one_hot_for_native_models),
+        native_categorical_models=args.native_categorical_models,
 
         run_cluster=args.run_cluster,
         queue=args.queue,
