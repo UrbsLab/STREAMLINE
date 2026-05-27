@@ -202,7 +202,15 @@ Included demo datasets:
 - `data/DemoRepDataRegression/simulation_data_rep.csv`
 - `data/DemoFeatureTypes/` for categorical and quantitative feature-type examples
 
-These datasets are used by the notebooks and test suite to exercise both classification and regression workflows.
+Additional UCI demo datasets with missing values and mixed categorical/quantitative features:
+
+- `data/UCIBinaryClassification/heart_disease_cleveland.csv`
+- `data/UCIMulticlassClassification/dermatology.csv`
+- `data/UCIRegression/auto_mpg.csv`
+- `data/UCIFeatureTypes/` for UCI categorical and quantitative feature-type examples
+- `data/UCI_DemoDatasets_README.md` for source links, target labels, Auto MPG field handling, and example Phase 1 commands
+
+These datasets are used by the notebooks and test suite to exercise classification, multiclass classification, and regression workflows.
 
 ## Output Structure
 
