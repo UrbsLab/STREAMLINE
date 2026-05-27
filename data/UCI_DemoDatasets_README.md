@@ -6,9 +6,9 @@ These datasets are normalized from official UCI Machine Learning Repository sour
 
 | STREAMLINE task | Local CSV | UCI source | Outcome | Notes |
 | --- | --- | --- | --- | --- |
-| Binary classification | `data/UCIBinaryClassification/heart_disease_cleveland.csv` | Heart Disease, processed Cleveland data | `Class` | The original `num` target is binarized as `0` for no disease and `1` for disease presence. Missing `?` values are stored as `NA`. |
-| Multiclass classification | `data/UCIMulticlassClassification/dermatology.csv` | Dermatology | `Class` | The original 1-6 disease codes are normalized to 0-5 for model compatibility. Missing `?` values are stored as `NA`. |
-| Regression | `data/UCIRegression/auto_mpg.csv` | Auto MPG | `MPG` | Predicts miles per gallon from mixed vehicle attributes. The high-cardinality UCI `car_name` field is dropped from the modeling CSV. Missing horsepower values are stored as `NA`. |
+| Binary classification | `data/UCIBinaryClassification/heart_disease_cleveland.csv` and `_copy.csv` | Heart Disease, processed Cleveland data | `Class` | The original `num` target is binarized as `0` for no disease and `1` for disease presence. Missing `?` values are stored as `NA`. |
+| Multiclass classification | `data/UCIMulticlassClassification/dermatology.csv` and `_copy.csv` | Dermatology | `Class` | The original 1-6 disease codes are normalized to 0-5 for model compatibility. Missing `?` values are stored as `NA`. |
+| Regression | `data/UCIRegression/auto_mpg.csv` and `_copy.csv` | Auto MPG | `MPG` | Predicts miles per gallon from mixed vehicle attributes. The high-cardinality UCI `car_name` field is dropped from the modeling CSV. Missing horsepower values are stored as `NA`. |
 
 ## Source URLs
 
@@ -18,6 +18,15 @@ These datasets are normalized from official UCI Machine Learning Repository sour
 - Dermatology raw data file: https://archive.ics.uci.edu/ml/machine-learning-databases/dermatology/dermatology.data
 - Auto MPG: https://archive.ics.uci.edu/dataset/9/auto+mpg
 - Auto MPG raw data file: https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data
+
+
+## Replication demo folders
+
+The following folders mirror the cleaned schemas above and can be used by Phase 10 replication examples:
+
+- `data/UCIRepBinaryClassification/heart_disease_cleveland_rep.csv`
+- `data/UCIRepMulticlassClassification/dermatology_rep.csv`
+- `data/UCIRepRegression/auto_mpg_rep.csv`
 
 ## Feature-type files
 

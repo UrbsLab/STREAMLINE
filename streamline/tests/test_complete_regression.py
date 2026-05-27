@@ -23,7 +23,7 @@ from streamline.p9_compare_datasets.p9_runner import P9Runner
 from streamline.p10_replication.p10_runner import P10Runner
 from streamline.p11_reporting.p11_runner import P11Runner
 
-SKIP_TILL_MODELING_PHASES = True  # Set to False to run full pipeline; True to skip directly to Phase 8+ for faster testing of later phases
+SKIP_TILL_MODELING_PHASES = os.getenv("STREAMLINE_SKIP_TO_REGRESSION_PHASE8", "0").strip().lower() in {"1", "true", "yes"}
 
 def _pick_first_dataset_dir(exp_root: Path) -> Path:
     """
@@ -45,7 +45,7 @@ def _exists_any(path_candidates: Iterable[Path]) -> bool:
 @pytest.mark.integration
 def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     """
-    End-to-end smoke test on regression demo data.
+    End-to-end smoke test on the UCI Auto MPG regression demo data.
 
     P1: data process
     P2: impute & scale
@@ -60,21 +60,21 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     P11: reporting (standard + replication mode)
 
     Notes:
-      - You can override the demo-data root with STREAMLINE_REGRESSION_DATA_ROOT.
-      - You can override the outcome label with STREAMLINE_REGRESSION_OUTCOME_LABEL.
+      - Set STREAMLINE_SKIP_TO_REGRESSION_PHASE8=1 only when precomputed outputs already exist.
     """
 
     # --- Layout ---------------------------------------------------------
-    outcome_label = "Cognition_Score"
-    instance_label = "Class"
+    outcome_label = "MPG"
+    instance_label = "InstanceID"
     
     repo_root = Path(__file__).resolve().parent.parent.parent
     tmp_path = repo_root / "test"
-    data_root = repo_root / "data" / "DemoDataRegression"
-    assert data_root.is_dir(), f"Expected DemoData under {data_root}"
+    data_root = repo_root / "data" / "UCIRegression"
+    feature_root = repo_root / "data" / "UCIFeatureTypes"
+    assert data_root.is_dir(), f"Expected UCI regression data under {data_root}"
 
-    output_root = tmp_path / "out_full_regression_pipeline"
-    experiment_name = "DemoExpRegression"
+    output_root = tmp_path / "out_full_uci_regression_pipeline"
+    experiment_name = "UCIAutoMPGRegression"
     cv_splits = 3
     output_root.mkdir(parents=True, exist_ok=True)
     exp_root = output_root / experiment_name
@@ -88,8 +88,12 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
             data_path=str(data_root),
             output_path=str(output_root),
             experiment_name=experiment_name,
+            outcome_label=outcome_label,
+            outcome_type="Continuous",
             instance_label=instance_label,
             n_splits=cv_splits,
+            categorical_features=str(feature_root / "auto_mpg_categorical_features.csv"),
+            quantitative_features=str(feature_root / "auto_mpg_quantitative_features.csv"),
             force=True,
         )
         p1.run()
@@ -310,10 +314,10 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     # ------------------------------------------------------------------
     # Phase 10: Replication
     # ------------------------------------------------------------------
-    rep_data_root = repo_root / "data" / "DemoRepDataRegression"
-    assert rep_data_root.is_dir(), f"Expected DemoRepDataRegression under {rep_data_root}"
+    rep_data_root = repo_root / "data" / "UCIRepRegression"
+    assert rep_data_root.is_dir(), f"Expected UCI regression replication data under {rep_data_root}"
 
-    dataset_for_rep = data_root / "simulation_data.csv"
+    dataset_for_rep = data_root / "auto_mpg.csv"
     assert dataset_for_rep.is_file(), f"Expected training dataset file at {dataset_for_rep}"
 
     p10 = P10Runner(
@@ -327,7 +331,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     p10.run()
 
     rep_root = exp_root / dataset_for_rep.stem / "replication"
-    rep_ds_dir = rep_root / "simulation_data_rep"
+    rep_ds_dir = rep_root / "auto_mpg_rep"
     assert rep_root.is_dir(), "Phase 10 should create replication directory under training dataset"
     assert rep_ds_dir.is_dir(), "Phase 10 should create replication dataset directory"
     assert (rep_ds_dir / "model_evaluation" / "Summary_performance_mean.csv").is_file(), \

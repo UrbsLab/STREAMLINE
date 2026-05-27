@@ -22,9 +22,9 @@ from streamline.p11_reporting.p11_runner import P11Runner
 
 
 @pytest.mark.integration
-def test_full_streamline_pipeline_demodata(tmp_path: Path):
+def test_full_streamline_pipeline_uci_multiclass(tmp_path: Path):
     """
-    End-to-end smoke test on the real DemoData:
+    End-to-end smoke test on the UCI Dermatology multiclass demo data:
 
     P1: data process
     P2: impute & scale
@@ -45,11 +45,12 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     # --- Layout ---------------------------------------------------------
     repo_root = Path(__file__).resolve().parent.parent.parent
     tmp_path = repo_root / "test"
-    data_root = repo_root / "data" / "DemoData"
-    assert data_root.is_dir(), f"Expected DemoData under {data_root}"
+    data_root = repo_root / "data" / "UCIMulticlassClassification"
+    feature_root = repo_root / "data" / "UCIFeatureTypes"
+    assert data_root.is_dir(), f"Expected UCI multiclass data under {data_root}"
 
     output_root = tmp_path / "out_full_pipeline"
-    experiment_name = "DemoExp"
+    experiment_name = "UCIDermatologyExp"
     cv_splits = 3
 
     # P1 may create experiment folder itself; ensure parent exists
@@ -65,8 +66,12 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
         data_path=str(data_root),
         output_path=str(output_root),
         experiment_name=experiment_name,
+        outcome_label="Class",
+        outcome_type="Multiclass",
         instance_label="InstanceID",
         n_splits=cv_splits,
+        categorical_features=str(feature_root / "dermatology_categorical_features.csv"),
+        quantitative_features=str(feature_root / "dermatology_quantitative_features.csv"),
         force=True
         # any other args you normally pass can be added here
     )
@@ -267,10 +272,10 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     # ------------------------------------------------------------------
     # Phase 10: Replication (whatever semantics you defined)
     # ------------------------------------------------------------------
-    rep_data_root = repo_root / "data" / "DemoRepData"
-    assert rep_data_root.is_dir(), f"Expected DemoRepData under {rep_data_root}"
+    rep_data_root = repo_root / "data" / "UCIRepMulticlassClassification"
+    assert rep_data_root.is_dir(), f"Expected UCI multiclass replication data under {rep_data_root}"
 
-    dataset_for_rep = data_root / "hcc_data_custom.csv"
+    dataset_for_rep = data_root / "dermatology.csv"
     assert dataset_for_rep.is_file(), f"Expected training dataset file at {dataset_for_rep}"
 
     p10 = P10Runner(
@@ -284,7 +289,7 @@ def test_full_streamline_pipeline_demodata(tmp_path: Path):
     p10.run()
 
     rep_root = exp_root / dataset_for_rep.stem / "replication"
-    rep_ds_dir = rep_root / "hcc_data_custom_rep"
+    rep_ds_dir = rep_root / "dermatology_rep"
     assert rep_root.is_dir(), "Phase 10 should create replication directory under training dataset"
     assert rep_ds_dir.is_dir(), "Phase 10 should create replication dataset directory"
     assert (rep_ds_dir / "model_evaluation" / "Summary_performance_mean.csv").is_file(), \

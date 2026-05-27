@@ -127,8 +127,8 @@ The updated Colab workflow is designed to support:
 
 For local notebook use, start from:
 
-- [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb)
-- [`STREAMLINE_GoogleColab.ipynb`](STREAMLINE_GoogleColab.ipynb) if you want the same parameter-driven flow locally
+- [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb) for local binary, multiclass, regression, and custom workflows
+- [`STREAMLINE_ColabNotebook.ipynb`](STREAMLINE_ColabNotebook.ipynb) for the Colab version of the parameter-driven flow
 
 ### Local CLI
 
@@ -204,9 +204,9 @@ Included demo datasets:
 
 Additional UCI demo datasets with missing values and mixed categorical/quantitative features:
 
-- `data/UCIBinaryClassification/heart_disease_cleveland.csv`
-- `data/UCIMulticlassClassification/dermatology.csv`
-- `data/UCIRegression/auto_mpg.csv`
+- `data/UCIBinaryClassification/heart_disease_cleveland.csv` and companion `_copy.csv`
+- `data/UCIMulticlassClassification/dermatology.csv` and companion `_copy.csv`
+- `data/UCIRegression/auto_mpg.csv` and companion `_copy.csv`
 - `data/UCIFeatureTypes/` for UCI categorical and quantitative feature-type examples
 - `data/UCI_DemoDatasets_README.md` for source links, target labels, Auto MPG field handling, and example Phase 1 commands
 
