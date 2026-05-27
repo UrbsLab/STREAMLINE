@@ -6,16 +6,16 @@ These datasets are normalized from official UCI Machine Learning Repository sour
 
 | STREAMLINE task | Local CSV | UCI source | Outcome | Notes |
 | --- | --- | --- | --- | --- |
-| Binary classification | `data/UCIBinaryClassification/heart_disease_cleveland.csv` and `_copy.csv` | Heart Disease, processed Cleveland data | `Class` | The original `num` target is binarized as `0` for no disease and `1` for disease presence. Missing `?` values are stored as `NA`. |
-| Multiclass classification | `data/UCIMulticlassClassification/dermatology.csv` and `_copy.csv` | Dermatology | `Class` | The original 1-6 disease codes are normalized to 0-5 for model compatibility. Missing `?` values are stored as `NA`. |
+| Binary classification | `data/UCIBinaryClassification/hcc_survival.csv` and `_copy.csv` | HCC Survival | `Class` | The target is one-year survival, encoded as `0=dies` and `1=lives`. Missing `?` values are stored as `NA`. |
+| Multiclass classification | `data/UCIMulticlassClassification/student_dropout_academic_success.csv` and `_copy.csv` | Predict Students' Dropout and Academic Success | `Class` | The original labels are normalized as `0=Dropout`, `1=Enrolled`, and `2=Graduate`. UCI reports no missing values after preprocessing; this demo adds deterministic synthetic missingness with seed 42 to selected categorical and quantitative features and stores those cells as `NA`. |
 | Regression | `data/UCIRegression/auto_mpg.csv` and `_copy.csv` | Auto MPG | `MPG` | Predicts miles per gallon from mixed vehicle attributes. The high-cardinality UCI `car_name` field is dropped from the modeling CSV. Missing horsepower values are stored as `NA`. |
 
 ## Source URLs
 
-- Heart Disease: https://archive.ics.uci.edu/dataset/45/heart+disease
-- Heart Disease raw processed Cleveland file: https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data
-- Dermatology: https://archive.ics.uci.edu/dataset/33/dermatology
-- Dermatology raw data file: https://archive.ics.uci.edu/ml/machine-learning-databases/dermatology/dermatology.data
+- HCC Survival: https://archive.ics.uci.edu/dataset/423/hcc+survival
+- HCC Survival raw zip file: https://archive.ics.uci.edu/static/public/423/hcc+survival.zip
+- Predict Students' Dropout and Academic Success: https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success
+- Predict Students' Dropout and Academic Success raw zip file: https://archive.ics.uci.edu/static/public/697/predict+students+dropout+and+academic+success.zip
 - Auto MPG: https://archive.ics.uci.edu/dataset/9/auto+mpg
 - Auto MPG raw data file: https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data
 
@@ -24,8 +24,8 @@ These datasets are normalized from official UCI Machine Learning Repository sour
 
 The following folders mirror the cleaned schemas above and can be used by Phase 10 replication examples:
 
-- `data/UCIRepBinaryClassification/heart_disease_cleveland_rep.csv`
-- `data/UCIRepMulticlassClassification/dermatology_rep.csv`
+- `data/UCIRepBinaryClassification/hcc_survival_rep.csv`
+- `data/UCIRepMulticlassClassification/student_dropout_academic_success_rep.csv`
 - `data/UCIRepRegression/auto_mpg_rep.csv`
 
 ## Feature-type files
@@ -35,9 +35,9 @@ The files in `data/UCIFeatureTypes/` are one-column CSVs with header `Feature`, 
 ## Example Phase 1 commands
 
 ```bash
-python -m streamline.p1_data_process.p1_cli --data_path data/UCIBinaryClassification --output_path out --experiment_name UCIHeartDisease --outcome_label Class --outcome_type Binary --instance_label InstanceID --categorical_features data/UCIFeatureTypes/heart_disease_categorical_features.csv --quantitative_features data/UCIFeatureTypes/heart_disease_quantitative_features.csv
+python -m streamline.p1_data_process.p1_cli --data_path data/UCIBinaryClassification --output_path out --experiment_name UCIHCCSurvival --outcome_label Class --outcome_type Binary --instance_label InstanceID --categorical_features data/UCIFeatureTypes/hcc_survival_categorical_features.csv --quantitative_features data/UCIFeatureTypes/hcc_survival_quantitative_features.csv
 
-python -m streamline.p1_data_process.p1_cli --data_path data/UCIMulticlassClassification --output_path out --experiment_name UCIDermatology --outcome_label Class --outcome_type Multiclass --instance_label InstanceID --categorical_features data/UCIFeatureTypes/dermatology_categorical_features.csv --quantitative_features data/UCIFeatureTypes/dermatology_quantitative_features.csv
+python -m streamline.p1_data_process.p1_cli --data_path data/UCIMulticlassClassification --output_path out --experiment_name UCIStudentDropout --outcome_label Class --outcome_type Multiclass --instance_label InstanceID --categorical_features data/UCIFeatureTypes/student_dropout_categorical_features.csv --quantitative_features data/UCIFeatureTypes/student_dropout_quantitative_features.csv
 
 python -m streamline.p1_data_process.p1_cli --data_path data/UCIRegression --output_path out --experiment_name UCIAutoMPG --outcome_label MPG --outcome_type Continuous --instance_label InstanceID --categorical_features data/UCIFeatureTypes/auto_mpg_categorical_features.csv --quantitative_features data/UCIFeatureTypes/auto_mpg_quantitative_features.csv
 ```

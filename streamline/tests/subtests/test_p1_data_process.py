@@ -8,7 +8,7 @@ from streamline.p1_data_process.p1_runner import P1Runner
 pytest.skip("Tested Already", allow_module_level=True)
 
 output_path = "./tests/"
-dataset_path, experiment_name = "./data/DemoData/", "demo"
+dataset_path, experiment_name = "./data/UCIBinaryClassification/", "demo"
 
 # NEW: choose execution mode
 #   False      -> serial
@@ -32,34 +32,8 @@ def test_classification():
         instance_label="InstanceID",
         n_splits=3,
         ignore_features=None,
-        categorical_features=[
-            'Gender', 'Symptoms ', 'Alcohol', 'Hepatitis B Surface Antigen',
-            'Hepatitis B e Antigen', 'Hepatitis B Core Antibody',
-            'Hepatitis C Virus Antibody', 'Cirrhosis',
-            'Endemic Countries', 'Smoking', 'Diabetes', 'Obesity',
-            'Hemochromatosis', 'Arterial Hypertension',
-            'Chronic Renal Insufficiency', 'Human Immunodeficiency Virus',
-            'Nonalcoholic Steatohepatitis', 'Esophageal Varices', 'Splenomegaly',
-            'Portal Hypertension', 'Portal Vein Thrombosis', 'Liver Metastasis',
-            'Radiological Hallmark', 'Sim_Cat_2', 'Sim_Cat_3', 'Sim_Cat_4',
-            'Sim_Text_Cat_2', 'Sim_Text_Cat_3', 'Sim_Text_Cat_4'
-        ],
-        quantitative_features=[
-            'Sim_Miss_0.6', 'Alkaline phosphatase (U/L)',
-            'Aspartate transaminase (U/L)', 'International Normalised Ratio*',
-            'Performance Status*', 'Sim_Cor_-1.0_B', 'Alanine transaminase (U/L)',
-            'Platelets', 'Direct Bilirubin (mg/dL)', 'Encephalopathy degree*',
-            'Sim_Cor_0.9_A', 'Albumin (mg/dL)', 'Number of Nodules',
-            'Sim_Cor_1.0_A', 'Haemoglobin (g/dL)',
-            'Major dimension of nodule (cm)', 'Leukocytes(G/L)',
-            'Total Proteins (g/dL)', 'Sim_Miss_0.7', 'Ascites degree*',
-            'Creatinine (mg/dL)', 'Iron', 'Sim_Cor_0.9_B',
-            'Grams of Alcohol per day', 'Sim_Cor_-1.0_A',
-            'Oxygen Saturation (%)', 'Gamma glutamyl transferase (U/L)',
-            'Total Bilirubin(mg/dL)', 'Ferritin (ng/mL)',
-            'Packs of cigarets per year', 'Mean Corpuscular Volume',
-            'Sim_Cor_1.0_B', 'Alpha-Fetoprotein (ng/mL)'
-        ],
+        categorical_features="./data/UCIFeatureTypes/hcc_survival_categorical_features.csv",
+        quantitative_features="./data/UCIFeatureTypes/hcc_survival_quantitative_features.csv",
         correlation_removal_threshold=1,
         run_cluster=run_cluster,  # NEW
         force=1,

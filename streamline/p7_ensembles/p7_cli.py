@@ -76,13 +76,13 @@ if __name__ == "__main__":
     ## List available ensembles
 
     # python -m streamline.p7_ensembles.p7_cli \
-    # --output_path test --experiment_name data/DemoData --n_splits 5 --list_ensembles
+    # --output_path test --experiment_name DemoBinary --n_splits 5 --list_ensembles
 
 
     ## Plain (no tuning), include calibration
 
     # python -m streamline.p7_ensembles.p7_cli \
-    # --output_path test --experiment_name data/DemoData --n_splits 5 \
+    # --output_path test --experiment_name DemoBinary --n_splits 5 \
     # --ensembles hard_voting,soft_voting,stack_lr \
     # --base_models LR,SVM,NB \
     # --calibrate 1 --calibrate_method sigmoid --calibrate_cv 5
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     ## Tune stacking meta-LR (30 trials / 10 min)
 
     # python -m streamline.p7_ensembles.p7_cli \
-    # --output_path test --experiment_name data/DemoData --n_splits 5 \
+    # --output_path test --experiment_name DemoBinary --n_splits 5 \
     # --ensembles stack_lr \
     # --base_models LR,SVM,NB \
     # --stack_tune 1 --stack_trials 30 --stack_timeout 600

@@ -15,7 +15,7 @@ pytest.skip("Tested Already", allow_module_level=True)
 
 
 
-def _seed_exp_no_missing(tmp_path: Path, dataset_name: str = "hcc_data"):
+def _seed_exp_no_missing(tmp_path: Path, dataset_name: str = "demo_data"):
     """
     Minimal Phase-1-like layout with NO missing values,
     so we can isolate scaling behavior (impute_data=False in the job).

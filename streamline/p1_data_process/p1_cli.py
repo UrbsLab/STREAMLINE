@@ -155,15 +155,21 @@ def main():
 if __name__ == "__main__":
     # # Serial
     # python -m streamline.p1_data_process.p1_cli \
-    # --data_path ./data/DemoData \
+    # --data_path ./data/UCIBinaryClassification \
     # --output_path ./test \
-    # --experiment_name MyExp
+    # --experiment_name MyExp \
+    # --outcome_label Class \
+    # --outcome_type Binary \
+    # --instance_label InstanceID
 
     # # Local Dask with 1 worker per core
     # python -m streamline.p1_data_process.p1_cli \
-    # --data_path ./data/DemoData \
+    # --data_path ./data/UCIBinaryClassification \
     # --output_path ./test \
     # --experiment_name MyExp \
+    # --outcome_label Class \
+    # --outcome_type Binary \
+    # --instance_label InstanceID \
     # --run_cluster Local
 
     main()

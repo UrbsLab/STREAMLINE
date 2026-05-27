@@ -135,16 +135,16 @@ For local notebook use, start from:
 Each phase can be run independently with its CLI entry point. For example:
 
 ```bash
-python -m streamline.p1_data_process.p1_cli --data_path data/DemoData --output_path out --experiment_name DemoRun
-python -m streamline.p2_impute_scale.p2_cli --output_path out --experiment_name DemoRun
-python -m streamline.p3_feature_learning.p3_cli --output_path out --experiment_name DemoRun
-python -m streamline.p4_feature_importance.p4_cli --output_path out --experiment_name DemoRun
-python -m streamline.p5_feature_selection.p5_cli --output_path out --experiment_name DemoRun
-python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoRun
-python -m streamline.p7_ensembles.p7_cli --output_path out --experiment_name DemoRun
-python -m streamline.p8_summary_statistics.p8_cli --output_path out --experiment_name DemoRun
-python -m streamline.p9_compare_datasets.p9_cli --output_path out --experiment_name DemoRun
-python -m streamline.p11_reporting.p11_cli --experiment_path out/DemoRun --report_mode standard
+python -m streamline.p1_data_process.p1_cli --data_path data/UCIBinaryClassification --output_path out --experiment_name DemoBinary --outcome_label Class --outcome_type Binary --instance_label InstanceID --categorical_features data/UCIFeatureTypes/hcc_survival_categorical_features.csv --quantitative_features data/UCIFeatureTypes/hcc_survival_quantitative_features.csv
+python -m streamline.p2_impute_scale.p2_cli --output_path out --experiment_name DemoBinary
+python -m streamline.p3_feature_learning.p3_cli --output_path out --experiment_name DemoBinary
+python -m streamline.p4_feature_importance.p4_cli --output_path out --experiment_name DemoBinary
+python -m streamline.p5_feature_selection.p5_cli --output_path out --experiment_name DemoBinary
+python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoBinary --outcome_label Class --model_type Binary --instance_label InstanceID
+python -m streamline.p7_ensembles.p7_cli --output_path out --experiment_name DemoBinary
+python -m streamline.p8_summary_statistics.p8_cli --output_path out --experiment_name DemoBinary --outcome_label Class --outcome_type Binary --instance_label InstanceID
+python -m streamline.p9_compare_datasets.p9_cli --output_path out --experiment_name DemoBinary --outcome_label Class --outcome_type Binary --instance_label InstanceID
+python -m streamline.p11_reporting.p11_cli --experiment_path out/DemoBinary --report_mode standard
 ```
 
 For a longer command cookbook covering classification, regression, replication, and reporting examples, see [`sample_runcommands.txt`](sample_runcommands.txt).
@@ -153,13 +153,13 @@ Replication and replication reporting are available through:
 
 ```bash
 python -m streamline.p10_replication.p10_cli \
-  --rep_data_path data/DemoRepData \
-  --dataset_for_rep data/DemoData/hcc_data_custom.csv \
+  --rep_data_path data/UCIRepBinaryClassification \
+  --dataset_for_rep data/UCIBinaryClassification/hcc_survival.csv \
   --output_path out \
-  --experiment_name DemoRun
+  --experiment_name DemoBinary
 
 python -m streamline.p11_reporting.p11_cli \
-  --experiment_path out/DemoRun \
+  --experiment_path out/DemoBinary \
   --report_mode replication
 ```
 
@@ -193,20 +193,14 @@ Notes:
 
 ## Demo Data And Demo Paths
 
-Included demo datasets:
+Included UCI demo datasets with missing values and mixed categorical/quantitative features:
 
-- `data/DemoData/hcc_data.csv`
-- `data/DemoData/hcc_data_custom.csv`
-- `data/DemoDataRegression/simulation_data.csv`
-- `data/DemoRepData/hcc_data_custom_rep.csv`
-- `data/DemoRepDataRegression/simulation_data_rep.csv`
-- `data/DemoFeatureTypes/` for categorical and quantitative feature-type examples
-
-Additional UCI demo datasets with missing values and mixed categorical/quantitative features:
-
-- `data/UCIBinaryClassification/heart_disease_cleveland.csv` and companion `_copy.csv`
-- `data/UCIMulticlassClassification/dermatology.csv` and companion `_copy.csv`
+- `data/UCIBinaryClassification/hcc_survival.csv` and companion `_copy.csv`
+- `data/UCIMulticlassClassification/student_dropout_academic_success.csv` and companion `_copy.csv`
 - `data/UCIRegression/auto_mpg.csv` and companion `_copy.csv`
+- `data/UCIRepBinaryClassification/hcc_survival_rep.csv`
+- `data/UCIRepMulticlassClassification/student_dropout_academic_success_rep.csv`
+- `data/UCIRepRegression/auto_mpg_rep.csv`
 - `data/UCIFeatureTypes/` for UCI categorical and quantitative feature-type examples
 - `data/UCI_DemoDatasets_README.md` for source links, target labels, Auto MPG field handling, and example Phase 1 commands
 

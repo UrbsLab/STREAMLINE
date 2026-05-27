@@ -14,9 +14,10 @@
 # - Phase 7 ensembles are classification-only; skip Phase 7 for regression.
 #
 # Demo data included in this repository:
-# - Classification: data/DemoData
-# - Regression:     data/DemoDataRegression
-# - Replication:    data/DemoRepData and data/DemoRepDataRegression
+# - Binary classification:     data/UCIBinaryClassification
+# - Multiclass classification: data/UCIMulticlassClassification
+# - Regression:                data/UCIRegression
+# - Replication:               data/UCIRepBinaryClassification, data/UCIRepMulticlassClassification, data/UCIRepRegression
 # ----------------------------------------------------------
 
 
@@ -61,7 +62,7 @@ python -m streamline.p7_ensembles.p7_cli \
 # 1. Classification workflow example
 # ==========================================================
 # Demo input folder:
-#   data/DemoData
+#   data/UCIBinaryClassification
 # Example experiment output:
 #   out/DemoBinary
 
@@ -70,11 +71,14 @@ python -m streamline.p7_ensembles.p7_cli \
 # Phase 1 - Data Process
 # ----------------------
 python -m streamline.p1_data_process.p1_cli \
-  --data_path data/DemoData \
+  --data_path data/UCIBinaryClassification \
   --output_path out \
   --experiment_name DemoBinary \
   --outcome_label Class \
+  --outcome_type Binary \
   --instance_label InstanceID \
+  --categorical_features data/UCIFeatureTypes/hcc_survival_categorical_features.csv \
+  --quantitative_features data/UCIFeatureTypes/hcc_survival_quantitative_features.csv \
   --n_splits 5 \
   --top_features 20 \
   --sig_cutoff 0.05 \
@@ -203,12 +207,12 @@ python -m streamline.p9_compare_datasets.p9_cli \
 # Phase 10 - Replication / External Validation
 # ---------------------------------------
 # Reuses the trained workflow from:
-#   data/DemoData/hcc_data_custom.csv
+#   data/UCIBinaryClassification/hcc_survival.csv
 # Applies it to replication datasets under:
-#   data/DemoRepData
+#   data/UCIRepBinaryClassification
 python -m streamline.p10_replication.p10_cli \
-  --rep_data_path data/DemoRepData \
-  --dataset_for_rep data/DemoData/hcc_data_custom.csv \
+  --rep_data_path data/UCIRepBinaryClassification \
+  --dataset_for_rep data/UCIBinaryClassification/hcc_survival.csv \
   --output_path out \
   --experiment_name DemoBinary \
   --show_plots 0
@@ -240,7 +244,7 @@ python -m streamline.p11_reporting.p11_cli \
 # 2. Regression workflow example
 # ==========================================================
 # Demo input folder:
-#   data/DemoDataRegression
+#   data/UCIRegression
 # Example experiment output:
 #   out/DemoRegression
 
@@ -249,12 +253,14 @@ python -m streamline.p11_reporting.p11_cli \
 # Phase 1 - Data Process
 # ----------------------
 python -m streamline.p1_data_process.p1_cli \
-  --data_path data/DemoDataRegression \
+  --data_path data/UCIRegression \
   --output_path out \
   --experiment_name DemoRegression \
-  --outcome_label Cognition_Score \
+  --outcome_label MPG \
   --outcome_type Continuous \
-  --instance_label Class \
+  --instance_label InstanceID \
+  --categorical_features data/UCIFeatureTypes/auto_mpg_categorical_features.csv \
+  --quantitative_features data/UCIFeatureTypes/auto_mpg_quantitative_features.csv \
   --n_splits 5 \
   --partition_method Random \
   --top_features 20 \
@@ -314,9 +320,9 @@ python -m streamline.p5_feature_selection.p5_cli \
 python -m streamline.p6_modeling.p6_cli \
   --output_path out \
   --experiment_name DemoRegression \
-  --outcome_label Cognition_Score \
+  --outcome_label MPG \
   --model_type Regression \
-  --instance_label Class \
+  --instance_label InstanceID \
   --n_splits 5 \
   --models LR,RF,SVR \
   --scoring_metric explained_variance \
@@ -340,9 +346,9 @@ python -m streamline.p6_modeling.p6_cli \
 python -m streamline.p8_summary_statistics.p8_cli \
   --output_path out \
   --experiment_name DemoRegression \
-  --outcome_label Cognition_Score \
+  --outcome_label MPG \
   --outcome_type Continuous \
-  --instance_label Class \
+  --instance_label InstanceID \
   --n_splits 5 \
   --scoring_metric explained_variance \
   --metric_weight explained_variance \
@@ -359,9 +365,9 @@ python -m streamline.p8_summary_statistics.p8_cli \
 python -m streamline.p9_compare_datasets.p9_cli \
   --output_path out \
   --experiment_name DemoRegression \
-  --outcome_label Cognition_Score \
+  --outcome_label MPG \
   --outcome_type Continuous \
-  --instance_label Class \
+  --instance_label InstanceID \
   --sig_cutoff 0.05 \
   --show_plots 0
 
@@ -370,8 +376,8 @@ python -m streamline.p9_compare_datasets.p9_cli \
 # Phase 10 - Replication / External Validation
 # ---------------------------------------
 python -m streamline.p10_replication.p10_cli \
-  --rep_data_path data/DemoRepDataRegression \
-  --dataset_for_rep data/DemoDataRegression/simulation_data.csv \
+  --rep_data_path data/UCIRepRegression \
+  --dataset_for_rep data/UCIRegression/auto_mpg.csv \
   --output_path out \
   --experiment_name DemoRegression \
   --show_plots 0
