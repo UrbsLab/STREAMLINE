@@ -204,7 +204,7 @@ Included UCI demo datasets with missing values and mixed categorical/quantitativ
 - `data/UCIFeatureTypes/` for UCI categorical and quantitative feature-type examples
 - `data/UCI_DemoDatasets_README.md` for source links, target labels, Auto MPG field handling, and example Phase 1 commands
 
-These datasets are used by the notebooks and test suite to exercise classification, multiclass classification, and regression workflows.
+These datasets are used by the notebooks and test suite to exercise classification, multiclass classification, and regression workflows. The normal UCI folders contain deterministic 80% training splits; the matching `data/UCIRep*` folders contain the held-out 20% replication splits.
 
 ## Output Structure
 

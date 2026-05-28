@@ -1,14 +1,14 @@
 # UCI Demo Datasets for STREAMLINE
 
-These datasets are normalized from official UCI Machine Learning Repository sources into the same style used by the built-in demo data: one task-specific data folder with CSV files, plus optional feature-type CSVs.
+These datasets are normalized from official UCI Machine Learning Repository sources into the same style used by the built-in demo data: one task-specific data folder with CSV files, plus optional feature-type CSVs. Each dataset is split deterministically with seed 42: the normal demo folder contains the 80% training split and the matching `UCIRep*` folder contains the held-out 20% replication split. Classification splits are stratified by `Class`; the regression split is random.
 
 ## Selected datasets
 
 | STREAMLINE task | Local CSV | UCI source | Outcome | Notes |
 | --- | --- | --- | --- | --- |
-| Binary classification | `data/UCIBinaryClassification/hcc_survival.csv` and `_copy.csv` | HCC Survival | `Class` | The target is one-year survival, encoded as `0=dies` and `1=lives`. Missing `?` values are stored as `NA`. |
-| Multiclass classification | `data/UCIMulticlassClassification/student_dropout_academic_success.csv` and `_copy.csv` | Predict Students' Dropout and Academic Success | `Class` | The original labels are normalized as `0=Dropout`, `1=Enrolled`, and `2=Graduate`. UCI reports no missing values after preprocessing; this demo adds deterministic synthetic missingness with seed 42 to selected categorical and quantitative features and stores those cells as `NA`. |
-| Regression | `data/UCIRegression/auto_mpg.csv` and `_copy.csv` | Auto MPG | `MPG` | Predicts miles per gallon from mixed vehicle attributes. The high-cardinality UCI `car_name` field is dropped from the modeling CSV. Missing horsepower values are stored as `NA`. |
+| Binary classification | `data/UCIBinaryClassification/hcc_survival.csv` and `_copy.csv` | HCC Survival | `Class` | 132 training rows and 33 held-out replication rows. The target is one-year survival, encoded as `0=dies` and `1=lives`. Missing `?` values are stored as `NA`. |
+| Multiclass classification | `data/UCIMulticlassClassification/student_dropout_academic_success.csv` and `_copy.csv` | Predict Students' Dropout and Academic Success | `Class` | 3539 training rows and 885 held-out replication rows. The original labels are normalized as `0=Dropout`, `1=Enrolled`, and `2=Graduate`. UCI reports no missing values after preprocessing; this demo adds deterministic synthetic missingness with seed 42 to selected categorical and quantitative features and stores those cells as `NA`. |
+| Regression | `data/UCIRegression/auto_mpg.csv` and `_copy.csv` | Auto MPG | `MPG` | 318 training rows and 80 held-out replication rows. Predicts miles per gallon from mixed vehicle attributes. The high-cardinality UCI `car_name` field is dropped from the modeling CSV. Missing horsepower values are stored as `NA`. |
 
 ## Source URLs
 
@@ -22,7 +22,7 @@ These datasets are normalized from official UCI Machine Learning Repository sour
 
 ## Replication demo folders
 
-The following folders mirror the cleaned schemas above and can be used by Phase 10 replication examples:
+The following folders mirror the cleaned schemas above and contain held-out 20% replication splits for Phase 10 examples:
 
 - `data/UCIRepBinaryClassification/hcc_survival_rep.csv`
 - `data/UCIRepMulticlassClassification/student_dropout_academic_success_rep.csv`

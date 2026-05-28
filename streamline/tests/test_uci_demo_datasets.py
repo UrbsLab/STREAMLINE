@@ -17,8 +17,12 @@ UCI_DATASETS = [
         "quantitative": REPO_ROOT / "data" / "UCIFeatureTypes" / "hcc_survival_quantitative_features.csv",
         "outcome": "Class",
         "expected_classes": {"0", "1"},
-        "expected_rows": 165,
-        "expected_missing": 826,
+        "expected_rows": 132,
+        "expected_missing": 668,
+        "expected_rep_rows": 33,
+        "expected_rep_missing": 158,
+        "expected_full_rows": 165,
+        "expected_full_missing": 826,
         "expected_categorical": 26,
         "expected_quantitative": 23,
     },
@@ -31,8 +35,12 @@ UCI_DATASETS = [
         "quantitative": REPO_ROOT / "data" / "UCIFeatureTypes" / "student_dropout_quantitative_features.csv",
         "outcome": "Class",
         "expected_classes": {"0", "1", "2"},
-        "expected_rows": 4424,
-        "expected_missing": 704,
+        "expected_rows": 3539,
+        "expected_missing": 573,
+        "expected_rep_rows": 885,
+        "expected_rep_missing": 131,
+        "expected_full_rows": 4424,
+        "expected_full_missing": 704,
         "expected_categorical": 17,
         "expected_quantitative": 19,
     },
@@ -45,8 +53,12 @@ UCI_DATASETS = [
         "quantitative": REPO_ROOT / "data" / "UCIFeatureTypes" / "auto_mpg_quantitative_features.csv",
         "outcome": "MPG",
         "expected_classes": None,
-        "expected_rows": 398,
-        "expected_missing": 6,
+        "expected_rows": 318,
+        "expected_missing": 4,
+        "expected_rep_rows": 80,
+        "expected_rep_missing": 2,
+        "expected_full_rows": 398,
+        "expected_full_missing": 6,
         "expected_categorical": 3,
         "expected_quantitative": 4,
     },
@@ -102,3 +114,19 @@ def test_uci_companion_and_replication_datasets_match_training_schema():
         assert rep_rows, f"{spec['name']} replication data should have rows"
         assert list(train_rows[0]) == list(copy_rows[0]), f"{spec['name']} companion copy schema should match training schema"
         assert list(train_rows[0]) == list(rep_rows[0]), f"{spec['name']} replication schema should match training schema"
+        assert train_rows == copy_rows, f"{spec['name']} companion copy data should match the training split"
+        assert len(rep_rows) == spec["expected_rep_rows"], f"{spec['name']} replication row count changed"
+
+        train_ids = {row["InstanceID"] for row in train_rows}
+        rep_ids = {row["InstanceID"] for row in rep_rows}
+        assert not (train_ids & rep_ids), f"{spec['name']} training and replication splits should be disjoint"
+        assert len(train_ids | rep_ids) == spec["expected_full_rows"], f"{spec['name']} full split row count changed"
+
+        train_missing = sum(value == "NA" for row in train_rows for value in row.values())
+        rep_missing = sum(value == "NA" for row in rep_rows for value in row.values())
+        assert rep_missing == spec["expected_rep_missing"], f"{spec['name']} replication missing value count changed"
+        assert train_missing + rep_missing == spec["expected_full_missing"], f"{spec['name']} full missing value count changed"
+
+        if spec["expected_classes"] is not None:
+            observed_rep = {row[spec["outcome"]] for row in rep_rows}
+            assert observed_rep == spec["expected_classes"], f"{spec['name']} replication class labels changed"
