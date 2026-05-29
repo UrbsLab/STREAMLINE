@@ -34,6 +34,18 @@ def _bool(v: Optional[str], default: bool = False) -> bool:
     return default
 
 
+def parse_sampling_strategy(value):
+    if value in (None, "", "auto"):
+        return "auto"
+    try:
+        return json.loads(value)
+    except Exception:
+        try:
+            return float(value)
+        except Exception:
+            return value
+
+
 def main():
     ap = argparse.ArgumentParser(
         "STREAMLINE Phase 2 Runner (CV-based, Dask-aware)",
@@ -48,6 +60,7 @@ def main():
     ap.add_argument("--multi_impute", default=None)
     ap.add_argument("--overwrite_cv", default=None)
     ap.add_argument("--outcome_label", default=None)
+    ap.add_argument("--outcome_type", default=None, choices=["Binary", "Multiclass", "Continuous"])
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None, type=int)
 
@@ -58,6 +71,12 @@ def main():
     # Scaler registry
     ap.add_argument("--scaler_id", default=None)
     ap.add_argument("--scaler_params", default="{}")
+
+    # SMOTE/SMOTENC oversampling; applied after imputation/scaling to train folds only.
+    ap.add_argument("--smote", default=None, help="1/true enables SMOTE for classification training folds")
+    ap.add_argument("--smote_method", default="auto", choices=["auto", "smote", "smotenc"])
+    ap.add_argument("--smote_sampling_strategy", default="auto")
+    ap.add_argument("--smote_k_neighbors", default=5, type=int)
 
     # Execution/modes
     ap.add_argument("--run_cluster", default="Serial", help='Serial | Local | BashSLURM | BashLSF | "<dask-cluster-name>"')
@@ -96,6 +115,7 @@ def main():
         multi_impute=None if args.multi_impute is None else _bool(args.multi_impute, False),
         overwrite_cv=None if args.overwrite_cv is None else _bool(args.overwrite_cv, True),
         outcome_label=args.outcome_label,
+        outcome_type=args.outcome_type,
         instance_label=args.instance_label,
         random_state=args.random_state,
         # registries
@@ -103,6 +123,10 @@ def main():
         imputer_params=_maybe_json(args.imputer_params),
         scaler_id=args.scaler_id,
         scaler_params=_maybe_json(args.scaler_params),
+        smote=None if args.smote is None else _bool(args.smote, False),
+        smote_method=args.smote_method,
+        smote_sampling_strategy=parse_sampling_strategy(args.smote_sampling_strategy),
+        smote_k_neighbors=args.smote_k_neighbors,
         # execution
         run_cluster=args.run_cluster if args.run_cluster not in (None, "Serial", "False", "false") else False,
         queue=args.queue,
@@ -130,5 +154,12 @@ if __name__ == "__main__":
     # --imputer_params '{"n_neighbors": 7, "weights": "distance"}' \
     # --scaler_id minmax \
     # --scaler_params '{"feature_range":[0,1]}'
+
+    # # Enable post-imputation/scaling SMOTE for train folds only
+    # python -m streamline.p2_impute_scale.p2_cli \
+    # --output_path ./out \
+    # --experiment_name MyExp \
+    # --smote 1 \
+    # --smote_method auto
 
     main()

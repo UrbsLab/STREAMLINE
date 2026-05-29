@@ -46,6 +46,7 @@ class P2Runner:
         multi_impute: "bool | None" = None,
         overwrite_cv: "bool | None" = None,
         outcome_label: "str | None" = None,
+        outcome_type: "str | None" = None,
         instance_label: "str | None" = None,
         random_state: "int | None" = None,
 
@@ -54,6 +55,10 @@ class P2Runner:
         imputer_params: "Dict[str, Any] | None" = None,
         scaler_id: "str | None" = None,
         scaler_params: "Dict[str, Any] | None" = None,
+        smote: "bool | None" = None,
+        smote_method: "str | None" = None,
+        smote_sampling_strategy: "str | dict | float | None" = None,
+        smote_k_neighbors: "int | None" = None,
 
         # execution mode
         run_cluster: "str | bool" = False,   # False | "Local" | "BashSLURM" | "BashLSF" | "<dask-cluster-name>"
@@ -72,6 +77,7 @@ class P2Runner:
         self.overwrite_cv = self._coalesce_bool(overwrite_cv, True)
 
         self.outcome_label = outcome_label or meta.get('Outcome Label', 'Class')
+        self.outcome_type = outcome_type or meta.get('Outcome Type', None)
         self.instance_label = instance_label if (instance_label is not None) else meta.get('Instance Label', None)
         self.random_state = random_state if (random_state is not None) else meta.get('Random Seed', 0)
 
@@ -90,6 +96,11 @@ class P2Runner:
             try: sp = json.loads(sp or "{}")
             except Exception: sp = {}
         self.scaler_params = (scaler_params or {}) or sp
+
+        self.smote = self._coalesce_bool(smote, meta.get('Use SMOTE', False))
+        self.smote_method = smote_method if smote_method is not None else meta.get('P2 SMOTE Method', 'auto')
+        self.smote_sampling_strategy = smote_sampling_strategy if smote_sampling_strategy is not None else meta.get('P2 SMOTE Sampling Strategy', 'auto')
+        self.smote_k_neighbors = int(smote_k_neighbors if smote_k_neighbors is not None else meta.get('P2 SMOTE K Neighbors', 5))
 
 
         # execution
@@ -186,12 +197,17 @@ class P2Runner:
             multi_impute=self.multi_impute,
             overwrite_cv=self.overwrite_cv,
             outcome_label=self.outcome_label,
+            outcome_type=self.outcome_type,
             instance_label=self.instance_label,
             random_state=self.random_state,
             imputer_id=self.imputer_id,
             imputer_params=self.imputer_params,
             scaler_id=self.scaler_id,
             scaler_params=self.scaler_params,
+            smote=self.smote,
+            smote_method=self.smote_method,
+            smote_sampling_strategy=self.smote_sampling_strategy,
+            smote_k_neighbors=self.smote_k_neighbors,
         )
         job.run()
 
@@ -227,12 +243,17 @@ class P2Runner:
             "multi_impute": self.multi_impute,
             "overwrite_cv": self.overwrite_cv,
             "outcome_label": self.outcome_label,
+            "outcome_type": self.outcome_type,
             "instance_label": self.instance_label,
             "random_state": self.random_state,
             "imputer_id": self.imputer_id,
             "imputer_params": self.imputer_params,
             "scaler_id": self.scaler_id,
             "scaler_params": self.scaler_params,
+            "smote": self.smote,
+            "smote_method": self.smote_method,
+            "smote_sampling_strategy": self.smote_sampling_strategy,
+            "smote_k_neighbors": self.smote_k_neighbors,
             "queue": self.queue,
             "reserved_memory": self.reserved_memory,
         }
@@ -313,12 +334,17 @@ class P2Runner:
             '--multi_impute', str(int(self.multi_impute)) if self.multi_impute is not None else '',
             '--overwrite_cv', str(int(self.overwrite_cv)) if self.overwrite_cv is not None else '',
             '--outcome_label', self.outcome_label or '',
+            '--outcome_type', self.outcome_type or '',
             '--instance_label', self.instance_label or '',
             '--random_state', str(self.random_state) if self.random_state is not None else '',
             '--imputer_id', self.imputer_id or '',
             '--imputer_params', json.dumps(self.imputer_params or {}),
             '--scaler_id', self.scaler_id or '',
             '--scaler_params', json.dumps(self.scaler_params or {}),
+            '--smote', str(int(self.smote)) if self.smote is not None else '',
+            '--smote_method', self.smote_method or 'auto',
+            '--smote_sampling_strategy', json.dumps(self.smote_sampling_strategy) if isinstance(self.smote_sampling_strategy, (dict, list)) else str(self.smote_sampling_strategy),
+            '--smote_k_neighbors', str(self.smote_k_neighbors),
         ]
         return ' '.join(args)
     

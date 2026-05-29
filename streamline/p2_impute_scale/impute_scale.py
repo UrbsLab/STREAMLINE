@@ -39,6 +39,11 @@ class ImputeAndScale:
         # NEW (optional)
         scaler_id: "str | None" = None,
         scaler_params: "dict | None" = None,
+        outcome_type: "str | None" = None,
+        smote: bool = False,
+        smote_method: str = "auto",
+        smote_sampling_strategy: "str | dict | float" = "auto",
+        smote_k_neighbors: int = 5,
     ):
         self.cv_train_path = cv_train_path
         self.cv_test_path = cv_test_path
@@ -57,6 +62,11 @@ class ImputeAndScale:
         self.imputer_params = imputer_params or {}
         self.scaler_id = scaler_id
         self.scaler_params = scaler_params or {}
+        self.outcome_type = outcome_type
+        self.smote = bool(smote)
+        self.smote_method = str(smote_method or "auto").strip().lower()
+        self.smote_sampling_strategy = smote_sampling_strategy
+        self.smote_k_neighbors = int(smote_k_neighbors)
         
 
     def run(self):
@@ -117,6 +127,11 @@ class ImputeAndScale:
             logging.info('Scaling Data Values...')
             x_train, x_test = self.data_scaling(x_train, x_test)
 
+        # SMOTE is intentionally applied after imputation/scaling and only to train.
+        if self.smote:
+            logging.info('Applying SMOTE to training fold...')
+            x_train, y_train, i_train = self.apply_smote(x_train, y_train, i_train)
+
         # Reassemble
         if self.instance_label is None:
             data_train = pd.concat([pd.DataFrame(y_train, columns=[self.outcome_label]),
@@ -134,7 +149,7 @@ class ImputeAndScale:
 
         # Export & finalize
         logging.info('Saving Processed Train and Test Data...')
-        if self.impute_data or self.scale_data:
+        if self.impute_data or self.scale_data or self.smote:
             self.write_cv_files(data_train, data_test)
 
         self.save_runtime()
@@ -261,6 +276,164 @@ class ImputeAndScale:
         with open(out_scl, 'wb') as f:
             pickle.dump(scaler, f)
         return x_train, x_test
+
+    def apply_smote(self, x_train: pd.DataFrame, y_train: pd.Series, i_train: "pd.Series | None"):
+        if self.outcome_type == "Continuous":
+            raise ValueError("SMOTE is only supported for Binary and Multiclass outcomes, not Continuous outcomes.")
+
+        class_counts = y_train.value_counts(dropna=False).to_dict()
+        if len(class_counts) < 2:
+            logging.warning("SMOTE skipped for %s CV%s because only one class is present.", self.dataset_name, self.cv_count)
+            self.save_smote_metadata("none", False, class_counts, class_counts, [], "only one class present")
+            return x_train, y_train, i_train
+
+        smallest_class_count = min(class_counts.values())
+        largest_class_count = max(class_counts.values())
+        if smallest_class_count == largest_class_count:
+            logging.info("SMOTE skipped for %s CV%s because classes are already balanced.", self.dataset_name, self.cv_count)
+            self.save_smote_metadata("none", False, class_counts, class_counts, [], "classes already balanced")
+            return x_train, y_train, i_train
+        if smallest_class_count < 2:
+            logging.warning("SMOTE skipped for %s CV%s because at least one class has fewer than 2 rows.", self.dataset_name, self.cv_count)
+            self.save_smote_metadata("none", False, class_counts, class_counts, [], "class count below 2")
+            return x_train, y_train, i_train
+
+        try:
+            from imblearn.over_sampling import SMOTE, SMOTENC
+        except ImportError as exc:
+            raise ImportError(
+                "SMOTE requires the optional dependency imbalanced-learn. "
+                "Install it with `pip install imbalanced-learn` or use the project requirements."
+            ) from exc
+
+        categorical_columns = [
+            col for col in (self.categorical_variables or [])
+            if col in x_train.columns
+        ]
+        categorical_indices = [x_train.columns.get_loc(col) for col in categorical_columns]
+        resolved_method = self.resolve_smote_method(categorical_indices, x_train)
+        neighbors = min(max(int(self.smote_k_neighbors), 1), smallest_class_count - 1)
+
+        if resolved_method == "smotenc":
+            sampler = SMOTENC(
+                categorical_features=categorical_indices,
+                sampling_strategy=self.smote_sampling_strategy,
+                k_neighbors=neighbors,
+                random_state=self.random_state,
+            )
+        else:
+            sampler = SMOTE(
+                sampling_strategy=self.smote_sampling_strategy,
+                k_neighbors=neighbors,
+                random_state=self.random_state,
+            )
+
+        original_rows = len(x_train)
+        x_resampled, y_resampled = sampler.fit_resample(x_train, y_train)
+        x_resampled = pd.DataFrame(x_resampled, columns=x_train.columns)
+        y_resampled = pd.Series(y_resampled, name=self.outcome_label)
+        self.restore_resampled_dtypes(x_resampled, x_train, categorical_columns)
+
+        if i_train is not None:
+            original_ids = list(pd.Series(i_train).astype(str))
+            synthetic_count = len(x_resampled) - original_rows
+            synthetic_ids = [
+                f"{self.dataset_name}_CV_{self.cv_count}_SMOTE_{idx + 1:06d}"
+                for idx in range(synthetic_count)
+            ]
+            i_resampled = pd.Series(original_ids + synthetic_ids, name=self.instance_label)
+        else:
+            i_resampled = None
+
+        after_counts = y_resampled.value_counts(dropna=False).to_dict()
+        self.save_smote_metadata(
+            resolved_method,
+            True,
+            class_counts,
+            after_counts,
+            categorical_columns,
+            None,
+            neighbors,
+            len(x_resampled) - original_rows,
+        )
+        logging.info(
+            "SMOTE complete for %s CV%s: %s rows -> %s rows",
+            self.dataset_name,
+            self.cv_count,
+            original_rows,
+            len(x_resampled),
+        )
+
+        return (
+            x_resampled.reset_index(drop=True),
+            y_resampled.reset_index(drop=True),
+            None if i_resampled is None else i_resampled.reset_index(drop=True),
+        )
+
+    def resolve_smote_method(self, categorical_indices, x_train):
+        if self.smote_method not in {"auto", "smote", "smotenc"}:
+            raise ValueError("smote_method must be one of: auto, smote, smotenc")
+
+        if self.smote_method == "auto":
+            if categorical_indices:
+                if len(categorical_indices) == len(x_train.columns):
+                    raise ValueError("SMOTENC requires at least one non-categorical feature.")
+                return "smotenc"
+            return "smote"
+
+        if self.smote_method == "smotenc" and not categorical_indices:
+            raise ValueError("smote_method='smotenc' requires at least one categorical feature.")
+
+        if self.smote_method == "smotenc" and len(categorical_indices) == len(x_train.columns):
+            raise ValueError("SMOTENC requires at least one non-categorical feature.")
+
+        return self.smote_method
+
+    def restore_resampled_dtypes(self, x_resampled, x_original, categorical_columns):
+        categorical_set = set(categorical_columns)
+        for col in x_resampled.columns:
+            if col in categorical_set:
+                try:
+                    x_resampled[col] = x_resampled[col].astype(x_original[col].dtype)
+                except Exception:
+                    pass
+            else:
+                x_resampled[col] = pd.to_numeric(x_resampled[col], errors="coerce")
+
+    def save_smote_metadata(
+        self,
+        method,
+        applied,
+        class_counts_before,
+        class_counts_after,
+        categorical_columns,
+        reason=None,
+        k_neighbors=None,
+        synthetic_rows=0,
+    ):
+        out_path = os.path.join(
+            self.experiment_path,
+            self.dataset_name,
+            "impute_scale",
+            f"smote_cv{self.cv_count}.pickle",
+        )
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        with open(out_path, "wb") as f:
+            pickle.dump(
+                {
+                    "applied": bool(applied),
+                    "method": method,
+                    "requested_method": self.smote_method,
+                    "sampling_strategy": self.smote_sampling_strategy,
+                    "k_neighbors": k_neighbors,
+                    "synthetic_rows": int(synthetic_rows),
+                    "categorical_features": list(categorical_columns),
+                    "class_counts_before": dict(class_counts_before),
+                    "class_counts_after": dict(class_counts_after),
+                    "reason": reason,
+                },
+                f,
+            )
 
 
     def write_cv_files(self, data_train, data_test):

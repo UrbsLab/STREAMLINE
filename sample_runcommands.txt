@@ -93,6 +93,15 @@ python -m streamline.p2_impute_scale.p2_cli \
   --experiment_name DemoBinary \
   --random_state 42
 
+# Optional: enable post-imputation/scaling SMOTE on training folds only.
+# `auto` uses SMOTENC when processed categorical features are present, otherwise SMOTE.
+# python -m streamline.p2_impute_scale.p2_cli \
+#   --output_path out \
+#   --experiment_name DemoBinary \
+#   --smote 1 \
+#   --smote_method auto \
+#   --random_state 42
+
 
 # ----------------------------
 # Phase 3 - Feature Learning

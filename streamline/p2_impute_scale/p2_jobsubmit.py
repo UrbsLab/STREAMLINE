@@ -31,6 +31,18 @@ def _load_metadata(exp_path: str) -> Dict[str, Any]:
     return {}
 
 
+def parse_sampling_strategy(value):
+    if value in (None, "", "auto"):
+        return "auto"
+    try:
+        return json.loads(value)
+    except Exception:
+        try:
+            return float(value)
+        except Exception:
+            return value
+
+
 def main():
     ap = argparse.ArgumentParser("P2 single-CV-pair jobsubmit")
     ap.add_argument("--cv_train_path", required=True)
@@ -44,6 +56,7 @@ def main():
     ap.add_argument("--overwrite_cv", default=None)
 
     ap.add_argument("--outcome_label", default=None)
+    ap.add_argument("--outcome_type", default=None)
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None)
 
@@ -52,6 +65,11 @@ def main():
 
     ap.add_argument("--scaler_id", default=None)
     ap.add_argument("--scaler_params", default="{}")  # JSON string
+
+    ap.add_argument("--smote", default=None)
+    ap.add_argument("--smote_method", default="auto")
+    ap.add_argument("--smote_sampling_strategy", default="auto")
+    ap.add_argument("--smote_k_neighbors", default=5)
 
     args = ap.parse_args()
     exp_path = args.experiment_path
@@ -65,6 +83,7 @@ def main():
     overwrite_cv = _coalesce_bool(args.overwrite_cv, True)
 
     outcome_label = args.outcome_label or meta.get('Outcome Label', 'Class')
+    outcome_type = args.outcome_type if args.outcome_type not in (None, '') else meta.get('Outcome Type', None)
     instance_label = args.instance_label if args.instance_label not in (None, '') else meta.get('Instance Label', None)
     random_state = None
     if args.random_state not in (None, ''):
@@ -100,6 +119,16 @@ def main():
         except Exception: sp = {}
     scaler_params = scaler_params_cli or sp or {}
 
+    smote = _coalesce_bool(args.smote, meta.get('Use SMOTE', False))
+    smote_method = args.smote_method or meta.get('P2 SMOTE Method', 'auto')
+    smote_sampling_strategy = parse_sampling_strategy(args.smote_sampling_strategy)
+    if smote_sampling_strategy == "auto":
+        smote_sampling_strategy = meta.get('P2 SMOTE Sampling Strategy', 'auto')
+    try:
+        smote_k_neighbors = int(args.smote_k_neighbors)
+    except Exception:
+        smote_k_neighbors = int(meta.get('P2 SMOTE K Neighbors', 5))
+
     job = ImputeAndScale(
         cv_train_path=args.cv_train_path,
         cv_test_path=args.cv_test_path,
@@ -109,12 +138,17 @@ def main():
         multi_impute=multi_impute,
         overwrite_cv=overwrite_cv,
         outcome_label=outcome_label,
+        outcome_type=outcome_type,
         instance_label=instance_label,
         random_state=random_state,
         imputer_id=imputer_id,
         imputer_params=imputer_params,
         scaler_id=scaler_id,
         scaler_params=scaler_params,
+        smote=smote,
+        smote_method=smote_method,
+        smote_sampling_strategy=smote_sampling_strategy,
+        smote_k_neighbors=smote_k_neighbors,
     )
     job.run()
 
