@@ -58,7 +58,7 @@ def main():
             print(f"{name}: {', '.join(algs) if algs else '(none)'}")
         return
 
-    P5Runner(
+    runner = P5Runner(
         output_path=args.output_path,
         experiment_name=args.experiment_name,
         algorithms=args.algorithms,          # "auto" supported
@@ -76,8 +76,9 @@ def main():
         run_cluster=args.run_cluster or "Serial",
         queue=args.queue,
         reserved_memory=args.reserved_memory,
-    ).run()
-    save_run_command_from_args(args, "p5_feature_selection", run_command_args)
+    )
+    runner.run()
+    save_run_command_from_args(args, "p5_feature_selection", run_command_args, runner=runner)
 
 
 if __name__ == "__main__":

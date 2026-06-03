@@ -46,7 +46,7 @@ def main():
 
     require_args(ap, args, ["n_splits"])
 
-    P7Runner(
+    runner = P7Runner(
         output_path=args.output_path,
         experiment_name=args.experiment_name,
         n_splits=args.n_splits,
@@ -68,8 +68,9 @@ def main():
         queue=args.queue,
         reserved_memory=args.reserved_memory,
         random_state=(int(args.random_state) if str(args.random_state).lower() not in {"", "none"} else None),
-    ).run()
-    save_run_command_from_args(args, "p7_ensembles", run_command_args)
+    )
+    runner.run()
+    save_run_command_from_args(args, "p7_ensembles", run_command_args, runner=runner)
 
 if __name__ == "__main__":
     

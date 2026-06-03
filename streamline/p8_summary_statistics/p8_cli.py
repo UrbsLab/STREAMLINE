@@ -48,7 +48,7 @@ def main():
     require_args(ap, args, ["n_splits"])
     run_command_args = snapshot_args(args)
 
-    P8Runner(
+    runner = P8Runner(
         output_path=args.output_path,
         experiment_name=args.experiment_name,
         outcome_label=args.outcome_label,
@@ -67,8 +67,9 @@ def main():
         run_cluster=args.run_cluster,
         queue=args.queue,
         reserved_memory=args.reserved_memory,
-    ).run()
-    save_run_command_from_args(args, "p8_summary_statistics", run_command_args)
+    )
+    runner.run()
+    save_run_command_from_args(args, "p8_summary_statistics", run_command_args, runner=runner)
 
 
 if __name__ == "__main__":

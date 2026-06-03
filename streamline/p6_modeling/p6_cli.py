@@ -95,7 +95,7 @@ def main():
     require_args(ap, args, ["n_splits"])
 
     # ---- normal run ----
-    P6Runner(
+    runner = P6Runner(
         output_path=args.output_path,
         experiment_name=args.experiment_name,
         outcome_label=args.outcome_label,
@@ -123,8 +123,9 @@ def main():
         run_cluster=args.run_cluster,
         queue=args.queue,
         reserved_memory=args.reserved_memory,
-    ).run()
-    save_run_command_from_args(args, "p6_modeling", run_command_args)
+    )
+    runner.run()
+    save_run_command_from_args(args, "p6_modeling", run_command_args, runner=runner)
 
 if __name__ == "__main__":
     main()
