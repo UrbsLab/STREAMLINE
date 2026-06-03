@@ -90,7 +90,7 @@ def main():
         reserved_memory=args.reserved_memory,
     )
     job.run()
-    save_run_command_from_args(args, "p11_reporting", run_command_args)
+    save_run_command_from_args(args, "p11_reporting", run_command_args, runner=job)
 
 
 if __name__ == "__main__":

@@ -149,7 +149,7 @@ def main():
     )
 
     runner.run()
-    save_run_command_from_args(args, "p1_data_process", run_command_args)
+    save_run_command_from_args(args, "p1_data_process", run_command_args, runner=runner)
 
 
 if __name__ == "__main__":

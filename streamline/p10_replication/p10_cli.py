@@ -76,7 +76,7 @@ def main() -> None:
         show_plots=bool(args.show_plots),
     )
     runner.run()
-    save_run_command_from_args(args, "p10_replication", run_command_args)
+    save_run_command_from_args(args, "p10_replication", run_command_args, runner=runner)
 
 
 if __name__ == "__main__":

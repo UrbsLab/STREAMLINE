@@ -69,7 +69,7 @@ def main():
         reserved_memory=args.reserved_memory,
     )
     runner.run()
-    save_run_command_from_args(args, "p3_feature_learning", run_command_args)
+    save_run_command_from_args(args, "p3_feature_learning", run_command_args, runner=runner)
 
 if __name__ == "__main__":
     main()
