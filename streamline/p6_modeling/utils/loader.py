@@ -22,6 +22,8 @@ SUBDIR = {
     "Regression": "regression",
 }
 
+DEFAULT_EXCLUDED_MODEL_IDS = {"elcs"}
+
 
 def _get_models_root() -> Path:
     """
@@ -76,6 +78,24 @@ def load_model_classes(model_type: str) -> List[Type]:
                     classes.append(obj)
 
     return sorted(classes, key=lambda c: getattr(c, "model_name", str(c)))
+
+
+def model_class_ids(model_class: Type) -> set[str]:
+    return {
+        str(getattr(model_class, "small_name", "")).strip().lower(),
+        str(getattr(model_class, "model_name", "")).strip().lower(),
+    }
+
+
+def is_default_excluded_model(model_class: Type) -> bool:
+    return bool(model_class_ids(model_class).intersection(DEFAULT_EXCLUDED_MODEL_IDS))
+
+
+def load_default_model_classes(model_type: str) -> List[Type]:
+    return [
+        model_class for model_class in load_model_classes(model_type)
+        if not is_default_excluded_model(model_class)
+    ]
 
 
 def get_model_by_id(model_type: str, model_id: str) -> Type:
@@ -188,4 +208,3 @@ if __name__ == "__main__":
 
     print(f"\nRound-trip checks completed. Successful lookups: {ok_count}")
     print("=== Self-test done ===")
-

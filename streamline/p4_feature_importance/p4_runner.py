@@ -14,7 +14,7 @@ from streamline.p4_feature_importance.utils.fi_loader import list_importances
 class P4Runner:
     """
     Phase 4: Feature Importance
-    - models: list[str] of model ids (e.g., ["mutualinformation","multisurf","multisurfstar"])
+    - models: list[str] of model ids (e.g., ["mutualinformation","multisurf"])
     - models_params: dict id->params (JSON)
     """
     def __init__(
@@ -46,7 +46,7 @@ class P4Runner:
         # defaults
         models = self._csv_to_list(models)
         meta = self._load_metadata()
-        self.models = models or meta.get("P4 Models", ["mutualinformation","multisurf",])  # default to these 3 if not specified
+        self.models = models or meta.get("P4 Models", ["mutualinformation","multisurf"])
         # if metadata also stores CSV, normalize that too
         if isinstance(self.models, str):
             self.models = self._csv_to_list(self.models)

@@ -76,11 +76,32 @@ def snapshot_args(args: argparse.Namespace) -> Dict[str, Any]:
     }
 
 
+def snapshot_effective_args(args_snapshot: Dict[str, Any], runner: Any) -> Dict[str, Any]:
+    effective = copy.deepcopy(args_snapshot or {})
+    if runner is None:
+        return effective
+
+    runner_values: Dict[str, Any] = {}
+    for key, value in vars(runner).items():
+        if key.startswith("_"):
+            continue
+        if key == "kw" and isinstance(value, dict):
+            runner_values.update(value)
+            continue
+        runner_values[key] = value
+
+    for key in list(effective):
+        if key in runner_values:
+            effective[key] = copy.deepcopy(runner_values[key])
+    return effective
+
+
 def save_run_command_from_args(
     args: argparse.Namespace,
     phase: str,
     args_snapshot: Optional[Dict[str, Any]] = None,
     argv: Optional[Sequence[str]] = None,
+    runner: Optional[Any] = None,
 ) -> None:
     if getattr(args, "no_update_saved_run_command", False):
         return
@@ -88,10 +109,13 @@ def save_run_command_from_args(
     if exp_root is None:
         logging.info("run_commands.pickle not updated for %s: experiment path could not be resolved.", phase)
         return
+    saved_args = args_snapshot if args_snapshot is not None else snapshot_args(args)
+    if runner is not None:
+        saved_args = snapshot_effective_args(saved_args, runner)
     save_phase_run_command(
         exp_root=exp_root,
         phase=phase,
-        args=args_snapshot if args_snapshot is not None else snapshot_args(args),
+        args=saved_args,
         argv=argv if argv is not None else sys.argv[1:],
     )
 

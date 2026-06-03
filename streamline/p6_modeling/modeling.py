@@ -5,7 +5,7 @@ import logging
 import pickle
 from typing import List, Optional, Dict, Any
 from streamline.p6_modeling.utils.modeljob import ModelJob
-from streamline.p6_modeling.utils.loader import load_model_classes, get_model_by_id
+from streamline.p6_modeling.utils.loader import load_default_model_classes, get_model_by_id
 from streamline.p6_modeling.utils.categorical import normalize_model_id, parse_model_id_csv
 
 def _csv_to_list(v):
@@ -22,7 +22,7 @@ class ModelingPhaseJob:
         model_type: str = "Binary",     # "Binary" | "Multiclass" | "Regression"
         instance_label: Optional[str] = None,
         n_splits: int = 10,
-        models: List[str] | str | None = None,     # CSV or list; if None -> auto discover
+        models: List[str] | str | None = None,     # CSV or list; if None -> auto-discover defaults
         model_params_json: Optional[str] = None,
         # calibration
         calibrate: bool = False,
@@ -104,7 +104,7 @@ class ModelingPhaseJob:
 
         # Discover models if none provided
         if not self.models:
-            model_classes = load_model_classes(self.model_type)
+            model_classes = load_default_model_classes(self.model_type)
             if one_hot_disabled:
                 original_count = len(model_classes)
                 model_classes = [

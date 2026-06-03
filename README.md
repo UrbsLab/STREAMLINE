@@ -12,7 +12,7 @@ This repository is the most up-to-date starting point for the current refactored
 - Phase-first architecture spanning P1 through P11
 - Registry-backed extension points for multiple phases
 - Feature learning with PCA and related outputs
-- Feature importance methods including mutual information, MultiSURF, and MultiSURFstar
+- Feature importance methods including mutual information and MultiSURF, with additional methods available through the registry
 - Modeling with base learners, calibration support for classification, and composite feature importance from modeling
 - Classification ensemble evaluation
 - Summary statistics and cross-dataset comparison
@@ -66,6 +66,7 @@ Top-level items you will use most often:
 
 - [`STREAMLINE_GoogleColab.ipynb`](STREAMLINE_GoogleColab.ipynb): primary Colab-oriented notebook
 - [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb): local Jupyter notebook workflow
+- [`run_configs/`](run_configs): example `.cfg` files for full UCI demo pipelines
 - [`data/`](data): demo training and replication datasets
 - [`streamline/`](streamline): source code organized by phase
 - [`usefulnotebooks/`](usefulnotebooks): focused post hoc analysis and visualization notebooks
@@ -84,6 +85,7 @@ Key source directories:
 - `streamline/p9_compare_datasets`
 - `streamline/p10_replication`
 - `streamline/p11_reporting`
+- `streamline/pipeline` for config-driven P1-P11 orchestration
 
 ## Run Modes
 
@@ -91,6 +93,7 @@ STREAMLINE can be used in several ways depending on user preference and compute 
 
 - Google Colab notebook
 - Local Jupyter notebook
+- Config-driven full pipeline runs
 - Local command line
 - Local parallel execution
 - HPC / cluster execution using the phase CLIs and job submission helpers
@@ -100,6 +103,39 @@ The current codebase includes CLI and runner modules for every phase from P1 thr
 ## Saved Run Commands
 
 Each phase CLI records its resolved arguments in `<output_path>/<experiment_name>/run_commands.pickle` after a successful run. On later runs, the same phase will reuse saved arguments for options you omit, while command-line values you provide override and update the saved entry. Use `--ignore_saved_run_command` for a fresh run or `--no_update_saved_run_command` to avoid updating the pickle.
+
+## Config-Driven Pipeline Runs
+
+STREAMLINE can run multiple phases from one `.cfg` file, matching the config-file workflow used in earlier releases. The config runner reads shared settings from `[run]`, phase toggles from `[phases]`, phase-specific settings from sections such as `[p1]` and `[p6]`, and then calls the same P1-P11 runner classes used by the phase CLIs. The `[phases]` section supports direct flags such as `do_p1 = True` as well as old-style broad flags such as `do_till_report = True`.
+
+Dry-run a config to inspect the resolved phase calls:
+
+```bash
+python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
+```
+
+Run the configured pipeline:
+
+```bash
+python run.py -c run_configs/uci_binary_hcc.cfg
+```
+
+Useful controls:
+
+```bash
+python run.py -c run_configs/uci_binary_hcc.cfg --start_at p4
+python run.py -c run_configs/uci_binary_hcc.cfg --stop_after p8
+python run.py -c run_configs/uci_binary_hcc.cfg --only p6,p8,p11
+python run.py -c run_configs/uci_binary_hcc.cfg --skip p3,p4
+```
+
+Example configs are included for the three UCI demos:
+
+- `run_configs/uci_binary_hcc.cfg`
+- `run_configs/uci_multiclass_student.cfg`
+- `run_configs/uci_regression_auto_mpg.cfg`
+
+Phase 10 runs only when replication paths are configured, unless it is explicitly enabled. Phase 7 is automatically skipped for continuous/regression runs because the current ensemble registry is classification-only.
 
 ## Feature Type Handling
 

@@ -125,7 +125,7 @@ def test_p6_p7_p8_pipeline():
     ds_dir = exp_root / dataset_name
 
     # 2) Phase 6 - run a few simple models.
-    # Adjust "NB,LR,SVM" to match registry IDs (small_name) in your p6 loader.
+    # Adjust "NB,LR,DT" to match registry IDs (small_name) in your p6 loader.
     p6 = P6Runner(
         output_path=str(output_path),
         experiment_name=experiment_name,
@@ -133,7 +133,7 @@ def test_p6_p7_p8_pipeline():
         model_type="Binary",
         instance_label="InstanceID",
         n_splits=3,
-        models="NB,LR,SVM",
+        models="NB,LR,DT",
         calibrate=False,
         scoring_metric="balanced_accuracy",
         metric_direction="maximize",
@@ -162,7 +162,7 @@ def test_p6_p7_p8_pipeline():
         outcome_label="Class",
         instance_label="InstanceID",
         ensembles="hard_voting,soft_voting,stack_lr",
-        base_models="NB,LR,SVM",
+        base_models="NB,LR,DT",
         calibrate=0,             # keep off for speed
         calibrate_method="sigmoid",
         calibrate_cv=3,

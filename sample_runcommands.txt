@@ -22,7 +22,45 @@
 
 
 # ==========================================================
-# 0. Optional discovery commands
+# 0. Config-driven full pipeline examples
+# ==========================================================
+# These run the same P1-P11 runner classes used by the phase
+# commands below, with shared and phase-specific arguments loaded
+# from editable .cfg files. Use --dry_run first to inspect resolved calls.
+
+python run.py \
+  -c run_configs/uci_binary_hcc.cfg \
+  --dry_run
+
+python run.py \
+  -c run_configs/uci_binary_hcc.cfg
+
+python run.py \
+  -c run_configs/uci_multiclass_student.cfg
+
+python run.py \
+  -c run_configs/uci_regression_auto_mpg.cfg
+
+# Useful partial-run controls:
+python run.py \
+  -c run_configs/uci_binary_hcc.cfg \
+  --start_at p4
+
+python run.py \
+  -c run_configs/uci_binary_hcc.cfg \
+  --stop_after p8
+
+python run.py \
+  -c run_configs/uci_binary_hcc.cfg \
+  --only p6,p8,p11
+
+python run.py \
+  -c run_configs/uci_binary_hcc.cfg \
+  --skip p3,p4
+
+
+# ==========================================================
+# 1. Optional discovery commands
 # ==========================================================
 
 python -m streamline.p2_impute_scale.p2_cli \
@@ -59,7 +97,7 @@ python -m streamline.p7_ensembles.p7_cli \
 
 
 # ==========================================================
-# 1. Classification workflow example
+# 2. Classification workflow example
 # ==========================================================
 # Demo input folder:
 #   data/UCIBinaryClassification
@@ -110,7 +148,7 @@ python -m streamline.p3_feature_learning.p3_cli \
   --output_path out \
   --experiment_name DemoBinary \
   --learner_id pca \
-  --learner_params '{"n_components": 10}' \
+  --learner_params '{}' \
   --keep_original_features true \
   --random_state 42
 
@@ -121,8 +159,8 @@ python -m streamline.p3_feature_learning.p3_cli \
 python -m streamline.p4_feature_importance.p4_cli \
   --output_path out \
   --experiment_name DemoBinary \
-  --models "mutualinformation,multisurf,multisurfstar" \
-  --models_params '{"mutualinformation":{"outcome_type":"Binary"},"multisurf":{"n_jobs":4},"multisurfstar":{"n_jobs":4}}' \
+  --models "mutualinformation,multisurf" \
+  --models_params '{"mutualinformation":{"outcome_type":"Binary"},"multisurf":{"n_jobs":4}}' \
   --random_state 42
 
 
@@ -149,14 +187,14 @@ python -m streamline.p6_modeling.p6_cli \
   --model_type Binary \
   --instance_label InstanceID \
   --n_splits 5 \
-  --models LR,RF,XGB \
+  --models NB,LR,DT \
   --calibrate 1 \
   --calibrate_method sigmoid \
   --calibrate_cv 5 \
   --scoring_metric balanced_accuracy \
   --metric_direction maximize \
-  --n_trials 20 \
-  --timeout 120 \
+  --n_trials 200 \
+  --timeout 900 \
   --training_subsample 0 \
   --uniform_fi 0 \
   --save_plot 0 \
@@ -174,7 +212,7 @@ python -m streamline.p7_ensembles.p7_cli \
   --outcome_label Class \
   --instance_label InstanceID \
   --ensembles hard_voting,soft_voting,stack_lr \
-  --base_models LR,RF,XGB \
+  --base_models NB,LR,DT \
   --meta_train_source train \
   --calibrate 0 \
   --random_state 42
@@ -192,7 +230,7 @@ python -m streamline.p8_summary_statistics.p8_cli \
   --n_splits 5 \
   --scoring_metric balanced_accuracy \
   --metric_weight balanced_accuracy \
-  --top_features 25 \
+  --top_features 40 \
   --sig_cutoff 0.05 \
   --scale_data 1 \
   --show_plots 0 \
@@ -250,7 +288,7 @@ python -m streamline.p11_reporting.p11_cli \
 
 
 # ==========================================================
-# 2. Regression workflow example
+# 3. Regression workflow example
 # ==========================================================
 # Demo input folder:
 #   data/UCIRegression
@@ -293,7 +331,7 @@ python -m streamline.p3_feature_learning.p3_cli \
   --output_path out \
   --experiment_name DemoRegression \
   --learner_id pca \
-  --learner_params '{"n_components": 10}' \
+  --learner_params '{}' \
   --keep_original_features true \
   --random_state 42
 
@@ -304,8 +342,8 @@ python -m streamline.p3_feature_learning.p3_cli \
 python -m streamline.p4_feature_importance.p4_cli \
   --output_path out \
   --experiment_name DemoRegression \
-  --models "mutualinformation,multisurf,multisurfstar" \
-  --models_params '{"mutualinformation":{"outcome_type":"Continuous"},"multisurf":{"n_jobs":4},"multisurfstar":{"n_jobs":4}}' \
+  --models "mutualinformation,multisurf" \
+  --models_params '{"mutualinformation":{"outcome_type":"Continuous"},"multisurf":{"n_jobs":4}}' \
   --outcome_type Continuous \
   --random_state 42
 
@@ -333,11 +371,11 @@ python -m streamline.p6_modeling.p6_cli \
   --model_type Regression \
   --instance_label InstanceID \
   --n_splits 5 \
-  --models LR,RF,SVR \
+  --models LR,RF \
   --scoring_metric explained_variance \
   --metric_direction maximize \
-  --n_trials 20 \
-  --timeout 120 \
+  --n_trials 200 \
+  --timeout 900 \
   --training_subsample 0 \
   --uniform_fi 0 \
   --save_plot 0 \
@@ -361,7 +399,7 @@ python -m streamline.p8_summary_statistics.p8_cli \
   --n_splits 5 \
   --scoring_metric explained_variance \
   --metric_weight explained_variance \
-  --top_features 25 \
+  --top_features 40 \
   --sig_cutoff 0.05 \
   --scale_data 1 \
   --show_plots 0 \

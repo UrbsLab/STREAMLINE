@@ -31,7 +31,7 @@ class P6Runner:
         model_type: str = "Binary",     # "Binary" | "Multiclass" | "Regression"
         instance_label: Optional[str] = None,
         n_splits: int = 10,
-        models: List[str] | str | None = None,        # CSV/list; None = auto-discover from registry
+        models: List[str] | str | None = None,        # CSV/list; None = auto-discover defaults
         model_params_json: Optional[str] = None,
 
 

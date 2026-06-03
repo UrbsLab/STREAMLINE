@@ -34,7 +34,7 @@ def main():
     ap.add_argument("--output_path", required=True)
     ap.add_argument("--experiment_name", required=True)
 
-    # NOW: comma-separated only (e.g., "mutualinformation,multisurf,multisurfstar")
+    # NOW: comma-separated only (e.g., "mutualinformation,multisurf")
     ap.add_argument("--models", required=False, help='Comma-separated: e.g. "mutualinformation,multisurf"')
     # keep JSON dict for params (per-model)
     ap.add_argument("--models_params", default=None, help='JSON dict: {"mutualinformation": {...}, "multisurf": {...}}')
@@ -91,10 +91,10 @@ def main():
     save_run_command_from_args(args, "p4_feature_importance", run_command_args)
 
 if __name__ == "__main__":
-    # # run three models (comma-separated), pass params to only multisurf via JSON
+    # # run two models (comma-separated), pass params to only multisurf via JSON
     # python -m streamline.p4_feature_importance.p4_cli \
     # --output_path ./test --experiment_name MyExp \
-    # --models "mutualinformation,multisurf,multisurfstar" \
+    # --models "mutualinformation,multisurf" \
     # --models_params '{"multisurf":{"use_turf": true, "turf_pct": 0.5, "n_jobs": 4}}' \
     # --top_k 100 --instance_subset 2000
     main()

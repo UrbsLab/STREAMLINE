@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
+from streamline.utils.run_commands import RUN_COMMANDS_FILENAME, load_run_commands
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +34,34 @@ PHASE_LABELS = {
     "4": "Feature Selection",
     "5": "Modeling",
     "8": "Stats Summary",
+}
+
+RUN_COMMAND_PHASE_ORDER = [
+    "p1_data_process",
+    "p2_impute_scale",
+    "p3_feature_learning",
+    "p4_feature_importance",
+    "p5_feature_selection",
+    "p6_modeling",
+    "p7_ensembles",
+    "p8_summary_statistics",
+    "p9_compare_datasets",
+    "p10_replication",
+    "p11_reporting",
+]
+
+RUN_COMMAND_PHASE_LABELS = {
+    "p1_data_process": "P1 Data Processing",
+    "p2_impute_scale": "P2 Impute / Scale",
+    "p3_feature_learning": "P3 Feature Learning",
+    "p4_feature_importance": "P4 Feature Importance",
+    "p5_feature_selection": "P5 Feature Selection",
+    "p6_modeling": "P6 Modeling",
+    "p7_ensembles": "P7 Ensembles",
+    "p8_summary_statistics": "P8 Summary Statistics",
+    "p9_compare_datasets": "P9 Dataset Comparison",
+    "p10_replication": "P10 Replication",
+    "p11_reporting": "P11 Reporting",
 }
 
 CLASSIFICATION_METRICS = [
@@ -359,6 +389,248 @@ class ReportPhaseJob:
         except Exception:
             pass
         return {}
+
+    def load_run_command_context(self) -> Dict[str, Any]:
+        path = self.exp_root / RUN_COMMANDS_FILENAME
+        store = load_run_commands(self.exp_root)
+        phases_blob = store.get("phases", {}) if isinstance(store, dict) else {}
+        phases = phases_blob if isinstance(phases_blob, dict) else {}
+
+        records: Dict[str, Dict[str, Any]] = {}
+        for phase, phase_store in phases.items():
+            if not isinstance(phase_store, dict):
+                continue
+            latest = phase_store.get("latest", {})
+            if not isinstance(latest, dict):
+                continue
+            args = latest.get("args") or {}
+            safe_args = json.loads(json.dumps(args, default=str)) if isinstance(args, dict) else {}
+            records[str(phase)] = {
+                "phase": str(phase),
+                "label": RUN_COMMAND_PHASE_LABELS.get(str(phase), str(phase)),
+                "updated_at": latest.get("updated_at", ""),
+                "command": latest.get("command", ""),
+                "args": safe_args,
+            }
+
+        ordered_phases = [
+            phase
+            for phase in RUN_COMMAND_PHASE_ORDER
+            if phase in records
+        ] + sorted(
+            phase
+            for phase in records
+            if phase not in set(RUN_COMMAND_PHASE_ORDER)
+        )
+        latest_phase = ""
+        latest_updated_at = ""
+        for phase in ordered_phases:
+            updated = str(records[phase].get("updated_at") or "")
+            if updated >= latest_updated_at:
+                latest_phase = phase
+                latest_updated_at = updated
+
+        return {
+            "present": path.is_file() and bool(records),
+            "path": str(path),
+            "recorded_phase_count": len(records),
+            "recorded_phases": ordered_phases,
+            "latest_phase": latest_phase,
+            "latest_phase_label": RUN_COMMAND_PHASE_LABELS.get(latest_phase, latest_phase),
+            "latest_updated_at": latest_updated_at,
+            "records": records,
+        }
+
+    def phase_args_from_records(self, records: Dict[str, Any], phase: str) -> Dict[str, Any]:
+        record = records.get(phase, {}) if isinstance(records, dict) else {}
+        args = record.get("args", {}) if isinstance(record, dict) else {}
+        return args if isinstance(args, dict) else {}
+
+    def report_value(self, value: Any, *, max_len: int = 120) -> str:
+        if value is None:
+            return "Not specified"
+        if isinstance(value, bool):
+            return "True" if value else "False"
+        if isinstance(value, (list, tuple, set)):
+            items = [str(item) for item in value]
+            if not items:
+                return "None"
+            if len(items) > 5:
+                text = ", ".join(items[:5]) + f", ... ({len(items)} total)"
+            else:
+                text = ", ".join(items)
+        elif isinstance(value, dict):
+            text = json.dumps(value, sort_keys=True, default=str)
+        else:
+            text = str(value)
+
+        text = " ".join(text.split())
+        if text == "":
+            return "Not specified"
+        return _shorten(text, max_len)
+
+    def add_summary_line(
+        self,
+        lines: List[str],
+        label: str,
+        value: Any,
+        *,
+        max_len: int = 120,
+    ) -> None:
+        lines.append(f"{label}: {self.report_value(value, max_len=max_len)}")
+
+    def build_dataset_summary_lines(self, dataset_blocks: Sequence[Dict[str, Any]]) -> List[str]:
+        if not dataset_blocks:
+            return ["No datasets discovered"]
+
+        lines = [
+            f"Dataset Count: {len(dataset_blocks)}",
+        ]
+        for ds in dataset_blocks[:6]:
+            dataset_id = str(ds.get("dataset_id") or "")
+            dataset_name = str(ds.get("dataset_name") or "")
+            dataset_path = str(ds.get("dataset_path") or "")
+            task_type = str(ds.get("task_type") or "")
+            if "/replication/" in dataset_path:
+                parent = Path(dataset_path).parents[1].name if len(Path(dataset_path).parents) > 1 else ""
+                suffix = f" from {parent}" if parent else ""
+                label = f"{dataset_id} = {dataset_name}{suffix}"
+            else:
+                label = f"{dataset_id} = {dataset_name}"
+            lines.append(_shorten(label, 120))
+            if task_type:
+                lines.append(f"  Task Type: {task_type}")
+        if len(dataset_blocks) > 6:
+            lines.append(f"... {len(dataset_blocks) - 6} more datasets")
+        return lines
+
+    def build_run_command_summary(
+        self,
+        *,
+        metadata: Dict[str, Any],
+        metadata_pickle: Dict[str, Any],
+        run_params: Dict[str, Any],
+        dataset_blocks: Sequence[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        context = self.load_run_command_context()
+        records = context.get("records", {})
+
+        p1 = self.phase_args_from_records(records, "p1_data_process")
+        p2 = self.phase_args_from_records(records, "p2_impute_scale")
+        p3 = self.phase_args_from_records(records, "p3_feature_learning")
+        p4 = self.phase_args_from_records(records, "p4_feature_importance")
+        p5 = self.phase_args_from_records(records, "p5_feature_selection")
+        p6 = self.phase_args_from_records(records, "p6_modeling")
+        p7 = self.phase_args_from_records(records, "p7_ensembles")
+        p8 = self.phase_args_from_records(records, "p8_summary_statistics")
+        p10 = self.phase_args_from_records(records, "p10_replication")
+
+        phase_labels = [
+            RUN_COMMAND_PHASE_LABELS.get(phase, phase)
+            for phase in context.get("recorded_phases", [])
+        ]
+
+        overview: List[str] = []
+        self.add_summary_line(overview, "Report Mode", self.report_mode)
+        self.add_summary_line(overview, "Experiment Name", self.experiment_name)
+        self.add_summary_line(overview, "Outcome Label", metadata.get("Outcome Label"))
+        self.add_summary_line(overview, "Outcome Type", metadata.get("Outcome Type"))
+        self.add_summary_line(overview, "Instance Label", metadata.get("Instance Label"))
+        self.add_summary_line(overview, "STREAMLINE Version", _try_streamline_version())
+
+        provenance: List[str] = []
+        self.add_summary_line(provenance, "Command Pickle", "Found" if context.get("present") else "Not found")
+        self.add_summary_line(provenance, "Path", context.get("path"), max_len=110)
+        self.add_summary_line(provenance, "Recorded Phases", ", ".join(phase_labels) if phase_labels else "None", max_len=150)
+        self.add_summary_line(provenance, "Latest Saved Phase", context.get("latest_phase_label") or "None")
+        self.add_summary_line(provenance, "Latest Saved At", context.get("latest_updated_at") or "Not available")
+        if not context.get("present"):
+            provenance.append("Fallback: metadata and current P11 arguments")
+
+        data_cv: List[str] = []
+        self.add_summary_line(data_cv, "Data Path", p1.get("data_path") or metadata_pickle.get("Data Path"))
+        self.add_summary_line(data_cv, "CV Splits", p1.get("n_splits") or p6.get("n_splits") or metadata_pickle.get("CV Partitions") or run_params.get("CV Partitions"))
+        self.add_summary_line(data_cv, "Partition Method", p1.get("partition_method") or metadata_pickle.get("Partition Method") or run_params.get("Partition Method"))
+        self.add_summary_line(data_cv, "One-Hot Encoding", p1.get("one_hot_encoding") if "one_hot_encoding" in p1 else metadata_pickle.get("One Hot Encoding"))
+        self.add_summary_line(data_cv, "Categorical Cutoff", p1.get("categorical_cutoff") or metadata_pickle.get("Categorical Cutoff"))
+        self.add_summary_line(data_cv, "Ignored Features", p1.get("ignore_features") or metadata_pickle.get("Ignored Features"))
+        self.add_summary_line(data_cv, "Categorical Features", p1.get("categorical_features") or metadata_pickle.get("Specified Categorical Features"), max_len=120)
+        self.add_summary_line(data_cv, "Quantitative Features", p1.get("quantitative_features") or metadata_pickle.get("Specified Quantitative Features"), max_len=120)
+
+        processing: List[str] = []
+        self.add_summary_line(processing, "Scale Data", p2.get("scale_data") if "scale_data" in p2 else metadata_pickle.get("Use Data Scaling"))
+        self.add_summary_line(processing, "Impute Data", p2.get("impute_data") if "impute_data" in p2 else metadata_pickle.get("Use Data Imputation"))
+        self.add_summary_line(processing, "Multivariate Imputation", p2.get("multi_impute") if "multi_impute" in p2 else metadata_pickle.get("Use Multivariate Imputation"))
+        self.add_summary_line(processing, "Overwrite CV", p2.get("overwrite_cv") if "overwrite_cv" in p2 else metadata_pickle.get("Overwrite CV Datasets"))
+        self.add_summary_line(processing, "SMOTE", p2.get("smote") if "smote" in p2 else "Not specified")
+        self.add_summary_line(processing, "SMOTE Method", p2.get("smote_method") or "auto")
+        self.add_summary_line(processing, "Missingness Cutoff", p1.get("featureeng_missingness") or metadata_pickle.get("Engineering Missingness Cutoff"))
+        self.add_summary_line(processing, "Correlation Removal", p1.get("correlation_removal_threshold") or metadata_pickle.get("Correlation Removal Threshold"))
+
+        feature_selection: List[str] = []
+        self.add_summary_line(feature_selection, "Feature Learner", p3.get("learner_id") or "Not run / not specified")
+        self.add_summary_line(feature_selection, "Keep Original Features", p3.get("keep_original_features") if "keep_original_features" in p3 else "Not specified")
+        self.add_summary_line(feature_selection, "FI Models", p4.get("models") or "Not specified")
+        self.add_summary_line(feature_selection, "FI Params", p4.get("models_params") or "Not specified", max_len=130)
+        self.add_summary_line(feature_selection, "P5 Algorithms", p5.get("algorithms") or "auto")
+        self.add_summary_line(feature_selection, "Selector", p5.get("selector_id") or "default")
+        self.add_summary_line(feature_selection, "Max Features To Keep", p5.get("max_features_to_keep") or metadata_pickle.get("Max Features to Keep"))
+        self.add_summary_line(feature_selection, "Top Features To Display", p5.get("top_features") or p8.get("top_features") or metadata_pickle.get("Top Model Features to Display"))
+
+        modeling: List[str] = []
+        self.add_summary_line(modeling, "Model Type", p6.get("model_type") or metadata.get("Outcome Type"))
+        self.add_summary_line(modeling, "Models", p6.get("models") or "auto/default")
+        self.add_summary_line(modeling, "Scoring Metric", p6.get("scoring_metric") or p8.get("scoring_metric") or "Not specified")
+        self.add_summary_line(modeling, "Metric Direction", p6.get("metric_direction") or "Not specified")
+        self.add_summary_line(modeling, "Optuna Trials Requested", p6.get("n_trials") or "Not specified")
+        self.add_summary_line(modeling, "Optuna Timeout Seconds", p6.get("timeout") or "Not specified")
+        self.add_summary_line(modeling, "Training Subsample", p6.get("training_subsample") if "training_subsample" in p6 else "Not specified")
+        self.add_summary_line(modeling, "Calibration", p6.get("calibrate") if "calibrate" in p6 else "Not specified")
+        self.add_summary_line(modeling, "Native Categorical Bypass", p6.get("bypass_one_hot_for_native_models") if "bypass_one_hot_for_native_models" in p6 else "Not specified")
+        self.add_summary_line(modeling, "Native Categorical Models", p6.get("native_categorical_models") or "Not specified")
+        if p7:
+            self.add_summary_line(modeling, "Ensembles", p7.get("ensembles") or "Not specified")
+            self.add_summary_line(modeling, "Base Models", p7.get("base_models") or "Not specified")
+
+        replication: List[str] = []
+        if self.report_mode == "replication" or p10:
+            self.add_summary_line(replication, "Replication Data Path", p10.get("rep_data_path") or "Not specified")
+            self.add_summary_line(replication, "Training Dataset For Rep", p10.get("dataset_for_rep") or "Not specified", max_len=130)
+            self.add_summary_line(replication, "Match Label", p10.get("match_label") or metadata_pickle.get("Match Label"))
+            self.add_summary_line(replication, "P10 Show Plots", p10.get("show_plots") if "show_plots" in p10 else "Not specified")
+            self.add_summary_line(replication, "Rep Report Focus", "Held-out/external replication folders only" if self.report_mode == "replication" else "Standard report")
+
+        reporting: List[str] = []
+        self.add_summary_line(reporting, "Report Mode", self.report_mode)
+        self.add_summary_line(reporting, "Make PDF", self.make_pdf)
+        self.add_summary_line(reporting, "Enable Plots", self.enable_plots)
+        self.add_summary_line(reporting, "Reuse Existing Figures", self.reuse_existing_figures)
+        self.add_summary_line(reporting, "P8 Metric Weight", p8.get("metric_weight") or "Not specified")
+        self.add_summary_line(reporting, "P8 Include Ensembles", p8.get("include_ensembles") if "include_ensembles" in p8 else "Not specified")
+
+        dataset_lines = self.build_dataset_summary_lines(dataset_blocks)
+
+        sections = [
+            {"title": "Run Overview", "lines": overview},
+            {"title": "Saved Command Pickle", "lines": provenance},
+            {"title": "Data and CV Settings", "lines": data_cv},
+            {"title": "EDA, Imputation, and SMOTE", "lines": processing},
+            {"title": "Feature Importance / Selection", "lines": feature_selection},
+            {"title": "Modeling and Ensembles", "lines": modeling},
+        ]
+        if replication:
+            sections.append({"title": "Replication Settings", "lines": replication})
+        sections.extend(
+            [
+                {"title": "Reporting Settings", "lines": reporting},
+                {"title": "Target Dataset(s)", "lines": dataset_lines},
+            ]
+        )
+
+        return {
+            **context,
+            "sections": sections,
+        }
 
     def _read_csv_table(self, path: Path) -> Optional[TableData]:
         if not path.is_file():
@@ -2662,10 +2934,6 @@ class ReportPhaseJob:
         return body_y + h
 
     def _render_global_summary(self, pdf: _StreamlinePDF, report_data: Dict[str, Any]):
-        metadata = report_data.get("metadata_pickle", {}) or {}
-        run_params = report_data.get("run_params", {}) or {}
-        datasets = report_data.get("datasets", [])
-
         pdf.add_page()
         pdf.set_font("Times", "B", 12)
         pdf.cell(
@@ -2678,81 +2946,52 @@ class ReportPhaseJob:
         )
         pdf.ln(1)
 
-        def kv_lines(keys: Sequence[str], src_a: Dict[str, Any], src_b: Dict[str, Any]) -> List[str]:
-            out: List[str] = []
-            for key in keys:
-                val = src_a.get(key, src_b.get(key, ""))
-                if isinstance(val, list):
-                    val = ", ".join([str(v) for v in val])
-                out.append(f"{key}: {val}")
-            return out
-
-        general = kv_lines(
-            [
-                "CV Partitions",
-                "Partition Method",
-                "Categorical Cutoff",
-                "Statistical Significance Cutoff",
-                "Random Seed",
-                "Run From Notebook",
-            ],
-            metadata,
-            run_params,
-        )
-        stats = kv_lines(
-            [
-                "Export ROC Plot",
-                "Export PRC Plot",
-                "Export Metric Boxplot",
-                "Export Feature Importance Boxplots",
-                "Top Model Features to Display",
-                "Export Feature Correlations",
-            ],
-            metadata,
-            run_params,
-        )
-        process = kv_lines(
-            [
-                "Engineering Missingness Cutoff",
-                "Cleaning Missingness Cutoff",
-                "Correlation Removal Threshold",
-                "Use Data Scaling",
-                "Use Data Imputation",
-                "Use Multivariate Imputation",
-                "Overwrite CV Datasets",
-            ],
-            metadata,
-            run_params,
-        )
-        target_data = kv_lines(
-            [
-                "Data Path",
-                "Output Path",
-                "Experiment Name",
-                "Outcome Label",
-                "Outcome Type",
-                "Instance Label",
-                "Match Label",
-                "Ignored Features",
-                "Specified Categorical Features",
-                "Specified Quantitative Features",
-            ],
-            metadata,
-            report_data.get("metadata", {}),
-        )
-        target_sets = [f"{ds.get('dataset_id')} = {ds.get('dataset_name')}" for ds in datasets]
-
         left_x, left_w = 10.0, 92.0
         right_x, right_w = 108.0, 92.0
         y0 = pdf.get_y()
-        y_left = y0
-        y_right = y0
+        column_y = [y0, y0]
+        column_x = [left_x, right_x]
+        column_w = [left_w, right_w]
 
-        y_left = self._render_box(pdf, x=left_x, y=y_left, w=left_w, title="General Pipeline Settings", lines=general) + 1
-        y_left = self._render_box(pdf, x=left_x, y=y_left, w=left_w, title="Stats and Figure Settings", lines=stats) + 1
-        y_right = self._render_box(pdf, x=right_x, y=y_right, w=right_w, title="EDA and Processing Settings", lines=process) + 1
-        y_right = self._render_box(pdf, x=right_x, y=y_right, w=right_w, title="Target Dataset(s)", lines=target_sets) + 1
-        self._render_box(pdf, x=right_x, y=y_right, w=right_w, title="Target Data Settings", lines=target_data)
+        summary = report_data.get("run_command_summary", {}) or {}
+        sections = summary.get("sections") or []
+        if not sections:
+            sections = [
+                {
+                    "title": "Run Overview",
+                    "lines": [
+                        f"Experiment Name: {report_data.get('experiment_name', '')}",
+                        f"Experiment Root: {report_data.get('experiment_root', '')}",
+                        f"Report Mode: {report_data.get('report_mode', '')}",
+                    ],
+                }
+            ]
+
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            title = str(section.get("title") or "Summary")
+            lines = [
+                str(line)
+                for line in (section.get("lines") or [])
+                if str(line).strip() != ""
+            ]
+            column = 0 if column_y[0] <= column_y[1] else 1
+            if column_y[column] > 260:
+                pdf.add_page()
+                column_y = [20.0, 20.0]
+                column = 0
+            column_y[column] = (
+                self._render_box(
+                    pdf,
+                    x=column_x[column],
+                    y=column_y[column],
+                    w=column_w[column],
+                    title=title,
+                    lines=lines,
+                )
+                + 1
+            )
 
     def _render_dataset_header(self, pdf: _StreamlinePDF, ds: Dict[str, Any], section_title: str):
         pdf.add_page()
@@ -3316,6 +3555,13 @@ class ReportPhaseJob:
         else:
             report_title = "STREAMLINE Testing Data Evaluation Report"
 
+        run_command_summary = self.build_run_command_summary(
+            metadata=metadata,
+            metadata_pickle=metadata_pickle,
+            run_params=run_params,
+            dataset_blocks=dataset_blocks,
+        )
+
         report_data: Dict[str, Any] = {
             "title": report_title,
             "generated_at": _now_iso_local(),
@@ -3328,6 +3574,7 @@ class ReportPhaseJob:
             "metadata_pickle": metadata_pickle,
             "alg_info": alg_info,
             "run_params": run_params,
+            "run_command_summary": run_command_summary,
             "datasets": dataset_blocks,
             "dataset_comparisons": dc_block,
         }

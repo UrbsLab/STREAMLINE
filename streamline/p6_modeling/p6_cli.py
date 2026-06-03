@@ -33,7 +33,7 @@ def main():
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--n_splits", type=int, default=None)
     ap.add_argument("--models", default=None,
-                    help="CSV of model ids (small_name or underscored model_name). Omit to auto-discover.")
+                    help="CSV of model ids (small_name or underscored model_name). Omit to auto-discover default models; eLCS is not included by default.")
     # NEW: per-model JSON overrides
     ap.add_argument(
         "--model_params_json",
