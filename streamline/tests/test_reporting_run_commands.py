@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import pickle
 from pathlib import Path
@@ -72,6 +74,20 @@ def save_demo_commands(exp_root: Path) -> None:
     )
 
 
+def summary_lines(payload: dict) -> list[str]:
+    lines = []
+    for section in payload["run_command_summary"]["sections"]:
+        lines.extend(section["lines"])
+    return lines
+
+
+def summary_titles(payload: dict) -> list[str]:
+    return [
+        section["title"]
+        for section in payload["run_command_summary"]["sections"]
+    ]
+
+
 def test_report_data_includes_saved_command_summary(tmp_path: Path):
     exp_root = tmp_path / "out" / "DemoExp"
     exp_root.mkdir(parents=True)
@@ -99,11 +115,12 @@ def test_report_data_includes_saved_command_summary(tmp_path: Path):
     sections = {section["title"]: section["lines"] for section in summary["sections"]}
 
     assert summary["present"] is True
-    assert any("Command Pickle: Found" in line for line in sections["Saved Command Pickle"])
+    assert "Saved Command Pickle" not in summary_titles(payload)
     assert any("CV Splits: 3" in line for line in sections["Data and CV Settings"])
     assert any("SMOTE: False" in line for line in sections["EDA, Imputation, and SMOTE"])
     assert any("Models: NB,LR,DT" in line for line in sections["Modeling and Ensembles"])
     assert any("Replication Data Path: data/UCIRepBinaryClassification" in line for line in sections["Replication Settings"])
+    assert not any("Not specified" in line for line in summary_lines(payload))
 
 
 def test_replication_report_first_page_summary_uses_replication_settings(tmp_path: Path):
@@ -143,3 +160,86 @@ def test_replication_report_first_page_summary_uses_replication_settings(tmp_pat
     assert any("Rep Report Focus: Held-out/external replication folders only" in line for line in sections["Replication Settings"])
     assert any("Report Mode: replication" in line for line in sections["Reporting Settings"])
     assert any("hcc_survival_rep from hcc_survival" in line for line in sections["Target Dataset(s)"])
+    assert not any("Not specified" in line for line in summary_lines(payload))
+
+
+def test_legacy_report_summary_uses_run_params_and_artifacts(tmp_path: Path):
+    exp_root = tmp_path / "out" / "LegacyExp"
+    exp_root.mkdir(parents=True)
+    with (exp_root / "metadata.pickle").open("wb") as handle:
+        pickle.dump(
+            {
+                "Data Path": "data/Legacy",
+                "Outcome Label": "Class",
+                "Outcome Type": "Binary",
+                "Instance Label": "InstanceID",
+                "CV Partitions": 3,
+                "Partition Method": "Stratified",
+                "Specified Categorical Features": "categorical.csv",
+                "Specified Quantitative Features": "quantitative.csv",
+            },
+            handle,
+        )
+    with (exp_root / "run_params.pickle").open("wb") as handle:
+        pickle.dump(
+            {
+                "2026-01-01T00:00:00": {
+                    "data_path": "data/Legacy",
+                    "n_splits": 3,
+                    "partition_method": "Stratified",
+                    "one_hot_encoding": True,
+                },
+                "2026-01-01T00:00:01": {
+                    "phase": "p2_impute_scale",
+                    "scale_data": True,
+                    "impute_data": True,
+                    "multi_impute": False,
+                    "overwrite_cv": True,
+                    "smote": False,
+                    "smote_method": "auto",
+                },
+                "2026-01-01T00:00:02": {
+                    "phase": "p4_feature_importance",
+                    "models": ["mutualinformation"],
+                    "models_params": {},
+                },
+            },
+            handle,
+        )
+
+    ds = exp_root / "legacy_data"
+    make_dataset(ds)
+    (ds / "impute_scale").mkdir(parents=True)
+    (ds / "impute_scale" / "scaler_cv0.pickle").write_bytes(b"")
+    (ds / "feature_importance" / "mutualinformation").mkdir(parents=True)
+    (ds / "feature_importance" / "mutualinformation" / "mutualinformation_scores_cv_0.csv").write_text("feature,score\nx,1\n")
+    (ds / "feature_selection").mkdir(parents=True)
+    (ds / "feature_selection" / "InformativeFeatureSummary.csv").write_text("CV_Partition,Informative,Uninformative\n0,2,0\n")
+    (ds / "models" / "pickledModels").mkdir(parents=True)
+    (ds / "models" / "pickledModels" / "LR_0.pickle").write_bytes(b"")
+    (ds / "models" / "optuna_trials").mkdir(parents=True)
+    (ds / "models" / "optuna_trials" / "LR_optuna_trials0.csv").write_text("number,value\n0,0.5\n1,0.6\n")
+    (ds / "ensemble_evaluation" / "metrics_by_cv").mkdir(parents=True)
+    (ds / "ensemble_evaluation" / "metrics_by_cv" / "HEV_CV_0.json").write_text("{}")
+    make_dataset(ds / "replication" / "legacy_data_rep")
+
+    ReportPhaseJob(
+        experiment_path=str(exp_root),
+        report_mode="replication",
+        make_pdf=False,
+        enable_plots=False,
+    ).run()
+
+    payload = json.loads((exp_root / "reporting_replication" / "report_data.json").read_text())
+    lines = summary_lines(payload)
+
+    assert "Saved Command Pickle" not in summary_titles(payload)
+    assert any("Data Path: data/Legacy" in line for line in lines)
+    assert any("SMOTE: False" in line for line in lines)
+    assert any("FI Models: mutualinformation" in line for line in lines)
+    assert any("Feature Learner: Not run" in line for line in lines)
+    assert any("Models: LR" in line for line in lines)
+    assert any("Ensembles: hard_voting" in line for line in lines)
+    assert any("Optuna Trials Completed: 2 completed across 1 model/CV runs" in line for line in lines)
+    assert any("Replication Data Path: legacy_data_rep from legacy_data" in line for line in lines)
+    assert not any("Not specified" in line for line in lines)

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from streamline.pipeline.pipeline_runner import PipelineRunner
 from streamline.p6_modeling.utils.loader import load_default_model_classes
-from streamline.utils.run_commands import load_phase_run_command
+from streamline.utils.run_commands import load_phase_run_command, snapshot_effective_args
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -112,10 +112,12 @@ def test_example_configs_dry_run_expected_phases():
 
 def test_config_runner_records_phase_args_in_run_command_pickle(monkeypatch, tmp_path):
     class FakeRunner:
-        def __init__(self, output_path, experiment_name, foo=None):
+        def __init__(self, output_path, experiment_name, foo="default", optional=None, run_cluster="Serial"):
             self.output_path = output_path
             self.experiment_name = experiment_name
             self.foo = foo
+            self.optional = "resolved-default" if optional is None else optional
+            self.run_cluster = run_cluster
 
         def run(self):
             Path(self.output_path, self.experiment_name).mkdir(parents=True, exist_ok=True)
@@ -146,4 +148,32 @@ def test_config_runner_records_phase_args_in_run_command_pickle(monkeypatch, tmp
 
     record = load_phase_run_command(output_path / "DemoExp", "p1_data_process")
     assert record["args"]["foo"] == "bar"
+    assert record["args"]["optional"] == "resolved-default"
+    assert record["args"]["run_cluster"] == "Serial"
     assert record["args"]["experiment_name"] == "DemoExp"
+
+
+def test_effective_args_snapshot_uses_runner_kw_dict():
+    class FakeRunner:
+        def __init__(self):
+            self.kw = {
+                "outcome_type": "Binary",
+                "show_plots": False,
+            }
+            self.queue = "defq"
+            self.runtime_only = "not saved"
+
+    effective = snapshot_effective_args(
+        {
+            "outcome_type": None,
+            "show_plots": True,
+            "queue": "oldq",
+        },
+        FakeRunner(),
+    )
+
+    assert effective == {
+        "outcome_type": "Binary",
+        "show_plots": False,
+        "queue": "defq",
+    }

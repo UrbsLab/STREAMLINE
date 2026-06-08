@@ -64,6 +64,18 @@ RUN_COMMAND_PHASE_LABELS = {
     "p11_reporting": "P11 Reporting",
 }
 
+LEGACY_NOT_RECORDED = "Not recorded in legacy output"
+NOT_RUN = "Not run"
+NO_VALUE = object()
+
+ENSEMBLE_SMALL_NAME_TO_ID = {
+    "HEV": "hard_voting",
+    "SEV": "soft_voting",
+    "STK_LR": "stack_lr",
+    "STK_DT": "stack_dt",
+    "STK_RF": "stack_rf",
+}
+
 CLASSIFICATION_METRICS = [
     "Balanced Accuracy",
     "Accuracy",
@@ -446,9 +458,155 @@ class ReportPhaseJob:
         args = record.get("args", {}) if isinstance(record, dict) else {}
         return args if isinstance(args, dict) else {}
 
+    def value_is_present(self, value: Any) -> bool:
+        return value is not None and value != ""
+
+    def first_present_value(self, *values: Any, default: Any = NO_VALUE) -> Any:
+        for value in values:
+            if self.value_is_present(value):
+                return value
+        if default is not NO_VALUE:
+            return default
+        return None
+
+    def phase_summary_value(
+        self,
+        phase_ran: bool,
+        *values: Any,
+        default: Any = NO_VALUE,
+    ) -> Any:
+        if not phase_ran:
+            return NOT_RUN
+        value = self.first_present_value(*values)
+        if self.value_is_present(value):
+            return value
+        if default is not NO_VALUE:
+            return default
+        return LEGACY_NOT_RECORDED
+
+    def run_params_by_phase(self, run_params_all: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+        if not isinstance(run_params_all, dict):
+            return {}
+
+        by_phase: Dict[str, Dict[str, Any]] = {}
+        for timestamp in sorted(run_params_all):
+            params = run_params_all.get(timestamp)
+            if not isinstance(params, dict):
+                continue
+
+            phase = str(params.get("phase") or "")
+            if not phase and any(
+                key in params
+                for key in (
+                    "data_path",
+                    "n_splits",
+                    "partition_method",
+                    "one_hot_encoding",
+                    "categorical_features",
+                    "quantitative_features",
+                )
+            ):
+                phase = "p1_data_process"
+            if not phase:
+                continue
+            by_phase[phase] = params
+        return by_phase
+
+    def merged_phase_args(
+        self,
+        command_args: Dict[str, Any],
+        run_param_args: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        merged = dict(run_param_args or {})
+        for key, value in (command_args or {}).items():
+            if self.value_is_present(value):
+                merged[key] = value
+        return merged
+
+    def summary_dataset_paths(self) -> Dict[str, List[Path]]:
+        primary = self._list_primary_datasets()
+        replication = self._list_replication_datasets()
+        return {
+            "primary": primary,
+            "replication": replication,
+        }
+
+    def summary_cv_split_count(self, dataset_dirs: Sequence[Path]) -> Optional[int]:
+        for ds_dir in dataset_dirs:
+            cv_dir = ds_dir / "CVDatasets"
+            if cv_dir.is_dir():
+                count = len(list(cv_dir.glob("*_Train.csv")))
+                if count:
+                    return count
+        return None
+
+    def summary_feature_importance_models(self, dataset_dirs: Sequence[Path]) -> List[str]:
+        models: Set[str] = set()
+        for ds_dir in dataset_dirs:
+            root = ds_dir / "feature_importance"
+            if not root.is_dir():
+                continue
+            for child in sorted(root.iterdir()):
+                if child.is_dir() and any(child.iterdir()):
+                    models.add(child.name)
+        return sorted(models)
+
+    def summary_model_ids(self, dataset_dirs: Sequence[Path]) -> List[str]:
+        ids: Set[str] = set()
+        for ds_dir in dataset_dirs:
+            for path in (ds_dir / "models" / "pickledModels").glob("*.pickle"):
+                model_id = re.sub(r"_(?:CV_)?\d+$", "", path.stem)
+                if model_id:
+                    ids.add(model_id)
+            if ids:
+                continue
+            table = self._read_csv_table(ds_dir / "model_evaluation" / "Summary_performance_mean.csv")
+            if table and table.rows and table.columns:
+                name_col = table.columns[0]
+                for row in table.rows:
+                    name = str(row.get(name_col, "")).strip()
+                    if name:
+                        ids.add(name)
+        return sorted(ids)
+
+    def summary_ensemble_ids(self, dataset_dirs: Sequence[Path]) -> List[str]:
+        ids: Set[str] = set()
+        for ds_dir in dataset_dirs:
+            for path in (ds_dir / "ensemble_evaluation" / "metrics_by_cv").glob("*.json"):
+                small = re.sub(r"_CV_\d+$", "", path.stem)
+                ids.add(ENSEMBLE_SMALL_NAME_TO_ID.get(small, small))
+            for path in (ds_dir / "ensemble_evaluation" / "pickled_ensembles").glob("*.pickle"):
+                small = re.sub(r"_\d+$", "", path.stem)
+                ids.add(ENSEMBLE_SMALL_NAME_TO_ID.get(small, small))
+        return sorted(ids)
+
+    def summary_optuna_trials(self, dataset_dirs: Sequence[Path]) -> Optional[str]:
+        counts: List[int] = []
+        for ds_dir in dataset_dirs:
+            for path in (ds_dir / "models" / "optuna_trials").glob("*_optuna_trials*.csv"):
+                try:
+                    with path.open("r", newline="", encoding="utf-8-sig") as handle:
+                        row_count = max(sum(1 for _ in handle) - 1, 0)
+                    counts.append(row_count)
+                except Exception as exc:
+                    logger.warning("Could not count Optuna trials in %s: %r", path, exc)
+        if not counts:
+            return None
+        total = sum(counts)
+        return f"{total} completed across {len(counts)} model/CV runs"
+
+    def summary_replication_labels(self, replication_dirs: Sequence[Path]) -> str:
+        labels: List[str] = []
+        for rep_dir in replication_dirs[:5]:
+            parent = rep_dir.parents[1].name if len(rep_dir.parents) > 1 else ""
+            labels.append(f"{rep_dir.name} from {parent}" if parent else rep_dir.name)
+        if len(replication_dirs) > 5:
+            labels.append(f"... ({len(replication_dirs)} total)")
+        return ", ".join(labels)
+
     def report_value(self, value: Any, *, max_len: int = 120) -> str:
         if value is None:
-            return "Not specified"
+            return "None"
         if isinstance(value, bool):
             return "True" if value else "False"
         if isinstance(value, (list, tuple, set)):
@@ -466,7 +624,7 @@ class ReportPhaseJob:
 
         text = " ".join(text.split())
         if text == "":
-            return "Not specified"
+            return "None"
         return _shorten(text, max_len)
 
     def add_summary_line(
@@ -509,26 +667,43 @@ class ReportPhaseJob:
         *,
         metadata: Dict[str, Any],
         metadata_pickle: Dict[str, Any],
+        run_params_all: Dict[str, Any],
         run_params: Dict[str, Any],
         dataset_blocks: Sequence[Dict[str, Any]],
     ) -> Dict[str, Any]:
         context = self.load_run_command_context()
         records = context.get("records", {})
+        run_phase_args = self.run_params_by_phase(run_params_all)
 
-        p1 = self.phase_args_from_records(records, "p1_data_process")
-        p2 = self.phase_args_from_records(records, "p2_impute_scale")
-        p3 = self.phase_args_from_records(records, "p3_feature_learning")
-        p4 = self.phase_args_from_records(records, "p4_feature_importance")
-        p5 = self.phase_args_from_records(records, "p5_feature_selection")
-        p6 = self.phase_args_from_records(records, "p6_modeling")
-        p7 = self.phase_args_from_records(records, "p7_ensembles")
-        p8 = self.phase_args_from_records(records, "p8_summary_statistics")
-        p10 = self.phase_args_from_records(records, "p10_replication")
+        p1 = self.merged_phase_args(self.phase_args_from_records(records, "p1_data_process"), run_phase_args.get("p1_data_process", {}))
+        p2 = self.merged_phase_args(self.phase_args_from_records(records, "p2_impute_scale"), run_phase_args.get("p2_impute_scale", {}))
+        p3 = self.merged_phase_args(self.phase_args_from_records(records, "p3_feature_learning"), run_phase_args.get("p3_feature_learning", {}))
+        p4 = self.merged_phase_args(self.phase_args_from_records(records, "p4_feature_importance"), run_phase_args.get("p4_feature_importance", {}))
+        p5 = self.merged_phase_args(self.phase_args_from_records(records, "p5_feature_selection"), run_phase_args.get("p5_feature_selection", {}))
+        p6 = self.merged_phase_args(self.phase_args_from_records(records, "p6_modeling"), run_phase_args.get("p6_modeling", {}))
+        p7 = self.merged_phase_args(self.phase_args_from_records(records, "p7_ensembles"), run_phase_args.get("p7_ensembles", {}))
+        p8 = self.merged_phase_args(self.phase_args_from_records(records, "p8_summary_statistics"), run_phase_args.get("p8_summary_statistics", {}))
+        p10 = self.merged_phase_args(self.phase_args_from_records(records, "p10_replication"), run_phase_args.get("p10_replication", {}))
 
-        phase_labels = [
-            RUN_COMMAND_PHASE_LABELS.get(phase, phase)
-            for phase in context.get("recorded_phases", [])
-        ]
+        summary_paths = self.summary_dataset_paths()
+        primary_dirs = summary_paths["primary"]
+        replication_dirs = summary_paths["replication"]
+        recovered_cv_splits = self.summary_cv_split_count(primary_dirs)
+        recovered_fi_models = self.summary_feature_importance_models(primary_dirs)
+        recovered_model_ids = self.summary_model_ids(primary_dirs)
+        recovered_ensemble_ids = self.summary_ensemble_ids(primary_dirs)
+        recovered_optuna_trials = self.summary_optuna_trials(primary_dirs)
+        recovered_replication_labels = self.summary_replication_labels(replication_dirs)
+
+        p1_ran = bool(p1 or primary_dirs or metadata_pickle)
+        p2_ran = bool(p2 or any((ds / "impute_scale").is_dir() and any((ds / "impute_scale").iterdir()) for ds in primary_dirs))
+        p3_ran = bool(p3 or any((ds / "feature_learning").is_dir() and any((ds / "feature_learning").iterdir()) for ds in primary_dirs))
+        p4_ran = bool(p4 or recovered_fi_models)
+        p5_ran = bool(p5 or any((ds / "feature_selection" / "InformativeFeatureSummary.csv").is_file() for ds in primary_dirs))
+        p6_ran = bool(p6 or recovered_model_ids)
+        p7_ran = bool(p7 or recovered_ensemble_ids)
+        p8_ran = bool(p8 or any((ds / "runtime" / "runtime_Stats.txt").is_file() or (ds / "model_evaluation" / "Summary_performance_mean.csv").is_file() for ds in primary_dirs))
+        p10_ran = bool(p10 or replication_dirs)
 
         overview: List[str] = []
         self.add_summary_line(overview, "Report Mode", self.report_mode)
@@ -538,66 +713,59 @@ class ReportPhaseJob:
         self.add_summary_line(overview, "Instance Label", metadata.get("Instance Label"))
         self.add_summary_line(overview, "STREAMLINE Version", _try_streamline_version())
 
-        provenance: List[str] = []
-        self.add_summary_line(provenance, "Command Pickle", "Found" if context.get("present") else "Not found")
-        self.add_summary_line(provenance, "Path", context.get("path"), max_len=110)
-        self.add_summary_line(provenance, "Recorded Phases", ", ".join(phase_labels) if phase_labels else "None", max_len=150)
-        self.add_summary_line(provenance, "Latest Saved Phase", context.get("latest_phase_label") or "None")
-        self.add_summary_line(provenance, "Latest Saved At", context.get("latest_updated_at") or "Not available")
-        if not context.get("present"):
-            provenance.append("Fallback: metadata and current P11 arguments")
-
         data_cv: List[str] = []
-        self.add_summary_line(data_cv, "Data Path", p1.get("data_path") or metadata_pickle.get("Data Path"))
-        self.add_summary_line(data_cv, "CV Splits", p1.get("n_splits") or p6.get("n_splits") or metadata_pickle.get("CV Partitions") or run_params.get("CV Partitions"))
-        self.add_summary_line(data_cv, "Partition Method", p1.get("partition_method") or metadata_pickle.get("Partition Method") or run_params.get("Partition Method"))
-        self.add_summary_line(data_cv, "One-Hot Encoding", p1.get("one_hot_encoding") if "one_hot_encoding" in p1 else metadata_pickle.get("One Hot Encoding"))
-        self.add_summary_line(data_cv, "Categorical Cutoff", p1.get("categorical_cutoff") or metadata_pickle.get("Categorical Cutoff"))
-        self.add_summary_line(data_cv, "Ignored Features", p1.get("ignore_features") or metadata_pickle.get("Ignored Features"))
-        self.add_summary_line(data_cv, "Categorical Features", p1.get("categorical_features") or metadata_pickle.get("Specified Categorical Features"), max_len=120)
-        self.add_summary_line(data_cv, "Quantitative Features", p1.get("quantitative_features") or metadata_pickle.get("Specified Quantitative Features"), max_len=120)
+        self.add_summary_line(data_cv, "Data Path", self.phase_summary_value(p1_ran, p1.get("data_path"), metadata_pickle.get("Data Path")))
+        self.add_summary_line(data_cv, "CV Splits", self.phase_summary_value(p1_ran, p1.get("n_splits"), p6.get("n_splits"), metadata_pickle.get("CV Partitions"), run_params.get("CV Partitions"), recovered_cv_splits))
+        self.add_summary_line(data_cv, "Partition Method", self.phase_summary_value(p1_ran, p1.get("partition_method"), metadata_pickle.get("Partition Method"), run_params.get("Partition Method"), default="Stratified"))
+        self.add_summary_line(data_cv, "One-Hot Encoding", self.phase_summary_value(p1_ran, p1.get("one_hot_encoding"), metadata_pickle.get("One Hot Encoding"), default=True))
+        self.add_summary_line(data_cv, "Categorical Cutoff", self.phase_summary_value(p1_ran, p1.get("categorical_cutoff"), metadata_pickle.get("Categorical Cutoff"), default=10))
+        self.add_summary_line(data_cv, "Ignored Features", self.phase_summary_value(p1_ran, p1.get("ignore_features"), metadata_pickle.get("Ignored Features"), default=[]))
+        self.add_summary_line(data_cv, "Categorical Features", self.phase_summary_value(p1_ran, p1.get("categorical_features"), metadata_pickle.get("Specified Categorical Features"), default=[]), max_len=120)
+        self.add_summary_line(data_cv, "Quantitative Features", self.phase_summary_value(p1_ran, p1.get("quantitative_features"), metadata_pickle.get("Specified Quantitative Features"), default=[]), max_len=120)
 
         processing: List[str] = []
-        self.add_summary_line(processing, "Scale Data", p2.get("scale_data") if "scale_data" in p2 else metadata_pickle.get("Use Data Scaling"))
-        self.add_summary_line(processing, "Impute Data", p2.get("impute_data") if "impute_data" in p2 else metadata_pickle.get("Use Data Imputation"))
-        self.add_summary_line(processing, "Multivariate Imputation", p2.get("multi_impute") if "multi_impute" in p2 else metadata_pickle.get("Use Multivariate Imputation"))
-        self.add_summary_line(processing, "Overwrite CV", p2.get("overwrite_cv") if "overwrite_cv" in p2 else metadata_pickle.get("Overwrite CV Datasets"))
-        self.add_summary_line(processing, "SMOTE", p2.get("smote") if "smote" in p2 else "Not specified")
-        self.add_summary_line(processing, "SMOTE Method", p2.get("smote_method") or "auto")
-        self.add_summary_line(processing, "Missingness Cutoff", p1.get("featureeng_missingness") or metadata_pickle.get("Engineering Missingness Cutoff"))
-        self.add_summary_line(processing, "Correlation Removal", p1.get("correlation_removal_threshold") or metadata_pickle.get("Correlation Removal Threshold"))
+        self.add_summary_line(processing, "Scale Data", self.phase_summary_value(p2_ran, p2.get("scale_data"), metadata_pickle.get("Use Data Scaling"), default=True))
+        self.add_summary_line(processing, "Impute Data", self.phase_summary_value(p2_ran, p2.get("impute_data"), metadata_pickle.get("Use Data Imputation"), default=True))
+        self.add_summary_line(processing, "Multivariate Imputation", self.phase_summary_value(p2_ran, p2.get("multi_impute"), metadata_pickle.get("Use Multivariate Imputation"), default=False))
+        self.add_summary_line(processing, "Overwrite CV", self.phase_summary_value(p2_ran, p2.get("overwrite_cv"), metadata_pickle.get("Overwrite CV Datasets"), default=True))
+        self.add_summary_line(processing, "SMOTE", self.phase_summary_value(p2_ran, p2.get("smote"), metadata_pickle.get("Use SMOTE"), default=False))
+        self.add_summary_line(processing, "SMOTE Method", self.phase_summary_value(p2_ran, p2.get("smote_method"), metadata_pickle.get("P2 SMOTE Method"), default="auto"))
+        self.add_summary_line(processing, "Missingness Cutoff", self.phase_summary_value(p1_ran, p1.get("featureeng_missingness"), metadata_pickle.get("Engineering Missingness Cutoff"), default=0.5))
+        self.add_summary_line(processing, "Correlation Removal", self.phase_summary_value(p1_ran, p1.get("correlation_removal_threshold"), metadata_pickle.get("Correlation Removal Threshold"), default=1.0))
 
         feature_selection: List[str] = []
-        self.add_summary_line(feature_selection, "Feature Learner", p3.get("learner_id") or "Not run / not specified")
-        self.add_summary_line(feature_selection, "Keep Original Features", p3.get("keep_original_features") if "keep_original_features" in p3 else "Not specified")
-        self.add_summary_line(feature_selection, "FI Models", p4.get("models") or "Not specified")
-        self.add_summary_line(feature_selection, "FI Params", p4.get("models_params") or "Not specified", max_len=130)
-        self.add_summary_line(feature_selection, "P5 Algorithms", p5.get("algorithms") or "auto")
-        self.add_summary_line(feature_selection, "Selector", p5.get("selector_id") or "default")
-        self.add_summary_line(feature_selection, "Max Features To Keep", p5.get("max_features_to_keep") or metadata_pickle.get("Max Features to Keep"))
-        self.add_summary_line(feature_selection, "Top Features To Display", p5.get("top_features") or p8.get("top_features") or metadata_pickle.get("Top Model Features to Display"))
+        self.add_summary_line(feature_selection, "Feature Learner", self.phase_summary_value(p3_ran, p3.get("learner_id"), metadata_pickle.get("P3 Learner Id"), default="pca"))
+        self.add_summary_line(feature_selection, "Keep Original Features", self.phase_summary_value(p3_ran, p3.get("keep_original_features"), metadata_pickle.get("P3 Keep Original Features"), default=True))
+        self.add_summary_line(feature_selection, "FI Models", self.phase_summary_value(p4_ran, p4.get("models"), metadata_pickle.get("P4 Models"), recovered_fi_models, default=["mutualinformation", "multisurf"]))
+        self.add_summary_line(feature_selection, "FI Params", self.phase_summary_value(p4_ran, p4.get("models_params"), metadata_pickle.get("P4 Models Params"), default={}), max_len=130)
+        self.add_summary_line(feature_selection, "P5 Algorithms", self.phase_summary_value(p5_ran, p5.get("algorithms"), recovered_fi_models, default="auto"))
+        self.add_summary_line(feature_selection, "Selector", self.phase_summary_value(p5_ran, p5.get("selector_id"), default="default"))
+        self.add_summary_line(feature_selection, "Max Features To Keep", self.phase_summary_value(p5_ran, p5.get("max_features_to_keep"), metadata_pickle.get("Max Features to Keep"), default=2000))
+        self.add_summary_line(feature_selection, "Top Features To Display", self.phase_summary_value(p5_ran or p8_ran, p5.get("top_features"), p8.get("top_features"), metadata_pickle.get("Top Model Features to Display"), default=20))
 
         modeling: List[str] = []
-        self.add_summary_line(modeling, "Model Type", p6.get("model_type") or metadata.get("Outcome Type"))
-        self.add_summary_line(modeling, "Models", p6.get("models") or "auto/default")
-        self.add_summary_line(modeling, "Scoring Metric", p6.get("scoring_metric") or p8.get("scoring_metric") or "Not specified")
-        self.add_summary_line(modeling, "Metric Direction", p6.get("metric_direction") or "Not specified")
-        self.add_summary_line(modeling, "Optuna Trials Requested", p6.get("n_trials") or "Not specified")
-        self.add_summary_line(modeling, "Optuna Timeout Seconds", p6.get("timeout") or "Not specified")
-        self.add_summary_line(modeling, "Training Subsample", p6.get("training_subsample") if "training_subsample" in p6 else "Not specified")
-        self.add_summary_line(modeling, "Calibration", p6.get("calibrate") if "calibrate" in p6 else "Not specified")
-        self.add_summary_line(modeling, "Native Categorical Bypass", p6.get("bypass_one_hot_for_native_models") if "bypass_one_hot_for_native_models" in p6 else "Not specified")
-        self.add_summary_line(modeling, "Native Categorical Models", p6.get("native_categorical_models") or "Not specified")
-        if p7:
-            self.add_summary_line(modeling, "Ensembles", p7.get("ensembles") or "Not specified")
-            self.add_summary_line(modeling, "Base Models", p7.get("base_models") or "Not specified")
+        self.add_summary_line(modeling, "Model Type", self.phase_summary_value(p6_ran, p6.get("model_type"), metadata.get("Outcome Type")))
+        self.add_summary_line(modeling, "Models", self.phase_summary_value(p6_ran, p6.get("models"), recovered_model_ids, default="auto/default"))
+        self.add_summary_line(modeling, "Scoring Metric", self.phase_summary_value(p6_ran or p8_ran, p6.get("scoring_metric"), p8.get("scoring_metric"), metadata_pickle.get("Primary Metric"), default="balanced_accuracy"))
+        self.add_summary_line(modeling, "Metric Direction", self.phase_summary_value(p6_ran, p6.get("metric_direction"), default="maximize"))
+        if self.value_is_present(p6.get("n_trials")):
+            self.add_summary_line(modeling, "Optuna Trials Requested", p6.get("n_trials"))
+        if self.value_is_present(p6.get("timeout")):
+            self.add_summary_line(modeling, "Optuna Timeout Seconds", p6.get("timeout"))
+        self.add_summary_line(modeling, "Optuna Trials Completed", self.phase_summary_value(p6_ran, recovered_optuna_trials, default="0 completed"))
+        self.add_summary_line(modeling, "Training Subsample", self.phase_summary_value(p6_ran, p6.get("training_subsample"), default=0))
+        self.add_summary_line(modeling, "Calibration", self.phase_summary_value(p6_ran, p6.get("calibrate"), default=False))
+        self.add_summary_line(modeling, "Native Categorical Bypass", self.phase_summary_value(p6_ran, p6.get("bypass_one_hot_for_native_models"), default=True))
+        self.add_summary_line(modeling, "Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("native_categorical_models"), default="CGB"))
+        self.add_summary_line(modeling, "Ensembles", self.phase_summary_value(p7_ran, p7.get("ensembles"), recovered_ensemble_ids, default="hard_voting,soft_voting,stack_lr"))
+        self.add_summary_line(modeling, "Base Models", self.phase_summary_value(p7_ran, p7.get("base_models"), p6.get("models"), recovered_model_ids, default="auto/default"))
 
         replication: List[str] = []
-        if self.report_mode == "replication" or p10:
-            self.add_summary_line(replication, "Replication Data Path", p10.get("rep_data_path") or "Not specified")
-            self.add_summary_line(replication, "Training Dataset For Rep", p10.get("dataset_for_rep") or "Not specified", max_len=130)
-            self.add_summary_line(replication, "Match Label", p10.get("match_label") or metadata_pickle.get("Match Label"))
-            self.add_summary_line(replication, "P10 Show Plots", p10.get("show_plots") if "show_plots" in p10 else "Not specified")
+        if self.report_mode == "replication" or p10_ran:
+            self.add_summary_line(replication, "Replication Data Path", self.phase_summary_value(p10_ran, p10.get("rep_data_path"), recovered_replication_labels), max_len=130)
+            self.add_summary_line(replication, "Training Dataset For Rep", self.phase_summary_value(p10_ran, p10.get("dataset_for_rep"), [ds.name for ds in primary_dirs]), max_len=130)
+            self.add_summary_line(replication, "Match Label", self.phase_summary_value(p10_ran, p10.get("match_label"), metadata_pickle.get("Match Label"), default="None"))
+            self.add_summary_line(replication, "P10 Show Plots", self.phase_summary_value(p10_ran, p10.get("show_plots"), default=False))
             self.add_summary_line(replication, "Rep Report Focus", "Held-out/external replication folders only" if self.report_mode == "replication" else "Standard report")
 
         reporting: List[str] = []
@@ -605,14 +773,13 @@ class ReportPhaseJob:
         self.add_summary_line(reporting, "Make PDF", self.make_pdf)
         self.add_summary_line(reporting, "Enable Plots", self.enable_plots)
         self.add_summary_line(reporting, "Reuse Existing Figures", self.reuse_existing_figures)
-        self.add_summary_line(reporting, "P8 Metric Weight", p8.get("metric_weight") or "Not specified")
-        self.add_summary_line(reporting, "P8 Include Ensembles", p8.get("include_ensembles") if "include_ensembles" in p8 else "Not specified")
+        self.add_summary_line(reporting, "P8 Metric Weight", self.phase_summary_value(p8_ran, p8.get("metric_weight"), default="balanced_accuracy"))
+        self.add_summary_line(reporting, "P8 Include Ensembles", self.phase_summary_value(p8_ran, p8.get("include_ensembles"), default=True))
 
         dataset_lines = self.build_dataset_summary_lines(dataset_blocks)
 
         sections = [
             {"title": "Run Overview", "lines": overview},
-            {"title": "Saved Command Pickle", "lines": provenance},
             {"title": "Data and CV Settings", "lines": data_cv},
             {"title": "EDA, Imputation, and SMOTE", "lines": processing},
             {"title": "Feature Importance / Selection", "lines": feature_selection},
@@ -3558,6 +3725,7 @@ class ReportPhaseJob:
         run_command_summary = self.build_run_command_summary(
             metadata=metadata,
             metadata_pickle=metadata_pickle,
+            run_params_all=run_params_all,
             run_params=run_params,
             dataset_blocks=dataset_blocks,
         )
