@@ -14,6 +14,7 @@ class MultiSURFStar:
     model_name = "MultiSURF*"
     small_name = "MS*"
     path_name = "multisurfstar"
+    uses_instance_subset = True
 
     def __init__(self, random_state: int | None = None, n_jobs: int | None = None, **kwargs):
         self.random_state = random_state

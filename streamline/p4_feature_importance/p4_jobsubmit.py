@@ -25,7 +25,7 @@ def main():
     ap.add_argument("--outcome_type", default=None)
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None)
-    ap.add_argument("--instance_subset", default=None)
+    ap.add_argument("--instance_subset", default=2000)
 
     args = ap.parse_args()
 

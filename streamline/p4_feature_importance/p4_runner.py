@@ -32,7 +32,7 @@ class P4Runner:
         outcome_type: "str | None" = None,
         instance_label: "str | None" = None,
         random_state: "int | None" = None,
-        instance_subset: "int | None" = None,
+        instance_subset: "int | None" = 2000,
         run_cluster: "str | bool" = False,
         queue: str = "defq",
         reserved_memory: int = 4,
@@ -59,7 +59,7 @@ class P4Runner:
         self.outcome_type = outcome_type or meta.get("Outcome Type", None)
         self.instance_label = instance_label if instance_label is not None else meta.get("Instance Label", None)
         self.random_state = random_state if random_state is not None else meta.get("Random Seed", 0)
-        self.instance_subset = instance_subset if instance_subset is not None else meta.get("P4 Instance Subset", None)
+        self.instance_subset = instance_subset if instance_subset is not None else meta.get("P4 Instance Subset", 2000)
 
         exp_root = os.path.join(self.output_path, self.experiment_name)
         if not os.path.exists(exp_root):

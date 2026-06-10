@@ -14,6 +14,7 @@ class MultiSURF:
     model_name = "MultiSURF"
     small_name = "MS"
     path_name = "multisurf"
+    uses_instance_subset = True
 
     def __init__(self, n_neighbors: Optional[int] = None, random_state: int | None = None,
                  use_turf: bool = False, turf_pct: float | None = None, n_jobs: int | None = None, **kwargs):

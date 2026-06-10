@@ -739,6 +739,7 @@ class ReportPhaseJob:
         self.add_summary_line(feature_selection, "Keep Original Features", self.phase_summary_value(p3_ran, p3.get("keep_original_features"), metadata_pickle.get("P3 Keep Original Features"), default=True))
         self.add_summary_line(feature_selection, "FI Models", self.phase_summary_value(p4_ran, p4.get("models"), metadata_pickle.get("P4 Models"), recovered_fi_models, default=["mutualinformation", "multisurf"]))
         self.add_summary_line(feature_selection, "FI Params", self.phase_summary_value(p4_ran, p4.get("models_params"), metadata_pickle.get("P4 Models Params"), default={}), max_len=130)
+        self.add_summary_line(feature_selection, "FI Instance Subset", self.phase_summary_value(p4_ran, p4.get("instance_subset"), metadata_pickle.get("P4 Instance Subset"), default=2000))
         self.add_summary_line(feature_selection, "P5 Algorithms", self.phase_summary_value(p5_ran, p5.get("algorithms"), recovered_fi_models, default="auto"))
         self.add_summary_line(feature_selection, "Selector", self.phase_summary_value(p5_ran, p5.get("selector_id"), default="default"))
         self.add_summary_line(feature_selection, "Max Features To Keep", self.phase_summary_value(p5_ran, p5.get("max_features_to_keep"), metadata_pickle.get("Max Features to Keep"), default=2000))

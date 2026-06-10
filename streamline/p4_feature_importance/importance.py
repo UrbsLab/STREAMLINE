@@ -31,7 +31,7 @@ class FeatureImportance:
         outcome_type: Optional[str] = None,      # for MI
         instance_label: Optional[str] = None,
         random_state: Optional[int] = None,
-        instance_subset: int | None = None,
+        instance_subset: int | None = 2000,
     ):
         self.cv_train_path = cv_train_path
         self.cv_test_path = cv_test_path
@@ -46,7 +46,7 @@ class FeatureImportance:
         self.outcome_type = outcome_type
         self.instance_label = instance_label
         self.random_state = random_state
-        self.instance_subset = instance_subset
+        self.instance_subset = int(instance_subset) if instance_subset not in (None, "") else None
 
         self.dataset_name: Optional[str] = None
         self.cv_count: Optional[str] = None
@@ -67,20 +67,14 @@ class FeatureImportance:
         Xtr = tr.drop(columns=drop_cols, errors="ignore")
         Xte = te.drop(columns=drop_cols, errors="ignore")
 
-        # optional sampling
-        if self.instance_subset:
-            n = min(len(Xtr), int(self.instance_subset))
-            idx = Xtr.sample(n, random_state=self.random_state).index
-            X_fit, y_fit = Xtr.loc[idx], y_tr.loc[idx]
-        else:
-            X_fit, y_fit = Xtr, y_tr
-
         params = dict(self.model_params)
         if self.model_id == "mutualinformation" and self.outcome_type and "outcome_type" not in params:
             params["outcome_type"] = self.outcome_type
 
         logging.info("Running %s...", self.model_id)
-        model = load_importance(self.model_id, **params).fit(X_fit, y_fit)
+        model = load_importance(self.model_id, **params)
+        X_fit, y_fit = self.sample_instances_for_model(model, Xtr, y_tr)
+        model.fit(X_fit, y_fit)
 
         # write scores CSV for this model
         logging.info("Sort and pickle feature importance scores...")
@@ -91,7 +85,9 @@ class FeatureImportance:
         with open(os.path.join(base, f"selector_cv{self.cv_count}.pickle"), "wb") as f:
             pickle.dump({"id": self.model_id, "params": model.get_params(),
                          "model_name": getattr(model, "model_name", self.model_id),
-                         "small_name": getattr(model, "small_name", self.model_id)}, f)
+                         "small_name": getattr(model, "small_name", self.model_id),
+                         "instance_subset": self.instance_subset,
+                         "instances_fit": int(len(X_fit))}, f)
 
         if self.top_k is not None or self.threshold is not None:
             Xtr_sel = model.transform(Xtr, top_k=self.top_k, threshold=self.threshold)
@@ -129,6 +125,42 @@ class FeatureImportance:
         tr = pd.read_csv(self.cv_train_path, na_values='NA', sep=',')
         te = pd.read_csv(self.cv_test_path, na_values='NA', sep=',')
         return tr, te
+
+    @staticmethod
+    def uses_instance_subset(model, model_id: str) -> bool:
+        identifiers = {
+            model_id,
+            getattr(model, "id", ""),
+            getattr(model, "path_name", ""),
+            getattr(model, "small_name", ""),
+            getattr(model, "model_name", ""),
+        }
+        normalized = {
+            str(identifier).lower().replace(" ", "").replace("_", "").replace("-", "").replace("*", "star")
+            for identifier in identifiers
+            if str(identifier).strip()
+        }
+        return bool(getattr(model, "uses_instance_subset", False)) or bool(
+            normalized.intersection({"multisurf", "ms", "multisurfstar", "mss"})
+        )
+
+    def sample_instances_for_model(self, model, Xtr: pd.DataFrame, y_tr: pd.Series) -> Tuple[pd.DataFrame, pd.Series]:
+        if not self.uses_instance_subset(model, self.model_id):
+            return Xtr, y_tr
+        if self.instance_subset is None or int(self.instance_subset) <= 0:
+            return Xtr, y_tr
+        n = min(len(Xtr), int(self.instance_subset))
+        if n >= len(Xtr):
+            return Xtr, y_tr
+        idx = Xtr.sample(n, random_state=self.random_state).index
+        logging.info(
+            "Phase 4 %s using instance_subset=%s (%s of %s training instances).",
+            self.model_id,
+            self.instance_subset,
+            n,
+            len(Xtr),
+        )
+        return Xtr.loc[idx], y_tr.loc[idx]
 
     def _model_dir(self, model) -> str:
         path_name = getattr(model, "path_name", self.model_id)
