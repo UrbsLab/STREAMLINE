@@ -116,10 +116,13 @@ def test_report_data_includes_saved_command_summary(tmp_path: Path):
 
     assert summary["present"] is True
     assert "Saved Command Pickle" not in summary_titles(payload)
-    assert any("CV Splits: 3" in line for line in sections["Data and CV Settings"])
-    assert any("SMOTE: False" in line for line in sections["EDA, Imputation, and SMOTE"])
-    assert any("Models: NB,LR,DT" in line for line in sections["Modeling and Ensembles"])
-    assert any("Replication Data Path: data/UCIRepBinaryClassification" in line for line in sections["Replication Settings"])
+    assert "P10 Replication Settings" not in sections
+    assert any("CV Splits: 3" in line for line in sections["P1 Data Processing and CV"])
+    assert any("SMOTE: False" in line for line in sections["P1-P2 EDA, Scaling, Imputation, and SMOTE"])
+    assert any("Models: NB,LR,DT" in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
+    assert any("Bypass One-Hot for Native Categorical Models: 1" in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
+    assert not any(line.startswith("Selector:") for line in summary_lines(payload))
+    assert not any("Task Type:" in line for line in sections["Target Dataset(s)"])
     assert not any("Not specified" in line for line in summary_lines(payload))
 
 
@@ -157,9 +160,10 @@ def test_replication_report_first_page_summary_uses_replication_settings(tmp_pat
     sections = {section["title"]: section["lines"] for section in payload["run_command_summary"]["sections"]}
 
     assert payload["report_mode"] == "replication"
-    assert any("Rep Report Focus: Held-out/external replication folders only" in line for line in sections["Replication Settings"])
-    assert any("Report Mode: replication" in line for line in sections["Reporting Settings"])
+    assert any("Rep Report Focus: Held-out/external replication folders only" in line for line in sections["P10 Replication Settings"])
+    assert any("Report Mode: replication" in line for line in sections["P11 Reporting Settings"])
     assert any("hcc_survival_rep from hcc_survival" in line for line in sections["Target Dataset(s)"])
+    assert not any("Task Type:" in line for line in sections["Target Dataset(s)"])
     assert not any("Not specified" in line for line in summary_lines(payload))
 
 

@@ -649,7 +649,6 @@ class ReportPhaseJob:
             dataset_id = str(ds.get("dataset_id") or "")
             dataset_name = str(ds.get("dataset_name") or "")
             dataset_path = str(ds.get("dataset_path") or "")
-            task_type = str(ds.get("task_type") or "")
             if "/replication/" in dataset_path:
                 parent = Path(dataset_path).parents[1].name if len(Path(dataset_path).parents) > 1 else ""
                 suffix = f" from {parent}" if parent else ""
@@ -657,8 +656,6 @@ class ReportPhaseJob:
             else:
                 label = f"{dataset_id} = {dataset_name}"
             lines.append(_shorten(label, 120))
-            if task_type:
-                lines.append(f"  Task Type: {task_type}")
         if len(dataset_blocks) > 6:
             lines.append(f"... {len(dataset_blocks) - 6} more datasets")
         return lines
@@ -741,7 +738,6 @@ class ReportPhaseJob:
         self.add_summary_line(feature_selection, "FI Params", self.phase_summary_value(p4_ran, p4.get("models_params"), metadata_pickle.get("P4 Models Params"), default={}), max_len=130)
         self.add_summary_line(feature_selection, "FI Instance Subset", self.phase_summary_value(p4_ran, p4.get("instance_subset"), metadata_pickle.get("P4 Instance Subset"), default=2000))
         self.add_summary_line(feature_selection, "P5 Algorithms", self.phase_summary_value(p5_ran, p5.get("algorithms"), recovered_fi_models, default="auto"))
-        self.add_summary_line(feature_selection, "Selector", self.phase_summary_value(p5_ran, p5.get("selector_id"), default="default"))
         self.add_summary_line(feature_selection, "Max Features To Keep", self.phase_summary_value(p5_ran, p5.get("max_features_to_keep"), metadata_pickle.get("Max Features to Keep"), default=2000))
         self.add_summary_line(feature_selection, "Top Features To Display", self.phase_summary_value(p5_ran or p8_ran, p5.get("top_features"), p8.get("top_features"), metadata_pickle.get("Top Model Features to Display"), default=20))
 
@@ -757,18 +753,18 @@ class ReportPhaseJob:
         self.add_summary_line(modeling, "Optuna Trials Completed", self.phase_summary_value(p6_ran, recovered_optuna_trials, default="0 completed"))
         self.add_summary_line(modeling, "Training Subsample", self.phase_summary_value(p6_ran, p6.get("training_subsample"), default=0))
         self.add_summary_line(modeling, "Calibration", self.phase_summary_value(p6_ran, p6.get("calibrate"), default=False))
-        self.add_summary_line(modeling, "Native Categorical Bypass", self.phase_summary_value(p6_ran, p6.get("bypass_one_hot_for_native_models"), default=True))
+        self.add_summary_line(modeling, "Bypass One-Hot for Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("bypass_one_hot_for_native_models"), default=True))
         self.add_summary_line(modeling, "Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("native_categorical_models"), default=NATIVE_CATEGORICAL_MODELS_DEFAULT))
         self.add_summary_line(modeling, "Ensembles", self.phase_summary_value(p7_ran, p7.get("ensembles"), recovered_ensemble_ids, default="hard_voting,soft_voting,stack_lr"))
         self.add_summary_line(modeling, "Base Models", self.phase_summary_value(p7_ran, p7.get("base_models"), p6.get("models"), recovered_model_ids, default="auto/default"))
 
         replication: List[str] = []
-        if self.report_mode == "replication" or p10_ran:
+        if self.report_mode == "replication":
             self.add_summary_line(replication, "Replication Data Path", self.phase_summary_value(p10_ran, p10.get("rep_data_path"), recovered_replication_labels), max_len=130)
             self.add_summary_line(replication, "Training Dataset For Rep", self.phase_summary_value(p10_ran, p10.get("dataset_for_rep"), [ds.name for ds in primary_dirs]), max_len=130)
             self.add_summary_line(replication, "Match Label", self.phase_summary_value(p10_ran, p10.get("match_label"), metadata_pickle.get("Match Label"), default="None"))
             self.add_summary_line(replication, "P10 Show Plots", self.phase_summary_value(p10_ran, p10.get("show_plots"), default=False))
-            self.add_summary_line(replication, "Rep Report Focus", "Held-out/external replication folders only" if self.report_mode == "replication" else "Standard report")
+            self.add_summary_line(replication, "Rep Report Focus", "Held-out/external replication folders only")
 
         reporting: List[str] = []
         self.add_summary_line(reporting, "Report Mode", self.report_mode)
@@ -782,16 +778,16 @@ class ReportPhaseJob:
 
         sections = [
             {"title": "Run Overview", "lines": overview},
-            {"title": "Data and CV Settings", "lines": data_cv},
-            {"title": "EDA, Imputation, and SMOTE", "lines": processing},
-            {"title": "Feature Importance / Selection", "lines": feature_selection},
-            {"title": "Modeling and Ensembles", "lines": modeling},
+            {"title": "P1 Data Processing and CV", "lines": data_cv},
+            {"title": "P1-P2 EDA, Scaling, Imputation, and SMOTE", "lines": processing},
+            {"title": "P3-P5 Feature Learning, Importance, and Selection", "lines": feature_selection},
+            {"title": "P6-P8 Modeling, Ensembles, and Metrics", "lines": modeling},
         ]
         if replication:
-            sections.append({"title": "Replication Settings", "lines": replication})
+            sections.append({"title": "P10 Replication Settings", "lines": replication})
         sections.extend(
             [
-                {"title": "Reporting Settings", "lines": reporting},
+                {"title": "P11 Reporting Settings", "lines": reporting},
                 {"title": "Target Dataset(s)", "lines": dataset_lines},
             ]
         )
@@ -3180,7 +3176,6 @@ class ReportPhaseJob:
         pdf.set_font("Times", "", 8)
         pdf.cell(190, 5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, ln=1, align="L")
         pdf.cell(190, 5, f"Dataset Path: {ds.get('dataset_path')}", border=1, ln=1, align="L")
-        pdf.cell(190, 5, f"Task Type: {ds.get('task_type')}", border=1, ln=1, align="L")
 
     def _render_dataset_eda_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         self._render_dataset_header(pdf, ds, "EDA and Feature Engineering")
