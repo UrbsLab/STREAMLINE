@@ -8,6 +8,12 @@ from sklearn.base import BaseEstimator
 
 
 MISSING_CATEGORY_TOKEN = "__STREAMLINE_MISSING__"
+NATIVE_CATEGORICAL_MODELS_DEFAULT = "CGB,ExSTraCS"
+NATIVE_CATEGORICAL_MODEL_IDS_DEFAULT = (
+    "CGB",
+    "Category Gradient Boosting",
+    "ExSTraCS",
+)
 
 
 def normalize_model_id(value: object) -> str:

@@ -14,6 +14,7 @@ from pandas.api.types import is_object_dtype, is_string_dtype
 
 from streamline.p6_modeling.utils.categorical import (
     FeatureTypeModelWrapper,
+    NATIVE_CATEGORICAL_MODEL_IDS_DEFAULT,
     cast_native_categoricals,
     normalize_model_id,
     one_hot_align,
@@ -73,7 +74,7 @@ class ModelJob:
         self.bypass_one_hot_for_native_models = bool(bypass_one_hot_for_native_models)
         self.native_categorical_models = parse_model_id_csv(
             native_categorical_models,
-            default=("CGB", "Category Gradient Boosting"),
+            default=NATIVE_CATEGORICAL_MODEL_IDS_DEFAULT,
         )
         self.raw_feature_names = list(self.feature_names)
         self.raw_categorical_feature_names = []
@@ -454,17 +455,48 @@ class ModelJob:
         except Exception:
             params = {}
 
+        model_ids = {
+            normalize_model_id(getattr(model, "small_name", "")),
+            normalize_model_id(getattr(model, "model_name", "")),
+        }
         module = estimator.__class__.__module__.lower()
         name = estimator.__class__.__name__.lower()
         supports_cat_features = "cat_features" in params or "catboost" in module or "catboost" in name
-        if not supports_cat_features:
+        supports_exstracs_discrete_attributes = (
+            self.categorical_encoding_mode == "native"
+            and (
+                "exstracs" in model_ids
+                or "exstracs" in module
+                or "exstracs" in name
+                or (
+                    "discrete_attribute_limit" in params
+                    and "specified_attributes" in params
+                )
+            )
+        )
+        if not supports_cat_features and not supports_exstracs_discrete_attributes:
             return
 
-        cat_features = list(self.categorical_feature_names)
-        try:
-            estimator.set_params(cat_features=cat_features)
-        except Exception as exc:
-            logging.warning("Could not set cat_features on %s: %s", model.small_name, exc)
+        if supports_cat_features:
+            cat_features = list(self.categorical_feature_names)
+            try:
+                estimator.set_params(cat_features=cat_features)
+            except Exception as exc:
+                logging.warning("Could not set cat_features on %s: %s", model.small_name, exc)
+
+        if supports_exstracs_discrete_attributes:
+            categorical_indices = [
+                self.feature_names.index(col)
+                for col in self.categorical_feature_names
+                if col in self.feature_names
+            ]
+            try:
+                estimator.set_params(
+                    discrete_attribute_limit="d",
+                    specified_attributes=np.asarray(categorical_indices, dtype=int),
+                )
+            except Exception as exc:
+                logging.warning("Could not set ExSTraCS categorical attributes on %s: %s", model.small_name, exc)
 
     def _wrap_model_if_needed(self, estimator):
         if self.categorical_encoding_mode not in {"one_hot", "native"}:
@@ -483,6 +515,12 @@ class ModelJob:
             "raw_feature_count": len(self.raw_feature_names),
             "encoded_feature_count": len(self.encoded_feature_names),
             "categorical_features": list(self.raw_categorical_feature_names),
+            "native_categorical_features": list(self.categorical_feature_names),
+            "native_categorical_indices": [
+                self.feature_names.index(col)
+                for col in self.categorical_feature_names
+                if col in self.feature_names
+            ],
             "native_categorical_models": sorted(self.native_categorical_models),
             "bypass_one_hot_for_native_models": bool(self.bypass_one_hot_for_native_models),
         }

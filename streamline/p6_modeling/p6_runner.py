@@ -9,6 +9,7 @@ from dask.distributed import Client, LocalCluster
 logger = logging.getLogger("distributed.worker"); logger.setLevel(logging.WARNING)
 
 from streamline.p6_modeling.modeling import ModelingPhaseJob
+from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 from streamline.utils.runners import num_cores
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
@@ -50,7 +51,7 @@ class P6Runner:
         save_plot: bool = False,
         random_state: Optional[int] = None,
         bypass_one_hot_for_native_models: bool = True,
-        native_categorical_models: str | List[str] | None = "CGB",
+        native_categorical_models: str | List[str] | None = NATIVE_CATEGORICAL_MODELS_DEFAULT,
 
         # execution
         run_cluster: str = "Serial",   # "Serial" | "Local" | "BashSLURM" | "BashLSF" | "<cluster>"

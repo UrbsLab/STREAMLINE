@@ -1,5 +1,6 @@
 import argparse
 from streamline.p6_modeling.p6_runner import P6Runner
+from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 from streamline.p6_modeling.utils.loader import list_models, list_all_models
 from streamline.utils.run_commands import (
     add_run_command_args,
@@ -63,7 +64,7 @@ def main():
     )
     ap.add_argument(
         "--native_categorical_models",
-        default="CGB",
+        default=NATIVE_CATEGORICAL_MODELS_DEFAULT,
         help="CSV of model ids allowed to run when P1 one_hot_encoding is false.",
     )
 

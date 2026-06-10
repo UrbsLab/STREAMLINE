@@ -1,5 +1,6 @@
 import argparse
 from .modeling import ModelingPhaseJob  # or `.job` depending on your filename
+from .utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 
 def _b(x):
     if x is None: return False
@@ -37,7 +38,7 @@ def main():
     ap.add_argument("--save_plot", default="0")
     ap.add_argument("--random_state", default=None)
     ap.add_argument("--bypass_one_hot_for_native_models", default="1")
-    ap.add_argument("--native_categorical_models", default="CGB")
+    ap.add_argument("--native_categorical_models", default=NATIVE_CATEGORICAL_MODELS_DEFAULT)
 
     args = ap.parse_args()
 

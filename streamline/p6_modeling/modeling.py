@@ -6,7 +6,12 @@ import pickle
 from typing import List, Optional, Dict, Any
 from streamline.p6_modeling.utils.modeljob import ModelJob
 from streamline.p6_modeling.utils.loader import load_default_model_classes, get_model_by_id
-from streamline.p6_modeling.utils.categorical import normalize_model_id, parse_model_id_csv
+from streamline.p6_modeling.utils.categorical import (
+    NATIVE_CATEGORICAL_MODEL_IDS_DEFAULT,
+    NATIVE_CATEGORICAL_MODELS_DEFAULT,
+    normalize_model_id,
+    parse_model_id_csv,
+)
 
 def _csv_to_list(v):
     if v is None: return None
@@ -40,7 +45,7 @@ class ModelingPhaseJob:
         save_plot: bool = False,
         random_state: Optional[int] = None,
         bypass_one_hot_for_native_models: bool = True,
-        native_categorical_models: List[str] | str | None = "CGB",
+        native_categorical_models: List[str] | str | None = NATIVE_CATEGORICAL_MODELS_DEFAULT,
     ):
         self.dataset_dir = dataset_dir
         self.dataset_name = os.path.basename(dataset_dir.rstrip("/"))
@@ -70,7 +75,7 @@ class ModelingPhaseJob:
         self.native_categorical_models = native_categorical_models
         self.native_categorical_model_ids = parse_model_id_csv(
             native_categorical_models,
-            default=("CGB", "Category Gradient Boosting"),
+            default=NATIVE_CATEGORICAL_MODEL_IDS_DEFAULT,
         )
         # --- NEW: parse model_params_json ---
         self.model_params: Dict[str, Dict[str, Any]] = {}

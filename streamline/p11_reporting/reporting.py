@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
+from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 from streamline.utils.run_commands import RUN_COMMANDS_FILENAME, load_run_commands
 
 logger = logging.getLogger(__name__)
@@ -756,7 +757,7 @@ class ReportPhaseJob:
         self.add_summary_line(modeling, "Training Subsample", self.phase_summary_value(p6_ran, p6.get("training_subsample"), default=0))
         self.add_summary_line(modeling, "Calibration", self.phase_summary_value(p6_ran, p6.get("calibrate"), default=False))
         self.add_summary_line(modeling, "Native Categorical Bypass", self.phase_summary_value(p6_ran, p6.get("bypass_one_hot_for_native_models"), default=True))
-        self.add_summary_line(modeling, "Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("native_categorical_models"), default="CGB"))
+        self.add_summary_line(modeling, "Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("native_categorical_models"), default=NATIVE_CATEGORICAL_MODELS_DEFAULT))
         self.add_summary_line(modeling, "Ensembles", self.phase_summary_value(p7_ran, p7.get("ensembles"), recovered_ensemble_ids, default="hard_voting,soft_voting,stack_lr"))
         self.add_summary_line(modeling, "Base Models", self.phase_summary_value(p7_ran, p7.get("base_models"), p6.get("models"), recovered_model_ids, default="auto/default"))
 
@@ -2269,8 +2270,8 @@ class ReportPhaseJob:
 
         mean_columns = ["Algorithm"] + available_metrics
 
-        # Bold best mean per metric with tie handling at 3 decimals.
-        mean_bold_cells: Set[Tuple[int, int]] = set()
+        # Highlight best mean per metric with tie handling at 3 decimals.
+        mean_highlight_cells: Set[Tuple[int, int]] = set()
         for c_idx, metric in enumerate(available_metrics, start=1):
             scored: List[Tuple[int, float]] = []
             for r_idx, row in enumerate(mean_rows, start=1):
@@ -2284,7 +2285,7 @@ class ReportPhaseJob:
             best_val = max(v for _, v in scored) if higher else min(v for _, v in scored)
             for r_idx, v in scored:
                 if v == best_val:
-                    mean_bold_cells.add((r_idx, c_idx))
+                    mean_highlight_cells.add((r_idx, c_idx))
 
         # Combined median rows.
         median_rows: List[List[str]] = []
@@ -2314,7 +2315,7 @@ class ReportPhaseJob:
             median_rows.append(row)
 
         median_columns = ["Algorithm"] + available_metrics
-        median_bold_cells: Set[Tuple[int, int]] = set()
+        median_highlight_cells: Set[Tuple[int, int]] = set()
         for c_idx, metric in enumerate(available_metrics, start=1):
             scored: List[Tuple[int, float]] = []
             for r_idx, row in enumerate(median_rows, start=1):
@@ -2328,15 +2329,17 @@ class ReportPhaseJob:
             best_val = max(v for _, v in scored) if higher else min(v for _, v in scored)
             for r_idx, v in scored:
                 if v == best_val:
-                    median_bold_cells.add((r_idx, c_idx))
+                    median_highlight_cells.add((r_idx, c_idx))
 
         return {
             "mean_columns": mean_columns,
             "mean_rows": mean_rows,
-            "mean_bold_cells": [(r, c) for r, c in sorted(mean_bold_cells)],
+            "mean_highlight_cells": [(r, c) for r, c in sorted(mean_highlight_cells)],
+            "mean_bold_cells": [(r, c) for r, c in sorted(mean_highlight_cells)],
             "median_columns": median_columns,
             "median_rows": median_rows,
-            "median_bold_cells": [(r, c) for r, c in sorted(median_bold_cells)],
+            "median_highlight_cells": [(r, c) for r, c in sorted(median_highlight_cells)],
+            "median_bold_cells": [(r, c) for r, c in sorted(median_highlight_cells)],
         }
 
     def _resolve_dataset_images(
@@ -2633,6 +2636,11 @@ class ReportPhaseJob:
         missingness_table = self._format_rows_for_display(self._read_csv_table(explore / "DataMissingness.csv"))
         informative_summary = self._format_rows_for_display(self._read_csv_table(ds_dir / "feature_selection" / "InformativeFeatureSummary.csv"))
         data_process_summary = self._format_rows_for_display(self._read_csv_table(explore / "DataProcessSummary.csv"))
+        if data_process_summary and data_process_summary.columns and data_process_summary.columns[0] == "Algorithm":
+            old_col = data_process_summary.columns[0]
+            data_process_summary.columns[0] = "Step"
+            for row in data_process_summary.rows:
+                row["Step"] = row.pop(old_col, "")
         runtimes = self._format_runtime_table(self._read_csv_table(ds_dir / "runtimes.csv"))
 
         model_eval = ds_dir / "model_evaluation"
@@ -2954,12 +2962,13 @@ class ReportPhaseJob:
         font_size: float = 6.0,
         row_h: float = 3.8,
         bold_cells: Optional[Set[Tuple[int, int]]] = None,
+        shade_cells: Optional[Set[Tuple[int, int]]] = None,
         max_first_col_width: float = 42.0,
     ) -> float:
         if not columns:
             return y
         n = len(columns)
-        bold = bold_cells or set()
+        shaded = shade_cells if shade_cells is not None else (bold_cells or set())
 
         if n == 1:
             col_widths = [width]
@@ -3014,10 +3023,13 @@ class ReportPhaseJob:
                 txt = row[c_i] if c_i < len(row) else ""
                 max_chars = max(8, int(col_widths[c_i] * 2.2))
                 txt = _shorten(str(txt), width=max_chars)
-                style = "B" if r_i == 0 or (r_i, c_i) in bold else ""
+                style = "B" if r_i == 0 else ""
                 align = "R" if (r_i > 0 and c_i in numeric_cols) else "L"
+                fill = r_i > 0 and (r_i, c_i) in shaded
+                if fill:
+                    pdf.set_fill_color(230, 230, 230)
                 pdf.set_font("Times", style, font_size)
-                pdf.cell(col_widths[c_i], row_h, txt, border=1, ln=0, align=align)
+                pdf.cell(col_widths[c_i], row_h, txt, border=1, ln=0, align=align, fill=fill)
             pdf.ln(row_h)
 
         # Paginate long tables and repeat header on each new page.
@@ -3170,7 +3182,7 @@ class ReportPhaseJob:
         pdf.cell(190, 5, f"Task Type: {ds.get('task_type')}", border=1, ln=1, align="L")
 
     def _render_dataset_eda_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
-        self._render_dataset_header(pdf, ds, "EDA")
+        self._render_dataset_header(pdf, ds, "EDA and Feature Engineering")
         y_start = 34.0
 
         uv = ds.get("tables", {}).get("univariate_top10", {})
@@ -3233,26 +3245,41 @@ class ReportPhaseJob:
         dps = ds.get("tables", {}).get("data_process_summary", {})
         dps_cols = dps.get("columns", [])
         dps_rows = dps.get("rows", [])
+        dps_changed_cells: Set[Tuple[int, int]] = set()
+        for r_idx in range(1, len(dps_rows)):
+            current = dps_rows[r_idx]
+            previous = dps_rows[r_idx - 1]
+            for c_idx in range(1, min(len(dps_cols), len(current))):
+                current_value = str(current[c_idx]).strip()
+                previous_value = str(previous[c_idx]).strip() if c_idx < len(previous) else ""
+                current_float = _safe_float(current_value)
+                previous_float = _safe_float(previous_value)
+                if current_float is not None and previous_float is not None:
+                    if abs(current_float - previous_float) > 1e-12:
+                        dps_changed_cells.add((r_idx + 1, c_idx))
+                elif current_value != previous_value:
+                    dps_changed_cells.add((r_idx + 1, c_idx))
 
         ce_lines = [
             "C1 - Remove instances with no outcome and features to ignore",
-            "E1 - Add missingness features",
+            "E1 - Feature engineering: add missingness features",
             "C2 - Remove features with invariance or high missingness",
             "C3 - Remove instances with high missingness",
-            "E2 - Add one-hot-encoding of categorical features",
+            "E2 - Feature engineering: add or bypass categorical one-hot encoding as configured",
             "C4 - Remove highly correlated features",
+            "Gray cells mark values that changed from the previous step.",
         ]
 
         # Keep the DataProcessSummary + legend together and avoid overlap.
         est_table_h = 5.0 + 3.4 * float(max(2, len(dps_rows) + 1))
         est_legend_h = 5.0 + 3.7 * float(max(2, len(ce_lines)))
         if y_next + est_table_h + est_legend_h > 270:
-            self._render_dataset_header(pdf, ds, "EDA (continued)")
+            self._render_dataset_header(pdf, ds, "EDA and Feature Engineering (continued)")
             y_next = 34.0
 
         pdf.set_xy(10, y_next)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Data Process Summary", border=1, ln=1, align="L")
+        pdf.cell(190, 5, "Data Process and Feature Engineering Summary", border=1, ln=1, align="L")
         if dps_cols:
             y_next = self._render_table(
                 pdf,
@@ -3263,6 +3290,7 @@ class ReportPhaseJob:
                 rows=dps_rows,
                 font_size=5.4,
                 row_h=3.4,
+                shade_cells=dps_changed_cells,
                 max_first_col_width=30.0,
             )
         else:
@@ -3271,7 +3299,7 @@ class ReportPhaseJob:
             pdf.multi_cell(190, 3.6, "DataProcessSummary.csv not found.", border=1, align="L")
             y_next = pdf.get_y()
 
-        legend_title = "DataProcessSummary Step Key (C/E)"
+        legend_title = "DataProcessSummary Step Key (C = cleaning, E = feature engineering)"
         self._render_box(
             pdf,
             x=10,
@@ -3368,15 +3396,21 @@ class ReportPhaseJob:
         figs = ds.get("figures", {})
         mean_cols = perf.get("mean_columns", [])
         mean_rows = perf.get("mean_rows", [])
-        mean_bold = set((int(r), int(c)) for r, c in perf.get("mean_bold_cells", []))
+        mean_highlight = set(
+            (int(r), int(c))
+            for r, c in perf.get("mean_highlight_cells", perf.get("mean_bold_cells", []))
+        )
         med_cols = perf.get("median_columns", [])
         med_rows = perf.get("median_rows", [])
-        med_bold = set((int(r), int(c)) for r, c in perf.get("median_bold_cells", []))
+        med_highlight = set(
+            (int(r), int(c))
+            for r, c in perf.get("median_highlight_cells", perf.get("median_bold_cells", []))
+        )
 
         y = 34.0
         pdf.set_xy(10, y)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Model and Ensemble Performance (Mean +/- SD)", border=1, ln=1, align="L")
+        pdf.cell(190, 5, "Model and Ensemble Performance (Mean +/- SD; gray = best/tied metric)", border=1, ln=1, align="L")
         y = self._render_table(
             pdf,
             x=10,
@@ -3386,14 +3420,14 @@ class ReportPhaseJob:
             rows=mean_rows,
             font_size=5.5,
             row_h=3.4,
-            bold_cells=mean_bold,
+            shade_cells=mean_highlight,
             max_first_col_width=46.0,
         )
 
         y += 2
         pdf.set_xy(10, y)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Model and Ensemble Performance (Median)", border=1, ln=1, align="L")
+        pdf.cell(190, 5, "Model and Ensemble Performance (Median; gray = best/tied metric)", border=1, ln=1, align="L")
         y = self._render_table(
             pdf,
             x=10,
@@ -3403,7 +3437,7 @@ class ReportPhaseJob:
             rows=med_rows,
             font_size=5.5,
             row_h=3.4,
-            bold_cells=med_bold,
+            shade_cells=med_highlight,
             max_first_col_width=46.0,
         )
 
