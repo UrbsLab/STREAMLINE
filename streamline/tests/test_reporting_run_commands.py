@@ -120,7 +120,7 @@ def test_report_data_includes_saved_command_summary(tmp_path: Path):
     assert any("CV Splits: 3" in line for line in sections["P1 Data Processing and CV"])
     assert any("SMOTE: False" in line for line in sections["P1-P2 EDA, Scaling, Imputation, and SMOTE"])
     assert any("Models: NB,LR,DT" in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
-    assert any("Bypass One-Hot for Native Categorical Models: 1" in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
+    assert any("Categorical Handling: One-hot encoding enabled; native categorical models may bypass it." in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
     assert not any(line.startswith("Selector:") for line in summary_lines(payload))
     assert not any("Task Type:" in line for line in sections["Target Dataset(s)"])
     assert not any("Not specified" in line for line in summary_lines(payload))
@@ -247,3 +247,104 @@ def test_legacy_report_summary_uses_run_params_and_artifacts(tmp_path: Path):
     assert any("Optuna Trials Completed: 2 completed across 1 model/CV runs" in line for line in lines)
     assert any("Replication Data Path: legacy_data_rep from legacy_data" in line for line in lines)
     assert not any("Not specified" in line for line in lines)
+
+
+def test_regression_report_summary_uses_regression_metric_defaults(tmp_path: Path):
+    exp_root = tmp_path / "out" / "RegressionExp"
+    exp_root.mkdir(parents=True)
+    with (exp_root / "metadata.pickle").open("wb") as handle:
+        pickle.dump(
+            {
+                "Outcome Label": "MPG",
+                "Outcome Type": "Continuous",
+                "Instance Label": "InstanceID",
+                "One Hot Encoding": False,
+            },
+            handle,
+        )
+
+    ds = exp_root / "auto_mpg"
+    make_dataset(ds)
+    (ds / "runtime").mkdir(parents=True)
+    (ds / "runtime" / "runtime_Stats.txt").write_text("1.0")
+    save_phase_run_command(
+        exp_root,
+        "p1_data_process",
+        {
+            "output_path": str(exp_root.parent),
+            "experiment_name": exp_root.name,
+            "outcome_label": "MPG",
+            "outcome_type": "Continuous",
+            "one_hot_encoding": False,
+        },
+        argv=["python", "-m", "streamline.p1_data_process.p1_cli"],
+    )
+    save_phase_run_command(
+        exp_root,
+        "p6_modeling",
+        {
+            "output_path": str(exp_root.parent),
+            "experiment_name": exp_root.name,
+            "model_type": "Continuous",
+            "models": "LR,RF",
+            "scoring_metric": "balanced_accuracy",
+            "bypass_one_hot_for_native_models": True,
+            "native_categorical_models": "CGB,ExSTraCS",
+        },
+        argv=["python", "-m", "streamline.p6_modeling.p6_cli"],
+    )
+    save_phase_run_command(
+        exp_root,
+        "p8_summary_statistics",
+        {
+            "output_path": str(exp_root.parent),
+            "experiment_name": exp_root.name,
+            "scoring_metric": "balanced_accuracy",
+            "metric_weight": "balanced_accuracy",
+        },
+        argv=["python", "-m", "streamline.p8_summary_statistics.p8_cli"],
+    )
+
+    ReportPhaseJob(
+        experiment_path=str(exp_root),
+        report_mode="standard",
+        make_pdf=False,
+        enable_plots=False,
+    ).run()
+
+    payload = json.loads((exp_root / "reporting" / "report_data.json").read_text())
+    sections = {section["title"]: section["lines"] for section in payload["run_command_summary"]["sections"]}
+    modeling = sections["P6-P8 Modeling, Ensembles, and Metrics"]
+    reporting = sections["P11 Reporting Settings"]
+
+    assert any("Scoring Metric: explained_variance" in line for line in modeling)
+    assert any("P8 Metric Weight: explained_variance" in line for line in reporting)
+    assert any("Categorical Handling: One-hot encoding disabled; categorical features are passed to native-capable models (CGB,ExSTraCS)." in line for line in modeling)
+
+
+def test_report_dataset_page_titles_are_context_specific(tmp_path: Path):
+    exp_root = tmp_path / "out" / "TitleExp"
+    exp_root.mkdir(parents=True)
+    make_dataset(exp_root / "toy")
+
+    job = ReportPhaseJob(
+        experiment_path=str(exp_root),
+        report_mode="standard",
+        make_pdf=False,
+        enable_plots=False,
+    )
+    assert job.feature_summary_page_title() == "Feature Learning, Importance, and Selection"
+    assert job.feature_summary_page_title(continued=True) == "Feature Learning, Importance, and Selection (continued)"
+    assert job.performance_page_title() == "Cross-Validation Performance"
+    assert job.evaluation_page_title({"task_type": "Regression"}) == "Regression Evaluation"
+    assert job.evaluation_page_title({"task_type": "Multiclass Classification"}) == "ROC/PRC Evaluation"
+
+    rep_job = ReportPhaseJob(
+        experiment_path=str(exp_root),
+        report_mode="replication",
+        make_pdf=False,
+        enable_plots=False,
+    )
+    assert rep_job.performance_page_title() == "Replication Performance"
+    assert rep_job.evaluation_page_title({"task_type": "Regression"}) == "Replication Regression Evaluation"
+    assert rep_job.evaluation_page_title({"task_type": "Multiclass Classification"}) == "Replication ROC/PRC Evaluation"

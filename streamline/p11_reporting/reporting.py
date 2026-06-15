@@ -98,6 +98,25 @@ REGRESSION_METRICS = [
     "Max Error",
 ]
 
+REGRESSION_DEFAULT_METRIC = "explained_variance"
+
+CLASSIFICATION_ONLY_METRIC_KEYS = {
+    "balanced_accuracy",
+    "accuracy",
+    "f1",
+    "f1_macro",
+    "recall",
+    "recall_macro",
+    "precision",
+    "precision_macro",
+    "roc_auc",
+    "roc_auc_macro",
+    "average_precision",
+    "average_precision_macro",
+    "prc_auc",
+    "prc_aps",
+}
+
 METRIC_DIRECTION_HIGHER_IS_BETTER = {
     "Balanced Accuracy": True,
     "Accuracy": True,
@@ -485,6 +504,99 @@ class ReportPhaseJob:
             return default
         return LEGACY_NOT_RECORDED
 
+    def truthy_config_value(self, value: Any) -> Optional[bool]:
+        if value in (NOT_RUN, LEGACY_NOT_RECORDED) or not self.value_is_present(value):
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return bool(value)
+        text = str(value).strip().lower()
+        if text in {"1", "true", "yes", "y", "on"}:
+            return True
+        if text in {"0", "false", "no", "n", "off"}:
+            return False
+        return None
+
+    def report_is_regression(self, metadata: Dict[str, Any], dataset_blocks: Sequence[Dict[str, Any]]) -> bool:
+        outcome_type = str(metadata.get("Outcome Type") or "").strip().lower()
+        if outcome_type in {"continuous", "regression", "numeric", "real", "float"}:
+            return True
+        return any(str(ds.get("task_type") or "").strip().lower() == "regression" for ds in dataset_blocks)
+
+    def report_metric_for_outcome(self, value: Any, is_regression: bool, *, default: str) -> Any:
+        if value in (NOT_RUN, LEGACY_NOT_RECORDED):
+            return value
+        if not self.value_is_present(value):
+            return default
+        if not is_regression:
+            return value
+
+        metric = str(value).strip()
+        metric_key = metric.lower().replace(" ", "_").replace("-", "_")
+        if metric_key in CLASSIFICATION_ONLY_METRIC_KEYS:
+            return default
+        return value
+
+    def categorical_handling_summary(
+        self,
+        *,
+        p1_ran: bool,
+        p6_ran: bool,
+        p1: Dict[str, Any],
+        p6: Dict[str, Any],
+        metadata_pickle: Dict[str, Any],
+    ) -> Any:
+        one_hot = self.phase_summary_value(
+            p1_ran,
+            p1.get("one_hot_encoding"),
+            metadata_pickle.get("One Hot Encoding"),
+            default=True,
+        )
+        bypass = self.phase_summary_value(
+            p6_ran,
+            p6.get("bypass_one_hot_for_native_models"),
+            default=True,
+        )
+        native_models = self.phase_summary_value(
+            p6_ran,
+            p6.get("native_categorical_models"),
+            default=NATIVE_CATEGORICAL_MODELS_DEFAULT,
+        )
+
+        one_hot_bool = self.truthy_config_value(one_hot)
+        bypass_bool = self.truthy_config_value(bypass)
+        native_text = self.report_value(native_models)
+
+        if one_hot == NOT_RUN and bypass == NOT_RUN:
+            return NOT_RUN
+        if one_hot_bool is True and bypass_bool is True:
+            return f"One-hot encoding enabled; native categorical models may bypass it ({native_text})."
+        if one_hot_bool is True:
+            return "One-hot encoding enabled for all modeling features."
+        if one_hot_bool is False and bypass_bool is True:
+            return f"One-hot encoding disabled; categorical features are passed to native-capable models ({native_text})."
+        if one_hot_bool is False:
+            return "One-hot encoding disabled; no native categorical bypass was recorded."
+        if bypass_bool is True:
+            return f"Native categorical bypass enabled for {native_text}."
+        return LEGACY_NOT_RECORDED
+
+    def feature_summary_page_title(self, *, continued: bool = False) -> str:
+        title = "Feature Learning, Importance, and Selection"
+        return f"{title} (continued)" if continued else title
+
+    def performance_page_title(self) -> str:
+        if self.report_mode == "replication":
+            return "Replication Performance"
+        return "Cross-Validation Performance"
+
+    def evaluation_page_title(self, ds: Dict[str, Any]) -> str:
+        is_regression = str(ds.get("task_type") or "").strip().lower() == "regression"
+        if self.report_mode == "replication":
+            return "Replication Regression Evaluation" if is_regression else "Replication ROC/PRC Evaluation"
+        return "Regression Evaluation" if is_regression else "ROC/PRC Evaluation"
+
     def run_params_by_phase(self, run_params_all: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         if not isinstance(run_params_all, dict):
             return {}
@@ -692,6 +804,8 @@ class ReportPhaseJob:
         recovered_ensemble_ids = self.summary_ensemble_ids(primary_dirs)
         recovered_optuna_trials = self.summary_optuna_trials(primary_dirs)
         recovered_replication_labels = self.summary_replication_labels(replication_dirs)
+        is_regression = self.report_is_regression(metadata, dataset_blocks)
+        default_metric = REGRESSION_DEFAULT_METRIC if is_regression else "balanced_accuracy"
 
         p1_ran = bool(p1 or primary_dirs or metadata_pickle)
         p2_ran = bool(p2 or any((ds / "impute_scale").is_dir() and any((ds / "impute_scale").iterdir()) for ds in primary_dirs))
@@ -715,7 +829,6 @@ class ReportPhaseJob:
         self.add_summary_line(data_cv, "Data Path", self.phase_summary_value(p1_ran, p1.get("data_path"), metadata_pickle.get("Data Path")))
         self.add_summary_line(data_cv, "CV Splits", self.phase_summary_value(p1_ran, p1.get("n_splits"), p6.get("n_splits"), metadata_pickle.get("CV Partitions"), run_params.get("CV Partitions"), recovered_cv_splits))
         self.add_summary_line(data_cv, "Partition Method", self.phase_summary_value(p1_ran, p1.get("partition_method"), metadata_pickle.get("Partition Method"), run_params.get("Partition Method"), default="Stratified"))
-        self.add_summary_line(data_cv, "One-Hot Encoding", self.phase_summary_value(p1_ran, p1.get("one_hot_encoding"), metadata_pickle.get("One Hot Encoding"), default=True))
         self.add_summary_line(data_cv, "Categorical Cutoff", self.phase_summary_value(p1_ran, p1.get("categorical_cutoff"), metadata_pickle.get("Categorical Cutoff"), default=10))
         self.add_summary_line(data_cv, "Ignored Features", self.phase_summary_value(p1_ran, p1.get("ignore_features"), metadata_pickle.get("Ignored Features"), default=[]))
         self.add_summary_line(data_cv, "Categorical Features", self.phase_summary_value(p1_ran, p1.get("categorical_features"), metadata_pickle.get("Specified Categorical Features"), default=[]), max_len=120)
@@ -744,7 +857,8 @@ class ReportPhaseJob:
         modeling: List[str] = []
         self.add_summary_line(modeling, "Model Type", self.phase_summary_value(p6_ran, p6.get("model_type"), metadata.get("Outcome Type")))
         self.add_summary_line(modeling, "Models", self.phase_summary_value(p6_ran, p6.get("models"), recovered_model_ids, default="auto/default"))
-        self.add_summary_line(modeling, "Scoring Metric", self.phase_summary_value(p6_ran or p8_ran, p6.get("scoring_metric"), p8.get("scoring_metric"), metadata_pickle.get("Primary Metric"), default="balanced_accuracy"))
+        scoring_metric = self.phase_summary_value(p6_ran or p8_ran, p6.get("scoring_metric"), p8.get("scoring_metric"), metadata_pickle.get("Primary Metric"), default=default_metric)
+        self.add_summary_line(modeling, "Scoring Metric", self.report_metric_for_outcome(scoring_metric, is_regression, default=default_metric))
         self.add_summary_line(modeling, "Metric Direction", self.phase_summary_value(p6_ran, p6.get("metric_direction"), default="maximize"))
         if self.value_is_present(p6.get("n_trials")):
             self.add_summary_line(modeling, "Optuna Trials Requested", p6.get("n_trials"))
@@ -753,8 +867,7 @@ class ReportPhaseJob:
         self.add_summary_line(modeling, "Optuna Trials Completed", self.phase_summary_value(p6_ran, recovered_optuna_trials, default="0 completed"))
         self.add_summary_line(modeling, "Training Subsample", self.phase_summary_value(p6_ran, p6.get("training_subsample"), default=0))
         self.add_summary_line(modeling, "Calibration", self.phase_summary_value(p6_ran, p6.get("calibrate"), default=False))
-        self.add_summary_line(modeling, "Bypass One-Hot for Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("bypass_one_hot_for_native_models"), default=True))
-        self.add_summary_line(modeling, "Native Categorical Models", self.phase_summary_value(p6_ran, p6.get("native_categorical_models"), default=NATIVE_CATEGORICAL_MODELS_DEFAULT))
+        self.add_summary_line(modeling, "Categorical Handling", self.categorical_handling_summary(p1_ran=p1_ran, p6_ran=p6_ran, p1=p1, p6=p6, metadata_pickle=metadata_pickle), max_len=150)
         self.add_summary_line(modeling, "Ensembles", self.phase_summary_value(p7_ran, p7.get("ensembles"), recovered_ensemble_ids, default="hard_voting,soft_voting,stack_lr"))
         self.add_summary_line(modeling, "Base Models", self.phase_summary_value(p7_ran, p7.get("base_models"), p6.get("models"), recovered_model_ids, default="auto/default"))
 
@@ -771,7 +884,8 @@ class ReportPhaseJob:
         self.add_summary_line(reporting, "Make PDF", self.make_pdf)
         self.add_summary_line(reporting, "Enable Plots", self.enable_plots)
         self.add_summary_line(reporting, "Reuse Existing Figures", self.reuse_existing_figures)
-        self.add_summary_line(reporting, "P8 Metric Weight", self.phase_summary_value(p8_ran, p8.get("metric_weight"), default="balanced_accuracy"))
+        p8_metric_weight = self.phase_summary_value(p8_ran, p8.get("metric_weight"), default=default_metric)
+        self.add_summary_line(reporting, "P8 Metric Weight", self.report_metric_for_outcome(p8_metric_weight, is_regression, default=default_metric))
         self.add_summary_line(reporting, "P8 Include Ensembles", self.phase_summary_value(p8_ran, p8.get("include_ensembles"), default=True))
 
         dataset_lines = self.build_dataset_summary_lines(dataset_blocks)
@@ -3306,7 +3420,7 @@ class ReportPhaseJob:
         )
 
     def _render_feature_learning_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
-        self._render_dataset_header(pdf, ds, "Feature Learning")
+        self._render_dataset_header(pdf, ds, self.feature_summary_page_title())
         figs = ds.get("figures", {})
         panels = [p for p in (figs.get("feature_learning_panels") or []) if isinstance(p, dict) and p.get("path")]
 
@@ -3346,7 +3460,7 @@ class ReportPhaseJob:
                 y=34,
                 w=190,
                 h=106,
-                title="Top Scores (Feature Learning)",
+                title="Top Feature Importance Scores",
                 img_path=figs.get("mutual_info"),
             )
 
@@ -3373,7 +3487,7 @@ class ReportPhaseJob:
             remaining = panels[2:]
             slots = [(10, 34), (106, 34), (10, 142), (106, 142)]
             for i in range(0, len(remaining), 4):
-                self._render_dataset_header(pdf, ds, "Feature Learning (continued)")
+                self._render_dataset_header(pdf, ds, self.feature_summary_page_title(continued=True))
                 chunk = remaining[i : i + 4]
                 for panel, (x, y) in zip(chunk, slots):
                     self._draw_image_panel(
@@ -3387,7 +3501,7 @@ class ReportPhaseJob:
                     )
 
     def _render_performance_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
-        self._render_dataset_header(pdf, ds, "Performance (Cross-Validation)")
+        self._render_dataset_header(pdf, ds, self.performance_page_title())
         perf = ds.get("performance", {})
         figs = ds.get("figures", {})
         mean_cols = perf.get("mean_columns", [])
@@ -3485,7 +3599,7 @@ class ReportPhaseJob:
 
     def _render_evaluation_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         if ds.get("task_type") == "Regression":
-            self._render_dataset_header(pdf, ds, "Evaluation Results")
+            self._render_dataset_header(pdf, ds, self.evaluation_page_title(ds))
             figs = ds.get("figures", {})
             self._draw_image_panel(
                 pdf,
@@ -3516,7 +3630,7 @@ class ReportPhaseJob:
             )
             return
 
-        self._render_dataset_header(pdf, ds, "Evaluation Results (Curves)")
+        self._render_dataset_header(pdf, ds, self.evaluation_page_title(ds))
         figs = ds.get("figures", {})
         self._draw_image_panel(
             pdf,
