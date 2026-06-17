@@ -241,6 +241,7 @@ def _shorten(text: str, width: int = 46) -> str:
     return text[: max(0, width - 3)] + "..."
 
 
+
 def _linspace(start: float, end: float, num: int) -> List[float]:
     if num <= 1:
         return [start]
@@ -1633,12 +1634,19 @@ class ReportPhaseJob:
                 import matplotlib.pyplot as plt  # type: ignore
 
                 out.parent.mkdir(parents=True, exist_ok=True)
-                fig_h = max(4.2, 0.25 * len(labels))
-                fig, ax = plt.subplots(figsize=(8.5, fig_h))
-                ax.barh(labels, vals, color="#4E79A7")
+                fig_side = max(5.8, min(7.2, 0.25 * len(labels) + 2.4))
+                labels = [
+                    f"{rank}. {feature}"
+                    for rank, (feature, _score) in enumerate(data, start=1)
+                ][::-1]
+                fig, ax = plt.subplots(figsize=(fig_side, fig_side))
+                ax.barh(labels, vals, color="#86A8CA", height=0.55)
                 ax.set_xlabel("Median score across CV folds")
-                ax.set_ylabel("Feature")
-                fig.tight_layout()
+                ax.set_ylabel("Ranked feature order")
+                ax.grid(axis="x", color="#E1E5EA", linewidth=0.7)
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                fig.subplots_adjust(left=0.42, right=0.97, top=0.96, bottom=0.12)
                 fig.savefig(out, dpi=180)
                 plt.close(fig)
                 return str(out)
@@ -1712,12 +1720,19 @@ class ReportPhaseJob:
                 import matplotlib.pyplot as plt  # type: ignore
 
                 out.parent.mkdir(parents=True, exist_ok=True)
-                fig_h = max(4.2, 0.25 * len(labels))
-                fig, ax = plt.subplots(figsize=(8.5, fig_h))
-                ax.barh(labels, vals, color="#4E79A7")
+                fig_side = max(5.8, min(7.2, 0.25 * len(labels) + 2.4))
+                labels = [
+                    f"{rank}. {feature}"
+                    for rank, (feature, _score) in enumerate(data, start=1)
+                ][::-1]
+                fig, ax = plt.subplots(figsize=(fig_side, fig_side))
+                ax.barh(labels, vals, color="#86A8CA", height=0.55)
                 ax.set_xlabel("Median score across CV folds")
-                ax.set_ylabel("Feature")
-                fig.tight_layout()
+                ax.set_ylabel("Ranked feature order")
+                ax.grid(axis="x", color="#E1E5EA", linewidth=0.7)
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                fig.subplots_adjust(left=0.42, right=0.97, top=0.96, bottom=0.12)
                 fig.savefig(out, dpi=180)
                 plt.close(fig)
                 return str(out)
@@ -1762,6 +1777,285 @@ class ReportPhaseJob:
                 panels.append({"key": method_key, "title": f"Top Scores ({label})", "path": fig_path})
 
         return panels
+
+    def format_feature_summary_value(self, values: Sequence[float]) -> str:
+        clean_values = [float(v) for v in values if v is not None and math.isfinite(float(v))]
+        if not clean_values:
+            return ""
+        mean_value = statistics.mean(clean_values)
+        if len(clean_values) == 1:
+            return _format_number(mean_value)
+        sd_value = statistics.stdev(clean_values)
+        if abs(sd_value) < 1e-12:
+            return _format_number(mean_value)
+        return f"{_format_number(mean_value)} +/- {_format_number(sd_value)}"
+
+    def labels_match(self, value: Any, label: str) -> bool:
+        value_text = str(value).strip()
+        label_text = str(label).strip()
+        if value_text == label_text:
+            return True
+        value_float = _safe_float(value_text)
+        label_float = _safe_float(label_text)
+        return value_float is not None and label_float is not None and abs(value_float - label_float) < 1e-12
+
+    def feature_summary_columns(self, data_process_summary: Optional[TableData]) -> List[str]:
+        if data_process_summary and len(data_process_summary.columns) > 1:
+            return ["Step"] + list(data_process_summary.columns[1:])
+        return [
+            "Step",
+            "Instances",
+            "Total Features",
+            "Categorical Features",
+            "Quantitative Features",
+            "Missing Values",
+            "Missing Percent",
+        ]
+
+    def cv_train_files(self, ds_dir: Path, *, pre_selection: bool) -> List[Path]:
+        dataset_name = ds_dir.name
+        cv_dir = ds_dir / "CVDatasets"
+        if not cv_dir.is_dir():
+            return []
+        if pre_selection:
+            return sorted(cv_dir.glob(f"{dataset_name}_CVPre_*_Train.csv"))
+        return sorted(path for path in cv_dir.glob(f"{dataset_name}_CV_*_Train.csv") if "_CVPre_" not in path.name)
+
+    def summarize_cv_train_files(
+        self,
+        files: Sequence[Path],
+        metadata: Dict[str, Any],
+        columns: Sequence[str],
+    ) -> Dict[str, str]:
+        if not files:
+            return {}
+
+        outcome_label = str(metadata.get("Outcome Label") or metadata.get("outcome_label") or self.outcome_label or "Class")
+        instance_label = str(metadata.get("Instance Label") or metadata.get("instance_label") or self.instance_label or "InstanceID")
+        class_columns = [col for col in columns if col.lower().startswith("class ")]
+        numeric_values: Dict[str, List[float]] = {col: [] for col in columns if col != "Step"}
+
+        missing_tokens = {"", "?", "na", "n/a", "nan", "none", "null"}
+        for path in files:
+            try:
+                with path.open("r", encoding="utf-8-sig", newline="") as handle:
+                    reader = csv.DictReader(handle)
+                    fieldnames = list(reader.fieldnames or [])
+                    rows = list(reader)
+            except OSError:
+                continue
+            if not fieldnames:
+                continue
+
+            outcome_col = outcome_label if outcome_label in fieldnames else None
+            if outcome_col is None:
+                lowered = {col.lower(): col for col in fieldnames}
+                outcome_col = lowered.get(outcome_label.lower()) or lowered.get("class")
+            instance_col = instance_label if instance_label in fieldnames else None
+            if instance_col is None:
+                lowered = {col.lower(): col for col in fieldnames}
+                instance_col = lowered.get(instance_label.lower()) or lowered.get("instanceid")
+
+            excluded = {col for col in (outcome_col, instance_col) if col}
+            feature_cols = [col for col in fieldnames if col not in excluded]
+            instances = float(len(rows))
+            total_features = float(len(feature_cols))
+            missing_values = 0.0
+            for row in rows:
+                for feature in feature_cols:
+                    if str(row.get(feature, "")).strip().lower() in missing_tokens:
+                        missing_values += 1.0
+            total_cells = instances * total_features
+
+            if "Instances" in numeric_values:
+                numeric_values["Instances"].append(instances)
+            if "Total Features" in numeric_values:
+                numeric_values["Total Features"].append(total_features)
+            if "Missing Values" in numeric_values:
+                numeric_values["Missing Values"].append(missing_values)
+            if "Missing Percent" in numeric_values:
+                numeric_values["Missing Percent"].append(missing_values / total_cells if total_cells else 0.0)
+
+            if outcome_col:
+                for class_col in class_columns:
+                    label = class_col.split("Class ", 1)[1].strip()
+                    count = sum(1 for row in rows if self.labels_match(row.get(outcome_col, ""), label))
+                    numeric_values.setdefault(class_col, []).append(float(count))
+
+        return {col: self.format_feature_summary_value(vals) for col, vals in numeric_values.items() if vals}
+
+    def last_data_process_row(self, data_process_summary: Optional[TableData], columns: Sequence[str]) -> Dict[str, str]:
+        if not data_process_summary or not data_process_summary.rows:
+            return {}
+        source = data_process_summary.rows[-1]
+        row: Dict[str, str] = {"Step": "Post Processing"}
+        for col in columns[1:]:
+            row[col] = source.get(col, "")
+        return row
+
+    def read_feature_manifests(self, ds_dir: Path) -> List[Dict[str, Any]]:
+        feature_dir = ds_dir / "feature_learning"
+        if not feature_dir.is_dir():
+            return []
+        manifests: List[Dict[str, Any]] = []
+        for path in sorted(feature_dir.glob("feature_manifest_cv*.json")):
+            blob = self._read_json(path)
+            if blob:
+                manifests.append(blob)
+        return manifests
+
+    def feature_input_summary_from_manifests(
+        self,
+        manifests: Sequence[Dict[str, Any]],
+        columns: Sequence[str],
+        cv_context: Dict[str, str],
+    ) -> Dict[str, str]:
+        if not manifests:
+            return {}
+        input_counts: List[float] = []
+        instance_counts: List[float] = []
+        for manifest in manifests:
+            input_count = _safe_float(manifest.get("input_feature_count"))
+            if input_count is not None:
+                input_counts.append(input_count)
+            train_shape = manifest.get("train_shape")
+            if isinstance(train_shape, (list, tuple)) and train_shape:
+                instance_count = _safe_float(train_shape[0])
+                if instance_count is not None:
+                    instance_counts.append(instance_count)
+
+        summary: Dict[str, str] = {}
+        if "Instances" in columns:
+            summary["Instances"] = self.format_feature_summary_value(instance_counts)
+        if "Total Features" in columns:
+            summary["Total Features"] = self.format_feature_summary_value(input_counts)
+        for col in ("Missing Values", "Missing Percent"):
+            if col in columns:
+                summary[col] = cv_context.get(col, "0")
+        for col in columns:
+            if col.lower().startswith("class "):
+                summary[col] = cv_context.get(col, "")
+        return {key: value for key, value in summary.items() if value != ""}
+
+    def feature_rows_from_manifests(
+        self,
+        manifests: Sequence[Dict[str, Any]],
+        columns: Sequence[str],
+        base_row: Dict[str, str],
+        cv_context: Dict[str, str],
+    ) -> List[Dict[str, str]]:
+        if not manifests:
+            return []
+
+        rows: List[Dict[str, str]] = []
+        final_counts: List[float] = []
+        instance_counts: List[float] = []
+        keep_original_values: List[bool] = []
+        for manifest in manifests:
+            final_count = _safe_float(manifest.get("final_feature_count"))
+            if final_count is not None:
+                final_counts.append(final_count)
+            train_shape = manifest.get("train_shape")
+            if isinstance(train_shape, (list, tuple)) and train_shape:
+                instance_count = _safe_float(train_shape[0])
+                if instance_count is not None:
+                    instance_counts.append(instance_count)
+            params = manifest.get("params")
+            if isinstance(params, dict):
+                keep_original_values.append(bool(params.get("keep_original_features", True)))
+
+        categorical_base = _safe_float(base_row.get("Categorical Features", ""))
+        treat_as_all_engineered = bool(keep_original_values) and not any(keep_original_values)
+        categorical_values: List[float] = []
+        quantitative_values: List[float] = []
+        if final_counts:
+            if treat_as_all_engineered:
+                categorical_values = [0.0 for _ in final_counts]
+                quantitative_values = list(final_counts)
+            elif categorical_base is not None:
+                categorical_values = [categorical_base for _ in final_counts]
+                quantitative_values = [max(0.0, count - categorical_base) for count in final_counts]
+
+        for step in ("P3 Feature Learning", "P4 Feature Importance"):
+            row: Dict[str, str] = {col: "" for col in columns}
+            row["Step"] = step
+            if "Instances" in row:
+                row["Instances"] = self.format_feature_summary_value(instance_counts)
+            if "Total Features" in row:
+                row["Total Features"] = self.format_feature_summary_value(final_counts)
+            if "Categorical Features" in row:
+                row["Categorical Features"] = self.format_feature_summary_value(categorical_values)
+            if "Quantitative Features" in row:
+                row["Quantitative Features"] = self.format_feature_summary_value(quantitative_values)
+            for col in ("Missing Values", "Missing Percent"):
+                if col in row:
+                    row[col] = "0"
+            for col in columns:
+                if col.lower().startswith("class "):
+                    row[col] = cv_context.get(col, "")
+            rows.append(row)
+        return rows
+
+    def feature_selection_counts(self, ds_dir: Path) -> List[float]:
+        table = self._read_csv_table(ds_dir / "feature_selection" / "InformativeFeatureSummary.csv")
+        if not table or not table.rows:
+            return []
+        informative_col = None
+        for col in table.columns:
+            low = col.lower()
+            if "informative" in low and "uninformative" not in low:
+                informative_col = col
+                break
+        if informative_col is None:
+            return []
+        counts: List[float] = []
+        for row in table.rows:
+            value = _safe_float(row.get(informative_col, ""))
+            if value is not None:
+                counts.append(value)
+        return counts
+
+    def feature_learning_selection_cv_summary(
+        self,
+        ds_dir: Path,
+        metadata: Dict[str, Any],
+        data_process_summary: Optional[TableData],
+    ) -> Optional[TableData]:
+        columns = self.feature_summary_columns(data_process_summary)
+        rows: List[Dict[str, str]] = []
+
+        pre_cv_summary = self.summarize_cv_train_files(self.cv_train_files(ds_dir, pre_selection=True), metadata, columns)
+        final_cv_summary = self.summarize_cv_train_files(self.cv_train_files(ds_dir, pre_selection=False), metadata, columns)
+        manifests = self.read_feature_manifests(ds_dir)
+        cv_context = pre_cv_summary or final_cv_summary
+
+        base_row = self.last_data_process_row(data_process_summary, columns)
+        input_summary = self.feature_input_summary_from_manifests(manifests, columns, cv_context)
+        if base_row or input_summary:
+            row = {col: "" for col in columns}
+            row.update(base_row)
+            row["Step"] = "Post Processing"
+            for col in columns[1:]:
+                if col in input_summary:
+                    row[col] = input_summary[col]
+            rows.append(row)
+
+        rows.extend(self.feature_rows_from_manifests(manifests, columns, base_row, cv_context))
+
+        selection_counts = self.feature_selection_counts(ds_dir)
+        if selection_counts or final_cv_summary:
+            row = {col: "" for col in columns}
+            row["Step"] = "P5 Feature Selection"
+            for col in columns[1:]:
+                if col in final_cv_summary:
+                    row[col] = final_cv_summary[col]
+            if "Total Features" in row and selection_counts:
+                row["Total Features"] = self.format_feature_summary_value(selection_counts)
+            rows.append(row)
+
+        if not rows:
+            return None
+        return TableData(columns=columns, rows=rows)
 
     def _load_metrics_by_cv(self, metrics_dir: Path, metric_name: str) -> Dict[str, List[float]]:
         key = METRIC_JSON_KEYS.get(metric_name, metric_name)
@@ -2752,6 +3046,7 @@ class ReportPhaseJob:
             data_process_summary.columns[0] = "Step"
             for row in data_process_summary.rows:
                 row["Step"] = row.pop(old_col, "")
+        feature_cv_summary = self.feature_learning_selection_cv_summary(ds_dir, metadata, data_process_summary)
         runtimes = self._format_runtime_table(self._read_csv_table(ds_dir / "runtimes.csv"))
 
         model_eval = ds_dir / "model_evaluation"
@@ -2793,6 +3088,10 @@ class ReportPhaseJob:
             "informative_feature_summary": {
                 "columns": informative_summary.columns if informative_summary else [],
                 "rows": [[row.get(c, "") for c in informative_summary.columns] for row in (informative_summary.rows if informative_summary else [])],
+            },
+            "feature_cv_summary": {
+                "columns": feature_cv_summary.columns if feature_cv_summary else [],
+                "rows": [[row.get(c, "") for c in feature_cv_summary.columns] for row in (feature_cv_summary.rows if feature_cv_summary else [])],
             },
             "data_process_summary": {
                 "columns": data_process_summary.columns if data_process_summary else [],
@@ -3181,7 +3480,7 @@ class ReportPhaseJob:
         pdf.cell(w, 5, title, border=1, ln=1, align="L")
         body_y = pdf.get_y()
         pdf.set_xy(x, body_y)
-        pdf.cell(w, h, "", border=1, ln=0)
+        pdf.cell(w, h, "", border=0, ln=0)
 
         if img_path:
             p = Path(img_path)
@@ -3287,8 +3586,10 @@ class ReportPhaseJob:
         pdf.add_page()
         pdf.set_font("Times", "B", 11)
         pdf.cell(190, 6, section_title, border=1, ln=1, align="L")
-        pdf.set_font("Times", "", 8)
-        pdf.cell(190, 5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, ln=1, align="L")
+        pdf.set_font("Times", "B", 10)
+        pdf.set_fill_color(235, 238, 242)
+        pdf.cell(190, 6.5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, ln=1, align="L", fill=True)
+        pdf.set_font("Times", "", 7.5)
         pdf.cell(190, 5, f"Dataset Path: {ds.get('dataset_path')}", border=1, ln=1, align="L")
 
     def _render_dataset_eda_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
@@ -3420,54 +3721,76 @@ class ReportPhaseJob:
         )
 
     def _render_feature_learning_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
-        self._render_dataset_header(pdf, ds, self.feature_summary_page_title())
+        self._render_dataset_header(pdf, ds, "Feature Learning and Feature Selection")
         figs = ds.get("figures", {})
         panels = [p for p in (figs.get("feature_learning_panels") or []) if isinstance(p, dict) and p.get("path")]
 
         if len(panels) >= 2:
-            self._draw_image_panel(
+            left_bottom = self._draw_image_panel(
                 pdf,
                 x=10,
                 y=34,
-                w=94,
-                h=106,
+                w=90,
+                h=88,
                 title=str(panels[0].get("title") or "Top Scores (Method 1)"),
                 img_path=str(panels[0].get("path") or ""),
             )
-            self._draw_image_panel(
+            right_bottom = self._draw_image_panel(
                 pdf,
-                x=106,
+                x=110,
                 y=34,
-                w=94,
-                h=106,
+                w=90,
+                h=88,
                 title=str(panels[1].get("title") or "Top Scores (Method 2)"),
                 img_path=str(panels[1].get("path") or ""),
             )
+            y_next = max(left_bottom, right_bottom) + 3
         elif len(panels) == 1:
-            self._draw_image_panel(
+            y_next = self._draw_image_panel(
                 pdf,
-                x=10,
+                x=52,
                 y=34,
-                w=190,
-                h=106,
+                w=106,
+                h=96,
                 title=str(panels[0].get("title") or "Top Scores"),
                 img_path=str(panels[0].get("path") or ""),
-            )
+            ) + 3
         else:
-            self._draw_image_panel(
+            y_next = self._draw_image_panel(
                 pdf,
-                x=10,
+                x=52,
                 y=34,
-                w=190,
-                h=106,
+                w=106,
+                h=96,
                 title="Top Feature Importance Scores",
                 img_path=figs.get("mutual_info"),
-            )
+            ) + 3
+
+        cv_summary = ds.get("tables", {}).get("feature_cv_summary", {})
+        cv_cols = cv_summary.get("columns", [])
+        cv_rows = cv_summary.get("rows", [])
+        if cv_cols:
+            pdf.set_xy(10, y_next)
+            pdf.set_font("Times", "B", 9)
+            pdf.cell(190, 5, "Feature Learning / Selection CV Summary", border=1, ln=1, align="L")
+            y_next = self._render_table(
+                pdf,
+                x=10,
+                y=pdf.get_y(),
+                width=190,
+                columns=cv_cols,
+                rows=cv_rows,
+                font_size=5.6,
+                row_h=3.7,
+                max_first_col_width=34.0,
+            ) + 3
+        else:
+            y_next = max(y_next, 133)
 
         t = ds.get("tables", {}).get("informative_feature_summary", {})
         cols = t.get("columns", [])
         rows = t.get("rows", [])
-        pdf.set_xy(10, 145)
+        pdf.set_xy(10, y_next)
         pdf.set_font("Times", "B", 9)
         pdf.cell(190, 5, "Informative Feature Summary", border=1, ln=1, align="L")
         self._render_table(
@@ -3485,17 +3808,17 @@ class ReportPhaseJob:
         # Render additional FI method panels on continuation pages when present.
         if len(panels) > 2:
             remaining = panels[2:]
-            slots = [(10, 34), (106, 34), (10, 142), (106, 142)]
+            slots = [(10, 34), (110, 34), (10, 132), (110, 132)]
             for i in range(0, len(remaining), 4):
-                self._render_dataset_header(pdf, ds, self.feature_summary_page_title(continued=True))
+                self._render_dataset_header(pdf, ds, "Feature Learning and Feature Selection (continued)")
                 chunk = remaining[i : i + 4]
                 for panel, (x, y) in zip(chunk, slots):
                     self._draw_image_panel(
                         pdf,
                         x=x,
                         y=y,
-                        w=94,
-                        h=104,
+                        w=90,
+                        h=88,
                         title=str(panel.get("title") or "Top Scores"),
                         img_path=str(panel.get("path") or ""),
                     )
