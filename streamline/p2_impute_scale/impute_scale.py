@@ -268,6 +268,8 @@ class ImputeAndScale:
                 scaler.transform(x_test[num_cols]).round(decimal_places),
                 columns=num_cols, index=x_test.index
             )
+            x_train = x_train.astype(x_train_num.dtypes.to_dict())
+            x_test = x_test.astype(x_test_num.dtypes.to_dict())
             x_train.loc[:, num_cols] = x_train_num
             x_test.loc[:, num_cols] = x_test_num
 

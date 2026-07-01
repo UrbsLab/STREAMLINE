@@ -12,7 +12,7 @@ class LogisticRegression(MulticlassClassificationModel, ABC):
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(LogR, "Logistic Regression", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = {'penalty': ['l2', 'l1'], 'C': [1e-05, 100000.0], 'dual': [True, False],
-                           'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+                           'solver': ['newton-cg', 'lbfgs', 'sag', 'saga'],
                            'class_weight': [None, 'balanced'], 'max_iter': [10, 1000], 'random_state': [random_state, ]}
         self.small_name = "LR"
         self.color = "dimgrey"

@@ -111,7 +111,9 @@ class DefaultFeatureSelector:
         plt.barh(ns["Feature"][::-1], ns["Importance"][::-1])
         title = {"mutualinformation": "Mutual Information",
                  "multisurf": "MultiSURF",
-                 "multisurfstar": "MultiSURF*"}.get(alg, alg)
+                 "multisurfstar": "MultiSURF*",
+                 "multiswrfdb": "MultiSWRFDB",
+                 "multiswrfdbstar": "MultiSWRFDB*"}.get(alg, alg)
         plt.xlabel("Median Score"); plt.title(f"Sorted Median {title} Scores")
         plt.tight_layout(); plt.savefig(os.path.join(out_dir, "TopAverageScores.png"), bbox_inches="tight")
         if self.show_plots: plt.show()

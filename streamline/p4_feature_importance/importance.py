@@ -1,10 +1,23 @@
 # streamline/p4_feature_importance/importance.py
 from __future__ import annotations
 import os, time, json, pickle, random, logging
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any, Tuple, List
 import numpy as np
 import pandas as pd
-from streamline.p4_feature_importance.utils.fi_loader import load_importance
+from streamline.p4_feature_importance.utils.fi_loader import (
+    load_importance,
+    normalize_importance_key,
+    resolve_importance_id,
+)
+
+DEFAULT_INSTANCE_SUBSET = 2000
+REBATE_MODEL_IDS = {"multisurf", "multisurfstar", "multiswrfdb", "multiswrfdbstar"}
+OUTCOME_TYPE_TO_REBATE_LABEL = {
+    "binary": "binary",
+    "multiclass": "multiclass",
+    "continuous": "continuous",
+    "regression": "continuous",
+}
 
 class FeatureImportance:
     """
@@ -31,7 +44,7 @@ class FeatureImportance:
         outcome_type: Optional[str] = None,      # for MI
         instance_label: Optional[str] = None,
         random_state: Optional[int] = None,
-        instance_subset: int | None = 2000,
+        instance_subset: int | None = DEFAULT_INSTANCE_SUBSET,
     ):
         self.cv_train_path = cv_train_path
         self.cv_test_path = cv_test_path
@@ -68,8 +81,15 @@ class FeatureImportance:
         Xte = te.drop(columns=drop_cols, errors="ignore")
 
         params = dict(self.model_params)
+        rebate_categorical_names: List[str] = []
+        rebate_categorical_indices: List[int] = []
         if self.model_id == "mutualinformation" and self.outcome_type and "outcome_type" not in params:
             params["outcome_type"] = self.outcome_type
+        if self.is_rebate_model(self.model_id):
+            params, rebate_categorical_names, rebate_categorical_indices = self.configure_rebate_params(
+                params,
+                list(Xtr.columns),
+            )
 
         logging.info("Running %s...", self.model_id)
         model = load_importance(self.model_id, **params)
@@ -82,12 +102,19 @@ class FeatureImportance:
 
         # save params artifact
         base = self._model_dir(model)
+        selector_payload = {
+            "id": getattr(model, "id", self.model_id),
+            "params": model.get_params(),
+            "model_name": getattr(model, "model_name", self.model_id),
+            "small_name": getattr(model, "small_name", self.model_id),
+            "instance_subset": self.instance_subset,
+            "instances_fit": int(len(X_fit)),
+        }
+        if self.is_rebate_model(self.model_id):
+            selector_payload["categorical_features"] = rebate_categorical_names
+            selector_payload["categorical_feature_indices"] = rebate_categorical_indices
         with open(os.path.join(base, f"selector_cv{self.cv_count}.pickle"), "wb") as f:
-            pickle.dump({"id": self.model_id, "params": model.get_params(),
-                         "model_name": getattr(model, "model_name", self.model_id),
-                         "small_name": getattr(model, "small_name", self.model_id),
-                         "instance_subset": self.instance_subset,
-                         "instances_fit": int(len(X_fit))}, f)
+            pickle.dump(selector_payload, f)
 
         if self.top_k is not None or self.threshold is not None:
             Xtr_sel = model.transform(Xtr, top_k=self.top_k, threshold=self.threshold)
@@ -127,6 +154,77 @@ class FeatureImportance:
         return tr, te
 
     @staticmethod
+    def is_rebate_model(model_id: str) -> bool:
+        resolved = resolve_importance_id(model_id) or model_id
+        return resolved in REBATE_MODEL_IDS or normalize_importance_key(model_id) in {
+            "multisurf",
+            "multisurfstar",
+            "multiswrfdb",
+            "multiswrfdbstar",
+        }
+
+    def load_categorical_feature_names(self) -> List[str]:
+        path = os.path.join(
+            self.experiment_path,
+            self.dataset_name,
+            "exploratory",
+            "categorical_features.pickle",
+        )
+        if not os.path.exists(path):
+            logging.warning(
+                "STREAMLINE categorical feature list not found at %s; passing an empty "
+                "categorical_features list to %s.",
+                path,
+                self.model_id,
+            )
+            return []
+        try:
+            with open(path, "rb") as f:
+                values = pickle.load(f) or []
+        except Exception as e:
+            logging.warning(
+                "Could not read STREAMLINE categorical feature list at %s (%s); passing "
+                "an empty categorical_features list to %s.",
+                path,
+                e,
+                self.model_id,
+            )
+            return []
+        return [str(v) for v in values if str(v).strip()]
+
+    def categorical_feature_indices(self, feature_columns: List[str]) -> Tuple[List[str], List[int]]:
+        categorical_names = self.load_categorical_feature_names()
+        categorical_set = set(categorical_names)
+        indices = [idx for idx, col in enumerate(feature_columns) if col in categorical_set]
+        kept_names = [feature_columns[idx] for idx in indices]
+        logging.info(
+            "Phase 4 %s passing %d STREAMLINE categorical feature index(es) to ReBATE.",
+            self.model_id,
+            len(indices),
+        )
+        return kept_names, indices
+
+    def rebate_label_type(self) -> Optional[str]:
+        if not self.outcome_type:
+            return None
+        return OUTCOME_TYPE_TO_REBATE_LABEL.get(str(self.outcome_type).strip().lower())
+
+    def configure_rebate_params(self, params: Dict[str, Any], feature_columns: List[str]):
+        params = dict(params)
+        categorical_names, categorical_indices = self.categorical_feature_indices(feature_columns)
+        if "categorical_features" in params and list(params.get("categorical_features") or []) != categorical_indices:
+            logging.warning(
+                "Ignoring user-supplied categorical_features for %s; using STREAMLINE's "
+                "categorical_features.pickle list.",
+                self.model_id,
+            )
+        params["categorical_features"] = categorical_indices
+        label_type = self.rebate_label_type()
+        if label_type and "label_type" not in params:
+            params["label_type"] = label_type
+        return params, categorical_names, categorical_indices
+
+    @staticmethod
     def uses_instance_subset(model, model_id: str) -> bool:
         identifiers = {
             model_id,
@@ -140,9 +238,13 @@ class FeatureImportance:
             for identifier in identifiers
             if str(identifier).strip()
         }
-        return bool(getattr(model, "uses_instance_subset", False)) or bool(
-            normalized.intersection({"multisurf", "ms", "multisurfstar", "mss"})
-        )
+        subset_ids = {
+            "multisurf", "ms",
+            "multisurfstar", "mss",
+            "multiswrfdb", "mswrfdb",
+            "multiswrfdbstar", "mswrfdbstar",
+        }
+        return bool(getattr(model, "uses_instance_subset", False)) or bool(normalized.intersection(subset_ids))
 
     def sample_instances_for_model(self, model, Xtr: pd.DataFrame, y_tr: pd.Series) -> Tuple[pd.DataFrame, pd.Series]:
         if not self.uses_instance_subset(model, self.model_id):

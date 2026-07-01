@@ -8,13 +8,15 @@ from dask.distributed import Client, LocalCluster
 
 from streamline.utils.runners import num_cores
 from streamline.utils.cluster import get_cluster
-from streamline.p4_feature_importance.importance import FeatureImportance
-from streamline.p4_feature_importance.utils.fi_loader import list_importances
+from streamline.p4_feature_importance.importance import DEFAULT_INSTANCE_SUBSET, FeatureImportance
+from streamline.p4_feature_importance.utils.fi_loader import list_importances, resolve_importance_id
+
+DEFAULT_P4_MODELS = ["mutualinformation", "multiswrfdb", "multiswrfdbstar"]
 
 class P4Runner:
     """
     Phase 4: Feature Importance
-    - models: list[str] of model ids (e.g., ["mutualinformation","multisurf"])
+    - models: list[str] of model ids (e.g., ["mutualinformation","multiswrfdb","multiswrfdbstar"])
     - models_params: dict id->params (JSON)
     """
     def __init__(
@@ -32,7 +34,7 @@ class P4Runner:
         outcome_type: "str | None" = None,
         instance_label: "str | None" = None,
         random_state: "int | None" = None,
-        instance_subset: "int | None" = 2000,
+        instance_subset: "int | None" = DEFAULT_INSTANCE_SUBSET,
         run_cluster: "str | bool" = False,
         queue: str = "defq",
         reserved_memory: int = 4,
@@ -46,11 +48,14 @@ class P4Runner:
         # defaults
         models = self._csv_to_list(models)
         meta = self._load_metadata()
-        self.models = models or meta.get("P4 Models", ["mutualinformation","multisurf"])
+        self.models = models or meta.get("P4 Models", DEFAULT_P4_MODELS)
         # if metadata also stores CSV, normalize that too
         if isinstance(self.models, str):
             self.models = self._csv_to_list(self.models)
-        self.models_params = models_params or json.loads(meta.get("P4 Models Params", "{}") or "{}")
+        self.models = [resolve_importance_id(m) or m for m in self.models]
+        self.models_params = self.normalize_model_params(
+            models_params or json.loads(meta.get("P4 Models Params", "{}") or "{}")
+        )
         self.top_k = top_k if top_k is not None else meta.get("P4 TopK", None)
         self.threshold = threshold if threshold is not None else meta.get("P4 Threshold", None)
         self.keep_original_features = bool(keep_original_features if keep_original_features is not None else meta.get("P4 Keep Original Features", False))
@@ -59,7 +64,7 @@ class P4Runner:
         self.outcome_type = outcome_type or meta.get("Outcome Type", None)
         self.instance_label = instance_label if instance_label is not None else meta.get("Instance Label", None)
         self.random_state = random_state if random_state is not None else meta.get("Random Seed", 0)
-        self.instance_subset = instance_subset if instance_subset is not None else meta.get("P4 Instance Subset", 2000)
+        self.instance_subset = instance_subset if instance_subset is not None else meta.get("P4 Instance Subset", DEFAULT_INSTANCE_SUBSET)
 
         exp_root = os.path.join(self.output_path, self.experiment_name)
         if not os.path.exists(exp_root):
@@ -156,6 +161,15 @@ class P4Runner:
         if isinstance(v, str):
             return [m.strip() for m in v.split(",") if m.strip()]
         return v
+
+    def normalize_model_params(self, params):
+        if not isinstance(params, dict):
+            return {}
+        normalized = {}
+        for model_id, model_params in params.items():
+            resolved = resolve_importance_id(model_id) or model_id
+            normalized[resolved] = model_params
+        return normalized
 
     def _save_run_params(self, mode: str):
         from datetime import datetime

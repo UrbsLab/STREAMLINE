@@ -38,8 +38,38 @@ def list_importances() -> Dict[str, Type]:
     if __CACHE is None: __CACHE = _discover()
     return dict(__CACHE)
 
+def normalize_importance_key(value: str) -> str:
+    return (
+        str(value)
+        .strip()
+        .lower()
+        .replace(" ", "")
+        .replace("_", "")
+        .replace("-", "")
+        .replace("*", "star")
+    )
+
+def resolve_importance_id(model_id: str) -> Optional[str]:
+    models = list_importances()
+    if model_id in models:
+        return model_id
+
+    aliases: Dict[str, str] = {}
+    for mid, cls in models.items():
+        for key in filter(None, [
+            mid,
+            getattr(cls, "path_name", ""),
+            getattr(cls, "small_name", ""),
+            getattr(cls, "model_name", ""),
+            getattr(cls, "__name__", ""),
+        ]):
+            aliases[str(key).strip().lower()] = mid
+            aliases[normalize_importance_key(str(key))] = mid
+    return aliases.get(str(model_id).strip().lower()) or aliases.get(normalize_importance_key(model_id))
+
 def load_importance(model_id: str, **params):
     models = list_importances()
-    if model_id not in models:
+    resolved = resolve_importance_id(model_id)
+    if resolved not in models:
         raise ValueError(f"Feature-importance model '{model_id}' not found. Available: {', '.join(sorted(models))}")
-    return models[model_id](**params)
+    return models[resolved](**params)

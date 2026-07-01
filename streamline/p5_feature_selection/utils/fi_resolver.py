@@ -3,6 +3,17 @@ from __future__ import annotations
 import os
 from typing import Dict, List, Tuple, Optional
 
+def normalize_algorithm_key(value: str) -> str:
+    return (
+        str(value)
+        .strip()
+        .lower()
+        .replace(" ", "")
+        .replace("_", "")
+        .replace("-", "")
+        .replace("*", "star")
+    )
+
 def _safe_list_models() -> Dict[str, type]:
     """
     Try to import the Phase-4 loader and list models (id -> class).
@@ -33,6 +44,7 @@ def _build_alias_map(models: Dict[str, type]) -> Dict[str, str]:
             getattr(cls, "__name__", "").strip(),
         ]):
             alias[key.lower()] = path_name
+            alias[normalize_algorithm_key(key)] = path_name
     return alias
 
 def _scan_fs_algorithms(fs_root: str) -> List[str]:
@@ -75,7 +87,7 @@ def resolve_algorithms(dataset_dir: str, algorithms: Optional[str | List[str]]) 
     for tok in tokens:
         key = tok.lower()
         # try registry alias (id/small/safe names)
-        pn = alias.get(key)
+        pn = alias.get(key) or alias.get(normalize_algorithm_key(tok))
         if pn is None:
             # if user passed a folder name, and it exists, accept it
             if key in available_fs:
@@ -108,6 +120,15 @@ ALG_MAP = {
     "MI": "mutualinformation",
     "MS": "multisurf",
     "MS*": "multisurfstar",
+    "MSS": "multisurfstar",
+    "MULTISURF": "multisurf",
+    "MULTISURF*": "multisurfstar",
+    "MULTISURFSTAR": "multisurfstar",
+    "MSWRFDB": "multiswrfdb",
+    "MSWRFDB*": "multiswrfdbstar",
+    "MULTISWRFDB": "multiswrfdb",
+    "MULTISWRFDB*": "multiswrfdbstar",
+    "MULTISWRFDBSTAR": "multiswrfdbstar",
 }
 
 def _normalize_algorithms(algorithms):
@@ -118,7 +139,11 @@ def _normalize_algorithms(algorithms):
         algorithms = [a.strip() for a in algorithms.split(",") if a.strip()]
     out, seen = [], set()
     for a in algorithms:
-        a = ALG_MAP.get(a, a)
+        key = str(a).strip()
+        a = ALG_MAP.get(
+            key,
+            ALG_MAP.get(key.upper(), ALG_MAP.get(normalize_algorithm_key(key).upper(), key)),
+        )
         if a not in seen:
             out.append(a); seen.add(a)
     return out
@@ -149,4 +174,3 @@ def _discover_algorithms(dataset_dir: str, n_splits: int, strict: bool = False):
                 continue
         algs.append(name)
     return algs
-

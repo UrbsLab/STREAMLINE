@@ -50,7 +50,7 @@ def make_sample_ensembles():
 
 def make_sample_feature_importance():
     features = [f"Feature_{i}" for i in range(1, 21)]
-    algos = ["MS", "MS*", "MI"]
+    algos = ["MI", "MSWRFDB", "MSWRFDB*"]
     rng = np.random.default_rng(123)
 
     rows = []

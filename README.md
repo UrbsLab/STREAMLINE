@@ -12,7 +12,7 @@ This repository is the most up-to-date starting point for the current refactored
 - Phase-first architecture spanning P1 through P11
 - Registry-backed extension points for multiple phases
 - Feature learning with PCA and related outputs
-- Feature importance methods including mutual information and MultiSURF, with additional methods available through the registry
+- Feature importance methods including mutual information, MultiSURF, MultiSURF*, MultiSWRFDB, and MultiSWRFDB*
 - Modeling with base learners, calibration support for classification, and composite feature importance from modeling
 - Classification ensemble evaluation
 - Summary statistics and cross-dataset comparison

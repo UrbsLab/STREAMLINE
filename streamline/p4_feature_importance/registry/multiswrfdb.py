@@ -11,11 +11,11 @@ from streamline.p4_feature_importance.utils.input_normalization import (
 )
 
 
-class MultiSURFStar:
-    id = "multisurfstar"
-    model_name = "MultiSURF*"
-    small_name = "MS*"
-    path_name = "multisurfstar"
+class MultiSWRFDB:
+    id = "multiswrfdb"
+    model_name = "MultiSWRFDB"
+    small_name = "MSWRFDB"
+    path_name = "multiswrfdb"
     uses_instance_subset = True
 
     def __init__(
@@ -60,9 +60,9 @@ class MultiSURFStar:
         X_array = self.normalize_rebate_matrix(X)
         y_array = normalize_target_vector(y)
         try:
-            from skrebate import MultiSURFstar as RebateModel, TURF
+            from skrebate import MultiSWRFDB as RebateModel, TURF
         except (ModuleNotFoundError, ImportError) as e:
-            raise Exception("MultiSURF* requires 'skrebate==0.8.2'.") from e
+            raise Exception("MultiSWRFDB requires 'skrebate==0.8.2'.") from e
 
         base = RebateModel(**self.build_rebate_params(len(self.columns)))
         if self.use_turf:

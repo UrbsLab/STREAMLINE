@@ -73,16 +73,16 @@ The runner also accepts old-style broad flags such as `do_till_report`.
 
 | Parameter | Default or example | Description |
 | --- | --- | --- |
-| `models` | `mutualinformation,multisurf` | Feature-importance methods to run. |
-| `models_params` | method dictionary | Per-method parameter dictionary. |
-| `instance_subset` | method-specific | Optional sampling limit for expensive methods. |
+| `models` | `mutualinformation,multiswrfdb,multiswrfdbstar` | Feature-importance methods to run. |
+| `models_params` | method dictionary | Per-method parameter dictionary. STREAMLINE injects ReBATE `categorical_features` from saved feature-type artifacts. |
+| `instance_subset` | `2000` for ReBATE methods | Optional sampling limit for expensive methods. |
 
 ## P5 Feature Selection
 
 | Parameter | Default or example | Description |
 | --- | --- | --- |
 | `selector_id` | `default` | Feature selector registry ID. |
-| `algorithms` | `auto` | Modeling algorithms considered by selector logic. |
+| `algorithms` | `auto` | Feature-importance methods considered by selector logic. |
 | `top_features` | `20` | Number of features to keep when applicable. |
 
 ## P6 Modeling

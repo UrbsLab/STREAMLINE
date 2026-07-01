@@ -1,6 +1,6 @@
 # streamline/p4_feature_importance/p4_jobsubmit.py
 import argparse, json
-from streamline.p4_feature_importance.importance import FeatureImportance
+from streamline.p4_feature_importance.importance import DEFAULT_INSTANCE_SUBSET, FeatureImportance
 
 def _maybe_json(s: str):
     try: return json.loads(s or "{}")
@@ -25,7 +25,7 @@ def main():
     ap.add_argument("--outcome_type", default=None)
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None)
-    ap.add_argument("--instance_subset", default=2000)
+    ap.add_argument("--instance_subset", default=DEFAULT_INSTANCE_SUBSET)
 
     args = ap.parse_args()
 

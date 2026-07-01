@@ -5,7 +5,7 @@ from streamline.p6_modeling.utils.loader import load_default_model_classes
 from streamline.utils.run_commands import load_phase_run_command, snapshot_effective_args
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
 def test_pipeline_controls_use_phase_aliases():

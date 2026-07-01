@@ -120,7 +120,7 @@ def test_report_data_includes_saved_command_summary(tmp_path: Path):
     assert any("CV Splits: 3" in line for line in sections["P1 Data Processing and CV"])
     assert any("SMOTE: False" in line for line in sections["P1-P2 EDA, Scaling, Imputation, and SMOTE"])
     assert any("Models: NB,LR,DT" in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
-    assert any("Categorical Handling: One-hot encoding enabled; native categorical models may bypass it." in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
+    assert any("Categorical Handling: One-hot encoding enabled; native categorical models may bypass it (CGB)." in line for line in sections["P6-P8 Modeling, Ensembles, and Metrics"])
     assert not any(line.startswith("Selector:") for line in summary_lines(payload))
     assert not any("Task Type:" in line for line in sections["Target Dataset(s)"])
     assert not any("Not specified" in line for line in summary_lines(payload))

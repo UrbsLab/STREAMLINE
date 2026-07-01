@@ -1,6 +1,7 @@
 # streamline/p4_feature_importance/cli.py
 import argparse, json
 from streamline.p4_feature_importance.p4_runner import P4Runner
+from streamline.p4_feature_importance.importance import DEFAULT_INSTANCE_SUBSET
 from streamline.p4_feature_importance.utils.fi_loader import list_importances
 from streamline.utils.run_commands import (
     add_run_command_args,
@@ -34,10 +35,14 @@ def main():
     ap.add_argument("--output_path", required=True)
     ap.add_argument("--experiment_name", required=True)
 
-    # NOW: comma-separated only (e.g., "mutualinformation,multisurf")
-    ap.add_argument("--models", required=False, help='Comma-separated: e.g. "mutualinformation,multisurf"')
+    # NOW: comma-separated only (e.g., "mutualinformation,multiswrfdb,multiswrfdbstar")
+    ap.add_argument("--models", required=False, help='Comma-separated: e.g. "mutualinformation,multiswrfdb,multiswrfdbstar"')
     # keep JSON dict for params (per-model)
-    ap.add_argument("--models_params", default=None, help='JSON dict: {"mutualinformation": {...}, "multisurf": {...}}')
+    ap.add_argument(
+        "--models_params",
+        default=None,
+        help='JSON dict: {"mutualinformation": {...}, "multiswrfdb": {...}}; ReBATE categorical_features is injected by STREAMLINE.',
+    )
 
     ap.add_argument("--top_k", default=None, type=int)
     ap.add_argument("--threshold", default=None, type=float)
@@ -47,7 +52,7 @@ def main():
     ap.add_argument("--outcome_type", default=None)
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None, type=int)
-    ap.add_argument("--instance_subset", default=2000, type=int)
+    ap.add_argument("--instance_subset", default=DEFAULT_INSTANCE_SUBSET, type=int)
 
     ap.add_argument("--run_cluster", default="Serial")
     ap.add_argument("--queue", default="defq")
@@ -91,10 +96,10 @@ def main():
     save_run_command_from_args(args, "p4_feature_importance", run_command_args, runner=runner)
 
 if __name__ == "__main__":
-    # # run two models (comma-separated), pass params to only multisurf via JSON
+    # # run three models (comma-separated), pass params to one ReBATE method via JSON
     # python -m streamline.p4_feature_importance.p4_cli \
     # --output_path ./test --experiment_name MyExp \
-    # --models "mutualinformation,multisurf" \
-    # --models_params '{"multisurf":{"use_turf": true, "turf_pct": 0.5, "n_jobs": 4}}' \
+    # --models "mutualinformation,multiswrfdb,multiswrfdbstar" \
+    # --models_params '{"multiswrfdb":{"use_turf": true, "turf_pct": 0.5, "n_jobs": 4}}' \
     # --top_k 100 --instance_subset 2000
     main()
