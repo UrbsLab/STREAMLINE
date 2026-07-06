@@ -33,7 +33,7 @@ def main():
     ap.add_argument(
         "--reporting_dir",
         default=None,
-        help="Optional output directory for report artifacts (report_data.json, report.pdf, figures)",
+        help="Optional output directory for report artifacts (report_data.json, experiment-named PDF, figures)",
     )
     ap.add_argument(
         "--report_mode",

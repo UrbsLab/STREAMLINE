@@ -366,6 +366,6 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
     p11_rep.run()
 
     rep_report_json = exp_root / "reporting_replication" / "report_data.json"
-    rep_report_pdf = exp_root / "reporting_replication" / "report.pdf"
+    rep_report_pdf = exp_root / "reporting_replication" / f"{experiment_name}_STREAMLINE_Replication_Report.pdf"
     assert rep_report_json.is_file(), "Phase 11 replication mode should produce report_data.json"
-    assert rep_report_pdf.is_file(), "Phase 11 replication mode should produce report.pdf"
+    assert rep_report_pdf.is_file(), "Phase 11 replication mode should produce an experiment-named replication PDF"

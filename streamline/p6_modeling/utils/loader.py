@@ -22,7 +22,39 @@ SUBDIR = {
     "Regression": "regression",
 }
 
+OUTCOME_TYPE_TO_MODEL_TYPE = {
+    "binary": "Binary",
+    "binaryclassification": "Binary",
+    "binary_classification": "Binary",
+    "multiclass": "Multiclass",
+    "multiclassclassification": "Multiclass",
+    "multiclass_classification": "Multiclass",
+    "continuous": "Regression",
+    "regression": "Regression",
+}
+
 DEFAULT_EXCLUDED_MODEL_IDS = {"elcs"}
+
+
+def normalize_modeling_type(outcome_type: Optional[str] = None, model_type: Optional[str] = None) -> str:
+    value = outcome_type if outcome_type not in (None, "") else model_type
+    if value in (None, ""):
+        return "Binary"
+
+    text = str(value).strip()
+    normalized = OUTCOME_TYPE_TO_MODEL_TYPE.get(text.lower())
+    if normalized:
+        return normalized
+    if text in SUBDIR:
+        return text
+
+    known = ", ".join(["Binary", "Multiclass", "Continuous", "Regression"])
+    raise ValueError(f"Unknown outcome_type/model_type '{value}'. Expected one of: {known}")
+
+
+def modeling_type_to_outcome_type(model_type: Optional[str]) -> str:
+    normalized = normalize_modeling_type(model_type=model_type)
+    return "Continuous" if normalized == "Regression" else normalized
 
 
 def _get_models_root() -> Path:

@@ -20,6 +20,7 @@ from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.p9_compare_datasets.p9_runner import P9Runner
 from streamline.p10_replication.p10_runner import P10Runner
 from streamline.p11_reporting.p11_runner import P11Runner
+from streamline.p6_modeling.utils.loader import normalize_modeling_type
 from streamline.utils.run_commands import save_phase_run_command, snapshot_effective_args
 
 
@@ -326,8 +327,10 @@ class PipelineRunner:
             return False
         outcome_type = str(self.common_config.get("outcome_type", "")).lower()
         p6_config = self.phase_config("p6_modeling")
-        model_type = str(p6_config.get("model_type", self.common_config.get("model_type", ""))).lower()
-        return outcome_type in {"continuous", "regression"} or model_type == "regression"
+        p6_outcome_type = p6_config.get("outcome_type", self.common_config.get("outcome_type"))
+        p6_model_type = p6_config.get("model_type", self.common_config.get("model_type"))
+        model_type = normalize_modeling_type(outcome_type=p6_outcome_type, model_type=p6_model_type)
+        return outcome_type in {"continuous", "regression"} or model_type == "Regression"
 
     def run_phase(self, phase: str) -> None:
         runner_class = PHASE_RUNNERS[phase]
@@ -382,13 +385,11 @@ class PipelineRunner:
         )
 
     def apply_p6_defaults(self, phase_config: dict[str, Any]) -> None:
-        if "model_type" in phase_config or "model_type" in self.common_config:
+        if "outcome_type" in phase_config:
             return
         outcome_type = self.common_config.get("outcome_type")
-        if outcome_type == "Continuous":
-            phase_config["model_type"] = "Regression"
-        elif outcome_type:
-            phase_config["model_type"] = outcome_type
+        if outcome_type:
+            phase_config["outcome_type"] = outcome_type
 
     def run_reporting(self, kwargs: dict[str, Any], config: dict[str, Any]) -> None:
         modes = config.get("report_modes")

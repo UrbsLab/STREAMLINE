@@ -226,7 +226,7 @@ def test_p11_reporting_end_to_end():
 
     reports_dir = exp_root / "reporting"
     html_report = reports_dir / "report.html"
-    pdf_report = reports_dir / "report.pdf"
+    pdf_report = reports_dir / f"{experiment_name}_STREAMLINE_Report.pdf"
 
     assert reports_dir.is_dir(), "Reporting phase should create a reports/ directory"
     assert html_report.is_file(), "Expected HTML report from reporting phase"

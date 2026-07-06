@@ -1,6 +1,7 @@
 import argparse
 from .modeling import ModelingPhaseJob  # or `.job` depending on your filename
 from .utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
+from .utils.loader import normalize_modeling_type
 
 def _b(x):
     if x is None: return False
@@ -10,7 +11,8 @@ def main():
     ap = argparse.ArgumentParser("P6 Modeling jobsubmit (single dataset)")
     ap.add_argument("--dataset_dir", required=True)
     ap.add_argument("--outcome_label", default="Class")
-    ap.add_argument("--model_type", default="BinaryClassification")
+    ap.add_argument("--outcome_type", default=None)
+    ap.add_argument("--model_type", default=None)
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--n_splits", type=int, required=True)
     ap.add_argument("--models", default=None)
@@ -41,11 +43,12 @@ def main():
     ap.add_argument("--native_categorical_models", default=NATIVE_CATEGORICAL_MODELS_DEFAULT)
 
     args = ap.parse_args()
+    modeling_type = normalize_modeling_type(outcome_type=args.outcome_type, model_type=args.model_type)
 
     ModelingPhaseJob(
         dataset_dir=args.dataset_dir,
         outcome_label=args.outcome_label,
-        model_type=args.model_type,
+        model_type=modeling_type,
         instance_label=(args.instance_label if args.instance_label else None),
         n_splits=int(args.n_splits),
         models=args.models,

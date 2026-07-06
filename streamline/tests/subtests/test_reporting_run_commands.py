@@ -49,7 +49,7 @@ def save_demo_commands(exp_root: Path) -> None:
         {
             "output_path": str(exp_root.parent),
             "experiment_name": exp_root.name,
-            "model_type": "Binary",
+            "outcome_type": "Binary",
             "models": "NB,LR,DT",
             "scoring_metric": "balanced_accuracy",
             "metric_direction": "maximize",
@@ -124,6 +124,27 @@ def test_report_data_includes_saved_command_summary(tmp_path: Path):
     assert not any(line.startswith("Selector:") for line in summary_lines(payload))
     assert not any("Task Type:" in line for line in sections["Target Dataset(s)"])
     assert not any("Not specified" in line for line in summary_lines(payload))
+
+
+def test_report_pdf_filenames_include_experiment_name_and_mode(tmp_path: Path):
+    exp_root = tmp_path / "out" / "Demo Exp"
+    exp_root.mkdir(parents=True)
+
+    standard_job = ReportPhaseJob(
+        experiment_path=str(exp_root),
+        report_mode="standard",
+        make_pdf=False,
+        enable_plots=False,
+    )
+    replication_job = ReportPhaseJob(
+        experiment_path=str(exp_root),
+        report_mode="replication",
+        make_pdf=False,
+        enable_plots=False,
+    )
+
+    assert standard_job.paths.pdf.name == "Demo_Exp_STREAMLINE_Report.pdf"
+    assert replication_job.paths.pdf.name == "Demo_Exp_STREAMLINE_Replication_Report.pdf"
 
 
 def test_replication_report_first_page_summary_uses_replication_settings(tmp_path: Path):
@@ -285,7 +306,7 @@ def test_regression_report_summary_uses_regression_metric_defaults(tmp_path: Pat
         {
             "output_path": str(exp_root.parent),
             "experiment_name": exp_root.name,
-            "model_type": "Continuous",
+            "outcome_type": "Continuous",
             "models": "LR,RF",
             "scoring_metric": "balanced_accuracy",
             "bypass_one_hot_for_native_models": True,

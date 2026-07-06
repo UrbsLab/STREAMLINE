@@ -303,6 +303,11 @@ class ReportPaths:
     figures_dir: Path
 
 
+def safe_report_filename_part(value: Any) -> str:
+    text = re.sub(r"[^A-Za-z0-9._-]+", "_", str(value or "").strip()).strip("._-")
+    return text or "STREAMLINE"
+
+
 @dataclass
 class TableData:
     columns: List[str]
@@ -397,9 +402,15 @@ class ReportPhaseJob:
         return ReportPaths(
             reporting_dir=reporting_dir,
             data_json=reporting_dir / "report_data.json",
-            pdf=reporting_dir / "report.pdf",
+            pdf=reporting_dir / self.report_pdf_filename(),
             figures_dir=figures_dir,
         )
+
+    def report_pdf_filename(self) -> str:
+        experiment = safe_report_filename_part(self.experiment_name)
+        if self.report_mode == "replication":
+            return f"{experiment}_STREAMLINE_Replication_Report.pdf"
+        return f"{experiment}_STREAMLINE_Report.pdf"
 
     def _read_pickle_if_exists(self, path: Path) -> Optional[Dict[str, Any]]:
         try:
@@ -856,7 +867,7 @@ class ReportPhaseJob:
         self.add_summary_line(feature_selection, "Top Features To Display", self.phase_summary_value(p5_ran or p8_ran, p5.get("top_features"), p8.get("top_features"), metadata_pickle.get("Top Model Features to Display"), default=20))
 
         modeling: List[str] = []
-        self.add_summary_line(modeling, "Model Type", self.phase_summary_value(p6_ran, p6.get("model_type"), metadata.get("Outcome Type")))
+        self.add_summary_line(modeling, "P6 Outcome Type", self.phase_summary_value(p6_ran, p6.get("outcome_type"), p6.get("model_type"), metadata.get("Outcome Type")))
         self.add_summary_line(modeling, "Models", self.phase_summary_value(p6_ran, p6.get("models"), recovered_model_ids, default="auto/default"))
         scoring_metric = self.phase_summary_value(p6_ran or p8_ran, p6.get("scoring_metric"), p8.get("scoring_metric"), metadata_pickle.get("Primary Metric"), default=default_metric)
         self.add_summary_line(modeling, "Scoring Metric", self.report_metric_for_outcome(scoring_metric, is_regression, default=default_metric))
@@ -4240,7 +4251,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--reporting-dir",
         default=None,
-        help="Optional output directory for report artifacts (report_data.json, report.pdf, figures).",
+        help="Optional output directory for report artifacts (report_data.json, experiment-named PDF, figures).",
     )
     parser.add_argument(
         "--report-mode",

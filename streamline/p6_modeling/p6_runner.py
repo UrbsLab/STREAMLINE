@@ -10,6 +10,7 @@ logger = logging.getLogger("distributed.worker"); logger.setLevel(logging.WARNIN
 
 from streamline.p6_modeling.modeling import ModelingPhaseJob
 from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
+from streamline.p6_modeling.utils.loader import modeling_type_to_outcome_type, normalize_modeling_type
 from streamline.utils.runners import num_cores
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
@@ -29,7 +30,8 @@ class P6Runner:
         experiment_name: str,
         *,
         outcome_label: str = "Class",
-        model_type: str = "Binary",     # "Binary" | "Multiclass" | "Regression"
+        outcome_type: Optional[str] = None,  # "Binary" | "Multiclass" | "Continuous"
+        model_type: Optional[str] = None,    # Backward-compatible alias; use outcome_type.
         instance_label: Optional[str] = None,
         n_splits: int = 10,
         models: List[str] | str | None = None,        # CSV/list; None = auto-discover defaults
@@ -61,7 +63,8 @@ class P6Runner:
         self.output_path = output_path
         self.experiment_name = experiment_name
         self.outcome_label = outcome_label
-        self.model_type = model_type
+        self.model_type = normalize_modeling_type(outcome_type=outcome_type, model_type=model_type)
+        self.outcome_type = outcome_type or modeling_type_to_outcome_type(self.model_type)
         self.instance_label = instance_label
         self.n_splits = int(n_splits)
         self.models = models
@@ -165,7 +168,7 @@ class P6Runner:
             "python", script,
             "--dataset_dir", dataset_dir,
             "--outcome_label", self.outcome_label,
-            "--model_type", self.model_type,
+            "--outcome_type", self.outcome_type,
             "--instance_label", self.instance_label or "",
             "--n_splits", str(self.n_splits),
             "--models", (",".join(self.models) if isinstance(self.models, list) else (self.models or "")),

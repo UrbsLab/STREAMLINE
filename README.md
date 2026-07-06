@@ -176,7 +176,7 @@ python -m streamline.p2_impute_scale.p2_cli --output_path out --experiment_name 
 python -m streamline.p3_feature_learning.p3_cli --output_path out --experiment_name DemoBinary
 python -m streamline.p4_feature_importance.p4_cli --output_path out --experiment_name DemoBinary
 python -m streamline.p5_feature_selection.p5_cli --output_path out --experiment_name DemoBinary
-python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoBinary --outcome_label Class --model_type Binary --instance_label InstanceID
+python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoBinary --outcome_label Class --outcome_type Binary --instance_label InstanceID
 python -m streamline.p7_ensembles.p7_cli --output_path out --experiment_name DemoBinary
 python -m streamline.p8_summary_statistics.p8_cli --output_path out --experiment_name DemoBinary --outcome_label Class --outcome_type Binary --instance_label InstanceID
 python -m streamline.p9_compare_datasets.p9_cli --output_path out --experiment_name DemoBinary --outcome_label Class --outcome_type Binary --instance_label InstanceID
@@ -269,11 +269,11 @@ Within an experiment, common directories include:
 
 Standard reports are written to:
 
-- `<experiment>/reporting/report.pdf`
+- `<experiment>/reporting/<experiment_name>_STREAMLINE_Report.pdf`
 
 Replication reports are written to:
 
-- `<experiment>/reporting_replication/report.pdf`
+- `<experiment>/reporting_replication/<experiment_name>_STREAMLINE_Replication_Report.pdf`
 
 ## Reporting
 

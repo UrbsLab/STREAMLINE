@@ -86,7 +86,7 @@ python -m streamline.p4_feature_importance.p4_cli \
 python -m streamline.p6_modeling.p6_cli \
   --output_path out \
   --experiment_name DemoBinary \
-  --model_type Binary \
+  --outcome_type Binary \
   --list_models
 
 python -m streamline.p7_ensembles.p7_cli \
@@ -184,7 +184,7 @@ python -m streamline.p6_modeling.p6_cli \
   --output_path out \
   --experiment_name DemoBinary \
   --outcome_label Class \
-  --model_type Binary \
+  --outcome_type Binary \
   --instance_label InstanceID \
   --n_splits 5 \
   --models NB,LR,DT \
@@ -368,7 +368,7 @@ python -m streamline.p6_modeling.p6_cli \
   --output_path out \
   --experiment_name DemoRegression \
   --outcome_label MPG \
-  --model_type Regression \
+  --outcome_type Continuous \
   --instance_label InstanceID \
   --n_splits 5 \
   --models LR,RF \

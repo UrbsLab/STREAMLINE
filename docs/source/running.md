@@ -91,7 +91,7 @@ do_p10 = True
 do_p11 = True
 
 [p6]
-model_type = Binary
+outcome_type = Binary
 models = NB,LR,DT
 scoring_metric = balanced_accuracy
 metric_direction = maximize
@@ -131,7 +131,7 @@ python -m streamline.p6_modeling.p6_cli \
   --output_path out \
   --experiment_name DemoBinary \
   --outcome_label Class \
-  --model_type Binary \
+  --outcome_type Binary \
   --instance_label InstanceID \
   --models NB,LR,DT \
   --scoring_metric balanced_accuracy \
@@ -167,6 +167,6 @@ python -m streamline.p2_impute_scale.p2_cli --output_path out --experiment_name 
 python -m streamline.p2_impute_scale.p2_cli --output_path out --experiment_name DemoBinary --list-scalers
 python -m streamline.p3_feature_learning.p3_cli --output_path out --experiment_name DemoBinary --list-learners
 python -m streamline.p4_feature_importance.p4_cli --output_path out --experiment_name DemoBinary --list-models
-python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoBinary --model_type Binary --list_models
+python -m streamline.p6_modeling.p6_cli --output_path out --experiment_name DemoBinary --outcome_type Binary --list_models
 python -m streamline.p7_ensembles.p7_cli --output_path out --experiment_name DemoBinary --list_ensembles
 ```

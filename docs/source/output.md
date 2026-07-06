@@ -20,8 +20,8 @@ Common experiment-level outputs include:
 | --- | --- |
 | `run_commands.pickle` | Saved resolved phase arguments for repeat runs. |
 | `DatasetComparisons/` | P9 cross-dataset comparison outputs. |
-| `reporting/report.pdf` | Standard P11 report. |
-| `reporting_replication/report.pdf` | Replication P11 report. |
+| `reporting/<experiment_name>_STREAMLINE_Report.pdf` | Standard P11 report. |
+| `reporting_replication/<experiment_name>_STREAMLINE_Replication_Report.pdf` | Replication P11 report. |
 | `jobsCompleted/` | Completion markers for orchestration. |
 
 ## Dataset-Level Folders

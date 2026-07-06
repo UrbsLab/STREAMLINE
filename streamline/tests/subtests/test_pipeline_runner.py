@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from streamline.pipeline.pipeline_runner import PipelineRunner
+from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p6_modeling.utils.loader import load_default_model_classes
 from streamline.utils.run_commands import load_phase_run_command, snapshot_effective_args
 
@@ -108,6 +109,30 @@ def test_example_configs_dry_run_expected_phases():
         )
 
         assert runner.run() == expected_phases
+
+
+def test_p6_runner_uses_outcome_type_as_public_task_parameter(tmp_path):
+    output_path = tmp_path / "out"
+    exp_root = output_path / "DemoExp"
+    exp_root.mkdir(parents=True)
+
+    runner = P6Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        outcome_type="Continuous",
+    )
+
+    assert runner.outcome_type == "Continuous"
+    assert runner.model_type == "Regression"
+
+    legacy_runner = P6Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        model_type="Regression",
+    )
+
+    assert legacy_runner.outcome_type == "Continuous"
+    assert legacy_runner.model_type == "Regression"
 
 
 def test_config_runner_records_phase_args_in_run_command_pickle(monkeypatch, tmp_path):

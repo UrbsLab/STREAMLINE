@@ -1,7 +1,7 @@
 import argparse
 from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
-from streamline.p6_modeling.utils.loader import list_models, list_all_models
+from streamline.p6_modeling.utils.loader import list_models, list_all_models, normalize_modeling_type
 from streamline.utils.run_commands import (
     add_run_command_args,
     apply_saved_run_command,
@@ -29,8 +29,10 @@ def main():
     ap.add_argument("--experiment_name", required=True)
 
     ap.add_argument("--outcome_label", default="Class")
-    ap.add_argument("--model_type", default="Binary",
-                    help="Binary | Multiclass | Regression")
+    ap.add_argument("--outcome_type", default=None,
+                    help="Binary | Multiclass | Continuous")
+    ap.add_argument("--model_type", default=None,
+                    help="Deprecated alias for --outcome_type. Binary | Multiclass | Regression")
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--n_splits", type=int, default=None)
     ap.add_argument("--models", default=None,
@@ -89,8 +91,9 @@ def main():
         return
 
     if args.list_models:
-        entries = list_models(args.model_type)
-        _print_models(entries, title=f"Available models ({args.model_type}):")
+        modeling_type = normalize_modeling_type(outcome_type=args.outcome_type, model_type=args.model_type)
+        entries = list_models(modeling_type)
+        _print_models(entries, title=f"Available models ({modeling_type}):")
         return
 
     require_args(ap, args, ["n_splits"])
@@ -100,6 +103,7 @@ def main():
         output_path=args.output_path,
         experiment_name=args.experiment_name,
         outcome_label=args.outcome_label,
+        outcome_type=args.outcome_type,
         model_type=args.model_type,
         instance_label=args.instance_label,
         n_splits=args.n_splits,

@@ -11,7 +11,7 @@ where possible.
 | `output_path` | `out` | all phases | Parent folder for experiment outputs. |
 | `experiment_name` | `UCIHCCPipeline` | all phases | Experiment folder name. |
 | `outcome_label` | `Class`, `MPG` | P1, P6, P8, P9, P11 | Outcome column. |
-| `outcome_type` | `Binary`, `Multiclass`, `Continuous` | P1, P8, P9, P11 | Learning task type. |
+| `outcome_type` | `Binary`, `Multiclass`, `Continuous` | P1, P6, P8, P9, P11 | Learning task type. |
 | `instance_label` | `InstanceID` | P1, P6-P11 | Optional row identifier column. |
 | `n_splits` | `3`, `5`, `10` | CV-aware phases | Number of CV folds. |
 | `run_cluster` | `Serial`, `Local`, `BashSLURM`, `BashLSF` | all phases | Execution mode. |
@@ -89,7 +89,7 @@ The runner also accepts old-style broad flags such as `do_till_report`.
 
 | Parameter | Default or example | Description |
 | --- | --- | --- |
-| `model_type` | `Binary`, `Multiclass`, `Regression` | Modeling task. |
+| `outcome_type` | `Binary`, `Multiclass`, `Continuous` | Modeling task. `model_type` is still accepted as a backward-compatible alias. |
 | `models` | `NB,LR,DT` | Model registry IDs. |
 | `scoring_metric` | `balanced_accuracy`, `explained_variance` | Optuna/evaluation metric. |
 | `metric_direction` | `maximize` or `minimize` | Optimization direction. |
