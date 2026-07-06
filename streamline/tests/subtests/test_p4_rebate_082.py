@@ -6,6 +6,10 @@ import numpy as np
 import pandas as pd
 
 from streamline.p4_feature_importance.importance import FeatureImportance
+import streamline.p4_feature_importance.p4_runner as p4_runner_module
+from streamline.p4_feature_importance.p4_runner import P4Runner
+from streamline.p4_feature_importance.registry.multisurf import MultiSURF
+from streamline.p4_feature_importance.registry.multisurfstar import MultiSURFStar
 from streamline.p4_feature_importance.registry.multiswrfdb import MultiSWRFDB
 from streamline.p5_feature_selection.registry.default import DefaultFeatureSelector
 
@@ -124,6 +128,7 @@ def test_rebate_receives_streamline_categorical_feature_indexes(monkeypatch, tmp
         payload = pickle.load(f)
     assert payload["categorical_features"] == ["cat_a", "cat_b"]
     assert payload["categorical_feature_indices"] == [1, 2]
+    assert (exp_root / "Dataset" / "runtime" / "runtime_feature_importance_multiswrfdb_cv0.txt").exists()
 
 
 def test_rebate_turf_uses_full_feature_count_by_default(monkeypatch, tmp_path):
@@ -159,6 +164,44 @@ def test_rebate_wrappers_accept_string_categorical_indexes():
 
     assert X_array.shape == (2, 2)
     assert np.isfinite(X_array[:, 1]).all()
+
+
+def test_multisurf_wrappers_do_not_pass_neighbor_param_to_skrebate():
+    assert "n_neighbors" not in MultiSURF(n_neighbors=7).build_rebate_params(3)
+    assert "n_neighbors" not in MultiSURFStar(n_neighbors=7).build_rebate_params(3)
+
+
+def test_p4_runner_applies_rebate_n_jobs_defaults_for_active_models(tmp_path):
+    output_path = tmp_path / "out"
+    exp_root = output_path / "DemoExp"
+    exp_root.mkdir(parents=True)
+
+    runner = P4Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        models="mutualinformation,multiswrfdb,multiswrfdbstar",
+    )
+
+    assert runner.models_params["multiswrfdb"]["n_jobs"] == 1
+    assert runner.models_params["multiswrfdbstar"]["n_jobs"] == 1
+    assert "mutualinformation" not in runner.models_params
+
+
+def test_p4_runner_defaults_to_all_registered_importance_models(monkeypatch, tmp_path):
+    output_path = tmp_path / "out"
+    exp_root = output_path / "DemoExp"
+    exp_root.mkdir(parents=True)
+
+    monkeypatch.setattr(
+        p4_runner_module,
+        "list_importances",
+        lambda: {"z_model": object, "a_model": object},
+    )
+    monkeypatch.setattr(p4_runner_module, "resolve_importance_id", lambda model_id: model_id)
+
+    runner = P4Runner(output_path=str(output_path), experiment_name="DemoExp")
+
+    assert runner.models == ["a_model", "z_model"]
 
 
 def test_default_feature_selector_can_cap_more_than_two_algorithms():

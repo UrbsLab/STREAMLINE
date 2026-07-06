@@ -10,7 +10,7 @@ import dask
 from dask.distributed import Client, LocalCluster
 
 from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
 from streamline.utils.cluster import get_cluster  # returns connected Dask Client
 
 logger = logging.getLogger("distributed.worker")
@@ -23,6 +23,7 @@ class P8Runner:
     Modes via run_cluster:
       • "Serial"
       • "Local"
+      • "Parallel"
       • "BashSLURM" | "BashLSF"
       • "<dask-cluster-name>" (get_cluster(...) provides a connected Client)
     """
@@ -46,7 +47,7 @@ class P8Runner:
         include_ensembles: bool = True,
         multiclass_average: str = "micro",
         # execution
-        run_cluster: str = "Serial",   # "Serial" | "Local" | "BashSLURM" | "BashLSF" | "<cluster>"
+        run_cluster: str = "Serial",   # "Serial" | "Local" | "Parallel" | "BashSLURM" | "BashLSF" | "<cluster>"
         queue: str = "defq",
         reserved_memory: int = 4,
     ):
@@ -112,14 +113,16 @@ class P8Runner:
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(self._run_one)(ds) for ds in datasets]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 8 Dask jobs")
+        elif mode == "Parallel":
+            run_parallel_items(self._run_one, datasets, label="Phase 8 Parallel jobs")
         elif mode in ("BashSLURM", "BashLSF"):
             for ds in datasets:
                 self._submit_bash(ds, mode)
         else:
             client: Client = get_cluster(mode, self.exp_root, self.queue, self.reserved_memory)
             tasks = [dask.delayed(self._run_one)(ds) for ds in datasets]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 8 Dask jobs")
 
     def _run_one(self, dataset_dir: str):
         StatisticsPhaseJob(

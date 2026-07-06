@@ -60,7 +60,7 @@ def main():
     ap.add_argument(
         "--run_cluster",
         default="Serial",
-        help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>",
+        help="Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>",
     )
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)

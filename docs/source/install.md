@@ -77,7 +77,7 @@ regression, or custom datasets.
 ## Cluster Notes
 
 Cluster use is environment-specific. The phase CLIs and config runner accept
-`run_cluster` settings such as `Serial`, `Local`, `BashSLURM`, and `BashLSF`
+`run_cluster` settings such as `Serial`, `Local`, `Parallel`, `BashSLURM`, and `BashLSF`
 depending on phase support. For long runs, use a persistent terminal session
 such as `tmux` or `screen` so orchestration is not interrupted if your SSH
 connection drops.

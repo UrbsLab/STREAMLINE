@@ -209,6 +209,8 @@ def _format_number(value: Any, *, is_pvalue: bool = False) -> str:
     f = _safe_float(value)
     if f is None:
         return str(value) if value is not None else ""
+    if not math.isfinite(f):
+        return str(f)
     if is_pvalue and abs(f) < 0.001 and f != 0:
         return f"{f:.2e}"
     rounded = round(f, 3)
@@ -859,9 +861,9 @@ class ReportPhaseJob:
         feature_selection: List[str] = []
         self.add_summary_line(feature_selection, "Feature Learner", self.phase_summary_value(p3_ran, p3.get("learner_id"), metadata_pickle.get("P3 Learner Id"), default="pca"))
         self.add_summary_line(feature_selection, "Keep Original Features", self.phase_summary_value(p3_ran, p3.get("keep_original_features"), metadata_pickle.get("P3 Keep Original Features"), default=True))
-        self.add_summary_line(feature_selection, "FI Models", self.phase_summary_value(p4_ran, p4.get("models"), metadata_pickle.get("P4 Models"), recovered_fi_models, default=["mutualinformation", "multisurf"]))
+        self.add_summary_line(feature_selection, "FI Models", self.phase_summary_value(p4_ran, p4.get("models"), metadata_pickle.get("P4 Models"), recovered_fi_models, default="all registered FI methods"))
         self.add_summary_line(feature_selection, "FI Params", self.phase_summary_value(p4_ran, p4.get("models_params"), metadata_pickle.get("P4 Models Params"), default={}), max_len=130)
-        self.add_summary_line(feature_selection, "FI Instance Subset", self.phase_summary_value(p4_ran, p4.get("instance_subset"), metadata_pickle.get("P4 Instance Subset"), default=2000))
+        self.add_summary_line(feature_selection, "FI Instance Subset", self.phase_summary_value(p4_ran, p4.get("instance_subset"), metadata_pickle.get("P4 Instance Subset"), default="Not used"))
         self.add_summary_line(feature_selection, "P5 Algorithms", self.phase_summary_value(p5_ran, p5.get("algorithms"), recovered_fi_models, default="auto"))
         self.add_summary_line(feature_selection, "Max Features To Keep", self.phase_summary_value(p5_ran, p5.get("max_features_to_keep"), metadata_pickle.get("Max Features to Keep"), default=2000))
         self.add_summary_line(feature_selection, "Top Features To Display", self.phase_summary_value(p5_ran or p8_ran, p5.get("top_features"), p8.get("top_features"), metadata_pickle.get("Top Model Features to Display"), default=20))

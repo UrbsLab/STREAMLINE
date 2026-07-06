@@ -147,6 +147,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
             outcome_label=outcome_label,
             outcome_type="Continuous",
             instance_label=instance_label,
+            instance_subset=2000,
             run_cluster="Serial",
         )
         p4.run()

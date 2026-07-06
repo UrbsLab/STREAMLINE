@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from streamline.pipeline.pipeline_runner import PipelineRunner
+from streamline.pipeline.pipeline_runner import PipelineRunner, load_config
+import streamline.p6_modeling.p6_runner as p6_runner_module
 from streamline.p6_modeling.p6_runner import P6Runner
 from streamline.p6_modeling.utils.loader import load_default_model_classes
 from streamline.utils.run_commands import load_phase_run_command, snapshot_effective_args
@@ -111,6 +112,151 @@ def test_example_configs_dry_run_expected_phases():
         assert runner.run() == expected_phases
 
 
+def test_example_configs_include_explicit_non_json_phase_parameters():
+    required_run_keys = {
+        "output_path",
+        "experiment_name",
+        "outcome_label",
+        "outcome_type",
+        "instance_label",
+        "n_splits",
+        "run_cluster",
+        "queue",
+        "reserved_memory",
+        "random_state",
+    }
+    required_phase_keys = {
+        "p1": {
+            "data_path",
+            "exclude_eda_output",
+            "match_label",
+            "ignore_features",
+            "categorical_features",
+            "quantitative_features",
+            "top_features",
+            "categorical_cutoff",
+            "sig_cutoff",
+            "featureeng_missingness",
+            "cleaning_missingness",
+            "correlation_removal_threshold",
+            "partition_method",
+            "show_plots",
+            "one_hot_encoding",
+            "cv_provided",
+            "cv_input_root",
+            "enable_plots",
+            "plot_missingness",
+            "plot_class_counts",
+            "plot_correlation",
+            "correlation_plot_max_features",
+            "plot_univariate",
+            "univariate_top_k",
+            "plot_anomalies",
+            "force",
+        },
+        "p2": {
+            "scale_data",
+            "impute_data",
+            "multi_impute",
+            "overwrite_cv",
+            "imputer_id",
+            "scaler_id",
+            "smote",
+            "smote_method",
+            "smote_sampling_strategy",
+            "smote_k_neighbors",
+        },
+        "p3": {
+            "learner_id",
+            "feature_namespace",
+            "keep_original_features",
+            "overwrite_cv",
+        },
+        "p4": {
+            "models",
+            "top_k",
+            "threshold",
+            "keep_original_features",
+            "overwrite_cv",
+            "instance_subset",
+        },
+        "p5": {
+            "algorithms",
+            "n_splits",
+            "max_features_to_keep",
+            "filter_poor_features",
+            "overwrite_cv",
+            "selector_id",
+            "export_scores",
+            "top_features",
+            "show_plots",
+            "strict_discovery",
+        },
+        "p6": {
+            "outcome_type",
+            "model_type",
+            "models",
+            "calibrate",
+            "calibrate_method",
+            "calibrate_cv",
+            "scoring_metric",
+            "metric_direction",
+            "n_trials",
+            "timeout",
+            "training_subsample",
+            "uniform_fi",
+            "save_plot",
+            "bypass_one_hot_for_native_models",
+            "native_categorical_models",
+        },
+        "p7": {
+            "ensembles",
+            "base_models",
+            "meta_train_source",
+            "calibrate",
+            "calibrate_method",
+            "calibrate_cv",
+        },
+        "p8": {
+            "scoring_metric",
+            "metric_weight",
+            "top_features",
+            "sig_cutoff",
+            "scale_data",
+            "exclude_plots",
+            "show_plots",
+            "include_ensembles",
+            "multiclass_average",
+        },
+        "p9": {"sig_cutoff", "show_plots"},
+        "p10": {
+            "rep_data_path",
+            "dataset_for_rep",
+            "match_label",
+            "exclude_plots",
+            "show_plots",
+        },
+        "p11": {
+            "report_modes",
+            "reporting_dir",
+            "outcome_label",
+            "outcome_type",
+            "instance_label",
+            "make_pdf",
+            "enable_plots",
+            "reuse_existing_figures",
+        },
+    }
+
+    for config_path in sorted((PROJECT_ROOT / "run_configs").glob("uci_*.cfg")):
+        config = load_config(config_path)
+        missing_run = required_run_keys.difference(config["run"])
+        assert not missing_run, f"{config_path.name} missing [run] keys: {sorted(missing_run)}"
+        for phase, keys in required_phase_keys.items():
+            missing = keys.difference(config["phases"].get(phase, {}))
+            assert not missing, f"{config_path.name} missing [{phase}] keys: {sorted(missing)}"
+
+
 def test_p6_runner_uses_outcome_type_as_public_task_parameter(tmp_path):
     output_path = tmp_path / "out"
     exp_root = output_path / "DemoExp"
@@ -133,6 +279,34 @@ def test_p6_runner_uses_outcome_type_as_public_task_parameter(tmp_path):
 
     assert legacy_runner.outcome_type == "Continuous"
     assert legacy_runner.model_type == "Regression"
+
+
+def test_parallel_mode_name_and_p6_dispatch(monkeypatch, tmp_path):
+    output_path = tmp_path / "out"
+    dataset_dir = output_path / "DemoExp" / "DemoDataset"
+    (dataset_dir / "CVDatasets").mkdir(parents=True)
+    captured = {}
+
+    def fake_parallel_items(function, items, **kwargs):
+        captured["items"] = list(items)
+        captured["function"] = function
+
+    def fail_get_cluster(*args, **kwargs):
+        raise AssertionError("Parallel mode should not use Dask cluster lookup")
+
+    monkeypatch.setattr(p6_runner_module, "run_parallel_items", fake_parallel_items)
+    monkeypatch.setattr(p6_runner_module, "get_cluster", fail_get_cluster)
+
+    runner = P6Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        outcome_type="Binary",
+        run_cluster="Parallel",
+    )
+    runner.run()
+
+    assert captured["items"] == [str(dataset_dir)]
+    assert callable(captured["function"])
 
 
 def test_config_runner_records_phase_args_in_run_command_pickle(monkeypatch, tmp_path):

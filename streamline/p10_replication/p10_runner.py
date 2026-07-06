@@ -10,11 +10,10 @@ from typing import List, Optional
 
 import dask
 from dask.distributed import Client, LocalCluster
-from joblib import Parallel, delayed
 
 from streamline.p10_replication.replication import ReplicationJob
 from streamline.utils.cluster import get_cluster
-from streamline.utils.runners import num_cores, runner_fn
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items, runner_fn
 
 
 class P10Runner:
@@ -34,7 +33,7 @@ class P10Runner:
         instance_label: Optional[str] = None,
         match_label: Optional[str] = None,
         exclude_plots: Optional[List[str]] = None,
-        run_cluster: str = "Serial",   # Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>
+        run_cluster: str = "Serial",   # Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>
         queue: str = "defq",
         reserved_memory: int = 4,
         show_plots: bool = False,
@@ -132,7 +131,15 @@ class P10Runner:
             for job in jobs:
                 job.run()
         elif self.run_cluster == "Local":
-            Parallel(n_jobs=num_cores)(delayed(runner_fn)(job) for job in jobs)
+            with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
+                with Client(cluster) as client:
+                    run_dask_tasks(
+                        [dask.delayed(runner_fn)(job) for job in jobs],
+                        client,
+                        label="Phase 10 Dask jobs",
+                    )
+        elif self.run_cluster == "Parallel":
+            run_parallel_items(runner_fn, jobs, label="Phase 10 Parallel jobs")
         elif self.run_cluster in {"BashSLURM", "BashLSF"}:
             return
         else:
@@ -142,9 +149,10 @@ class P10Runner:
                 self.queue,
                 self.reserved_memory,
             )
-            dask.compute(
+            run_dask_tasks(
                 [dask.delayed(runner_fn)(job) for job in jobs],
-                scheduler=client,
+                client,
+                label="Phase 10 Dask jobs",
             )
 
     def _build_job(self, dataset_filename: str) -> ReplicationJob:

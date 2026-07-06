@@ -8,7 +8,7 @@ import dask
 from dask.distributed import Client, LocalCluster
 import logging
 
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
 from streamline.utils.cluster import get_cluster
 from streamline.p5_feature_selection.feature_selection import FeatureSelection
 from streamline.p5_feature_selection.utils.fi_resolver import  _normalize_algorithms, _discover_algorithms
@@ -22,6 +22,7 @@ class P5Runner:
     run_cluster modes:
       • "Serial" (default)
       • "Local"
+      • "Parallel"
       • "BashSLURM"
       • "BashLSF"
       • "<dask-cluster-name>" → use get_cluster(name, ...)
@@ -106,7 +107,9 @@ class P5Runner:
             with LocalCluster(processes=True, n_workers=n_workers, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(self._run_one)(ds_dir) for ds_dir in datasets]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 5 Dask jobs")
+        elif mode == "Parallel":
+            run_parallel_items(self._run_one, datasets, label="Phase 5 Parallel jobs")
         elif mode in ("BashSLURM","BashLSF"):
             for ds_dir in datasets:
                 # discover now so the submitted script has a concrete list
@@ -123,7 +126,7 @@ class P5Runner:
                 self.reserved_memory
             )
             tasks = [dask.delayed(self._run_one)(ds_dir) for ds_dir in datasets]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 5 Dask jobs")
         logging.info("Phase 5 completed for experiment '%s'.", self.experiment_name)
 
     # ----------------------------

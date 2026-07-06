@@ -79,7 +79,7 @@ def main():
     ap.add_argument("--smote_k_neighbors", default=5, type=int)
 
     # Execution/modes
-    ap.add_argument("--run_cluster", default="Serial", help='Serial | Local | BashSLURM | BashLSF | "<dask-cluster-name>"')
+    ap.add_argument("--run_cluster", default="Serial", help='Serial | Local | Parallel | BashSLURM | BashLSF | "<dask-cluster-name>"')
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", default=4, type=int)
 

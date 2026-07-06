@@ -11,7 +11,7 @@ logger = logging.getLogger("distributed.worker"); logger.setLevel(logging.WARNIN
 from streamline.p6_modeling.modeling import ModelingPhaseJob
 from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 from streamline.p6_modeling.utils.loader import modeling_type_to_outcome_type, normalize_modeling_type
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
 
@@ -21,6 +21,7 @@ class P6Runner:
     Modes via run_cluster:
       • "Serial"
       • "Local"
+      • "Parallel"
       • "BashSLURM" | "BashLSF"
       • "<dask-cluster-name>" (get_cluster(...) provides a connected Client)
     """
@@ -56,7 +57,7 @@ class P6Runner:
         native_categorical_models: str | List[str] | None = NATIVE_CATEGORICAL_MODELS_DEFAULT,
 
         # execution
-        run_cluster: str = "Serial",   # "Serial" | "Local" | "BashSLURM" | "BashLSF" | "<cluster>"
+        run_cluster: str = "Serial",   # "Serial" | "Local" | "Parallel" | "BashSLURM" | "BashLSF" | "<cluster>"
         queue: str = "defq",
         reserved_memory: int = 4,
     ):
@@ -117,13 +118,15 @@ class P6Runner:
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(self._run_one)(ds) for ds in datasets]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 6 Dask jobs")
+        elif mode == "Parallel":
+            run_parallel_items(self._run_one, datasets, label="Phase 6 Parallel jobs")
         elif mode in ("BashSLURM", "BashLSF"):
             for ds in datasets: self._submit_bash(ds, mode)
         else:
             client: Client = get_cluster(mode, self.exp_root, self.queue, self.reserved_memory)
             tasks = [dask.delayed(self._run_one)(ds) for ds in datasets]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 6 Dask jobs")
 
     def _run_one(self, dataset_dir: str):
         ModelingPhaseJob(

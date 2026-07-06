@@ -4,7 +4,7 @@ import json
 import pickle
 from pathlib import Path
 
-from streamline.p11_reporting.reporting import ReportPhaseJob
+from streamline.p11_reporting.reporting import ReportPhaseJob, _format_number
 from streamline.utils.run_commands import save_phase_run_command
 
 
@@ -79,6 +79,11 @@ def summary_lines(payload: dict) -> list[str]:
     for section in payload["run_command_summary"]["sections"]:
         lines.extend(section["lines"])
     return lines
+
+
+def test_report_number_formatter_handles_infinite_values():
+    assert _format_number("inf") == "inf"
+    assert _format_number("-inf") == "-inf"
 
 
 def summary_titles(payload: dict) -> list[str]:

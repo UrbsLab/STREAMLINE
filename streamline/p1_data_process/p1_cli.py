@@ -82,7 +82,7 @@ def main():
     ap.add_argument("--correlation_removal_threshold", default=1.0, type=float)
 
     # Execution
-    ap.add_argument("--run_cluster", default="Serial", help='Serial | Local | BashSLURM | BashLSF | "<dask-cluster-name>"')
+    ap.add_argument("--run_cluster", default="Serial", help='Serial | Local | Parallel | BashSLURM | BashLSF | "<dask-cluster-name>"')
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", default=4, type=int)
     ap.add_argument("--random_state", default=None, type=int)

@@ -13,7 +13,7 @@ class DecisionTreeClassifier(BinaryClassificationModel, ABC):
         super().__init__(DT, "Decision Tree", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = {'criterion': ['gini', 'entropy'], 'splitter': ['best', 'random'], 'max_depth': [1, 30],
                            'min_samples_split': [2, 50], 'min_samples_leaf': [1, 50],
-                           'max_features': [None, 'auto', 'log2'], 'class_weight': [None, 'balanced'],
+                           'max_features': [None, 'sqrt', 'log2'], 'class_weight': [None, 'balanced'],
                            'random_state': [random_state, ]}
         self.small_name = "DT"
         self.color = "yellow"

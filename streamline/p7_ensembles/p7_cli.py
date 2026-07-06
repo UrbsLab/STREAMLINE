@@ -30,7 +30,8 @@ def main():
     ap.add_argument("--calibrate", type=int, default=0)
     ap.add_argument("--calibrate_method", default="sigmoid")
     ap.add_argument("--calibrate_cv", type=int, default=5)
-    ap.add_argument("--run_cluster", default="Serial")
+    ap.add_argument("--run_cluster", default="Serial",
+                    help="Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>")
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", type=int, default=4)
     ap.add_argument("--random_state", default=0)

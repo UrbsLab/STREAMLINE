@@ -12,7 +12,7 @@ from dask.distributed import Client, LocalCluster
 
 from streamline.p11_reporting.reporting import ReportPhaseJob
 from streamline.utils.cluster import get_cluster
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_functions
 
 
 class P11Runner:
@@ -37,7 +37,7 @@ class P11Runner:
         make_pdf: bool = True,
         enable_plots: bool = True,
         reuse_existing_figures: bool = True,
-        run_cluster: str = "Serial",  # Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>
+        run_cluster: str = "Serial",  # Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>
         queue: str = "defq",
         reserved_memory: int = 4,
     ):
@@ -90,10 +90,10 @@ class P11Runner:
             # Local dask (mainly for development on multi-core machines)
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
-                    dask.compute(
-                        [dask.delayed(self._run_one)()],
-                        scheduler=client,
-                    )
+                    run_dask_tasks([dask.delayed(self._run_one)()], client, label="Phase 11 Dask jobs")
+
+        elif self.run_cluster == "Parallel":
+            run_parallel_functions([self._run_one], label="Phase 11 Parallel jobs")
 
         elif self.run_cluster in ("BashSLURM", "BashLSF"):
             self._submit_bash()
@@ -103,10 +103,7 @@ class P11Runner:
             client: Client = get_cluster(
                 self.run_cluster, str(self.exp_root), self.queue, self.reserved_memory
             )
-            dask.compute(
-                [dask.delayed(self._run_one)()],
-                scheduler=client,
-            )
+            run_dask_tasks([dask.delayed(self._run_one)()], client, label="Phase 11 Dask jobs")
 
     def _run_one(self):
         ReportPhaseJob(**self.kw).run()

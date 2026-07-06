@@ -53,13 +53,13 @@ def make_cv_dataset(tmp_path: Path) -> tuple[Path, Path, Path]:
     return exp, train_path, test_path
 
 
-def test_p4_runner_default_instance_subset_matches_legacy_default(tmp_path: Path):
+def test_p4_runner_does_not_subset_by_default(tmp_path: Path):
     exp = tmp_path / "out" / "Exp"
     exp.mkdir(parents=True)
 
     runner = P4Runner(output_path=str(tmp_path / "out"), experiment_name="Exp")
 
-    assert runner.instance_subset == 2000
+    assert runner.instance_subset is None
 
 
 def test_p4_instance_subset_only_samples_subset_aware_models(monkeypatch, tmp_path: Path):

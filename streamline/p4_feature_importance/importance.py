@@ -10,7 +10,6 @@ from streamline.p4_feature_importance.utils.fi_loader import (
     resolve_importance_id,
 )
 
-DEFAULT_INSTANCE_SUBSET = 2000
 REBATE_MODEL_IDS = {"multisurf", "multisurfstar", "multiswrfdb", "multiswrfdbstar"}
 OUTCOME_TYPE_TO_REBATE_LABEL = {
     "binary": "binary",
@@ -44,7 +43,7 @@ class FeatureImportance:
         outcome_type: Optional[str] = None,      # for MI
         instance_label: Optional[str] = None,
         random_state: Optional[int] = None,
-        instance_subset: int | None = DEFAULT_INSTANCE_SUBSET,
+        instance_subset: int | None = None,
     ):
         self.cv_train_path = cv_train_path
         self.cv_test_path = cv_test_path
@@ -134,7 +133,7 @@ class FeatureImportance:
 
             self._write_selected_cv_files(model, train_out, test_out)
 
-        self._save_runtime()
+        self._save_runtime(model)
         self._complete_flag(model)
         logging.info(
             "%s CV%s phase 4 %s evaluation complete",
@@ -305,11 +304,15 @@ class FeatureImportance:
         train.to_csv(os.path.join(out_dir, f"{self.dataset_name}_CV_{self.cv_count}_Train.csv"), index=False)
         test.to_csv(os.path.join(out_dir, f"{self.dataset_name}_CV_{self.cv_count}_Test.csv"), index=False)
 
-    def _save_runtime(self):
+    def _save_runtime(self, model):
         rt = os.path.join(self.experiment_path, self.dataset_name, "runtime")
         os.makedirs(rt, exist_ok=True)
+        elapsed = str(time.time() - self.job_start_time)
+        path_name = getattr(model, "path_name", self.model_id)
+        with open(os.path.join(rt, f"runtime_feature_importance_{path_name}_cv{self.cv_count}.txt"), "w+") as f:
+            f.write(elapsed)
         with open(os.path.join(rt, f"runtime_feature_importance{self.cv_count}.txt"), "w+") as f:
-            f.write(str(time.time() - self.job_start_time))
+            f.write(elapsed)
 
     def _complete_flag(self, model):
         done = os.path.join(self.experiment_path, "jobsCompleted")

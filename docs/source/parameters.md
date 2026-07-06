@@ -14,7 +14,7 @@ where possible.
 | `outcome_type` | `Binary`, `Multiclass`, `Continuous` | P1, P6, P8, P9, P11 | Learning task type. |
 | `instance_label` | `InstanceID` | P1, P6-P11 | Optional row identifier column. |
 | `n_splits` | `3`, `5`, `10` | CV-aware phases | Number of CV folds. |
-| `run_cluster` | `Serial`, `Local`, `BashSLURM`, `BashLSF` | all phases | Execution mode. |
+| `run_cluster` | `Serial`, `Local`, `Parallel`, `BashSLURM`, `BashLSF` | all phases | Execution mode. `Local` uses a local Dask cluster; `Parallel` uses local joblib parallelism. |
 | `random_state` | `42` | stochastic phases | Seed for reproducibility. |
 
 ## Phase Toggles
@@ -73,9 +73,9 @@ The runner also accepts old-style broad flags such as `do_till_report`.
 
 | Parameter | Default or example | Description |
 | --- | --- | --- |
-| `models` | `mutualinformation,multiswrfdb,multiswrfdbstar` | Feature-importance methods to run. |
+| `models` | all registered methods | Feature-importance methods to run. |
 | `models_params` | method dictionary | Per-method parameter dictionary. STREAMLINE injects ReBATE `categorical_features` from saved feature-type artifacts. |
-| `instance_subset` | `2000` for ReBATE methods | Optional sampling limit for expensive methods. |
+| `instance_subset` | not used unless provided | Optional sampling limit for expensive methods. |
 
 ## P5 Feature Selection
 

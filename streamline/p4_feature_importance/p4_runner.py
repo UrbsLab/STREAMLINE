@@ -1,17 +1,23 @@
 # streamline/p4_feature_importance/runner.py
 import os, glob, json, time, pickle, logging
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
 import dask
 from dask.distributed import Client, LocalCluster
 
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster
-from streamline.p4_feature_importance.importance import DEFAULT_INSTANCE_SUBSET, FeatureImportance
+from streamline.p4_feature_importance.importance import FeatureImportance
 from streamline.p4_feature_importance.utils.fi_loader import list_importances, resolve_importance_id
 
-DEFAULT_P4_MODELS = ["mutualinformation", "multiswrfdb", "multiswrfdbstar"]
+DEFAULT_P4_MODELS_PARAMS = {
+    "multisurf": {"n_jobs": 1},
+    "multisurfstar": {"n_jobs": 1},
+    "multiswrfdb": {"n_jobs": 1},
+    "multiswrfdbstar": {"n_jobs": 1},
+}
 
 class P4Runner:
     """
@@ -34,7 +40,7 @@ class P4Runner:
         outcome_type: "str | None" = None,
         instance_label: "str | None" = None,
         random_state: "int | None" = None,
-        instance_subset: "int | None" = DEFAULT_INSTANCE_SUBSET,
+        instance_subset: "int | None" = None,
         run_cluster: "str | bool" = False,
         queue: str = "defq",
         reserved_memory: int = 4,
@@ -48,14 +54,17 @@ class P4Runner:
         # defaults
         models = self._csv_to_list(models)
         meta = self._load_metadata()
-        self.models = models or meta.get("P4 Models", DEFAULT_P4_MODELS)
+        metadata_models = meta.get("P4 Models", None)
+        self.models = models or metadata_models or sorted(list_importances().keys())
         # if metadata also stores CSV, normalize that too
         if isinstance(self.models, str):
             self.models = self._csv_to_list(self.models)
         self.models = [resolve_importance_id(m) or m for m in self.models]
-        self.models_params = self.normalize_model_params(
-            models_params or json.loads(meta.get("P4 Models Params", "{}") or "{}")
-        )
+        raw_model_params = models_params
+        if raw_model_params is None:
+            metadata_params = meta.get("P4 Models Params", "{}") or "{}"
+            raw_model_params = json.loads(metadata_params) if isinstance(metadata_params, str) else metadata_params
+        self.models_params = self.apply_default_model_params(self.normalize_model_params(raw_model_params))
         self.top_k = top_k if top_k is not None else meta.get("P4 TopK", None)
         self.threshold = threshold if threshold is not None else meta.get("P4 Threshold", None)
         self.keep_original_features = bool(keep_original_features if keep_original_features is not None else meta.get("P4 Keep Original Features", False))
@@ -64,7 +73,7 @@ class P4Runner:
         self.outcome_type = outcome_type or meta.get("Outcome Type", None)
         self.instance_label = instance_label if instance_label is not None else meta.get("Instance Label", None)
         self.random_state = random_state if random_state is not None else meta.get("Random Seed", 0)
-        self.instance_subset = instance_subset if instance_subset is not None else meta.get("P4 Instance Subset", DEFAULT_INSTANCE_SUBSET)
+        self.instance_subset = instance_subset if instance_subset is not None else meta.get("P4 Instance Subset", None)
 
         exp_root = os.path.join(self.output_path, self.experiment_name)
         if not os.path.exists(exp_root):
@@ -110,11 +119,13 @@ class P4Runner:
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(self._run_one)(m, tr, te) for (m,tr,te) in jobs]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 4 Dask jobs")
+        elif mode == "Parallel":
+            run_parallel_jobs(self._run_one, jobs, label="Phase 4 Parallel jobs")
         elif self.run_cluster and self.run_cluster != "Serial" and self.run_cluster not in ("BashSLURM","BashLSF"):
             client: Client = get_cluster(self.run_cluster, exp_root, self.queue, self.reserved_memory)
             tasks = [dask.delayed(self._run_one)(m, tr, te) for (m,tr,te) in jobs]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 4 Dask jobs")
         elif self.run_cluster in ("BashSLURM","BashLSF"):
             for m,tr,te in jobs: self._submit_bash_job(m, tr, te)
         else:
@@ -170,6 +181,21 @@ class P4Runner:
             resolved = resolve_importance_id(model_id) or model_id
             normalized[resolved] = model_params
         return normalized
+
+    def apply_default_model_params(self, params):
+        merged = {
+            model_id: deepcopy(DEFAULT_P4_MODELS_PARAMS[model_id])
+            for model_id in self.models
+            if model_id in DEFAULT_P4_MODELS_PARAMS
+        }
+        for model_id, model_params in (params or {}).items():
+            resolved = resolve_importance_id(model_id) or model_id
+            base = merged.setdefault(resolved, {})
+            if isinstance(model_params, dict):
+                base.update(model_params)
+            else:
+                merged[resolved] = {}
+        return merged
 
     def _save_run_params(self, mode: str):
         from datetime import datetime

@@ -160,7 +160,7 @@ python -m streamline.p4_feature_importance.p4_cli \
   --output_path out \
   --experiment_name DemoBinary \
   --models "mutualinformation,multiswrfdb,multiswrfdbstar" \
-  --models_params '{"mutualinformation":{"outcome_type":"Binary"},"multiswrfdb":{"n_jobs":4},"multiswrfdbstar":{"n_jobs":4}}' \
+  --models_params '{"mutualinformation":{"outcome_type":"Binary"},"multiswrfdb":{"n_jobs":1},"multiswrfdbstar":{"n_jobs":1}}' \
   --random_state 42
 
 
@@ -343,7 +343,7 @@ python -m streamline.p4_feature_importance.p4_cli \
   --output_path out \
   --experiment_name DemoRegression \
   --models "mutualinformation,multiswrfdb,multiswrfdbstar" \
-  --models_params '{"mutualinformation":{"outcome_type":"Continuous"},"multiswrfdb":{"n_jobs":4},"multiswrfdbstar":{"n_jobs":4}}' \
+  --models_params '{"mutualinformation":{"outcome_type":"Continuous"},"multiswrfdb":{"n_jobs":1},"multiswrfdbstar":{"n_jobs":1}}' \
   --outcome_type Continuous \
   --random_state 42
 

@@ -6,7 +6,7 @@ from typing import Dict, Any, List, Tuple
 import dask
 from dask.distributed import Client, LocalCluster
 
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster
 from streamline.p3_feature_learning.feature_learn import FeatureLearn
 from streamline.p3_feature_learning.utils.fl_loader import list_learners
@@ -25,7 +25,7 @@ class P3Runner:
         outcome_label: "str | None" = None,
         instance_label: "str | None" = None,
         random_state: "int | None" = None,
-        run_cluster: "str | bool" = False,   # False | Local | BashSLURM | BashLSF | "<dask-cluster>"
+        run_cluster: "str | bool" = False,   # False | Local | Parallel | BashSLURM | BashLSF | "<dask-cluster>"
         queue: str = "defq",
         reserved_memory: int = 4,
     ):
@@ -86,11 +86,13 @@ class P3Runner:
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(self._run_one)(tr, te) for tr, te in jobs]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 3 Dask jobs")
+        elif mode == "Parallel":
+            run_parallel_jobs(self._run_one, jobs, label="Phase 3 Parallel jobs")
         elif self.run_cluster and self.run_cluster != "Serial" and self.run_cluster not in ("BashSLURM", "BashLSF"):
             client: Client = get_cluster(self.run_cluster, exp_root, self.queue, self.reserved_memory)
             tasks = [dask.delayed(self._run_one)(tr, te) for tr, te in jobs]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 3 Dask jobs")
         elif self.run_cluster in ("BashSLURM", "BashLSF"):
             for tr, te in jobs: self._submit_bash_job(tr, te)
         else:

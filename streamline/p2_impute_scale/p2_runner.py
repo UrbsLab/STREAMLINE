@@ -16,7 +16,7 @@ from dask.distributed import Client, LocalCluster
 logger = logging.getLogger("distributed.worker")
 logger.setLevel(logging.WARNING)
 
-from streamline.utils.runners import num_cores  # runner_fn not needed; we call job.run()
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs  # runner_fn not needed; we call job.run()
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 from streamline.p2_impute_scale.impute_scale import ImputeAndScale
 from streamline.p2_impute_scale.utils.impute_loader import list_imputers
@@ -29,6 +29,8 @@ class P2Runner:
 
     Modes (set via run_cluster):
       • "Local"        → local Dask parallelization.
+      • "Parallel"     → local joblib parallelization.
+      • "Parallel"     → local joblib parallelization.
       • "BashSLURM"    → submit a bash script (sbatch) that runs p2_jobsubmit.py per CV pair.
       • "BashLSF"      → submit a bash script (bsub) that runs p2_jobsubmit.py per CV pair.
       • any other str  → modern Dask cluster name; get_cluster(name, ...) returns a connected Client (works in Jupyter).
@@ -61,7 +63,7 @@ class P2Runner:
         smote_k_neighbors: "int | None" = None,
 
         # execution mode
-        run_cluster: "str | bool" = False,   # False | "Local" | "BashSLURM" | "BashLSF" | "<dask-cluster-name>"
+        run_cluster: "str | bool" = False,   # False | "Local" | "Parallel" | "BashSLURM" | "BashLSF" | "<dask-cluster-name>"
         queue: str = 'defq',
         reserved_memory: int = 4,
     ):
@@ -157,7 +159,10 @@ class P2Runner:
                     tasks = [
                         dask.delayed(self._run_one_pair)(tr, te) for (tr, te) in jobs
                     ]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 2 Dask jobs")
+
+        elif run_mode == "Parallel":
+            run_parallel_jobs(self._run_one_pair, jobs, label="Phase 2 Parallel jobs")
 
         elif self.run_cluster and self.run_cluster != "Serial" and self.run_cluster!= "Serial" and self.run_cluster not in ("BashSLURM", "BashLSF"):
             # Modern Dask cluster (works in Jupyter)
@@ -170,7 +175,7 @@ class P2Runner:
             tasks = [
                 dask.delayed(self._run_one_pair)(tr, te) for (tr, te) in jobs
             ]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 2 Dask jobs")
 
         elif self.run_cluster in ("BashSLURM", "BashLSF"):
             # Bash scripts that call p2_jobsubmit.py per CV pair

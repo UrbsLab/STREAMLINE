@@ -112,7 +112,6 @@ class MultiSURF:
     def build_rebate_params(self, feature_count: int) -> Dict[str, Any]:
         params = {
             "n_features_to_select": self.n_features_to_select or feature_count,
-            "n_neighbors": self.n_neighbors,
             "categorical_features": self.categorical_feature_indexes(),
             "categorical_threshold": self.categorical_threshold,
             "multiclass_threshold": self.multiclass_threshold,

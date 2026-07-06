@@ -11,7 +11,7 @@ from dask.distributed import Client, LocalCluster
 
 from streamline.utils.cluster import get_cluster
 from streamline.p9_compare_datasets.compare_datasets import DatasetCompareJob
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_functions
 
 
 class P9Runner:
@@ -62,20 +62,16 @@ class P9Runner:
         elif self.run_cluster == "Local":
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
-                    dask.compute(
-                        [dask.delayed(self._run_one)()],
-                        scheduler=client,
-                    )
+                    run_dask_tasks([dask.delayed(self._run_one)()], client, label="Phase 9 Dask jobs")
+        elif self.run_cluster == "Parallel":
+            run_parallel_functions([self._run_one], label="Phase 9 Parallel jobs")
         elif self.run_cluster in ("BashSLURM", "BashLSF"):
             self._submit_bash()
         else:
             client: Client = get_cluster(
                 self.run_cluster, str(self.exp_root), self.queue, self.reserved_memory
             )
-            dask.compute(
-                [dask.delayed(self._run_one)()],
-                scheduler=client,
-            )
+            run_dask_tasks([dask.delayed(self._run_one)()], client, label="Phase 9 Dask jobs")
 
     def _run_one(self):
         DatasetCompareJob(**self.kw).run()

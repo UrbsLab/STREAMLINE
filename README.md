@@ -95,7 +95,8 @@ STREAMLINE can be used in several ways depending on user preference and compute 
 - Local Jupyter notebook
 - Config-driven full pipeline runs
 - Local command line
-- Local parallel execution
+- Local parallel execution with `run_cluster=Parallel` (joblib, no Dask)
+- Local Dask execution with `run_cluster=Local`
 - HPC / cluster execution using the phase CLIs and job submission helpers
 
 The current codebase includes CLI and runner modules for every phase from P1 through P11.

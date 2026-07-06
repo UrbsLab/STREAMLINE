@@ -99,6 +99,12 @@ n_trials = 200
 timeout = 900
 ```
 
+Use `run_cluster = Local` for a local Dask cluster, or `run_cluster = Parallel`
+for local joblib parallelism without Dask.
+
+`Parallel` and Dask-backed runs show progress when `tqdm`/Dask progress support is
+available. Set `STREAMLINE_PROGRESS=0` to disable these progress displays.
+
 Use the included configs as templates:
 
 * `run_configs/uci_binary_hcc.cfg`

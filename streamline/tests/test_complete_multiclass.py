@@ -134,6 +134,7 @@ def test_full_streamline_pipeline_uci_multiclass(tmp_path: Path):
         output_path=str(output_root),
         experiment_name=experiment_name,
         instance_label="InstanceID",
+        instance_subset=2000,
         run_cluster="Serial",
     )
     p4.run()

@@ -47,7 +47,7 @@ def main() -> None:
     parser.add_argument(
         "--run_cluster",
         default="Serial",
-        help="Serial | Local | BashSLURM | BashLSF | <dask-cluster-name>",
+        help="Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>",
     )
     parser.add_argument("--queue", default="defq")
     parser.add_argument("--reserved_memory", type=int, default=4)

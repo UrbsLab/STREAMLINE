@@ -1,7 +1,6 @@
 # streamline/p4_feature_importance/cli.py
 import argparse, json
 from streamline.p4_feature_importance.p4_runner import P4Runner
-from streamline.p4_feature_importance.importance import DEFAULT_INSTANCE_SUBSET
 from streamline.p4_feature_importance.utils.fi_loader import list_importances
 from streamline.utils.run_commands import (
     add_run_command_args,
@@ -52,9 +51,10 @@ def main():
     ap.add_argument("--outcome_type", default=None)
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None, type=int)
-    ap.add_argument("--instance_subset", default=DEFAULT_INSTANCE_SUBSET, type=int)
+    ap.add_argument("--instance_subset", default=None, type=int)
 
-    ap.add_argument("--run_cluster", default="Serial")
+    ap.add_argument("--run_cluster", default="Serial",
+                    help="Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>")
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", default=4, type=int)
 
@@ -100,6 +100,6 @@ if __name__ == "__main__":
     # python -m streamline.p4_feature_importance.p4_cli \
     # --output_path ./test --experiment_name MyExp \
     # --models "mutualinformation,multiswrfdb,multiswrfdbstar" \
-    # --models_params '{"multiswrfdb":{"use_turf": true, "turf_pct": 0.5, "n_jobs": 4}}' \
-    # --top_k 100 --instance_subset 2000
+    # --models_params '{"multiswrfdb":{"use_turf": true, "turf_pct": 0.5, "n_jobs": 1}}' \
+    # --top_k 100 --instance_subset 2000  # optional sampling limit
     main()

@@ -15,7 +15,7 @@ logger = logging.getLogger("distributed.worker")
 logger.setLevel(logging.WARNING)
 
 from streamline.p1_data_process.data_process import DataProcess
-from streamline.utils.runners import parallel_eda_call, num_cores
+from streamline.utils.runners import parallel_eda_call, num_cores, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
 
@@ -25,6 +25,7 @@ class P1Runner:
 
     Modes (set via run_cluster):
       • "Local"        → local Dask parallelization.
+      • "Parallel"     → local joblib parallelization.
       • "BashSLURM"    → submit a bash script (sbatch) that runs p1_jobsubmit.py per dataset.
       • "BashLSF"      → submit a bash script (bsub) that runs p1_jobsubmit.py per dataset.
       • any other str  → modern Dask cluster name; get_cluster(name, ...) returns a connected Client (works in Jupyter).
@@ -55,7 +56,7 @@ class P1Runner:
         cleaning_missingness=0.5,
         correlation_removal_threshold=1.0,
         random_state=None,
-        run_cluster=False,       # False | "Local" | "BashSLURM" | "BashLSF" | "<dask-cluster-name>"
+        run_cluster=False,       # False | "Local" | "Parallel" | "BashSLURM" | "BashLSF" | "<dask-cluster-name>"
         queue='defq',
         reserved_memory=4,
         show_plots=False,
@@ -251,14 +252,20 @@ class P1Runner:
             with LocalCluster(processes=True, n_workers=n_workers, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
                     tasks = [dask.delayed(parallel_eda_call)(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list]
-                    dask.compute(tasks, scheduler=client)
+                    run_dask_tasks(tasks, client, label="Phase 1 Dask jobs")
+        elif run_mode == "Parallel":
+            run_parallel_jobs(
+                parallel_eda_call,
+                [(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list],
+                label="Phase 1 Parallel jobs",
+            )
         elif self.run_cluster and self.run_cluster != "Serial" and self.run_cluster not in ("BashSLURM", "BashLSF"):
             # Modern Dask cluster (works in Jupyter)
             client: Client = get_cluster(self.run_cluster,
                                          os.path.join(self.output_path, self.experiment_name),
                                          self.queue, self.reserved_memory)
             tasks = [dask.delayed(parallel_eda_call)(job_obj, {'top_features': self.top_features}) for job_obj in job_obj_list]
-            dask.compute(tasks, scheduler=client)
+            run_dask_tasks(tasks, client, label="Phase 1 Dask jobs")
         else:
             # Serial
             for job_obj in job_obj_list:

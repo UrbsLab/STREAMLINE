@@ -35,7 +35,8 @@ def main():
     ap.add_argument("--instance_label", default=None)
     ap.add_argument("--random_state", default=None, type=int)
 
-    ap.add_argument("--run_cluster", default="Serial")
+    ap.add_argument("--run_cluster", default="Serial",
+                    help="Serial | Local | Parallel | BashSLURM | BashLSF | <dask-cluster-name>")
     ap.add_argument("--queue", default="defq")
     ap.add_argument("--reserved_memory", default=4, type=int)
 

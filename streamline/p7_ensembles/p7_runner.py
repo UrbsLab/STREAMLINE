@@ -4,7 +4,7 @@ from pathlib import Path
 import dask
 from dask.distributed import Client, LocalCluster
 from streamline.utils.cluster import get_cluster
-from streamline.utils.runners import num_cores
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
 from streamline.p7_ensembles.ensembles import EnsemblePhaseJob
 
 class P7Runner:
@@ -46,12 +46,14 @@ class P7Runner:
         elif self.run_cluster == "Local":
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
-                    dask.compute([dask.delayed(self._run_one)(ds) for ds in datasets], scheduler=client)
+                    run_dask_tasks([dask.delayed(self._run_one)(ds) for ds in datasets], client, label="Phase 7 Dask jobs")
+        elif self.run_cluster == "Parallel":
+            run_parallel_items(self._run_one, datasets, label="Phase 7 Parallel jobs")
         elif self.run_cluster in ("BashSLURM","BashLSF"):
             for ds in datasets: self._submit_bash(ds)
         else:
             client: Client = get_cluster(self.run_cluster, str(self.exp_root), self.queue, self.reserved_memory)
-            dask.compute([dask.delayed(self._run_one)(ds) for ds in datasets], scheduler=client)
+            run_dask_tasks([dask.delayed(self._run_one)(ds) for ds in datasets], client, label="Phase 7 Dask jobs")
 
     def _run_one(self, ds):
         EnsemblePhaseJob(dataset_dir=str(ds), **self.kw).run()
