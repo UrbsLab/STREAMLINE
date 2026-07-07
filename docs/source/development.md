@@ -61,6 +61,12 @@ Run the default main suite when changing shared phase behavior:
 pytest
 ```
 
+Run the optional TabPFN smoke test directly when changing TabPFN handling:
+
+```bash
+pytest streamline/tests/subtests/tabpfn_smoke.py -q -rs
+```
+
 STREAMLINE supports Python 3.10 and newer. The CI pytest workflow exercises the
 main suite on Python 3.10, 3.11, 3.12, and 3.13.
 

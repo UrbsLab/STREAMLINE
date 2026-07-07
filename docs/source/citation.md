@@ -11,7 +11,6 @@ Related links:
 
 * [Springer chapter](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9)
 * [arXiv preprint](https://arxiv.org/abs/2206.12002)
-* [Historical citation page](https://urbslab.github.io/STREAMLINE/citation.html)
 
 For reproducibility, report:
 

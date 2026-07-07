@@ -5,7 +5,7 @@ improvements, and new registry-backed methods.
 
 ## Before Opening A Pull Request
 
-1. Start from the current development branch.
+1. Start from `main` or the target release branch.
 2. Keep changes scoped to the phase or feature being changed.
 3. Add or update tests for behavior changes.
 4. Update docs, configs, or notebooks when parameter names or user workflows change.
@@ -26,7 +26,7 @@ When updating docs:
 
 * Prefer current P1-P11 phase names.
 * Keep config names, CLI names, and notebook names aligned.
-* Avoid reintroducing old 9-phase terminology except when explicitly discussing historical docs.
+* Avoid reintroducing outdated phase names.
 * Update `sample_runcommands.txt` and `run_configs/` if examples change.
 
 ## Reporting Bugs

@@ -1,15 +1,21 @@
 # TabPFN Token Setup
 
+TabPFN is optional in STREAMLINE. Install it separately when you want to run
+TabPFN models:
+
+```bash
+pip install tabpfn
+```
+
 TabPFN requires a one-time Prior Labs license acceptance before it can download
 model weights for local inference. STREAMLINE can import and configure TabPFN
-without this token, but Phase 6 will skip requested TabPFN models until
+without this token, but Phase 6 skips requested TabPFN models until
 `TABPFN_TOKEN` is available in the environment.
 
 ```{warning}
 If `TABPFN_TOKEN` is not set, Phase 6 warns and skips requested TabPFN models
 instead of failing the full run. Other requested models, including HEROS, still
-run normally. A passing test suite without a token means the rest of STREAMLINE
-was checked, but TabPFN model fitting was not exercised.
+run normally. A passing run with skipped TabPFN means TabPFN was not fit.
 ```
 
 ## Get A Token
@@ -19,8 +25,8 @@ was checked, but TabPFN model fitting was not exercised.
 3. Accept the TabPFN license on the Licenses tab.
 4. Copy the API key from `https://ux.priorlabs.ai/account`.
 
-Do not commit this token to git, notebooks, config files, shell history shared
-with others, or issue trackers.
+Do not commit this token to git, notebooks, config files, shared shell history,
+or issue trackers.
 
 ## Set The Token For One Terminal Session
 
@@ -58,17 +64,18 @@ conda deactivate
 conda activate streamline
 ```
 
-## Run The Tests
+## Run The TabPFN-Specific Pytest
 
-The default pytest suite runs the main binary, multiclass, and regression
-end-to-end tests:
+The TabPFN pytest is intentionally explicit-only so the main test suite does
+not run a heavyweight model download or fit by accident. Run it directly:
 
 ```bash
-pytest
+pytest streamline/tests/subtests/tabpfn_smoke.py -q -rs
 ```
 
-Without `TABPFN_TOKEN`, Phase 6 warns and skips TabPFN when TabPFN is requested.
-Other requested models continue to run.
+Without `TABPFN_TOKEN`, the no-token skip behavior is tested and the actual
+TabPFN fit test is skipped with a visible reason. With `TABPFN_TOKEN` set, the
+same command also runs the TabPFN binary wrapper fit smoke test.
 
 ## Use TabPFN In Notebooks
 

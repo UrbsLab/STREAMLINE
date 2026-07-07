@@ -38,10 +38,10 @@ Then confirm that the config runner is available:
 python run.py --help
 ```
 
-TabPFN requires a Prior Labs token before local model weights can be downloaded.
-Without the token, Phase 6 warns and skips requested TabPFN models while other
-models continue. See [TabPFN Token Setup](tabpfn_token.md) before running
-TabPFN models.
+TabPFN is optional and is not required for the default STREAMLINE demos. Install
+it separately with `pip install tabpfn` before running TabPFN models. TabPFN
+also requires a Prior Labs token before model weights can be downloaded; see
+[TabPFN Token Setup](tabpfn_token.md).
 
 ## Local venv Environment
 
@@ -92,9 +92,19 @@ depending on phase support. For long runs, use a persistent terminal session
 such as `tmux` or `screen` so orchestration is not interrupted if your SSH
 connection drops.
 
-## Known Dependency Notes
+## Known Installation Issues
 
-Some modeling packages include compiled dependencies. If `lightgbm`,
-`catboost`, `xgboost`, or rule-learning packages fail to install through pip
-on your platform, install the compatible package through conda-forge or use the
-provided conda environment as the baseline.
+Some modeling and reporting packages include compiled dependencies. On macOS,
+especially on Apple Silicon or fresh Conda environments, install the compiled
+pieces through conda-forge first if pip reports build, linker, Graphviz, or
+WeasyPrint errors:
+
+```bash
+conda install -c conda-forge lightgbm xgboost catboost -y
+conda install -c conda-forge graphviz python-graphviz -y
+conda install -c conda-forge weasyprint cairocffi cairo pango gdk-pixbuf libffi -y
+pip install -r requirements.txt
+```
+
+If the failure is isolated to one package, install only that package from
+conda-forge and rerun `pip install -r requirements.txt`.

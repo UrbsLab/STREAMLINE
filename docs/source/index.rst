@@ -7,13 +7,13 @@ Overview
 --------------------------------------
 
 STREAMLINE is an end-to-end automated machine learning pipeline for
-supervised tabular data. The current refactored codebase supports binary
-classification, multiclass classification, and regression, with integrated
+supervised tabular data. The v3 main release supports binary classification,
+multiclass classification, and regression, with integrated
 data processing, imputation, scaling, feature learning, feature importance,
 feature selection, model training, classification ensembles, summary
 statistics, dataset comparison, replication, and PDF reporting.
 
-The schematic below summarizes the current STREAMLINE v3 workflow.
+The schematic below summarizes the STREAMLINE v3 workflow.
 
 .. image:: pictures/STREAMLINE_v3_paper_new_lightcolor.png
    :alt: STREAMLINE v3 automated machine learning pipeline overview
@@ -98,15 +98,11 @@ How This Documentation Is Organized
 * Use :doc:`pipeline` for a phase-by-phase explanation of what STREAMLINE does.
 * Use :doc:`changelog` to understand how v3 differs from the legacy and v2 branches.
 
-Relationship To Earlier Documentation
+Version History
 --------------------------------------
 
-The historical public documentation describes the original STREAMLINE release
-and a 9-phase binary-classification-focused pipeline. This site documents the
-current v3 refactor, which uses explicit P1-P11 phase modules, adds
-multiclass and regression workflows, supports config-driven full runs, and
-generates standard and replication PDF reports. See :doc:`changelog` for a
-version-by-version summary.
+This site documents the STREAMLINE v3 main release. See :doc:`changelog` for
+the v3, v2, and v1 release-line summary.
 
 Current Scope
 --------------------------------------

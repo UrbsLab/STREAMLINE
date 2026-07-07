@@ -1,131 +1,120 @@
 # Changelog
 
-This page maps STREAMLINE's branch history to the public GitHub release log.
-It is a user-facing summary rather than a commit-by-commit changelog.
+This page summarizes the major STREAMLINE release lines in newest-first order.
+The v3 line is the main release line for this documentation site. The v2 line
+is the previous tested and stable public version. The v1 line covers the
+original legacy implementation.
 
-Release log reference:
-[GitHub Releases](https://github.com/UrbsLab/STREAMLINE/releases?page=1)
+Release tags are listed as anchors so users can map documentation language back
+to GitHub releases.
 
-## Version Map
+## v3 Main Release
 
-| Documentation name | Branch/reference | Release tag reference | Status |
-| --- | --- | --- | --- |
-| STREAMLINE v1 | `legacy` | `v0.1.0-alpha` through `v0.2.5-beta` | Historical legacy line |
-| STREAMLINE v2 | `main` / `v2` | `v0.3.0-beta` through `v0.3.4-beta` | Current public release line |
-| STREAMLINE v3 | current v3 development | planned next major tag, for example `v3.0.0` | Current improvement branch, not yet a GitHub release |
+**Tag reference:** `v3.0.0` when the v3 release is tagged on `main`.
 
-## Release Log Summary
+STREAMLINE v3 is the current main release. It refactors STREAMLINE into an
+eleven-phase architecture and extends the pipeline beyond the previous
+binary-classification-centered workflow.
 
-| Release | Date | Release title / note |
+Major changes:
+
+* Supports binary classification, multiclass classification, and regression.
+* Uses explicit P1-P11 phase modules for data processing, imputation/scaling,
+  feature learning, feature importance, feature selection, modeling,
+  classification ensembles, summary statistics, dataset comparison,
+  replication, and reporting.
+* Adds config-driven full-pipeline execution with parameter names aligned
+  across `.cfg` files, command-line calls, and notebooks.
+* Adds updated Google Colab and local Jupyter workflows for binary,
+  multiclass, regression, and custom datasets.
+* Adds UCI-based demo datasets and matching replication splits for tutorial
+  and test runs.
+* Adds optional SMOTE and SMOTENC balancing after Phase 2 imputation/scaling.
+* Improves categorical feature handling, including native categorical bypass
+  controls for compatible models.
+* Adds Decision Tree classification, HEROS wrappers, optional TabPFN wrappers,
+  and updated ExSTraCS categorical initialization.
+* Updates scikit-rebate handling for categorical feature indexes and adds
+  MultiSWRFDB and MultiSWRFDB* feature-importance methods.
+* Improves Phase 5 feature selection so rankings can be combined across more
+  than two feature-importance algorithms.
+* Adds `Parallel` local multiprocessing-style run mode alongside serial,
+  local Dask, and supported cluster modes.
+* Adds saved run-command metadata so reports can show the parameters actually
+  used while preserving defaults when a value was not explicitly specified.
+* Improves standard and replication PDF report first pages, dataset summaries,
+  metric highlighting, categorical handling text, feature-learning/selection
+  summaries, and replication naming.
+* Adds documentation and optional pytest coverage for TabPFN token setup and
+  skip behavior.
+
+## v2 Tested Stable Release
+
+**Tag references:** `v0.3.0-beta`, `v0.3.1-beta`, `v0.3.2-beta`,
+`v0.3.3-beta`, `v0.3.4-beta`.
+
+The v2 public beta line is the previous tested and stable STREAMLINE version.
+Its latest release was `v0.3.4-beta`.
+
+Notable updates across the v2 line:
+
+* Added Dask jobqueue support for multiple HPC cluster systems.
+* Expanded the original Phase 1 EDA flow into numerical encoding, automated
+  cleaning, missingness feature engineering, one-hot encoding, correlation
+  feature cleaning, processed-data EDA, and data-process summaries.
+* Added configuration-file support and whole-pipeline command-line execution.
+* Modularized modeling algorithms into classes and added Elastic Net.
+* Improved Google Colab workflows for easier data selection and output access.
+* Added replication processing parity for categorical and missingness handling.
+* Added invariant feature removal and matching replication behavior.
+* Improved PDF report formatting, first-page summaries, run-parameter display,
+  and multi-dataset report layout.
+* Fixed command-line, legacy cluster, replication, missingness naming, and
+  unseen categorical-value edge cases.
+
+Release highlights:
+
+| Tag | Date | Summary |
 | --- | --- | --- |
-| `v0.1.0-alpha` | 2022-05-12 | Alpha Release |
-| `v0.1.1-alpha` | 2022-05-12 | Alpha 0.1.1 |
-| `v0.1.2-alpha` | 2022-05-12 | Alpha 0.1.2 |
-| `v0.1.3-alpha` | 2022-05-12 | Alpha 0.1.3 |
-| `v0.2.0-beta` | 2022-05-14 | Beta Release 0.2.0 |
-| `v0.2.1-beta` | 2022-05-17 | Code rearrange and default updates |
-| `v0.2.2-beta` | 2022-05-19 | `.gitignore` update |
-| `v0.2.3-beta` | 2022-05-20 | Linux serial command-line runs fixed |
-| `v0.2.4-beta` | 2022-06-15 | Command-line cleanup |
-| `v0.2.5-beta` | 2022-06-24 | Minor statistical-analysis/code cleanup fix |
-| `v0.3.0-beta` | 2023-08-06 | Documentation update and removal of old documentation files |
-| `v0.3.1-beta` | 2023-09-07 | Development documentation update |
-| `v0.3.2-beta` | 2023-09-13 | Development documentation update |
-| `v0.3.3-beta` | 2023-09-23 | Development documentation update |
-| `v0.3.4-beta` | 2023-09-28 | Latest public beta release |
+| `v0.3.4-beta` | 2023-09-28 | PDF formatting improvements and legacy replication/report fixes. |
+| `v0.3.3-beta` | 2023-09-23 | Invariant feature removal, replication parity fixes, notebook ordering fixes, and report text updates. |
+| `v0.3.2-beta` | 2023-09-13 | Legacy command-line argument fixes, job-status docs, schematic and PDF naming updates. |
+| `v0.3.1-beta` | 2023-09-07 | Replication imputation fallback and alphabetized model legends. |
+| `v0.3.0-beta` | 2023-08-06 | Major command-line, cluster, Phase 1, replication, config, modeling, Colab, and report updates. |
 
-## STREAMLINE v1: Legacy Line
+## v1 Legacy Release
 
-Reference: `legacy` branch, with public release history from
-`v0.1.0-alpha` through `v0.2.5-beta`.
+**Tag references:** `v0.1.0-alpha`, `v0.1.1-alpha`, `v0.1.2-alpha`,
+`v0.1.3-alpha`, `v0.2.0-beta`, `v0.2.1-beta`, `v0.2.2-beta`,
+`v0.2.3-beta`, `v0.2.4-beta`, `v0.2.5-beta`.
 
-The legacy line contains the original STREAMLINE implementation. It was
-organized around phase-specific scripts and job files for exploratory
-analysis, preprocessing, feature importance, feature selection, modeling,
-statistics, dataset comparison, replication/application, report generation,
-and cleanup.
+The v1 line covers the first public STREAMLINE implementation and early beta
+stabilization work.
 
-Major characteristics:
+Notable updates across the v1 line:
 
-* focused on tabular supervised binary classification
-* script/job-file style execution
-* demonstration HCC data and replication examples
-* Google Colab and Jupyter notebook entry points
-* early PDF reports and post-run analysis notebooks
-* cluster-oriented job submission patterns
+* Introduced the first stable STREAMLINE implementation inherited from
+  AutoMLPipe-BC concepts.
+* Moved the codebase into the `streamline` package folder.
+* Updated default Optuna parameters and documented reproducibility limitations
+  when parallel optimization uses timeouts.
+* Fixed serial Linux command-line execution and several command-line phase
+  issues.
+* Improved composite feature-importance behavior, feature-selection options,
+  report formatting, and Optuna plotting failure handling.
+* Added support for replication input as `.csv` or `.txt`.
+* Switched feature-importance summary reporting between mean and median during
+  early beta refinements based on collaborator feedback.
+* Added small statistical-comparison and no-missing-data imputation fixes.
 
-Important release milestones:
+Release highlights:
 
-* `v0.1.0-alpha`: first public alpha release line
-* `v0.2.0-beta`: beta release line begins
-* `v0.2.1-beta`: code rearrange and default updates
-* `v0.2.3-beta`: Linux serial command-line run fixes
-* `v0.2.5-beta`: minor statistical-analysis and old-code cleanup fixes
-
-Use v1 only when reproducing an old analysis that depends on the legacy script
-layout.
-
-## STREAMLINE v2: Main Public Line
-
-Reference: `main` / `v2` branch, with public release history from
-`v0.3.0-beta` through `v0.3.4-beta`.
-
-v2 is the current public release line represented by the older hosted
-documentation. It reorganized STREAMLINE into importable package areas such as
-`dataprep`, `featurefns`, `modeling`, `models`, `postanalysis`, `runners`, and
-`utils`.
-
-Major improvements over v1:
-
-* clearer Sphinx documentation site
-* improved package structure and runner classes
-* maintained Google Colab and Jupyter workflows
-* command-line and cluster-oriented execution paths
-* automated PDF reports and generated plots
-* useful post-run notebooks for thresholds, prediction probabilities, ROC/PRC plots, and feature importance visualization
-
-Important release milestones:
-
-* `v0.3.0-beta`: documentation refresh and old documentation cleanup
-* `v0.3.1-beta` through `v0.3.4-beta`: development-documentation updates
-* `v0.3.4-beta`: latest public GitHub release
-
-Important scope note: v2 documentation describes the historical 9-phase
-STREAMLINE workflow and is primarily binary-classification-oriented.
-
-## STREAMLINE v3: Current Improvement Branch
-
-Reference: current v3 development branch. This branch is not yet represented
-by a public GitHub release tag. The intended release reference should be the
-next major tag, for example `v3.0.0`, once v3 is merged and released.
-
-v3 keeps the original goal of transparent, reproducible tabular AutoML, but
-reorganizes the implementation around explicit P1-P11 phase packages and
-config-driven orchestration.
-
-Major improvements over v2:
-
-* supports binary classification, multiclass classification, and regression
-* replaces older package areas with explicit phase modules:
-  `p1_data_process` through `p11_reporting`
-* adds a config runner through `run.py` and `run_configs/*.cfg`
-* aligns parameter names across config files, CLIs, and notebooks
-* saves resolved run commands so repeated phase calls can reuse prior settings
-* adds UCI-based demo datasets for binary, multiclass, and regression workflows
-* adds deterministic held-out replication demo splits for P10
-* adds SMOTE/SMOTENC support in P2
-* adds feature learning as its own P3 phase
-* updates feature importance/selection around current scikit-rebate behavior
-* adds MultiSWRFDB and MultiSWRFDB* feature-importance options
-* supports native categorical handling for models such as CatBoost/CGB and ExSTraCS
-* records Optuna trial accounting so reports show how many trials actually ran
-* supports local joblib parallelism with `run_cluster = Parallel`
-* keeps local Dask execution under `run_cluster = Local`
-* restructures modeling jobs around dataset/model/CV work units
-* adds and updates complete binary, multiclass, and regression pytest smoke tests
-* improves standard and replication PDF report summaries, feature-engineering tables, feature-importance figures, and replication naming
-* updates the Google Colab and local Jupyter notebooks for demo and custom data modes
-* removes old main-era files that are no longer part of the maintained v3 workflow
-
-Use v3 for new work once released or when intentionally working from the v3
-development branch.
+| Tag | Date | Summary |
+| --- | --- | --- |
+| `v0.2.5-beta` | 2022-06-24 | Statistical-comparison edge-case catch and cleanup. |
+| `v0.2.4-beta` | 2022-06-15 | No-missing-data imputation fix, replication file support, and FI/report summary updates. |
+| `v0.2.3-beta` | 2022-05-20 | Stable Linux serial command-line beta. |
+| `v0.2.2-beta` | 2022-05-19 | Composite FI, metric weighting, serial CLI, report formatting, and Optuna fixes. |
+| `v0.2.1-beta` | 2022-05-17 | Package layout, Optuna default, reproducibility, and scaled-data rounding updates. |
+| `v0.2.0-beta` | 2022-05-14 | First beta for external use. |
+| `v0.1.x-alpha` | 2022-05-12 | Initial alpha releases and early Anaconda/scipy compatibility fixes. |

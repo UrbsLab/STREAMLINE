@@ -14,14 +14,4 @@
 
 ## Version History
 
-See [Changelog](changelog.md) for a branch-level summary of the legacy, v2,
-and v3 STREAMLINE lines.
-
-## Historical Documentation
-
-The older public documentation remains useful for background context, but it
-describes earlier package names and a 9-phase pipeline:
-
-[Historical STREAMLINE documentation](https://urbslab.github.io/STREAMLINE/index.html)
-
-Use this documentation set for the current v3/refactored implementation.
+See [Changelog](changelog.md) for the v3, v2, and v1 release-line summary.
