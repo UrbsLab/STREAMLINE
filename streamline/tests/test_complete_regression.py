@@ -196,7 +196,7 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
             scoring_metric="neg_mean_squared_error", # prefix with 'neg_' if using sklearn convention, don't change direction
             metric_direction="maximize",
             n_trials=1,
-            timeout=W,
+            timeout=15,
             training_subsample=0,
             uniform_fi=False,
             save_plot=False,

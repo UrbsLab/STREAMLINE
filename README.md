@@ -204,6 +204,10 @@ python -m streamline.p11_reporting.p11_cli \
 
 For a reproducible local setup, create a dedicated environment and install the repository requirements.
 
+STREAMLINE supports Python 3.10 and newer. Python 3.11 is the recommended
+default for local demos because it works well across the current scientific
+Python stack while remaining close to the Colab/runtime defaults.
+
 Example with conda:
 
 ```bash
@@ -231,6 +235,7 @@ pip install -r requirements.txt
 Notes:
 
 - The pinned requirements are the best starting point for local reproducibility.
+- Continuous integration runs the main end-to-end tests on Python 3.10, 3.11, 3.12, and 3.13.
 - If you intentionally install the latest unpinned package versions, expect to do some compatibility testing because the upstream scientific Python stack changes frequently.
 - Some optional packages depend on compiled libraries or environment-specific binaries.
 

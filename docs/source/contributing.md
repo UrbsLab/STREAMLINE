@@ -14,8 +14,9 @@ improvements, and new registry-backed methods.
 ## Useful Checks
 
 ```bash
-pytest streamline/tests/test_pipeline_runner.py
-pytest streamline/tests/test_uci_demo_datasets.py
+pytest streamline/tests/test_complete_binary.py
+pytest streamline/tests/test_complete_multiclass.py
+pytest streamline/tests/test_complete_regression.py
 sphinx-build -b html docs/source docs/build/html
 ```
 

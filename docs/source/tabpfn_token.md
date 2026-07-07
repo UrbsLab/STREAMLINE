@@ -58,21 +58,25 @@ conda deactivate
 conda activate streamline
 ```
 
-## Run The Token-Gated Tests
+## Run The Tests
 
-With `TABPFN_TOKEN` set, run:
-
-```bash
-pytest streamline/tests/subtests/test_p6_heros_tabpfn.py -q
-```
-
-Without `TABPFN_TOKEN`, the TabPFN fit tests are intentionally skipped and the
-complete pipeline tests emit a Phase 6 warning when TabPFN is requested. Use
-`-rs` to show skip reasons:
+The default pytest suite runs the main binary, multiclass, and regression
+end-to-end tests:
 
 ```bash
-pytest streamline/tests/subtests/test_p6_heros_tabpfn.py -q -rs
+pytest
 ```
+
+Phase-level subtests are kept for targeted maintainer debugging and are skipped
+by default collection. With `TABPFN_TOKEN` set, maintainers can run the
+token-gated TabPFN subtest by overriding the default pytest `addopts`:
+
+```bash
+pytest -o addopts='' streamline/tests/subtests/test_p6_heros_tabpfn.py -q
+```
+
+Without `TABPFN_TOKEN`, TabPFN fit checks are intentionally skipped and Phase 6
+warns when TabPFN is requested. Other requested models continue to run.
 
 ## Use TabPFN In Notebooks
 

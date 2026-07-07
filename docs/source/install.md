@@ -19,6 +19,10 @@ dataset runs.
 
 The recommended local setup is a dedicated conda environment:
 
+STREAMLINE supports Python 3.10 and newer. Python 3.11 is the recommended
+default for local demos because it works well across the current scientific
+Python stack while remaining close to common notebook runtimes.
+
 ```bash
 git clone --single-branch https://github.com/UrbsLab/STREAMLINE.git
 cd STREAMLINE

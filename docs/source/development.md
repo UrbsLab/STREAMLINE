@@ -42,19 +42,26 @@ Prefer the existing registry patterns when adding new components:
 
 ## Tests
 
-Run focused tests while developing:
+The default pytest configuration collects only the current main end-to-end
+tests. Legacy tests and phase-level subtests are kept in the repository for
+targeted debugging, but they are skipped by default collection.
+
+Run one main test while developing:
 
 ```bash
-pytest streamline/tests/test_pipeline_runner.py
-pytest streamline/tests/test_reporting_run_commands.py
-pytest streamline/tests/test_uci_demo_datasets.py
+pytest streamline/tests/test_complete_binary.py
+pytest streamline/tests/test_complete_multiclass.py
+pytest streamline/tests/test_complete_regression.py
 ```
 
-Run the full suite when changing shared phase behavior:
+Run the default main suite when changing shared phase behavior:
 
 ```bash
 pytest
 ```
+
+STREAMLINE supports Python 3.10 and newer. The CI pytest workflow exercises the
+main suite on Python 3.10, 3.11, 3.12, and 3.13.
 
 ## Documentation
 
