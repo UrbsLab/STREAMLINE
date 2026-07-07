@@ -24,7 +24,10 @@ autoclass_content = "both"
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
 myst_heading_anchors = 3
-source_suffix = [".rst", ".md"]
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 root_doc = "index"
 
 templates_path = ["_templates"]

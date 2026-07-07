@@ -64,11 +64,49 @@ The repository is organized around eleven explicit phases:
 Recommended Starting Points
 --------------------------------------
 
+* Use :doc:`install` if you are setting up a local environment.
+* Use :doc:`running` if you want to run a demo immediately.
+* Use :doc:`data` if you are preparing a custom dataset.
+* Use :doc:`parameters` when editing a ``.cfg`` file or notebook parameter block.
+* Use :doc:`output` after a run to find reports, metrics, figures, and saved models.
+
+Quick Start
+--------------------------------------
+
+For most users, the easiest local route is:
+
+.. code-block:: bash
+
+   conda create -n streamline python=3.11 pip
+   conda activate streamline
+   pip install -r requirements.txt
+   python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
+   python run.py -c run_configs/uci_binary_hcc.cfg
+
+The notebooks expose the same major settings as the config files and are a
+better starting point for interactive tutorials, Colab demos, and custom data
+exploration.
+
+How This Documentation Is Organized
+--------------------------------------
+
 * Use :doc:`install` to prepare a local environment.
 * Use :doc:`data` to format custom datasets and understand the included UCI demos.
 * Use :doc:`running` for notebooks, config-driven runs, and phase-by-phase CLI commands.
 * Use :doc:`parameters` when editing ``.cfg`` files or command-line calls.
 * Use :doc:`output` to navigate experiment folders and reports.
+* Use :doc:`pipeline` for a phase-by-phase explanation of what STREAMLINE does.
+* Use :doc:`changelog` to understand how v3 differs from the legacy and v2 branches.
+
+Relationship To Earlier Documentation
+--------------------------------------
+
+The historical public documentation describes the original STREAMLINE release
+and a 9-phase binary-classification-focused pipeline. This site documents the
+current v3 refactor, which uses explicit P1-P11 phase modules, adds
+multiclass and regression workflows, supports config-driven full runs, and
+generates standard and replication PDF reports. See :doc:`changelog` for a
+version-by-version summary.
 
 Current Scope
 --------------------------------------
@@ -103,6 +141,7 @@ questions, contact Harsh Bandhey at ``harsh.bandhey@cshs.org``.
 
    self
    about
+   changelog
    pipeline
    data
    install
@@ -115,4 +154,3 @@ questions, contact Harsh Bandhey at ``harsh.bandhey@cshs.org``.
    development
    contributing
    citation
-   modules

@@ -41,7 +41,7 @@ python run.py --help
 TabPFN requires a Prior Labs token before local model weights can be downloaded.
 Without the token, Phase 6 warns and skips requested TabPFN models while other
 models continue. See [TabPFN Token Setup](tabpfn_token.md) before running
-TabPFN models or the token-gated TabPFN fit tests.
+TabPFN models.
 
 ## Local venv Environment
 

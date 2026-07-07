@@ -8,8 +8,8 @@ without this token, but Phase 6 will skip requested TabPFN models until
 ```{warning}
 If `TABPFN_TOKEN` is not set, Phase 6 warns and skips requested TabPFN models
 instead of failing the full run. Other requested models, including HEROS, still
-run normally. A passing test suite with skipped TabPFN tests means TabPFN was
-not fully run.
+run normally. A passing test suite without a token means the rest of STREAMLINE
+was checked, but TabPFN model fitting was not exercised.
 ```
 
 ## Get A Token
@@ -25,7 +25,7 @@ with others, or issue trackers.
 ## Set The Token For One Terminal Session
 
 Activate your STREAMLINE environment and export the token before running
-TabPFN models or TabPFN fit tests:
+TabPFN models:
 
 ```bash
 conda activate streamline
@@ -67,16 +67,8 @@ end-to-end tests:
 pytest
 ```
 
-Phase-level subtests are kept for targeted maintainer debugging and are skipped
-by default collection. With `TABPFN_TOKEN` set, maintainers can run the
-token-gated TabPFN subtest by overriding the default pytest `addopts`:
-
-```bash
-pytest -o addopts='' streamline/tests/subtests/test_p6_heros_tabpfn.py -q
-```
-
-Without `TABPFN_TOKEN`, TabPFN fit checks are intentionally skipped and Phase 6
-warns when TabPFN is requested. Other requested models continue to run.
+Without `TABPFN_TOKEN`, Phase 6 warns and skips TabPFN when TabPFN is requested.
+Other requested models continue to run.
 
 ## Use TabPFN In Notebooks
 

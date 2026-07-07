@@ -10,6 +10,18 @@ STREAMLINE can be run through:
 For most command-line work, start with the `.cfg` runner. It keeps shared
 settings, phase toggles, and phase-specific parameters in one editable file.
 
+## Choose A Run Path
+
+| Use case | Recommended path |
+| --- | --- |
+| Conference tutorial or first demo | Google Colab notebook |
+| Interactive local exploration | `STREAMLINE_Notebook.ipynb` |
+| Reproducible full pipeline run | `python run.py -c run_configs/<config>.cfg` |
+| Debugging one phase | Phase CLI command |
+| Faster local execution without Dask | `run_cluster = Parallel` |
+| Local Dask execution | `run_cluster = Local` |
+| HPC execution | `BashSLURM`, `BashLSF`, or a site-specific Dask cluster setting |
+
 ## Google Colab
 
 Open the Colab notebook:
@@ -51,6 +63,10 @@ Run the multiclass and regression demos:
 python run.py -c run_configs/uci_multiclass_student.cfg
 python run.py -c run_configs/uci_regression_auto_mpg.cfg
 ```
+
+The included configs are designed as reproducible examples. For a short
+notebook or Colab demonstration, use the notebook parameter block, which uses a
+smaller modeling budget and shows plots by default.
 
 Partial-run examples:
 
@@ -110,6 +126,25 @@ Use the included configs as templates:
 * `run_configs/uci_binary_hcc.cfg`
 * `run_configs/uci_multiclass_student.cfg`
 * `run_configs/uci_regression_auto_mpg.cfg`
+
+## Rerunning Phases
+
+STREAMLINE stores resolved phase arguments in `run_commands.pickle` inside the
+experiment folder. If you rerun a phase and omit an option, the saved value can
+be reused. Explicit command-line or config values override the saved value.
+
+Use this control when you need a clean rerun:
+
+```bash
+python -m streamline.p6_modeling.p6_cli \
+  --output_path out \
+  --experiment_name DemoBinary \
+  --outcome_type Binary \
+  --ignore_saved_run_command
+```
+
+Use `--no_update_saved_run_command` when you want to run with temporary
+settings without changing the saved command summary.
 
 ## Phase CLI Commands
 

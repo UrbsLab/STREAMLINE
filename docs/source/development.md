@@ -43,8 +43,9 @@ Prefer the existing registry patterns when adding new components:
 ## Tests
 
 The default pytest configuration collects only the current main end-to-end
-tests. Legacy tests and phase-level subtests are kept in the repository for
-targeted debugging, but they are skipped by default collection.
+tests. Legacy and phase-level subtests were removed from the maintained v3
+test path so routine testing stays focused on the binary, multiclass, and
+regression demo pipelines.
 
 Run one main test while developing:
 

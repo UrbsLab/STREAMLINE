@@ -12,6 +12,13 @@ STREAMLINE expects tabular supervised learning datasets.
 6. Encode missing values as blank cells, `NA`, `NaN`, or `?`; avoid numeric placeholders such as `-99` unless they are real values.
 7. Keep replication datasets aligned with the original dataset's feature names and outcome/instance labels.
 
+Recommended preparation before P1:
+
+* Remove free-text, image, raw time-series, or other unstructured columns unless you have already converted them to tabular features.
+* Decide whether high-cardinality identifier-like fields should be `instance_label`, ignored, or removed before modeling.
+* Check that the outcome column has the interpretation you expect. Binary labels should be documented so downstream metrics are not ambiguous.
+* Keep a copy of the raw source data outside the STREAMLINE output directory.
+
 The current code supports:
 
 | Task | Example `outcome_type` | Notes |
@@ -32,6 +39,10 @@ quantitative_features = path/to/quantitative_features.csv
 Each file should contain feature names, one per row or in a single column. If
 feature type files are omitted, P1 can infer categorical features using
 `categorical_cutoff`.
+
+Supplying feature-type files is recommended for real analyses because numeric
+codes are common in biomedical and administrative data. A coded feature such as
+`1`, `2`, `3` may be categorical even though it looks numeric to Python.
 
 ### One-Hot Encoding And Native Categorical Models
 
@@ -61,6 +72,10 @@ The demo sources are:
 * Auto MPG: [UCI Auto MPG](https://archive.ics.uci.edu/dataset/9/auto+mpg)
 
 Feature type files for the demos live in `data/UCIFeatureTypes/`.
+
+The normal demo folders contain training/development splits. The matching
+`UCIRep*` folders contain held-out replication splits created for STREAMLINE
+demonstration and testing.
 
 ## Replication Data
 

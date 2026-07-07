@@ -24,6 +24,22 @@ Common experiment-level outputs include:
 | `reporting_replication/<experiment_name>_STREAMLINE_Replication_Report.pdf` | Replication P11 report. |
 | `jobsCompleted/` | Completion markers for orchestration. |
 
+## How To Check A Run Quickly
+
+After a full demo run, check for these files first:
+
+```text
+<output_path>/<experiment_name>/<dataset>/model_evaluation/Summary_performance_mean.csv
+<output_path>/<experiment_name>/reporting/<experiment_name>_STREAMLINE_Report.pdf
+```
+
+If P10/P11 replication ran, also check:
+
+```text
+<output_path>/<experiment_name>/<dataset>/replication/<rep_dataset>/model_evaluation/Summary_performance_mean.csv
+<output_path>/<experiment_name>/reporting_replication/<experiment_name>_STREAMLINE_Replication_Report.pdf
+```
+
 ## Dataset-Level Folders
 
 Each dataset gets a folder under the experiment directory:
@@ -59,6 +75,11 @@ python -m streamline.p11_reporting.p11_cli \
 The standard report focuses on training/CV experiment outputs. The replication
 report focuses on external validation outputs under the dataset replication
 folders.
+
+The first page of each report is intended to answer the practical questions
+users ask first: what dataset was run, what phases were run, which settings
+were used, what task type was evaluated, and where the strongest or tied metric
+results appear.
 
 ## Report Data
 
