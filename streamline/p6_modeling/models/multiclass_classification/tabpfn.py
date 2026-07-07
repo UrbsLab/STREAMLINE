@@ -14,7 +14,7 @@ except Exception:  # pragma: no cover
     _TabPFNClassifier = None
 
 
-def _supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """
     Filter kwargs to those supported by callable_obj's signature (robust across TabPFN versions).
     """
@@ -28,6 +28,16 @@ def _supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
     allowed = set(sig.parameters.keys())
     return {k: v for k, v in kwargs.items() if k in allowed}
+
+
+def tabpfn_ensemble_param(callable_obj) -> str:
+    try:
+        params = set(inspect.signature(callable_obj).parameters)
+    except Exception:
+        return "N_ensemble_configurations"
+    if "n_estimators" in params:
+        return "n_estimators"
+    return "N_ensemble_configurations"
 
 
 class TabPFNMultiClassClassifier(MulticlassClassificationModel, ABC):
@@ -79,36 +89,37 @@ class TabPFNMultiClassClassifier(MulticlassClassificationModel, ABC):
 
         self.n_jobs = n_jobs  # unused by TabPFN; kept for interface consistency
 
+        ensemble_param = tabpfn_ensemble_param(_TabPFNClassifier)
         self.param_grid: Dict[str, Any] = {
-            "N_ensemble_configurations": [8, 16, 32, 64],
-            "fit_mode": ["fit_direct", "fit_with_cache"],
+            ensemble_param: [8, 16, 32, 64],
+            "fit_mode": ["fit_preprocessors", "fit_with_cache"],
             "device": ["cpu"],
         }
 
         self._base_params = {
             "device": "cpu",
-            "N_ensemble_configurations": int(n_ensemble_configurations),
+            ensemble_param: int(n_ensemble_configurations),
         }
         if fit_mode is not None:
             self._base_params["fit_mode"] = fit_mode
 
-        self._base_params = _supported_kwargs(_TabPFNClassifier, self._base_params)
+        self._base_params = supported_kwargs(_TabPFNClassifier, self._base_params)
 
     def objective(self, trial, params: Dict[str, Any] | None = None):
         cand = dict(self._base_params)
 
-        cand["N_ensemble_configurations"] = trial.suggest_categorical(
-            "N_ensemble_configurations", self.param_grid["N_ensemble_configurations"]
-        )
+        ensemble_param = tabpfn_ensemble_param(_TabPFNClassifier)
+        ensemble_values = self.param_grid.get(ensemble_param) or self.param_grid.get("N_ensemble_configurations", [8])
+        cand[ensemble_param] = trial.suggest_categorical(ensemble_param, ensemble_values)
 
         # Only keep fit_mode if your installed TabPFN supports it
         cand2 = dict(cand)
         cand2["fit_mode"] = trial.suggest_categorical("fit_mode", self.param_grid["fit_mode"])
-        cand2 = _supported_kwargs(_TabPFNClassifier, cand2)
+        cand2 = supported_kwargs(_TabPFNClassifier, cand2)
         cand = cand2
 
         cand["device"] = "cpu"
-        cand = _supported_kwargs(_TabPFNClassifier, cand)
+        cand = supported_kwargs(_TabPFNClassifier, cand)
 
         self.params = cand
         return self.hyper_eval()

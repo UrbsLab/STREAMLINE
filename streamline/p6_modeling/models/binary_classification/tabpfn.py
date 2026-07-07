@@ -14,7 +14,7 @@ except Exception:  # pragma: no cover
     _TabPFNClassifier = None
 
 
-def _supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """
     Filter kwargs to those supported by callable_obj's signature (robust across TabPFN versions).
     """
@@ -29,6 +29,16 @@ def _supported_kwargs(callable_obj, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
     allowed = set(sig.parameters.keys())
     return {k: v for k, v in kwargs.items() if k in allowed}
+
+
+def tabpfn_ensemble_param(callable_obj) -> str:
+    try:
+        params = set(inspect.signature(callable_obj).parameters)
+    except Exception:
+        return "N_ensemble_configurations"
+    if "n_estimators" in params:
+        return "n_estimators"
+    return "N_ensemble_configurations"
 
 
 class TabPFNClassifier(BinaryClassificationModel, ABC):
@@ -89,47 +99,45 @@ class TabPFNClassifier(BinaryClassificationModel, ABC):
         self.color = "purple"
 
         # Build a conservative param grid. We'll filter by the installed TabPFN signature anyway.
+        ensemble_param = tabpfn_ensemble_param(_TabPFNClassifier)
         self.param_grid: Dict[str, Any] = {
-            # Common across versions (documented for sklearn-style interface)
-            "N_ensemble_configurations": [8, 16, 32, 64],
-            # Some versions add fit_mode; we only use it if supported.
-            "fit_mode": ["fit_direct", "fit_with_cache"],
-            # Always CPU
+            ensemble_param: [8, 16, 32, 64],
+            "fit_mode": ["fit_preprocessors", "fit_with_cache"],
             "device": ["cpu"],
         }
 
         self._base_params = {
             "device": "cpu",
-            "N_ensemble_configurations": int(n_ensemble_configurations),
+            ensemble_param: int(n_ensemble_configurations),
         }
         if fit_mode is not None:
             self._base_params["fit_mode"] = fit_mode
 
         # Ensure base params are compatible with the installed TabPFN version
-        self._base_params = _supported_kwargs(_TabPFNClassifier, self._base_params)
+        self._base_params = supported_kwargs(_TabPFNClassifier, self._base_params)
 
     def objective(self, trial, params: Dict[str, Any] | None = None):
         # Start from CPU-only base params
         cand = dict(self._base_params)
 
         # Tune ensemble size
-        cand["N_ensemble_configurations"] = trial.suggest_categorical(
-            "N_ensemble_configurations", self.param_grid["N_ensemble_configurations"]
-        )
+        ensemble_param = tabpfn_ensemble_param(_TabPFNClassifier)
+        ensemble_values = self.param_grid.get(ensemble_param) or self.param_grid.get("N_ensemble_configurations", [8])
+        cand[ensemble_param] = trial.suggest_categorical(ensemble_param, ensemble_values)
 
         # Tune fit_mode only if supported by the installed TabPFN signature
         cand_with_fit_mode = dict(cand)
         cand_with_fit_mode["fit_mode"] = trial.suggest_categorical(
             "fit_mode", self.param_grid["fit_mode"]
         )
-        cand_with_fit_mode = _supported_kwargs(_TabPFNClassifier, cand_with_fit_mode)
+        cand_with_fit_mode = supported_kwargs(_TabPFNClassifier, cand_with_fit_mode)
 
         # If fit_mode got filtered out, don't record it (keeps Optuna tidy)
         cand = cand_with_fit_mode
 
         # Always force CPU (even if someone tries to pass something in)
         cand["device"] = "cpu"
-        cand = _supported_kwargs(_TabPFNClassifier, cand)
+        cand = supported_kwargs(_TabPFNClassifier, cand)
 
         self.params = cand
         mean_cv_score = self.hyper_eval()

@@ -4,6 +4,7 @@ from typing import Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_bool_dtype
 from sklearn.base import BaseEstimator
 
 
@@ -48,9 +49,21 @@ def one_hot_align(
     if encoded_feature_names is not None:
         encoded = encoded.reindex(columns=encoded_feature_names, fill_value=0)
     for col in encoded.columns:
-        if encoded[col].dtype == bool:
+        if is_bool_dtype(encoded[col]):
             encoded[col] = encoded[col].astype(int)
+    encoded = encoded.apply(pd.to_numeric, errors="coerce")
     return encoded
+
+
+def to_numeric_matrix(data) -> np.ndarray:
+    if isinstance(data, pd.DataFrame):
+        frame = data
+    else:
+        arr = np.asarray(data)
+        if arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+        frame = pd.DataFrame(arr)
+    return frame.apply(pd.to_numeric, errors="coerce").to_numpy(dtype=float, na_value=np.nan)
 
 
 class FeatureTypeModelWrapper(BaseEstimator):
@@ -94,6 +107,13 @@ class FeatureTypeModelWrapper(BaseEstimator):
         return pd.DataFrame(arr)
 
     def _prepare(self, X):
+        if self.mode == "numeric":
+            if isinstance(X, pd.DataFrame):
+                missing = [c for c in self.raw_feature_names if c not in X.columns]
+                if not missing:
+                    X = X.loc[:, self.raw_feature_names]
+            return to_numeric_matrix(X)
+
         if self.mode == "one_hot":
             arr = np.asarray(X)
             if (
@@ -106,23 +126,23 @@ class FeatureTypeModelWrapper(BaseEstimator):
                     raw,
                     self.categorical_columns,
                     self.encoded_feature_names,
-                ).values
+                ).to_numpy(dtype=float, na_value=np.nan)
             if (
                 not isinstance(X, pd.DataFrame)
                 and arr.ndim == 2
                 and self.encoded_feature_names is not None
                 and arr.shape[1] == len(self.encoded_feature_names)
             ):
-                return X
+                return to_numeric_matrix(X)
             if isinstance(X, pd.DataFrame) and self.encoded_feature_names is not None:
                 if all(c in X.columns for c in self.encoded_feature_names):
-                    return X.loc[:, self.encoded_feature_names].values
+                    return to_numeric_matrix(X.loc[:, self.encoded_feature_names])
             raw = self._as_raw_frame(X)
             return one_hot_align(
                 raw,
                 self.categorical_columns,
                 self.encoded_feature_names,
-            ).values
+            ).to_numpy(dtype=float, na_value=np.nan)
 
         if self.mode == "native":
             raw = self._as_raw_frame(X)

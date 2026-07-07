@@ -133,6 +133,8 @@ def test_full_streamline_pipeline_uci_multiclass(tmp_path: Path):
     p4 = P4Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
+        models="mutualinformation,multiswrfdb",
+        models_params={"mutualinformation": {"outcome_type": "Multiclass"}, "multiswrfdb": {"n_jobs": 1}},
         instance_label="InstanceID",
         instance_subset=2000,
         run_cluster="Serial",
@@ -167,6 +169,8 @@ def test_full_streamline_pipeline_uci_multiclass(tmp_path: Path):
     # Phase 6: Modeling
     # ------------------------------------------------------------------
     # Use a small model set + tiny search to keep tests fast, similar to earlier tests
+    p6_models = ["NB", "LR", "DT"]
+
     p6 = P6Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
@@ -174,7 +178,7 @@ def test_full_streamline_pipeline_uci_multiclass(tmp_path: Path):
         model_type="Multiclass",
         instance_label="InstanceID",
         n_splits=cv_splits,
-        models="NB,LR,DT",
+        models=",".join(p6_models),
         calibrate=False,
         scoring_metric="balanced_accuracy",
         metric_direction="maximize",
@@ -202,7 +206,7 @@ def test_full_streamline_pipeline_uci_multiclass(tmp_path: Path):
         outcome_label="Class",
         instance_label="InstanceID",
         ensembles="hard_voting,soft_voting,stack_lr",
-        base_models="NB,LR,DT",
+        base_models=",".join(p6_models),
         meta_train_source="train",
         calibrate=0,
         calibrate_method="sigmoid",

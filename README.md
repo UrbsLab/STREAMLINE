@@ -211,8 +211,14 @@ git clone --single-branch https://github.com/UrbsLab/STREAMLINE.git
 cd STREAMLINE
 conda create -n streamline python=3.11 pip
 conda activate streamline
+conda install pytorch=2.6 -y
 pip install -r requirements.txt
 ```
+
+TabPFN requires a Prior Labs token before local model weights can be downloaded.
+Without the token, Phase 6 warns and skips requested TabPFN models while other
+models continue. See `docs/source/tabpfn_token.md` before running TabPFN models
+or the token-gated TabPFN fit tests.
 
 Example with `venv`:
 

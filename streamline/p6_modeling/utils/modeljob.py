@@ -19,6 +19,7 @@ from streamline.p6_modeling.utils.categorical import (
     normalize_model_id,
     one_hot_align,
     parse_model_id_csv,
+    to_numeric_matrix,
 )
 
 
@@ -154,8 +155,7 @@ class ModelJob:
         logging.info(self.full_path.split('/')[-1] + " [CV_" + str(self.cv_count) + "] (" + self.algorithm
                      + ") training complete. ------------------------------------")
         experiment_path = '/'.join(self.full_path.split('/')[:-1])
-        if os.path.exists(experiment_path + '/jobsCompleted/') is False:
-            os.makedirs(experiment_path + '/jobsCompleted/')
+        os.makedirs(experiment_path + '/jobsCompleted/', exist_ok=True)
         job_file = open(experiment_path + '/jobsCompleted/job_model_' + self.full_path.split('/')[-1]
                         + '_' + str(self.cv_count) + '_' + self.algorithm + '.txt', 'w')
         job_file.write('complete')
@@ -196,10 +196,8 @@ class ModelJob:
             else:
                 raise
 
-        if not os.path.exists(self.full_path + '/models/'):
-            os.makedirs(self.full_path + '/models/')
-        if not os.path.exists(self.full_path + '/models/pickledModels/'):
-            os.makedirs(self.full_path + '/models/pickledModels/')
+        os.makedirs(self.full_path + '/models/', exist_ok=True)
+        os.makedirs(self.full_path + '/models/pickledModels/', exist_ok=True)
         # keep pickled_metrics only for residuals (regression)
         if not os.path.exists(self.full_path + '/model_evaluation/pickled_metrics/'):
             os.makedirs(self.full_path + '/model_evaluation/pickled_metrics/', exist_ok=True)
@@ -358,14 +356,14 @@ class ModelJob:
             self.categorical_feature_names = []
             self.categorical_encoding_mode = "one_hot"
             del train; del test
-            return x_train.values, y_train, x_test.values, y_test
+            return to_numeric_matrix(x_train), y_train, to_numeric_matrix(x_test), y_test
 
         self.feature_names = list(x_train.columns)
         self.encoded_feature_names = list(x_train.columns)
         self.categorical_feature_names = []
         self.categorical_encoding_mode = "none"
         del train; del test
-        return x_train.values, y_train, x_test.values, y_test
+        return to_numeric_matrix(x_train), y_train, to_numeric_matrix(x_test), y_test
 
     @staticmethod
     def _take_rows(x, indices):
@@ -499,11 +497,12 @@ class ModelJob:
                 logging.warning("Could not set ExSTraCS categorical attributes on %s: %s", model.small_name, exc)
 
     def _wrap_model_if_needed(self, estimator):
-        if self.categorical_encoding_mode not in {"one_hot", "native"}:
-            return estimator
+        mode = self.categorical_encoding_mode
+        if mode not in {"one_hot", "native"}:
+            mode = "numeric"
         return FeatureTypeModelWrapper(
             estimator,
-            mode=self.categorical_encoding_mode,
+            mode=mode,
             raw_feature_names=self.raw_feature_names,
             categorical_columns=self.raw_categorical_feature_names,
             encoded_feature_names=self.encoded_feature_names,

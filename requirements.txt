@@ -26,6 +26,7 @@ scikit-XCS
 scikit-ExSTraCS
 scikit-eLCS
 skheros
+tabpfn
 wittgenstein
 kaleido
 dask-jobqueue

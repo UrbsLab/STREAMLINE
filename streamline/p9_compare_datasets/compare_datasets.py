@@ -719,7 +719,7 @@ class DatasetCompareJob:
         df = pd.DataFrame(rows)
         # ensure numeric where possible
         for c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="ignore")
+            df[c] = pd.to_numeric(df[c], errors="coerce")
         return df
 
     def inter_set_fn(self, fn, algorithm: str) -> List[List[Any]]:

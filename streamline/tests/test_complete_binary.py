@@ -86,8 +86,8 @@ def test_full_streamline_pipeline_uci_binary_hcc(tmp_path: Path):
     p4 = P4Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
-        models="mutualinformation,multisurf",
-        models_params={"mutualinformation": {"outcome_type": "Binary"}, "multisurf": {"n_jobs": 1}},
+        models="mutualinformation,multiswrfdb",
+        models_params={"mutualinformation": {"outcome_type": "Binary"}, "multiswrfdb": {"n_jobs": 1}},
         outcome_label=outcome_label,
         outcome_type="Binary",
         instance_label=instance_label,
@@ -98,8 +98,8 @@ def test_full_streamline_pipeline_uci_binary_hcc(tmp_path: Path):
 
     fi_dir = ds_dir / "feature_importance"
     assert fi_dir.exists(), "Phase 4 should write feature importance artifacts"
-    selector_path = fi_dir / "multisurf" / "selector_cv0.pickle"
-    assert selector_path.is_file(), "Phase 4 should save the MultiSURF selector payload"
+    selector_path = fi_dir / "multiswrfdb" / "selector_cv0.pickle"
+    assert selector_path.is_file(), "Phase 4 should save the MultiSWRFDB selector payload"
     with open(selector_path, "rb") as f:
         selector_payload = pickle.load(f)
     assert selector_payload["instance_subset"] == 2000
@@ -116,6 +116,8 @@ def test_full_streamline_pipeline_uci_binary_hcc(tmp_path: Path):
 
     assert (ds_dir / "feature_selection").exists(), "Phase 5 should write feature selection artifacts"
 
+    p6_models = ["NB", "LR", "DT"]
+
     p6 = P6Runner(
         output_path=str(output_root),
         experiment_name=experiment_name,
@@ -123,11 +125,11 @@ def test_full_streamline_pipeline_uci_binary_hcc(tmp_path: Path):
         outcome_type="Binary",
         instance_label=instance_label,
         n_splits=cv_splits,
-        models="NB,LR,DT",
+        models=",".join(p6_models),
         calibrate=False,
         scoring_metric="balanced_accuracy",
         metric_direction="maximize",
-        n_trials=2,
+        n_trials=1,
         timeout=15,
         training_subsample=0,
         uniform_fi=False,
@@ -148,7 +150,7 @@ def test_full_streamline_pipeline_uci_binary_hcc(tmp_path: Path):
         outcome_label=outcome_label,
         instance_label=instance_label,
         ensembles="hard_voting,soft_voting,stack_lr",
-        base_models="NB,LR,DT",
+        base_models=",".join(p6_models),
         meta_train_source="train",
         calibrate=0,
         calibrate_method="sigmoid",

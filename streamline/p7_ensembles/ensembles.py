@@ -332,7 +332,7 @@ def _normalize_outcome_type(value: Optional[str]) -> Optional[str]:
     return str(value)
 
 def _prep_xy(df: pd.DataFrame, outcome_label: str):
-    X = df.drop(columns=[outcome_label]).values
+    X = df.drop(columns=[outcome_label]).copy()
     y = df[outcome_label].values
     return X, y
 

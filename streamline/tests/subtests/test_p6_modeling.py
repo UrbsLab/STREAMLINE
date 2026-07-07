@@ -98,7 +98,7 @@ def _run_p6_for_models(
         uniform_fi=False,
         save_plot=False,
         random_state=123,
-    ).run()
+    ).run_all_model_cv_jobs()
 
 
 def _assert_artifacts(dataset_dir: Path, small_name: str):

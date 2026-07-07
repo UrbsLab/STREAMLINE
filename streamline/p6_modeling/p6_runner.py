@@ -1,5 +1,7 @@
 from __future__ import annotations
+import json
 import os, time
+import shlex
 from pathlib import Path
 from typing import Optional, List
 import logging
@@ -11,7 +13,7 @@ logger = logging.getLogger("distributed.worker"); logger.setLevel(logging.WARNIN
 from streamline.p6_modeling.modeling import ModelingPhaseJob
 from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 from streamline.p6_modeling.utils.loader import modeling_type_to_outcome_type, normalize_modeling_type
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
+from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
 
@@ -100,36 +102,73 @@ class P6Runner:
             os.makedirs(os.path.join(self.exp_root, "logs"), exist_ok=True)
 
     def run(self):
-        datasets = [
-            os.path.join(self.exp_root, name)
-            for name in sorted(os.listdir(self.exp_root))
-            if os.path.isdir(os.path.join(self.exp_root, name))
-            and name not in {"jobsCompleted","jobs","logs","dask_logs","DatasetComparisons"}
-            and os.path.isdir(os.path.join(self.exp_root, name, "CVDatasets"))
-        ]
+        datasets = self.find_modeling_dataset_dirs()
         if not datasets:
             logging.warning("No datasets found for Phase 6 under %s", self.exp_root)
             return
 
         mode = self.run_cluster
         if mode == "Serial":
-            for ds in datasets: self._run_one(ds)
+            self.run_modeling_phase_jobs_serially(datasets)
         elif mode == "Local":
+            jobs, model_counts = self.collect_model_cv_jobs(datasets)
+            label = self.format_model_cv_progress_label("Dask", jobs, model_counts)
+            if not jobs:
+                logging.warning("No Phase 6 model/CV jobs to run.")
+                self.mark_modeling_phase_complete(datasets)
+                return
             with LocalCluster(processes=True, n_workers=num_cores, threads_per_worker=1) as cluster:
                 with Client(cluster) as client:
-                    tasks = [dask.delayed(self._run_one)(ds) for ds in datasets]
-                    run_dask_tasks(tasks, client, label="Phase 6 Dask jobs")
+                    tasks = [
+                        dask.delayed(self.run_model_cv_job)(dataset_dir, ModelCls, cv_idx)
+                        for dataset_dir, ModelCls, cv_idx in jobs
+                    ]
+                    run_dask_tasks(tasks, client, label=label)
+            self.mark_modeling_phase_complete(datasets)
         elif mode == "Parallel":
-            run_parallel_items(self._run_one, datasets, label="Phase 6 Parallel jobs")
+            jobs, model_counts = self.collect_model_cv_jobs(datasets)
+            label = self.format_model_cv_progress_label("Parallel", jobs, model_counts)
+            if not jobs:
+                logging.warning("No Phase 6 model/CV jobs to run.")
+                self.mark_modeling_phase_complete(datasets)
+                return
+            run_parallel_jobs(self.run_model_cv_job, jobs, label=label)
+            self.mark_modeling_phase_complete(datasets)
         elif mode in ("BashSLURM", "BashLSF"):
-            for ds in datasets: self._submit_bash(ds, mode)
+            jobs, model_counts = self.collect_model_cv_jobs(datasets)
+            logging.info(self.format_model_cv_progress_label(mode, jobs, model_counts))
+            for dataset_dir, ModelCls, cv_idx in jobs:
+                self.submit_bash_model_job(dataset_dir, ModelCls, cv_idx, mode)
         else:
+            jobs, model_counts = self.collect_model_cv_jobs(datasets)
+            label = self.format_model_cv_progress_label("Dask", jobs, model_counts)
+            if not jobs:
+                logging.warning("No Phase 6 model/CV jobs to run.")
+                self.mark_modeling_phase_complete(datasets)
+                return
             client: Client = get_cluster(mode, self.exp_root, self.queue, self.reserved_memory)
-            tasks = [dask.delayed(self._run_one)(ds) for ds in datasets]
-            run_dask_tasks(tasks, client, label="Phase 6 Dask jobs")
+            tasks = [
+                dask.delayed(self.run_model_cv_job)(ds, ModelCls, cv_idx)
+                for ds, ModelCls, cv_idx in jobs
+            ]
+            run_dask_tasks(tasks, client, label=label)
+            self.mark_modeling_phase_complete(datasets)
 
-    def _run_one(self, dataset_dir: str):
-        ModelingPhaseJob(
+    def find_modeling_dataset_dirs(self):
+        return [
+            os.path.join(self.exp_root, name)
+            for name in sorted(os.listdir(self.exp_root))
+            if os.path.isdir(os.path.join(self.exp_root, name))
+            and name not in {"jobsCompleted","jobs","logs","dask_logs","DatasetComparisons"}
+            and os.path.isdir(os.path.join(self.exp_root, name, "CVDatasets"))
+        ]
+
+    def run_modeling_phase_jobs_serially(self, datasets):
+        for dataset_dir in datasets:
+            self.make_modeling_phase_job(dataset_dir).run_all_model_cv_jobs()
+
+    def make_modeling_phase_job(self, dataset_dir: str):
+        return ModelingPhaseJob(
             dataset_dir=dataset_dir,
             outcome_label=self.outcome_label,
             model_type=self.model_type,
@@ -156,14 +195,49 @@ class P6Runner:
             random_state=self.random_state,
             bypass_one_hot_for_native_models=self.bypass_one_hot_for_native_models,
             native_categorical_models=self.native_categorical_models,
-        ).run()
+        )
 
-    def _submit_bash(self, dataset_dir: str, mode: str):
+    def collect_model_cv_jobs(self, datasets):
+        jobs = []
+        model_counts = {}
+        for dataset_dir in datasets:
+            phase_job = self.make_modeling_phase_job(dataset_dir)
+            model_classes = phase_job.resolve_model_classes()
+            model_counts[dataset_dir] = len(model_classes)
+            for ModelCls, cv_idx in phase_job.model_cv_specs():
+                jobs.append((dataset_dir, ModelCls, cv_idx))
+        return jobs, model_counts
+
+    def run_model_cv_job(self, dataset_dir: str, ModelCls, cv_idx: int):
+        self.make_modeling_phase_job(dataset_dir).run_single_model_cv(ModelCls, cv_idx)
+
+    def mark_modeling_phase_complete(self, datasets):
+        for dataset_dir in datasets:
+            self.make_modeling_phase_job(dataset_dir).mark_phase_complete()
+
+    def format_model_cv_progress_label(self, mode: str, jobs, model_counts):
+        dataset_count = len(model_counts)
+        model_count = sum(model_counts.values())
+        return (
+            f"Phase 6 {mode} jobs: {len(jobs)} model/CV jobs "
+            f"({model_count} model(s) across {dataset_count} dataset(s), "
+            f"{self.n_splits} CV split(s))"
+        )
+
+    def model_ids_csv(self):
+        if isinstance(self.models, list):
+            return ",".join(self.models)
+        return self.models or ""
+
+    def submit_bash_model_job(self, dataset_dir: str, ModelCls, cv_idx: int, mode: str):
         job_ref = str(time.time())
         jobs = os.path.join(self.exp_root, "jobs")
         logs = os.path.join(self.exp_root, "logs")
         os.makedirs(jobs, exist_ok=True); os.makedirs(logs, exist_ok=True)
-        sh_path = os.path.join(jobs, f"P6_{job_ref}_run.sh")
+
+        model_id = getattr(ModelCls, "small_name", getattr(ModelCls, "model_name", "model"))
+        dataset_name = os.path.basename(dataset_dir.rstrip("/"))
+        sh_path = os.path.join(jobs, f"P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}_run.sh")
         launcher = "sbatch" if mode == "BashSLURM" else "bsub <"
 
         script = str(Path(__file__).parent / "p6_jobsubmit.py")
@@ -174,7 +248,9 @@ class P6Runner:
             "--outcome_type", self.outcome_type,
             "--instance_label", self.instance_label or "",
             "--n_splits", str(self.n_splits),
-            "--models", (",".join(self.models) if isinstance(self.models, list) else (self.models or "")),
+            "--models", self.model_ids_csv(),
+            "--model_id", model_id,
+            "--cv_idx", str(cv_idx),
 
             "--calibrate", "1" if self.calibrate else "0",
             "--calibrate_method", self.calibrate_method,
@@ -198,25 +274,29 @@ class P6Runner:
             ),
         ]
         if self.model_params_json:
-            json_arg = self.model_params_json.replace('"', '\\"')
-            args.extend(["--model_params_json", f'"{json_arg}"'])
-        cmd = " ".join(args)
+            json_arg = (
+                json.dumps(self.model_params_json)
+                if isinstance(self.model_params_json, dict)
+                else str(self.model_params_json)
+            )
+            args.extend(["--model_params_json", json_arg])
+        cmd = " ".join(shlex.quote(str(arg)) for arg in args)
 
         with open(sh_path, "w") as sh:
             sh.write("#!/bin/bash\n")
             if mode == "BashSLURM":
                 sh.write(f"#SBATCH -p {self.queue}\n")
-                sh.write(f"#SBATCH --job-name={job_ref}\n")
+                sh.write(f"#SBATCH --job-name=P6_{model_id}_{cv_idx}_{job_ref}\n")
                 sh.write(f"#SBATCH --mem={self.reserved_memory}G\n")
-                sh.write(f"#SBATCH -o {logs}/P6_{job_ref}.o\n")
-                sh.write(f"#SBATCH -e {logs}/P6_{job_ref}.e\n")
+                sh.write(f"#SBATCH -o {logs}/P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}.o\n")
+                sh.write(f"#SBATCH -e {logs}/P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}.e\n")
                 sh.write("srun " + cmd + "\n")
             else:
                 sh.write(f"#BSUB -q {self.queue}\n")
-                sh.write(f"#BSUB -J {job_ref}\n")
+                sh.write(f"#BSUB -J P6_{model_id}_{cv_idx}_{job_ref}\n")
                 sh.write(f"#BSUB -R \"rusage[mem={self.reserved_memory}G]\"\n")
                 sh.write(f"#BSUB -M {self.reserved_memory}GB\n")
-                sh.write(f"#BSUB -o {logs}/P6_{job_ref}.o\n")
-                sh.write(f"#BSUB -e {logs}/P6_{job_ref}.e\n")
+                sh.write(f"#BSUB -o {logs}/P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}.o\n")
+                sh.write(f"#BSUB -e {logs}/P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}.e\n")
                 sh.write(cmd + "\n")
         os.system(f"{launcher} {sh_path}")

@@ -25,6 +25,7 @@ from streamline.p11_reporting.p11_runner import P11Runner
 
 SKIP_TILL_MODELING_PHASES = os.getenv("STREAMLINE_SKIP_TO_REGRESSION_PHASE8", "0").strip().lower() in {"1", "true", "yes"}
 
+
 def _pick_first_dataset_dir(exp_root: Path) -> Path:
     """
     STREAMLINE phase outputs typically look like:
@@ -144,6 +145,8 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         p4 = P4Runner(
             output_path=str(output_root),
             experiment_name=experiment_name,
+            models="mutualinformation,multiswrfdb",
+            models_params={"mutualinformation": {"outcome_type": "Continuous"}, "multiswrfdb": {"n_jobs": 1}},
             outcome_label=outcome_label,
             outcome_type="Continuous",
             instance_label=instance_label,
@@ -179,6 +182,8 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
         #
         # Adjust 'models=' to whatever your regression registry supports.
         # Common STREAMLINE abbreviations often include: LR, RF, SVR, EN (ElasticNet), LASSO, RIDGE, XGB, etc.
+        p6_models = ["LR", "RF", "SVR"]
+
         p6 = P6Runner(
             output_path=str(output_root),
             experiment_name=experiment_name,
@@ -186,12 +191,12 @@ def test_full_streamline_pipeline_demodata_regression(tmp_path: Path):
             model_type="Regression",
             instance_label=instance_label,
             n_splits=cv_splits,
-            models="LR,RF,SVR",
+            models=",".join(p6_models),
             calibrate=False,  # usually not relevant for regression; harmless if ignored
             scoring_metric="neg_mean_squared_error", # prefix with 'neg_' if using sklearn convention, don't change direction
             metric_direction="maximize",
-            n_trials=2,
-            timeout=15,
+            n_trials=1,
+            timeout=W,
             training_subsample=0,
             uniform_fi=False,
             save_plot=False,

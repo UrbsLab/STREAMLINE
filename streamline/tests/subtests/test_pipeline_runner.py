@@ -10,6 +10,14 @@ from streamline.utils.run_commands import load_phase_run_command, snapshot_effec
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
+def csv_values(value):
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [item.strip() for item in str(value).split(",") if item.strip()]
+
+
 def test_pipeline_controls_use_phase_aliases():
     config = {
         "run": {
@@ -257,6 +265,35 @@ def test_example_configs_include_explicit_non_json_phase_parameters():
             assert not missing, f"{config_path.name} missing [{phase}] keys: {sorted(missing)}"
 
 
+def test_example_configs_keep_current_fi_and_demo_model_sets():
+    cases = {
+        "uci_binary_hcc.cfg": {
+            "model_type": "Binary",
+            "expected_p6_models": {"NB", "LR", "DT"},
+        },
+        "uci_multiclass_student.cfg": {
+            "model_type": "Multiclass",
+            "expected_p6_models": {"NB", "LR", "DT"},
+        },
+        "uci_regression_auto_mpg.cfg": {
+            "model_type": "Regression",
+            "expected_p6_models": {"LR", "RF"},
+        },
+    }
+
+    for config_name, expected in cases.items():
+        config = load_config(PROJECT_ROOT / "run_configs" / config_name)
+        p4_config = config["phases"]["p4"]
+        p6_config = config["phases"]["p6"]
+
+        assert csv_values(p4_config["models"]) == ["mutualinformation", "multiswrfdb"]
+        assert set(p4_config["models_params"]) == {"mutualinformation", "multiswrfdb"}
+
+        p6_models = set(csv_values(p6_config["models"]))
+        assert p6_models == expected["expected_p6_models"]
+        assert p6_config["model_params_json"] in (None, {})
+
+
 def test_p6_runner_uses_outcome_type_as_public_task_parameter(tmp_path):
     output_path = tmp_path / "out"
     exp_root = output_path / "DemoExp"
@@ -287,26 +324,101 @@ def test_parallel_mode_name_and_p6_dispatch(monkeypatch, tmp_path):
     (dataset_dir / "CVDatasets").mkdir(parents=True)
     captured = {}
 
-    def fake_parallel_items(function, items, **kwargs):
-        captured["items"] = list(items)
+    def fake_parallel_jobs(function, jobs, **kwargs):
+        captured["jobs"] = list(jobs)
         captured["function"] = function
+        captured["label"] = kwargs.get("label")
 
     def fail_get_cluster(*args, **kwargs):
         raise AssertionError("Parallel mode should not use Dask cluster lookup")
 
-    monkeypatch.setattr(p6_runner_module, "run_parallel_items", fake_parallel_items)
+    monkeypatch.setattr(p6_runner_module, "run_parallel_jobs", fake_parallel_jobs)
     monkeypatch.setattr(p6_runner_module, "get_cluster", fail_get_cluster)
 
     runner = P6Runner(
         output_path=str(output_path),
         experiment_name="DemoExp",
         outcome_type="Binary",
+        models="NB,LR",
+        n_splits=2,
         run_cluster="Parallel",
     )
     runner.run()
 
-    assert captured["items"] == [str(dataset_dir)]
+    assert len(captured["jobs"]) == 4
+    assert {job[0] for job in captured["jobs"]} == {str(dataset_dir)}
+    assert [getattr(job[1], "small_name") for job in captured["jobs"]] == ["NB", "NB", "LR", "LR"]
+    assert [job[2] for job in captured["jobs"]] == [0, 1, 0, 1]
+    assert "4 model/CV jobs" in captured["label"]
     assert callable(captured["function"])
+
+
+def test_p6_local_dask_dispatch_reports_model_cv_job_count(monkeypatch, tmp_path):
+    output_path = tmp_path / "out"
+    dataset_dir = output_path / "DemoExp" / "DemoDataset"
+    (dataset_dir / "CVDatasets").mkdir(parents=True)
+    captured = {}
+
+    class DummyContext:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_run_dask_tasks(tasks, client, label=None):
+        captured["task_count"] = len(list(tasks))
+        captured["label"] = label
+
+    monkeypatch.setattr(p6_runner_module, "LocalCluster", DummyContext)
+    monkeypatch.setattr(p6_runner_module, "Client", DummyContext)
+    monkeypatch.setattr(p6_runner_module, "run_dask_tasks", fake_run_dask_tasks)
+
+    runner = P6Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        outcome_type="Binary",
+        models="NB,LR",
+        n_splits=2,
+        run_cluster="Local",
+    )
+    runner.run()
+
+    assert captured["task_count"] == 4
+    assert "4 model/CV jobs" in captured["label"]
+    assert "2 model(s)" in captured["label"]
+
+
+def test_p6_bash_submission_writes_one_script_per_model_cv(monkeypatch, tmp_path):
+    output_path = tmp_path / "out"
+    dataset_dir = output_path / "DemoExp" / "DemoDataset"
+    (dataset_dir / "CVDatasets").mkdir(parents=True)
+    submitted = []
+
+    monkeypatch.setattr(p6_runner_module.os, "system", lambda cmd: submitted.append(cmd) or 0)
+
+    runner = P6Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        outcome_type="Binary",
+        models="NB,LR",
+        n_splits=2,
+        run_cluster="BashSLURM",
+    )
+    runner.run()
+
+    scripts = sorted((output_path / "DemoExp" / "jobs").glob("P6_DemoDataset_*_run.sh"))
+    assert len(scripts) == 4
+    assert len(submitted) == 4
+
+    script_text = "\n".join(path.read_text() for path in scripts)
+    assert script_text.count("--model_id NB") == 2
+    assert script_text.count("--model_id LR") == 2
+    assert script_text.count("--cv_idx 0") == 2
+    assert script_text.count("--cv_idx 1") == 2
 
 
 def test_config_runner_records_phase_args_in_run_command_pickle(monkeypatch, tmp_path):
