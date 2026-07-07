@@ -205,7 +205,7 @@ def model_overrides_for_class(ModelCls, model_params: Dict[str, Dict[str, Any]])
 def create_model_instance(ModelCls, *, random_state, scoring_metric, metric_direction, model_params):
     model = ModelCls(
         random_state=random_state,
-        n_jobs=-1,
+        n_jobs=None,
         scoring_metric=scoring_metric,
         metric_direction=metric_direction,
     )
