@@ -14,4 +14,4 @@
 
 ## Version History
 
-See [Changelog](changelog.md) for the v3, v2, and v1 release-line summary.
+See [Changelog](changelog.md) for the v1.0.0, v0.3.4, and v0.2.5 release-line summary.

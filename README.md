@@ -4,7 +4,7 @@
 
 STREAMLINE is an end-to-end automated machine learning pipeline for tabular biomedical and general supervised learning workflows. The current codebase supports binary classification, multiclass classification, and regression, with integrated feature learning, feature importance, feature selection, base-model training, classification ensembles, summary statistics, dataset comparison, replication, and PDF reporting.
 
-This repository is the main starting point for the STREAMLINE v3 release and its current 11-phase implementation.
+This repository is the main starting point for the STREAMLINE v1.0.0 release and its current 11-phase implementation.
 
 ## What Is Included In This Version
 
@@ -338,7 +338,7 @@ In practice, this means new preprocessing, feature-learning, feature-importance,
 
 - STREAMLINE is designed for supervised learning on tabular data.
 - Unstructured data pipelines such as image, text, audio, and raw time-series feature extraction are not automated here.
-- The documentation in `docs/source` is the current documentation for the v3 main release.
+- The documentation in `docs/source` is the current documentation for the v1.0.0 main release.
 - As with any ML pipeline assembled on top of evolving third-party libraries, latest-version local environments may expose compatibility issues that require updates.
 
 ## Publications And Citation

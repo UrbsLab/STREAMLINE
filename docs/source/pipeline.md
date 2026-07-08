@@ -6,7 +6,7 @@ STREAMLINE run is called an **experiment**. Each experiment can contain one or
 more datasets, and each dataset is processed through cross-validation folds so
 that model evaluation stays separated from model training.
 
-The current v3 pipeline has eleven phases. P1-P8 are the core training and
+The current v1.0.0 pipeline has eleven phases. P1-P8 are the core training and
 summary workflow, P9 compares multiple datasets inside an experiment, P10
 applies trained workflows to external replication data, and P11 produces PDF
 reports.
@@ -136,7 +136,7 @@ P7 builds classification ensembles from P6 base model predictions. Current
 ensemble methods include hard voting, soft voting, and logistic-regression
 stacking.
 
-P7 is classification-only in the current v3 implementation. Regression
+P7 is classification-only in the current v1.0.0 implementation. Regression
 workflows should skip P7 and continue from P6 to P8.
 
 ## P8: Summary Statistics
