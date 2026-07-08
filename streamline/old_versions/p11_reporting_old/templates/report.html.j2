@@ -1,0 +1,447 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }} - {{ experiment_name }}</title>
+
+  <style>
+    @page {
+      size: A4;
+      margin: 10mm 8mm 14mm 8mm;
+
+      /* Old PDF feels like a centered footer line */
+      @bottom-center {
+        content: "Generated with STREAMLINE ({{ streamline_version }})";
+        font-size: 9px;
+        font-style: italic;
+      }
+      @bottom-right {
+        content: "Page " counter(page) " / " counter(pages);
+        font-size: 9px;
+      }
+    }
+
+    html, body {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 11px;
+      line-height: 1.15;
+    }
+
+    h1 { font-size: 16px; margin: 0; }
+    h2 { font-size: 13px; margin: 0; }
+
+    .muted { color: #222; font-size: 10px; }
+
+    .page-break { page-break-before: always; }
+    .avoid-break { page-break-inside: avoid; break-inside: avoid; }
+
+    /* --- Box + bar system (old PDF vibe) --- */
+    .card {
+      border: 1.3px solid #111;
+      padding: 6px;
+      margin: 0 0 8px 0;
+    }
+
+    /* Big boxed title strip (like old report title bars) */
+    .title-strip {
+      border: 1.3px solid #111;
+      padding: 4px 6px;
+      margin: 0 0 6px 0;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    /* Section headers: gray filled bar with border */
+    .section-title {
+      font-weight: bold;
+      border: 1.2px solid #111;
+      background: #d9d9d9;
+      padding: 4px 6px;
+      margin: 0 0 6px 0;
+    }
+
+    /* --- Tables: heavier borders + gray header row --- */
+    table.tbl {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 9px;
+    }
+    table.tbl th, table.tbl td {
+      border: 1.1px solid #111;
+      padding: 2px 3px;
+      word-wrap: break-word;
+      vertical-align: top;
+    }
+    table.tbl thead { display: table-header-group; }
+    table.tbl th {
+      font-weight: bold;
+      text-align: center;
+      background: #d9d9d9;
+    }
+
+    td.kv-key {
+      background: #efefef;
+      font-weight: bold;
+      width: 35%;
+    }
+
+    td.best { font-weight: bold; background: #e6e6e6; }
+
+    /* --- FIGURE LAYOUT (WeasyPrint-stable) --- */
+    table.figgrid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 6px;
+      table-layout: fixed;
+    }
+    table.figgrid td {
+      vertical-align: top;
+      width: 50%;
+    }
+
+    .fig-title { font-weight: bold; margin: 0 0 3px 0; font-size: 10px; }
+
+    .figbox {
+      border: 1.1px solid #111;
+      padding: 3px;
+      background: #fff;
+    }
+
+    /* Fixed-height figure box keeps mosaics on the same page */
+    .h70 { height: 65mm; }
+    .h80 { height: 75mm; }
+    .h90 { height: 85mm; }
+
+    /* Image scaling inside fixed-height boxes */
+    img.figure {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Cover / header -->
+  <div class="title-strip avoid-break">
+    STREAMLINE Evaluation Report
+  </div>
+
+  <div class="card avoid-break">
+    <div class="muted">
+      Experiment: <b>{{ experiment_name }}</b><br/>
+      Generated at: {{ generated_at }}<br/>
+      Report Version: {{ streamline_version }}
+    </div>
+  </div>
+
+  <!-- Metadata -->
+  <div class="card">
+    <div class="section-title">Metadata</div>
+    <table class="tbl">
+      <thead><tr><th style="width:35%;">Key</th><th>Value</th></tr></thead>
+      <tbody>
+      {% for k, v in metadata.items() %}
+        <tr>
+          <td class="kv-key">{{ k }}</td>
+          <td>{{ v }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% for ds in datasets %}
+    <div class="page-break"></div>
+
+    <div class="title-strip avoid-break">
+      Dataset: {{ ds.dataset_name }}
+    </div>
+
+    <div class="card avoid-break">
+      <div class="muted">{{ ds.dataset_dir }}</div>
+    </div>
+
+    <!-- Exploratory + performance mosaic (2x2) -->
+    <div class="card avoid-break">
+      <div class="section-title">Exploratory + Performance Summary (Mosaic)</div>
+
+      <table class="figgrid">
+        <tr>
+          <td>
+            <div class="fig-title">Class Balance</div>
+            <div class="figbox h80">
+              {% if ds.figures.class_balance %}
+                <img class="figure" src="{{ ds.figures.class_balance }}" />
+              {% else %}
+                <div class="muted">ClassCounts.csv missing or could not be plotted.</div>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <div class="fig-title">Missingness (Top 25)</div>
+            <div class="figbox h80">
+              {% if ds.figures.missingness %}
+                <img class="figure" src="{{ ds.figures.missingness }}" />
+              {% else %}
+                <div class="muted">DataMissingness.csv missing or could not be plotted.</div>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="fig-title">Models: Mean Performance</div>
+            <div class="figbox h80">
+              {% if ds.figures.models_mean_bar %}
+                <img class="figure" src="{{ ds.figures.models_mean_bar }}" />
+              {% else %}
+                <div class="muted">Summary_performance_mean.csv missing or could not be plotted.</div>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <div class="fig-title">Models: CV Distribution</div>
+            <div class="figbox h80">
+              {% if ds.figures.models_cv_box %}
+                <img class="figure" src="{{ ds.figures.models_cv_box }}" />
+              {% else %}
+                <div class="muted">metrics_by_cv not found or could not be plotted.</div>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Performance tables -->
+    <div class="card">
+      <div class="section-title">Model Performance</div>
+
+      {% if ds.perf.models_mean_std.present %}
+        <div style="margin-bottom:6px;"><b>Mean ± Std</b></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for c in ds.perf.models_mean_std.columns %}
+                <th>{{ c }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.perf.models_mean_std.rows %}
+              <tr>
+                {% for cell in row.cells %}
+                  <td class="{{ 'best' if cell.best else '' }}">{{ cell.value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Summary_performance_mean/std.csv not found.</div>
+      {% endif %}
+
+      <div style="height:10px;"></div>
+
+      {% if ds.perf.models_median.present %}
+        <div style="margin-bottom:6px;"><b>Median</b></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for c in ds.perf.models_median.columns %}
+                <th>{{ c }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.perf.models_median.rows %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Summary_performance_median.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <!-- Curves mosaic (side-by-side) -->
+    <div class="card avoid-break">
+      <div class="section-title">Model Curves (Side-by-Side)</div>
+
+      <table class="figgrid">
+        <tr>
+          <td>
+            <div class="fig-title">ROC Overlay</div>
+            <div class="figbox h90">
+              {% if ds.figures.models_roc_overlay %}
+                <img class="figure" src="{{ ds.figures.models_roc_overlay }}" />
+              {% else %}
+                <div class="muted">curves_by_cv/*_roc.json missing or could not be plotted.</div>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <div class="fig-title">PRC Overlay</div>
+            <div class="figbox h90">
+              {% if ds.figures.models_prc_overlay %}
+                <img class="figure" src="{{ ds.figures.models_prc_overlay }}" />
+              {% else %}
+                <div class="muted">curves_by_cv/*_prc.json missing or could not be plotted.</div>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Feature importance (full width) -->
+    <div class="card avoid-break">
+      <div class="section-title">Feature Importance</div>
+      <div class="figbox h90">
+        {% if ds.figures.fi_top20 %}
+          <img class="figure" src="{{ ds.figures.fi_top20 }}" />
+        {% else %}
+          <div class="muted">No *_FI.csv found under model_evaluation/feature_importance/.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Univariate -->
+    <div class="card">
+      <div class="section-title">Univariate Significance (Top 10)</div>
+      {% if ds.tables.univariate_top10.present %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in ds.tables.univariate_top10.columns %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.tables.univariate_top10.rows %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Univariate_Significance.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <!-- Informative features -->
+    <div class="card">
+      <div class="section-title">Informative Feature Summary</div>
+      {% if ds.tables.informative_feature_summary.present %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in ds.tables.informative_feature_summary.columns %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.tables.informative_feature_summary.rows %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">feature_selection/InformativeFeatureSummary.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <!-- Runtime -->
+    <div class="card">
+      <div class="section-title">Runtime Summary (runtimes.csv)</div>
+      {% if ds.tables.runtimes.present %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in ds.tables.runtimes.columns %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.tables.runtimes.rows %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">runtimes.csv not found.</div>
+      {% endif %}
+    </div>
+
+  {% endfor %}
+
+  {% if dataset_comparisons.present %}
+    <div class="page-break"></div>
+
+    <div class="title-strip avoid-break">
+      Dataset Comparisons
+    </div>
+
+    <div class="card avoid-break">
+      <div class="section-title">Kruskal-Wallis Summary</div>
+      <div class="figbox h90">
+        {% if dataset_comparisons.figures.kw_pvalues %}
+          <img class="figure" src="{{ dataset_comparisons.figures.kw_pvalues }}" />
+        {% else %}
+          <div class="muted">Could not plot KW p-values (BestCompare_KruskalWallis.csv).</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">BestCompare_KruskalWallis.csv</div>
+      {% if dataset_comparisons.tables.best_kw.present %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in dataset_comparisons.tables.best_kw.columns %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in dataset_comparisons.tables.best_kw.rows %}
+              <tr>
+                {% for cell in row %}
+                  <td>{{ cell }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">BestCompare_KruskalWallis.csv not found.</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</body>
+</html>

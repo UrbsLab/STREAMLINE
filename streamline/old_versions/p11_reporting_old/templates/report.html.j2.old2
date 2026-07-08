@@ -1,0 +1,484 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }} - {{ experiment_name }}</title>
+  <style>
+    /* --- Pagination / page numbers (WeasyPrint) --- */
+    @page {
+      size: A4;
+      margin: 14mm 12mm 16mm 12mm;
+
+      @bottom-left {
+        content: "Generated with STREAMLINE ({{ streamline_version }})";
+        font-size: 9px;
+        font-style: italic;
+      }
+      @bottom-right {
+        content: "Page " counter(page) " / " counter(pages);
+        font-size: 9px;
+      }
+    }
+
+    html, body { font-family: "Times New Roman", Times, serif; font-size: 12px; }
+    h1, h2, h3 { margin: 0 0 6px 0; }
+    .muted { color: #444; font-size: 11px; }
+
+    .page-break { page-break-before: always; }
+    .avoid-break { page-break-inside: avoid; }
+
+    .card {
+      border: 1px solid #111;
+      padding: 8px;
+      margin: 0 0 10px 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    img.figure {
+      width: 100%;
+      height: auto;
+      border: 1px solid #333;
+    }
+
+    /* --- Tables --- */
+    table.tbl {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 10px;
+    }
+    table.tbl th, table.tbl td {
+      border: 1px solid #111;
+      padding: 3px 4px;
+      word-wrap: break-word;
+    }
+    table.tbl thead { display: table-header-group; } /* repeat headers across pages */
+    table.tbl th {
+      font-weight: bold;
+      text-align: center;
+    }
+    table.tbl td { text-align: left; }
+    td.best {
+      font-weight: bold;
+      background: #e6e6e6;
+    }
+
+    .section-title {
+      font-weight: bold;
+      border: 1px solid #111;
+      padding: 6px;
+      margin: 0 0 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Front / summary -->
+  <div class="card avoid-break">
+    <h1>STREAMLINE Evaluation Report</h1>
+    <div class="muted">
+      Experiment: <b>{{ experiment_name }}</b><br/>
+      Generated at: {{ generated_at }}<br/>
+      Mode: {{ "Training" if training else "Replication/Testing" }}<br/>
+      Outcome Type: {{ outcome_type }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Metadata</div>
+    <table class="tbl">
+      <thead><tr><th style="width:35%;">Key</th><th>Value</th></tr></thead>
+      <tbody>
+      {% for k, v in metadata.items() %}
+        <tr>
+          <td><b>{{ k }}</b></td>
+          <td>{{ v }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if alg_info %}
+  <div class="card">
+    <div class="section-title">Algorithm Info</div>
+    <table class="tbl">
+      <thead><tr><th style="width:55%;">Algorithm</th><th>Enabled</th></tr></thead>
+      <tbody>
+      {% for k in alg_info.keys()|sort %}
+        <tr>
+          <td><b>{{ k }}</b></td>
+          <td>{{ alg_info[k][0] }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Per-dataset -->
+  {% for ds in datasets %}
+    <div class="page-break"></div>
+
+    <div class="card avoid-break">
+      <h2>Dataset: {{ ds.dataset_name }}</h2>
+      <div class="muted">{{ ds.dataset_dir }}</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card avoid-break">
+        <div class="section-title">Exploratory</div>
+        {% if ds.figures.class_counts %}
+          <div><b>Class Balance (Processed)</b></div>
+          <img class="figure" src="{{ ds.figures.class_counts }}" />
+        {% else %}
+          <div class="muted">ClassCountsBarPlot.png not found.</div>
+        {% endif %}
+
+        <div style="height:8px;"></div>
+
+        {% if ds.figures.feature_correlations %}
+          <div><b>Feature Correlations</b></div>
+          <img class="figure" src="{{ ds.figures.feature_correlations }}" />
+        {% else %}
+          <div class="muted">FeatureCorrelations.png not found.</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="section-title">Data Processing Summary</div>
+        {% if ds.tables.data_process_summary and ds.tables.data_process_summary|length > 0 %}
+          <table class="tbl">
+            <thead>
+              <tr>
+                {% for col in ds.tables.data_process_summary[0].keys() %}
+                  <th>{{ col }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in ds.tables.data_process_summary %}
+                <tr>
+                  {% for col, val in r.items() %}
+                    <td>{{ val }}</td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="muted">DataProcessSummary.csv not found or empty.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Univariate Significance (Top 10)</div>
+      {% if ds.tables.univariate_top10 and ds.tables.univariate_top10|length > 0 %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in ds.tables.univariate_top10[0].keys() %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in ds.tables.univariate_top10 %}
+              <tr>
+                {% for col, val in r.items() %}
+                  <td>{{ val }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Univariate_Significance.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Model Performance</div>
+
+      {% if ds.perf.models_mean_std.present %}
+        <div><b>Mean ± Std</b></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for c in ds.perf.models_mean_std.columns %}
+                <th>{{ c }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.perf.models_mean_std.rows %}
+              <tr>
+                {% for cell in row.cells %}
+                  <td class="{{ 'best' if cell.best else '' }}">{{ cell.value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Summary_performance_mean/std.csv not found.</div>
+      {% endif %}
+
+      <div style="height:10px;"></div>
+
+      {% if ds.perf.models_median.present %}
+        <div><b>Median</b></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for c in ds.perf.models_median.columns %}
+                <th>{{ c }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.perf.models_median.rows %}
+              <tr>
+                {% for cell in row.cells %}
+                  <td>{{ cell.value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Summary_performance_median.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Ensemble Performance</div>
+
+      {% if ds.perf.ensembles_mean_std.present %}
+        <div><b>Mean ± Std</b></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for c in ds.perf.ensembles_mean_std.columns %}
+                <th>{{ c }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.perf.ensembles_mean_std.rows %}
+              <tr>
+                {% for cell in row.cells %}
+                  <td class="{{ 'best' if cell.best else '' }}">{{ cell.value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Ensembles_performance_mean/std.csv not found.</div>
+      {% endif %}
+
+      <div style="height:10px;"></div>
+
+      {% if ds.perf.ensembles_median.present %}
+        <div><b>Median</b></div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for c in ds.perf.ensembles_median.columns %}
+                <th>{{ c }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in ds.perf.ensembles_median.rows %}
+              <tr>
+                {% for cell in row.cells %}
+                  <td>{{ cell.value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">Ensembles_performance_median.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <div class="grid-2">
+      <div class="card avoid-break">
+        <div class="section-title">Model Summary Curves</div>
+        {% if ds.figures.summary_roc %}
+          <div><b>ROC (All Models)</b></div>
+          <img class="figure" src="{{ ds.figures.summary_roc }}" />
+        {% else %}
+          <div class="muted">Summary_ROC.png not found.</div>
+        {% endif %}
+        <div style="height:8px;"></div>
+        {% if ds.figures.summary_prc %}
+          <div><b>PRC (All Models)</b></div>
+          <img class="figure" src="{{ ds.figures.summary_prc }}" />
+        {% else %}
+          <div class="muted">Summary_PRC.png not found.</div>
+        {% endif %}
+      </div>
+
+      <div class="card avoid-break">
+        <div class="section-title">Ensemble Summary Curves</div>
+        {% if ds.figures.summary_roc_ensembles %}
+          <div><b>ROC (Ensembles)</b></div>
+          <img class="figure" src="{{ ds.figures.summary_roc_ensembles }}" />
+        {% else %}
+          <div class="muted">Summary_ROC_ensembles.png not found.</div>
+        {% endif %}
+        <div style="height:8px;"></div>
+        {% if ds.figures.summary_prc_ensembles %}
+          <div><b>PRC (Ensembles)</b></div>
+          <img class="figure" src="{{ ds.figures.summary_prc_ensembles }}" />
+        {% else %}
+          <div class="muted">Summary_PRC_ensembles.png not found.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Informative Feature Summary</div>
+      {% if ds.tables.informative_feature_summary and ds.tables.informative_feature_summary|length > 0 %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in ds.tables.informative_feature_summary[0].keys() %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in ds.tables.informative_feature_summary %}
+              <tr>
+                {% for col, val in r.items() %}
+                  <td>{{ val }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">feature_selection/InformativeFeatureSummary.csv not found.</div>
+      {% endif %}
+    </div>
+
+    <div class="grid-2">
+      <div class="card avoid-break">
+        <div class="section-title">Feature Importance (Mutual Information)</div>
+        {% if ds.figures.fi_mutualinformation %}
+          <img class="figure" src="{{ ds.figures.fi_mutualinformation }}" />
+        {% else %}
+          <div class="muted">feature_importance/mutualinformation/TopAverageScores.png not found.</div>
+        {% endif %}
+      </div>
+      <div class="card avoid-break">
+        <div class="section-title">Feature Importance (MultiSURF)</div>
+        {% if ds.figures.fi_multisurf %}
+          <img class="figure" src="{{ ds.figures.fi_multisurf }}" />
+        {% else %}
+          <div class="muted">feature_importance/multisurf/TopAverageScores.png not found.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Runtime Summary (runtimes.csv)</div>
+      {% if ds.tables.runtimes and ds.tables.runtimes|length > 0 %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in ds.tables.runtimes[0].keys() %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in ds.tables.runtimes %}
+              <tr>
+                {% for col, val in r.items() %}
+                  <td>{{ val }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">runtimes.csv not found.</div>
+      {% endif %}
+    </div>
+
+  {% endfor %}
+
+  <!-- Dataset comparisons -->
+  {% if dataset_comparisons.present %}
+    <div class="page-break"></div>
+
+    <div class="card avoid-break">
+      <h2>Compare ML Performance Across Datasets</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card avoid-break">
+        {% if dataset_comparisons.figures.allmodels_roc_auc %}
+          <div><b>All Models: ROC AUC</b></div>
+          <img class="figure" src="{{ dataset_comparisons.figures.allmodels_roc_auc }}" />
+        {% else %}
+          <div class="muted">DataCompareAllModels_ROC AUC.png not found.</div>
+        {% endif %}
+      </div>
+      <div class="card avoid-break">
+        {% if dataset_comparisons.figures.allmodels_prc_auc %}
+          <div><b>All Models: PRC AUC</b></div>
+          <img class="figure" src="{{ dataset_comparisons.figures.allmodels_prc_auc }}" />
+        {% else %}
+          <div class="muted">DataCompareAllModels_PRC AUC.png not found.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">BestCompare_KruskalWallis.csv</div>
+      {% if dataset_comparisons.tables.best_kw and dataset_comparisons.tables.best_kw|length > 0 %}
+        <table class="tbl">
+          <thead>
+            <tr>
+              {% for col in dataset_comparisons.tables.best_kw[0].keys() %}
+                <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in dataset_comparisons.tables.best_kw %}
+              <tr>
+                {% for col, val in r.items() %}
+                  <td>{{ val }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="muted">BestCompare_KruskalWallis.csv not found.</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</body>
+</html>

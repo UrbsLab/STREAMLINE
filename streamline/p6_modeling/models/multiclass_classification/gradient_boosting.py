@@ -1,0 +1,173 @@
+from abc import ABC
+from streamline.p6_modeling.utils.submodels import MulticlassClassificationModel
+from sklearn.ensemble import GradientBoostingClassifier as GB
+from xgboost import XGBClassifier as XGB
+from lightgbm import LGBMClassifier as LGB
+from catboost import CatBoostClassifier as CGB
+
+
+class GBClassifier(MulticlassClassificationModel, ABC):
+    model_name = "Gradient Boosting"
+    small_name = "GB"
+    color = "cornflowerblue"
+
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
+                 metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
+        super().__init__(GB, "Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {'n_estimators': [10, 1000], 'loss': ['deviance', 'exponential'],
+                           'learning_rate': [0.0001, 0.3], 'min_samples_leaf': [1, 50], 'min_samples_split': [2, 50],
+                           'max_depth': [1, 30], 'random_state': [random_state, ]}
+        self.small_name = "GB"
+        self.color = "cornflowerblue"
+        self.n_jobs = n_jobs
+
+    def objective(self, trial, params=None):
+        self.params = {'n_estimators': trial.suggest_int('n_estimators', self.param_grid['n_estimators'][0],
+                                                         self.param_grid['n_estimators'][1]),
+                       'loss': trial.suggest_categorical('loss', self.param_grid['loss']),
+                       'learning_rate': trial.suggest_float('learning_rate', self.param_grid['learning_rate'][0],
+                                                            self.param_grid['learning_rate'][1], log=True),
+                       'min_samples_leaf': trial.suggest_int('min_samples_leaf', self.param_grid['min_samples_leaf'][0],
+                                                             self.param_grid['min_samples_leaf'][1]),
+                       'min_samples_split': trial.suggest_int('min_samples_split',
+                                                              self.param_grid['min_samples_split'][0],
+                                                              self.param_grid['min_samples_split'][1]),
+                       'max_depth': trial.suggest_int('max_depth', self.param_grid['max_depth'][0],
+                                                      self.param_grid['max_depth'][1]),
+                       'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state'])}
+
+        mean_cv_score = self.hyper_eval()
+        return mean_cv_score
+
+
+class XGBClassifier(MulticlassClassificationModel, ABC):
+    model_name = "Extreme Gradient Boosting"
+    small_name = "XGB"
+    color = "cyan"
+
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
+                 metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
+        super().__init__(XGB, "Extreme Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {'booster': ['gbtree'], 'objective': ['multi:softprob'], 'eval_metric': ['mlogloss'], 'verbosity': [0],
+                           'reg_lambda': [1e-08, 1.0], 'alpha': [1e-08, 1.0], 'eta': [1e-08, 1.0],
+                           'gamma': [1e-08, 1.0], 'max_depth': [1, 30], 'grow_policy': ['depthwise', 'lossguide'],
+                           'n_estimators': [10, 1000], 'min_samples_split': [2, 50], 'min_samples_leaf': [1, 50],
+                           'subsample': [0.5, 1.0], 'min_child_weight': [0.1, 10], 'colsample_bytree': [0.1, 1.0],
+                           'nthread': [1], 'random_state': [random_state, ]}
+        self.small_name = "XGB"
+        self.color = "cyan"
+        self.n_jobs = n_jobs
+
+    def objective(self, trial, params=None):
+        param_grid = self.param_grid
+        self.params = {'booster': trial.suggest_categorical('booster', param_grid['booster']),
+                       'objective': trial.suggest_categorical('objective', param_grid['objective']),
+                       'eval_metric': trial.suggest_categorical('eval_metric', param_grid['eval_metric']),
+                       'verbosity': trial.suggest_categorical('verbosity', param_grid['verbosity']),
+                       'reg_lambda': trial.suggest_float('reg_lambda', param_grid['reg_lambda'][0],
+                                                         param_grid['reg_lambda'][1], log=True),
+                       'alpha': trial.suggest_float('alpha', param_grid['alpha'][0], param_grid['alpha'][1], log=True),
+                       'eta': trial.suggest_float('eta', param_grid['eta'][0], param_grid['eta'][1], log=True),
+                       'gamma': trial.suggest_float('gamma', param_grid['gamma'][0], param_grid['gamma'][1], log=True),
+                       'max_depth': trial.suggest_int('max_depth', param_grid['max_depth'][0],
+                                                      param_grid['max_depth'][1]),
+                       'grow_policy': trial.suggest_categorical('grow_policy', param_grid['grow_policy']),
+                       'n_estimators': trial.suggest_int('n_estimators', param_grid['n_estimators'][0],
+                                                         param_grid['n_estimators'][1]),
+                       'min_samples_split': trial.suggest_int('min_samples_split', param_grid['min_samples_split'][0],
+                                                              param_grid['min_samples_split'][1]),
+                       'min_samples_leaf': trial.suggest_int('min_samples_leaf', param_grid['min_samples_leaf'][0],
+                                                             param_grid['min_samples_leaf'][1]),
+                       'subsample': trial.suggest_uniform('subsample', param_grid['subsample'][0],
+                                                          param_grid['subsample'][1]),
+                       'min_child_weight': trial.suggest_float('min_child_weight',
+                                                               param_grid['min_child_weight'][0],
+                                                               param_grid['min_child_weight'][1], log=True),
+                       'colsample_bytree': trial.suggest_uniform('colsample_bytree', param_grid['colsample_bytree'][0],
+                                                                 param_grid['colsample_bytree'][1]),
+                       'nthread': trial.suggest_categorical('nthread', param_grid['nthread']),
+                       'random_state': trial.suggest_categorical('random_state', param_grid['random_state']), }
+
+        mean_cv_score = self.hyper_eval()
+        return mean_cv_score
+
+
+class LGBClassifier(MulticlassClassificationModel, ABC):
+    model_name = "Light Gradient Boosting"
+    small_name = "LGB"
+    color = "pink"
+
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
+                 metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
+        super().__init__(LGB, "Light Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
+        self.param_grid = {'objective': ['multiclass'], 'metric': ['multi_logloss'], 'verbosity': [-1],
+                           'boosting_type': ['gbdt'], 'num_leaves': [2, 256], 'max_depth': [1, 30],
+                           'reg_alpha': [1e-08, 10.0], 'reg_lambda': [1e-08, 10.0], 'colsample_bytree': [0.4, 1.0],
+                           'subsample': [0.4, 1.0], 'subsample_freq': [1, 7], 'min_child_samples': [5, 100],
+                           'n_estimators': [10, 1000], 'num_threads': [1], 'random_state': [random_state, ]}
+        self.small_name = "LGB"
+        self.color = "pink"
+        self.n_jobs = n_jobs
+
+    def objective(self, trial, params=None):
+        param_grid = self.param_grid
+        self.params = {'objective': trial.suggest_categorical('objective', param_grid['objective']),
+                       'metric': trial.suggest_categorical('metric', param_grid['metric']),
+                       'verbosity': trial.suggest_categorical('verbosity', param_grid['verbosity']),
+                       'boosting_type': trial.suggest_categorical('boosting_type', param_grid['boosting_type']),
+                       'num_leaves': trial.suggest_int('num_leaves', param_grid['num_leaves'][0],
+                                                       param_grid['num_leaves'][1]),
+                       'max_depth': trial.suggest_int('max_depth', param_grid['max_depth'][0],
+                                                      param_grid['max_depth'][1]),
+                       'reg_alpha': trial.suggest_float('reg_alpha', param_grid['reg_alpha'][0],
+                                                        param_grid['reg_alpha'][1], log=True),
+                       'reg_lambda': trial.suggest_float('reg_lambda', param_grid['reg_lambda'][0],
+                                                         param_grid['reg_lambda'][1], log=True),
+                       'colsample_bytree': trial.suggest_uniform('colsample_bytree', param_grid['colsample_bytree'][0],
+                                                                 param_grid['colsample_bytree'][1]),
+                       'subsample': trial.suggest_uniform('subsample', param_grid['subsample'][0],
+                                                          param_grid['subsample'][1]),
+                       'subsample_freq': trial.suggest_int('subsample_freq', param_grid['subsample_freq'][0],
+                                                           param_grid['subsample_freq'][1]),
+                       'min_child_samples': trial.suggest_int('min_child_samples', param_grid['min_child_samples'][0],
+                                                              param_grid['min_child_samples'][1]),
+                       'n_estimators': trial.suggest_int('n_estimators', param_grid['n_estimators'][0],
+                                                         param_grid['n_estimators'][1]),
+                       'random_state': trial.suggest_categorical('random_state', param_grid['random_state']),
+                       }
+        # print(self.model.get_params())
+        mean_cv_score = self.hyper_eval()
+        return mean_cv_score
+
+
+class CGBClassifier(MulticlassClassificationModel, ABC):
+    model_name = "Category Gradient Boosting"
+    small_name = "CGB"
+    color = "magenta"
+
+    def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
+                 metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
+        super().__init__(CGB, "Category Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state,
+                         cv)
+        self.param_grid = {'learning_rate': [0.0001, 0.3], 'iterations': [10, 500], 'depth': [1, 10],
+                           'l2_leaf_reg': [1, 9], 'loss_function': ['Logloss'], 'verbose': [False],
+                           'random_state': [random_state, ]}
+        self.small_name = "CGB"
+        self.color = "magenta"
+        self.n_jobs = n_jobs
+
+    def objective(self, trial, params=None):
+        self.params = {'learning_rate': trial.suggest_float('learning_rate', self.param_grid['learning_rate'][0],
+                                                            self.param_grid['learning_rate'][1], log=True),
+                       'iterations': trial.suggest_int('iterations', self.param_grid['iterations'][0],
+                                                       self.param_grid['iterations'][1]),
+                       'depth': trial.suggest_int('depth', self.param_grid['depth'][0], self.param_grid['depth'][1]),
+                       'l2_leaf_reg': trial.suggest_int('l2_leaf_reg', self.param_grid['l2_leaf_reg'][0],
+                                                        self.param_grid['l2_leaf_reg'][1]),
+                       'loss_function': trial.suggest_categorical('loss_function', self.param_grid['loss_function']),
+                       'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state']),
+                       'verbose': trial.suggest_categorical('verbose', self.param_grid['verbose']),
+                       }
+
+        mean_cv_score = self.hyper_eval()
+        return mean_cv_score

@@ -1,201 +1,212 @@
-#  Detailed Pipeline Walkthrough
-This section is for users who want a more detailed understanding of (1) what STREAMLINE does, (2) what happens in durring each phase, (3) why it's designed the way it has been, (4) what user options are available to customize a run, and (5) what to expect when running a given phase. Phases 1-6 make up the core automated pipeline, with Phase 7 and beyond being run optionally based on user needs. Phases are organized to both encapsulate related pipeline elements, as well as to address practical computational needs. STREAMLINE includes reliable default run parameters so that it can easily be used 'as-is', but these parameters can be adjusted for further customization. We refer to a single run of the entire STREAMLINE pipeline as an 'experiment', with all outputs saved to a single 'experiment folder' for later examination and re-use.
+# Detailed Pipeline Walkthrough
 
-To avoid confusion on 'dataset' terminology we briefly review our definitions here:
-1. **Target dataset** - A whole dataset (minus any instances the user may wish to hold out for replication) that has not yet undergone any other data partitioning and is intended to be used in the training and testing of models within STREAMLINE. Could also be referred to as the 'development dataset'.
-2. **Training dataset** - A generally larger partition of the target dataset used in training a model
-3. **Testing dataset** - A generally smaller partition of the target dataset used to evaluate the trained model
-4. **Validation dataset** - The temporary, secondary hold-out partition of a given training dataset used for hyperparameter optimization. This is the product of using nested (aka double) cross-validation in STREAMLINE as a whole.
-5. **Replication dataset** - Further data that is withheld from STREAMLINE phases 1-7 to (1) compare model evaluations on the same hold-out data and (2) verify the replicatability and generalizability of model performance on data collected from other sites or sample populations. A replication dataset should have at least all of the features present in the target dataset which it seeks to replicate. 
+This page explains what STREAMLINE does during a run, why the phases are
+separated, what users can customize, and which outputs to expect. A single
+STREAMLINE run is called an **experiment**. Each experiment can contain one or
+more datasets, and each dataset is processed through cross-validation folds so
+that model evaluation stays separated from model training.
 
-***
-## Phase 1: Data Exploration & Processing
-This phase; (1) provides the user with key information about the target dataset(s) they wish to analyze, via an initial exploratory data analysis (EDA) (2) numerically encodes any text-based feature values in the data, (3) applies basic data cleaning and feature engineering to process the data, (4) informs the user how the data has been changed by the data processing, via a secondary, more in-depth EDA, and then (5) partitions the data using k-fold cross validation. 
+The current v1.0.0 pipeline has eleven phases. P1-P8 are the core training and
+summary workflow, P9 compares multiple datasets inside an experiment, P10
+applies trained workflows to external replication data, and P11 produces PDF
+reports.
 
-* **Parallelizability:** Runs once for each target dataset to be analyzed
-* **Run Time:** Typically fast, except when evaluating and visualizing feature correlation in datasets with a large number of features
+## Dataset Terms
 
-### Initial EDA
-Characterizes the orignal dataset as loaded by the user, including: data dimensions, feature type counts, missing value counts, class balance, other standard pandas data summaries (i.e. describe(), dtypes(), nunique()) and feature correlations (pearson). 
+| Term | Meaning |
+| --- | --- |
+| Target dataset | The input dataset supplied to P1 for model development. |
+| Training fold | The fold-specific subset used to fit preprocessing, feature learning, feature selection, and models. |
+| Testing fold | The fold-specific subset held out for model evaluation. |
+| Validation split | The internal split made inside model training for Optuna hyperparameter search. |
+| Replication dataset | An external or held-out dataset used in P10 after the main training/CV workflow has already produced fitted artifacts. |
 
-For precision, we strongly suggest users identify which features in their data should be treated as categorical vs. quantitative using the [`categorical_feature_path`](parameters.md#categorical-feature-path) and/or [`quantitative_feature_path`](parameters.md#quantitative-feature-path) run parameters. However, if not specified by the user, STREAMLINE will attempt to automatically determine feature types relying on the [`categorical_cutoff`](parameters.md#categorical-cutoff) parameter. Any features with fewer unique values than [`categorical_cutoff`](parameters.md#categorical-cutoff) will be treated as categorical, and all others will be treated as quantitative. 
+Replication data should not be used to tune model choices. It is meant to
+evaluate whether the trained workflow generalizes beyond the original CV test
+folds.
 
-* **Output:** (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap
+## Phase Summary
 
-### Numerical Encoding of Text-based Features
-Detects any features in the data with non-numeric values and applies [LabelEncoder](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html) to make them numeric as required by scikit-learn machine learning packages.
+| Phase | Module | Main CLI | Summary |
+| --- | --- | --- | --- |
+| P1 | `streamline.p1_data_process` | `python -m streamline.p1_data_process.p1_cli` | Load datasets, clean/encode columns, generate EDA outputs, and create CV folds. |
+| P2 | `streamline.p2_impute_scale` | `python -m streamline.p2_impute_scale.p2_cli` | Impute, scale, and optionally apply SMOTE/SMOTENC to training folds. |
+| P3 | `streamline.p3_feature_learning` | `python -m streamline.p3_feature_learning.p3_cli` | Add learned features such as PCA components and save fitted transformers/manifests. |
+| P4 | `streamline.p4_feature_importance` | `python -m streamline.p4_feature_importance.p4_cli` | Score features without mutating shared CV datasets. |
+| P5 | `streamline.p5_feature_selection` | `python -m streamline.p5_feature_selection.p5_cli` | Select informative features and persist selected CV datasets. |
+| P6 | `streamline.p6_modeling` | `python -m streamline.p6_modeling.p6_cli` | Train base models, tune with Optuna, evaluate CV metrics, and save predictions. |
+| P7 | `streamline.p7_ensembles` | `python -m streamline.p7_ensembles.p7_cli` | Build classification ensembles from base model predictions. |
+| P8 | `streamline.p8_summary_statistics` | `python -m streamline.p8_summary_statistics.p8_cli` | Aggregate performance, feature importance, and model summaries. |
+| P9 | `streamline.p9_compare_datasets` | `python -m streamline.p9_compare_datasets.p9_cli` | Compare dataset-level outputs within an experiment. |
+| P10 | `streamline.p10_replication` | `python -m streamline.p10_replication.p10_cli` | Apply trained workflows to replication datasets. |
+| P11 | `streamline.p11_reporting` | `python -m streamline.p11_reporting.p11_cli` | Generate standard and replication PDF reports. |
 
-### Basic Data Cleaning and Feature Engineering
-Applies the following steps to the target data, keeping track of changes to all data counts along the way:
-1. Remove any instances that are missing an outcome label (as these can not be used while conducting supervised learning)
-2. Remove any features identified by the user with [`ignore_features_path`](parameters.md#ignore-features-path) (a convenience for users that may wish to exclude one or more features from the analysis without changing the original dataset)
-3. Engineer/add 'missingness' features. Any original feature with a missing value proportion greater than [`featureeng_missingness`](parameters.md#featureeng-missingness) will have a new feature added to the dataset that encodes missingness with 0 = not missing and 1 = missing. This allows the user to examine whether missingness is ['not at random' (MNAR)](https://en.wikipedia.org/wiki/Missing_data), and is predictive of outcome itself.
-4. Remove any features that have invariant values (i.e. they are always the same), or that have only one value in addition to missing values. Then remove any features with a missingness greater than [`cleaning_missingness`](parameters.md#cleaning-missingness). Afterwards, remove any instances in the data that may have a missingness greater than [`cleaning_missingness`](parameters.md#cleaning-missingness).
-5. Engineer/add [one-hot-encoding](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html) for any categorical features in the data. This ensures that all categorical features are treated as such throughout all aspects of the pipeline. For example, a single categorical feature with 3 possible states will be encoded as 3 separate binary-valued features indicating whether an instance has that feature's state or not. Feature names are automatically updated by STREAMLINE to reflect this change.
-6. Remove highly correlated features based on [`correlation_removal_threshold`](parameters.md#correlation-removal-threshold). Randomly removes one feature of a highly correlated feature pair (Pearson). While perfectly correlated features can be safely cleaned in this way, there is a chance of information loss when removing less correlated features.
+## P1: Data Process
 
-* **Output:** CSV file summarizing changes to data counts during these cleaning and engineering steps.
+P1 loads one or more tabular datasets, applies initial cleaning and feature
+engineering, records exploratory summaries, and creates cross-validation
+train/test folds.
 
-### Processed Data EDA
-Completes a more comprehensive EDA of the processed dataset including: everything examined in the initial EDA, as well as a univariate association analysis of all features using Chi-Square (for categorical features), or Mann-Whitney U-Test (for quantitative features). 
+Common work in P1 includes:
 
-* **Output:** (1) CSV files for all above data characteristics, (2) bar plot of class balance, (3) histogram of missing values in data, (4) feature correlation heatmap, (5) a CSV file summarizing the univariate analyses including the test applied, test statistic, and p-value for each feature, (6) for any feature with a univariate analysis p-value less than [`sig_cutoff`](parameters.md#sig-cutoff) (i.e. significant association with outcome), a bar-plot will be generated if it is categorical, and a box-plot will be generated if it is quantitative.
+* removing instances with missing outcomes
+* excluding identifier or user-ignored columns
+* applying user-provided or inferred feature types
+* adding missingness indicator features when requested
+* removing invariant, high-missingness, or highly correlated features
+* optionally one-hot encoding categorical features
+* creating stratified, random, grouped, or provided CV folds
 
-### k-fold Cross Validation (CV) Partitioning
-For k-fold CV, STREAMLINE uses 'Stratified' partitioning by default, which aims to maintain the same/similar class balance within the 'k' training and testing datasets. The value of 'k' can be adjusted with [`cv_partitions`](parameters.md#cv-partitions). However using [`partition_method`](parameters.md#partition-method), users can also select 'Random' or 'Group' partitioning. 
+Important settings include `outcome_label`, `outcome_type`, `instance_label`,
+`categorical_features`, `quantitative_features`, `ignore_features`,
+`partition_method`, `n_splits`, `one_hot_encoding`, and `force`.
 
-Of note, 'Group' partitioning requires the dataset to include a column identified by [`match_label`](parameters.md#match-label). This column includes a group membership identifier for each instance which indicates that any instance with the same group ID should be kept within the same partition during cross validation. This was originally intended for running STREAMLINE on epidemiological data that had been matched for one or more covariates (e.g. age, sex, race) in order to adjust for their effects during modeling.
+Outputs include dataset summaries, feature-type artifacts, EDA tables/figures,
+and the initial `CVDatasets/` train/test files used by later phases.
 
-* **Output:** CSV files for each training and testing dataset generated following partitioning. Note, by default STREAMLINE will overwrite these files as the working datasets undergo imputation, scaling and feature selection in subsequent phases. However, the user can keep copies of these intermediary CV datasets for review using the parameter [`overwrite_cv`](parameters.md#overwrite-cv).
+## P2: Impute, Scale, And Balance
 
-***
-## Phase 2: Imputation and Scaling
-This phase conducts additional data preparation elements of the pipeline that occur after CV partitioning, i.e. missing value imputation and feature scaling. Both elements are 'trained' and applied separately to each individual training dataset. The respective testing datasets are not looked at when running imputation or feature scaling learning to avoid potential data leakage. However the learned imputation and scaling patterns are applied in the same way to the testing data as they were in the training data. Both imputation and scaling can optionally be turned off using the parameters [`impute_data`](parameters.md#impute-data) and [`scale_data`](parameters.md#scale-data), respectively for some specific use cases, however imputation must be on when missing data is present in order to run most scikit-learn modeling algorithms, and scaling should be on for certain modeling algorithms learn effectively (e.g. artificial neural networks), and for if the user wishes to infer feature importances directly from certain algorithm's internal estimators (e.g. logistic regression).
+P2 learns missing-value imputation and feature scaling from each training fold
+and applies the learned transformations to the corresponding test fold. This
+prevents leakage from test data into preprocessing.
 
-* **Parallelizability:** Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
-* **Run Time:** Typically fast, with the exception of imputing larger datasets with many missing values
+P2 can also apply SMOTE/SMOTENC to training folds after imputation and scaling.
+This is intended for classification tasks with meaningful class imbalance.
+When `smote_method = auto`, STREAMLINE uses SMOTENC when categorical features
+are present and standard SMOTE otherwise.
 
-### Imputation
-This phase first conducts imputation to replace any remaining missing values in the dataset with a 'value guess'. While missing value imputation could be reasonably viewed as data manufacturing, it is a common practice and viewed here as a necessary 'evil' in order to run scikit-learn modeling algorithms downstream (which mostly require complete datasets). Imputation is completed prior to scaling since it can influence the correct center and scale to be used.
+Outputs include transformed CV datasets and saved imputation/scaling metadata.
 
-Missing value imputation seeks to make a reasonable, educated guess as to the value of a given missing data entry. By default, STREAMLINE uses 'mode imputation' for all categorical values, and [multivariate imputation](https://scikit-learn.org/stable/modules/generated/sklearn.impute.IterativeImputer.html) for all quantitative features. However, for larger datasets, multivariate imputation can be slow and require alot of memory. Therefore, the user can deactivate multiple imputation with the [`multi_impute`](parameters.md#multi-impute)
-parameter, and STREAMLINE will use median imputation for quantitative features instead.
+## P3: Feature Learning
 
-### Scaling
-Second, this phase conducts feature scaling with [StandardScalar](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) to transform features to have a mean at zero with unit variance. This is only necessary for certain modeling algorithms, but it should not hinder the performance of other algorithms. The primary drawback to scaling prior to modeling is that any future data applied to the model will need to be scaled in the same way prior to making predictions. Furthermore, for algorithms that have directly interpretable models (e.g. decision tree), the values specified by these models need to be un-scaled in order to understand the model in the context of the original data values. STREAMLINE includes a [Useful Notebook](more.md) that can generate direct model visualizations for decision tree and genetic programming models. This code automatically un-scales the values specified in these models so they retain their interpretability.
+P3 applies feature-learning methods such as PCA. Learned transformations are
+fit on training folds and applied consistently to test folds and replication
+data.
 
-* **Output:** (1) Learned imputation and scaling strategies for each training dataset are saved as pickled objects allowing any replication or other future data to be identically processed prior to running it through the model. (2) If [`overwrite_cv`](parameters.md#overwrite-cv) is False, new imputed and scaled copies of the training and testing datasets are saved as CSV output files, otherwise the old dataset files are overwritten with these new ones to save space.
+Users can choose whether learned features replace the original feature set or
+are added alongside original features. P3 writes manifests so later phases know
+which columns were learned and how to reproduce them.
 
-***
-## Phase 3: Feature Importance Estimation
-This phase applies feature importance estimation algorithms (i.e. [Mutual information (MI)](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html) and [MultiSURF](https://github.com/UrbsLab/scikit-rebate), found in the ReBATE software package) often used as filter-based feature selection algorithms. Both algorithms are run by default, however the user can deactivate either using [`do_mutual_info`](parameters.md#do-mutual-info) or [`do_multisurf`](parameters.md#do-multisurf), respectively. MI scores features based on their univariate association with outcome, while MultiSURF scores features in a manner that is sensitive to both univariate and epistatic (i.e. multivariate feature interaction) associations.
+## P4: Feature Importance
 
-For datasets with a larger number of features (i.e. > 10,000) we recommend turning on the TuRF wrapper algorithm with [`use_turf`](parameters.md#use-turf), which has been shown to improve the sensitivity of MultiSURF to interactions, particularly in larger feature spaces. Users can increase the number of TuRF iterations (and performance) by decreasing [`turf_pct`](parameters.md#turf-pct) from 0.5, to approaching 0. However, this will significantly increase MultiSURF run time.
+P4 runs filter-style feature-importance methods on each training fold. Current
+methods include mutual information and ReBATE-based methods such as MultiSURF,
+MultiSURF*, MultiSWRFDB, and MultiSWRFDB*.
 
-Overall, this phase is important not only for subsequent feature selection, but as an opportunity to evaluate feature importance estimates prior to modeling outside of the initial univariate analyses (conducted on the entire dataset). Further, comparing feature rankings between MI, and MultiSURF can highlight features that may have little or no univariate effects, but that are involved in epistatic interactions that are predictive of outcome.
+P4 writes feature scores only. It does not mutate the shared CV datasets,
+which keeps model-specific feature-importance runs independent and avoids
+race conditions in parallel execution.
 
-* **Parallelizability:** Runs 'k' times for each algorithm (MI and MultiSURF) and each target dataset being analyzed (where k is number of CV partitions)
-* **Run Time:** Typically reasonably fast, but takes more time to run MultiSURF, in particular as the number of training instances approaches the default [`instance_subset`](parameters.md#instance-subset) parameter of 2000 instances, or if this parameter set higher in larger datasets. This is because MultiSURF scales quadratically with the number of training instances.
+Use `instance_subset` when a feature-importance method would be too slow on
+all training instances. ReBATE methods receive categorical feature indexes
+from STREAMLINE feature-type artifacts.
 
-* **Output:** CSV files of feature importance scores for both algorithms and each CV partition ranked from largest to smallest scores.
+## P5: Feature Selection
 
-***
-## Phase 4: Feature Selection
-This phase uses the feature importance estimates learned in the prior phase to conduct feature selection using a 'collective' feature selection approach. By default, STREAMLINE will remove any features from the training data that scored 0 or less by both feature importance algorithms (i.e. features deemed uninformative). Users can optionally ensure retention of all features prior to modeling by setting [`filter_poor_features`](parameters.md#filter-poor-features) to False. Users can also specify a maximum number of features to retain in each training dataset using [`max_features_to_keep`](parameters.md#max-features-to_keep) (which can help reduce overall pipeline runtime and make learning easier for modeling algorithms). If after removing 'uninformative features' there are still more features present than the user specified maximum, STREAMLINE will pick the unique top scoring features from one algorithm then the next until the maximum is reached and all other features are removed. Any features identified for removal from the training data are similarly removed from the testing data.
+P5 consumes P4 rankings and creates selected-feature CV datasets. The default
+selector can combine rankings from every feature-importance method that was
+run, not only a fixed pair of methods.
 
-* **Parallelizability:** Runs 'k' times for each target dataset being analyzed (where k is number of CV partitions)
-* **Run Time:** Fast
+Important settings include `algorithms`, `selector_id`, `top_features`,
+`max_features_to_keep`, and `filter_poor_features`.
 
-* **Output:** (1) CSV files summarizing feature selection for a target dataset (i.e. how many features were identified as informative or uninformative within each CV partition) and (2) a barplot of average feature importance scores (across CV partitions). The user can specify the maximum number of top scoring features to be plotted using [`top_fi_features`](parameters.md#top-fi-features).
+Outputs include selected train/test folds and feature-selection summary files.
 
-***
-## Phase 5: Machine Learning (ML) Modeling
-At the heart of STREAMLINE, this phase conducts (1) machine learning modeling using the training data, (2) model feature importance estimation (also with the training data), and (3) model evaluation on testing data. STREAMLINE uniquely includes 3 rule-based machine learning algorithms: ExSTraCS, XCS, and eLCS. These 'learning classifier systems' have been demonstrated to be able to detect complex associations while providing human interpretable models in the form of IF:THEN rule-sets. The ExSTraCS algorithm was developed by our research group to specifically handle the challenges of scalability, noise, and detection of epistasis and genetic heterogeneity in biomedical data mining. 
+## P6: Modeling
 
-* **Parallelizability:** Runs 'k' times for each algorithm and each target dataset being analyzed (where k is number of CV partitions)
-* **Run Time:** Slowest phase, but can be sped up by reducing the set of ML methods selected to run, or deactivating ML methods that run slowly on large datasets
+P6 trains and evaluates base models for binary classification, multiclass
+classification, or regression. Model IDs are loaded from the registry for the
+selected `outcome_type`.
 
-### Model Selection
-The first step is to decide which modeling algorithms to run. By default, STREAMLINE applies 14 of the 16 algorithms (excluding eLCS and XCS) it currently has built in. eLCS and XCS are currently experimental implementations of rule-based ML algorithms. Users can specify a specific subset of algorithms to run using [`algorithms`](parameters.md#algorithms), or alternatively indicate a list of algorithms to exclude from all available algorithms using [`exclude`](parameters.md#exclude). STREAMLINE is also set up so that more advanced users can add other scikit-learn compatible modeling algorithms to run within the pipeline (as explained in [Adding New Modeling Algorithms](models.md)). This allows STREAMLINE to be used as a rigorous framework to easily benchmark new modeling algorithms in comparison to other established algorithms.
+For models with tunable hyperparameters, STREAMLINE uses Optuna with
+`n_trials` and `timeout` budgets. P6 records how many trials actually ran, so
+the report can distinguish requested budget from completed search.
 
-Modeling algorithms vary in the implicit or explicit assumptions they make, the manner in which they learn, how they represent a solution (as a model), how well they handle different patterns of association in the data, how long they take to run, and how complex and/or interpretable the resulting model can be. To reduce runtime in datasets with a large number of training instances, users can specify a limited random number of training instances to use in training algorithms that run slowly in such datasets using [`training_subsample`](parameters.md#training-subsample).
+P6 also supports native categorical handling. If P1 was run with
+`one_hot_encoding = False`, P6 defaults to native categorical models such as
+CatBoost/CGB and ExSTraCS. Explicitly requesting an unsupported model raises an
+error instead of silently changing the data representation.
 
-In the STREAMLINE demo, we run only the fastest/simplest three algorithms (Naive Bayes, Logistic Regression, and Decision Tree), however these algorithms all have known limitations in their ability to detect complex associations in data. We encourage users to utilize a wider variety of the 14 established available algorithms, in their analyses, to give STREAMLINE the best opportunity to identify a best performing model for the given task (which is effectively impossible to predict for a given dataset ahead of time).
+Outputs include fitted model pickles, predictions, per-fold metrics, feature
+importance estimates, and Optuna trial summaries.
 
-We recommend users utilize at least the following set of algorithms within STREAMLINE: Naive Bayes, Logistic Regression, Decision Tree, Random Forest, XGBoost, SVM, ANN, and ExSTraCS as we have found these to be a reliable set of algorithms with an array of complementary strengths and weaknesses on different problems. [ExSTraCS](https://github.com/UrbsLab/scikit-ExSTraCS) is a rule-based machine learning algorithm in the sub-family of algorithms called [learning classifier systems (LCS)](https://www.youtube.com/watch?v=CRge_cZ2cJc) that has been specifically adapted to the challenges of biomedical data analysis.
+## P7: Ensemble Modeling
 
-### Hyperparameter Optimization
-Most machine learning algorithms have a variety of hyperparameter options that influence how the algorithm runs and performs on a given dataset. In designing STREAMLINE we sought to identify the full set of important hyperparameters for each algorithm, along with a comprehensive range of possible settings and hard-coded these into the pipeline.  STREAMLINE adopts the [Optuna](https://optuna.org/) package to conduct automated Bayesian optimization of hyperparameters for most algorithms by default. The evaluation metric 'balanced accuracy' is used to optimize hyperparameters as it takes class imbalance into account and places equal weight on the accurate prediction of both class outcomes. However, users can select an alternative metric with [`primary_metric`](parameters.md#primary-metric) and whether that metric needs to be maximized or minimized using the [`metric_direction`](parameters.md#metric-direction) parameter. To conduct the hyperparameter sweep, Optuna splits a given training dataset further, applying 3-fold cross validation to generate further internal training and validation partitions with which to evaluate different hyperparameter combinations.
+P7 builds classification ensembles from P6 base model predictions. Current
+ensemble methods include hard voting, soft voting, and logistic-regression
+stacking.
 
-Users can also configure how Optuna operates in STREAMLINE with [`n_trials`](parameters.md#n-trials) and [`timeout`](parameters.md#timeout) which controls the target number of hyperparameter value combination trials to conduct, as well as how much total time to try and complete these trials before picking the best hyperparameters found. To ensure reproducibility of the pipeline, note that [`timeout`](parameters.md#timeout) should be set to 'None' (however this can take much longer to complete depending on other pipeline settings).
+P7 is classification-only in the current v1.0.0 implementation. Regression
+workflows should skip P7 and continue from P6 to P8.
 
-Notable exceptions to most algorithms; Naive Bayes has no parameters to optimize, and rule-based (i.e. LCS) ML algorithms including ExSTraCS, eLCS, and XCS can be computationally expensive thus STREAMLINE is set to use their default hyperparameter settings without a sweep unless the user updates [`do_lcs_sweep`](parameters.md#do-lcs-sweep) and [`lcs_timeout`](parameters.md#lcs-timeout).  While these LCS algorithms have many possible hyperparameters to manipulate they have largely stable performance when leaving most of their parameters to default values. Exceptions to this include the key LCS hyperparameters (1) number of learning iterations, (2) maximum rule-population size, and (3) accuracy pressure (nu), which can be manually controlled without a hyperparameter sweep by [`lcs_iterations`](parameters.md#lcs-iterations), [`lcs_N`](parameters.md#lcs-n), and [`lcs_nu`](parameters.md#lcs-nu), respectively.
+## P8: Summary Statistics
 
-* **Output:** CSV files specifying the optimized hyperparameter settings found by Optuna for each partition and algorithm combination.
+P8 aggregates performance metrics and feature-importance outputs across folds.
+It produces model summary tables, curve plots for classification, regression
+diagnostic plots, composite feature-importance plots, and statistical
+comparison tables where applicable.
 
-### Train 'Optimized' Model
-Having selected the best hyperparameter combination identified for a given training dataset and algorithm, STREAMLINE now retrains each model on the entire training dataset using those respective hyperparameter settings. This yields a total of 'k' potentially 'optimized' models for each algorithm. 
+For classification reports, no-skill ROC/PR baselines are computed from the
+actual evaluation labels, so the baselines remain appropriate for multiclass
+or non-stratified/random CV settings.
 
-* **Output:** All trained models are pickled as python objects that can be loaded and applied later.
+## P9: Compare Datasets
 
-### Model Feature Importance Estimation
-Next, STREAMINE estimates and summarizes model feature importance scores for every algorithm run. This is distinct from the initial feature importance estimation phase, in that these estimates are specific to a given model as a useful part of model interpretation/explanation. By default, STREAMLINE employes [permutation feature importance](https://scikit-learn.org/stable/modules/permutation_importance.html) for estimating feature importances scores in the same uniform manner across all algorithms. Some ML algorithms that have a build in strategy to gather model feature importance estimates (i.e. LR,DT,RF,XGB,LGB,GB,eLCS,XCS,ExSTraCS). The user can instead use these estimates by setting [`use_uniform_fi`](parameters.md#use-uniform-fi) to `False`. This will direct STREAMLINE to report any available internal feature importance estimate for a given algorithm, while still utilizing permutation feature importance for algorithms with no such internal estimator. 
+P9 compares datasets inside the same experiment. It is useful when an
+experiment runs multiple related datasets or feature sets and the user wants
+the same statistical summaries and visual comparisons across them.
 
-* **Output:** All feature importance scores are pickled as python objects for use in the next phase of the pipeline.
+If an experiment contains only one dataset, P9 may still run but has less to
+compare.
 
-### Evaluate Performance
-The last step in this phase is to evaluate all trained models using their respective testing datasets.  A total of 16 standard classification metrics calculated for each model including: balanced accuracy, standard accuracy, F1 Score, sensitivity (recall), specificity, precision (positive predictive value), true positives, true negatives, false postitives, false negatives, negative predictive value, likeliehood ratio positive, likeliehood ratio negative, area under the ROC, area under the PRC, and average precision of PRC. 
+## P10: Replication
 
-* **Output:** All evaluation metrics are pickled as python objects for use in the next phase of the pipeline.
+P10 applies trained preprocessing, feature-learning, feature-selection, and
+modeling artifacts to external replication datasets. This phase should be used
+for data that were not part of training or CV evaluation.
 
-***
-## Phase 6: Post-Analysis
-This phase combines all modeling results to generate summary statistics files, generate results plots, and conduct non-parametric statistical significance analysis comparing ML performance across CV runs.
+The replication dataset must contain the required feature columns from the
+training dataset schema. Replication outputs are written under each target
+dataset's `replication/` folder.
 
-* **Output (Evaluation Metrics):**
-    1. Testing data evaluation metrics for each CV partition - CSV file for each modeling algorithm 
-    2. Average testing data evaluation metrics for each modeling algorithm - CSV file for mean, median, and standard deviation 
-    3. ROC and PRC curves for each CV partition in contrast with the average curve - ROC and PRC plot for each modeling algorithm
-        * The generation of these plots can be turned off with [`exclude_plots`](parameters.md#exclude-plots) 
-    4. Summary ROC and PRC plots - compares average ROC or PRC curves over all CV partitions for each modeling algorithm
-    5. Boxplots for each evaluation metric - comparing algorithm performance over all CV partitions
-        * The generation of these plots can be turned off with [`exclude_plots`](parameters.md#exclude-plots) 
+## P11: Reporting
 
-* **Output (Model Feature Importance):**
-    1. Model feature importance estimates for each CV partition - CSV file for each modeling algorithm
-    2. Boxplots comparing feature importance scores for each CV partition - CSV file for each modeling algorithm
-    3. Composite feature importance barplots illustrating average feature importance scores across all algorithms (2 versions)
-        1. Feature importance scores are normalized prior to visualization
-        2. Feature importance scores are normalized and weighted by average model performance metric (balanced accuracy by default)
-            * The metric used to weight this plot can be changed with [`metric_weight`](parameters.md#metric-weight)
-        * Number of top scoring features illustrated in feature importance plots is controled by [`top_model_fi_features`](parameters.md#top-model-fi-features)
+P11 builds standard and replication PDF reports from the experiment outputs.
+The standard report focuses on P1-P9 training/CV results. The replication
+report focuses on P10 external-validation results and uses a filename that
+includes `Replication_Report`.
 
-* **Output (Statistical Significance):**
-    1. Kruskal Wallis test results assessing whether there is a significant difference for each performance metric among all algorithms - CSV file
-        * For any metric that yields a significant difference based on [`sig_cutoff`](parameters.md#sig-cutoff), pairwise statistical tests between algorithms will be conducted using both the Mann Whitney U-test and the Wilcoxon Rank Test 
-    2. Pairwise statistical tests between algorithms using both the Mann Whitney U-test and the Wilcoxon Rank Test - CSV file for each statistic and significance test.
+Each report directory also contains `report_data.json`, which is useful for
+debugging report content without parsing the PDF.
 
-* **Parallelizability:** Runs once for each target dataset being analyzed.
-* **Run Time:** Moderately fast - turning off some figure generation can make this phase faster
+## Config Runner
 
-***
-## Phase 7: Compare Datasets
-This phase should be run when STREAMLINE was applied to more than one target dataset during the 'experiment'. It applies further non-parametric statistical significance testing between datasets to identify if performance differences were observed among datasets comparing (1) the best performing algorithms or (2) on an algorithm-by-algorithm basis. It also generates plots to compare performance across datasets and examine algorithm performance consistency. 
+`run.py` wraps `streamline.pipeline.pipeline_cli` and runs one or more phases
+from a `.cfg` file:
 
-* **Parallelizability:** Runs once - not parallelizable
-* **Run Time:** Fast
+```bash
+python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
+python run.py -c run_configs/uci_binary_hcc.cfg
+```
 
-* **Output (Comparing Best Performing Algorithms for each Metric):**
-    1. Kruskal Wallis test results assessing whether there is a significant difference between median CV performance metric among all datasets focused on the best performing algorithm for each dataset - CSV file
-        * For any metric that yields a significant difference based on [`sig_cutoff`](parameters.md#sig-cutoff), pairwise statistical tests between datasets will be conducted using both the Mann Whitney U-test and the Wilcoxon Rank Test 
-    2. Pairwise statistical tests between datasets focused on the best performing algorithm for each dataset using both the Mann Whitney U-test and the Wilcoxon Rank Test - CSV file for each significance test.
+Useful partial-run controls:
 
-* **Output (Comparing Algorithms Independently):**
-    1. Kruskal Wallis test results assessing whether there is a significant difference for each median CV performance metric among all datasets - CSV file for each algorithm
-        * For any metric that yields a significant difference based on [`sig_cutoff`](parameters.md#sig-cutoff), pairwise statistical tests between datasets will be conducted using both the Mann Whitney U-test and the Wilcoxon Rank Test 
-    2. Pairwise statistical tests between datasets using both the Mann Whitney U-test and the Wilcoxon Rank Test - CSV file for each significance test and algorithm
+```bash
+python run.py -c run_configs/uci_binary_hcc.cfg --start_at p4
+python run.py -c run_configs/uci_binary_hcc.cfg --stop_after p8
+python run.py -c run_configs/uci_binary_hcc.cfg --only p6,p8,p11
+python run.py -c run_configs/uci_binary_hcc.cfg --skip p3,p4
+```
 
-***
-## Phase 8: Replication
-This phase of STREAMLINE is only run when the user has further hold out data , i.e. one or more 'replication' datasets, which will be used to re-evaluate all models trained on a given target dataset. This means that this phase would need to be run once to evaluate the models of each original target dataset Notably, this phase would be the first time that all models are evaluated on the same set of data which is useful for more confidently picking a 'best' model and further evaluating model generalizability and it's ability to replicate performance on data collected at different times, sites, or populations.
-To run this phase the user needs to specify the filepath to the target dataset to be replicated with [`dataset_for_rep`](parameters.md#dataset-for-rep) as well as the folderpath to the folder containing one or more replication datasets using [`rep_data_path`](parameters.md#rep-data-path).
+## Saved Run Commands
 
-This phase begins by conducting an initial exploratory data analysis (EDA) on the new replication dataset(s), followed by processing the dataset in the same way as the original target dataset, yielding the same number of features (but not necessarily the same number of instances). This processing includes cleaning, feature engineering, missing value imputation, feature scaling, and feature selection. Then EDA is repeated to confirm processing of the replication dataset and generate a feature correlation heatmap, however univariate analyses are not repeated on the replication data.
+Each phase records resolved arguments in:
 
-Next all models previously trained for the target dataset are re-evaluated across all metrics using each replication dataset with results saved separately. Similarly all model evaluation plots (with the exception of feature importance plots) are automatically generated. As before non-parametric statistical tests are applied to examine differences in algorithm performance. 
+```text
+<output_path>/<experiment_name>/run_commands.pickle
+```
 
-* **Parallelizability:** Runs once for each replication dataset being analyzed for a given target dataset.
-* **Run Time:** Moderately fast
-
-* **Output:** Similar outputs to Phase 1 minus univariate analyses, and similar outputs to Phase 6 minus feature importance assessments. 
-
-***
-## Phase 9: Summary Report
-This final phase generates a pre-formatted PDF report summarizing (1) STREAMLINE run parameters, (2) key exploratory analysis for the processed target data, (3) key ML modeling results (including metrics and feature importances), (4) dataset comparisons (if relevant), (5) key statistical significance comparisons, and (6) runtime. STREAMLINE collects run-time information on each phase of the pipeline and for the training of each ML algorithm model.
-
-Separate reports are generated representing the findings from running Phases 1-7, i.e. 'Testing Data Evaluation Report', as well as for Phase 8 if run on replication data, i.e. 'Replication Data Evaluation Report'. 
-
-* **Parallelizability:** Runs once - not parallelizable
-* **Run Time:** About a minute
-
-* **Output:** One or more PDF reports
+Later runs reuse saved values for omitted options, while explicitly supplied
+command-line values override and update the saved entry. Use
+`--ignore_saved_run_command` for a fresh parser/default run and
+`--no_update_saved_run_command` to avoid modifying the pickle.
