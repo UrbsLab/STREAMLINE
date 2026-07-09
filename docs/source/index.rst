@@ -96,13 +96,13 @@ How This Documentation Is Organized
 * Use :doc:`parameters` when editing ``.cfg`` files or command-line calls.
 * Use :doc:`output` to navigate experiment folders and reports.
 * Use :doc:`pipeline` for a phase-by-phase explanation of what STREAMLINE does.
-* Use :doc:`changelog` to understand how v1.0.0 differs from v0.3.4 and v0.2.5.
+* Use :doc:`changelog` to review dated release entries and notable changes.
 
 Version History
 --------------------------------------
 
 This site documents the STREAMLINE v1.0.0 main release. See
-:doc:`changelog` for the v1.0.0, v0.3.4, and v0.2.5 release-line summary.
+:doc:`changelog` for dated release entries and notable changes.
 
 Current Scope
 --------------------------------------

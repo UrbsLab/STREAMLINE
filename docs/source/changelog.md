@@ -1,221 +1,312 @@
 # Changelog
 
-This page summarizes the major STREAMLINE release anchors in newest-first order.
-STREAMLINE v1.0.0 is the current main release documented by this site. STREAMLINE
-v0.3.4 is the previous tested and stable public release. STREAMLINE v0.2.5 is the
-legacy release anchor for the original implementation line.
+This changelog summarizes notable STREAMLINE changes in newest-first order.
+Older public release notes are based on the
+[GitHub Releases](https://github.com/UrbsLab/STREAMLINE/releases) entries, with
+minor wording cleanup for readability.
 
-For smaller patch-level and development notes, see the official
-[GitHub Releases](https://github.com/UrbsLab/STREAMLINE/releases) page.
+## v1.0.0 - Main Release
 
-## v1.0.0 Main Release
+STREAMLINE v1.0.0 is a major reorganization and expansion of STREAMLINE into a
+broader supervised tabular AutoML pipeline. It keeps the original transparent,
+end-to-end design while adding first-class support for more task types, clearer
+phase boundaries, registry-based extension points, updated notebooks, Sphinx
+documentation, and broader testing.
 
-**Tag reference:** `v1.0.0` when this release is tagged on `main`.
+### Added
 
-STREAMLINE v1.0.0 is a major reorganization, expansion, and modernization of the
-pipeline. It keeps STREAMLINE's original goal of transparent end-to-end tabular
-AutoML, while broadening the supported tasks, making phases easier to extend,
-and refreshing the notebooks, tests, reports, and documentation around the new
-workflow.
-
-### Architecture And Run Workflow
-
-* Refactored STREAMLINE into explicit P1-P11 phase modules: data processing,
-  imputation/scaling/balancing, feature learning, feature importance, feature
-  selection, modeling, classification ensembles, summary statistics, dataset
-  comparison, replication, and reporting.
-* Added config-driven full-pipeline execution with `.cfg` files, while keeping
-  phase-by-phase command-line and notebook workflows available.
-* Standardized parameter names across config files, command-line arguments,
-  notebooks, and saved run-command metadata.
+* Added explicit P1-P11 phase modules for data processing, imputation/scaling
+  and balancing, feature learning, feature importance, feature selection,
+  modeling, classification ensembles, summary statistics, dataset comparison,
+  replication, and reporting.
+* Added config-driven full-pipeline execution with `.cfg` files while keeping
+  phase-level CLI and notebook workflows.
 * Added run-command pickle support so repeated phase calls can reuse the
-  parameters that were actually used, while allowing users to override or ignore
-  saved values when needed.
-* Added `Parallel` local multiprocessing-style execution in addition to
-  `Serial`, local Dask through `Local`, and supported cluster submission modes.
-* Reorganized code around registries so users can add or swap methods more
-  cleanly across phases, including Phase 2 imputers/scalers, Phase 3 learners,
-  Phase 4 feature-importance methods, Phase 5 selectors, Phase 6 models, and
-  Phase 7 ensembles.
-
-### Binary, Multiclass, And Regression Support
-
-* Extended STREAMLINE beyond the earlier primarily binary-classification
-  workflow to support binary classification, multiclass classification, and
-  regression as first-class task types.
-* Added UCI-based demo datasets and matching held-out replication splits for
-  binary classification, multiclass classification, and regression tutorials and
-  tests.
-* Updated P1 task handling so user-specified `outcome_type` is respected instead
-  of being re-inferred only from the number of outcome values.
-* Updated P6 model loading and evaluation around task-specific model registries
-  for binary, multiclass, and regression runs.
-* Added multiclass evaluation support, including macro/micro metrics and
-  multiclass ROC/PR curve summaries where applicable.
-* Added regression evaluation support, including regression metrics such as
-  explained variance, Pearson correlation, MAE, MSE, median absolute error, max
-  error, residual outputs, and actual-vs-predicted style reporting.
-* Updated reports and summary statistics so metric names, no-skill baselines,
-  curves, and plots are task-aware instead of assuming binary classification.
-* Clarified that P7 ensemble modeling is currently classification-only, so
-  regression workflows proceed from P6 modeling to P8 summary statistics.
-
-### Data Processing, Feature Types, And Preprocessing
-
-* Added clearer feature-type handling for categorical and quantitative features,
-  including optional user-supplied feature type files and inferred feature types.
-* Added optional SMOTE/SMOTENC balancing after Phase 2 imputation and scaling,
-  with SMOTENC used when categorical features are present.
-* Added support for bypassing one-hot encoding when using models that can handle
-  categorical features natively.
-* Added explicit native-categorical model controls so unsupported models are
-  rejected when one-hot encoding is disabled instead of silently receiving an
-  incompatible representation.
-* Kept preprocessing extensible through the Phase 2 registry, so users can add
-  scalers such as `MaxAbsScaler` or custom imputers without changing the rest of
-  the pipeline.
-
-### Feature Learning, Importance, And Selection
-
+  parameters actually used in previous phases, while still allowing user
+  overrides.
+* Added binary classification, multiclass classification, and regression as
+  supported task types across core pipeline phases.
+* Added UCI demo datasets and held-out replication splits for binary,
+  multiclass, and regression examples.
+* Added optional SMOTE/SMOTENC balancing after Phase 2 imputation and scaling.
 * Added P3 feature learning as a dedicated phase, including PCA-style learned
   feature outputs and manifests.
-* Updated replication handling to use the saved training workflow artifacts and
-  feature manifests more consistently.
-* Updated Phase 4 so feature-importance methods write scores without mutating
-  shared CV datasets, avoiding order-dependent outputs and parallel race risks.
-* Updated scikit-rebate integration for the current package behavior, including
-  passing STREAMLINE's categorical feature indexes to ReBATE methods.
 * Added MultiSWRFDB and MultiSWRFDB* feature-importance methods.
-* Updated default feature-importance/selection behavior around mutual
-  information, MultiSWRFDB, and MultiSWRFDB*.
-* Improved Phase 5 feature selection so rankings can be combined across all
-  feature-importance methods that were run, not only a fixed pair of methods.
-* Added or restored `instance_subset` support for expensive feature-importance
-  methods so large runs can be controlled from config/CLI parameters.
-
-### Modeling And Native Categorical Algorithms
-
-* Reworked Phase 6 modeling around clearer dataset/model/CV execution units for
-  serial, parallel, Dask, and cluster runs.
 * Added Decision Tree support for classification workflows.
-* Added or updated HEROS wrappers and optional TabPFN wrappers.
-* Added TabPFN token handling: if `TABPFN_TOKEN` is not set, requested TabPFN
-  models are skipped with a warning while HEROS and other requested models
-  continue.
-* Updated ExSTraCS categorical initialization so categorical and continuous
-  attributes can be passed through its supported `discrete_attribute_limit` and
-  `specified_attributes` parameters.
-* Improved native categorical model handling for compatible algorithms such as
-  CatBoost/CGB and ExSTraCS.
-* Added Optuna trial accounting so reports can show how many trials actually ran
-  within the requested `n_trials` and `timeout` budgets.
-* Standardized model defaults across config, command-line, and notebook run
-  modes, including removal of deprecated/default-only legacy methods where
-  appropriate.
-
-### Reporting, Replication, And Outputs
-
+* Added HEROS and optional TabPFN wrappers, including token-aware TabPFN skip
+  behavior when `TABPFN_TOKEN` is unavailable.
+* Added local `Parallel` execution in addition to `Serial`, local Dask through
+  `Local`, and supported cluster submission modes.
 * Added standard and replication PDF report improvements, including clearer
   first-page summaries, experiment names, resolved/default parameter display,
   and report-mode-specific text.
-* Added dedicated replication report naming and clearer replication report
-  content so replication outputs are not confused with standard CV reports.
-* Improved report language around categorical handling, scaling/imputation,
-  feature learning, feature selection, and metric interpretation.
 * Added feature-learning and feature-selection summary tables modeled after the
-  data-processing/feature-engineering summary style.
-* Improved feature-importance figure layout, including more square plots and
-  clearer ordering emphasis.
-* Updated metric highlighting to use shading rather than only bold text.
-* Added no-skill ROC/PR legend notes and label-aware baseline handling for
+  data-processing and feature-engineering summary table style.
+* Added Sphinx/autodoc documentation and GitHub test workflows for Python 3.10,
+  3.11, and 3.12.
+
+### Changed
+
+* Reorganized code around registries for Phase 2 preprocessing, Phase 3 feature
+  learning, Phase 4 feature importance, Phase 5 selection, Phase 6 models, and
+  Phase 7 ensembles.
+* Standardized parameter names across config files, command-line arguments,
+  notebooks, and saved run-command metadata.
+* Updated Phase 1 task handling so user-specified `outcome_type` is respected
+  instead of being inferred only from the number of unique outcome values.
+* Updated Phase 4 so feature-importance methods write scores without mutating
+  shared CV datasets.
+* Updated scikit-rebate integration to pass STREAMLINE categorical feature
+  indexes to ReBATE methods.
+* Updated Phase 5 feature selection so rankings can be combined across all
+  feature-importance methods that were run.
+* Reworked Phase 6 modeling around clearer dataset/model/CV execution units for
+  serial, parallel, Dask, and cluster runs.
+* Updated ExSTraCS categorical initialization using supported
+  `discrete_attribute_limit` and `specified_attributes` parameters.
+* Updated native categorical handling for compatible algorithms such as
+  CatBoost/CGB and ExSTraCS.
+* Updated reports and summary statistics so metric names, no-skill baselines,
+  curves, and plots are task-aware rather than binary-only.
+* Updated Google Colab and local Jupyter notebooks for binary, multiclass,
+  regression, and custom dataset workflows.
+
+### Fixed
+
+* Fixed replication behavior that could otherwise zero-fill learned/PCA feature
+  columns instead of respecting saved feature-learning artifacts.
+* Fixed Phase 4 shared CV file mutation and parallel race risks.
+* Fixed `training_subsample` timing so subsampling affects the intended model
+  training workflow.
+* Fixed multiclass XGB/LGB objective handling and binary-only assumptions.
+* Fixed binary ensemble confusion-metric extraction so confusion matrices are
+  not dropped before TP/TN/FP/FN-derived metrics are calculated.
+* Fixed P1 bash/job submission path issues.
+* Fixed report wording where unspecified settings should instead show the
+  actual default used or indicate that a phase was not run.
+* Fixed no-skill ROC/PR legend notes and label-aware baseline handling for
   multiclass or non-stratified/random CV settings.
-* Improved output organization and report data JSON so reports are easier to
-  debug and regenerate.
 
-### Notebooks, Documentation, Tests, And Release Readiness
+## [v0.3.4-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.4-beta) - 2023-09-28
 
-* Updated the Google Colab notebook and local Jupyter notebook for the v1.0.0
-  workflow, including parameter blocks for binary, multiclass, regression, and
-  custom dataset runs.
-* Rebuilt the documentation website around the v1.0.0 workflow as the new main
-  documentation site.
-* Added Sphinx/autodoc documentation build support.
-* Added GitHub pytest workflows for Python 3.10, 3.11, and 3.12. Python 3.9 was
-  skipped because TabPFN does not support it.
-* Added optional TabPFN-specific pytest coverage for no-token skip behavior and
-  token-gated wrapper fitting.
-* Added macOS installation guidance for conda-forge compiled dependencies such
-  as Graphviz, WeasyPrint/Cairo/Pango, LightGBM, XGBoost, and CatBoost.
-* Removed or de-emphasized old main-era documentation paths and files that are
-  no longer part of the maintained v1.0.0 workflow.
+### Changed
 
-## v0.3.4 Tested Stable Release
+* Improved PDF report formatting so first-page content is clearer and reports
+  handle larger numbers of analyzed datasets more gracefully.
 
-**Tag references:** `v0.3.0-beta`, `v0.3.1-beta`, `v0.3.2-beta`,
-`v0.3.3-beta`, `v0.3.4-beta`.
+### Fixed
 
-The v0.3.x public beta line is the previous tested and stable STREAMLINE
-version. Its latest release was `v0.3.4-beta`.
+* Fixed an edge-case failure when running multiple separate replication and
+  replication-report phases in legacy mode.
 
-Notable updates across the v0.3.x line:
+## [v0.3.3-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.3-beta) - 2023-09-23
 
-* Added Dask jobqueue support for multiple HPC cluster systems.
-* Expanded the original Phase 1 EDA flow into numerical encoding, automated
-  cleaning, missingness feature engineering, one-hot encoding, correlation
-  feature cleaning, processed-data EDA, and data-process summaries.
-* Added configuration-file support and whole-pipeline command-line execution.
-* Modularized modeling algorithms into classes and added Elastic Net.
-* Improved Google Colab workflows for easier data selection and output access.
-* Added replication processing parity for categorical and missingness handling.
-* Added invariant feature removal and matching replication behavior.
-* Improved PDF report formatting, first-page summaries, run-parameter display,
-  and multi-dataset report layout.
-* Fixed command-line, legacy cluster, replication, missingness naming, and
-  unseen categorical-value edge cases.
+### Added
 
-Release highlights:
+* Added invariant feature removal during the C2 cleaning step of data
+  processing.
+* Added matching replication behavior so features removed during Phase 1
+  cleaning are also removed when replication data are processed.
 
-| Tag | Date | Summary |
-| --- | --- | --- |
-| `v0.3.4-beta` | 2023-09-28 | PDF formatting improvements and legacy replication/report fixes. |
-| `v0.3.3-beta` | 2023-09-23 | Invariant feature removal, replication parity fixes, notebook ordering fixes, and report text updates. |
-| `v0.3.2-beta` | 2023-09-13 | Legacy command-line argument fixes, job-status docs, schematic and PDF naming updates. |
-| `v0.3.1-beta` | 2023-09-07 | Replication imputation fallback and alphabetized model legends. |
-| `v0.3.0-beta` | 2023-08-06 | Major command-line, cluster, Phase 1, replication, config, modeling, Colab, and report updates. |
+### Changed
 
-## v0.2.5 Legacy Release
+* Updated replication PDF report content to simplify the data-processing report.
+* Updated first-page PDF report text sizing.
 
-**Tag references:** `v0.1.0-alpha`, `v0.1.1-alpha`, `v0.1.2-alpha`,
-`v0.1.3-alpha`, `v0.2.0-beta`, `v0.2.1-beta`, `v0.2.2-beta`,
-`v0.2.3-beta`, `v0.2.4-beta`, `v0.2.5-beta`.
+### Fixed
 
-The v0.2.x line covers the first public STREAMLINE implementation and early beta
-stabilization work. Its latest release was `v0.2.5-beta`.
+* Fixed algorithm ordering in notebook and Colab figures.
+* Fixed unseen binary categorical values during replication by converting them
+  to missing values instead of adding incompatible new features.
+* Fixed engineered missingness feature naming.
+* Fixed legacy cluster mode when categorical or quantitative feature files were
+  not specified.
 
-Notable updates across the v0.2.x line:
+## [v0.3.2-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.2-beta) - 2023-09-13
 
-* Introduced the first stable STREAMLINE implementation inherited from
-  AutoMLPipe-BC concepts.
-* Moved the codebase into the `streamline` package folder.
-* Updated default Optuna parameters and documented reproducibility limitations
-  when parallel optimization uses timeouts.
-* Fixed serial Linux command-line execution and several command-line phase
-  issues.
-* Improved composite feature-importance behavior, feature-selection options,
-  report formatting, and Optuna plotting failure handling.
-* Added support for replication input as `.csv` or `.txt`.
-* Switched feature-importance summary reporting between mean and median during
-  early beta refinements based on collaborator feedback.
-* Added small statistical-comparison and no-missing-data imputation fixes.
+### Changed
 
-Release highlights:
+* Updated legacy run mode so submitted jobs can be launched and the script can
+  exit instead of waiting for all jobs to complete.
+* Updated the STREAMLINE schematic.
+* Updated PDF summary file naming.
+* Added documentation describing how to check job status.
 
-| Tag | Date | Summary |
-| --- | --- | --- |
-| `v0.2.5-beta` | 2022-06-24 | Statistical-comparison edge-case catch and cleanup. |
-| `v0.2.4-beta` | 2022-06-15 | No-missing-data imputation fix, replication file support, and FI/report summary updates. |
-| `v0.2.3-beta` | 2022-05-20 | Stable Linux serial command-line beta. |
-| `v0.2.2-beta` | 2022-05-19 | Composite FI, metric weighting, serial CLI, report formatting, and Optuna fixes. |
-| `v0.2.1-beta` | 2022-05-17 | Package layout, Optuna default, reproducibility, and scaled-data rounding updates. |
-| `v0.2.0-beta` | 2022-05-14 | First beta for external use. |
-| `v0.1.x-alpha` | 2022-05-12 | Initial alpha releases and early Anaconda/scipy compatibility fixes. |
+### Fixed
+
+* Fixed command-line argument passing for legacy run mode.
+
+## [v0.3.1-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.1-beta) - 2023-09-07
+
+### Changed
+
+* Ordered plot legends, including composite feature-importance plot legends,
+  alphabetically by full model name.
+
+### Fixed
+
+* Fixed replication imputation when a feature had no missing values during
+  training but did have missing values in the replication dataset. The
+  replication phase now applies a simple fallback imputation strategy: mean for
+  quantitative features and mode for categorical features.
+
+## [v0.3.0-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.0-beta) - 2023-08-06
+
+### Added
+
+* Added Dask jobqueue support for running STREAMLINE across several HPC cluster
+  systems.
+* Expanded Phase 1 from exploratory analysis into numerical encoding,
+  automated cleaning, feature engineering, and a second processed-data EDA pass.
+* Added numerical encoding maps for binary text-valued features.
+* Added categorical and quantitative feature path parameters, plus output files
+  documenting final feature-type handling.
+* Added missingness feature engineering with output documentation.
+* Added feature and instance cleaning based on missingness.
+* Added one-hot encoding for categorical features with three or more values.
+* Added highly correlated feature removal with output documentation.
+* Added `DataProcessSummary.csv` to track feature, feature-type, instance,
+  class, and missing-value counts through data-processing steps.
+* Added replication processing parity so replication data are transformed to
+  match the target dataset feature space.
+* Added command-line support for running the whole pipeline as a single command.
+* Added configuration-file support for command-line runs.
+* Added class-based modeling algorithm modules to make adding compatible
+  scikit-learn-style classifiers easier.
+* Added Elastic Net as an included modeling algorithm.
+* Added expanded Colab workflows with repository download, easy/manual run
+  modes, user data selection, and output download/report display support.
+* Added custom HCC demo and replication datasets designed to exercise automatic
+  data cleaning, feature engineering, and replication behavior.
+
+### Changed
+
+* Reorganized repository hierarchy, file names, output names, and phase
+  groupings.
+* Updated the STREAMLINE schematic to match the reorganized phase structure.
+* Reverted model feature-importance plot sorting/presentation from median back
+  to mean to avoid confusing demo behavior with small CV counts.
+* Updated feature correlation heatmap colors, non-redundant triangle display,
+  feature-name scaling, and large-feature-count behavior.
+* Added `FeatureCorrelations.csv` output.
+* Reformatted PDF summaries to reorganize first-page run parameters, include
+  version text, and add data-processing/count summaries.
+* Added test run and score outputs to univariate analysis files.
+* Updated Jupyter and useful notebooks for the reorganized framework.
+
+## [v0.2.5-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.5-beta) - 2022-06-24
+
+### Fixed
+
+* Added a catch to prevent statistical-comparison result failures in specific
+  edge cases.
+* Cleaned up old commented code.
+
+## [v0.2.4-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.4-beta) - 2022-06-15
+
+### Changed
+
+* Switched feature-importance figure summaries from mean to median at a
+  collaborator's recommendation.
+* Added median algorithm performance summaries and median performance values to
+  PDF summaries.
+* Updated statistical significance output to present medians, matching the
+  non-parametric statistical comparisons more closely.
+
+### Fixed
+
+* Fixed a no-missing-data edge case where imputation was enabled but no
+  imputation file existed.
+* Updated model application so replication data can be loaded from `.csv` and
+  `.txt` files.
+
+## [v0.2.3-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.3-beta) - 2022-05-20
+
+### Added
+
+* Confirmed stable serial command-line functionality on Linux.
+
+### Changed
+
+* Marked the beta line as stable and fully functional based on testing and user
+  feedback after the alpha releases.
+
+## [v0.2.2-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.2-beta) - 2022-05-19
+
+### Changed
+
+* Added composite feature-importance plot weighting by balanced accuracy and
+  ROC AUC.
+* Removed the `None` option for maximum features in feature selection.
+* Updated Logistic Regression Optuna search behavior to avoid invalid
+  hyperparameter combinations.
+* Enforced Optuna 2.0.0 for hyperparameter-optimization figure generation and
+  added error handling so plotting issues do not fail an entire STREAMLINE run.
+* Updated notebooks for the beta fixes.
+
+### Fixed
+
+* Fixed composite feature importance when only one algorithm was used.
+* Fixed major issues preventing certain phases from running serially from the
+  command line.
+* Fixed first-page PDF summary formatting.
+
+## [v0.2.1-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.1-beta) - 2022-05-17
+
+### Changed
+
+* Moved the codebase into the `streamline` package folder and updated imports
+  accordingly.
+* Updated default Optuna run parameters.
+* Documented that complete reproducibility is not guaranteed when Optuna is run
+  in parallel.
+* Rounded scaled CV data to seven decimal places to reduce floating-point
+  reproducibility drift after scaling.
+
+## [v0.2.0-beta](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.0-beta) - 2022-05-14
+
+### Added
+
+* Published the first beta release after initial alpha testing across multiple
+  platforms and Anaconda installations.
+
+### Changed
+
+* Marked STREAMLINE ready for external use while noting that untested
+  configurations could still expose issues.
+* Added guidance for users to report run mode, Anaconda version, and errors
+  when issues arise.
+* Added an early request for users applying STREAMLINE in publications to check
+  the repository for the current citation reference.
+
+## [v0.1.3-alpha](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.3-alpha) - 2022-05-12
+
+### Changed
+
+* Updated README installation instructions.
+* Updated the default setting for model feature-importance estimation.
+* Recorded testing against the then-current Linux Anaconda version.
+
+## [v0.1.2-alpha](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.2-alpha) - 2022-05-12
+
+### Fixed
+
+* Fixed an Anaconda/scipy compatibility issue in exploratory analysis.
+
+## [v0.1.1-alpha](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.1-alpha) - 2022-05-12
+
+### Fixed
+
+* Replaced deprecated `scipy.interp()` usage with `numpy.interp()`.
+
+## [v0.1.0-alpha](https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.0-alpha) - 2022-05-12
+
+### Added
+
+* Published the first stable, bug-tested STREAMLINE implementation, inheriting
+  much of its underlying code from AutoMLPipe-BC.
+
+### Notes
+
+* This alpha was tested only with the specified Anaconda and package versions,
+  and only on Windows and Linux.

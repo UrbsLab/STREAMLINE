@@ -2,27 +2,25 @@
 
 # STREAMLINE
 
-STREAMLINE is an end-to-end automated machine learning pipeline for tabular biomedical and general supervised learning workflows. The current codebase supports binary classification, multiclass classification, and regression, with integrated feature learning, feature importance, feature selection, base-model training, classification ensembles, summary statistics, dataset comparison, replication, and PDF reporting.
+STREAMLINE is a parallelizable, customizable, end-to-end automated machine learning pipeline for supervised learning in structured, tabular data. It supports binary classification, multiclass classification, and regression outcomes. It includes exploratory analysis, data processing, imputation, scaling, feature learning, feature importance estimation, feature selection, multiple algorithm model training with hyperparameter optimization, ensemble modeling, comprehensive model evaluation with statistical comparisons, dataset comparison, easy replication, and PDF summary reporting.
 
-This repository is the main starting point for the STREAMLINE v1.0.0 release and its current 11-phase implementation.
+STREAMLINE is designed to make rigorous machine learning workflows easier to run, compare, reproduce, and extend. It can be run through Google Colab, a local Jupyter notebook, command-line phase runners, or configuration files that execute the full pipeline.
 
-## What Is Included In This Version
+## Quick Links
 
-- Unified support for binary classification, multiclass classification, and regression
-- Phase-first architecture spanning P1 through P11
-- Registry-backed extension points for multiple phases
-- Feature learning with PCA and related outputs
-- Feature importance methods including mutual information, MultiSURF, MultiSURF*, MultiSWRFDB, and MultiSWRFDB*
-- Modeling with base learners, calibration support for classification, and composite feature importance from modeling
-- Classification ensemble evaluation
-- Summary statistics and cross-dataset comparison
-- Replication / external validation as a dedicated phase
-- Automated reporting for both standard experiment outputs and replication outputs
-- Updated Google Colab and Jupyter notebook workflows
+- [Detailed documentation](https://urbslab.github.io/STREAMLINE/)
+- [Google Colab demo notebook](https://colab.research.google.com/drive/1ByQuU805GzDGAAGzbUYz8wahnOTUuzvg?usp=sharing)
+- [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb) for local Jupyter runs
+- [`run_configs/`](run_configs) for config-driven demo pipelines
+- [Citation information](#citing-streamline)
+
+## Workflow Schematic
+
+![STREAMLINE workflow schematic](docs/source/pictures/STREAMLINE_v3_paper_new_lightcolor.png)
 
 ## Pipeline Overview
 
-The current pipeline is organized into 11 phases:
+The pipeline is organized into 11 phases:
 
 | Phase | Name | Purpose |
 | --- | --- | --- |
@@ -64,7 +62,7 @@ The current pipeline is organized into 11 phases:
 
 Top-level items you will use most often:
 
-- [`STREAMLINE_GoogleColab.ipynb`](STREAMLINE_GoogleColab.ipynb): primary Colab-oriented notebook
+- [`STREAMLINE_ColabNotebook.ipynb`](STREAMLINE_ColabNotebook.ipynb): primary Colab-oriented notebook
 - [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb): local Jupyter notebook workflow
 - [`run_configs/`](run_configs): example `.cfg` files for full UCI demo pipelines
 - [`data/`](data): demo training and replication datasets
@@ -99,7 +97,7 @@ STREAMLINE can be used in several ways depending on user preference and compute 
 - Local Dask execution with `run_cluster=Local`
 - HPC / cluster execution using the phase CLIs and job submission helpers
 
-The current codebase includes CLI and runner modules for every phase from P1 through P11.
+STREAMLINE includes CLI and runner modules for every phase from P1 through P11.
 
 ## Saved Run Commands
 
@@ -107,7 +105,7 @@ Each phase CLI records its resolved arguments in `<output_path>/<experiment_name
 
 ## Config-Driven Pipeline Runs
 
-STREAMLINE can run multiple phases from one `.cfg` file, matching the config-file workflow used in earlier releases. The config runner reads shared settings from `[run]`, phase toggles from `[phases]`, phase-specific settings from sections such as `[p1]` and `[p6]`, and then calls the same P1-P11 runner classes used by the phase CLIs. The `[phases]` section supports direct flags such as `do_p1 = True` as well as old-style broad flags such as `do_till_report = True`.
+STREAMLINE can run multiple phases from one `.cfg` file. The config runner reads shared settings from `[run]`, phase toggles from `[phases]`, phase-specific settings from sections such as `[p1]` and `[p6]`, and then calls the same P1-P11 runner classes used by the phase CLIs. The `[phases]` section supports direct flags such as `do_p1 = True` as well as broad flags such as `do_till_report = True`.
 
 Dry-run a config to inspect the resolved phase calls:
 
@@ -165,7 +163,7 @@ The updated Colab workflow is designed to support:
 For local notebook use, start from:
 
 - [`STREAMLINE_Notebook.ipynb`](STREAMLINE_Notebook.ipynb) for local binary, multiclass, regression, and custom workflows
-- [`STREAMLINE_ColabNotebook.ipynb`](STREAMLINE_ColabNotebook.ipynb) for the Colab version of the parameter-driven flow
+- [`STREAMLINE_ColabNotebook.ipynb`](STREAMLINE_ColabNotebook.ipynb) for the Colab counterpart of the parameter-driven flow
 
 ### Local CLI
 
@@ -332,28 +330,58 @@ Relevant extension points include:
 - `streamline/p6_modeling/models`
 - `streamline/p7_ensembles/registry`
 
-In practice, this means new preprocessing, feature-learning, feature-importance, feature-selection, modeling, and ensemble components can be added in a more modular way than in older versions of STREAMLINE.
+In practice, this means new preprocessing, feature-learning, feature-importance, feature-selection, modeling, and ensemble components can be added without rewriting the surrounding pipeline orchestration.
 
 ## Current Notes And Limitations
 
 - STREAMLINE is designed for supervised learning on tabular data.
 - Unstructured data pipelines such as image, text, audio, and raw time-series feature extraction are not automated here.
-- The documentation in `docs/source` is the current documentation for the v1.0.0 main release.
-- As with any ML pipeline assembled on top of evolving third-party libraries, latest-version local environments may expose compatibility issues that require updates.
+- The documentation in `docs/source` is the source for the public documentation site.
+- As with any ML pipeline assembled on top of evolving third-party libraries, newer local environments may expose compatibility issues that require updates.
 
-## Publications And Citation
+## Citing STREAMLINE
 
-The first publication detailing STREAMLINE (release Beta 0.2.4) and applying it to simulated benchmark data is available here:
+If you use STREAMLINE in academic work, please cite the STREAMLINE book chapter:
 
-[Springer chapter](https://link.springer.com/chapter/10.1007/978-981-19-8460-0_9)
+Urbanowicz, R., Zhang, R., Cui, Y., Suri, P. (2023). [STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison](https://doi.org/10.1007/978-981-19-8460-0_9). In: Trujillo, L., Winkler, S.M., Silva, S., Banzhaf, W. (eds) *Genetic Programming Theory and Practice XIX*. Genetic and Evolutionary Computation. Springer, Singapore.
 
-The paper is also available as a preprint:
+BibTeX:
 
-[arXiv preprint](https://arxiv.org/abs/2206.12002)
+```bibtex
+@incollection{Urbanowicz2023STREAMLINE,
+  author    = {Urbanowicz, Ryan J. and Zhang, Robert and Cui, Yuhan and Suri, Pranshu},
+  editor    = {Trujillo, Leonardo and Winkler, Stephan M. and Silva, Sara and Banzhaf, Wolfgang},
+  title     = {STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison},
+  booktitle = {Genetic Programming Theory and Practice XIX},
+  series    = {Genetic and Evolutionary Computation},
+  pages     = {201--231},
+  year      = {2023},
+  publisher = {Springer, Singapore},
+  doi       = {10.1007/978-981-19-8460-0_9},
+  url       = {https://doi.org/10.1007/978-981-19-8460-0_9}
+}
+```
 
-Additional citation information and related publications:
+A STREAMLINE biomedical validation and application preprint is also available:
 
-[STREAMLINE citations](https://urbslab.github.io/STREAMLINE/citation.html)
+Urbanowicz, R.J., Bandhey, H., Keenan, B.T., Maislin, G., Hwang, S., Mowery, D.L., Lynch, S.M., Mazzotti, D.R., Han, F., Li, Q.Y., Penzel, T., Tufik, S., Bittencourt, L., Gislason, T., de Chazal, P., Singh, B., McArdle, N., Chen, N.H., Pack, A., Schwab, R.J., Cistulli, P.A., Magalang, U.J. (2023). [STREAMLINE: An Automated Machine Learning Pipeline for Biomedicine Applied to Examine the Utility of Photography-Based Phenotypes for OSA Prediction Across International Sleep Centers](https://doi.org/10.48550/arXiv.2312.05461). arXiv:2312.05461.
+
+BibTeX:
+
+```bibtex
+@misc{Urbanowicz2023STREAMLINEBiomedicine,
+  author        = {Urbanowicz, Ryan J. and Bandhey, Harsh and Keenan, Brendan T. and Maislin, Greg and Hwang, Sy and Mowery, Danielle L. and Lynch, Shannon M. and Mazzotti, Diego R. and Han, Fang and Li, Qing Yun and Penzel, Thomas and Tufik, Sergio and Bittencourt, Lia and Gislason, Thorarinn and de Chazal, Philip and Singh, Bhajan and McArdle, Nigel and Chen, Ning-Hung and Pack, Allan and Schwab, Richard J. and Cistulli, Peter A. and Magalang, Ulysses J.},
+  title         = {STREAMLINE: An Automated Machine Learning Pipeline for Biomedicine Applied to Examine the Utility of Photography-Based Phenotypes for OSA Prediction Across International Sleep Centers},
+  year          = {2023},
+  eprint        = {2312.05461},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.2312.05461},
+  url           = {https://doi.org/10.48550/arXiv.2312.05461}
+}
+```
+
+Additional citation details are available in the [STREAMLINE documentation](https://urbslab.github.io/STREAMLINE/citation.html).
 
 ## Additional Resources
 
