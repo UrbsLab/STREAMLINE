@@ -19,27 +19,31 @@ documentation, and broader testing.
   and balancing, feature learning, feature importance, feature selection,
   modeling, classification ensembles, summary statistics, dataset comparison,
   replication, and reporting.
-* Added config-driven full-pipeline execution with `.cfg` files while keeping
-  phase-level CLI and notebook workflows.
 * Added run-command pickle support so repeated phase calls can reuse the
   parameters actually used in previous phases, while still allowing user
   overrides.
 * Added binary classification, multiclass classification, and regression as
   supported task types across core pipeline phases.
+* Added optional probability calibration for classification base models and
+  ensembles, with configurable calibration method and CV folds.
 * Added UCI demo datasets and held-out replication splits for binary,
   multiclass, and regression examples.
 * Added optional SMOTE/SMOTENC balancing after Phase 2 imputation and scaling.
 * Added P3 feature learning as a dedicated phase, including PCA-style learned
   feature outputs and manifests.
 * Added MultiSWRFDB and MultiSWRFDB* feature-importance methods.
-* Added Decision Tree support for classification workflows.
+* Added expanded task-specific model registries for binary classification,
+  multiclass classification, and regression workflows.
+* Added multiclass Decision Tree support.
 * Added HEROS and optional TabPFN wrappers, including token-aware TabPFN skip
   behavior when `TABPFN_TOKEN` is unavailable.
+* Added Optuna trial accounting so model outputs and reports can distinguish
+  requested hyperparameter budgets from completed trials.
 * Added local `Parallel` execution in addition to `Serial`, local Dask through
   `Local`, and supported cluster submission modes.
-* Added standard and replication PDF report improvements, including clearer
-  first-page summaries, experiment names, resolved/default parameter display,
-  and report-mode-specific text.
+* Added standard and replication report-mode separation, experiment-name-aware
+  report titles and filenames, resolved/default parameter display, and
+  structured `report_data.json` output for report debugging.
 * Added feature-learning and feature-selection summary tables modeled after the
   data-processing and feature-engineering summary table style.
 * Added Sphinx/autodoc documentation and GitHub test workflows for Python 3.10,
@@ -50,6 +54,9 @@ documentation, and broader testing.
 * Reorganized code around registries for Phase 2 preprocessing, Phase 3 feature
   learning, Phase 4 feature importance, Phase 5 selection, Phase 6 models, and
   Phase 7 ensembles.
+* Updated the existing configuration-file workflow around `.cfg` files with
+  aligned parameter names, UCI demo configs, dry-run support, phase selection
+  flags, and matching notebook parameters.
 * Standardized parameter names across config files, command-line arguments,
   notebooks, and saved run-command metadata.
 * Updated Phase 1 task handling so user-specified `outcome_type` is respected
@@ -68,6 +75,8 @@ documentation, and broader testing.
   CatBoost/CGB and ExSTraCS.
 * Updated reports and summary statistics so metric names, no-skill baselines,
   curves, and plots are task-aware rather than binary-only.
+* Updated replication and reporting flows to handle binary, multiclass, and
+  regression outputs with task-specific metrics and plots.
 * Updated Google Colab and local Jupyter notebooks for binary, multiclass,
   regression, and custom dataset workflows.
 
