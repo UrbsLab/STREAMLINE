@@ -1,8 +1,16 @@
 # Citation
 
-If you use STREAMLINE in academic work, please cite the STREAMLINE book chapter
-and include the repository commit or release tag used for the analysis when
-reporting reproducible results.
+If you use STREAMLINE in academic work, please cite both the original STREAMLINE
+method paper and the biomedical application preprint. The method paper describes
+the original STREAMLINE design and earlier public implementation, while the
+biomedical application preprint demonstrates STREAMLINE in a large applied
+biomedical analysis. The current repository includes later extensions and
+updates beyond both publications.
+
+## STREAMLINE Method Paper
+
+This book chapter describes the original STREAMLINE method and earlier public
+implementation.
 
 Urbanowicz, R., Zhang, R., Cui, Y., Suri, P. (2023). [STREAMLINE: A Simple,
 Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data
@@ -11,7 +19,7 @@ In: Trujillo, L., Winkler, S.M., Silva, S., Banzhaf, W. (eds) *Genetic
 Programming Theory and Practice XIX*. Genetic and Evolutionary Computation.
 Springer, Singapore.
 
-## BibTeX
+BibTeX:
 
 ```bibtex
 @incollection{Urbanowicz2023STREAMLINE,
@@ -30,8 +38,6 @@ Springer, Singapore.
 
 ## Biomedical Application Preprint
 
-A STREAMLINE biomedical validation and application preprint is also available:
-
 Urbanowicz, R.J., Bandhey, H., Keenan, B.T., Maislin, G., Hwang, S., Mowery,
 D.L., Lynch, S.M., Mazzotti, D.R., Han, F., Li, Q.Y., Penzel, T., Tufik, S.,
 Bittencourt, L., Gislason, T., de Chazal, P., Singh, B., McArdle, N., Chen,
@@ -40,6 +46,8 @@ N.H., Pack, A., Schwab, R.J., Cistulli, P.A., Magalang, U.J. (2023).
 Examine the Utility of Photography-Based Phenotypes for OSA Prediction Across
 International Sleep Centers](https://doi.org/10.48550/arXiv.2312.05461).
 arXiv:2312.05461.
+
+BibTeX:
 
 ```bibtex
 @misc{Urbanowicz2023STREAMLINEBiomedicine,
@@ -53,13 +61,3 @@ arXiv:2312.05461.
   url           = {https://doi.org/10.48550/arXiv.2312.05461}
 }
 ```
-
-## Reproducibility Notes
-
-For reproducibility, report:
-
-* STREAMLINE commit hash or release tag
-* run configuration file or notebook parameters
-* dataset version/source
-* outcome type and primary metric
-* whether replication/P10 was run

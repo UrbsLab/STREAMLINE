@@ -341,7 +341,12 @@ In practice, this means new preprocessing, feature-learning, feature-importance,
 
 ## Citing STREAMLINE
 
-If you use STREAMLINE in academic work, please cite the STREAMLINE book chapter:
+If you use STREAMLINE in academic work, please cite both the original STREAMLINE
+method paper and the biomedical application preprint. The method paper describes
+the original STREAMLINE design and earlier public implementation, while the
+biomedical application preprint demonstrates STREAMLINE in a large applied
+biomedical analysis. The current repository includes later extensions and
+updates beyond both publications.
 
 Urbanowicz, R., Zhang, R., Cui, Y., Suri, P. (2023). [STREAMLINE: A Simple, Transparent, End-To-End Automated Machine Learning Pipeline Facilitating Data Analysis and Algorithm Comparison](https://doi.org/10.1007/978-981-19-8460-0_9). In: Trujillo, L., Winkler, S.M., Silva, S., Banzhaf, W. (eds) *Genetic Programming Theory and Practice XIX*. Genetic and Evolutionary Computation. Springer, Singapore.
 
