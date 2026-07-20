@@ -28,6 +28,8 @@ class BaseModel:
       - implement objective(trial, params=None)
       - call super().__init__(model=<sk_estimator_class>, model_name=<str>, ...)
     """
+    
+    subsampling_allowed = False
 
     def __init__(
         self,

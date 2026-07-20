@@ -44,6 +44,7 @@ class XGBClassifier(MulticlassClassificationModel, ABC):
     model_name = "Extreme Gradient Boosting"
     small_name = "XGB"
     color = "cyan"
+    subsampling_allowed = True
 
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):

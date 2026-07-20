@@ -168,8 +168,8 @@ class ModelJob:
         x_train, y_train, x_test, y_test = self.data_prep(model)
         self._configure_native_categorical_model(model)
 
-        # optional training subsample for certain models
-        if 0 < self.training_subsample < x_train.shape[0] and model.small_name in ['XGB', 'SVM', 'ANN', 'KNN']:
+        # optional training subsample for models that explicitly allow it
+        if 0 < self.training_subsample < x_train.shape[0] and getattr(model, "subsampling_allowed", False):
             sss = StratifiedShuffleSplit(n_splits=1, train_size=self.training_subsample, random_state=self.random_state)
             for train_index, _ in sss.split(x_train, y_train):
                 x_train = self._take_rows(x_train, train_index)
