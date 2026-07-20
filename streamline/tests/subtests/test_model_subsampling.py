@@ -135,8 +135,8 @@ def test_training_subsample_can_use_internal_stratified_strategy(tmp_path: Path)
 
 def test_heros_models_allow_training_subsample():
     assert HEROSClassifier.subsampling_allowed is True
-    assert HEROSClassifier.subsampling_strategy == "balanced"
+    assert HEROSClassifier.subsampling_strategy == "stratified"
     assert HEROSClassifier.undersampling_strategy == "auto"
     assert HEROSMulticlassClassifier.subsampling_allowed is True
-    assert HEROSMulticlassClassifier.subsampling_strategy == "balanced"
+    assert HEROSMulticlassClassifier.subsampling_strategy == "stratified"
     assert HEROSMulticlassClassifier.undersampling_strategy == "auto"
