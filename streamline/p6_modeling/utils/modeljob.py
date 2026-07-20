@@ -8,8 +8,8 @@ import numpy as np
 import optuna
 import pandas as pd
 from sklearn.inspection import permutation_importance
-from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import StratifiedShuffleSplit
 from pandas.api.types import is_object_dtype, is_string_dtype
 
 from streamline.p6_modeling.utils.categorical import (
@@ -170,12 +170,89 @@ class ModelJob:
 
         # optional training subsample for models that explicitly allow it
         if 0 < self.training_subsample < x_train.shape[0] and getattr(model, "subsampling_allowed", False):
-            sss = StratifiedShuffleSplit(n_splits=1, train_size=self.training_subsample, random_state=self.random_state)
-            for train_index, _ in sss.split(x_train, y_train):
-                x_train = self._take_rows(x_train, train_index)
-                y_train = y_train[train_index]
-            logging.warning('For ' + model.small_name
-                            + ', training sample reduced to ' + str(x_train.shape[0]) + ' instances')
+            y_array = np.asarray(y_train)
+            model_type = getattr(model, "model_type", None)
+            strategy = str(getattr(model, "subsampling_strategy", "balanced") or "balanced").strip().lower()
+
+            if model_type in {"Binary", "Multiclass"} and strategy in {"balanced",}:
+                try:
+                    from imblearn.under_sampling import RandomUnderSampler
+                except (ModuleNotFoundError, ImportError) as exc:
+                    raise ImportError(
+                        "Balanced training_subsample requires imbalanced-learn. "
+                        "Install it with `pip install imbalanced-learn` or use the project requirements."
+                    ) from exc
+
+                class_values = np.unique(y_array)
+                if len(class_values) <= 1:
+                    rng = np.random.default_rng(self.random_state)
+                    train_index = rng.choice(
+                        np.arange(len(y_array)),
+                        size=min(int(self.training_subsample), len(y_array)),
+                        replace=False,
+                    )
+                else:
+                    index_column = np.arange(len(y_array)).reshape(-1, 1)
+                    sampler = RandomUnderSampler(
+                        sampling_strategy=getattr(model, "undersampling_strategy", "auto"),
+                        random_state=self.random_state,
+                    )
+                    sampled_indices, _ = sampler.fit_resample(index_column, y_array)
+                    train_index = np.asarray(sampled_indices.ravel(), dtype=int)
+
+            elif model_type in {"Binary", "Multiclass"} and strategy in {"stratified", "proportional"}:
+                class_values, counts = np.unique(y_array, return_counts=True)
+                if len(class_values) <= 1 or counts.min() < 2 or int(self.training_subsample) < len(class_values):
+                    logging.warning(
+                        "training_subsample stratified sampling is not possible for this class distribution; "
+                        "using random sampling instead."
+                    )
+                    rng = np.random.default_rng(self.random_state)
+                    train_index = rng.choice(
+                        np.arange(len(y_array)),
+                        size=min(int(self.training_subsample), len(y_array)),
+                        replace=False,
+                    )
+                else:
+                    sss = StratifiedShuffleSplit(
+                        n_splits=1,
+                        train_size=min(int(self.training_subsample), len(y_array)),
+                        random_state=self.random_state,
+                    )
+                    for train_index, _ in sss.split(np.zeros(len(y_array)), y_array):
+                        train_index = np.asarray(train_index, dtype=int)
+
+            elif strategy in {"random", "uniform"} or model_type == "Regression":
+                rng = np.random.default_rng(self.random_state)
+                train_index = rng.choice(
+                    np.arange(len(y_array)),
+                    size=min(int(self.training_subsample), len(y_array)),
+                    replace=False,
+                )
+
+            else:
+                raise ValueError(
+                    f"Unknown subsampling_strategy '{strategy}' for {getattr(model, 'small_name', 'model')}. "
+                    "Use 'balanced', 'stratified', or 'random'."
+                )
+
+            x_train = self.take_rows(x_train, train_index)
+            y_train = y_array[train_index]
+            if model_type in {"Binary", "Multiclass"}:
+                values, counts = np.unique(y_train, return_counts=True)
+                class_counts = {str(value): int(count) for value, count in zip(values, counts)}
+                logging.warning(
+                    "For %s, training sample reduced to %s instances with %s class counts",
+                    model.small_name,
+                    x_train.shape[0],
+                    class_counts,
+                )
+            else:
+                logging.warning(
+                    "For %s, training sample reduced to %s instances",
+                    model.small_name,
+                    x_train.shape[0],
+                )
 
         try:
             model.fit(x_train, y_train, self.n_trials, self.timeout, self.feature_names)
@@ -366,7 +443,7 @@ class ModelJob:
         return to_numeric_matrix(x_train), y_train, to_numeric_matrix(x_test), y_test
 
     @staticmethod
-    def _take_rows(x, indices):
+    def take_rows(x, indices):
         if hasattr(x, "iloc"):
             return x.iloc[indices].reset_index(drop=True)
         return x[indices]

@@ -95,7 +95,7 @@ The runner also accepts old-style broad flags such as `do_till_report`.
 | `metric_direction` | `maximize` or `minimize` | Optimization direction. |
 | `n_trials` | `200` | Optuna trial budget. |
 | `timeout` | `900` | Optuna time budget in seconds. |
-| `training_subsample` | `0` | Optional training subset size for models that set `subsampling_allowed=True`, including ANN, SVM, KNN, XGB, and HEROS. |
+| `training_subsample` | `0` | Optional training subset size for models that set `subsampling_allowed=True`, including ANN, SVM, KNN, XGB, and HEROS. Classification subsampling is class-balanced by default with imbalanced-learn `RandomUnderSampler(sampling_strategy="auto")`; model wrappers can internally set `subsampling_strategy` to `stratified` for scikit-learn `StratifiedShuffleSplit` or `random`, or set `undersampling_strategy` to another imbalanced-learn string. |
 | `calibrate` | `0` or `1` | Classification calibration toggle. |
 | `bypass_one_hot_for_native_models` | `True` | Allow native categorical model path. |
 | `native_categorical_models` | `CGB,ExSTraCS` | Models allowed when P1 did not one-hot encode. |

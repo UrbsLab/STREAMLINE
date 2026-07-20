@@ -30,6 +30,8 @@ class BaseModel:
     """
     
     subsampling_allowed = False
+    subsampling_strategy = "stratified"  # "balanced" | "stratified" | "random"
+    undersampling_strategy = "auto"
 
     def __init__(
         self,
