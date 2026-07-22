@@ -13,7 +13,7 @@ from dask.distributed import Client, LocalCluster
 
 from streamline.p10_replication.replication import ReplicationJob
 from streamline.utils.cluster import get_cluster
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items, runner_fn
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_items, runner_fn
 
 
 class P10Runner:
@@ -193,7 +193,7 @@ class P10Runner:
         sh_path = jobs_dir / f"P10_{job_ref}_run.sh"
         submit_script = Path(__file__).with_name("p10_jobsubmit.py")
 
-        args = " ".join(
+        args = quote_command_parts(
             [
                 "python",
                 str(submit_script),
@@ -227,7 +227,7 @@ class P10Runner:
                 f.write(f"#SBATCH -o {logs_dir}/P10_{job_ref}.o\n")
                 f.write(f"#SBATCH -e {logs_dir}/P10_{job_ref}.e\n")
                 f.write(f"srun {args}\n")
-                launch_cmd = f"sbatch {sh_path}"
+                launch_cmd = f"sbatch {quote_command_parts([sh_path])}"
             else:
                 f.write(f"#BSUB -q {self.queue}\n")
                 f.write(f"#BSUB -J {job_ref}\n")
@@ -236,6 +236,6 @@ class P10Runner:
                 f.write(f"#BSUB -o {logs_dir}/P10_{job_ref}.o\n")
                 f.write(f"#BSUB -e {logs_dir}/P10_{job_ref}.e\n")
                 f.write(f"{args}\n")
-                launch_cmd = f"bsub < {sh_path}"
+                launch_cmd = f"bsub < {quote_command_parts([sh_path])}"
 
         os.system(launch_cmd)

@@ -15,6 +15,9 @@ where possible.
 | `instance_label` | `InstanceID` | P1, P6-P11 | Optional row identifier column. |
 | `n_splits` | `3`, `5`, `10` | CV-aware phases | Number of CV folds. |
 | `run_cluster` | `Serial`, `Local`, `Parallel`, `BashSLURM`, `BashLSF` | all phases | Execution mode. `Local` uses a local Dask cluster; `Parallel` uses local joblib parallelism. |
+| `wait_for_cluster_completion` | `True` | config runner | For `BashSLURM`/`BashLSF` full-pipeline runs, wait for STREAMLINE completion markers before starting the next phase. |
+| `cluster_phase_timeout` | `86400` | config runner | Maximum seconds to wait for a scheduler-submitted phase. |
+| `cluster_phase_poll_interval` | `30` | config runner | Seconds between completion-marker checks. |
 | `random_state` | `42` | stochastic phases | Seed for reproducibility. |
 
 ## Phase Toggles

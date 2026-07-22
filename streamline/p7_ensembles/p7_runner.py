@@ -4,7 +4,7 @@ from pathlib import Path
 import dask
 from dask.distributed import Client, LocalCluster
 from streamline.utils.cluster import get_cluster
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_items
 from streamline.p7_ensembles.ensembles import EnsemblePhaseJob
 
 class P7Runner:
@@ -74,7 +74,7 @@ class P7Runner:
         sh = jobs / f"P7_{job_ref}_run.sh"
         launcher = "sbatch" if self.run_cluster=="BashSLURM" else "bsub <"
         script = Path(__file__).with_name("p7_jobsubmit.py")
-        args = " ".join([
+        args = quote_command_parts([
             "python", str(script),
             "--dataset_dir", str(ds),
             "--n_splits", str(self.kw["n_splits"]),
@@ -98,4 +98,4 @@ class P7Runner:
             else:
                 f.write(f"#BSUB -q {self.queue}\n#BSUB -J {job_ref}\n#BSUB -R \"rusage[mem={self.reserved_memory}G]\"\n")
                 f.write(f"#BSUB -M {self.reserved_memory}GB\n#BSUB -o {logs}/P7_{job_ref}.o\n#BSUB -e {logs}/P7_{job_ref}.e\n{args}\n")
-        os.system(f"{launcher} {sh}")
+        os.system(f"{launcher} {quote_command_parts([sh])}")

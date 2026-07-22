@@ -8,7 +8,7 @@ import dask
 from dask.distributed import Client, LocalCluster
 import logging
 
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_items
 from streamline.utils.cluster import get_cluster
 from streamline.p5_feature_selection.feature_selection import FeatureSelection
 from streamline.p5_feature_selection.utils.fi_resolver import  _normalize_algorithms, _discover_algorithms
@@ -197,7 +197,7 @@ class P5Runner:
             "--top_features", str(self.top_features),
             "--show_plots", "1" if self.show_plots else "0",
         ]
-        cmd = " ".join(args)
+        cmd = quote_command_parts(args)
 
         with open(job_name, "w") as sh:
             sh.write("#!/bin/bash\n")
@@ -217,5 +217,5 @@ class P5Runner:
                 sh.write(f"#BSUB -e {run_dir}/logs/P5_{job_ref}.e\n")
                 sh.write(cmd + "\n")
 
-        os.system(f"{launcher} {job_name}")
+        os.system(f"{launcher} {quote_command_parts([job_name])}")
         logging.info("Phase 5 submitted cluster job script: %s", job_name)

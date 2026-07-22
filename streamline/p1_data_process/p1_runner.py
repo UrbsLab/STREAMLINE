@@ -15,7 +15,7 @@ logger = logging.getLogger("distributed.worker")
 logger.setLevel(logging.WARNING)
 
 from streamline.p1_data_process.data_process import DataProcess
-from streamline.utils.runners import parallel_eda_call, num_cores, run_dask_tasks, run_parallel_jobs
+from streamline.utils.runners import parallel_eda_call, num_cores, quote_command_parts, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
 
@@ -456,7 +456,7 @@ class P1Runner:
                 cmd = self._bash_submit_command(dataset_path, dataset_name=dataset_name, cv_input_root=cv_input_root)
                 sh.write(cmd + '\n')
 
-        os.system(f'{launcher} {job_name}')
+        os.system(f'{launcher} {quote_command_parts([job_name])}')
 
     def _bash_submit_command(self, dataset_path, dataset_name=None, cv_input_root=None):
         """
@@ -500,4 +500,4 @@ class P1Runner:
             '--univariate_top_k', str(int(self.univariate_top_k)),
             '--plot_anomalies', str(int(self.plot_anomalies)),
         ]
-        return ' '.join(args)
+        return quote_command_parts(args)

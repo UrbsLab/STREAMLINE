@@ -6,7 +6,7 @@ from typing import Dict, Any, List, Tuple
 import dask
 from dask.distributed import Client, LocalCluster
 
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster
 from streamline.p3_feature_learning.feature_learn import FeatureLearn
 from streamline.p3_feature_learning.utils.fl_loader import list_learners
@@ -183,7 +183,7 @@ class P3Runner:
                 cmd = self._bash_submit_command(cv_train_path, cv_test_path)
                 sh.write(cmd + "\n")
 
-        os.system(f"{launcher} {job_name}")
+        os.system(f"{launcher} {quote_command_parts([job_name])}")
         logging.info("Phase 3 submitted cluster job script: %s", job_name)
 
     def _bash_submit_command(self, tr: str, te: str) -> str:
@@ -203,4 +203,4 @@ class P3Runner:
             "--instance_label", self.instance_label or "",
             "--random_state", str(self.random_state) if self.random_state is not None else "",
         ]
-        return " ".join(args)
+        return quote_command_parts(args)

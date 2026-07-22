@@ -1,7 +1,6 @@
 from __future__ import annotations
 import json
 import os, time
-import shlex
 from pathlib import Path
 from typing import Optional, List
 import logging
@@ -13,7 +12,7 @@ logger = logging.getLogger("distributed.worker"); logger.setLevel(logging.WARNIN
 from streamline.p6_modeling.modeling import ModelingPhaseJob
 from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
 from streamline.p6_modeling.utils.loader import modeling_type_to_outcome_type, normalize_modeling_type
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 
 
@@ -280,7 +279,7 @@ class P6Runner:
                 else str(self.model_params_json)
             )
             args.extend(["--model_params_json", json_arg])
-        cmd = " ".join(shlex.quote(str(arg)) for arg in args)
+        cmd = quote_command_parts(args)
 
         with open(sh_path, "w") as sh:
             sh.write("#!/bin/bash\n")
@@ -299,4 +298,4 @@ class P6Runner:
                 sh.write(f"#BSUB -o {logs}/P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}.o\n")
                 sh.write(f"#BSUB -e {logs}/P6_{dataset_name}_{model_id}_CV{cv_idx}_{job_ref}.e\n")
                 sh.write(cmd + "\n")
-        os.system(f"{launcher} {sh_path}")
+        os.system(f"{launcher} {quote_command_parts([sh_path])}")

@@ -7,7 +7,7 @@ from typing import Dict, Any, List, Tuple
 import dask
 from dask.distributed import Client, LocalCluster
 
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_jobs
 from streamline.utils.cluster import get_cluster
 from streamline.p4_feature_importance.importance import FeatureImportance
 from streamline.p4_feature_importance.utils.fi_loader import list_importances, resolve_importance_id
@@ -251,7 +251,7 @@ class P4Runner:
                 sh.write(f"#BSUB -e {run_dir}/logs/P4_{model_id}_{job_ref}.e\n")
                 sh.write(self._bash_cmd(model_id, tr, te) + "\n")
 
-        os.system(f"{launcher} {job_name}")
+        os.system(f"{launcher} {quote_command_parts([job_name])}")
         logging.info("Phase 4 submitted cluster job script: %s", job_name)
 
     def _bash_cmd(self, model_id: str, tr: str, te: str) -> str:
@@ -275,4 +275,4 @@ class P4Runner:
             "--random_state", str(self.random_state) if self.random_state is not None else "",
             "--instance_subset", str(self.instance_subset) if self.instance_subset is not None else "",
         ]
-        return " ".join(args)
+        return quote_command_parts(args)

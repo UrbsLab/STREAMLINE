@@ -1,5 +1,6 @@
 import os
 import multiprocessing
+import shlex
 
 from joblib import Parallel, delayed
 
@@ -49,6 +50,10 @@ def progress_bar(iterable, total=None, label=None):
     except Exception:
         return iterable
     return tqdm(iterable, total=total, desc=label, unit="job")
+
+
+def quote_command_parts(parts):
+    return " ".join(shlex.quote("" if part is None else str(part)) for part in parts)
 
 
 def run_dask_tasks(tasks, client, label=None):

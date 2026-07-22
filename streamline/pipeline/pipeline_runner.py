@@ -5,6 +5,7 @@ import configparser
 import inspect
 import logging
 import os
+import time
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -82,6 +83,39 @@ CONTROL_KEYS = {
     "enabled",
     "report_modes",
     "skip_for_outcome_types",
+    "wait_for_cluster_completion",
+    "cluster_phase_timeout",
+    "cluster_phase_poll_interval",
+}
+
+CLUSTER_RUN_MODES = {"BashSLURM", "BashLSF"}
+
+PHASE_SCRIPT_PREFIXES = {
+    "p1_data_process": "P1",
+    "p2_impute_scale": "P2",
+    "p3_feature_learning": "P3",
+    "p4_feature_importance": "P4",
+    "p5_feature_selection": "P5",
+    "p6_modeling": "P6",
+    "p7_ensembles": "P7",
+    "p8_summary_statistics": "P8",
+    "p9_compare_datasets": "P9",
+    "p10_replication": "P10",
+    "p11_reporting": "P11",
+}
+
+PHASE_COMPLETION_PATTERNS = {
+    "p1_data_process": ("job_data_process_*.txt",),
+    "p2_impute_scale": ("job_preprocessing_*.txt",),
+    "p3_feature_learning": ("job_feature_learning_*.txt",),
+    "p4_feature_importance": ("job_feature_importance_*.txt",),
+    "p5_feature_selection": ("job_featureselection_*.txt",),
+    "p6_modeling": ("job_model_*.txt",),
+    "p7_ensembles": ("job_ensembles_*.txt",),
+    "p8_summary_statistics": ("job_stats_*.txt",),
+    "p9_compare_datasets": ("job_compare_datasets.txt",),
+    "p10_replication": ("job_apply_*.txt",),
+    "p11_reporting": ("job_reporting.txt",),
 }
 
 PHASE_TOGGLE_KEYS = {
@@ -347,7 +381,16 @@ class PipelineRunner:
             print(f"[dry-run] {phase}: {runner_class.__name__}({kwargs})")
             return
         runner = runner_class(**kwargs)
+        exp_root = self.experiment_root_from_kwargs(kwargs)
+        wait_for_cluster = self.should_wait_for_cluster_phase(kwargs, config)
+        phase_scripts_before = self.phase_job_scripts(exp_root, phase) if wait_for_cluster else set()
+        wait_start = time.time()
         runner.run()
+        if wait_for_cluster:
+            phase_scripts_after = self.phase_job_scripts(exp_root, phase)
+            submitted_jobs = len(phase_scripts_after - phase_scripts_before)
+            if submitted_jobs > 0:
+                self.wait_for_cluster_phase_completion(exp_root, phase, submitted_jobs, wait_start, config)
         self.save_phase_run_arguments(phase, snapshot_effective_args(kwargs, runner))
         logging.info("Finished %s", phase)
 
@@ -383,6 +426,76 @@ class PipelineRunner:
             args=dict(kwargs),
             argv=self.config_command_argv(phase),
         )
+
+    def should_wait_for_cluster_phase(self, kwargs: dict[str, Any], config: dict[str, Any]) -> bool:
+        run_cluster = str(kwargs.get("run_cluster") or "")
+        if run_cluster not in CLUSTER_RUN_MODES:
+            return False
+        wait_setting = config.get(
+            "wait_for_cluster_completion",
+            self.common_config.get("wait_for_cluster_completion", True),
+        )
+        if isinstance(wait_setting, str):
+            return wait_setting.strip().lower() not in {"0", "false", "no", "off"}
+        return bool(wait_setting)
+
+    def phase_job_scripts(self, exp_root: Path | None, phase: str) -> set[Path]:
+        if exp_root is None:
+            return set()
+        prefix = PHASE_SCRIPT_PREFIXES.get(phase)
+        if not prefix:
+            return set()
+        jobs_dir = Path(exp_root) / "jobs"
+        if not jobs_dir.is_dir():
+            return set()
+        return set(jobs_dir.glob(f"{prefix}_*_run.sh"))
+
+    def completed_cluster_markers(self, exp_root: Path | None, phase: str, since: float) -> set[Path]:
+        if exp_root is None:
+            return set()
+        jobs_completed = Path(exp_root) / "jobsCompleted"
+        if not jobs_completed.is_dir():
+            return set()
+        markers = set()
+        for pattern in PHASE_COMPLETION_PATTERNS.get(phase, ()):
+            for path in jobs_completed.glob(pattern):
+                try:
+                    if path.stat().st_mtime >= since - 1:
+                        markers.add(path)
+                except OSError:
+                    pass
+        return markers
+
+    def wait_for_cluster_phase_completion(
+        self,
+        exp_root: Path | None,
+        phase: str,
+        submitted_jobs: int,
+        wait_start: float,
+        config: dict[str, Any],
+    ) -> None:
+        timeout = float(config.get("cluster_phase_timeout", self.common_config.get("cluster_phase_timeout", 86400)))
+        poll_interval = float(config.get("cluster_phase_poll_interval", self.common_config.get("cluster_phase_poll_interval", 30)))
+        poll_interval = max(1.0, poll_interval)
+
+        logging.info(
+            "Waiting for %s submitted cluster job(s) from %s to write completion markers.",
+            submitted_jobs,
+            phase,
+        )
+        deadline = wait_start + timeout
+        while True:
+            completed = self.completed_cluster_markers(exp_root, phase, wait_start)
+            if len(completed) >= submitted_jobs:
+                logging.info("Detected %s/%s completion markers for %s.", len(completed), submitted_jobs, phase)
+                return
+            if time.time() >= deadline:
+                raise TimeoutError(
+                    f"Timed out waiting for {phase} cluster jobs to finish. "
+                    f"Detected {len(completed)} of {submitted_jobs} expected completion markers under "
+                    f"{Path(exp_root) / 'jobsCompleted' if exp_root else '<unknown experiment>'}."
+                )
+            time.sleep(poll_interval)
 
     def apply_p6_defaults(self, phase_config: dict[str, Any]) -> None:
         if "outcome_type" in phase_config:

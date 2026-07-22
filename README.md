@@ -107,6 +107,8 @@ Each phase CLI records its resolved arguments in `<output_path>/<experiment_name
 
 STREAMLINE can run multiple phases from one `.cfg` file. The config runner reads shared settings from `[run]`, phase toggles from `[phases]`, phase-specific settings from sections such as `[p1]` and `[p6]`, and then calls the same P1-P11 runner classes used by the phase CLIs. The `[phases]` section supports direct flags such as `do_p1 = True` as well as broad flags such as `do_till_report = True`.
 
+When `run_cluster = BashSLURM` or `run_cluster = BashLSF`, config-driven runs wait for STREAMLINE completion markers before moving to the next phase, so downstream phases do not start before scheduler-submitted jobs have finished writing their outputs.
+
 Dry-run a config to inspect the resolved phase calls:
 
 ```bash

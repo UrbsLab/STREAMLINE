@@ -10,7 +10,7 @@ import dask
 from dask.distributed import Client, LocalCluster
 
 from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_items
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_items
 from streamline.utils.cluster import get_cluster  # returns connected Dask Client
 
 logger = logging.getLogger("distributed.worker")
@@ -171,7 +171,7 @@ class P8Runner:
             "--include_ensembles", "1" if self.include_ensembles else "0",
             "--multiclass_average", self.multiclass_average,
         ]
-        cmd = " ".join(args)
+        cmd = quote_command_parts(args)
 
         with open(sh_path, "w") as sh:
             sh.write("#!/bin/bash\n")
@@ -190,4 +190,4 @@ class P8Runner:
                 sh.write(f"#BSUB -o {logs}/P8_{job_ref}.o\n")
                 sh.write(f"#BSUB -e {logs}/P8_{job_ref}.e\n")
                 sh.write(cmd + "\n")
-        os.system(f"{launcher} {sh_path}")
+        os.system(f"{launcher} {quote_command_parts([sh_path])}")

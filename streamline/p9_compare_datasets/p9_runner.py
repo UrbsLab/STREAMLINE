@@ -11,7 +11,7 @@ from dask.distributed import Client, LocalCluster
 
 from streamline.utils.cluster import get_cluster
 from streamline.p9_compare_datasets.compare_datasets import DatasetCompareJob
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_functions
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_functions
 
 
 class P9Runner:
@@ -90,7 +90,7 @@ class P9Runner:
         launcher = "sbatch" if self.run_cluster == "BashSLURM" else "bsub <"
         script = Path(__file__).with_name("p9_jobsubmit.py")
 
-        args = " ".join(
+        args = quote_command_parts(
             [
                 "python",
                 str(script),
@@ -129,4 +129,4 @@ class P9Runner:
                 f.write(f"#BSUB -e {logs}/P9_{job_ref}.e\n")
                 f.write(f"{args}\n")
 
-        os.system(f"{launcher} {sh}")
+        os.system(f"{launcher} {quote_command_parts([sh])}")

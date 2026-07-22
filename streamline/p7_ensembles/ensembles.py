@@ -303,7 +303,13 @@ class EnsemblePhaseJob:
                         json.dump(prc_curve_dict, f)
 
                 logging.info(f"[P7] Saved ensemble metrics/curves for {ens_small} CV={cv}")
-                
+
+        jobs_completed = self.ds_dir.parent / "jobsCompleted"
+        jobs_completed.mkdir(parents=True, exist_ok=True)
+        with (jobs_completed / f"job_ensembles_{self.dataset_name}.txt").open("w") as f:
+            f.write("complete")
+        logging.info("[P7] %s ensemble phase complete.", self.dataset_name)
+
 
 
 def _ensure_dir(p: Path):

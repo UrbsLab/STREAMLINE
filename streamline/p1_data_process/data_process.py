@@ -232,6 +232,13 @@ class DataProcess:
             self.cv_partitioner.run()
 
         self.save_runtime()
+        self.save_job_completion()
+
+    def save_job_completion(self):
+        jobs_dir = os.path.join(self.experiment_path, "jobsCompleted")
+        os.makedirs(jobs_dir, exist_ok=True)
+        with open(os.path.join(jobs_dir, f"job_data_process_{self.name}.txt"), "w") as f:
+            f.write("complete")
 
     def run_process(self, top_features=20):
         random.seed(self.random_state); np.random.seed(self.random_state)

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import shlex
 import time
 from pathlib import Path
 from typing import Optional
@@ -12,7 +11,7 @@ from dask.distributed import Client, LocalCluster
 
 from streamline.p11_reporting.reporting import ReportPhaseJob
 from streamline.utils.cluster import get_cluster
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_functions
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_functions
 
 
 class P11Runner:
@@ -150,7 +149,7 @@ class P11Runner:
             args.extend(["--reporting_dir", str(reporting_dir)])
         args.extend(["--report_mode", str(self.kw.get("report_mode") or "standard")])
 
-        arg_str = " ".join(shlex.quote(a) for a in args)
+        arg_str = quote_command_parts(args)
 
         with sh.open("w", encoding="utf-8") as f:
             f.write("#!/bin/bash\n")
@@ -170,4 +169,4 @@ class P11Runner:
                 f.write(f"#BSUB -e {logs}/P11_{job_ref}.e\n")
                 f.write(f"{arg_str}\n")
 
-        os.system(f"{launcher} {sh}")
+        os.system(f"{launcher} {quote_command_parts([sh])}")

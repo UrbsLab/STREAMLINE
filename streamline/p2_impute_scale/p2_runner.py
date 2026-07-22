@@ -16,7 +16,7 @@ from dask.distributed import Client, LocalCluster
 logger = logging.getLogger("distributed.worker")
 logger.setLevel(logging.WARNING)
 
-from streamline.utils.runners import num_cores, run_dask_tasks, run_parallel_jobs  # runner_fn not needed; we call job.run()
+from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_jobs  # runner_fn not needed; we call job.run()
 from streamline.utils.cluster import get_cluster  # must return a connected Dask Client
 from streamline.p2_impute_scale.impute_scale import ImputeAndScale
 from streamline.p2_impute_scale.utils.impute_loader import list_imputers
@@ -317,7 +317,7 @@ class P2Runner:
                 cmd = self._bash_submit_command(cv_train_path, cv_test_path)
                 sh.write(cmd + '\n')
 
-        os.system(f'{launcher} {job_name}')
+        os.system(f'{launcher} {quote_command_parts([job_name])}')
 
     def _bash_submit_command(self, cv_train_path: str, cv_test_path: str) -> str:
         """
@@ -351,5 +351,5 @@ class P2Runner:
             '--smote_sampling_strategy', json.dumps(self.smote_sampling_strategy) if isinstance(self.smote_sampling_strategy, (dict, list)) else str(self.smote_sampling_strategy),
             '--smote_k_neighbors', str(self.smote_k_neighbors),
         ]
-        return ' '.join(args)
+        return quote_command_parts(args)
     

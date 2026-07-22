@@ -118,6 +118,13 @@ timeout = 900
 Use `run_cluster = Local` for a local Dask cluster, or `run_cluster = Parallel`
 for local joblib parallelism without Dask.
 
+For `run_cluster = BashSLURM` or `run_cluster = BashLSF`, the config runner
+submits scheduler jobs and then waits for STREAMLINE completion markers before
+starting the next phase. This keeps full config runs from starting P2 before P1
+has finished writing `CVDatasets`. The wait can be adjusted with
+`wait_for_cluster_completion`, `cluster_phase_timeout`, and
+`cluster_phase_poll_interval` in the `[run]` section.
+
 `Parallel` and Dask-backed runs show progress when `tqdm`/Dask progress support is
 available. Set `STREAMLINE_PROGRESS=0` to disable these progress displays.
 
