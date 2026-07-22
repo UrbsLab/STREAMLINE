@@ -24,10 +24,10 @@ class HEROSClassifier(BinaryClassificationModel, ABC):
         #
         # Following our LCS wrappers, using discrete grids + allow overrides.
         self.param_grid = {
-            'iterations': [10000, 50000, 100000],
-            'pop_size': [500, 1000],
-            'model_iterations': [100, 250, 500],
-            'model_pop_size': [50, 100],
+            'iterations': [100000],
+            'pop_size': [1000],
+            'model_iterations': [500],
+            'model_pop_size': [100],
             'nu': [1],  # docs recommend 1 unless you *know* the problem is noise-free
         }
 
