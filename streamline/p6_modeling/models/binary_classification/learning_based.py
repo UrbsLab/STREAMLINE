@@ -84,7 +84,7 @@ class ExSTraCSClassifier(BinaryClassificationModel, ABC):
         super().__init__(ExSTraCS, "ExSTraCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
         self.param_grid = {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
                            'nu': [1, 10],
-                           'rule_compaction': ['None', 'QRF']}
+                           'rule_compaction': [None, 'QRF']}
         if iterations:
             self.param_grid['learning_iterations'] = [iterations, ]
         if N:
