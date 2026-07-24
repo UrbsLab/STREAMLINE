@@ -9,7 +9,6 @@ import time
 import json
 import logging
 from pathlib import Path
-from statistics import mean, median, stdev
 from typing import List, Dict, Tuple, Optional, Any
 from sklearn.metrics import auc
 

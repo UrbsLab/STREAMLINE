@@ -7,8 +7,14 @@ Intended to be launched by bash submit scripts (SLURM/LSF) or directly.
 
 import argparse
 import json
-from streamline.p5_feature_selection.feature_selection import FeatureSelection
+import sys
+from pathlib import Path
 
+try:
+    from .feature_selection import FeatureSelection
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p5_feature_selection.feature_selection import FeatureSelection
 
 def _to_bool(v, default=False):
     if v is None:

@@ -1,6 +1,13 @@
 # streamline/phases/p3_feature_learning/p3_jobsubmit.py
 import argparse, json, os, pickle
-from streamline.p3_feature_learning.feature_learn import FeatureLearn
+import sys
+from pathlib import Path
+
+try:
+    from .feature_learn import FeatureLearn
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p3_feature_learning.feature_learn import FeatureLearn
 
 def _maybe_json(s: str):
     try: return json.loads(s or "{}")

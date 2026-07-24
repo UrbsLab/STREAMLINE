@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
 
-from streamline.p11_reporting.p11_runner import P11Runner
-
+try:
+    from .p11_runner import P11Runner
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p11_reporting.p11_runner import P11Runner
 
 def _none_if_empty(val: str | None) -> str | None:
     if val is None:

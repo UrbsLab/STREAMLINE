@@ -3,10 +3,15 @@ import argparse
 import json
 import os
 import pickle
+import sys
+from pathlib import Path
 from typing import Any, Dict, Optional
 
-from streamline.p2_impute_scale.impute_scale import ImputeAndScale
-
+try:
+    from .impute_scale import ImputeAndScale
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p2_impute_scale.impute_scale import ImputeAndScale
 
 def _coalesce_bool(v: Optional[str], default: bool) -> bool:
     if v is None or v == '':

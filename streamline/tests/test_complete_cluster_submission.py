@@ -1,8 +1,12 @@
 import shlex
+import subprocess
+import sys
 from pathlib import Path
 
 from streamline.pipeline.pipeline_runner import PHASE_RUNNERS, PipelineRunner
 from streamline.p1_data_process.p1_runner import P1Runner
+import streamline.p8_summary_statistics.p8_runner as p8_runner_module
+from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.utils.runners import quote_command_parts
 
 
@@ -98,3 +102,43 @@ def test_pipeline_cluster_wait_setting_accepts_false_string(tmp_path):
     )
 
     assert not runner.should_wait_for_cluster_phase({"run_cluster": "BashSLURM"}, {})
+
+
+def test_p8_jobsubmit_can_import_streamline_when_run_as_file_from_other_cwd(tmp_path):
+    repo_root = Path(__file__).resolve().parents[2]
+    jobsubmit = repo_root / "streamline" / "p8_summary_statistics" / "p8_jobsubmit.py"
+
+    result = subprocess.run(
+        [sys.executable, str(jobsubmit), "--help"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "P8 Statistics jobsubmit" in result.stdout
+
+
+def test_p8_bash_submission_quotes_script_path(monkeypatch, tmp_path):
+    output_path = tmp_path / "out root"
+    dataset_dir = output_path / "DemoExp" / "Demo Dataset"
+    (dataset_dir / "CVDatasets").mkdir(parents=True)
+    submitted = []
+
+    monkeypatch.setattr(p8_runner_module.os, "system", lambda cmd: submitted.append(cmd) or 0)
+
+    runner = P8Runner(
+        output_path=str(output_path),
+        experiment_name="DemoExp",
+        outcome_type="Binary",
+        run_cluster="BashSLURM",
+    )
+    runner.run()
+
+    scripts = list((output_path / "DemoExp" / "jobs").glob("P8_*_run.sh"))
+    assert len(scripts) == 1
+    script_text = scripts[0].read_text()
+    assert "srun python" in script_text
+    assert submitted and submitted[0].startswith("sbatch '")
+    assert "out root" in submitted[0]

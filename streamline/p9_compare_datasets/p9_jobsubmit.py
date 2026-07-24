@@ -2,9 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
 
-from streamline.p9_compare_datasets.p9_runner import P9Runner
-
+try:
+    from .p9_runner import P9Runner
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p9_compare_datasets.p9_runner import P9Runner
 
 def main():
     ap = argparse.ArgumentParser(

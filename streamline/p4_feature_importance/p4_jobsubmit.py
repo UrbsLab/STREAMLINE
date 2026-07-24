@@ -1,6 +1,13 @@
 # streamline/p4_feature_importance/p4_jobsubmit.py
 import argparse, json
-from streamline.p4_feature_importance.importance import FeatureImportance
+import sys
+from pathlib import Path
+
+try:
+    from .importance import FeatureImportance
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p4_feature_importance.importance import FeatureImportance
 
 def _maybe_json(s: str):
     try: return json.loads(s or "{}")

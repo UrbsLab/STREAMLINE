@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import argparse
 import pickle
+import sys
 from pathlib import Path
 
-from streamline.p10_replication.replication import ReplicationJob
-
+try:
+    from .replication import ReplicationJob
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p10_replication.replication import ReplicationJob
 
 def main() -> None:
     parser = argparse.ArgumentParser("STREAMLINE Phase 10 Replication JobSubmit")

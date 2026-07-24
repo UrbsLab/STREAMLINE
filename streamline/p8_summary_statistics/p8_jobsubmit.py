@@ -1,6 +1,15 @@
 import argparse
-from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
+import sys
+from pathlib import Path
 
+try:
+    from .statistics import StatisticsPhaseJob
+except ImportError:
+    script_path = Path(__file__).resolve()
+    if sys.path and Path(sys.path[0] or ".").resolve() == script_path.parent:
+        sys.path.pop(0)
+    sys.path.insert(0, str(script_path.parents[2]))
+    from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
 
 def _b(x):
     if x is None:

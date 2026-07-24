@@ -1,7 +1,16 @@
 import argparse
-from streamline.p7_ensembles.ensembles import EnsemblePhaseJob
-from streamline.p7_ensembles.p7_runner import P7Runner
-from streamline.p7_ensembles.utils.loader import list_ensembles
+import sys
+from pathlib import Path
+
+try:
+    from .ensembles import EnsemblePhaseJob
+    from .p7_runner import P7Runner
+    from .utils.loader import list_ensembles
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from streamline.p7_ensembles.ensembles import EnsemblePhaseJob
+    from streamline.p7_ensembles.p7_runner import P7Runner
+    from streamline.p7_ensembles.utils.loader import list_ensembles
 
 def _print_ensembles():
     print("\nAvailable ensembles:")
