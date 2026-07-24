@@ -6,6 +6,7 @@ from pathlib import Path
 from streamline.pipeline.pipeline_runner import PHASE_RUNNERS, PipelineRunner
 from streamline.p1_data_process.p1_runner import P1Runner
 import streamline.p8_summary_statistics.p8_runner as p8_runner_module
+import streamline.p8_summary_statistics.p8_jobsubmit as p8_jobsubmit_module
 from streamline.p8_summary_statistics.p8_runner import P8Runner
 from streamline.utils.runners import quote_command_parts
 
@@ -142,3 +143,33 @@ def test_p8_bash_submission_quotes_script_path(monkeypatch, tmp_path):
     assert "srun python" in script_text
     assert submitted and submitted[0].startswith("sbatch '")
     assert "out root" in submitted[0]
+
+
+def test_p8_jobsubmit_passes_full_path_to_statistics_job(monkeypatch, tmp_path):
+    captured = {}
+
+    class FakeStatisticsPhaseJob:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+        def run(self):
+            captured["ran"] = True
+
+    monkeypatch.setattr(p8_jobsubmit_module, "StatisticsPhaseJob", FakeStatisticsPhaseJob)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "p8_jobsubmit.py",
+            "--dataset_dir",
+            str(tmp_path / "Dataset"),
+            "--n_splits",
+            "3",
+        ],
+    )
+
+    p8_jobsubmit_module.main()
+
+    assert captured["full_path"] == str(tmp_path / "Dataset")
+    assert "dataset_dir" not in captured
+    assert captured["ran"]

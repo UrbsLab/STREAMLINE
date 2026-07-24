@@ -386,8 +386,8 @@ class ModelJob:
         train = pd.read_csv(self.train_file_path)
         test = pd.read_csv(self.test_file_path)
         if self.instance_label is not None:
-            train = train.drop(self.instance_label, axis=1)
-            test = test.drop(self.instance_label, axis=1)
+            train = train.drop(columns=[self.instance_label], errors="ignore")
+            test = test.drop(columns=[self.instance_label], errors="ignore")
         x_train = train.drop(self.outcome_label, axis=1)
         y_train = train[self.outcome_label].values
         x_test = test.drop(self.outcome_label, axis=1)

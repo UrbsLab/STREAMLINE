@@ -15,7 +15,7 @@ from scipy.stats import kruskal, wilcoxon, mannwhitneyu
 
 import seaborn as sns
 
-from streamline.p6_modeling.utils.loader import list_models, get_model_by_id
+from streamline.p6_modeling.utils.loader import get_model_by_id, list_models, normalize_modeling_type
 
 sns.set_theme()
 logger = logging.getLogger(__name__)
@@ -172,7 +172,7 @@ class DatasetCompareJob:
         registry_entries: List[Dict[str, Any]] = []
         if list_models is not None:
             try:
-                registry_entries = list_models(outcome_type)
+                registry_entries = list_models(normalize_modeling_type(outcome_type=outcome_type))
             except Exception as e:
                 logger.warning(
                     "DatasetComparePhaseJob: list_models(%s) failed: %r",

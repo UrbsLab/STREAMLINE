@@ -92,8 +92,10 @@ def list_ensembles() -> List[Dict[str, str]]:
     """
     out: List[Dict[str, str]] = []
     for c in load_ensemble_classes():
+        display_name = getattr(c, "model_name", "") or getattr(c, "name", "") or c.__name__
         out.append({
             "id": getattr(c, "id", ""),
+            "name": display_name,
             "model_name": getattr(c, "model_name", ""),
             "small_name": getattr(c, "small_name", ""),
             "module": getattr(c, "__module__", ""),

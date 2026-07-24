@@ -11,7 +11,7 @@ except ImportError:
     sys.path.insert(0, str(script_path.parents[2]))
     from streamline.p8_summary_statistics.statistics import StatisticsPhaseJob
 
-def _b(x):
+def parse_bool_arg(x):
     if x is None:
         return False
     return str(x).strip().lower() in ("1", "true", "t", "yes", "y")
@@ -42,7 +42,7 @@ def main():
     ] if args.exclude_plots else []
 
     StatisticsPhaseJob(
-        dataset_dir=args.dataset_dir,
+        full_path=args.dataset_dir,
         outcome_label=args.outcome_label,
         outcome_type=args.outcome_type,
         instance_label=(args.instance_label if args.instance_label else None),
@@ -51,10 +51,10 @@ def main():
         top_features=int(args.top_features),
         sig_cutoff=float(args.sig_cutoff),
         metric_weight=args.metric_weight,
-        scale_data=_b(args.scale_data),
+        scale_data=parse_bool_arg(args.scale_data),
         exclude_plots=exclude_plots,
-        show_plots=_b(args.show_plots),
-        include_ensembles=_b(args.include_ensembles),
+        show_plots=parse_bool_arg(args.show_plots),
+        include_ensembles=parse_bool_arg(args.include_ensembles),
         multiclass_average=args.multiclass_average,
     ).run()
 

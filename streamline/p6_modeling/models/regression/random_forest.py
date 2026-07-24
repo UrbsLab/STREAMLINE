@@ -13,7 +13,7 @@ class RFRegressor(RegressionModel, ABC):
         super().__init__(RandomForestRegressor, "Random Forest", cv_folds,
                          scoring_metric, metric_direction, random_state, cv)
         self.param_grid = {'n_estimators': [10, 1000], 'max_depth': [1, 30], 'min_samples_split': [2, 50],
-                           'min_samples_leaf': [1, 50], 'max_features': [None, 'auto', 'log2'], 'bootstrap': [True],
+                           'min_samples_leaf': [1, 50], 'max_features': [None, 'sqrt', 'log2'], 'bootstrap': [True],
                            'oob_score': [False, True], 'random_state': [random_state, ]}
         self.small_name = "RF"
         self.color = "navy"

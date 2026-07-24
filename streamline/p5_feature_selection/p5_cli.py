@@ -20,7 +20,7 @@ def main():
     ap.add_argument("--algorithms", default="auto",
                     help='Comma-separated (e.g. "MI,MS") OR "auto" to discover from feature_importance/*/')
     ap.add_argument("--n_splits", default=None, type=int)
-    ap.add_argument("--outcome_label", default="Class")
+    ap.add_argument("--outcome_label", default=None)
     ap.add_argument("--instance_label", default=None)
 
     ap.add_argument("--max_features_to_keep", default=2000, type=int)

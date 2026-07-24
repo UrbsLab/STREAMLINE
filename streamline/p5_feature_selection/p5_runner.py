@@ -1,6 +1,6 @@
 # streamline/phases/p5_feature_selection/runner.py  (replace the class with this version)
 from __future__ import annotations
-import os, time, json
+import os, time, json, pickle
 from pathlib import Path
 from typing import Optional, List
 
@@ -34,7 +34,7 @@ class P5Runner:
         *,
         algorithms: "List[str] | str | None" = "auto",   # <-- default auto
         n_splits: int = 10,
-        outcome_label: str = "Class",
+        outcome_label: str | None = None,
         instance_label: Optional[str] = None,
         max_features_to_keep: int = 2000,
         filter_poor_features: bool = True,
@@ -55,10 +55,15 @@ class P5Runner:
     ):
         self.output_path = output_path
         self.experiment_name = experiment_name
+        self.exp_root = os.path.join(self.output_path, self.experiment_name)
+        if not os.path.isdir(self.exp_root):
+            raise Exception("Experiment must exist before phase 5 can begin")
+        meta = self._load_metadata()
+
         self._algorithms_raw = algorithms  # keep raw for "auto"
         self.n_splits = int(n_splits)
-        self.outcome_label = outcome_label
-        self.instance_label = instance_label
+        self.outcome_label = outcome_label or meta.get("Outcome Label", "Class")
+        self.instance_label = instance_label if instance_label is not None else meta.get("Instance Label", None)
         self.max_features_to_keep = int(max_features_to_keep)
         self.filter_poor_features = bool(filter_poor_features)
         self.overwrite_cv = bool(overwrite_cv)
@@ -73,13 +78,16 @@ class P5Runner:
         self.reserved_memory = int(reserved_memory)
         self.strict_discovery = bool(strict_discovery)
 
-        self.exp_root = os.path.join(self.output_path, self.experiment_name)
-        if not os.path.isdir(self.exp_root):
-            raise Exception("Experiment must exist before phase 5 can begin")
-
         if self.run_cluster in ("BashSLURM","BashLSF"):
             os.makedirs(os.path.join(self.exp_root, "jobs"), exist_ok=True)
             os.makedirs(os.path.join(self.exp_root, "logs"), exist_ok=True)
+
+    def _load_metadata(self):
+        meta_path = os.path.join(self.exp_root, "metadata.pickle")
+        if not os.path.exists(meta_path):
+            return {}
+        with open(meta_path, "rb") as f:
+            return pickle.load(f)
 
     # ----------------------------
     # Main
