@@ -1,0 +1,215 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TabPFN Token Setup &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Running STREAMLINE" href="running.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TabPFN Token Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#get-a-token">Get A Token</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-the-token-for-one-terminal-session">Set The Token For One Terminal Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#make-the-token-persistent-for-a-conda-environment">Make The Token Persistent For A Conda Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-tabpfn-specific-pytest">Run The TabPFN-Specific Pytest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-tabpfn-in-notebooks">Use TabPFN In Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">TabPFN Token Setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tabpfn_token.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tabpfn-token-setup">
+<h1>TabPFN Token Setup<a class="headerlink" href="#tabpfn-token-setup" title="Link to this heading"></a></h1>
+<p>TabPFN is optional in STREAMLINE. Install it separately when you want to run
+TabPFN models:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>tabpfn
+</pre></div>
+</div>
+<p>TabPFN requires a one-time Prior Labs license acceptance before it can download
+model weights for local inference. STREAMLINE can import and configure TabPFN
+without this token, but Phase 6 skips requested TabPFN models until
+<code class="docutils literal notranslate"><span class="pre">TABPFN_TOKEN</span></code> is available in the environment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">TABPFN_TOKEN</span></code> is not set, Phase 6 warns and skips requested TabPFN models
+instead of failing the full run. Other requested models, including HEROS, still
+run normally. A passing run with skipped TabPFN means TabPFN was not fit.</p>
+</div>
+<section id="get-a-token">
+<h2>Get A Token<a class="headerlink" href="#get-a-token" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">https://ux.priorlabs.ai</span></code> in a browser.</p></li>
+<li><p>Log in or create an account.</p></li>
+<li><p>Accept the TabPFN license on the Licenses tab.</p></li>
+<li><p>Copy the API key from <code class="docutils literal notranslate"><span class="pre">https://ux.priorlabs.ai/account</span></code>.</p></li>
+</ol>
+<p>Do not commit this token to git, notebooks, config files, shared shell history,
+or issue trackers.</p>
+</section>
+<section id="set-the-token-for-one-terminal-session">
+<h2>Set The Token For One Terminal Session<a class="headerlink" href="#set-the-token-for-one-terminal-session" title="Link to this heading"></a></h2>
+<p>Activate your STREAMLINE environment and export the token before running
+TabPFN models:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>streamline
+<span class="nb">export</span><span class="w"> </span><span class="nv">TABPFN_TOKEN</span><span class="o">=</span><span class="s2">&quot;paste-your-api-key-here&quot;</span>
+</pre></div>
+</div>
+<p>Confirm Python can see it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import os; print(&#39;TABPFN_TOKEN set:&#39;, bool(os.environ.get(&#39;TABPFN_TOKEN&#39;)))&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="make-the-token-persistent-for-a-conda-environment">
+<h2>Make The Token Persistent For A Conda Environment<a class="headerlink" href="#make-the-token-persistent-for-a-conda-environment" title="Link to this heading"></a></h2>
+<p>Create conda activation scripts so the token is set whenever the environment is
+activated and removed when it is deactivated:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>streamline
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONDA_PREFIX</span><span class="s2">/etc/conda/activate.d&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONDA_PREFIX</span><span class="s2">/etc/conda/deactivate.d&quot;</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;export TABPFN_TOKEN=&quot;paste-your-api-key-here&quot;\n&#39;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONDA_PREFIX</span><span class="s2">/etc/conda/activate.d/tabpfn_token.sh&quot;</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;unset TABPFN_TOKEN\n&#39;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONDA_PREFIX</span><span class="s2">/etc/conda/deactivate.d/tabpfn_token.sh&quot;</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONDA_PREFIX</span><span class="s2">/etc/conda/activate.d/tabpfn_token.sh&quot;</span>
+</pre></div>
+</div>
+<p>Restart the terminal or run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>deactivate
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+</pre></div>
+</div>
+</section>
+<section id="run-the-tabpfn-specific-pytest">
+<h2>Run The TabPFN-Specific Pytest<a class="headerlink" href="#run-the-tabpfn-specific-pytest" title="Link to this heading"></a></h2>
+<p>The TabPFN pytest is intentionally explicit-only so the main test suite does
+not run a heavyweight model download or fit by accident. Run it directly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>streamline/tests/subtests/tabpfn_smoke.py<span class="w"> </span>-q<span class="w"> </span>-rs
+</pre></div>
+</div>
+<p>Without <code class="docutils literal notranslate"><span class="pre">TABPFN_TOKEN</span></code>, the no-token skip behavior is tested and the actual
+TabPFN fit test is skipped with a visible reason. With <code class="docutils literal notranslate"><span class="pre">TABPFN_TOKEN</span></code> set, the
+same command also runs the TabPFN binary wrapper fit smoke test.</p>
+</section>
+<section id="use-tabpfn-in-notebooks">
+<h2>Use TabPFN In Notebooks<a class="headerlink" href="#use-tabpfn-in-notebooks" title="Link to this heading"></a></h2>
+<p>For local notebooks, set the token before launching Jupyter from the same shell:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>streamline
+<span class="nb">export</span><span class="w"> </span><span class="nv">TABPFN_TOKEN</span><span class="o">=</span><span class="s2">&quot;paste-your-api-key-here&quot;</span>
+jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+<p>For Colab, store the token in Colab secrets or set it in a private cell before
+running TabPFN models:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TABPFN_TOKEN&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;paste-your-api-key-here&quot;</span>
+</pre></div>
+</div>
+<p>Avoid saving notebooks with a real token embedded in a code cell.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running.html" class="btn btn-neutral float-right" title="Running STREAMLINE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

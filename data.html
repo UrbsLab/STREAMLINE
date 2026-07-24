@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datasets &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+    <link rel="prev" title="Detailed Pipeline Walkthrough" href="pipeline.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#input-data-requirements">Input Data Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-types">Feature Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#one-hot-encoding-and-native-categorical-models">One-Hot Encoding And Native Categorical Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#included-uci-demo-datasets">Included UCI Demo Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#replication-data">Replication Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ignored-columns">Ignored Columns</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Datasets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/data.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="datasets">
+<h1>Datasets<a class="headerlink" href="#datasets" title="Link to this heading"></a></h1>
+<section id="input-data-requirements">
+<h2>Input Data Requirements<a class="headerlink" href="#input-data-requirements" title="Link to this heading"></a></h2>
+<p>STREAMLINE expects tabular supervised learning datasets.</p>
+<ol class="arabic simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">.tsv</span></code>, or <code class="docutils literal notranslate"><span class="pre">.txt</span></code> files with a header row.</p></li>
+<li><p>Rows are instances and columns are variables.</p></li>
+<li><p>Include one outcome column specified by <code class="docutils literal notranslate"><span class="pre">outcome_label</span></code>.</p></li>
+<li><p>Include an optional instance identifier column specified by <code class="docutils literal notranslate"><span class="pre">instance_label</span></code>.</p></li>
+<li><p>Include optional feature-type files listing categorical and quantitative feature names.</p></li>
+<li><p>Encode missing values as blank cells, <code class="docutils literal notranslate"><span class="pre">NA</span></code>, <code class="docutils literal notranslate"><span class="pre">NaN</span></code>, or <code class="docutils literal notranslate"><span class="pre">?</span></code>; avoid numeric placeholders such as <code class="docutils literal notranslate"><span class="pre">-99</span></code> unless they are real values.</p></li>
+<li><p>Keep replication datasets aligned with the original dataset’s feature names and outcome/instance labels.</p></li>
+</ol>
+<p>Recommended preparation before P1:</p>
+<ul class="simple">
+<li><p>Remove free-text, image, raw time-series, or other unstructured columns unless you have already converted them to tabular features.</p></li>
+<li><p>Decide whether high-cardinality identifier-like fields should be <code class="docutils literal notranslate"><span class="pre">instance_label</span></code>, ignored, or removed before modeling.</p></li>
+<li><p>Check that the outcome column has the interpretation you expect. Binary labels should be documented so downstream metrics are not ambiguous.</p></li>
+<li><p>Keep a copy of the raw source data outside the STREAMLINE output directory.</p></li>
+</ul>
+<p>The current code supports:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Task</p></th>
+<th class="head"><p>Example <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Binary classification</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Binary</span></code></p></td>
+<td><p>Standard classification metrics, ROC, PRC, and calibration outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Multiclass classification</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Multiclass</span></code></p></td>
+<td><p>Macro/micro summaries where applicable.</p></td>
+</tr>
+<tr class="row-even"><td><p>Regression</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Continuous</span></code></p></td>
+<td><p>Regression metrics and residual-style outputs.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="feature-types">
+<h2>Feature Types<a class="headerlink" href="#feature-types" title="Link to this heading"></a></h2>
+<p>You can provide feature type files through:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>categorical_features = path/to/categorical_features.csv
+quantitative_features = path/to/quantitative_features.csv
+</pre></div>
+</div>
+<p>Each file should contain feature names, one per row or in a single column. If
+feature type files are omitted, P1 can infer categorical features using
+<code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code>.</p>
+<p>Supplying feature-type files is recommended for real analyses because numeric
+codes are common in biomedical and administrative data. A coded feature such as
+<code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, <code class="docutils literal notranslate"><span class="pre">3</span></code> may be categorical even though it looks numeric to Python.</p>
+<section id="one-hot-encoding-and-native-categorical-models">
+<h3>One-Hot Encoding And Native Categorical Models<a class="headerlink" href="#one-hot-encoding-and-native-categorical-models" title="Link to this heading"></a></h3>
+<p>By default, P1 one-hot encodes non-binary categorical features. Set
+<code class="docutils literal notranslate"><span class="pre">one_hot_encoding</span> <span class="pre">=</span> <span class="pre">False</span></code> when you want later models to handle raw categorical
+columns directly.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">one_hot_encoding</span></code> is false, P6 only runs models listed in
+<code class="docutils literal notranslate"><span class="pre">native_categorical_models</span></code> by default. Unsupported explicitly requested models
+raise an error instead of silently changing the feature representation.</p>
+</section>
+</section>
+<section id="included-uci-demo-datasets">
+<h2>Included UCI Demo Datasets<a class="headerlink" href="#included-uci-demo-datasets" title="Link to this heading"></a></h2>
+<p>The repository includes deterministic 80:20 train/replication splits for three
+UCI-derived demos:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Task</p></th>
+<th class="head"><p>Training folder</p></th>
+<th class="head"><p>Replication folder</p></th>
+<th class="head"><p>Outcome</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Binary classification</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/UCIBinaryClassification</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/UCIRepBinaryClassification</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Multiclass classification</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/UCIMulticlassClassification</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/UCIRepMulticlassClassification</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Regression</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/UCIRegression</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">data/UCIRepRegression</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MPG</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The demo sources are:</p>
+<ul class="simple">
+<li><p>HCC survival: <a class="reference external" href="https://archive.ics.uci.edu/dataset/423/hcc+survival">UCI HCC Survival</a></p></li>
+<li><p>Student dropout and academic success: <a class="reference external" href="https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success">UCI Predict Students’ Dropout and Academic Success</a></p></li>
+<li><p>Auto MPG: <a class="reference external" href="https://archive.ics.uci.edu/dataset/9/auto+mpg">UCI Auto MPG</a></p></li>
+</ul>
+<p>Feature type files for the demos live in <code class="docutils literal notranslate"><span class="pre">data/UCIFeatureTypes/</span></code>.</p>
+<p>The normal demo folders contain training/development splits. The matching
+<code class="docutils literal notranslate"><span class="pre">UCIRep*</span></code> folders contain held-out replication splits created for STREAMLINE
+demonstration and testing.</p>
+</section>
+<section id="replication-data">
+<h2>Replication Data<a class="headerlink" href="#replication-data" title="Link to this heading"></a></h2>
+<p>Replication datasets are external validation inputs for P10. They are not
+assumed to be official test splits from UCI. The included demo replication
+folders are deterministic held-out 20% splits made to exercise P10 and
+replication reporting.</p>
+</section>
+<section id="ignored-columns">
+<h2>Ignored Columns<a class="headerlink" href="#ignored-columns" title="Link to this heading"></a></h2>
+<p>Identifier-like fields should be supplied as <code class="docutils literal notranslate"><span class="pre">instance_label</span></code> or ignored before
+modeling. For Auto MPG, the car name is treated as an identifier-like field in
+the demo preparation rather than a normal predictive feature.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pipeline.html" class="btn btn-neutral float-left" title="Detailed Pipeline Walkthrough" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

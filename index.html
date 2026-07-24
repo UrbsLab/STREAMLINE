@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STREAMLINE &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="About STREAMLINE" href="about.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">STREAMLINE</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="streamline">
+<h1>STREAMLINE<a class="headerlink" href="#streamline" title="Link to this heading"></a></h1>
+<img alt="_images/STREAMLINE_Logo_Full.png" src="_images/STREAMLINE_Logo_Full.png" />
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>STREAMLINE is an end-to-end automated machine learning pipeline for
+supervised tabular data. The v1.0.0 main release supports binary classification,
+multiclass classification, and regression, with integrated
+data processing, imputation, scaling, feature learning, feature importance,
+feature selection, model training, classification ensembles, summary
+statistics, dataset comparison, replication, and PDF reporting.</p>
+<p>The schematic below summarizes the STREAMLINE v1.0.0 workflow.</p>
+<a class="reference internal image-reference" href="_images/STREAMLINE_v3_paper_new_lightcolor.png"><img alt="STREAMLINE v1.0.0 automated machine learning pipeline overview" src="_images/STREAMLINE_v3_paper_new_lightcolor.png" style="width: 100%;" />
+</a>
+<p>The repository is organized around eleven explicit phases:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Phase</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>P1</p></td>
+<td><p>Data Process</p></td>
+<td><p>Load data, infer or apply feature types, run exploratory summaries, and create CV partitions.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P2</p></td>
+<td><p>Impute and Scale</p></td>
+<td><p>Impute missing values, scale quantitative features, and optionally apply SMOTE/SMOTENC to training folds.</p></td>
+</tr>
+<tr class="row-even"><td><p>P3</p></td>
+<td><p>Feature Learning</p></td>
+<td><p>Learn transformed features such as PCA components and record feature-learning manifests.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P4</p></td>
+<td><p>Feature Importance</p></td>
+<td><p>Score features with filter-style feature-importance methods.</p></td>
+</tr>
+<tr class="row-even"><td><p>P5</p></td>
+<td><p>Feature Selection</p></td>
+<td><p>Select reduced feature sets for downstream modeling.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P6</p></td>
+<td><p>Modeling</p></td>
+<td><p>Train and evaluate base models with Optuna accounting and optional native categorical handling.</p></td>
+</tr>
+<tr class="row-even"><td><p>P7</p></td>
+<td><p>Ensembles</p></td>
+<td><p>Train classification ensembles on top of base model predictions.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P8</p></td>
+<td><p>Summary Statistics</p></td>
+<td><p>Aggregate metrics and summarize model and feature behavior.</p></td>
+</tr>
+<tr class="row-even"><td><p>P9</p></td>
+<td><p>Compare Datasets</p></td>
+<td><p>Compare results across datasets within an experiment.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P10</p></td>
+<td><p>Replication</p></td>
+<td><p>Apply trained workflows to external replication datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p>P11</p></td>
+<td><p>Reporting</p></td>
+<td><p>Generate standard and replication PDF reports.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="recommended-starting-points">
+<h2>Recommended Starting Points<a class="headerlink" href="#recommended-starting-points" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use <a class="reference internal" href="install.html"><span class="doc">Installation</span></a> if you are setting up a local environment.</p></li>
+<li><p>Use <a class="reference internal" href="running.html"><span class="doc">Running STREAMLINE</span></a> if you want to run a demo immediately.</p></li>
+<li><p>Use <a class="reference internal" href="data.html"><span class="doc">Datasets</span></a> if you are preparing a custom dataset.</p></li>
+<li><p>Use <a class="reference internal" href="parameters.html"><span class="doc">Run Parameters</span></a> when editing a <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> file or notebook parameter block.</p></li>
+<li><p>Use <a class="reference internal" href="output.html"><span class="doc">Output</span></a> after a run to find reports, metrics, figures, and saved models.</p></li>
+</ul>
+</section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<p>For most users, the easiest local route is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>streamline<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pip
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--dry_run
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg
+</pre></div>
+</div>
+<p>The notebooks expose the same major settings as the config files and are a
+better starting point for interactive tutorials, Colab demos, and custom data
+exploration.</p>
+</section>
+<section id="how-this-documentation-is-organized">
+<h2>How This Documentation Is Organized<a class="headerlink" href="#how-this-documentation-is-organized" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use <a class="reference internal" href="install.html"><span class="doc">Installation</span></a> to prepare a local environment.</p></li>
+<li><p>Use <a class="reference internal" href="data.html"><span class="doc">Datasets</span></a> to format custom datasets and understand the included UCI demos.</p></li>
+<li><p>Use <a class="reference internal" href="running.html"><span class="doc">Running STREAMLINE</span></a> for notebooks, config-driven runs, and phase-by-phase CLI commands.</p></li>
+<li><p>Use <a class="reference internal" href="parameters.html"><span class="doc">Run Parameters</span></a> when editing <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files or command-line calls.</p></li>
+<li><p>Use <a class="reference internal" href="output.html"><span class="doc">Output</span></a> to navigate experiment folders and reports.</p></li>
+<li><p>Use <a class="reference internal" href="pipeline.html"><span class="doc">Detailed Pipeline Walkthrough</span></a> for a phase-by-phase explanation of what STREAMLINE does.</p></li>
+<li><p>Use <a class="reference internal" href="changelog.html"><span class="doc">Changelog</span></a> to review dated release entries and notable changes.</p></li>
+</ul>
+</section>
+<section id="version-history">
+<h2>Version History<a class="headerlink" href="#version-history" title="Link to this heading"></a></h2>
+<p>This site documents the STREAMLINE v1.0.0 main release. See
+<a class="reference internal" href="changelog.html"><span class="doc">Changelog</span></a> for dated release entries and notable changes.</p>
+</section>
+<section id="current-scope">
+<h2>Current Scope<a class="headerlink" href="#current-scope" title="Link to this heading"></a></h2>
+<p>STREAMLINE is intended for supervised learning on tabular datasets. It does
+not automate feature extraction from unstructured data such as free text,
+images, audio, video, or raw time-series streams. Regression runs should skip
+P7 because the current ensemble registry is classification-only.</p>
+</section>
+<section id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Link to this heading"></a></h2>
+<p>STREAMLINE assembles a practical, reproducible machine learning workflow, but
+it is not a guarantee that the included preprocessing choices, models, or
+metrics are optimal for every scientific question. Users should still review
+input data quality, feature definitions, leakage risk, metric choice, and
+domain-specific interpretation.</p>
+</section>
+<section id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Link to this heading"></a></h2>
+<p>For general questions and collaborations, contact Ryan Urbanowicz at
+<code class="docutils literal notranslate"><span class="pre">ryan.urbanowicz&#64;cshs.org</span></code>.</p>
+<p>For codebase, installation, running, troubleshooting, and implementation
+questions, contact Harsh Bandhey at <code class="docutils literal notranslate"><span class="pre">harsh.bandhey&#64;cshs.org</span></code>.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="about.html" class="btn btn-neutral float-right" title="About STREAMLINE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

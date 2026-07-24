@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running STREAMLINE &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Run Parameters" href="parameters.html" />
+    <link rel="prev" title="TabPFN Token Setup" href="tabpfn_token.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running STREAMLINE</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#choose-a-run-path">Choose A Run Path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#google-colab">Google Colab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#local-jupyter">Local Jupyter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-driven-runs">Config-Driven Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-file-layout">Config File Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rerunning-phases">Rerunning Phases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-cli-commands">Phase CLI Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#discovery-commands">Discovery Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Running STREAMLINE</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/running.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="running-streamline">
+<h1>Running STREAMLINE<a class="headerlink" href="#running-streamline" title="Link to this heading"></a></h1>
+<p>STREAMLINE can be run through:</p>
+<ul class="simple">
+<li><p>Google Colab</p></li>
+<li><p>Local Jupyter notebook</p></li>
+<li><p>Config-driven full pipeline runs</p></li>
+<li><p>Phase-by-phase command-line calls</p></li>
+</ul>
+<p>For most command-line work, start with the <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> runner. It keeps shared
+settings, phase toggles, and phase-specific parameters in one editable file.</p>
+<section id="choose-a-run-path">
+<h2>Choose A Run Path<a class="headerlink" href="#choose-a-run-path" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Use case</p></th>
+<th class="head"><p>Recommended path</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Conference tutorial or first demo</p></td>
+<td><p>Google Colab notebook</p></td>
+</tr>
+<tr class="row-odd"><td><p>Interactive local exploration</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">STREAMLINE_Notebook.ipynb</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Reproducible full pipeline run</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run.py</span> <span class="pre">-c</span> <span class="pre">run_configs/&lt;config&gt;.cfg</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Debugging one phase</p></td>
+<td><p>Phase CLI command</p></td>
+</tr>
+<tr class="row-even"><td><p>Faster local execution without Dask</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">Parallel</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Local Dask execution</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">Local</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>HPC execution</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code>, <code class="docutils literal notranslate"><span class="pre">BashLSF</span></code>, or a site-specific Dask cluster setting</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="google-colab">
+<h2>Google Colab<a class="headerlink" href="#google-colab" title="Link to this heading"></a></h2>
+<p>Open the Colab notebook:</p>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1ByQuU805GzDGAAGzbUYz8wahnOTUuzvg?usp=sharing">Open the STREAMLINE Colab notebook</a></p>
+<p>At the top of the notebook, set the demo/run parameters. The notebook supports
+binary, multiclass, regression, and custom data modes.</p>
+</section>
+<section id="local-jupyter">
+<h2>Local Jupyter<a class="headerlink" href="#local-jupyter" title="Link to this heading"></a></h2>
+<p>From the repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>streamline
+jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+<p>Open <code class="docutils literal notranslate"><span class="pre">STREAMLINE_Notebook.ipynb</span></code>. The top parameter block controls which demo
+or custom dataset is run.</p>
+</section>
+<section id="config-driven-runs">
+<h2>Config-Driven Runs<a class="headerlink" href="#config-driven-runs" title="Link to this heading"></a></h2>
+<p>Dry-run a config first:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--dry_run
+</pre></div>
+</div>
+<p>Run a full binary demo:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg
+</pre></div>
+</div>
+<p>Run the multiclass and regression demos:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_multiclass_student.cfg
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_regression_auto_mpg.cfg
+</pre></div>
+</div>
+<p>The included configs are designed as reproducible examples. For a short
+notebook or Colab demonstration, use the notebook parameter block, which uses a
+smaller modeling budget and shows plots by default.</p>
+<p>Partial-run examples:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--start_at<span class="w"> </span>p4
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--stop_after<span class="w"> </span>p8
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--only<span class="w"> </span>p6,p8,p11
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--skip<span class="w"> </span>p3,p4
+</pre></div>
+</div>
+</section>
+<section id="config-file-layout">
+<h2>Config File Layout<a class="headerlink" href="#config-file-layout" title="Link to this heading"></a></h2>
+<p>Each config uses sections like:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[run]</span>
+<span class="na">output_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">out</span>
+<span class="na">experiment_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">UCIHCCPipeline</span>
+<span class="na">outcome_label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Class</span>
+<span class="na">outcome_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Binary</span>
+<span class="na">instance_label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">InstanceID</span>
+<span class="na">n_splits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3</span>
+<span class="na">run_cluster</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Serial</span>
+<span class="na">random_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">42</span>
+
+<span class="k">[phases]</span>
+<span class="na">phase_order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11</span>
+<span class="na">do_p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p6</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p9</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p10</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">do_p11</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+
+<span class="k">[p6]</span>
+<span class="na">outcome_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Binary</span>
+<span class="na">models</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">NB,LR,DT</span>
+<span class="na">scoring_metric</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">balanced_accuracy</span>
+<span class="na">metric_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">maximize</span>
+<span class="na">n_trials</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">200</span>
+<span class="na">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">900</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">Local</span></code> for a local Dask cluster, or <code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">Parallel</span></code>
+for local joblib parallelism without Dask.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">BashSLURM</span></code> or <code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">BashLSF</span></code>, the config runner
+submits scheduler jobs and then waits for STREAMLINE completion markers before
+starting the next phase. This keeps full config runs from starting P2 before P1
+has finished writing <code class="docutils literal notranslate"><span class="pre">CVDatasets</span></code>. The wait can be adjusted with
+<code class="docutils literal notranslate"><span class="pre">wait_for_cluster_completion</span></code>, <code class="docutils literal notranslate"><span class="pre">cluster_phase_timeout</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">cluster_phase_poll_interval</span></code> in the <code class="docutils literal notranslate"><span class="pre">[run]</span></code> section.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Parallel</span></code> and Dask-backed runs show progress when <code class="docutils literal notranslate"><span class="pre">tqdm</span></code>/Dask progress support is
+available. Set <code class="docutils literal notranslate"><span class="pre">STREAMLINE_PROGRESS=0</span></code> to disable these progress displays.</p>
+<p>Use the included configs as templates:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">run_configs/uci_binary_hcc.cfg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_configs/uci_multiclass_student.cfg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_configs/uci_regression_auto_mpg.cfg</span></code></p></li>
+</ul>
+</section>
+<section id="rerunning-phases">
+<h2>Rerunning Phases<a class="headerlink" href="#rerunning-phases" title="Link to this heading"></a></h2>
+<p>STREAMLINE stores resolved phase arguments in <code class="docutils literal notranslate"><span class="pre">run_commands.pickle</span></code> inside the
+experiment folder. If you rerun a phase and omit an option, the saved value can
+be reused. Explicit command-line or config values override the saved value.</p>
+<p>Use this control when you need a clean rerun:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--ignore_saved_run_command
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">--no_update_saved_run_command</span></code> when you want to run with temporary
+settings without changing the saved command summary.</p>
+</section>
+<section id="phase-cli-commands">
+<h2>Phase CLI Commands<a class="headerlink" href="#phase-cli-commands" title="Link to this heading"></a></h2>
+<p>Each phase can also be run independently. A binary classification example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p1_data_process.p1_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data_path<span class="w"> </span>data/UCIBinaryClassification<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_label<span class="w"> </span>Class<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--instance_label<span class="w"> </span>InstanceID<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--categorical_features<span class="w"> </span>data/UCIFeatureTypes/hcc_survival_categorical_features.csv<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--quantitative_features<span class="w"> </span>data/UCIFeatureTypes/hcc_survival_quantitative_features.csv<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_splits<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--force<span class="w"> </span><span class="nb">true</span>
+
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p2_impute_scale.p2_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p3_feature_learning.p3_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p4_feature_importance.p4_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p5_feature_selection.p5_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_label<span class="w"> </span>Class<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--instance_label<span class="w"> </span>InstanceID<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--models<span class="w"> </span>NB,LR,DT<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--scoring_metric<span class="w"> </span>balanced_accuracy<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--metric_direction<span class="w"> </span>maximize
+
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p7_ensembles.p7_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p8_summary_statistics.p8_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p9_compare_datasets.p9_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary
+
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p10_replication.p10_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rep_data_path<span class="w"> </span>data/UCIRepBinaryClassification<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--dataset_for_rep<span class="w"> </span>data/UCIBinaryClassification/hcc_survival.csv<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary
+
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p11_reporting.p11_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_path<span class="w"> </span>out/DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--report_mode<span class="w"> </span>standard
+
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p11_reporting.p11_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_path<span class="w"> </span>out/DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--report_mode<span class="w"> </span>replication
+</pre></div>
+</div>
+<p>More examples are available in <code class="docutils literal notranslate"><span class="pre">sample_runcommands.txt</span></code>.</p>
+</section>
+<section id="discovery-commands">
+<h2>Discovery Commands<a class="headerlink" href="#discovery-commands" title="Link to this heading"></a></h2>
+<p>Several phases can list registry options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p2_impute_scale.p2_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span>--list-imputers
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p2_impute_scale.p2_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span>--list-scalers
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p3_feature_learning.p3_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span>--list-learners
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p4_feature_importance.p4_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span>--list-models
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span>--list_models
+python<span class="w"> </span>-m<span class="w"> </span>streamline.p7_ensembles.p7_cli<span class="w"> </span>--output_path<span class="w"> </span>out<span class="w"> </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span>--list_ensembles
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tabpfn_token.html" class="btn btn-neutral float-left" title="TabPFN Token Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parameters.html" class="btn btn-neutral float-right" title="Run Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

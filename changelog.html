@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Changelog &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Detailed Pipeline Walkthrough" href="pipeline.html" />
+    <link rel="prev" title="About STREAMLINE" href="about.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v1-0-0-main-release">v1.0.0 - Main Release</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-3-4-beta-2023-09-28">v0.3.4-beta - 2023-09-28</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-3-3-beta-2023-09-23">v0.3.3-beta - 2023-09-23</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-3-2-beta-2023-09-13">v0.3.2-beta - 2023-09-13</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-3-1-beta-2023-09-07">v0.3.1-beta - 2023-09-07</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-3-0-beta-2023-08-06">v0.3.0-beta - 2023-08-06</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-2-5-beta-2022-06-24">v0.2.5-beta - 2022-06-24</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-2-4-beta-2022-06-15">v0.2.4-beta - 2022-06-15</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-2-3-beta-2022-05-20">v0.2.3-beta - 2022-05-20</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-2-2-beta-2022-05-19">v0.2.2-beta - 2022-05-19</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id17">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-2-1-beta-2022-05-17">v0.2.1-beta - 2022-05-17</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id19">Changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-2-0-beta-2022-05-14">v0.2.0-beta - 2022-05-14</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id20">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id21">Changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-3-alpha-2022-05-12">v0.1.3-alpha - 2022-05-12</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id22">Changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-2-alpha-2022-05-12">v0.1.2-alpha - 2022-05-12</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id23">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-1-alpha-2022-05-12">v0.1.1-alpha - 2022-05-12</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id24">Fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#v0-1-0-alpha-2022-05-12">v0.1.0-alpha - 2022-05-12</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id25">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Changelog</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/changelog.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h1>
+<p>This changelog summarizes notable STREAMLINE changes in newest-first order.
+Older public release notes are based on the
+<a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases">GitHub Releases</a> entries, with
+minor wording cleanup for readability.</p>
+<section id="v1-0-0-main-release">
+<h2>v1.0.0 - Main Release<a class="headerlink" href="#v1-0-0-main-release" title="Link to this heading"></a></h2>
+<p>STREAMLINE v1.0.0 is a major reorganization and expansion of STREAMLINE into a
+broader supervised tabular AutoML pipeline. It keeps the original transparent,
+end-to-end design while adding first-class support for more task types, clearer
+phase boundaries, registry-based extension points, updated notebooks, Sphinx
+documentation, and broader testing.</p>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Added explicit P1-P11 phase modules for data processing, imputation/scaling
+and balancing, feature learning, feature importance, feature selection,
+modeling, classification ensembles, summary statistics, dataset comparison,
+replication, and reporting.</p></li>
+<li><p>Added run-command pickle support so repeated phase calls can reuse the
+parameters actually used in previous phases, while still allowing user
+overrides.</p></li>
+<li><p>Added binary classification, multiclass classification, and regression as
+supported task types across core pipeline phases.</p></li>
+<li><p>Added optional probability calibration for classification base models and
+ensembles, with configurable calibration method and CV folds.</p></li>
+<li><p>Added UCI demo datasets and held-out replication splits for binary,
+multiclass, and regression examples.</p></li>
+<li><p>Added optional SMOTE/SMOTENC balancing after Phase 2 imputation and scaling.</p></li>
+<li><p>Added P3 feature learning as a dedicated phase, including PCA-style learned
+feature outputs and manifests.</p></li>
+<li><p>Added MultiSWRFDB and MultiSWRFDB* feature-importance methods.</p></li>
+<li><p>Added expanded task-specific model registries for binary classification,
+multiclass classification, and regression workflows.</p></li>
+<li><p>Added multiclass Decision Tree support.</p></li>
+<li><p>Added HEROS and optional TabPFN wrappers, including token-aware TabPFN skip
+behavior when <code class="docutils literal notranslate"><span class="pre">TABPFN_TOKEN</span></code> is unavailable.</p></li>
+<li><p>Added Optuna trial accounting so model outputs and reports can distinguish
+requested hyperparameter budgets from completed trials.</p></li>
+<li><p>Added local <code class="docutils literal notranslate"><span class="pre">Parallel</span></code> execution in addition to <code class="docutils literal notranslate"><span class="pre">Serial</span></code>, local Dask through
+<code class="docutils literal notranslate"><span class="pre">Local</span></code>, and supported cluster submission modes.</p></li>
+<li><p>Added standard and replication report-mode separation, experiment-name-aware
+report titles and filenames, resolved/default parameter display, and
+structured <code class="docutils literal notranslate"><span class="pre">report_data.json</span></code> output for report debugging.</p></li>
+<li><p>Added feature-learning and feature-selection summary tables modeled after the
+data-processing and feature-engineering summary table style.</p></li>
+<li><p>Added Sphinx/autodoc documentation and GitHub test workflows for Python 3.10,
+3.11, and 3.12.</p></li>
+</ul>
+</section>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reorganized code around registries for Phase 2 preprocessing, Phase 3 feature
+learning, Phase 4 feature importance, Phase 5 selection, Phase 6 models, and
+Phase 7 ensembles.</p></li>
+<li><p>Updated the existing configuration-file workflow around <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files with
+aligned parameter names, UCI demo configs, dry-run support, phase selection
+flags, and matching notebook parameters.</p></li>
+<li><p>Standardized parameter names across config files, command-line arguments,
+notebooks, and saved run-command metadata.</p></li>
+<li><p>Updated Phase 1 task handling so user-specified <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code> is respected
+instead of being inferred only from the number of unique outcome values.</p></li>
+<li><p>Updated Phase 4 so feature-importance methods write scores without mutating
+shared CV datasets.</p></li>
+<li><p>Updated scikit-rebate integration to pass STREAMLINE categorical feature
+indexes to ReBATE methods.</p></li>
+<li><p>Updated Phase 5 feature selection so rankings can be combined across all
+feature-importance methods that were run.</p></li>
+<li><p>Reworked Phase 6 modeling around clearer dataset/model/CV execution units for
+serial, parallel, Dask, and cluster runs.</p></li>
+<li><p>Updated ExSTraCS categorical initialization using supported
+<code class="docutils literal notranslate"><span class="pre">discrete_attribute_limit</span></code> and <code class="docutils literal notranslate"><span class="pre">specified_attributes</span></code> parameters.</p></li>
+<li><p>Updated native categorical handling for compatible algorithms such as
+CatBoost/CGB and ExSTraCS.</p></li>
+<li><p>Updated reports and summary statistics so metric names, no-skill baselines,
+curves, and plots are task-aware rather than binary-only.</p></li>
+<li><p>Updated replication and reporting flows to handle binary, multiclass, and
+regression outputs with task-specific metrics and plots.</p></li>
+<li><p>Updated Google Colab and local Jupyter notebooks for binary, multiclass,
+regression, and custom dataset workflows.</p></li>
+</ul>
+</section>
+<section id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed replication behavior that could otherwise zero-fill learned/PCA feature
+columns instead of respecting saved feature-learning artifacts.</p></li>
+<li><p>Fixed Phase 4 shared CV file mutation and parallel race risks.</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">training_subsample</span></code> timing so subsampling affects the intended model
+training workflow.</p></li>
+<li><p>Fixed multiclass XGB/LGB objective handling and binary-only assumptions.</p></li>
+<li><p>Fixed binary ensemble confusion-metric extraction so confusion matrices are
+not dropped before TP/TN/FP/FN-derived metrics are calculated.</p></li>
+<li><p>Fixed P1 bash/job submission path issues.</p></li>
+<li><p>Fixed report wording where unspecified settings should instead show the
+actual default used or indicate that a phase was not run.</p></li>
+<li><p>Fixed no-skill ROC/PR legend notes and label-aware baseline handling for
+multiclass or non-stratified/random CV settings.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-4-beta-2023-09-28">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.4-beta">v0.3.4-beta</a> - 2023-09-28<a class="headerlink" href="#v0-3-4-beta-2023-09-28" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>Changed<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Improved PDF report formatting so first-page content is clearer and reports
+handle larger numbers of analyzed datasets more gracefully.</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>Fixed<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed an edge-case failure when running multiple separate replication and
+replication-report phases in legacy mode.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-3-beta-2023-09-23">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.3-beta">v0.3.3-beta</a> - 2023-09-23<a class="headerlink" href="#v0-3-3-beta-2023-09-23" title="Link to this heading"></a></h2>
+<section id="id3">
+<h3>Added<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Added invariant feature removal during the C2 cleaning step of data
+processing.</p></li>
+<li><p>Added matching replication behavior so features removed during Phase 1
+cleaning are also removed when replication data are processed.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3>Changed<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Updated replication PDF report content to simplify the data-processing report.</p></li>
+<li><p>Updated first-page PDF report text sizing.</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>Fixed<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed algorithm ordering in notebook and Colab figures.</p></li>
+<li><p>Fixed unseen binary categorical values during replication by converting them
+to missing values instead of adding incompatible new features.</p></li>
+<li><p>Fixed engineered missingness feature naming.</p></li>
+<li><p>Fixed legacy cluster mode when categorical or quantitative feature files were
+not specified.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-2-beta-2023-09-13">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.2-beta">v0.3.2-beta</a> - 2023-09-13<a class="headerlink" href="#v0-3-2-beta-2023-09-13" title="Link to this heading"></a></h2>
+<section id="id6">
+<h3>Changed<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Updated legacy run mode so submitted jobs can be launched and the script can
+exit instead of waiting for all jobs to complete.</p></li>
+<li><p>Updated the STREAMLINE schematic.</p></li>
+<li><p>Updated PDF summary file naming.</p></li>
+<li><p>Added documentation describing how to check job status.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3>Fixed<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed command-line argument passing for legacy run mode.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-1-beta-2023-09-07">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.1-beta">v0.3.1-beta</a> - 2023-09-07<a class="headerlink" href="#v0-3-1-beta-2023-09-07" title="Link to this heading"></a></h2>
+<section id="id8">
+<h3>Changed<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Ordered plot legends, including composite feature-importance plot legends,
+alphabetically by full model name.</p></li>
+</ul>
+</section>
+<section id="id9">
+<h3>Fixed<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed replication imputation when a feature had no missing values during
+training but did have missing values in the replication dataset. The
+replication phase now applies a simple fallback imputation strategy: mean for
+quantitative features and mode for categorical features.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-3-0-beta-2023-08-06">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.3.0-beta">v0.3.0-beta</a> - 2023-08-06<a class="headerlink" href="#v0-3-0-beta-2023-08-06" title="Link to this heading"></a></h2>
+<section id="id10">
+<h3>Added<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Added Dask jobqueue support for running STREAMLINE across several HPC cluster
+systems.</p></li>
+<li><p>Expanded Phase 1 from exploratory analysis into numerical encoding,
+automated cleaning, feature engineering, and a second processed-data EDA pass.</p></li>
+<li><p>Added numerical encoding maps for binary text-valued features.</p></li>
+<li><p>Added categorical and quantitative feature path parameters, plus output files
+documenting final feature-type handling.</p></li>
+<li><p>Added missingness feature engineering with output documentation.</p></li>
+<li><p>Added feature and instance cleaning based on missingness.</p></li>
+<li><p>Added one-hot encoding for categorical features with three or more values.</p></li>
+<li><p>Added highly correlated feature removal with output documentation.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">DataProcessSummary.csv</span></code> to track feature, feature-type, instance,
+class, and missing-value counts through data-processing steps.</p></li>
+<li><p>Added replication processing parity so replication data are transformed to
+match the target dataset feature space.</p></li>
+<li><p>Added command-line support for running the whole pipeline as a single command.</p></li>
+<li><p>Added configuration-file support for command-line runs.</p></li>
+<li><p>Added class-based modeling algorithm modules to make adding compatible
+scikit-learn-style classifiers easier.</p></li>
+<li><p>Added Elastic Net as an included modeling algorithm.</p></li>
+<li><p>Added expanded Colab workflows with repository download, easy/manual run
+modes, user data selection, and output download/report display support.</p></li>
+<li><p>Added custom HCC demo and replication datasets designed to exercise automatic
+data cleaning, feature engineering, and replication behavior.</p></li>
+</ul>
+</section>
+<section id="id11">
+<h3>Changed<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Reorganized repository hierarchy, file names, output names, and phase
+groupings.</p></li>
+<li><p>Updated the STREAMLINE schematic to match the reorganized phase structure.</p></li>
+<li><p>Reverted model feature-importance plot sorting/presentation from median back
+to mean to avoid confusing demo behavior with small CV counts.</p></li>
+<li><p>Updated feature correlation heatmap colors, non-redundant triangle display,
+feature-name scaling, and large-feature-count behavior.</p></li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">FeatureCorrelations.csv</span></code> output.</p></li>
+<li><p>Reformatted PDF summaries to reorganize first-page run parameters, include
+version text, and add data-processing/count summaries.</p></li>
+<li><p>Added test run and score outputs to univariate analysis files.</p></li>
+<li><p>Updated Jupyter and useful notebooks for the reorganized framework.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-5-beta-2022-06-24">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.5-beta">v0.2.5-beta</a> - 2022-06-24<a class="headerlink" href="#v0-2-5-beta-2022-06-24" title="Link to this heading"></a></h2>
+<section id="id12">
+<h3>Fixed<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Added a catch to prevent statistical-comparison result failures in specific
+edge cases.</p></li>
+<li><p>Cleaned up old commented code.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-4-beta-2022-06-15">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.4-beta">v0.2.4-beta</a> - 2022-06-15<a class="headerlink" href="#v0-2-4-beta-2022-06-15" title="Link to this heading"></a></h2>
+<section id="id13">
+<h3>Changed<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Switched feature-importance figure summaries from mean to median at a
+collaborator’s recommendation.</p></li>
+<li><p>Added median algorithm performance summaries and median performance values to
+PDF summaries.</p></li>
+<li><p>Updated statistical significance output to present medians, matching the
+non-parametric statistical comparisons more closely.</p></li>
+</ul>
+</section>
+<section id="id14">
+<h3>Fixed<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed a no-missing-data edge case where imputation was enabled but no
+imputation file existed.</p></li>
+<li><p>Updated model application so replication data can be loaded from <code class="docutils literal notranslate"><span class="pre">.csv</span></code> and
+<code class="docutils literal notranslate"><span class="pre">.txt</span></code> files.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-3-beta-2022-05-20">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.3-beta">v0.2.3-beta</a> - 2022-05-20<a class="headerlink" href="#v0-2-3-beta-2022-05-20" title="Link to this heading"></a></h2>
+<section id="id15">
+<h3>Added<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Confirmed stable serial command-line functionality on Linux.</p></li>
+</ul>
+</section>
+<section id="id16">
+<h3>Changed<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Marked the beta line as stable and fully functional based on testing and user
+feedback after the alpha releases.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-2-beta-2022-05-19">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.2-beta">v0.2.2-beta</a> - 2022-05-19<a class="headerlink" href="#v0-2-2-beta-2022-05-19" title="Link to this heading"></a></h2>
+<section id="id17">
+<h3>Changed<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Added composite feature-importance plot weighting by balanced accuracy and
+ROC AUC.</p></li>
+<li><p>Removed the <code class="docutils literal notranslate"><span class="pre">None</span></code> option for maximum features in feature selection.</p></li>
+<li><p>Updated Logistic Regression Optuna search behavior to avoid invalid
+hyperparameter combinations.</p></li>
+<li><p>Enforced Optuna 2.0.0 for hyperparameter-optimization figure generation and
+added error handling so plotting issues do not fail an entire STREAMLINE run.</p></li>
+<li><p>Updated notebooks for the beta fixes.</p></li>
+</ul>
+</section>
+<section id="id18">
+<h3>Fixed<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed composite feature importance when only one algorithm was used.</p></li>
+<li><p>Fixed major issues preventing certain phases from running serially from the
+command line.</p></li>
+<li><p>Fixed first-page PDF summary formatting.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-1-beta-2022-05-17">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.1-beta">v0.2.1-beta</a> - 2022-05-17<a class="headerlink" href="#v0-2-1-beta-2022-05-17" title="Link to this heading"></a></h2>
+<section id="id19">
+<h3>Changed<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Moved the codebase into the <code class="docutils literal notranslate"><span class="pre">streamline</span></code> package folder and updated imports
+accordingly.</p></li>
+<li><p>Updated default Optuna run parameters.</p></li>
+<li><p>Documented that complete reproducibility is not guaranteed when Optuna is run
+in parallel.</p></li>
+<li><p>Rounded scaled CV data to seven decimal places to reduce floating-point
+reproducibility drift after scaling.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-2-0-beta-2022-05-14">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.2.0-beta">v0.2.0-beta</a> - 2022-05-14<a class="headerlink" href="#v0-2-0-beta-2022-05-14" title="Link to this heading"></a></h2>
+<section id="id20">
+<h3>Added<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Published the first beta release after initial alpha testing across multiple
+platforms and Anaconda installations.</p></li>
+</ul>
+</section>
+<section id="id21">
+<h3>Changed<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Marked STREAMLINE ready for external use while noting that untested
+configurations could still expose issues.</p></li>
+<li><p>Added guidance for users to report run mode, Anaconda version, and errors
+when issues arise.</p></li>
+<li><p>Added an early request for users applying STREAMLINE in publications to check
+the repository for the current citation reference.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-3-alpha-2022-05-12">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.3-alpha">v0.1.3-alpha</a> - 2022-05-12<a class="headerlink" href="#v0-1-3-alpha-2022-05-12" title="Link to this heading"></a></h2>
+<section id="id22">
+<h3>Changed<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Updated README installation instructions.</p></li>
+<li><p>Updated the default setting for model feature-importance estimation.</p></li>
+<li><p>Recorded testing against the then-current Linux Anaconda version.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-2-alpha-2022-05-12">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.2-alpha">v0.1.2-alpha</a> - 2022-05-12<a class="headerlink" href="#v0-1-2-alpha-2022-05-12" title="Link to this heading"></a></h2>
+<section id="id23">
+<h3>Fixed<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fixed an Anaconda/scipy compatibility issue in exploratory analysis.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-1-alpha-2022-05-12">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.1-alpha">v0.1.1-alpha</a> - 2022-05-12<a class="headerlink" href="#v0-1-1-alpha-2022-05-12" title="Link to this heading"></a></h2>
+<section id="id24">
+<h3>Fixed<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Replaced deprecated <code class="docutils literal notranslate"><span class="pre">scipy.interp()</span></code> usage with <code class="docutils literal notranslate"><span class="pre">numpy.interp()</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-1-0-alpha-2022-05-12">
+<h2><a class="reference external" href="https://github.com/UrbsLab/STREAMLINE/releases/tag/v0.1.0-alpha">v0.1.0-alpha</a> - 2022-05-12<a class="headerlink" href="#v0-1-0-alpha-2022-05-12" title="Link to this heading"></a></h2>
+<section id="id25">
+<h3>Added<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Published the first stable, bug-tested STREAMLINE implementation, inheriting
+much of its underlying code from AutoMLPipe-BC.</p></li>
+</ul>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>This alpha was tested only with the specified Anaconda and package versions,
+and only on Windows and Linux.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="about.html" class="btn btn-neutral float-left" title="About STREAMLINE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipeline.html" class="btn btn-neutral float-right" title="Detailed Pipeline Walkthrough" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

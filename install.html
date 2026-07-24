@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TabPFN Token Setup" href="tabpfn_token.html" />
+    <link rel="prev" title="Datasets" href="data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#google-colab">Google Colab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#local-conda-environment">Local Conda Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#local-venv-environment">Local venv Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-documentation">Building The Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#local-jupyter">Local Jupyter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-notes">Cluster Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#known-installation-issues">Known Installation Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/install.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<p>STREAMLINE can be run from Google Colab, a local notebook, or the command
+line. Local command-line and notebook use should be done from the repository
+root so Python can import the <code class="docutils literal notranslate"><span class="pre">streamline</span></code> package.</p>
+<section id="google-colab">
+<h2>Google Colab<a class="headerlink" href="#google-colab" title="Link to this heading"></a></h2>
+<p>No local installation is required for Colab. Open the current notebook and run
+the setup cells:</p>
+<p><a class="reference external" href="https://colab.research.google.com/drive/1ByQuU805GzDGAAGzbUYz8wahnOTUuzvg?usp=sharing">Open the STREAMLINE Colab notebook</a></p>
+<p>The notebook clones the repository with <code class="docutils literal notranslate"><span class="pre">--depth</span> <span class="pre">1</span></code>, installs requirements,
+and exposes a parameter block for binary, multiclass, regression, and custom
+dataset runs.</p>
+</section>
+<section id="local-conda-environment">
+<h2>Local Conda Environment<a class="headerlink" href="#local-conda-environment" title="Link to this heading"></a></h2>
+<p>The recommended local setup is a dedicated conda environment:</p>
+<p>STREAMLINE supports Python 3.10 and newer. Python 3.11 is the recommended
+default for local demos because it works well across the current scientific
+Python stack while remaining close to common notebook runtimes.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--single-branch<span class="w"> </span>https://github.com/UrbsLab/STREAMLINE.git
+<span class="nb">cd</span><span class="w"> </span>STREAMLINE
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>streamline<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pip
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+conda<span class="w"> </span>install<span class="w"> </span><span class="nv">pytorch</span><span class="o">=</span><span class="m">2</span>.6<span class="w"> </span>-y
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>Then confirm that the config runner is available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>TabPFN is optional and is not required for the default STREAMLINE demos. Install
+it separately with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">tabpfn</span></code> before running TabPFN models. TabPFN
+also requires a Prior Labs token before model weights can be downloaded; see
+<a class="reference internal" href="tabpfn_token.html"><span class="std std-doc">TabPFN Token Setup</span></a>.</p>
+</section>
+<section id="local-venv-environment">
+<h2>Local venv Environment<a class="headerlink" href="#local-venv-environment" title="Link to this heading"></a></h2>
+<p>A standard Python virtual environment also works:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--single-branch<span class="w"> </span>https://github.com/UrbsLab/STREAMLINE.git
+<span class="nb">cd</span><span class="w"> </span>STREAMLINE
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</section>
+<section id="building-the-documentation">
+<h2>Building The Documentation<a class="headerlink" href="#building-the-documentation" title="Link to this heading"></a></h2>
+<p>Install the docs-only packages and run Sphinx:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>docs/requirements.txt
+sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>docs/source<span class="w"> </span>docs/build/html
+</pre></div>
+</div>
+<p>The generated site opens from:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>docs/build/html/index.html
+</pre></div>
+</div>
+</section>
+<section id="local-jupyter">
+<h2>Local Jupyter<a class="headerlink" href="#local-jupyter" title="Link to this heading"></a></h2>
+<p>Install Jupyter if it is not already available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>jupyter
+jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+<p>Open <code class="docutils literal notranslate"><span class="pre">STREAMLINE_Notebook.ipynb</span></code> from the repository root. The notebook keeps a
+parameter block at the top so the same notebook can run binary, multiclass,
+regression, or custom datasets.</p>
+</section>
+<section id="cluster-notes">
+<h2>Cluster Notes<a class="headerlink" href="#cluster-notes" title="Link to this heading"></a></h2>
+<p>Cluster use is environment-specific. The phase CLIs and config runner accept
+<code class="docutils literal notranslate"><span class="pre">run_cluster</span></code> settings such as <code class="docutils literal notranslate"><span class="pre">Serial</span></code>, <code class="docutils literal notranslate"><span class="pre">Local</span></code>, <code class="docutils literal notranslate"><span class="pre">Parallel</span></code>, <code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code>, and <code class="docutils literal notranslate"><span class="pre">BashLSF</span></code>
+depending on phase support. For long runs, use a persistent terminal session
+such as <code class="docutils literal notranslate"><span class="pre">tmux</span></code> or <code class="docutils literal notranslate"><span class="pre">screen</span></code> so orchestration is not interrupted if your SSH
+connection drops.</p>
+</section>
+<section id="known-installation-issues">
+<h2>Known Installation Issues<a class="headerlink" href="#known-installation-issues" title="Link to this heading"></a></h2>
+<p>Some modeling and reporting packages include compiled dependencies. On macOS,
+especially on Apple Silicon or fresh Conda environments, install the compiled
+pieces through conda-forge first if pip reports build, linker, Graphviz, or
+WeasyPrint errors:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>lightgbm<span class="w"> </span>xgboost<span class="w"> </span>catboost<span class="w"> </span>-y
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>graphviz<span class="w"> </span>python-graphviz<span class="w"> </span>-y
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>weasyprint<span class="w"> </span>cairocffi<span class="w"> </span>cairo<span class="w"> </span>pango<span class="w"> </span>gdk-pixbuf<span class="w"> </span>libffi<span class="w"> </span>-y
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>If the failure is isolated to one package, install only that package from
+conda-forge and rerun <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data.html" class="btn btn-neutral float-left" title="Datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tabpfn_token.html" class="btn btn-neutral float-right" title="TabPFN Token Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

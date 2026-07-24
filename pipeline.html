@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detailed Pipeline Walkthrough &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Datasets" href="data.html" />
+    <link rel="prev" title="Changelog" href="changelog.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Detailed Pipeline Walkthrough</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dataset-terms">Dataset Terms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-summary">Phase Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p1-data-process">P1: Data Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p2-impute-scale-and-balance">P2: Impute, Scale, And Balance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p3-feature-learning">P3: Feature Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p4-feature-importance">P4: Feature Importance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p5-feature-selection">P5: Feature Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p6-modeling">P6: Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p7-ensemble-modeling">P7: Ensemble Modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p8-summary-statistics">P8: Summary Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p9-compare-datasets">P9: Compare Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p10-replication">P10: Replication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#p11-reporting">P11: Reporting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-runner">Config Runner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saved-run-commands">Saved Run Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Detailed Pipeline Walkthrough</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pipeline.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="detailed-pipeline-walkthrough">
+<h1>Detailed Pipeline Walkthrough<a class="headerlink" href="#detailed-pipeline-walkthrough" title="Link to this heading"></a></h1>
+<p>This page explains what STREAMLINE does during a run, why the phases are
+separated, what users can customize, and which outputs to expect. A single
+STREAMLINE run is called an <strong>experiment</strong>. Each experiment can contain one or
+more datasets, and each dataset is processed through cross-validation folds so
+that model evaluation stays separated from model training.</p>
+<p>The current v1.0.0 pipeline has eleven phases. P1-P8 are the core training and
+summary workflow, P9 compares multiple datasets inside an experiment, P10
+applies trained workflows to external replication data, and P11 produces PDF
+reports.</p>
+<section id="dataset-terms">
+<h2>Dataset Terms<a class="headerlink" href="#dataset-terms" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Term</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Target dataset</p></td>
+<td><p>The input dataset supplied to P1 for model development.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Training fold</p></td>
+<td><p>The fold-specific subset used to fit preprocessing, feature learning, feature selection, and models.</p></td>
+</tr>
+<tr class="row-even"><td><p>Testing fold</p></td>
+<td><p>The fold-specific subset held out for model evaluation.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Validation split</p></td>
+<td><p>The internal split made inside model training for Optuna hyperparameter search.</p></td>
+</tr>
+<tr class="row-even"><td><p>Replication dataset</p></td>
+<td><p>An external or held-out dataset used in P10 after the main training/CV workflow has already produced fitted artifacts.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Replication data should not be used to tune model choices. It is meant to
+evaluate whether the trained workflow generalizes beyond the original CV test
+folds.</p>
+</section>
+<section id="phase-summary">
+<h2>Phase Summary<a class="headerlink" href="#phase-summary" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Phase</p></th>
+<th class="head"><p>Module</p></th>
+<th class="head"><p>Main CLI</p></th>
+<th class="head"><p>Summary</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>P1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p1_data_process</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p1_data_process.p1_cli</span></code></p></td>
+<td><p>Load datasets, clean/encode columns, generate EDA outputs, and create CV folds.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p2_impute_scale</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p2_impute_scale.p2_cli</span></code></p></td>
+<td><p>Impute, scale, and optionally apply SMOTE/SMOTENC to training folds.</p></td>
+</tr>
+<tr class="row-even"><td><p>P3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p3_feature_learning</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p3_feature_learning.p3_cli</span></code></p></td>
+<td><p>Add learned features such as PCA components and save fitted transformers/manifests.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p4_feature_importance</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p4_feature_importance.p4_cli</span></code></p></td>
+<td><p>Score features without mutating shared CV datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p>P5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p5_feature_selection</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p5_feature_selection.p5_cli</span></code></p></td>
+<td><p>Select informative features and persist selected CV datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p6_modeling</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p6_modeling.p6_cli</span></code></p></td>
+<td><p>Train base models, tune with Optuna, evaluate CV metrics, and save predictions.</p></td>
+</tr>
+<tr class="row-even"><td><p>P7</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p7_ensembles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p7_ensembles.p7_cli</span></code></p></td>
+<td><p>Build classification ensembles from base model predictions.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p8_summary_statistics</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p8_summary_statistics.p8_cli</span></code></p></td>
+<td><p>Aggregate performance, feature importance, and model summaries.</p></td>
+</tr>
+<tr class="row-even"><td><p>P9</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p9_compare_datasets</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p9_compare_datasets.p9_cli</span></code></p></td>
+<td><p>Compare dataset-level outputs within an experiment.</p></td>
+</tr>
+<tr class="row-odd"><td><p>P10</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p10_replication</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p10_replication.p10_cli</span></code></p></td>
+<td><p>Apply trained workflows to replication datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p>P11</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">streamline.p11_reporting</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">streamline.p11_reporting.p11_cli</span></code></p></td>
+<td><p>Generate standard and replication PDF reports.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p1-data-process">
+<h2>P1: Data Process<a class="headerlink" href="#p1-data-process" title="Link to this heading"></a></h2>
+<p>P1 loads one or more tabular datasets, applies initial cleaning and feature
+engineering, records exploratory summaries, and creates cross-validation
+train/test folds.</p>
+<p>Common work in P1 includes:</p>
+<ul class="simple">
+<li><p>removing instances with missing outcomes</p></li>
+<li><p>excluding identifier or user-ignored columns</p></li>
+<li><p>applying user-provided or inferred feature types</p></li>
+<li><p>adding missingness indicator features when requested</p></li>
+<li><p>removing invariant, high-missingness, or highly correlated features</p></li>
+<li><p>optionally one-hot encoding categorical features</p></li>
+<li><p>creating stratified, random, grouped, or provided CV folds</p></li>
+</ul>
+<p>Important settings include <code class="docutils literal notranslate"><span class="pre">outcome_label</span></code>, <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code>, <code class="docutils literal notranslate"><span class="pre">instance_label</span></code>,
+<code class="docutils literal notranslate"><span class="pre">categorical_features</span></code>, <code class="docutils literal notranslate"><span class="pre">quantitative_features</span></code>, <code class="docutils literal notranslate"><span class="pre">ignore_features</span></code>,
+<code class="docutils literal notranslate"><span class="pre">partition_method</span></code>, <code class="docutils literal notranslate"><span class="pre">n_splits</span></code>, <code class="docutils literal notranslate"><span class="pre">one_hot_encoding</span></code>, and <code class="docutils literal notranslate"><span class="pre">force</span></code>.</p>
+<p>Outputs include dataset summaries, feature-type artifacts, EDA tables/figures,
+and the initial <code class="docutils literal notranslate"><span class="pre">CVDatasets/</span></code> train/test files used by later phases.</p>
+</section>
+<section id="p2-impute-scale-and-balance">
+<h2>P2: Impute, Scale, And Balance<a class="headerlink" href="#p2-impute-scale-and-balance" title="Link to this heading"></a></h2>
+<p>P2 learns missing-value imputation and feature scaling from each training fold
+and applies the learned transformations to the corresponding test fold. This
+prevents leakage from test data into preprocessing.</p>
+<p>P2 can also apply SMOTE/SMOTENC to training folds after imputation and scaling.
+This is intended for classification tasks with meaningful class imbalance.
+When <code class="docutils literal notranslate"><span class="pre">smote_method</span> <span class="pre">=</span> <span class="pre">auto</span></code>, STREAMLINE uses SMOTENC when categorical features
+are present and standard SMOTE otherwise.</p>
+<p>Outputs include transformed CV datasets and saved imputation/scaling metadata.</p>
+</section>
+<section id="p3-feature-learning">
+<h2>P3: Feature Learning<a class="headerlink" href="#p3-feature-learning" title="Link to this heading"></a></h2>
+<p>P3 applies feature-learning methods such as PCA. Learned transformations are
+fit on training folds and applied consistently to test folds and replication
+data.</p>
+<p>Users can choose whether learned features replace the original feature set or
+are added alongside original features. P3 writes manifests so later phases know
+which columns were learned and how to reproduce them.</p>
+</section>
+<section id="p4-feature-importance">
+<h2>P4: Feature Importance<a class="headerlink" href="#p4-feature-importance" title="Link to this heading"></a></h2>
+<p>P4 runs filter-style feature-importance methods on each training fold. Current
+methods include mutual information and ReBATE-based methods such as MultiSURF,
+MultiSURF*, MultiSWRFDB, and MultiSWRFDB*.</p>
+<p>P4 writes feature scores only. It does not mutate the shared CV datasets,
+which keeps model-specific feature-importance runs independent and avoids
+race conditions in parallel execution.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">instance_subset</span></code> when a feature-importance method would be too slow on
+all training instances. ReBATE methods receive categorical feature indexes
+from STREAMLINE feature-type artifacts.</p>
+</section>
+<section id="p5-feature-selection">
+<h2>P5: Feature Selection<a class="headerlink" href="#p5-feature-selection" title="Link to this heading"></a></h2>
+<p>P5 consumes P4 rankings and creates selected-feature CV datasets. The default
+selector can combine rankings from every feature-importance method that was
+run, not only a fixed pair of methods.</p>
+<p>Important settings include <code class="docutils literal notranslate"><span class="pre">algorithms</span></code>, <code class="docutils literal notranslate"><span class="pre">selector_id</span></code>, <code class="docutils literal notranslate"><span class="pre">top_features</span></code>,
+<code class="docutils literal notranslate"><span class="pre">max_features_to_keep</span></code>, and <code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code>.</p>
+<p>Outputs include selected train/test folds and feature-selection summary files.</p>
+</section>
+<section id="p6-modeling">
+<h2>P6: Modeling<a class="headerlink" href="#p6-modeling" title="Link to this heading"></a></h2>
+<p>P6 trains and evaluates base models for binary classification, multiclass
+classification, or regression. Model IDs are loaded from the registry for the
+selected <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code>.</p>
+<p>For models with tunable hyperparameters, STREAMLINE uses Optuna with
+<code class="docutils literal notranslate"><span class="pre">n_trials</span></code> and <code class="docutils literal notranslate"><span class="pre">timeout</span></code> budgets. P6 records how many trials actually ran, so
+the report can distinguish requested budget from completed search.</p>
+<p>P6 also supports native categorical handling. If P1 was run with
+<code class="docutils literal notranslate"><span class="pre">one_hot_encoding</span> <span class="pre">=</span> <span class="pre">False</span></code>, P6 defaults to native categorical models such as
+CatBoost/CGB and ExSTraCS. Explicitly requesting an unsupported model raises an
+error instead of silently changing the data representation.</p>
+<p>Outputs include fitted model pickles, predictions, per-fold metrics, feature
+importance estimates, and Optuna trial summaries.</p>
+</section>
+<section id="p7-ensemble-modeling">
+<h2>P7: Ensemble Modeling<a class="headerlink" href="#p7-ensemble-modeling" title="Link to this heading"></a></h2>
+<p>P7 builds classification ensembles from P6 base model predictions. Current
+ensemble methods include hard voting, soft voting, and logistic-regression
+stacking.</p>
+<p>P7 is classification-only in the current v1.0.0 implementation. Regression
+workflows should skip P7 and continue from P6 to P8.</p>
+</section>
+<section id="p8-summary-statistics">
+<h2>P8: Summary Statistics<a class="headerlink" href="#p8-summary-statistics" title="Link to this heading"></a></h2>
+<p>P8 aggregates performance metrics and feature-importance outputs across folds.
+It produces model summary tables, curve plots for classification, regression
+diagnostic plots, composite feature-importance plots, and statistical
+comparison tables where applicable.</p>
+<p>For classification reports, no-skill ROC/PR baselines are computed from the
+actual evaluation labels, so the baselines remain appropriate for multiclass
+or non-stratified/random CV settings.</p>
+</section>
+<section id="p9-compare-datasets">
+<h2>P9: Compare Datasets<a class="headerlink" href="#p9-compare-datasets" title="Link to this heading"></a></h2>
+<p>P9 compares datasets inside the same experiment. It is useful when an
+experiment runs multiple related datasets or feature sets and the user wants
+the same statistical summaries and visual comparisons across them.</p>
+<p>If an experiment contains only one dataset, P9 may still run but has less to
+compare.</p>
+</section>
+<section id="p10-replication">
+<h2>P10: Replication<a class="headerlink" href="#p10-replication" title="Link to this heading"></a></h2>
+<p>P10 applies trained preprocessing, feature-learning, feature-selection, and
+modeling artifacts to external replication datasets. This phase should be used
+for data that were not part of training or CV evaluation.</p>
+<p>The replication dataset must contain the required feature columns from the
+training dataset schema. Replication outputs are written under each target
+dataset’s <code class="docutils literal notranslate"><span class="pre">replication/</span></code> folder.</p>
+</section>
+<section id="p11-reporting">
+<h2>P11: Reporting<a class="headerlink" href="#p11-reporting" title="Link to this heading"></a></h2>
+<p>P11 builds standard and replication PDF reports from the experiment outputs.
+The standard report focuses on P1-P9 training/CV results. The replication
+report focuses on P10 external-validation results and uses a filename that
+includes <code class="docutils literal notranslate"><span class="pre">Replication_Report</span></code>.</p>
+<p>Each report directory also contains <code class="docutils literal notranslate"><span class="pre">report_data.json</span></code>, which is useful for
+debugging report content without parsing the PDF.</p>
+</section>
+<section id="config-runner">
+<h2>Config Runner<a class="headerlink" href="#config-runner" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">run.py</span></code> wraps <code class="docutils literal notranslate"><span class="pre">streamline.pipeline.pipeline_cli</span></code> and runs one or more phases
+from a <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--dry_run
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg
+</pre></div>
+</div>
+<p>Useful partial-run controls:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--start_at<span class="w"> </span>p4
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--stop_after<span class="w"> </span>p8
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--only<span class="w"> </span>p6,p8,p11
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/uci_binary_hcc.cfg<span class="w"> </span>--skip<span class="w"> </span>p3,p4
+</pre></div>
+</div>
+</section>
+<section id="saved-run-commands">
+<h2>Saved Run Commands<a class="headerlink" href="#saved-run-commands" title="Link to this heading"></a></h2>
+<p>Each phase records resolved arguments in:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;output_path&gt;/&lt;experiment_name&gt;/run_commands.pickle
+</pre></div>
+</div>
+<p>Later runs reuse saved values for omitted options, while explicitly supplied
+command-line values override and update the saved entry. Use
+<code class="docutils literal notranslate"><span class="pre">--ignore_saved_run_command</span></code> for a fresh parser/default run and
+<code class="docutils literal notranslate"><span class="pre">--no_update_saved_run_command</span></code> to avoid modifying the pickle.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="changelog.html" class="btn btn-neutral float-left" title="Changelog" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data.html" class="btn btn-neutral float-right" title="Datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
