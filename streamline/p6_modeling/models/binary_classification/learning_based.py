@@ -76,22 +76,25 @@ class XCSClassifier(BinaryClassificationModel, ABC):
 class ExSTraCSClassifier(BinaryClassificationModel, ABC):
     model_name = "ExSTraCS"
     small_name = "ExSTraCS"
+    uses_expertparam = True
     color = "lawngreen"
 
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None,
-                 iterations=None, N=None, nu=None, expert_knowledge=None):
+                 iterations=200000, N=2000, nu=1, expert_knowledge=None, rule_compaction='QRF'):
         super().__init__(ExSTraCS, "ExSTraCS", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = {'learning_iterations': [100000, 200000, 500000], 'N': [1000, 2000, 5000],
-                           'nu': [1, 10],
-                           'rule_compaction': [None, 'QRF']}
-        if iterations:
-            self.param_grid['learning_iterations'] = [iterations, ]
-        if N:
-            self.param_grid['N'] = [N, ]
-        if nu:
-            self.param_grid['nu'] = [nu, ]
-        self.param_grid['expert_knowledge'] = expert_knowledge
+
+        self.param_grid = {
+            'learning_iterations': (
+                [100000, 200000, 500000] if iterations is None else [iterations]
+            ),
+            'N': [1000, 2000, 5000] if N is None else [N],
+            'nu': [1, 10] if nu is None else [nu],
+            'rule_compaction': [None, 'QRF'] if rule_compaction is None else [rule_compaction],
+        }
+
+        if expert_knowledge is not None:
+            self.param_grid['expert_knowledge'] = [expert_knowledge]
         self.param_grid['random_state'] = [random_state, ]
         self.small_name = "ExSTraCS"
         self.color = "lawngreen"
@@ -103,9 +106,10 @@ class ExSTraCSClassifier(BinaryClassificationModel, ABC):
                        'N': trial.suggest_categorical('N', self.param_grid['N']),
                        'nu': trial.suggest_categorical('nu', self.param_grid['nu']),
                        'random_state': trial.suggest_categorical('random_state', self.param_grid['random_state']),
-                       'expert_knowledge': self.param_grid['expert_knowledge'],
                        'rule_compaction': trial.suggest_categorical('rule_compaction',
                                                                     self.param_grid['rule_compaction'])}
+        if 'expert_knowledge' in self.param_grid:
+            self.params['expert_knowledge'] = self.param_grid['expert_knowledge'][0]
 
         mean_cv_score = self.hyper_eval()
         return mean_cv_score

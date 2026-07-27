@@ -48,7 +48,7 @@ def main():
     ap.add_argument(
         "--model_params_json",
         default=None,
-        help="JSON string mapping model ids to dicts of attribute overrides.",
+        help="JSON or Python-literal string mapping model ids to constructor/model overrides.",
     )
 
     # calibration
@@ -138,6 +138,10 @@ def main():
             scoring_metric=args.scoring_metric,
             metric_direction=args.metric_direction,
             model_params=model_params,
+            dataset_dir=args.dataset_dir,
+            outcome_label=args.outcome_label,
+            instance_label=instance_label,
+            cv_idx=cv_idx,
         )
         model_job.run(model)
 

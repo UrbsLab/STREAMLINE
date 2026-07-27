@@ -94,6 +94,7 @@ The runner also accepts old-style broad flags such as `do_till_report`.
 | --- | --- | --- |
 | `outcome_type` | `Binary`, `Multiclass`, `Continuous` | Modeling task. `model_type` is still accepted as a backward-compatible alias. |
 | `models` | `NB,LR,DT` | Model registry IDs. |
+| `model_params_json` | `None` | Optional JSON mapping model IDs to constructor/model overrides. See [Model Parameter JSON](model_params_json.md) for HEROS, ExSTraCS, CLI, cfg, and notebook examples. |
 | `scoring_metric` | `balanced_accuracy`, `explained_variance` | Optuna/evaluation metric. |
 | `metric_direction` | `maximize` or `minimize` | Optimization direction. |
 | `n_trials` | `200` | Optuna trial budget. |

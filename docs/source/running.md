@@ -109,6 +109,7 @@ do_p11 = True
 [p6]
 outcome_type = Binary
 models = NB,LR,DT
+model_params_json = None
 scoring_metric = balanced_accuracy
 metric_direction = maximize
 n_trials = 200
@@ -117,6 +118,10 @@ timeout = 900
 
 Use `run_cluster = Local` for a local Dask cluster, or `run_cluster = Parallel`
 for local joblib parallelism without Dask.
+
+Use `model_params_json` when a model needs specific Phase 6 wrapper settings,
+such as HEROS `pop_size` or ExSTraCS `N`. See
+[Model Parameter JSON](model_params_json.md) for examples.
 
 For `run_cluster = BashSLURM` or `run_cluster = BashLSF`, the config runner
 submits scheduler jobs and then waits for STREAMLINE completion markers before

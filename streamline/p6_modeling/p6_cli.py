@@ -41,7 +41,7 @@ def main():
     ap.add_argument(
         "--model_params_json",
         default=None,
-        help="JSON string mapping model ids (small_name or model_name) to dicts of attribute overrides.",
+        help="JSON or Python-literal string mapping model ids to constructor/model overrides.",
     )
 
     # calibration

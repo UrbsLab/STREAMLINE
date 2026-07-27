@@ -7,12 +7,12 @@ from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.calibration import CalibratedClassifierCV
+from streamline.p6_modeling.utils.expert_knowledge import EXPERT_KNOWLEDGE_PARAMETER_NAMES
 
 warnings.filterwarnings(action='ignore', module='sklearn')
 warnings.filterwarnings(action='ignore', module='scipy')
 warnings.filterwarnings(action='ignore', module='optuna')
 warnings.filterwarnings(action="ignore", category=ConvergenceWarning, module="sklearn")
-
 
 class BaseModel:
     """
@@ -94,7 +94,7 @@ class BaseModel:
         self.y_train = y_train
         self.optuna_report = self._initial_optuna_report(n_trails, timeout)
         for key, value in self.param_grid.items():
-            if len(value) > 1 and key != 'expert_knowledge':
+            if len(value) > 1 and key not in EXPERT_KNOWLEDGE_PARAMETER_NAMES:
                 self.is_single = False
                 break
 

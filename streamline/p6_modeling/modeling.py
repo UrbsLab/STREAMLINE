@@ -1,4 +1,5 @@
 from __future__ import annotations
+import ast
 import os
 import json
 import logging
@@ -13,6 +14,13 @@ from streamline.p6_modeling.utils.categorical import (
     normalize_model_id,
     parse_model_id_csv,
 )
+from streamline.p6_modeling.utils.expert_knowledge import (
+    EXPERT_KNOWLEDGE_PARAMETER_NAMES,
+    load_expert_knowledge_scores,
+    model_constructor_parameter_names,
+    model_expert_knowledge_parameter_name,
+)
+
 
 def csv_to_list(v):
     if v is None: return None
@@ -25,18 +33,26 @@ def parse_model_params_json(model_params_json) -> Dict[str, Dict[str, Any]]:
     if not model_params_json:
         return model_params
     try:
-        parsed = model_params_json if isinstance(model_params_json, dict) else json.loads(model_params_json)
+        if isinstance(model_params_json, dict):
+            parsed = model_params_json
+        else:
+            try:
+                parsed = json.loads(model_params_json)
+            except json.JSONDecodeError:
+                parsed = ast.literal_eval(model_params_json)
     except Exception as exc:
         logging.error("[P6] Failed to parse model_params_json: %r", exc)
         raise
 
+    if parsed is None:
+        return model_params
     if isinstance(parsed, dict):
         return {
             str(key).lower(): (value if isinstance(value, dict) else {})
             for key, value in parsed.items()
         }
     logging.warning(
-        "[P6] model_params_json must be a JSON object mapping model ids → dicts; got %r",
+        "[P6] model_params_json must be a JSON/Python-literal object mapping model ids → dicts; got %r",
         type(parsed),
     )
     return model_params
@@ -202,15 +218,67 @@ def model_overrides_for_class(ModelCls, model_params: Dict[str, Dict[str, Any]])
     return overrides
 
 
-def create_model_instance(ModelCls, *, random_state, scoring_metric, metric_direction, model_params):
-    model = ModelCls(
-        random_state=random_state,
-        n_jobs=None,
-        scoring_metric=scoring_metric,
-        metric_direction=metric_direction,
-    )
+def split_model_overrides_for_constructor(ModelCls, overrides: Dict[str, Any]):
+    constructor_names = model_constructor_parameter_names(ModelCls)
+    constructor_overrides = {}
+    attribute_overrides = {}
+    for name, value in overrides.items():
+        if name in constructor_names:
+            constructor_overrides[name] = value
+        else:
+            attribute_overrides[name] = value
+    return constructor_overrides, attribute_overrides
 
-    for attr, value in model_overrides_for_class(ModelCls, model_params).items():
+
+def create_model_instance(
+    ModelCls,
+    *,
+    random_state,
+    scoring_metric,
+    metric_direction,
+    model_params,
+    dataset_dir=None,
+    outcome_label="Class",
+    instance_label=None,
+    cv_idx=None,
+):
+    overrides = model_overrides_for_class(ModelCls, model_params)
+    expert_parameter_name = model_expert_knowledge_parameter_name(ModelCls)
+    if expert_parameter_name:
+        for parameter_name in EXPERT_KNOWLEDGE_PARAMETER_NAMES:
+            if parameter_name in overrides and parameter_name != expert_parameter_name:
+                overrides[expert_parameter_name] = overrides.pop(parameter_name)
+                break
+
+    constructor_overrides, attribute_overrides = split_model_overrides_for_constructor(
+        ModelCls,
+        overrides,
+    )
+    if (
+        expert_parameter_name
+        and expert_parameter_name not in constructor_overrides
+        and dataset_dir is not None
+        and cv_idx is not None
+    ):
+        expert_knowledge = load_expert_knowledge_scores(
+            dataset_dir,
+            outcome_label,
+            instance_label,
+            int(cv_idx),
+        )
+        if expert_knowledge is not None:
+            constructor_overrides[expert_parameter_name] = expert_knowledge
+
+    model_kwargs = {
+        "random_state": random_state,
+        "n_jobs": None,
+        "scoring_metric": scoring_metric,
+        "metric_direction": metric_direction,
+    }
+    model_kwargs.update(constructor_overrides)
+    model = ModelCls(**model_kwargs)
+
+    for attr, value in attribute_overrides.items():
         setattr(model, attr, value)
 
     return model
@@ -354,6 +422,10 @@ class ModelingPhaseJob:
                     scoring_metric=self.scoring_metric,
                     metric_direction=self.metric_direction,
                     model_params=self.model_params,
+                    dataset_dir=self.dataset_dir,
+                    outcome_label=self.outcome_label,
+                    instance_label=self.instance_label,
+                    cv_idx=cv_idx,
                 ),
             ))
         return executions
@@ -389,6 +461,10 @@ class ModelingPhaseJob:
             scoring_metric=self.scoring_metric,
             metric_direction=self.metric_direction,
             model_params=self.model_params,
+            dataset_dir=self.dataset_dir,
+            outcome_label=self.outcome_label,
+            instance_label=self.instance_label,
+            cv_idx=cv_idx,
         )
         model_job.run(model)
 
