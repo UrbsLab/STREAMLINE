@@ -14,17 +14,22 @@ def _exploratory_dir(experiment_path: str, dataset_name: str) -> str:
 
 
 def render_missingness_hist(experiment_path: str, dataset_name: str, show: bool = False):
-    """Render Missingness histogram from DataMissingness.csv."""
+    """Render feature missingness bar chart from DataMissingness.csv."""
     exp_dir = _exploratory_dir(experiment_path, dataset_name)
     inp = os.path.join(exp_dir, "DataMissingness.csv")
-    out = os.path.join(exp_dir, "DataMissingnessHistogram.png")
+    out = os.path.join(exp_dir, "DataMissingness.png")
     df = pd.read_csv(inp, index_col=0)
-    counts = df["Count"].values
-    plt.figure()
-    plt.hist(counts, bins=100)
-    plt.xlabel("Missing Value Counts")
-    plt.ylabel("Frequency")
-    plt.title("Histogram of Missing Value Counts in Dataset")
+    counts = df["Count"]
+    counts = counts[counts > 0].sort_values(ascending=False).head(25)
+    plt.figure(figsize=(8, max(4, 0.28 * max(1, len(counts)))))
+    if counts.empty:
+        plt.axis("off")
+        plt.text(0.5, 0.5, "No missing feature values found", ha="center", va="center")
+    else:
+        counts.sort_values().plot(kind="barh", color="#4C78A8")
+        plt.xlabel("Missing Value Count")
+        plt.ylabel("Feature")
+        plt.title("Feature Missingness")
     plt.tight_layout()
     plt.savefig(out, bbox_inches="tight")
     if show: plt.show()

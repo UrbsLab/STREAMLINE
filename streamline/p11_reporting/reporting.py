@@ -1398,10 +1398,10 @@ class ReportPhaseJob:
         for row in table.rows:
             feat = row.get(feature_col, "")
             val = _safe_float(row.get(value_col, ""))
-            if feat and val is not None:
+            if feat and val is not None and val > 0:
                 rows.append((feat, val))
         if not rows:
-            return None
+            return self._save_simple_placeholder(out, title, "No missing feature values found.")
         rows = sorted(rows, key=lambda x: x[1], reverse=True)[:25]
         labels = [x[0] for x in rows][::-1]
         vals = [x[1] for x in rows][::-1]
@@ -1414,7 +1414,7 @@ class ReportPhaseJob:
                 fig_h = max(4.0, 0.18 * len(labels))
                 fig, ax = plt.subplots(figsize=(8.0, fig_h))
                 ax.barh(labels, vals, color="#4C78A8")
-                ax.set_xlabel(value_col)
+                ax.set_xlabel("Missing Value Count")
                 ax.set_ylabel("Feature")
                 fig.tight_layout()
                 fig.savefig(out, dpi=180)
@@ -2774,12 +2774,16 @@ class ReportPhaseJob:
 
         # Missingness top 25
         figs["missingness_top25"] = None
+        initial_explore = ds_dir / "exploratory" / "initial"
         reused_missing = self._reuse_generated_report_figure(
             f"{dataset_name}_missingness_top25.png",
             ds_dir=ds_dir,
         ) if self.reuse_existing_figures else None
         existing_missing = _first_existing(
             [
+                initial_explore / "DataMissingness.png",
+                initial_explore / "Missingness.png",
+                initial_explore / "MissingnessTop25.png",
                 ds_dir / "exploratory" / "DataMissingness.png",
                 ds_dir / "exploratory" / "Missingness.png",
                 ds_dir / "exploratory" / "MissingnessTop25.png",
@@ -2791,7 +2795,7 @@ class ReportPhaseJob:
         elif self.enable_plots:
             out = self.paths.figures_dir / f"{dataset_name}_missingness_top25.png"
             figs["missingness_top25"] = self._plot_missingness_top25(
-                missingness_table, out, f"{dataset_name}: Missingness Top 25 Features"
+                missingness_table, out, f"{dataset_name}: Initial Feature Missingness"
             )
 
         # Correlation matrix (prefer existing exploratory PNG; generate from CSV if missing)
@@ -2845,6 +2849,9 @@ class ReportPhaseJob:
             ) if self.reuse_existing_figures else None
             existing = _first_existing(
                 [
+                    initial_explore / "ClassCountsBarPlot.png",
+                    initial_explore / "ClassCountsBarplot.png",
+                    initial_explore / "ClassCounts.png",
                     ds_dir / "exploratory" / "ClassCountsBarPlot.png",
                     ds_dir / "exploratory" / "ClassCountsBarplot.png",
                     ds_dir / "exploratory" / "ClassCounts.png",
@@ -2857,7 +2864,7 @@ class ReportPhaseJob:
                 figs["class_balance"] = self._plot_class_balance(
                     class_counts,
                     self.paths.figures_dir / f"{dataset_name}_class_balance.png",
-                    f"{dataset_name}: Class Balance",
+                    f"{dataset_name}: Initial Class Balance",
                 )
             figs["target_distribution"] = None
 
@@ -3048,10 +3055,16 @@ class ReportPhaseJob:
         task_type = self._detect_task_type(ds_dir, metadata)
 
         explore = ds_dir / "exploratory"
+        initial_explore = explore / "initial"
         univariate = self._read_csv_table(explore / "univariate_analyses" / "Univariate_Significance.csv")
         univariate_top10 = self._univariate_top10(univariate)
-        class_counts = self._read_csv_table(explore / "ClassCounts.csv")
-        missingness_table = self._format_rows_for_display(self._read_csv_table(explore / "DataMissingness.csv"))
+        class_counts = self._read_csv_table(initial_explore / "ClassCounts.csv")
+        if class_counts is None:
+            class_counts = self._read_csv_table(explore / "ClassCounts.csv")
+        missingness_raw = self._read_csv_table(initial_explore / "DataMissingness.csv")
+        if missingness_raw is None:
+            missingness_raw = self._read_csv_table(explore / "DataMissingness.csv")
+        missingness_table = self._format_rows_for_display(missingness_raw)
         informative_summary = self._format_rows_for_display(self._read_csv_table(ds_dir / "feature_selection" / "InformativeFeatureSummary.csv"))
         data_process_summary = self._format_rows_for_display(self._read_csv_table(explore / "DataProcessSummary.csv"))
         if data_process_summary and data_process_summary.columns and data_process_summary.columns[0] == "Algorithm":
@@ -3634,14 +3647,14 @@ class ReportPhaseJob:
             y=y_after + 1,
             w=94,
             h=74,
-            title="Missingness Overview (Top 25 Features)",
+            title="Initial Feature Missingness (Top 25)",
             img_path=figs.get("missingness_top25"),
         )
         if ds.get("task_type") == "Regression":
             right_title = "Target Distribution (Histogram)"
             right_img = figs.get("target_distribution")
         else:
-            right_title = "Class Balance (Observed)"
+            right_title = "Initial Class Balance"
             right_img = figs.get("class_balance")
         right_bottom = self._draw_image_panel(
             pdf,

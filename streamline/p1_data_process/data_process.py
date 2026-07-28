@@ -391,7 +391,7 @@ class DataProcess:
                                    header=['Count'], index_label='Variable')
 
     def missingness_counts(self, initial='', save=True):
-        missing_count = self.data.isnull().sum()
+        missing_count = self.feature_only_data().isnull().sum()
         total_missing = int(missing_count.sum())
         if save:
             path = os.path.join(self.experiment_path, self.name, 'exploratory')
@@ -406,12 +406,19 @@ class DataProcess:
             return
         path = os.path.join(self.experiment_path, self.name, 'exploratory')
         os.makedirs(path, exist_ok=True)
-        missing_count = self.data.isnull().sum()
-        plt.hist(missing_count, bins=100)
-        plt.xlabel("Missing Value Counts")
-        plt.ylabel("Frequency")
-        plt.title("Histogram of Missing Value Counts in Dataset")
-        plt.savefig(os.path.join(path, initial + 'DataMissingnessHistogram.png'), bbox_inches='tight')
+        missing_count = self.feature_only_data().isnull().sum()
+        missing_count = missing_count[missing_count > 0].sort_values(ascending=False).head(25)
+        plt.figure(figsize=(8, max(4, 0.28 * max(1, len(missing_count)))))
+        if missing_count.empty:
+            plt.axis('off')
+            plt.text(0.5, 0.5, "No missing feature values found", ha='center', va='center')
+        else:
+            missing_count.sort_values().plot(kind='barh', color="#4C78A8")
+            plt.xlabel("Missing Value Count")
+            plt.ylabel("Feature")
+            plt.title("Initial Feature Missingness" if initial else "Feature Missingness")
+        plt.tight_layout()
+        plt.savefig(os.path.join(path, initial + 'DataMissingness.png'), bbox_inches='tight')
         if self.show_plots:
             plt.show()
         plt.close('all')
@@ -578,7 +585,7 @@ class DataProcess:
         with open(os.path.join(init_dir, 'initial_quantitative_features.csv'), 'w', newline="") as f:
             csv.writer(f).writerow(self.quantitative_features)
 
-    def counts_summary(self, total_missing=None, save=True, replicate=False):
+    def counts_summary(self, total_missing=None, save=True, replicate=False, initial=''):
         f_count = self.data.shape[1] - 1
         if self.instance_label is not None and self.instance_label in self.data.columns:
             f_count -= 1
@@ -601,7 +608,7 @@ class DataProcess:
         class_counts = self.data[self.outcome_label].value_counts()
 
         if save:
-            out_dir = os.path.join(self.experiment_path, self.name, 'exploratory')
+            out_dir = os.path.join(self.experiment_path, self.name, 'exploratory', initial)
             os.makedirs(out_dir, exist_ok=True)
             summary_df.to_csv(os.path.join(out_dir, 'DataCounts.csv'), index=False)
 
@@ -791,7 +798,8 @@ class DataProcess:
         logging.info(self.experiment_path)
         if "Describe" in self.explorations:
             self.describe_data(initial=initial)
-            _ = self.missingness_counts(initial=initial)
+            total_missing = self.missingness_counts(initial=initial)
+            self.counts_summary(total_missing, save=True, replicate=False, initial=initial)
             self.missing_count_plot(initial=initial)  # will only plot if flags allow
         if "Feature Correlation" in self.explorations:
             self.feature_correlation(initial=initial)  # CSV always; PNG gated

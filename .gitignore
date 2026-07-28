@@ -12,6 +12,8 @@ catboost_info/
 ./tests/*
 testlogs/
 dask_logs/
+output/
+output_final/
 OUTPUT/
 OSA_OUTPUT/
 OSA/
@@ -24,6 +26,7 @@ Scratchpad.ipynb
 UserData/
 UserRepData/
 UserOutput/
+user_configs
 DemoOutput/
 DemoOutputLocal/
 OSAData/
@@ -32,6 +35,8 @@ OSAData/
 /out/
 OSAData.zip
 multiplexer_dataset/
+data/suicide_phenotype_dataset/
+data/suicide_phenotype_feature_types/
 gametes_dataset/
 run_configs/cedars_amd.cfg
 data/AMD_Final/*
