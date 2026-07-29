@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import importlib.metadata
 import json
 import logging
 import math
@@ -24,8 +23,15 @@ logger = logging.getLogger(__name__)
 
 try:
     from fpdf import FPDF  # type: ignore
+    try:
+        from fpdf.enums import XPos, YPos  # type: ignore
+    except Exception:  # pragma: no cover
+        XPos = None  # type: ignore
+        YPos = None  # type: ignore
 except Exception:  # pragma: no cover
     FPDF = None  # type: ignore
+    XPos = None  # type: ignore
+    YPos = None  # type: ignore
 
 
 PHASE_LABELS = {
@@ -172,6 +178,18 @@ FEATURE_LEARNING_METHODS: List[Dict[str, Any]] = [
         "dir_aliases": ["multisurfstar", "multisurf_star", "multi_surfstar", "multi_surf_star"],
         "score_patterns": ["multisurfstar_scores_cv_*.csv", "multisurf_star_scores_cv_*.csv"],
     },
+    {
+        "key": "multiswrfdb",
+        "label": "MultiSWRFDB",
+        "dir_aliases": ["multiswrfdb", "multi_swrfdb", "multi_swrf_db"],
+        "score_patterns": ["multiswrfdb_scores_cv_*.csv", "multi_swrfdb_scores_cv_*.csv", "multi_swrf_db_scores_cv_*.csv"],
+    },
+    {
+        "key": "multiswrfdbstar",
+        "label": "MultiSWRFDB*",
+        "dir_aliases": ["multiswrfdbstar", "multiswrfdb_star", "multi_swrfdbstar", "multi_swrfdb_star", "multi_swrf_dbstar", "multi_swrf_db_star"],
+        "score_patterns": ["multiswrfdbstar_scores_cv_*.csv", "multiswrfdb_star_scores_cv_*.csv", "multi_swrfdbstar_scores_cv_*.csv", "multi_swrfdb_star_scores_cv_*.csv", "multi_swrf_dbstar_scores_cv_*.csv", "multi_swrf_db_star_scores_cv_*.csv"],
+    },
 ]
 
 
@@ -181,9 +199,14 @@ def _now_iso_local() -> str:
 
 def _try_streamline_version() -> str:
     try:
-        return importlib.metadata.version("streamline")
+        import streamline
+
+        version = getattr(streamline, "__version__", None)
+        if version:
+            return str(version)
     except Exception:
-        return "unknown"
+        pass
+    return "unknown"
 
 
 def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
@@ -316,6 +339,27 @@ class TableData:
     rows: List[Dict[str, str]]
 
 
+def _pdf_cell(
+    pdf: Any,
+    w: float,
+    h: float,
+    text: str = "",
+    *,
+    border: int = 0,
+    align: str = "",
+    fill: bool = False,
+    new_line: bool = False,
+):
+    if XPos is not None and YPos is not None:
+        kwargs = {"border": border, "align": align, "fill": fill}
+        if new_line:
+            kwargs["new_x"] = XPos.LMARGIN
+            kwargs["new_y"] = YPos.NEXT
+        return pdf.cell(w, h, text, **kwargs)
+    kwargs = {"border": border, "align": align, "fill": fill, "ln": 1 if new_line else 0}
+    return pdf.cell(w, h, text, **kwargs)
+
+
 if FPDF is not None:
 
     class _StreamlinePDF(FPDF):  # type: ignore[misc]
@@ -326,9 +370,9 @@ if FPDF is not None:
         def footer(self):
             self.set_y(-10)
             self.set_font("Times", "I", 7)
-            self.cell(0, 4, self.footer_text, border=0, ln=0, align="L")
+            _pdf_cell(self, 0, 4, self.footer_text, border=0, align="L")
             self.set_font("Times", "", 8)
-            self.cell(0, 4, f"Page {self.page_no()}/{{nb}}", border=0, ln=0, align="R")
+            _pdf_cell(self, 0, 4, f"Page {self.page_no()}/{{nb}}", border=0, align="R")
 
 else:
 
@@ -3465,7 +3509,7 @@ class ReportPhaseJob:
                 if fill:
                     pdf.set_fill_color(230, 230, 230)
                 pdf.set_font("Times", style, font_size)
-                pdf.cell(col_widths[c_i], row_h, txt, border=1, ln=0, align=align, fill=fill)
+                _pdf_cell(pdf, col_widths[c_i], row_h, txt, border=1, align=align, fill=fill)
             pdf.ln(row_h)
 
         # Paginate long tables and repeat header on each new page.
@@ -3483,7 +3527,7 @@ class ReportPhaseJob:
     def _render_box(self, pdf: _StreamlinePDF, *, x: float, y: float, w: float, title: str, lines: List[str]) -> float:
         pdf.set_xy(x, y)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(w, 5, title, border=1, ln=1, align="L")
+        _pdf_cell(pdf, w, 5, title, border=1, align="L", new_line=True)
         pdf.set_x(x)
         pdf.set_font("Times", "", 7)
         body = "\n".join(lines) if lines else "Not available"
@@ -3503,10 +3547,10 @@ class ReportPhaseJob:
     ) -> float:
         pdf.set_xy(x, y)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(w, 5, title, border=1, ln=1, align="L")
+        _pdf_cell(pdf, w, 5, title, border=1, align="L", new_line=True)
         body_y = pdf.get_y()
         pdf.set_xy(x, body_y)
-        pdf.cell(w, h, "", border=0, ln=0)
+        _pdf_cell(pdf, w, h, "", border=0)
 
         if img_path:
             p = Path(img_path)
@@ -3551,13 +3595,14 @@ class ReportPhaseJob:
     def _render_global_summary(self, pdf: _StreamlinePDF, report_data: Dict[str, Any]):
         pdf.add_page()
         pdf.set_font("Times", "B", 12)
-        pdf.cell(
+        _pdf_cell(
+            pdf,
             190,
             8,
             f"{report_data.get('title', 'STREAMLINE Testing Data Evaluation Report')}: {report_data.get('generated_at')}",
             border=1,
-            ln=1,
             align="L",
+            new_line=True,
         )
         pdf.ln(1)
 
@@ -3611,12 +3656,12 @@ class ReportPhaseJob:
     def _render_dataset_header(self, pdf: _StreamlinePDF, ds: Dict[str, Any], section_title: str):
         pdf.add_page()
         pdf.set_font("Times", "B", 11)
-        pdf.cell(190, 6, section_title, border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 6, section_title, border=1, align="L", new_line=True)
         pdf.set_font("Times", "B", 10)
         pdf.set_fill_color(235, 238, 242)
-        pdf.cell(190, 6.5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, ln=1, align="L", fill=True)
+        _pdf_cell(pdf, 190, 6.5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, align="L", fill=True, new_line=True)
         pdf.set_font("Times", "", 7.5)
-        pdf.cell(190, 5, f"Dataset Path: {ds.get('dataset_path')}", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, f"Dataset Path: {ds.get('dataset_path')}", border=1, align="L", new_line=True)
 
     def _render_dataset_eda_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         self._render_dataset_header(pdf, ds, "EDA and Feature Engineering")
@@ -3627,7 +3672,7 @@ class ReportPhaseJob:
         uv_rows = uv.get("rows", [])
         pdf.set_xy(10, y_start)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Univariate Analysis (Top 10)", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, "Univariate Analysis (Top 10)", border=1, align="L", new_line=True)
         y_after = self._render_table(
             pdf,
             x=10,
@@ -3716,7 +3761,7 @@ class ReportPhaseJob:
 
         pdf.set_xy(10, y_next)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Data Process and Feature Engineering Summary", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, "Data Process and Feature Engineering Summary", border=1, align="L", new_line=True)
         if dps_cols:
             y_next = self._render_table(
                 pdf,
@@ -3751,36 +3796,27 @@ class ReportPhaseJob:
         figs = ds.get("figures", {})
         panels = [p for p in (figs.get("feature_learning_panels") or []) if isinstance(p, dict) and p.get("path")]
 
-        if len(panels) >= 2:
-            left_bottom = self._draw_image_panel(
-                pdf,
-                x=10,
-                y=34,
-                w=90,
-                h=88,
-                title=str(panels[0].get("title") or "Top Scores (Method 1)"),
-                img_path=str(panels[0].get("path") or ""),
-            )
-            right_bottom = self._draw_image_panel(
-                pdf,
-                x=110,
-                y=34,
-                w=90,
-                h=88,
-                title=str(panels[1].get("title") or "Top Scores (Method 2)"),
-                img_path=str(panels[1].get("path") or ""),
-            )
-            y_next = max(left_bottom, right_bottom) + 3
-        elif len(panels) == 1:
-            y_next = self._draw_image_panel(
-                pdf,
-                x=52,
-                y=34,
-                w=106,
-                h=96,
-                title=str(panels[0].get("title") or "Top Scores"),
-                img_path=str(panels[0].get("path") or ""),
-            ) + 3
+        if panels:
+            panel_slots = [(10, 34), (110, 34), (10, 132), (110, 132)]
+            y_next = 34.0
+            for i in range(0, len(panels), 4):
+                if i > 0:
+                    self._render_dataset_header(pdf, ds, "Feature Learning and Feature Selection (continued)")
+                bottoms: List[float] = []
+                for panel, (x, y) in zip(panels[i : i + 4], panel_slots):
+                    bottoms.append(
+                        self._draw_image_panel(
+                            pdf,
+                            x=x,
+                            y=y,
+                            w=90,
+                            h=88,
+                            title=str(panel.get("title") or "Top Scores"),
+                            img_path=str(panel.get("path") or ""),
+                        )
+                    )
+                if bottoms:
+                    y_next = max(bottoms) + 3
         else:
             y_next = self._draw_image_panel(
                 pdf,
@@ -3796,9 +3832,12 @@ class ReportPhaseJob:
         cv_cols = cv_summary.get("columns", [])
         cv_rows = cv_summary.get("rows", [])
         if cv_cols:
+            if y_next > 224:
+                self._render_dataset_header(pdf, ds, "Feature Learning and Feature Selection (continued)")
+                y_next = 34.0
             pdf.set_xy(10, y_next)
             pdf.set_font("Times", "B", 9)
-            pdf.cell(190, 5, "Feature Learning / Selection CV Summary", border=1, ln=1, align="L")
+            _pdf_cell(pdf, 190, 5, "Feature Learning / Selection CV Summary", border=1, align="L", new_line=True)
             y_next = self._render_table(
                 pdf,
                 x=10,
@@ -3816,9 +3855,12 @@ class ReportPhaseJob:
         t = ds.get("tables", {}).get("informative_feature_summary", {})
         cols = t.get("columns", [])
         rows = t.get("rows", [])
+        if y_next > 242:
+            self._render_dataset_header(pdf, ds, "Feature Learning and Feature Selection (continued)")
+            y_next = 34.0
         pdf.set_xy(10, y_next)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Informative Feature Summary", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, "Informative Feature Summary", border=1, align="L", new_line=True)
         self._render_table(
             pdf,
             x=10,
@@ -3830,24 +3872,6 @@ class ReportPhaseJob:
             row_h=4.0,
             max_first_col_width=62.0,
         )
-
-        # Render additional FI method panels on continuation pages when present.
-        if len(panels) > 2:
-            remaining = panels[2:]
-            slots = [(10, 34), (110, 34), (10, 132), (110, 132)]
-            for i in range(0, len(remaining), 4):
-                self._render_dataset_header(pdf, ds, "Feature Learning and Feature Selection (continued)")
-                chunk = remaining[i : i + 4]
-                for panel, (x, y) in zip(chunk, slots):
-                    self._draw_image_panel(
-                        pdf,
-                        x=x,
-                        y=y,
-                        w=90,
-                        h=88,
-                        title=str(panel.get("title") or "Top Scores"),
-                        img_path=str(panel.get("path") or ""),
-                    )
 
     def _render_performance_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
         self._render_dataset_header(pdf, ds, self.performance_page_title())
@@ -3869,7 +3893,7 @@ class ReportPhaseJob:
         y = 34.0
         pdf.set_xy(10, y)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Model and Ensemble Performance (Mean +/- SD; gray = best/tied metric)", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, "Model and Ensemble Performance (Mean +/- SD; gray = best/tied metric)", border=1, align="L", new_line=True)
         y = self._render_table(
             pdf,
             x=10,
@@ -3886,7 +3910,7 @@ class ReportPhaseJob:
         y += 2
         pdf.set_xy(10, y)
         pdf.set_font("Times", "B", 9)
-        pdf.cell(190, 5, "Model and Ensemble Performance (Median; gray = best/tied metric)", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, "Model and Ensemble Performance (Median; gray = best/tied metric)", border=1, align="L", new_line=True)
         y = self._render_table(
             pdf,
             x=10,
@@ -4041,9 +4065,9 @@ class ReportPhaseJob:
 
         pdf.add_page()
         pdf.set_font("Times", "B", 11)
-        pdf.cell(190, 6, "Dataset Comparisons", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 6, "Dataset Comparisons", border=1, align="L", new_line=True)
         pdf.set_font("Times", "", 9)
-        pdf.cell(190, 5, "Comparison Overview (All Datasets)", border=1, ln=1, align="L")
+        _pdf_cell(pdf, 190, 5, "Comparison Overview (All Datasets)", border=1, align="L", new_line=True)
 
         figs = block.get("figures", {})
         if task_type == "Regression":
@@ -4079,7 +4103,7 @@ class ReportPhaseJob:
         if figs.get("kw_pvalues"):
             pdf.set_xy(10, 206)
             pdf.set_font("Times", "B", 9)
-            pdf.cell(190, 5, "Dataset Comparisons: Kruskal-Wallis P-Values", border=1, ln=1, align="L")
+            _pdf_cell(pdf, 190, 5, "Dataset Comparisons: Kruskal-Wallis P-Values", border=1, align="L", new_line=True)
             self._draw_image_panel(
                 pdf,
                 x=10,
@@ -4111,7 +4135,7 @@ class ReportPhaseJob:
                 y = 24.0
             pdf.set_xy(10, y)
             pdf.set_font("Times", "B", 11)
-            pdf.cell(190, 6, title, border=1, ln=1, align="L")
+            _pdf_cell(pdf, 190, 6, title, border=1, align="L", new_line=True)
             y = self._render_table(
                 pdf,
                 x=10,
