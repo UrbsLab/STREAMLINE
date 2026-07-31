@@ -101,11 +101,18 @@ The runner also accepts old-style broad flags such as `do_till_report`.
 | `timeout` | `900` | Optuna time budget in seconds. |
 | `training_subsample` | `0` | Optional training subset size for models that set `subsampling_allowed=True`, including ANN, SVM, KNN, XGB, and HEROS. Classification subsampling is class-balanced by default with imbalanced-learn `RandomUnderSampler(sampling_strategy="auto")`; model wrappers can internally set `subsampling_strategy` to `stratified` for scikit-learn `StratifiedShuffleSplit` or `random`, or set `undersampling_strategy` to another imbalanced-learn string. |
 | `calibrate` | `0` or `1` | Classification calibration toggle. |
+| `skip_completed_models` | `False` | Skip completed P6 model/CV jobs and run only failed or missing jobs. When `False`, P6 reruns the requested model jobs and overwrites existing model artifacts. |
 | `bypass_one_hot_for_native_models` | `True` | Allow native categorical model path. |
 | `native_categorical_models` | `CGB,ExSTraCS` | Models allowed when P1 did not one-hot encode. |
 
 P6 records Optuna trial accounting in model outputs so reports can show how
 many trials actually ran within the requested budget.
+
+By default, P6 reruns the requested model/CV jobs and overwrites existing model
+artifacts. Use `skip_completed_models = True` in a config file, or
+`--skip_completed_models 1` on the P6 CLI, when you want recovery behavior
+that skips completed `job_model_*` markers and runs only failed or missing
+jobs.
 
 ## P7 Ensembles
 

@@ -14,7 +14,7 @@ class GBClassifier(MulticlassClassificationModel, ABC):
     def __init__(self, cv_folds=3, scoring_metric='balanced_accuracy',
                  metric_direction='maximize', random_state=None, cv=None, n_jobs=None):
         super().__init__(GB, "Gradient Boosting", cv_folds, scoring_metric, metric_direction, random_state, cv)
-        self.param_grid = {'n_estimators': [10, 1000], 'loss': ['deviance', 'exponential'],
+        self.param_grid = {'n_estimators': [10, 1000], 'loss': ['log_loss', 'exponential'],
                            'learning_rate': [0.0001, 0.3], 'min_samples_leaf': [1, 50], 'min_samples_split': [2, 50],
                            'max_depth': [1, 30], 'random_state': [random_state, ]}
         self.small_name = "GB"

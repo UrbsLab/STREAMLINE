@@ -924,6 +924,7 @@ class ReportPhaseJob:
             self.add_summary_line(modeling, "Optuna Timeout Seconds", p6.get("timeout"))
         self.add_summary_line(modeling, "Optuna Trials Completed", self.phase_summary_value(p6_ran, recovered_optuna_trials, default="0 completed"))
         self.add_summary_line(modeling, "Training Subsample", self.phase_summary_value(p6_ran, p6.get("training_subsample"), default=0))
+        self.add_summary_line(modeling, "Skip Completed Models", self.phase_summary_value(p6_ran, p6.get("skip_completed_models"), default=False))
         self.add_summary_line(modeling, "Calibration", self.phase_summary_value(p6_ran, p6.get("calibrate"), default=False))
         self.add_summary_line(modeling, "Categorical Handling", self.categorical_handling_summary(p1_ran=p1_ran, p6_ran=p6_ran, p1=p1, p6=p6, metadata_pickle=metadata_pickle), max_len=150)
         self.add_summary_line(modeling, "Ensembles", self.phase_summary_value(p7_ran, p7.get("ensembles"), recovered_ensemble_ids, default="hard_voting,soft_voting,stack_lr"))

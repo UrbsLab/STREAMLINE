@@ -146,6 +146,8 @@ Phase 6 then uses `--bypass_one_hot_for_native_models` and `--native_categorical
 
 Phase 6 also writes Optuna trial accounting to `<dataset>/models/optuna_trials/*_optuna_trials*.csv` and includes the same trial summary in each per-CV metrics JSON. This records how many trials actually ran and completed within the requested `--n_trials` and `--timeout` budget.
 
+By default, Phase 6 reruns requested model/CV jobs and overwrites existing model artifacts. Use `--skip_completed_models 1` on the P6 CLI, or `skip_completed_models = True` in `[p6]` config settings, for recovery runs that skip completed `jobsCompleted/job_model_*` markers and submit only failed or missing ML model jobs.
+
 ## Getting Started
 
 ### Google Colab

@@ -54,6 +54,7 @@ class P6Runner:
         uniform_fi: bool = False,
         save_plot: bool = False,
         random_state: Optional[int] = None,
+        skip_completed_models: bool = False,
         bypass_one_hot_for_native_models: bool = True,
         native_categorical_models: str | List[str] | None = NATIVE_CATEGORICAL_MODELS_DEFAULT,
 
@@ -85,6 +86,7 @@ class P6Runner:
         self.uniform_fi = bool(uniform_fi)
         self.save_plot = bool(save_plot)
         self.random_state = random_state
+        self.skip_completed_models = bool(skip_completed_models)
         self.bypass_one_hot_for_native_models = bool(bypass_one_hot_for_native_models)
         self.native_categorical_models = native_categorical_models
 
@@ -136,6 +138,10 @@ class P6Runner:
         elif mode in ("BashSLURM", "BashLSF"):
             jobs, model_counts = self.collect_model_cv_jobs(datasets)
             logging.info(self.format_model_cv_progress_label(mode, jobs, model_counts))
+            if not jobs:
+                logging.warning("No Phase 6 model/CV jobs to submit.")
+                self.mark_modeling_phase_complete(datasets)
+                return
             for dataset_dir, ModelCls, cv_idx in jobs:
                 self.submit_bash_model_job(dataset_dir, ModelCls, cv_idx, mode)
         else:
@@ -192,6 +198,7 @@ class P6Runner:
             uniform_fi=self.uniform_fi,
             save_plot=self.save_plot,
             random_state=self.random_state,
+            skip_completed_models=self.skip_completed_models,
             bypass_one_hot_for_native_models=self.bypass_one_hot_for_native_models,
             native_categorical_models=self.native_categorical_models,
         )
@@ -203,7 +210,7 @@ class P6Runner:
             phase_job = self.make_modeling_phase_job(dataset_dir)
             model_classes = phase_job.resolve_model_classes()
             model_counts[dataset_dir] = len(model_classes)
-            for ModelCls, cv_idx in phase_job.model_cv_specs():
+            for ModelCls, cv_idx in phase_job.runnable_model_cv_specs():
                 jobs.append((dataset_dir, ModelCls, cv_idx))
         return jobs, model_counts
 
@@ -265,6 +272,7 @@ class P6Runner:
             "--uniform_fi", "1" if self.uniform_fi else "0",
             "--save_plot", "1" if self.save_plot else "0",
             "--random_state", str(self.random_state) if self.random_state is not None else "",
+            "--skip_completed_models", "1" if self.skip_completed_models else "0",
             "--bypass_one_hot_for_native_models", "1" if self.bypass_one_hot_for_native_models else "0",
             "--native_categorical_models", (
                 ",".join(self.native_categorical_models)

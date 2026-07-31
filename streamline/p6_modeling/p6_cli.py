@@ -59,6 +59,12 @@ def main():
     ap.add_argument("--save_plot", type=int, default=0)
     ap.add_argument("--random_state", default=None)
     ap.add_argument(
+        "--skip_completed_models",
+        type=int,
+        default=0,
+        help="1 to skip completed Phase 6 model/CV jobs and run only failed or missing jobs.",
+    )
+    ap.add_argument(
         "--bypass_one_hot_for_native_models",
         type=int,
         default=1,
@@ -122,6 +128,7 @@ def main():
         uniform_fi=bool(args.uniform_fi),
         save_plot=bool(args.save_plot),
         random_state=(int(args.random_state) if (args.random_state not in (None, "", "None")) else None),
+        skip_completed_models=bool(args.skip_completed_models),
         bypass_one_hot_for_native_models=bool(args.bypass_one_hot_for_native_models),
         native_categorical_models=args.native_categorical_models,
 

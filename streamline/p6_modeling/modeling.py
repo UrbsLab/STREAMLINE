@@ -348,6 +348,7 @@ class ModelingPhaseJob:
         uniform_fi: bool = False,
         save_plot: bool = False,
         random_state: Optional[int] = None,
+        skip_completed_models: bool = False,
         bypass_one_hot_for_native_models: bool = True,
         native_categorical_models: List[str] | str | None = NATIVE_CATEGORICAL_MODELS_DEFAULT,
     ):
@@ -375,6 +376,7 @@ class ModelingPhaseJob:
         self.uniform_fi = bool(uniform_fi)
         self.save_plot = bool(save_plot)
         self.random_state = random_state
+        self.skip_completed_models = bool(skip_completed_models)
         self.bypass_one_hot_for_native_models = bool(bypass_one_hot_for_native_models)
         self.native_categorical_models = native_categorical_models
         self.native_categorical_model_ids = parse_model_id_csv(
@@ -411,9 +413,40 @@ class ModelingPhaseJob:
                 specs.append((ModelCls, cv_idx))
         return specs
 
+    def runnable_model_cv_specs(self, cv_indices=None):
+        specs = []
+        skipped = 0
+        for ModelCls, cv_idx in self.model_cv_specs(cv_indices):
+            if self.skip_completed_models and self.model_cv_job_is_complete(ModelCls, cv_idx):
+                skipped += 1
+                logging.info(
+                    "[P6] skip_completed_models=True; skipping completed model job for %s CV_%s (%s).",
+                    self.dataset_name,
+                    cv_idx,
+                    getattr(ModelCls, "small_name", getattr(ModelCls, "model_name", "model")),
+                )
+                continue
+            specs.append((ModelCls, cv_idx))
+        if skipped:
+            logging.info(
+                "[P6] Skipped %s completed model/CV job(s) for %s.",
+                skipped,
+                self.dataset_name,
+            )
+        return specs
+
+    def model_cv_job_is_complete(self, ModelCls, cv_idx: int) -> bool:
+        return os.path.exists(
+            model_cv_flag_path(
+                self.dataset_dir,
+                getattr(ModelCls, "small_name", getattr(ModelCls, "model_name", "model")),
+                int(cv_idx),
+            )
+        )
+
     def create_model_cv_executions(self, cv_indices=None):
         executions = []
-        for ModelCls, cv_idx in self.model_cv_specs(cv_indices):
+        for ModelCls, cv_idx in self.runnable_model_cv_specs(cv_indices):
             executions.append((
                 self.create_model_job_for_cv(cv_idx),
                 create_model_instance(
@@ -454,6 +487,14 @@ class ModelingPhaseJob:
         )
 
     def run_single_model_cv(self, ModelCls, cv_idx: int):
+        if self.skip_completed_models and self.model_cv_job_is_complete(ModelCls, cv_idx):
+            logging.info(
+                "[P6] skip_completed_models=True; skipping completed model job for %s CV_%s (%s).",
+                self.dataset_name,
+                cv_idx,
+                getattr(ModelCls, "small_name", getattr(ModelCls, "model_name", "model")),
+            )
+            return
         model_job = self.create_model_job_for_cv(cv_idx)
         model = create_model_instance(
             ModelCls,

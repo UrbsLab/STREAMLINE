@@ -127,6 +127,10 @@ P6 also supports native categorical handling. If P1 was run with
 CatBoost/CGB and ExSTraCS. Explicitly requesting an unsupported model raises an
 error instead of silently changing the data representation.
 
+By default, rerunning P6 overwrites the requested model artifacts. Set
+`skip_completed_models=True` for recovery runs that skip completed model/CV
+markers and submit only failed or missing model jobs.
+
 Outputs include fitted model pickles, predictions, per-fold metrics, feature
 importance estimates, and Optuna trial summaries.
 
@@ -156,8 +160,8 @@ P9 compares datasets inside the same experiment. It is useful when an
 experiment runs multiple related datasets or feature sets and the user wants
 the same statistical summaries and visual comparisons across them.
 
-If an experiment contains only one dataset, P9 may still run but has less to
-compare.
+If an experiment contains fewer than two dataset folders with `CVDatasets`,
+P9 skips cleanly because there is no valid cross-dataset comparison to run.
 
 ## P10: Replication
 

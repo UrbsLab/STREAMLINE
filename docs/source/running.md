@@ -209,6 +209,11 @@ python -m streamline.p11_reporting.p11_cli \
   --report_mode replication
 ```
 
+By default, P6 reruns the requested model/CV jobs and overwrites existing model
+artifacts. Add `--skip_completed_models 1` when you want recovery behavior
+that skips completed `jobsCompleted/job_model_*` markers and runs only failed
+or missing model jobs.
+
 More examples are available in `sample_runcommands.txt`.
 
 ## Discovery Commands

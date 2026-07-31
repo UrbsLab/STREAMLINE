@@ -217,6 +217,7 @@ def test_example_configs_include_explicit_non_json_phase_parameters():
             "training_subsample",
             "uniform_fi",
             "save_plot",
+            "skip_completed_models",
             "bypass_one_hot_for_native_models",
             "native_categorical_models",
         },

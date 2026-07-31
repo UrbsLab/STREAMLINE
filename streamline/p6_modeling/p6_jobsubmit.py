@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -8,6 +9,7 @@ try:
         create_model_instance,
         mark_modeling_phase_complete,
         mark_modeling_phase_complete_if_all_model_cv_jobs_finished,
+        model_cv_flag_path,
         model_class_matching_id,
         parse_model_params_json,
         resolve_model_classes_for_dataset,
@@ -21,6 +23,7 @@ except ImportError:
         create_model_instance,
         mark_modeling_phase_complete,
         mark_modeling_phase_complete_if_all_model_cv_jobs_finished,
+        model_cv_flag_path,
         model_class_matching_id,
         parse_model_params_json,
         resolve_model_classes_for_dataset,
@@ -67,6 +70,7 @@ def main():
     ap.add_argument("--uniform_fi", default="0")
     ap.add_argument("--save_plot", default="0")
     ap.add_argument("--random_state", default=None)
+    ap.add_argument("--skip_completed_models", default="0")
     ap.add_argument("--bypass_one_hot_for_native_models", default="1")
     ap.add_argument("--native_categorical_models", default=NATIVE_CATEGORICAL_MODELS_DEFAULT)
 
@@ -76,6 +80,7 @@ def main():
     n_splits = int(args.n_splits)
     random_state = int(args.random_state) if (args.random_state not in (None, "", "None")) else None
     bypass_native = parse_bool(args.bypass_one_hot_for_native_models)
+    skip_completed_models = parse_bool(args.skip_completed_models)
     model_params = parse_model_params_json(args.model_params_json)
 
     model_classes = resolve_model_classes_for_dataset(
@@ -109,6 +114,34 @@ def main():
             for ModelCls in model_classes
             for cv_idx in range(n_splits)
         ]
+
+    skipped = 0
+    if skip_completed_models:
+        runnable_jobs = []
+        for ModelCls, cv_idx in jobs_to_run:
+            model_id = getattr(ModelCls, "small_name", getattr(ModelCls, "model_name", "model"))
+            if os.path.exists(model_cv_flag_path(args.dataset_dir, model_id, int(cv_idx))):
+                skipped += 1
+                logging.info(
+                    "[P6] skip_completed_models=True; skipping completed model job for %s CV_%s (%s).",
+                    Path(args.dataset_dir).name,
+                    cv_idx,
+                    model_id,
+                )
+            else:
+                runnable_jobs.append((ModelCls, cv_idx))
+        jobs_to_run = runnable_jobs
+
+    if skipped:
+        logging.info("[P6] Skipped %s completed model/CV job(s).", skipped)
+
+    if not jobs_to_run:
+        mark_modeling_phase_complete_if_all_model_cv_jobs_finished(
+            args.dataset_dir,
+            model_classes,
+            n_splits,
+        )
+        return
 
     for ModelCls, cv_idx in jobs_to_run:
         model_job = ModelJob(
