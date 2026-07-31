@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import time
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -12,6 +13,15 @@ from dask.distributed import Client, LocalCluster
 from streamline.utils.cluster import get_cluster
 from streamline.p9_compare_datasets.compare_datasets import DatasetCompareJob
 from streamline.utils.runners import num_cores, quote_command_parts, run_dask_tasks, run_parallel_functions
+
+EXPERIMENT_UTILITY_DIRS = {
+    "jobsCompleted",
+    "jobs",
+    "logs",
+    "dask_logs",
+    "runtime",
+    "DatasetComparisons",
+}
 
 
 class P9Runner:
@@ -57,6 +67,9 @@ class P9Runner:
         """
         Phase 9 is a single job per experiment (not per dataset).
         """
+        if not self.should_run_dataset_comparison():
+            return
+
         if self.run_cluster == "Serial":
             self._run_one()
         elif self.run_cluster == "Local":
@@ -75,6 +88,39 @@ class P9Runner:
 
     def _run_one(self):
         DatasetCompareJob(**self.kw).run()
+
+    def should_run_dataset_comparison(self) -> bool:
+        dataset_dirs = self.find_comparable_dataset_dirs()
+        if len(dataset_dirs) >= 2:
+            return True
+
+        logging.info(
+            "Skipping Phase 9 dataset comparison: %d dataset(s) with CVDatasets found under %s; at least 2 are required.",
+            len(dataset_dirs),
+            self.exp_root,
+        )
+        self.mark_phase_complete()
+        return False
+
+    def find_comparable_dataset_dirs(self):
+        return [
+            path
+            for path in sorted(self.exp_root.iterdir())
+            if path.is_dir()
+            and path.name not in EXPERIMENT_UTILITY_DIRS
+            and (path / "CVDatasets").is_dir()
+        ]
+
+    def mark_phase_complete(self):
+        jobs_dir = self.exp_root / "jobsCompleted"
+        jobs_dir.mkdir(exist_ok=True)
+        with open(jobs_dir / "job_compare_datasets.txt", "w") as f:
+            f.write("skipped: fewer than two datasets")
+
+        runtime_dir = self.exp_root / "runtime"
+        runtime_dir.mkdir(exist_ok=True)
+        with open(runtime_dir / "runtime_compare_datasets.txt", "w") as f:
+            f.write("0.0")
 
     def _submit_bash(self):
         """

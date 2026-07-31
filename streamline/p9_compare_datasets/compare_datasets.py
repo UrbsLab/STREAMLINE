@@ -20,6 +20,15 @@ from streamline.p6_modeling.utils.loader import get_model_by_id, list_models, no
 sns.set_theme()
 logger = logging.getLogger(__name__)
 
+EXPERIMENT_UTILITY_DIRS = {
+    "jobsCompleted",
+    "jobs",
+    "logs",
+    "dask_logs",
+    "runtime",
+    "DatasetComparisons",
+}
+
 
 class DatasetCompareJob:
     """
@@ -62,6 +71,10 @@ class DatasetCompareJob:
         self.instance_label = instance_label
         self.sig_cutoff = sig_cutoff
         self.show_plots = show_plots
+        self.datasets: List[str] = []
+        self.dataset_directory_paths: List[str] = []
+        self.metrics: Optional[List[str]] = None
+        self.skip_comparison = False
 
         self.exp_root = os.path.join(self.output_path, self.experiment_name)
         if not os.path.isdir(self.exp_root):
@@ -72,28 +85,21 @@ class DatasetCompareJob:
             os.path.join(self.exp_root, name)
             for name in sorted(os.listdir(self.exp_root))
             if os.path.isdir(os.path.join(self.exp_root, name))
-            and name
-            not in {
-                "jobsCompleted",
-                "jobs",
-                "logs",
-                "dask_logs",
-                "runtime",
-                "DatasetComparisons",
-            }
+            and name not in EXPERIMENT_UTILITY_DIRS
             and os.path.isdir(os.path.join(self.exp_root, name, "CVDatasets"))
         ]
-        if not datasets:
-            logging.warning("No datasets found for Phase 9 under %s", self.exp_root)
-            return
 
-        self.datasets: List[str] = [Path(d).name for d in datasets]
-        self.dataset_directory_paths: List[str] = datasets
+        self.datasets = [Path(d).name for d in datasets]
+        self.dataset_directory_paths = datasets
 
-        if not self.dataset_directory_paths:
-            raise RuntimeError(
-                f"No dataset folders found under experiment: {self.experiment_path}"
+        if len(self.dataset_directory_paths) < 2:
+            self.skip_comparison = True
+            logging.info(
+                "Skipping Phase 9 dataset comparison: %d dataset(s) with CVDatasets found under %s; at least 2 are required.",
+                len(self.dataset_directory_paths),
+                self.exp_root,
             )
+            return
 
         # Discover base models from Phase 6 metrics
         (
@@ -123,8 +129,6 @@ class DatasetCompareJob:
         self.colors: Dict[str, Any] = {}
         self.colors.update(base_colors)
         self.colors.update(ensemble_colors)
-
-        self.metrics: Optional[List[str]] = None
 
     # ------------------------------------------------------------------
     # Algorithm discovery (base models, from model_evaluation/metrics_by_cv)
@@ -290,6 +294,11 @@ class DatasetCompareJob:
             "Running dataset comparison (Phase 9) for experiment %s",
             self.experiment_name,
         )
+        if self.skip_comparison:
+            self.save_runtime()
+            self.mark_phase_complete(skipped=True)
+            logger.info("Phase 9 dataset comparison skipped.")
+            return
 
         # metrics from first dataset (Summary_performance_mean)
         first_summary = (
@@ -334,10 +343,7 @@ class DatasetCompareJob:
 
         self.save_runtime()
         logger.info("Phase 9 dataset comparison complete.")
-        jobs_dir = Path(self.experiment_path) / "jobsCompleted"
-        jobs_dir.mkdir(exist_ok=True)
-        with open(jobs_dir / "job_compare_datasets.txt", "w") as f:
-            f.write("complete")
+        self.mark_phase_complete()
 
     # ------------------------------------------------------------------
     # Core comparison methods
@@ -674,6 +680,13 @@ class DatasetCompareJob:
         runtime_file = runtime_dir / "runtime_compare_datasets.txt"
         with runtime_file.open("w") as f:
             f.write(str(time.time() - self.job_start_time))
+
+    def mark_phase_complete(self, skipped: bool = False):
+        jobs_dir = Path(self.experiment_path) / "jobsCompleted"
+        jobs_dir.mkdir(exist_ok=True)
+        message = "skipped: fewer than two datasets" if skipped else "complete"
+        with open(jobs_dir / "job_compare_datasets.txt", "w") as f:
+            f.write(message)
 
     # ------------------------------------------------------------------
     # Shared helper methods
