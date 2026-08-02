@@ -9,7 +9,7 @@ def prepare_prc_curve_for_interpolation(
     recall: Sequence[float],
     precision: Sequence[float],
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Return PRC coordinates sorted by increasing recall for interpolation."""
+    """Return PRC coordinates in increasing recall order for interpolation."""
     recall_values = np.asarray(recall, dtype=float)
     precision_values = np.asarray(precision, dtype=float)
 
@@ -27,18 +27,18 @@ def prepare_prc_curve_for_interpolation(
     if recall_values.size == 0:
         return recall_values, precision_values
 
-    order = np.argsort(recall_values, kind="mergesort")
-    recall_values = recall_values[order]
-    precision_values = precision_values[order]
+    recall_deltas = np.diff(recall_values)
+    if np.all(recall_deltas <= 0):
+        # sklearn.metrics.precision_recall_curve returns recall from high to low.
+        # Reverse both arrays so interpolation follows the original threshold path.
+        recall_values = recall_values[::-1]
+        precision_values = precision_values[::-1]
+    elif not np.all(recall_deltas >= 0):
+        order = np.argsort(recall_values, kind="mergesort")
+        recall_values = recall_values[order]
+        precision_values = precision_values[order]
 
-    unique_recall = []
-    unique_precision = []
-    for value in np.unique(recall_values):
-        matching_precision = precision_values[recall_values == value]
-        unique_recall.append(float(value))
-        unique_precision.append(float(np.max(matching_precision)))
-
-    return np.asarray(unique_recall, dtype=float), np.asarray(unique_precision, dtype=float)
+    return recall_values, precision_values
 
 
 def interpolate_prc_curve(
