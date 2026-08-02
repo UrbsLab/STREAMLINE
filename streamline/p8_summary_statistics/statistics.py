@@ -39,6 +39,10 @@ from streamline.p8_summary_statistics.utils.fi_core import (
     weight_frac_fi,
 )
 from streamline.p8_summary_statistics.utils.plot_regression import residuals_regression
+from streamline.p8_summary_statistics.utils.curve_utils import (
+    interpolate_prc_curve,
+    prepare_prc_curve_for_interpolation,
+)
 
 
 from scipy import stats
@@ -969,7 +973,7 @@ class StatisticsPhaseJob:
                     aucs.append(roc_auc)
 
                 if recall.size > 0 and prec.size > 0:
-                    precs.append(np.interp(mean_recall, recall, prec))
+                    precs.append(interpolate_prc_curve(mean_recall, recall, prec))
                     praucs.append(prec_rec_auc)
                     aveprecs.append(ave_prec)
 
@@ -1179,7 +1183,7 @@ class StatisticsPhaseJob:
                     aucs.append(roc_auc)
 
                 if recall.size > 0 and prec.size > 0:
-                    precs.append(np.interp(mean_recall, recall, prec))
+                    precs.append(interpolate_prc_curve(mean_recall, recall, prec))
                     praucs.append(prec_rec_auc)
                     aveprecs.append(ave_prec)
 
@@ -1671,9 +1675,9 @@ class StatisticsPhaseJob:
                 rec = np.array(prc_data.get("recall", []), dtype=float)
                 if rec.size == 0 or prec.size == 0:
                     continue
-                sidx = np.argsort(rec)
-                rec_sorted = rec[sidx]
-                prec_sorted = prec[sidx]
+                rec_sorted, prec_sorted = prepare_prc_curve_for_interpolation(rec, prec)
+                if rec_sorted.size == 0 or prec_sorted.size == 0:
+                    continue
                 pinterp = np.interp(common_rec, rec_sorted, prec_sorted)
                 precs.append(pinterp)
                 pr_aucs.append(auc(rec_sorted, prec_sorted))

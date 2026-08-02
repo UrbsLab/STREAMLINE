@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from streamline.p6_modeling.utils.categorical import NATIVE_CATEGORICAL_MODELS_DEFAULT
+from streamline.p8_summary_statistics.utils.curve_utils import interpolate_prc_curve
 from streamline.utils.run_commands import RUN_COMMANDS_FILENAME, load_run_commands
 
 logger = logging.getLogger(__name__)
@@ -318,6 +319,12 @@ def _interp_sorted(x: Sequence[float], y: Sequence[float], x_new: Sequence[float
             t = (xv - x0) / (x1 - x0)
             out.append(y0 + t * (y1 - y0))
     return out
+
+
+def _interp_curve(curve_kind: str, x: Sequence[float], y: Sequence[float], x_new: Sequence[float]) -> List[float]:
+    if curve_kind == "prc":
+        return [float(value) for value in interpolate_prc_curve(x_new, x, y)]
+    return _interp_sorted(x, y, x_new)
 
 
 @dataclass
@@ -2346,7 +2353,7 @@ class ReportPhaseJob:
                 x_grid = _linspace(0.0, 1.0, 250)
                 interpolated: List[List[float]] = []
                 for _, sx, sy, _ in one_level:
-                    yi = _interp_sorted(sx, sy, x_grid)
+                    yi = _interp_curve(curve_kind, sx, sy, x_grid)
                     yi = [max(0.0, min(1.0, v)) for v in yi]
                     interpolated.append(yi)
                 if interpolated:
@@ -2385,7 +2392,7 @@ class ReportPhaseJob:
                 x_grid = _linspace(0.0, 1.0, 250)
                 interpolated: List[List[float]] = []
                 for _, sx, sy, _ in nested:
-                    yi = _interp_sorted(sx, sy, x_grid)
+                    yi = _interp_curve(curve_kind, sx, sy, x_grid)
                     yi = [max(0.0, min(1.0, v)) for v in yi]
                     interpolated.append(yi)
                 if interpolated:
@@ -2434,7 +2441,7 @@ class ReportPhaseJob:
             interpolated: List[List[float]] = []
             tags: List[str] = []
             for x, y, tag in curves:
-                yi = _interp_sorted(x, y, x_grid)
+                yi = _interp_curve(curve_kind, x, y, x_grid)
                 yi = [max(0.0, min(1.0, v)) for v in yi]
                 interpolated.append(yi)
                 if tag:
