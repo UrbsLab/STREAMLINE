@@ -2739,6 +2739,8 @@ class ReportPhaseJob:
             mean_rows.append(row)
 
         mean_columns = ["Algorithm"] + available_metrics
+        base_mean_rows = mean_rows[: len(ordered_algs)]
+        ensemble_mean_rows = mean_rows[len(ordered_algs) :]
 
         # Highlight best mean per metric with tie handling at 3 decimals.
         mean_highlight_cells: Set[Tuple[int, int]] = set()
@@ -2785,6 +2787,8 @@ class ReportPhaseJob:
             median_rows.append(row)
 
         median_columns = ["Algorithm"] + available_metrics
+        base_median_rows = median_rows[: len(ordered_algs)]
+        ensemble_median_rows = median_rows[len(ordered_algs) :]
         median_highlight_cells: Set[Tuple[int, int]] = set()
         for c_idx, metric in enumerate(available_metrics, start=1):
             scored: List[Tuple[int, float]] = []
@@ -2801,6 +2805,27 @@ class ReportPhaseJob:
                 if v == best_val:
                     median_highlight_cells.add((r_idx, c_idx))
 
+        def highlight_cells_for_rows(
+            rows_to_score: List[List[str]],
+            raw_values: Dict[str, Dict[str, float]],
+        ) -> List[Tuple[int, int]]:
+            highlight_cells: Set[Tuple[int, int]] = set()
+            for c_idx, metric in enumerate(available_metrics, start=1):
+                scored: List[Tuple[int, float]] = []
+                for r_idx, row in enumerate(rows_to_score, start=1):
+                    raw_name = row[0] if row else ""
+                    val = raw_values.get(raw_name, {}).get(metric)
+                    if val is not None:
+                        scored.append((r_idx, round(val, 3)))
+                if not scored:
+                    continue
+                higher = METRIC_DIRECTION_HIGHER_IS_BETTER.get(metric, True)
+                best_val = max(v for _, v in scored) if higher else min(v for _, v in scored)
+                for r_idx, v in scored:
+                    if v == best_val:
+                        highlight_cells.add((r_idx, c_idx))
+            return [(r, c) for r, c in sorted(highlight_cells)]
+
         return {
             "mean_columns": mean_columns,
             "mean_rows": mean_rows,
@@ -2810,6 +2835,18 @@ class ReportPhaseJob:
             "median_rows": median_rows,
             "median_highlight_cells": [(r, c) for r, c in sorted(median_highlight_cells)],
             "median_bold_cells": [(r, c) for r, c in sorted(median_highlight_cells)],
+            "model_mean_columns": mean_columns,
+            "model_mean_rows": base_mean_rows,
+            "model_mean_highlight_cells": highlight_cells_for_rows(base_mean_rows, raw_means),
+            "model_median_columns": median_columns,
+            "model_median_rows": base_median_rows,
+            "model_median_highlight_cells": highlight_cells_for_rows(base_median_rows, median_raw),
+            "ensemble_mean_columns": mean_columns,
+            "ensemble_mean_rows": ensemble_mean_rows,
+            "ensemble_mean_highlight_cells": highlight_cells_for_rows(ensemble_mean_rows, raw_means),
+            "ensemble_median_columns": median_columns,
+            "ensemble_median_rows": ensemble_median_rows,
+            "ensemble_median_highlight_cells": highlight_cells_for_rows(ensemble_median_rows, median_raw),
         }
 
     def _resolve_dataset_images(
@@ -3661,18 +3698,50 @@ class ReportPhaseJob:
                 + 1
             )
 
-    def _render_dataset_header(self, pdf: _StreamlinePDF, ds: Dict[str, Any], section_title: str):
+    def _render_dataset_header(
+        self,
+        pdf: _StreamlinePDF,
+        ds: Dict[str, Any],
+        section_title: str,
+        *,
+        primary: bool = False,
+    ):
         pdf.add_page()
-        pdf.set_font("Times", "B", 11)
-        _pdf_cell(pdf, 190, 6, section_title, border=1, align="L", new_line=True)
-        pdf.set_font("Times", "B", 10)
-        pdf.set_fill_color(235, 238, 242)
-        _pdf_cell(pdf, 190, 6.5, f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}", border=1, align="L", fill=True, new_line=True)
+        if primary:
+            pdf.set_font("Times", "B", 16)
+            pdf.set_fill_color(218, 226, 238)
+            _pdf_cell(
+                pdf,
+                190,
+                12.5,
+                f"{ds.get('dataset_id')}: {ds.get('dataset_name')}",
+                border=1,
+                align="L",
+                fill=True,
+                new_line=True,
+            )
+            pdf.set_font("Times", "B", 10)
+            _pdf_cell(pdf, 190, 6, section_title, border=1, align="L", new_line=True)
+        else:
+            pdf.set_font("Times", "B", 11)
+            _pdf_cell(pdf, 190, 6, section_title, border=1, align="L", new_line=True)
+            pdf.set_font("Times", "B", 9)
+            pdf.set_fill_color(235, 238, 242)
+            _pdf_cell(
+                pdf,
+                190,
+                5.5,
+                f"{ds.get('dataset_id')} | Dataset: {ds.get('dataset_name')}",
+                border=1,
+                align="L",
+                fill=True,
+                new_line=True,
+            )
         pdf.set_font("Times", "", 7.5)
         _pdf_cell(pdf, 190, 5, f"Dataset Path: {ds.get('dataset_path')}", border=1, align="L", new_line=True)
 
     def _render_dataset_eda_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
-        self._render_dataset_header(pdf, ds, "EDA and Feature Engineering")
+        self._render_dataset_header(pdf, ds, "EDA and Feature Engineering", primary=True)
         y_start = 34.0
 
         uv = ds.get("tables", {}).get("univariate_top10", {})
@@ -3885,23 +3954,23 @@ class ReportPhaseJob:
         self._render_dataset_header(pdf, ds, self.performance_page_title())
         perf = ds.get("performance", {})
         figs = ds.get("figures", {})
-        mean_cols = perf.get("mean_columns", [])
-        mean_rows = perf.get("mean_rows", [])
+        mean_cols = perf.get("model_mean_columns", perf.get("mean_columns", []))
+        mean_rows = perf.get("model_mean_rows", perf.get("mean_rows", []))
         mean_highlight = set(
             (int(r), int(c))
-            for r, c in perf.get("mean_highlight_cells", perf.get("mean_bold_cells", []))
+            for r, c in perf.get("model_mean_highlight_cells", perf.get("mean_highlight_cells", perf.get("mean_bold_cells", [])))
         )
-        med_cols = perf.get("median_columns", [])
-        med_rows = perf.get("median_rows", [])
+        med_cols = perf.get("model_median_columns", perf.get("median_columns", []))
+        med_rows = perf.get("model_median_rows", perf.get("median_rows", []))
         med_highlight = set(
             (int(r), int(c))
-            for r, c in perf.get("median_highlight_cells", perf.get("median_bold_cells", []))
+            for r, c in perf.get("model_median_highlight_cells", perf.get("median_highlight_cells", perf.get("median_bold_cells", [])))
         )
 
         y = 34.0
         pdf.set_xy(10, y)
         pdf.set_font("Times", "B", 9)
-        _pdf_cell(pdf, 190, 5, "Model and Ensemble Performance (Mean +/- SD; gray = best/tied metric)", border=1, align="L", new_line=True)
+        _pdf_cell(pdf, 190, 5, "Core Algorithm Performance (Mean +/- SD; gray = best/tied metric)", border=1, align="L", new_line=True)
         y = self._render_table(
             pdf,
             x=10,
@@ -3918,7 +3987,7 @@ class ReportPhaseJob:
         y += 2
         pdf.set_xy(10, y)
         pdf.set_font("Times", "B", 9)
-        _pdf_cell(pdf, 190, 5, "Model and Ensemble Performance (Median; gray = best/tied metric)", border=1, align="L", new_line=True)
+        _pdf_cell(pdf, 190, 5, "Core Algorithm Performance (Median; gray = best/tied metric)", border=1, align="L", new_line=True)
         y = self._render_table(
             pdf,
             x=10,
@@ -3932,50 +4001,122 @@ class ReportPhaseJob:
             max_first_col_width=46.0,
         )
 
-        y = max(y + 2, 178)
         metric = ds.get("performance_distribution_metric") or ""
         distribution_title = f"{metric} Distribution by Algorithm" if metric else "Performance Distribution by Algorithm"
-        composite_path = figs.get("composite_feature_scores")
         distribution_path = figs.get("performance_distribution")
 
-        if composite_path and distribution_path:
+        if distribution_path:
+            y = max(y + 3, 172)
+            if y > 214:
+                self._render_dataset_header(pdf, ds, f"{self.performance_page_title()} (continued)")
+                y = 34.0
+            self._draw_image_panel(
+                pdf,
+                x=10,
+                y=y,
+                w=190,
+                h=72,
+                title=distribution_title,
+                img_path=distribution_path,
+            )
+
+    def _render_composite_feature_importance_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        figs = ds.get("figures", {})
+        composite_path = figs.get("composite_feature_scores")
+        if not composite_path:
+            return
+        self._render_dataset_header(pdf, ds, "Composite Feature Importance")
+        self._draw_image_panel(
+            pdf,
+            x=10,
+            y=34,
+            w=190,
+            h=205,
+            title="Composite Permutation Feature Importance",
+            img_path=composite_path,
+        )
+
+    def _render_ensemble_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
+        perf = ds.get("performance", {})
+        figs = ds.get("figures", {})
+        mean_rows = perf.get("ensemble_mean_rows", [])
+        med_rows = perf.get("ensemble_median_rows", [])
+        has_ensemble_table = bool(mean_rows or med_rows)
+        has_ensemble_figures = bool(figs.get("ensembles_roc") or figs.get("ensembles_prc"))
+        if not has_ensemble_table and not has_ensemble_figures:
+            return
+
+        self._render_dataset_header(pdf, ds, "Ensemble Performance and Evaluation")
+        y = 34.0
+
+        mean_cols = perf.get("ensemble_mean_columns", [])
+        mean_highlight = set(
+            (int(r), int(c))
+            for r, c in perf.get("ensemble_mean_highlight_cells", [])
+        )
+        if mean_cols and mean_rows:
+            pdf.set_xy(10, y)
+            pdf.set_font("Times", "B", 9)
+            _pdf_cell(pdf, 190, 5, "Ensemble Performance (Mean +/- SD; gray = best/tied metric)", border=1, align="L", new_line=True)
+            y = self._render_table(
+                pdf,
+                x=10,
+                y=pdf.get_y(),
+                width=190,
+                columns=mean_cols,
+                rows=mean_rows,
+                font_size=5.7,
+                row_h=3.5,
+                shade_cells=mean_highlight,
+                max_first_col_width=52.0,
+            ) + 2
+
+        med_cols = perf.get("ensemble_median_columns", [])
+        med_highlight = set(
+            (int(r), int(c))
+            for r, c in perf.get("ensemble_median_highlight_cells", [])
+        )
+        if med_cols and med_rows:
+            pdf.set_xy(10, y)
+            pdf.set_font("Times", "B", 9)
+            _pdf_cell(pdf, 190, 5, "Ensemble Performance (Median; gray = best/tied metric)", border=1, align="L", new_line=True)
+            y = self._render_table(
+                pdf,
+                x=10,
+                y=pdf.get_y(),
+                width=190,
+                columns=med_cols,
+                rows=med_rows,
+                font_size=5.7,
+                row_h=3.5,
+                shade_cells=med_highlight,
+                max_first_col_width=52.0,
+            ) + 3
+
+        if ds.get("task_type") == "Regression":
+            return
+
+        if has_ensemble_figures:
+            if y > 140:
+                self._render_dataset_header(pdf, ds, "Ensemble Performance and Evaluation (continued)")
+                y = 34.0
             self._draw_image_panel(
                 pdf,
                 x=10,
                 y=y,
                 w=94,
-                h=78,
-                title="Permutation Feature Importance (Composite)",
-                img_path=composite_path,
+                h=112,
+                title="ROC Summary (Ensembles)",
+                img_path=figs.get("ensembles_roc"),
             )
             self._draw_image_panel(
                 pdf,
                 x=106,
                 y=y,
                 w=94,
-                h=78,
-                title=distribution_title,
-                img_path=distribution_path,
-            )
-        elif composite_path:
-            self._draw_image_panel(
-                pdf,
-                x=10,
-                y=y,
-                w=190,
-                h=78,
-                title="Permutation Feature Importance (Composite)",
-                img_path=composite_path,
-            )
-        else:
-            self._draw_image_panel(
-                pdf,
-                x=10,
-                y=y,
-                w=190,
-                h=78,
-                title=distribution_title,
-                img_path=distribution_path,
+                h=112,
+                title="PRC Summary (Ensembles)",
+                img_path=figs.get("ensembles_prc"),
             )
 
     def _render_evaluation_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
@@ -4018,7 +4159,7 @@ class ReportPhaseJob:
             x=10,
             y=34,
             w=94,
-            h=104,
+            h=126,
             title="ROC Summary (Base Models)",
             img_path=figs.get("models_roc"),
         )
@@ -4027,27 +4168,9 @@ class ReportPhaseJob:
             x=106,
             y=34,
             w=94,
-            h=104,
+            h=126,
             title="PRC Summary (Base Models)",
             img_path=figs.get("models_prc"),
-        )
-        self._draw_image_panel(
-            pdf,
-            x=10,
-            y=142,
-            w=94,
-            h=104,
-            title="ROC Summary (Ensembles)",
-            img_path=figs.get("ensembles_roc"),
-        )
-        self._draw_image_panel(
-            pdf,
-            x=106,
-            y=142,
-            w=94,
-            h=104,
-            title="PRC Summary (Ensembles)",
-            img_path=figs.get("ensembles_prc"),
         )
 
     def _render_runtime_page(self, pdf: _StreamlinePDF, ds: Dict[str, Any]):
@@ -4179,7 +4302,9 @@ class ReportPhaseJob:
             if not is_replication_report:
                 self._render_feature_learning_page(pdf, ds)
             self._render_performance_page(pdf, ds)
+            self._render_composite_feature_importance_page(pdf, ds)
             self._render_evaluation_page(pdf, ds)
+            self._render_ensemble_page(pdf, ds)
             self._render_runtime_page(pdf, ds)
 
         dc = report_data.get("dataset_comparisons", {})

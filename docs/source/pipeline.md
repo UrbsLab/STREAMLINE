@@ -189,17 +189,17 @@ debugging report content without parsing the PDF.
 from a `.cfg` file:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
-python run.py -c run_configs/uci_binary_hcc.cfg
+python run.py -c run_configs/local/uci_binary_hcc.cfg --dry_run
+python run.py -c run_configs/local/uci_binary_hcc.cfg
 ```
 
 Useful partial-run controls:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --start_at p4
-python run.py -c run_configs/uci_binary_hcc.cfg --stop_after p8
-python run.py -c run_configs/uci_binary_hcc.cfg --only p6,p8,p11
-python run.py -c run_configs/uci_binary_hcc.cfg --skip p3,p4
+python run.py -c run_configs/local/uci_binary_hcc.cfg --start_at p4
+python run.py -c run_configs/local/uci_binary_hcc.cfg --stop_after p8
+python run.py -c run_configs/local/uci_binary_hcc.cfg --only p6,p8,p11
+python run.py -c run_configs/local/uci_binary_hcc.cfg --skip p3,p4
 ```
 
 ## Saved Run Commands

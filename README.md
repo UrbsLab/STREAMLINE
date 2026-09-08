@@ -112,29 +112,32 @@ When `run_cluster = BashSLURM` or `run_cluster = BashLSF`, config-driven runs wa
 Dry-run a config to inspect the resolved phase calls:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
+python run.py -c run_configs/local/uci_binary_hcc.cfg --dry_run
 ```
 
 Run the configured pipeline:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg
+python run.py -c run_configs/local/uci_binary_hcc.cfg
 ```
 
 Useful controls:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --start_at p4
-python run.py -c run_configs/uci_binary_hcc.cfg --stop_after p8
-python run.py -c run_configs/uci_binary_hcc.cfg --only p6,p8,p11
-python run.py -c run_configs/uci_binary_hcc.cfg --skip p3,p4
+python run.py -c run_configs/local/uci_binary_hcc.cfg --start_at p4
+python run.py -c run_configs/local/uci_binary_hcc.cfg --stop_after p8
+python run.py -c run_configs/local/uci_binary_hcc.cfg --only p6,p8,p11
+python run.py -c run_configs/local/uci_binary_hcc.cfg --skip p3,p4
 ```
 
-Example configs are included for the three UCI demos:
+Example configs are included for the three UCI demos and are organized by run environment:
 
-- `run_configs/uci_binary_hcc.cfg`
-- `run_configs/uci_multiclass_student.cfg`
-- `run_configs/uci_regression_auto_mpg.cfg`
+- `run_configs/local/uci_binary_hcc.cfg`
+- `run_configs/local/uci_multiclass_student.cfg`
+- `run_configs/local/uci_regression_auto_mpg.cfg`
+- `run_configs/hpc/cedars_slurm_hcc.cfg`
+
+The original top-level demo configs are still kept for backward compatibility.
 
 Phase 10 runs only when replication paths are configured, unless it is explicitly enabled. Phase 7 is automatically skipped for continuous/regression runs because the current ensemble registry is classification-only.
 

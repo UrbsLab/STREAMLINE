@@ -16,7 +16,7 @@ settings, phase toggles, and phase-specific parameters in one editable file.
 | --- | --- |
 | Conference tutorial or first demo | Google Colab notebook |
 | Interactive local exploration | `STREAMLINE_Notebook.ipynb` |
-| Reproducible full pipeline run | `python run.py -c run_configs/<config>.cfg` |
+| Reproducible full pipeline run | `python run.py -c run_configs/local/<config>.cfg` |
 | Debugging one phase | Phase CLI command |
 | Faster local execution without Dask | `run_cluster = Parallel` |
 | Local Dask execution | `run_cluster = Local` |
@@ -48,20 +48,20 @@ or custom dataset is run.
 Dry-run a config first:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
+python run.py -c run_configs/local/uci_binary_hcc.cfg --dry_run
 ```
 
 Run a full binary demo:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg
+python run.py -c run_configs/local/uci_binary_hcc.cfg
 ```
 
 Run the multiclass and regression demos:
 
 ```bash
-python run.py -c run_configs/uci_multiclass_student.cfg
-python run.py -c run_configs/uci_regression_auto_mpg.cfg
+python run.py -c run_configs/local/uci_multiclass_student.cfg
+python run.py -c run_configs/local/uci_regression_auto_mpg.cfg
 ```
 
 The included configs are designed as reproducible examples. For a short
@@ -71,10 +71,10 @@ smaller modeling budget and shows plots by default.
 Partial-run examples:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --start_at p4
-python run.py -c run_configs/uci_binary_hcc.cfg --stop_after p8
-python run.py -c run_configs/uci_binary_hcc.cfg --only p6,p8,p11
-python run.py -c run_configs/uci_binary_hcc.cfg --skip p3,p4
+python run.py -c run_configs/local/uci_binary_hcc.cfg --start_at p4
+python run.py -c run_configs/local/uci_binary_hcc.cfg --stop_after p8
+python run.py -c run_configs/local/uci_binary_hcc.cfg --only p6,p8,p11
+python run.py -c run_configs/local/uci_binary_hcc.cfg --skip p3,p4
 ```
 
 ## Config File Layout
@@ -133,11 +133,14 @@ has finished writing `CVDatasets`. The wait can be adjusted with
 `Parallel` and Dask-backed runs show progress when `tqdm`/Dask progress support is
 available. Set `STREAMLINE_PROGRESS=0` to disable these progress displays.
 
-Use the included configs as templates:
+Use the included configs as templates. Local demo configs live in
+`run_configs/local/`, and scheduler/HPC templates live in `run_configs/hpc/`.
+The original top-level demo config paths are kept for backward compatibility.
 
-* `run_configs/uci_binary_hcc.cfg`
-* `run_configs/uci_multiclass_student.cfg`
-* `run_configs/uci_regression_auto_mpg.cfg`
+* `run_configs/local/uci_binary_hcc.cfg`
+* `run_configs/local/uci_multiclass_student.cfg`
+* `run_configs/local/uci_regression_auto_mpg.cfg`
+* `run_configs/hpc/cedars_slurm_hcc.cfg`
 
 ## Rerunning Phases
 

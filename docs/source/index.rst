@@ -80,8 +80,8 @@ For most users, the easiest local route is:
    conda create -n streamline python=3.11 pip
    conda activate streamline
    pip install -r requirements.txt
-   python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
-   python run.py -c run_configs/uci_binary_hcc.cfg
+   python run.py -c run_configs/local/uci_binary_hcc.cfg --dry_run
+   python run.py -c run_configs/local/uci_binary_hcc.cfg
 
 The notebooks expose the same major settings as the config files and are a
 better starting point for interactive tutorials, Colab demos, and custom data
