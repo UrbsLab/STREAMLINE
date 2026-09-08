@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Parameter JSON &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Output" href="output.html" />
+    <link rel="prev" title="Run Parameters" href="parameters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Model Parameter JSON</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expert-knowledge">Expert Knowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-file-examples">Config File Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cli-examples">CLI Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notebook-examples">Notebook Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#heros">HEROS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exstracs">ExSTraCS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-none">Using <code class="docutils literal notranslate"><span class="pre">None</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-mistakes">Common Mistakes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Model Parameter JSON</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/model_params_json.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="model-parameter-json">
+<h1>Model Parameter JSON<a class="headerlink" href="#model-parameter-json" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">model_params_json</span></code> lets Phase 6 pass model-specific settings into model
+wrappers. Use it when most STREAMLINE run settings can stay shared, but one
+model needs a specific constructor value.</p>
+<p>The parameter is named <code class="docutils literal notranslate"><span class="pre">model_params_json</span></code> in <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files, notebooks, and the
+Phase 6 CLI.</p>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">model_params_json</span></code> is a mapping from model ID to parameter overrides:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"MODEL_ID"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"parameter_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"parameter_value"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Model IDs are matched case-insensitively against the model wrapper
+<code class="docutils literal notranslate"><span class="pre">small_name</span></code> or full <code class="docutils literal notranslate"><span class="pre">model_name</span></code>. For example, <code class="docutils literal notranslate"><span class="pre">HEROS</span></code>, <code class="docutils literal notranslate"><span class="pre">heros</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">ExSTraCS</span></code> are accepted model keys.</p>
+<p>Use exact model wrapper parameter names. For constructor-controlled settings,
+such as HEROS and ExSTraCS hyperparameters, values must be present before the
+wrapper builds its Phase 6 parameter grid.</p>
+</section>
+<section id="expert-knowledge">
+<h2>Expert Knowledge<a class="headerlink" href="#expert-knowledge" title="Link to this heading"></a></h2>
+<p>Phase 6 automatically passes Phase 4 feature-importance scores into model
+wrappers that expose an expert-knowledge constructor parameter. ExSTraCS uses
+this through its <code class="docutils literal notranslate"><span class="pre">expert_knowledge</span></code> parameter.</p>
+<p>The score vector is loaded separately for each CV split and ordered to match
+the features in that CV training file after feature selection. STREAMLINE uses
+Relief-style scores first when available (<code class="docutils literal notranslate"><span class="pre">MultiSWRFDB</span></code>, <code class="docutils literal notranslate"><span class="pre">MultiSWRFDB*</span></code>,
+<code class="docutils literal notranslate"><span class="pre">MultiSURF</span></code>, <code class="docutils literal notranslate"><span class="pre">MultiSURF*</span></code>) and falls back to mutual information.</p>
+<p>You usually do not need to set <code class="docutils literal notranslate"><span class="pre">expert_knowledge</span></code> yourself. If you do supply
+it through <code class="docutils literal notranslate"><span class="pre">model_params_json</span></code>, your value takes precedence over the automatic
+Phase 4 score loading.</p>
+</section>
+<section id="config-file-examples">
+<h2>Config File Examples<a class="headerlink" href="#config-file-examples" title="Link to this heading"></a></h2>
+<p>In a <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> file, place <code class="docutils literal notranslate"><span class="pre">model_params_json</span></code> in the <code class="docutils literal notranslate"><span class="pre">[p6]</span></code> section:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[p6]</span>
+<span class="na">outcome_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Binary</span>
+<span class="na">models</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">HEROS,ExSTraCS</span>
+<span class="na">model_params_json = {"HEROS": {"iterations": 200000, "pop_size": 2000, "model_iterations": 1000, "model_pop_size": 200, "nu": 1}, "ExSTraCS": {"iterations": 200000, "N": 2000, "nu": 1, "rule_compaction"</span><span class="o">:</span><span class="w"> </span><span class="s">"QRF"</span><span class="na">}}</span>
+</pre></div>
+</div>
+<p>This runs HEROS and ExSTraCS with fixed values. It does not create a broad
+hyperparameter sweep because every supplied value is a single numeric or string
+value.</p>
+</section>
+<section id="cli-examples">
+<h2>CLI Examples<a class="headerlink" href="#cli-examples" title="Link to this heading"></a></h2>
+<p>For a direct Phase 6 CLI run, quote the parameter string:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_splits<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--models<span class="w"> </span>HEROS,ExSTraCS<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model_params_json<span class="w"> </span><span class="s1">'{"HEROS": {"pop_size": 2000, "model_pop_size": 200}, "ExSTraCS": {"N": 5000, "nu": 1}}'</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">None</span></code> when you want to restore a built-in candidate list for one
+parameter. This example searches only HEROS <code class="docutils literal notranslate"><span class="pre">pop_size</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_splits<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--models<span class="w"> </span>HEROS<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model_params_json<span class="w"> </span><span class="s1">'{"HEROS": {"pop_size": None}}'</span>
+</pre></div>
+</div>
+<p>You can combine fixed values and <code class="docutils literal notranslate"><span class="pre">None</span></code> in the same CLI value. This keeps
+HEROS mostly fixed while searching <code class="docutils literal notranslate"><span class="pre">pop_size</span></code>, and keeps ExSTraCS mostly fixed
+while searching <code class="docutils literal notranslate"><span class="pre">N</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_splits<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--models<span class="w"> </span>HEROS,ExSTraCS<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model_params_json<span class="w"> </span><span class="s1">'{"HEROS": {"iterations": 100000, "pop_size": None, "model_iterations": 500, "model_pop_size": 100, "nu": 1}, "ExSTraCS": {"iterations": 200000, "N": None, "nu": 1, "rule_compaction": "QRF"}}'</span>
+</pre></div>
+</div>
+<p>To run the built-in candidate sweep for every HEROS and ExSTraCS wrapper
+parameter, set each tunable parameter to <code class="docutils literal notranslate"><span class="pre">None</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_splits<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--models<span class="w"> </span>HEROS,ExSTraCS<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_trials<span class="w"> </span><span class="m">200</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--timeout<span class="w"> </span><span class="m">900</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model_params_json<span class="w"> </span><span class="s1">'{"HEROS": {"iterations": None, "pop_size": None, "model_iterations": None, "model_pop_size": None, "nu": None}, "ExSTraCS": {"iterations": None, "N": None, "nu": None, "rule_compaction": None}}'</span>
+</pre></div>
+</div>
+</section>
+<section id="notebook-examples">
+<h2>Notebook Examples<a class="headerlink" href="#notebook-examples" title="Link to this heading"></a></h2>
+<p>In a notebook parameter block, use a Python dictionary:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">P6_MODEL_PARAMS_JSON</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"HEROS"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">200000</span><span class="p">,</span>
+        <span class="s2">"pop_size"</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+        <span class="s2">"model_iterations"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="s2">"model_pop_size"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s2">"nu"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"ExSTraCS"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">200000</span><span class="p">,</span>
+        <span class="s2">"N"</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+        <span class="s2">"nu"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">"rule_compaction"</span><span class="p">:</span> <span class="s2">"QRF"</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">None</span></code> in notebooks when you want the built-in candidate list for a
+specific parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">P6_MODEL_PARAMS_JSON</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"HEROS"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"pop_size"</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="s2">"ExSTraCS"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"iterations"</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="heros">
+<h2>HEROS<a class="headerlink" href="#heros" title="Link to this heading"></a></h2>
+<p>HEROS uses these Phase 6 wrapper parameters:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head text-right"><p>Fixed default</p></th>
+<th class="head"><p>Candidate list when set to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iterations</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">100000</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[100000,</span> <span class="pre">200000,</span> <span class="pre">500000]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pop_size</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">1000</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[1000,</span> <span class="pre">2000,</span> <span class="pre">5000]</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_iterations</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">500</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[500,</span> <span class="pre">1000]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_pop_size</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">100</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[100,</span> <span class="pre">200]</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nu</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">10]</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Use <code class="docutils literal notranslate"><span class="pre">pop_size</span></code> for the top-level HEROS population size. Use
+<code class="docutils literal notranslate"><span class="pre">model_pop_size</span></code> for the internal model population size. HEROS does not use an
+<code class="docutils literal notranslate"><span class="pre">N</span></code> alias in STREAMLINE.</p>
+<p>Example fixed HEROS settings:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"HEROS"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"iterations"</span><span class="p">:</span><span class="w"> </span><span class="mi">200000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"pop_size"</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"model_iterations"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"model_pop_size"</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"nu"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Example HEROS run where only <code class="docutils literal notranslate"><span class="pre">pop_size</span></code> is searched:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">"HEROS"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+    <span class="s2">"pop_size"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"model_iterations"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="s2">"model_pop_size"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">"nu"</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="exstracs">
+<h2>ExSTraCS<a class="headerlink" href="#exstracs" title="Link to this heading"></a></h2>
+<p>ExSTraCS uses these Phase 6 wrapper parameters:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head text-right"><p>Fixed default</p></th>
+<th class="head"><p>Candidate list when set to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iterations</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">200000</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[100000,</span> <span class="pre">200000,</span> <span class="pre">500000]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">N</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">2000</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[1000,</span> <span class="pre">2000,</span> <span class="pre">5000]</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nu</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">10]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rule_compaction</span></code></p></td>
+<td class="text-right"><p><code class="docutils literal notranslate"><span class="pre">&quot;QRF&quot;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[None,</span> <span class="pre">&quot;QRF&quot;]</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>ExSTraCS uses <code class="docutils literal notranslate"><span class="pre">N</span></code> for population size. HEROS uses <code class="docutils literal notranslate"><span class="pre">pop_size</span></code>.</p>
+<p>When Phase 4 feature-importance results exist, STREAMLINE automatically passes
+CV-specific expert knowledge into ExSTraCS. Manual <code class="docutils literal notranslate"><span class="pre">expert_knowledge</span></code> values in
+<code class="docutils literal notranslate"><span class="pre">model_params_json</span></code> override the automatic Phase 4 scores.</p>
+<p>Example fixed ExSTraCS settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">"ExSTraCS"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">200000</span><span class="p">,</span>
+    <span class="s2">"N"</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="s2">"nu"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"rule_compaction"</span><span class="p">:</span> <span class="s2">"QRF"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Example ExSTraCS run where only <code class="docutils literal notranslate"><span class="pre">N</span></code> is searched:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">"ExSTraCS"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"iterations"</span><span class="p">:</span> <span class="mi">200000</span><span class="p">,</span>
+    <span class="s2">"N"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">"nu"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"rule_compaction"</span><span class="p">:</span> <span class="s2">"QRF"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="using-none">
+<h2>Using <code class="docutils literal notranslate"><span class="pre">None</span></code><a class="headerlink" href="#using-none" title="Link to this heading"></a></h2>
+<p>By default, HEROS and ExSTraCS use fixed single-value settings. This protects
+runs from accidentally launching expensive RBML hyperparameter searches.</p>
+<p>Passing <code class="docutils literal notranslate"><span class="pre">None</span></code> restores the built-in candidate list only for that parameter.
+If any model parameter has a candidate list with more than one value, Phase 6
+uses Optuna for that model within the configured <code class="docutils literal notranslate"><span class="pre">n_trials</span></code> and <code class="docutils literal notranslate"><span class="pre">timeout</span></code>
+budget.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model_params_json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">{"HEROS": {"pop_size": None}}</span>
+</pre></div>
+</div>
+<p>To sweep all built-in HEROS and ExSTraCS wrapper candidate lists from a
+<code class="docutils literal notranslate"><span class="pre">.cfg</span></code> file:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model_params_json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">{"HEROS": {"iterations": None, "pop_size": None, "model_iterations": None, "model_pop_size": None, "nu": None}, "ExSTraCS": {"iterations": None, "N": None, "nu": None, "rule_compaction": None}}</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>streamline.p6_modeling.p6_cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output_path<span class="w"> </span>out<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--experiment_name<span class="w"> </span>DemoBinary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--outcome_type<span class="w"> </span>Binary<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--n_splits<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--models<span class="w"> </span>HEROS<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model_params_json<span class="w"> </span><span class="s1">'{"HEROS": {"pop_size": None}}'</span>
+</pre></div>
+</div>
+<p>For notebook dictionaries:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">P6_MODEL_PARAMS_JSON</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"HEROS"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"pop_size"</span><span class="p">:</span> <span class="kc">None</span><span class="p">}}</span>
+</pre></div>
+</div>
+<p>To sweep all built-in HEROS and ExSTraCS wrapper candidate lists from a
+notebook:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">P6_MODEL_PARAMS_JSON</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"HEROS"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"iterations"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"pop_size"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"model_iterations"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"model_pop_size"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"nu"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"ExSTraCS"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"iterations"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"N"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"nu"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">"rule_compaction"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="common-mistakes">
+<h2>Common Mistakes<a class="headerlink" href="#common-mistakes" title="Link to this heading"></a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">model_params_json</span></code>, not <code class="docutils literal notranslate"><span class="pre">model_json_param</span></code>.</p>
+<p>Use HEROS <code class="docutils literal notranslate"><span class="pre">pop_size</span></code>, not <code class="docutils literal notranslate"><span class="pre">N</span></code>.</p>
+<p>Use ExSTraCS <code class="docutils literal notranslate"><span class="pre">N</span></code>, not <code class="docutils literal notranslate"><span class="pre">pop_size</span></code>.</p>
+<p>Use Python values such as <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">True</span></code>, and <code class="docutils literal notranslate"><span class="pre">False</span></code> in CLI strings, cfg
+files, and notebook dictionaries.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="parameters.html" class="btn btn-neutral float-left" title="Run Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

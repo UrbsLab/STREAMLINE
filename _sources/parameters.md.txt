@@ -1,0 +1,385 @@
+# Run Parameters
+
+STREAMLINE parameters can be supplied through `.cfg` files, notebooks, or phase
+CLI flags. The recommended full-pipeline path is the config runner:
+
+```bash
+python run.py -c run_configs/local/uci_binary_hcc.cfg --dry_run
+python run.py -c run_configs/local/uci_binary_hcc.cfg
+```
+
+The `.cfg` parameter names intentionally match the command-line names wherever
+possible. This page has two layers: a short set of essential parameters that
+most users need to set correctly, followed by a more exhaustive phase-by-phase
+reference. Essential parameters are repeated in the exhaustive reference so the
+reader can either skim from the top or look up a single phase later.
+
+Use these terms consistently when reading the tables:
+
+* **Task type** means the supervised learning problem: `Binary`, `Multiclass`,
+  or `Continuous`. This is controlled by `outcome_type`.
+* **Execution mode** means where jobs run: `Serial`, `Parallel`, `Local`,
+  `BashSLURM`, `BashLSF`, or a named Dask cluster. This is controlled by
+  `run_cluster`.
+* **Run path** means how STREAMLINE is launched: a notebook, the full config
+  runner, or an individual phase CLI.
+* **Report mode** means whether P11 creates a standard training/CV report or a
+  replication report.
+
+Later phases can load values saved by earlier phases in `metadata.pickle` and
+`run_commands.pickle`. When a default below says it comes from metadata, the
+owning phase is named where possible. For example, outcome labels, feature
+types, CV counts, and one-hot settings are saved by P1; imputation, scaling,
+and SMOTE settings are saved by P2; feature-learning settings are saved by P3;
+feature-importance settings are saved by P4; modeling settings are saved by P6.
+Explicit `.cfg` or CLI values override remembered values.
+
+## Essential Parameters To Run STREAMLINE
+
+These are the parameters most users should understand before starting a run.
+Start from one of the included files in `run_configs/local/` or
+`run_configs/hpc/`, change these values, and use `--dry_run` to inspect the
+resolved phase calls before launching a full analysis.
+
+### Every Config Run
+
+These parameters define the run itself. They belong in `[run]` for config files,
+or must be repeated on each individual phase CLI when running phases manually.
+
+| Parameter | Default value | Where to set it | Description |
+| --- | --- | --- | --- |
+| `output_path` | Required | `[run]`; every phase CLI | Parent folder where STREAMLINE writes the experiment output. |
+| `experiment_name` | Required | `[run]`; every phase CLI | Name of the experiment folder created under `output_path`. |
+| `outcome_label` | `Class` | `[run]`, `[p1]`; repeated by later phase CLIs when needed | Outcome column in the input data. P1 records it for later phases. |
+| `outcome_type` | P1 can infer; later phases should be explicit | `[run]`, `[p1]`, `[p6]`, `[p8]`, `[p9]`, `[p11]` | Task type: `Binary`, `Multiclass`, or `Continuous`. Set this explicitly for paper or benchmark runs. |
+| `instance_label` | `None` | `[run]`, `[p1]`; repeated by later phase CLIs when needed | Optional row identifier column. P1 records it and excludes it from modeling. |
+| `n_splits` | `10` | `[run]`; CV-aware phase CLIs | Number of cross-validation folds. Demo configs use `3` for speed. |
+| `run_cluster` | `Serial` | `[run]`; every phase CLI | Execution mode. Use `Parallel` for local joblib multiprocessing, `Local` for local Dask, or `BashSLURM`/`BashLSF` for scheduler submission. |
+| `random_state` | Phase-specific, often `None` or `0` | `[run]`; stochastic phase CLIs | Seed for reproducible CV partitioning, imputation/SMOTE, feature learning, modeling, and ensembles. |
+| `phase_order` | `p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11` | `[phases]` | Ordered list of phases for the config runner. |
+| `do_p1` through `do_p11` | `True` unless disabled | `[phases]` | Phase toggles. P10 also requires replication paths; P7 is skipped for continuous outcomes. |
+
+### Phase-Specific Essentials
+
+These parameters decide what data are analyzed, how features are handled, which
+models run, and which reports are produced. They are grouped by the phase that
+first uses or remembers them.
+
+| Parameter | Default value | Where to set it | Description |
+| --- | --- | --- | --- |
+| `data_path` | Required for P1 | `[p1]` | Folder containing one or more input `.csv`, `.tsv`, or `.txt` datasets. |
+| `categorical_features` | `None` | `[p1]` | Optional file listing categorical feature names. Recommended when feature types matter. |
+| `quantitative_features` | `None` | `[p1]` | Optional file listing quantitative feature names. Recommended with `categorical_features`. |
+| `ignore_features` | `None` | `[p1]` | Optional file or list of feature names to exclude before modeling. |
+| `partition_method` | `Stratified` | `[p1]` | CV strategy. Continuous outcomes are forced to `Random`. |
+| `one_hot_encoding` | `True` | `[p1]` | Expand non-binary categorical features in P1. If `False`, P6 only allows native-categorical models unless that guard is disabled. |
+| `scale_data` | P2 remembered value, fallback `True` | `[p2]`, `[p8]` | Applies scaling in P2 and records whether scaled data was used in summary/reporting. |
+| `impute_data` | P2 remembered value, fallback `True` | `[p2]` | Enables missing-value imputation for CV train/test folds. |
+| `smote` | P2 remembered value, fallback `False` | `[p2]` | Enables classification-only training-fold oversampling after imputation and scaling. |
+| `models` | All available non-excluded P6 models | `[p6]` | Model IDs to train, such as `NB,LR,DT,RF,CGB,HEROS,ExSTraCS`. Demo configs use small model lists for speed. |
+| `model_params_json` | `None` | `[p6]` | Optional JSON or Python-literal dictionary of model-specific overrides. See [Model Parameter JSON](model_params_json.md). |
+| `scoring_metric` | `balanced_accuracy` | `[p6]`, `[p8]` | Primary modeling/evaluation metric. Use `explained_variance` for regression unless intentionally changing the regression metric. |
+| `metric_direction` | `maximize` | `[p6]` | Optuna optimization direction. Use `minimize` only for loss/error metrics where lower is better. |
+| `n_trials` | `200` | `[p6]` | Maximum Optuna trials per model/CV job. |
+| `timeout` | `900` | `[p6]` | Maximum Optuna time budget in seconds per model/CV job. |
+| `training_subsample` | `0` | `[p6]` | Optional cap on training rows for models that explicitly allow subsampling. `0` disables it. |
+| `skip_completed_models` | `False` | `[p6]` | When `True`, P6 runs only missing or failed model/CV jobs. Default behavior reruns requested model jobs and overwrites artifacts. |
+| `rep_data_path` | Required for P10 | `[p10]` | Folder containing replication/external-validation datasets. |
+| `dataset_for_rep` | Required for P10 | `[p10]` | Original training dataset path used to identify the trained dataset output folder. |
+| `report_modes` | `standard` for P11; demo configs use `standard,replication` | `[p11]` | Report types generated by the config runner. |
+
+CLI-only controls are prefixed with `--` in the exhaustive reference. They are
+not written into `.cfg` files. Use them to choose a config file, dry-run a
+config, run only part of the phase order, list registry methods, or control
+saved run-command reuse.
+
+### Config Template Folders
+
+The `run_configs/` directory is organized by execution environment:
+
+| Folder | Use case | Included examples |
+| --- | --- | --- |
+| `run_configs/local/` | Local serial, local joblib `Parallel`, and local Dask `Local` runs. | Binary HCC, multiclass student dropout, and regression Auto MPG demo configs. |
+| `run_configs/hpc/` | Scheduler-oriented templates that use `BashSLURM`, `BashLSF`, or site-specific cluster settings. | `cedars_slurm_hcc.cfg` as a Cedars/SLURM starting point. |
+
+The original top-level demo configs are still kept for backward compatibility,
+but new examples should point users to the environment-specific subfolders.
+
+## Full Parameter Reference By Phase
+
+Defaults below are the current runner defaults when a parameter is omitted.
+Where noted, later phases may load the value from experiment metadata saved by
+earlier phases.
+
+### Shared Run Parameters
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `output_path` | Required | Parent folder for experiment outputs. |
+| `experiment_name` | Required | Experiment folder name under `output_path`. |
+| `outcome_label` | `Class` | Outcome column. Passed to P1 and reused by modeling, evaluation, comparison, replication, and reporting. |
+| `outcome_type` | `None` in P1; later phases use metadata when possible | Learning task type: `Binary`, `Multiclass`, or `Continuous`. |
+| `instance_label` | `None` | Optional row identifier column. |
+| `n_splits` | `10` | Number of CV folds for CV-aware phases. |
+| `run_cluster` | `Serial` | Execution mode. `Parallel` uses local joblib multiprocessing; `Local` uses a local Dask cluster; `BashSLURM` and `BashLSF` submit scheduler scripts. |
+| `queue` | `defq` | Scheduler queue/partition for BashSLURM, BashLSF, or named cluster execution. |
+| `reserved_memory` | `4` | Memory request in GB for submitted cluster jobs. |
+| `random_state` | `None` in P1 and P6; metadata or `0` in several later phases | Seed for stochastic steps. Set explicitly for reproducible paper runs. |
+| `wait_for_cluster_completion` | `True` for BashSLURM/BashLSF config runs | Makes the config runner wait for submitted cluster jobs to write completion markers before starting the next phase. |
+| `cluster_phase_timeout` | `86400` | Maximum seconds to wait for a submitted cluster phase. |
+| `cluster_phase_poll_interval` | `30` | Seconds between completion-marker checks for submitted cluster phases. |
+
+### Config Runner Controls
+
+These are command-line controls for `python run.py -c ...`, not `.cfg` keys.
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `--config`, `-c` | Required | Path to a STREAMLINE `.cfg` or `.ini` file. |
+| `--dry_run` | `False` | Print resolved phase runner calls without running phases. |
+| `--start_at` | `None` | Start at a phase alias such as `p4` or `p6_modeling`. |
+| `--stop_after` | `None` | Stop after a phase alias such as `p8` or `p11`. |
+| `--only` | `None` | Run only a comma-separated set of phase aliases. |
+| `--skip` | `None` | Skip a comma-separated set of phase aliases. |
+| `--log_level` | `INFO` | Python logging level for the config runner. |
+
+### Phase Toggles
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `phase_order` | `p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11` | Phase order used by the config runner. |
+| `do_p1` | `True` | Run P1 data exploration and processing. |
+| `do_p2` | `True` | Run P2 imputation, scaling, and optional SMOTE. |
+| `do_p3` | `True` | Run P3 feature learning. |
+| `do_p4` | `True` | Run P4 feature importance. |
+| `do_p5` | `True` | Run P5 feature selection. |
+| `do_p6` | `True` | Run P6 modeling. |
+| `do_p7` | `True` | Run P7 ensembles. P7 is skipped automatically for continuous outcomes. |
+| `do_p8` | `True` | Run P8 summary statistics and plots. |
+| `do_p9` | `True` | Run P9 dataset comparison. P9 skips itself when fewer than two datasets are available. |
+| `do_p10` | `True` when replication paths are configured | Run P10 replication or external validation. |
+| `do_p11` | `True` | Run P11 reporting. |
+| `enabled` | `True` | Per-phase override for disabling an individual phase section, commonly used as `enabled = False` in `[p7]` for regression configs. |
+| `do_all` | Not set | Old-style broad toggle that enables or disables all phases when present. |
+| `do_till_report` | Not set | Old-style broad toggle for running phases through the standard report path. |
+
+### P1 Data Process
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `data_path` | Required | Folder containing raw input datasets, or omitted only when importing prebuilt CV datasets. |
+| `exclude_eda_output` | `None` | Optional list of EDA outputs to skip, such as `describe_csv` or `correlation`. |
+| `match_label` | `None` | Optional column label used when matching or harmonizing datasets. |
+| `ignore_features` | `None` | Optional file or list of feature names to exclude. |
+| `categorical_features` | `None` | Optional feature-name file for categorical variables. |
+| `quantitative_features` | `None` | Optional feature-name file for quantitative variables. |
+| `top_features` | `20` | Number of top features shown in applicable P1 summaries. |
+| `categorical_cutoff` | `10` | If feature-type files are absent, features with at most this many unique values may be treated as categorical. |
+| `sig_cutoff` | `0.05` | Statistical significance threshold used in P1 analyses. |
+| `featureeng_missingness` | `0.5` | Missingness threshold for creating missingness indicator features. |
+| `cleaning_missingness` | `0.5` | Missingness threshold for removing high-missingness features or instances. |
+| `correlation_removal_threshold` | `1.0` | Correlation threshold for removing highly correlated features. `1.0` effectively disables correlation removal. |
+| `partition_method` | `Stratified` | CV partitioning strategy. Continuous outcomes are forced to `Random`. |
+| `show_plots` | `False` | Display P1 plots interactively. Usually `False` for batch runs. |
+| `one_hot_encoding` | `True` | Expand non-binary categorical features during P1 processing. |
+| `cv_provided` | `False` | Import existing CV train/test files instead of creating CV splits from raw datasets. |
+| `cv_input_root` | `None` | Root folder containing prebuilt `<dataset>/CVDatasets` folders when `cv_provided=True`. |
+| `enable_plots` | `False` | Master toggle for optional P1 plot generation. |
+| `plot_missingness` | `False` | Generate missingness plots. |
+| `plot_class_counts` | `False` | Generate outcome/class count plots. |
+| `plot_correlation` | `False` | Generate correlation plots. |
+| `correlation_plot_max_features` | `200` | Maximum number of features included in correlation plots. |
+| `plot_univariate` | `False` | Generate univariate feature analysis plots. |
+| `univariate_top_k` | `20` | Number of top univariate features to display. |
+| `plot_anomalies` | `False` | Generate anomaly/outlier plots when available. |
+| `force` | `False` | Overwrite existing P1 outputs. Demo configs set this to `True` for easy reruns. |
+
+### P2 Impute, Scale, And Balance
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `scale_data` | P2 saved metadata, fallback `True` | Scale features using the selected scaler. |
+| `impute_data` | P2 saved metadata, fallback `True` | Impute missing feature values. |
+| `multi_impute` | P2 saved metadata, fallback `False` | Use multivariate imputation for quantitative features when supported. |
+| `overwrite_cv` | `True` | Rewrite CV train/test files with P2 outputs. |
+| `outcome_label` | P1 saved metadata, fallback `Class` | Outcome column. |
+| `outcome_type` | P1 saved metadata, fallback `None` | Learning task type. |
+| `instance_label` | P1 saved metadata, fallback `None` | Optional row identifier column. |
+| `random_state` | P1/P2 saved metadata, fallback `0` | Seed for stochastic imputers or SMOTE. |
+| `imputer_id` | P2 saved metadata, fallback `None` | Registry imputer ID. `None` uses the phase default. |
+| `imputer_params` | P2 saved metadata, fallback `{}` | Dictionary of imputer parameters. |
+| `scaler_id` | P2 saved metadata, fallback `None` | Registry scaler ID. `None` uses the phase default. |
+| `scaler_params` | P2 saved metadata, fallback `{}` | Dictionary of scaler parameters. |
+| `smote` | P2 saved metadata, fallback `False` | Apply classification-only oversampling to training folds after imputation and scaling. |
+| `smote_method` | P2 saved metadata, fallback `auto` | `auto`, `smote`, or `smotenc`. `auto` uses SMOTENC when categorical features are present. |
+| `smote_sampling_strategy` | P2 saved metadata, fallback `auto` | Sampling strategy passed to imbalanced-learn. |
+| `smote_k_neighbors` | P2 saved metadata, fallback `5` | Neighbor count passed to SMOTE or SMOTENC. |
+| `--list-imputers` | `False` | CLI-only utility: list discovered imputer registry IDs and exit. |
+| `--list-scalers` | `False` | CLI-only utility: list discovered scaler registry IDs and exit. |
+
+### P3 Feature Learning
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `learner_id` | P3 saved metadata, fallback `pca` | Feature learner registry ID. |
+| `learner_params` | P3 saved metadata, fallback `{}` | Dictionary of learner parameters. |
+| `feature_namespace` | P3 saved metadata, fallback `FL_PCA` | Prefix/namespace for learned feature names. |
+| `keep_original_features` | P3 saved metadata, fallback `True` | Keep original features alongside learned features. |
+| `overwrite_cv` | `True` | Rewrite CV train/test files with P3 outputs. |
+| `outcome_label` | P1 saved metadata, fallback `Class` | Outcome column. |
+| `instance_label` | P1 saved metadata, fallback `None` | Optional row identifier column. |
+| `random_state` | P1/P3 saved metadata, fallback `0` | Seed for stochastic learners. |
+| `--list-learners` | `False` | CLI-only utility: list discovered feature-learning registry IDs and exit. |
+
+### P4 Feature Importance
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `models` | P4 saved metadata, fallback all registered FI methods | Feature-importance methods to run, such as `mutualinformation,multiswrfdb`. |
+| `models_params` | P4 saved metadata, fallback ReBATE `n_jobs=1` defaults where applicable | Per-method parameter dictionary. STREAMLINE injects saved categorical feature indexes for ReBATE methods. |
+| `top_k` | P4 saved metadata, fallback `None` | Optional top-k selector control for model-specific selected outputs. |
+| `threshold` | P4 saved metadata, fallback `None` | Optional score threshold for model-specific selected outputs. |
+| `keep_original_features` | P4 saved metadata, fallback `False` | Keep original features in selected-output artifacts when generated. |
+| `overwrite_cv` | `True` | Overwrite P4 model-specific outputs. Shared CV files are not mutated by P4. |
+| `outcome_label` | P1 saved metadata, fallback `Class` | Outcome column. |
+| `outcome_type` | P1 saved metadata, fallback `None` | Learning task type passed to compatible FI methods. |
+| `instance_label` | P1 saved metadata, fallback `None` | Optional row identifier column. |
+| `random_state` | P1/P4 saved metadata, fallback `0` | Seed for stochastic FI methods. |
+| `instance_subset` | P4 saved metadata, fallback `None` | Optional row cap for expensive FI methods. No subsampling is used when `None`. |
+| `--list-models` | `False` | CLI-only utility: list discovered feature-importance methods and exit. |
+
+### P5 Feature Selection
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `algorithms` | `auto` | FI algorithms considered by the selector. `auto` discovers completed P4 outputs. |
+| `n_splits` | `10` | Number of CV folds expected in FI outputs. Usually inherited from `[run]`. |
+| `outcome_label` | P1 saved metadata, fallback `Class` | Outcome column. |
+| `instance_label` | P1 saved metadata, fallback `None` | Optional row identifier column. |
+| `max_features_to_keep` | `2000` | Upper bound on selected features after combining FI rankings. |
+| `filter_poor_features` | `True` | Remove features with consistently poor or zero FI evidence. |
+| `overwrite_cv` | `False` | Overwrite P5 selected CV outputs. |
+| `selector_id` | `default` | Feature selector registry ID. |
+| `selector_params` | `{}` | Dictionary of selector parameters. |
+| `export_scores` | `True` | Write feature-selection score summaries. |
+| `top_features` | `20` | Number of top features shown in P5 plots/summaries. |
+| `show_plots` | `False` | Display P5 plots interactively. |
+| `strict_discovery` | `False` | Require all expected CV FI files for an algorithm during `auto` discovery. |
+| `--list-algorithms` | `False` | CLI-only utility: list available/discovered FI algorithms and exit. |
+
+### P6 Modeling
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `outcome_type` | `None`; resolved from `model_type`, otherwise `Binary` | Modeling task: `Binary`, `Multiclass`, or `Continuous`. The config runner fills this from `[run]` when available. |
+| `model_type` | `None` | Backward-compatible alias for `outcome_type`; prefer `outcome_type` in new configs. |
+| `models` | All available non-excluded models for the task | Model registry IDs. eLCS is excluded from default discovery. |
+| `model_params_json` | `None` | Optional JSON or Python-literal mapping of model IDs to parameter overrides. See [Model Parameter JSON](model_params_json.md). |
+| `calibrate` | `False` | Enable probability calibration for classification models. |
+| `calibrate_method` | `sigmoid` | Calibration method, usually `sigmoid` or `isotonic`. |
+| `calibrate_cv` | `5` | Internal CV folds used for calibration. |
+| `scoring_metric` | `balanced_accuracy` | Optuna/evaluation metric. Regression configs should use a regression metric such as `explained_variance`. |
+| `metric_direction` | `maximize` | Optuna optimization direction. |
+| `n_trials` | `200` | Maximum Optuna trials per model/CV job. |
+| `timeout` | `900` | Maximum Optuna seconds per model/CV job. |
+| `training_subsample` | `0` | Optional training subset size for models with `subsampling_allowed=True`; `0` disables subsampling. |
+| `uniform_fi` | `False` | Use uniform permutation FI handling when supported. |
+| `save_plot` | `False` | Save model-level plots generated during modeling. |
+| `skip_completed_models` | `False` | When `True`, run only failed or missing model/CV jobs. When `False`, rerun requested jobs and overwrite artifacts. |
+| `bypass_one_hot_for_native_models` | `True` | Allow the native categorical model path when P1 was run with `one_hot_encoding=False`. |
+| `native_categorical_models` | `CGB,ExSTraCS` | Allowed native-categorical model IDs when one-hot encoding is bypassed. |
+| `--list_models` | `False` | CLI-only utility: list default model IDs for the selected task and exit. |
+| `--list_models_all` | `False` | CLI-only utility: list all registered model IDs for all tasks and exit. |
+
+P6 records Optuna trial accounting in model outputs so reports can show how
+many trials actually ran within the requested budget.
+
+By default, P6 reruns the requested model/CV jobs and overwrites existing model
+artifacts. Use `skip_completed_models = True` in a config file, or
+`--skip_completed_models 1` on the P6 CLI, when you want recovery behavior that
+skips completed `job_model_*` markers and runs only failed or missing jobs.
+
+### P7 Ensembles
+
+P7 is classification-only. The config runner skips P7 automatically for
+continuous outcomes.
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `ensembles` | `hard_voting,soft_voting,stack_lr` | Ensemble registry IDs. |
+| `base_models` | `None` | Base model predictions to combine. `None` lets P7 discover compatible model outputs. |
+| `meta_train_source` | `train` | Source for stacking meta-training data: `train` or `test`. |
+| `calibrate` | `False` | Enable calibration for ensemble probabilities when supported. |
+| `calibrate_method` | `sigmoid` | Calibration method, usually `sigmoid` or `isotonic`. |
+| `calibrate_cv` | `5` | Internal CV folds used for calibration. |
+| `random_state` | `0` | Seed for stochastic ensemble behavior. |
+| `--list_ensembles` | `False` | CLI-only utility: list ensemble registry IDs and exit. |
+
+### P8 Summary Statistics
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `outcome_type` | P1/P6 saved metadata, fallback `Binary` | Learning task used to choose classification or regression summaries. |
+| `scoring_metric` | `balanced_accuracy` | Primary metric label used in summaries. |
+| `metric_weight` | `balanced_accuracy` | Metric used to weight composite model FI plots. Continuous outcomes default to `explained_variance` if an incompatible metric is supplied. |
+| `top_features` | `40` | Number of top features shown in composite FI visualizations. |
+| `sig_cutoff` | `0.05` | Statistical significance threshold for comparisons. |
+| `scale_data` | `True` | Metadata/reporting flag indicating whether scaled data are being summarized. |
+| `exclude_plots` | `None` or empty string | Comma-separated plots to skip, such as `plot_ROC,plot_PRC,plot_FI_box,plot_metric_boxplots`. |
+| `show_plots` | `False` | Display P8 plots interactively. |
+| `include_ensembles` | `True` | Include P7 ensemble outputs in summaries when present. |
+| `multiclass_average` | `micro` | Multiclass averaging mode for ROC/PRC summaries: `micro` or `macro`. |
+
+### P9 Compare Datasets
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `outcome_label` | `Class` | Outcome column. |
+| `outcome_type` | `Binary` | Learning task type. |
+| `instance_label` | `None` | Optional row identifier column. |
+| `sig_cutoff` | `0.05` | Statistical significance threshold for between-dataset comparisons. |
+| `show_plots` | `False` | Display P9 plots interactively. |
+
+P9 compares datasets within the same experiment and writes a skipped marker when
+fewer than two dataset folders with `CVDatasets/` are present.
+
+### P10 Replication
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `rep_data_path` | Required | Folder containing external replication datasets. |
+| `dataset_for_rep` | Required | Original training dataset path used to identify the trained dataset output folder. |
+| `outcome_label` | P1 saved metadata | Optional override for the outcome column. |
+| `instance_label` | P1 saved metadata | Optional override for the row identifier column. |
+| `match_label` | `None` | Optional label used to match or harmonize replication inputs. |
+| `exclude_plots` | `None` | Comma-separated plots to skip, such as `plot_ROC`, `plot_PRC`, `plot_metric_boxplots`, `plot_FI_box`, or `feature_correlations`. |
+| `show_plots` | `False` | Display replication plots interactively. |
+
+### P11 Reporting
+
+| Parameter | Default value | Description |
+| --- | --- | --- |
+| `experiment_path` | Required unless `output_path` and `experiment_name` are provided | Direct path to the experiment output folder. |
+| `output_path` | Required unless `experiment_path` is provided | Parent output folder. |
+| `experiment_name` | Required unless `experiment_path` is provided | Experiment folder name. |
+| `reporting_dir` | `None` | Optional directory for report artifacts. `None` uses the standard experiment reporting folders. |
+| `report_modes` | `standard` in config runner unless set | Config-runner convenience parameter for generating multiple report modes, such as `standard,replication`. |
+| `report_mode` | `standard` | Single report mode: `standard` or `replication`. |
+| `outcome_label` | `Class` in runner, often loaded from metadata/report data | Outcome column used in report labels. |
+| `outcome_type` | `Binary` in runner, often loaded from metadata/report data | Learning task type used in report labels and metric filtering. |
+| `instance_label` | `None` | Optional row identifier column. |
+| `make_pdf` | `True` | Export a PDF report. |
+| `enable_plots` | `True` | Generate missing report plots when possible. |
+| `reuse_existing_figures` | `True` | Reuse existing report figure PNGs when available. Set to `False` to regenerate report figures. |
+
+### Saved Run Command Controls
+
+All phase CLIs support these run-command controls.
+
+| Flag | Default value | Description |
+| --- | --- | --- |
+| `--ignore_saved_run_command` | `False` | Ignore `run_commands.pickle` for this run. |
+| `--no_update_saved_run_command` | `False` | Do not update `run_commands.pickle` after the run. |
+
+Use these flags when you want to run a phase with explicit command-line values
+instead of reusing arguments saved from a previous run.

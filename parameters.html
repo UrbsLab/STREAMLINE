@@ -1,0 +1,1323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run Parameters &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Model Parameter JSON" href="model_params_json.html" />
+    <link rel="prev" title="Running STREAMLINE" href="running.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#essential-parameters-to-run-streamline">Essential Parameters To Run STREAMLINE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#every-config-run">Every Config Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#phase-specific-essentials">Phase-Specific Essentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#config-template-folders">Config Template Folders</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#full-parameter-reference-by-phase">Full Parameter Reference By Phase</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared-run-parameters">Shared Run Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#config-runner-controls">Config Runner Controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#phase-toggles">Phase Toggles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p1-data-process">P1 Data Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p2-impute-scale-and-balance">P2 Impute, Scale, And Balance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p3-feature-learning">P3 Feature Learning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p4-feature-importance">P4 Feature Importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p5-feature-selection">P5 Feature Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p6-modeling">P6 Modeling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p7-ensembles">P7 Ensembles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p8-summary-statistics">P8 Summary Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p9-compare-datasets">P9 Compare Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p10-replication">P10 Replication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#p11-reporting">P11 Reporting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#saved-run-command-controls">Saved Run Command Controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_params_json.html">Model Parameter JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Run Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/parameters.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="run-parameters">
+<h1>Run Parameters<a class="headerlink" href="#run-parameters" title="Link to this heading"></a></h1>
+<p>STREAMLINE parameters can be supplied through <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files, notebooks, or phase
+CLI flags. The recommended full-pipeline path is the config runner:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/local/uci_binary_hcc.cfg<span class="w"> </span>--dry_run
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/local/uci_binary_hcc.cfg
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> parameter names intentionally match the command-line names wherever
+possible. This page has two layers: a short set of essential parameters that
+most users need to set correctly, followed by a more exhaustive phase-by-phase
+reference. Essential parameters are repeated in the exhaustive reference so the
+reader can either skim from the top or look up a single phase later.</p>
+<p>Use these terms consistently when reading the tables:</p>
+<ul class="simple">
+<li><p><strong>Task type</strong> means the supervised learning problem: <code class="docutils literal notranslate"><span class="pre">Binary</span></code>, <code class="docutils literal notranslate"><span class="pre">Multiclass</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">Continuous</span></code>. This is controlled by <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code>.</p></li>
+<li><p><strong>Execution mode</strong> means where jobs run: <code class="docutils literal notranslate"><span class="pre">Serial</span></code>, <code class="docutils literal notranslate"><span class="pre">Parallel</span></code>, <code class="docutils literal notranslate"><span class="pre">Local</span></code>,
+<code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code>, <code class="docutils literal notranslate"><span class="pre">BashLSF</span></code>, or a named Dask cluster. This is controlled by
+<code class="docutils literal notranslate"><span class="pre">run_cluster</span></code>.</p></li>
+<li><p><strong>Run path</strong> means how STREAMLINE is launched: a notebook, the full config
+runner, or an individual phase CLI.</p></li>
+<li><p><strong>Report mode</strong> means whether P11 creates a standard training/CV report or a
+replication report.</p></li>
+</ul>
+<p>Later phases can load values saved by earlier phases in <code class="docutils literal notranslate"><span class="pre">metadata.pickle</span></code> and
+<code class="docutils literal notranslate"><span class="pre">run_commands.pickle</span></code>. When a default below says it comes from metadata, the
+owning phase is named where possible. For example, outcome labels, feature
+types, CV counts, and one-hot settings are saved by P1; imputation, scaling,
+and SMOTE settings are saved by P2; feature-learning settings are saved by P3;
+feature-importance settings are saved by P4; modeling settings are saved by P6.
+Explicit <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> or CLI values override remembered values.</p>
+<section id="essential-parameters-to-run-streamline">
+<h2>Essential Parameters To Run STREAMLINE<a class="headerlink" href="#essential-parameters-to-run-streamline" title="Link to this heading"></a></h2>
+<p>These are the parameters most users should understand before starting a run.
+Start from one of the included files in <code class="docutils literal notranslate"><span class="pre">run_configs/local/</span></code> or
+<code class="docutils literal notranslate"><span class="pre">run_configs/hpc/</span></code>, change these values, and use <code class="docutils literal notranslate"><span class="pre">--dry_run</span></code> to inspect the
+resolved phase calls before launching a full analysis.</p>
+<section id="every-config-run">
+<h3>Every Config Run<a class="headerlink" href="#every-config-run" title="Link to this heading"></a></h3>
+<p>These parameters define the run itself. They belong in <code class="docutils literal notranslate"><span class="pre">[run]</span></code> for config files,
+or must be repeated on each individual phase CLI when running phases manually.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Where to set it</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output_path</span></code></p></td>
+<td><p>Required</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>; every phase CLI</p></td>
+<td><p>Parent folder where STREAMLINE writes the experiment output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></p></td>
+<td><p>Required</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>; every phase CLI</p></td>
+<td><p>Name of the experiment folder created under <code class="docutils literal notranslate"><span class="pre">output_path</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p1]</span></code>; repeated by later phase CLIs when needed</p></td>
+<td><p>Outcome column in the input data. P1 records it for later phases.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p>P1 can infer; later phases should be explicit</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p1]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p6]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p8]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p9]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p11]</span></code></p></td>
+<td><p>Task type: <code class="docutils literal notranslate"><span class="pre">Binary</span></code>, <code class="docutils literal notranslate"><span class="pre">Multiclass</span></code>, or <code class="docutils literal notranslate"><span class="pre">Continuous</span></code>. Set this explicitly for paper or benchmark runs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p1]</span></code>; repeated by later phase CLIs when needed</p></td>
+<td><p>Optional row identifier column. P1 records it and excludes it from modeling.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_splits</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>; CV-aware phase CLIs</p></td>
+<td><p>Number of cross-validation folds. Demo configs use <code class="docutils literal notranslate"><span class="pre">3</span></code> for speed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">run_cluster</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Serial</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>; every phase CLI</p></td>
+<td><p>Execution mode. Use <code class="docutils literal notranslate"><span class="pre">Parallel</span></code> for local joblib multiprocessing, <code class="docutils literal notranslate"><span class="pre">Local</span></code> for local Dask, or <code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code>/<code class="docutils literal notranslate"><span class="pre">BashLSF</span></code> for scheduler submission.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p>Phase-specific, often <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[run]</span></code>; stochastic phase CLIs</p></td>
+<td><p>Seed for reproducible CV partitioning, imputation/SMOTE, feature learning, modeling, and ensembles.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">phase_order</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[phases]</span></code></p></td>
+<td><p>Ordered list of phases for the config runner.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p1</span></code> through <code class="docutils literal notranslate"><span class="pre">do_p11</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> unless disabled</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[phases]</span></code></p></td>
+<td><p>Phase toggles. P10 also requires replication paths; P7 is skipped for continuous outcomes.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="phase-specific-essentials">
+<h3>Phase-Specific Essentials<a class="headerlink" href="#phase-specific-essentials" title="Link to this heading"></a></h3>
+<p>These parameters decide what data are analyzed, how features are handled, which
+models run, and which reports are produced. They are grouped by the phase that
+first uses or remembers them.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Where to set it</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data_path</span></code></p></td>
+<td><p>Required for P1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p1]</span></code></p></td>
+<td><p>Folder containing one or more input <code class="docutils literal notranslate"><span class="pre">.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">.tsv</span></code>, or <code class="docutils literal notranslate"><span class="pre">.txt</span></code> datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">categorical_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p1]</span></code></p></td>
+<td><p>Optional file listing categorical feature names. Recommended when feature types matter.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">quantitative_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p1]</span></code></p></td>
+<td><p>Optional file listing quantitative feature names. Recommended with <code class="docutils literal notranslate"><span class="pre">categorical_features</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ignore_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p1]</span></code></p></td>
+<td><p>Optional file or list of feature names to exclude before modeling.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">partition_method</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Stratified</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p1]</span></code></p></td>
+<td><p>CV strategy. Continuous outcomes are forced to <code class="docutils literal notranslate"><span class="pre">Random</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">one_hot_encoding</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p1]</span></code></p></td>
+<td><p>Expand non-binary categorical features in P1. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, P6 only allows native-categorical models unless that guard is disabled.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scale_data</span></code></p></td>
+<td><p>P2 remembered value, fallback <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p2]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p8]</span></code></p></td>
+<td><p>Applies scaling in P2 and records whether scaled data was used in summary/reporting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">impute_data</span></code></p></td>
+<td><p>P2 remembered value, fallback <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p2]</span></code></p></td>
+<td><p>Enables missing-value imputation for CV train/test folds.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">smote</span></code></p></td>
+<td><p>P2 remembered value, fallback <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p2]</span></code></p></td>
+<td><p>Enables classification-only training-fold oversampling after imputation and scaling.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">models</span></code></p></td>
+<td><p>All available non-excluded P6 models</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>Model IDs to train, such as <code class="docutils literal notranslate"><span class="pre">NB,LR,DT,RF,CGB,HEROS,ExSTraCS</span></code>. Demo configs use small model lists for speed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_params_json</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>Optional JSON or Python-literal dictionary of model-specific overrides. See <a class="reference internal" href="model_params_json.html"><span class="std std-doc">Model Parameter JSON</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scoring_metric</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">balanced_accuracy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code>, <code class="docutils literal notranslate"><span class="pre">[p8]</span></code></p></td>
+<td><p>Primary modeling/evaluation metric. Use <code class="docutils literal notranslate"><span class="pre">explained_variance</span></code> for regression unless intentionally changing the regression metric.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metric_direction</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">maximize</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>Optuna optimization direction. Use <code class="docutils literal notranslate"><span class="pre">minimize</span></code> only for loss/error metrics where lower is better.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_trials</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>Maximum Optuna trials per model/CV job.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeout</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">900</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>Maximum Optuna time budget in seconds per model/CV job.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">training_subsample</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>Optional cap on training rows for models that explicitly allow subsampling. <code class="docutils literal notranslate"><span class="pre">0</span></code> disables it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip_completed_models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p6]</span></code></p></td>
+<td><p>When <code class="docutils literal notranslate"><span class="pre">True</span></code>, P6 runs only missing or failed model/CV jobs. Default behavior reruns requested model jobs and overwrites artifacts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rep_data_path</span></code></p></td>
+<td><p>Required for P10</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p10]</span></code></p></td>
+<td><p>Folder containing replication/external-validation datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dataset_for_rep</span></code></p></td>
+<td><p>Required for P10</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p10]</span></code></p></td>
+<td><p>Original training dataset path used to identify the trained dataset output folder.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">report_modes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">standard</span></code> for P11; demo configs use <code class="docutils literal notranslate"><span class="pre">standard,replication</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[p11]</span></code></p></td>
+<td><p>Report types generated by the config runner.</p></td>
+</tr>
+</tbody>
+</table>
+<p>CLI-only controls are prefixed with <code class="docutils literal notranslate"><span class="pre">--</span></code> in the exhaustive reference. They are
+not written into <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> files. Use them to choose a config file, dry-run a
+config, run only part of the phase order, list registry methods, or control
+saved run-command reuse.</p>
+</section>
+<section id="config-template-folders">
+<h3>Config Template Folders<a class="headerlink" href="#config-template-folders" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">run_configs/</span></code> directory is organized by execution environment:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Folder</p></th>
+<th class="head"><p>Use case</p></th>
+<th class="head"><p>Included examples</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">run_configs/local/</span></code></p></td>
+<td><p>Local serial, local joblib <code class="docutils literal notranslate"><span class="pre">Parallel</span></code>, and local Dask <code class="docutils literal notranslate"><span class="pre">Local</span></code> runs.</p></td>
+<td><p>Binary HCC, multiclass student dropout, and regression Auto MPG demo configs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">run_configs/hpc/</span></code></p></td>
+<td><p>Scheduler-oriented templates that use <code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code>, <code class="docutils literal notranslate"><span class="pre">BashLSF</span></code>, or site-specific cluster settings.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cedars_slurm_hcc.cfg</span></code> as a Cedars/SLURM starting point.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The original top-level demo configs are still kept for backward compatibility,
+but new examples should point users to the environment-specific subfolders.</p>
+</section>
+</section>
+<section id="full-parameter-reference-by-phase">
+<h2>Full Parameter Reference By Phase<a class="headerlink" href="#full-parameter-reference-by-phase" title="Link to this heading"></a></h2>
+<p>Defaults below are the current runner defaults when a parameter is omitted.
+Where noted, later phases may load the value from experiment metadata saved by
+earlier phases.</p>
+<section id="shared-run-parameters">
+<h3>Shared Run Parameters<a class="headerlink" href="#shared-run-parameters" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output_path</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Parent folder for experiment outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Experiment folder name under <code class="docutils literal notranslate"><span class="pre">output_path</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p>Outcome column. Passed to P1 and reused by modeling, evaluation, comparison, replication, and reporting.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> in P1; later phases use metadata when possible</p></td>
+<td><p>Learning task type: <code class="docutils literal notranslate"><span class="pre">Binary</span></code>, <code class="docutils literal notranslate"><span class="pre">Multiclass</span></code>, or <code class="docutils literal notranslate"><span class="pre">Continuous</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_splits</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p>Number of CV folds for CV-aware phases.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">run_cluster</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Serial</span></code></p></td>
+<td><p>Execution mode. <code class="docutils literal notranslate"><span class="pre">Parallel</span></code> uses local joblib multiprocessing; <code class="docutils literal notranslate"><span class="pre">Local</span></code> uses a local Dask cluster; <code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code> and <code class="docutils literal notranslate"><span class="pre">BashLSF</span></code> submit scheduler scripts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">queue</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">defq</span></code></p></td>
+<td><p>Scheduler queue/partition for BashSLURM, BashLSF, or named cluster execution.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
+<td><p>Memory request in GB for submitted cluster jobs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> in P1 and P6; metadata or <code class="docutils literal notranslate"><span class="pre">0</span></code> in several later phases</p></td>
+<td><p>Seed for stochastic steps. Set explicitly for reproducible paper runs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wait_for_cluster_completion</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> for BashSLURM/BashLSF config runs</p></td>
+<td><p>Makes the config runner wait for submitted cluster jobs to write completion markers before starting the next phase.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cluster_phase_timeout</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">86400</span></code></p></td>
+<td><p>Maximum seconds to wait for a submitted cluster phase.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cluster_phase_poll_interval</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">30</span></code></p></td>
+<td><p>Seconds between completion-marker checks for submitted cluster phases.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="config-runner-controls">
+<h3>Config Runner Controls<a class="headerlink" href="#config-runner-controls" title="Link to this heading"></a></h3>
+<p>These are command-line controls for <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run.py</span> <span class="pre">-c</span> <span class="pre">...</span></code>, not <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> keys.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--config</span></code>, <code class="docutils literal notranslate"><span class="pre">-c</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Path to a STREAMLINE <code class="docutils literal notranslate"><span class="pre">.cfg</span></code> or <code class="docutils literal notranslate"><span class="pre">.ini</span></code> file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--dry_run</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Print resolved phase runner calls without running phases.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--start_at</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Start at a phase alias such as <code class="docutils literal notranslate"><span class="pre">p4</span></code> or <code class="docutils literal notranslate"><span class="pre">p6_modeling</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--stop_after</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Stop after a phase alias such as <code class="docutils literal notranslate"><span class="pre">p8</span></code> or <code class="docutils literal notranslate"><span class="pre">p11</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--only</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Run only a comma-separated set of phase aliases.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--skip</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Skip a comma-separated set of phase aliases.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--log_level</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">INFO</span></code></p></td>
+<td><p>Python logging level for the config runner.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="phase-toggles">
+<h3>Phase Toggles<a class="headerlink" href="#phase-toggles" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">phase_order</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11</span></code></p></td>
+<td><p>Phase order used by the config runner.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P1 data exploration and processing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">do_p2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P2 imputation, scaling, and optional SMOTE.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P3 feature learning.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">do_p4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P4 feature importance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p5</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P5 feature selection.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">do_p6</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P6 modeling.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p7</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P7 ensembles. P7 is skipped automatically for continuous outcomes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">do_p8</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P8 summary statistics and plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p9</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P9 dataset comparison. P9 skips itself when fewer than two datasets are available.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">do_p10</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> when replication paths are configured</p></td>
+<td><p>Run P10 replication or external validation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_p11</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Run P11 reporting.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">enabled</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Per-phase override for disabling an individual phase section, commonly used as <code class="docutils literal notranslate"><span class="pre">enabled</span> <span class="pre">=</span> <span class="pre">False</span></code> in <code class="docutils literal notranslate"><span class="pre">[p7]</span></code> for regression configs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">do_all</span></code></p></td>
+<td><p>Not set</p></td>
+<td><p>Old-style broad toggle that enables or disables all phases when present.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">do_till_report</span></code></p></td>
+<td><p>Not set</p></td>
+<td><p>Old-style broad toggle for running phases through the standard report path.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p1-data-process">
+<h3>P1 Data Process<a class="headerlink" href="#p1-data-process" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data_path</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Folder containing raw input datasets, or omitted only when importing prebuilt CV datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exclude_eda_output</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional list of EDA outputs to skip, such as <code class="docutils literal notranslate"><span class="pre">describe_csv</span></code> or <code class="docutils literal notranslate"><span class="pre">correlation</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">match_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional column label used when matching or harmonizing datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ignore_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional file or list of feature names to exclude.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">categorical_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional feature-name file for categorical variables.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">quantitative_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional feature-name file for quantitative variables.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">top_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">20</span></code></p></td>
+<td><p>Number of top features shown in applicable P1 summaries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">categorical_cutoff</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p>If feature-type files are absent, features with at most this many unique values may be treated as categorical.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Statistical significance threshold used in P1 analyses.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">featureeng_missingness</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code></p></td>
+<td><p>Missingness threshold for creating missingness indicator features.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cleaning_missingness</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code></p></td>
+<td><p>Missingness threshold for removing high-missingness features or instances.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">correlation_removal_threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
+<td><p>Correlation threshold for removing highly correlated features. <code class="docutils literal notranslate"><span class="pre">1.0</span></code> effectively disables correlation removal.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">partition_method</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Stratified</span></code></p></td>
+<td><p>CV partitioning strategy. Continuous outcomes are forced to <code class="docutils literal notranslate"><span class="pre">Random</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">show_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Display P1 plots interactively. Usually <code class="docutils literal notranslate"><span class="pre">False</span></code> for batch runs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">one_hot_encoding</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Expand non-binary categorical features during P1 processing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cv_provided</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Import existing CV train/test files instead of creating CV splits from raw datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cv_input_root</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Root folder containing prebuilt <code class="docutils literal notranslate"><span class="pre">&lt;dataset&gt;/CVDatasets</span></code> folders when <code class="docutils literal notranslate"><span class="pre">cv_provided=True</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">enable_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Master toggle for optional P1 plot generation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plot_missingness</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Generate missingness plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">plot_class_counts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Generate outcome/class count plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plot_correlation</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Generate correlation plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">correlation_plot_max_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200</span></code></p></td>
+<td><p>Maximum number of features included in correlation plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plot_univariate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Generate univariate feature analysis plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">univariate_top_k</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">20</span></code></p></td>
+<td><p>Number of top univariate features to display.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plot_anomalies</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Generate anomaly/outlier plots when available.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">force</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Overwrite existing P1 outputs. Demo configs set this to <code class="docutils literal notranslate"><span class="pre">True</span></code> for easy reruns.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p2-impute-scale-and-balance">
+<h3>P2 Impute, Scale, And Balance<a class="headerlink" href="#p2-impute-scale-and-balance" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scale_data</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Scale features using the selected scaler.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">impute_data</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Impute missing feature values.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">multi_impute</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Use multivariate imputation for quantitative features when supported.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Rewrite CV train/test files with P2 outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p>Outcome column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Learning task type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p>P1/P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Seed for stochastic imputers or SMOTE.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">imputer_id</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Registry imputer ID. <code class="docutils literal notranslate"><span class="pre">None</span></code> uses the phase default.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">imputer_params</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">{}</span></code></p></td>
+<td><p>Dictionary of imputer parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scaler_id</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Registry scaler ID. <code class="docutils literal notranslate"><span class="pre">None</span></code> uses the phase default.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scaler_params</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">{}</span></code></p></td>
+<td><p>Dictionary of scaler parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">smote</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Apply classification-only oversampling to training folds after imputation and scaling.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">smote_method</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">auto</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auto</span></code>, <code class="docutils literal notranslate"><span class="pre">smote</span></code>, or <code class="docutils literal notranslate"><span class="pre">smotenc</span></code>. <code class="docutils literal notranslate"><span class="pre">auto</span></code> uses SMOTENC when categorical features are present.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">smote_sampling_strategy</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">auto</span></code></p></td>
+<td><p>Sampling strategy passed to imbalanced-learn.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">smote_k_neighbors</span></code></p></td>
+<td><p>P2 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">5</span></code></p></td>
+<td><p>Neighbor count passed to SMOTE or SMOTENC.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--list-imputers</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list discovered imputer registry IDs and exit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--list-scalers</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list discovered scaler registry IDs and exit.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p3-feature-learning">
+<h3>P3 Feature Learning<a class="headerlink" href="#p3-feature-learning" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">learner_id</span></code></p></td>
+<td><p>P3 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">pca</span></code></p></td>
+<td><p>Feature learner registry ID.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">learner_params</span></code></p></td>
+<td><p>P3 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">{}</span></code></p></td>
+<td><p>Dictionary of learner parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">feature_namespace</span></code></p></td>
+<td><p>P3 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">FL_PCA</span></code></p></td>
+<td><p>Prefix/namespace for learned feature names.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">keep_original_features</span></code></p></td>
+<td><p>P3 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Keep original features alongside learned features.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Rewrite CV train/test files with P3 outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p>Outcome column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p>P1/P3 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Seed for stochastic learners.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--list-learners</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list discovered feature-learning registry IDs and exit.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p4-feature-importance">
+<h3>P4 Feature Importance<a class="headerlink" href="#p4-feature-importance" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">models</span></code></p></td>
+<td><p>P4 saved metadata, fallback all registered FI methods</p></td>
+<td><p>Feature-importance methods to run, such as <code class="docutils literal notranslate"><span class="pre">mutualinformation,multiswrfdb</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">models_params</span></code></p></td>
+<td><p>P4 saved metadata, fallback ReBATE <code class="docutils literal notranslate"><span class="pre">n_jobs=1</span></code> defaults where applicable</p></td>
+<td><p>Per-method parameter dictionary. STREAMLINE injects saved categorical feature indexes for ReBATE methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">top_k</span></code></p></td>
+<td><p>P4 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional top-k selector control for model-specific selected outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p>P4 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional score threshold for model-specific selected outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">keep_original_features</span></code></p></td>
+<td><p>P4 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Keep original features in selected-output artifacts when generated.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Overwrite P4 model-specific outputs. Shared CV files are not mutated by P4.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p>Outcome column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Learning task type passed to compatible FI methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p>P1/P4 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Seed for stochastic FI methods.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_subset</span></code></p></td>
+<td><p>P4 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row cap for expensive FI methods. No subsampling is used when <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--list-models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list discovered feature-importance methods and exit.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p5-feature-selection">
+<h3>P5 Feature Selection<a class="headerlink" href="#p5-feature-selection" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auto</span></code></p></td>
+<td><p>FI algorithms considered by the selector. <code class="docutils literal notranslate"><span class="pre">auto</span></code> discovers completed P4 outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_splits</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p>Number of CV folds expected in FI outputs. Usually inherited from <code class="docutils literal notranslate"><span class="pre">[run]</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p>Outcome column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p>P1 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_features_to_keep</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2000</span></code></p></td>
+<td><p>Upper bound on selected features after combining FI rankings.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filter_poor_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Remove features with consistently poor or zero FI evidence.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">overwrite_cv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Overwrite P5 selected CV outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">selector_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">default</span></code></p></td>
+<td><p>Feature selector registry ID.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">selector_params</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{}</span></code></p></td>
+<td><p>Dictionary of selector parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">export_scores</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Write feature-selection score summaries.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">top_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">20</span></code></p></td>
+<td><p>Number of top features shown in P5 plots/summaries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">show_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Display P5 plots interactively.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">strict_discovery</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Require all expected CV FI files for an algorithm during <code class="docutils literal notranslate"><span class="pre">auto</span></code> discovery.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--list-algorithms</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list available/discovered FI algorithms and exit.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p6-modeling">
+<h3>P6 Modeling<a class="headerlink" href="#p6-modeling" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code>; resolved from <code class="docutils literal notranslate"><span class="pre">model_type</span></code>, otherwise <code class="docutils literal notranslate"><span class="pre">Binary</span></code></p></td>
+<td><p>Modeling task: <code class="docutils literal notranslate"><span class="pre">Binary</span></code>, <code class="docutils literal notranslate"><span class="pre">Multiclass</span></code>, or <code class="docutils literal notranslate"><span class="pre">Continuous</span></code>. The config runner fills this from <code class="docutils literal notranslate"><span class="pre">[run]</span></code> when available.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Backward-compatible alias for <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code>; prefer <code class="docutils literal notranslate"><span class="pre">outcome_type</span></code> in new configs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">models</span></code></p></td>
+<td><p>All available non-excluded models for the task</p></td>
+<td><p>Model registry IDs. eLCS is excluded from default discovery.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_params_json</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional JSON or Python-literal mapping of model IDs to parameter overrides. See <a class="reference internal" href="model_params_json.html"><span class="std std-doc">Model Parameter JSON</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calibrate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Enable probability calibration for classification models.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">calibrate_method</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sigmoid</span></code></p></td>
+<td><p>Calibration method, usually <code class="docutils literal notranslate"><span class="pre">sigmoid</span></code> or <code class="docutils literal notranslate"><span class="pre">isotonic</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calibrate_cv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5</span></code></p></td>
+<td><p>Internal CV folds used for calibration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scoring_metric</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">balanced_accuracy</span></code></p></td>
+<td><p>Optuna/evaluation metric. Regression configs should use a regression metric such as <code class="docutils literal notranslate"><span class="pre">explained_variance</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metric_direction</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">maximize</span></code></p></td>
+<td><p>Optuna optimization direction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_trials</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">200</span></code></p></td>
+<td><p>Maximum Optuna trials per model/CV job.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeout</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">900</span></code></p></td>
+<td><p>Maximum Optuna seconds per model/CV job.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">training_subsample</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Optional training subset size for models with <code class="docutils literal notranslate"><span class="pre">subsampling_allowed=True</span></code>; <code class="docutils literal notranslate"><span class="pre">0</span></code> disables subsampling.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">uniform_fi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Use uniform permutation FI handling when supported.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">save_plot</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Save model-level plots generated during modeling.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip_completed_models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>When <code class="docutils literal notranslate"><span class="pre">True</span></code>, run only failed or missing model/CV jobs. When <code class="docutils literal notranslate"><span class="pre">False</span></code>, rerun requested jobs and overwrite artifacts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bypass_one_hot_for_native_models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Allow the native categorical model path when P1 was run with <code class="docutils literal notranslate"><span class="pre">one_hot_encoding=False</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">native_categorical_models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CGB,ExSTraCS</span></code></p></td>
+<td><p>Allowed native-categorical model IDs when one-hot encoding is bypassed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--list_models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list default model IDs for the selected task and exit.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--list_models_all</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list all registered model IDs for all tasks and exit.</p></td>
+</tr>
+</tbody>
+</table>
+<p>P6 records Optuna trial accounting in model outputs so reports can show how
+many trials actually ran within the requested budget.</p>
+<p>By default, P6 reruns the requested model/CV jobs and overwrites existing model
+artifacts. Use <code class="docutils literal notranslate"><span class="pre">skip_completed_models</span> <span class="pre">=</span> <span class="pre">True</span></code> in a config file, or
+<code class="docutils literal notranslate"><span class="pre">--skip_completed_models</span> <span class="pre">1</span></code> on the P6 CLI, when you want recovery behavior that
+skips completed <code class="docutils literal notranslate"><span class="pre">job_model_*</span></code> markers and runs only failed or missing jobs.</p>
+</section>
+<section id="p7-ensembles">
+<h3>P7 Ensembles<a class="headerlink" href="#p7-ensembles" title="Link to this heading"></a></h3>
+<p>P7 is classification-only. The config runner skips P7 automatically for
+continuous outcomes.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ensembles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hard_voting,soft_voting,stack_lr</span></code></p></td>
+<td><p>Ensemble registry IDs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">base_models</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Base model predictions to combine. <code class="docutils literal notranslate"><span class="pre">None</span></code> lets P7 discover compatible model outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">meta_train_source</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">train</span></code></p></td>
+<td><p>Source for stacking meta-training data: <code class="docutils literal notranslate"><span class="pre">train</span></code> or <code class="docutils literal notranslate"><span class="pre">test</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">calibrate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Enable calibration for ensemble probabilities when supported.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calibrate_method</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sigmoid</span></code></p></td>
+<td><p>Calibration method, usually <code class="docutils literal notranslate"><span class="pre">sigmoid</span></code> or <code class="docutils literal notranslate"><span class="pre">isotonic</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">calibrate_cv</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5</span></code></p></td>
+<td><p>Internal CV folds used for calibration.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">random_state</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Seed for stochastic ensemble behavior.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--list_ensembles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>CLI-only utility: list ensemble registry IDs and exit.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p8-summary-statistics">
+<h3>P8 Summary Statistics<a class="headerlink" href="#p8-summary-statistics" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p>P1/P6 saved metadata, fallback <code class="docutils literal notranslate"><span class="pre">Binary</span></code></p></td>
+<td><p>Learning task used to choose classification or regression summaries.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scoring_metric</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">balanced_accuracy</span></code></p></td>
+<td><p>Primary metric label used in summaries.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">metric_weight</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">balanced_accuracy</span></code></p></td>
+<td><p>Metric used to weight composite model FI plots. Continuous outcomes default to <code class="docutils literal notranslate"><span class="pre">explained_variance</span></code> if an incompatible metric is supplied.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">top_features</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">40</span></code></p></td>
+<td><p>Number of top features shown in composite FI visualizations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Statistical significance threshold for comparisons.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scale_data</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Metadata/reporting flag indicating whether scaled data are being summarized.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">exclude_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> or empty string</p></td>
+<td><p>Comma-separated plots to skip, such as <code class="docutils literal notranslate"><span class="pre">plot_ROC,plot_PRC,plot_FI_box,plot_metric_boxplots</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">show_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Display P8 plots interactively.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">include_ensembles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Include P7 ensemble outputs in summaries when present.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">multiclass_average</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">micro</span></code></p></td>
+<td><p>Multiclass averaging mode for ROC/PRC summaries: <code class="docutils literal notranslate"><span class="pre">micro</span></code> or <code class="docutils literal notranslate"><span class="pre">macro</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p9-compare-datasets">
+<h3>P9 Compare Datasets<a class="headerlink" href="#p9-compare-datasets" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Class</span></code></p></td>
+<td><p>Outcome column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Binary</span></code></p></td>
+<td><p>Learning task type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sig_cutoff</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Statistical significance threshold for between-dataset comparisons.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">show_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Display P9 plots interactively.</p></td>
+</tr>
+</tbody>
+</table>
+<p>P9 compares datasets within the same experiment and writes a skipped marker when
+fewer than two dataset folders with <code class="docutils literal notranslate"><span class="pre">CVDatasets/</span></code> are present.</p>
+</section>
+<section id="p10-replication">
+<h3>P10 Replication<a class="headerlink" href="#p10-replication" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rep_data_path</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Folder containing external replication datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dataset_for_rep</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Original training dataset path used to identify the trained dataset output folder.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p>P1 saved metadata</p></td>
+<td><p>Optional override for the outcome column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p>P1 saved metadata</p></td>
+<td><p>Optional override for the row identifier column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">match_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional label used to match or harmonize replication inputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exclude_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Comma-separated plots to skip, such as <code class="docutils literal notranslate"><span class="pre">plot_ROC</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_PRC</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_metric_boxplots</span></code>, <code class="docutils literal notranslate"><span class="pre">plot_FI_box</span></code>, or <code class="docutils literal notranslate"><span class="pre">feature_correlations</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">show_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Display replication plots interactively.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="p11-reporting">
+<h3>P11 Reporting<a class="headerlink" href="#p11-reporting" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">experiment_path</span></code></p></td>
+<td><p>Required unless <code class="docutils literal notranslate"><span class="pre">output_path</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment_name</span></code> are provided</p></td>
+<td><p>Direct path to the experiment output folder.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output_path</span></code></p></td>
+<td><p>Required unless <code class="docutils literal notranslate"><span class="pre">experiment_path</span></code> is provided</p></td>
+<td><p>Parent output folder.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">experiment_name</span></code></p></td>
+<td><p>Required unless <code class="docutils literal notranslate"><span class="pre">experiment_path</span></code> is provided</p></td>
+<td><p>Experiment folder name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reporting_dir</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional directory for report artifacts. <code class="docutils literal notranslate"><span class="pre">None</span></code> uses the standard experiment reporting folders.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">report_modes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">standard</span></code> in config runner unless set</p></td>
+<td><p>Config-runner convenience parameter for generating multiple report modes, such as <code class="docutils literal notranslate"><span class="pre">standard,replication</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">report_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">standard</span></code></p></td>
+<td><p>Single report mode: <code class="docutils literal notranslate"><span class="pre">standard</span></code> or <code class="docutils literal notranslate"><span class="pre">replication</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Class</span></code> in runner, often loaded from metadata/report data</p></td>
+<td><p>Outcome column used in report labels.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">outcome_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Binary</span></code> in runner, often loaded from metadata/report data</p></td>
+<td><p>Learning task type used in report labels and metric filtering.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">instance_label</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Optional row identifier column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">make_pdf</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Export a PDF report.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">enable_plots</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Generate missing report plots when possible.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reuse_existing_figures</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Reuse existing report figure PNGs when available. Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> to regenerate report figures.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="saved-run-command-controls">
+<h3>Saved Run Command Controls<a class="headerlink" href="#saved-run-command-controls" title="Link to this heading"></a></h3>
+<p>All phase CLIs support these run-command controls.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--ignore_saved_run_command</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Ignore <code class="docutils literal notranslate"><span class="pre">run_commands.pickle</span></code> for this run.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--no_update_saved_run_command</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Do not update <code class="docutils literal notranslate"><span class="pre">run_commands.pickle</span></code> after the run.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Use these flags when you want to run a phase with explicit command-line values
+instead of reusing arguments saved from a previous run.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running.html" class="btn btn-neutral float-left" title="Running STREAMLINE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="model_params_json.html" class="btn btn-neutral float-right" title="Model Parameter JSON" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
