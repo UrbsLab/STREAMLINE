@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HPC and Cluster Runs &mdash; STREAMLINE</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=292eb321"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Run Parameters" href="parameters.html" />
+    <link rel="prev" title="Running STREAMLINE" href="running.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            STREAMLINE
+              <img src="_static/STREAMLINE_Logo_NoText.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Table of Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About STREAMLINE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Detailed Pipeline Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tabpfn_token.html">TabPFN Token Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running STREAMLINE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HPC and Cluster Runs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#when-to-use-each-execution-mode">When To Use Each Execution Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#included-hpc-config-templates">Included HPC Config Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-cluster-setup">Basic Cluster Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conda-installation-quickstart">Conda Installation Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-tmux-for-long-runs">Use tmux For Long Runs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scheduler-settings-in-configs">Scheduler Settings In Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-jobs">Monitoring Jobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recovery-and-reruns">Recovery And Reruns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#practical-hpc-checklist">Practical HPC Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Run Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_params_json.html">Model Parameter JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tips.html">Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">STREAMLINE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">HPC and Cluster Runs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/hpc.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hpc-and-cluster-runs">
+<h1>HPC and Cluster Runs<a class="headerlink" href="#hpc-and-cluster-runs" title="Link to this heading"></a></h1>
+<p>STREAMLINE can run small examples on a laptop, but paper-scale runs often need a
+cluster. The cluster path is still the same pipeline: edit a <code class="docutils literal notranslate"><span class="pre">.cfg</span></code>, dry-run it,
+then launch the config runner. The difference is that selected phases submit
+many scheduler jobs through SLURM or LSF and the config runner waits for those
+jobs to finish before moving to the next phase.</p>
+<section id="when-to-use-each-execution-mode">
+<h2>When To Use Each Execution Mode<a class="headerlink" href="#when-to-use-each-execution-mode" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>Best use</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Serial</span></code></p></td>
+<td><p>Debugging, small demos, and first config checks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Parallel</span></code></p></td>
+<td><p>A single machine or one allocated compute node using joblib multiprocessing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Local</span></code></p></td>
+<td><p>A local Dask cluster on one machine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BashSLURM</span></code></p></td>
+<td><p>HPC systems that submit jobs with <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BashLSF</span></code></p></td>
+<td><p>HPC systems that submit jobs with <code class="docutils literal notranslate"><span class="pre">bsub</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Named Dask cluster</p></td>
+<td><p>Site-specific Dask jobqueue execution when configured by the user/site.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Use a scheduler mode for long P4/P6/P8/P10/P11-style workloads or any analysis
+that would be inappropriate to run directly on a login node. Use <code class="docutils literal notranslate"><span class="pre">Parallel</span></code> only
+inside an interactive allocation or on a machine where it is acceptable to use
+multiple local cores.</p>
+</section>
+<section id="included-hpc-config-templates">
+<h2>Included HPC Config Templates<a class="headerlink" href="#included-hpc-config-templates" title="Link to this heading"></a></h2>
+<p>HPC configs live in <code class="docutils literal notranslate"><span class="pre">run_configs/hpc/</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Config</p></th>
+<th class="head"><p>Scheduler</p></th>
+<th class="head"><p>Intended starting point</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">run_configs/hpc/cedars_slurm_hcc.cfg</span></code></p></td>
+<td><p>SLURM</p></td>
+<td><p>Cedars/Sinai-style SLURM clusters using <code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">BashSLURM</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">run_configs/hpc/upenn_lsf_hcc.cfg</span></code></p></td>
+<td><p>LSF</p></td>
+<td><p>UPenn/I2C2-style LSF clusters using <code class="docutils literal notranslate"><span class="pre">run_cluster</span> <span class="pre">=</span> <span class="pre">BashLSF</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Both templates run the HCC binary demo by default. Copy one of them before using
+it for a real project and edit at least <code class="docutils literal notranslate"><span class="pre">output_path</span></code>, <code class="docutils literal notranslate"><span class="pre">experiment_name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">data_path</span></code>, <code class="docutils literal notranslate"><span class="pre">queue</span></code>, <code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code>, model list, and modeling budget.</p>
+</section>
+<section id="basic-cluster-setup">
+<h2>Basic Cluster Setup<a class="headerlink" href="#basic-cluster-setup" title="Link to this heading"></a></h2>
+<p>From a login node:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ssh<span class="w"> </span>&lt;user&gt;@&lt;cluster-host&gt;
+git<span class="w"> </span>clone<span class="w"> </span>--single-branch<span class="w"> </span>https://github.com/UrbsLab/STREAMLINE.git
+<span class="nb">cd</span><span class="w"> </span>STREAMLINE
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>streamline<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pip
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+python<span class="w"> </span>run.py<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>Many clusters require modules before Conda, Python, or compiled libraries are
+available. If your site uses modules, load the same modules before installation
+and before running STREAMLINE jobs. Also make sure the repository, data, and
+<code class="docutils literal notranslate"><span class="pre">output_path</span></code> are on a filesystem visible to compute nodes.</p>
+</section>
+<section id="conda-installation-quickstart">
+<h2>Conda Installation Quickstart<a class="headerlink" href="#conda-installation-quickstart" title="Link to this heading"></a></h2>
+<p>If Conda is already available on the cluster, either directly or through a
+module, create a dedicated STREAMLINE environment from the repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>module<span class="w"> </span>load<span class="w"> </span>anaconda<span class="w">  </span><span class="c1"># omit or change this if your cluster uses a different module name</span>
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>streamline<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pip
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>If Conda is not available, install Miniconda in your home or project space using
+your cluster’s approved download method:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/miniconda3
+curl<span class="w"> </span>-L<span class="w"> </span>https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh<span class="w"> </span>-o<span class="w"> </span>/tmp/miniconda.sh
+bash<span class="w"> </span>/tmp/miniconda.sh<span class="w"> </span>-b<span class="w"> </span>-p<span class="w"> </span>~/miniconda3
+<span class="nb">source</span><span class="w"> </span>~/miniconda3/etc/profile.d/conda.sh
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>streamline<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11<span class="w"> </span>pip
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>Some HPC systems block outbound internet from compute nodes. In that case,
+install packages from the login node, a site Conda mirror, or an administrator
+provided module/wheelhouse, then run STREAMLINE from the same environment.</p>
+</section>
+<section id="use-tmux-for-long-runs">
+<h2>Use tmux For Long Runs<a class="headerlink" href="#use-tmux-for-long-runs" title="Link to this heading"></a></h2>
+<p>The config runner is the phase orchestrator. Scheduler jobs can keep running if
+your SSH connection drops, but the runner may stop waiting and the next phases
+may not launch. Use <code class="docutils literal notranslate"><span class="pre">tmux</span></code> or <code class="docutils literal notranslate"><span class="pre">screen</span></code> for long runs.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tmux<span class="w"> </span>new<span class="w"> </span>-s<span class="w"> </span>streamline
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/cedars_slurm_hcc.cfg<span class="w"> </span>--dry_run
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/cedars_slurm_hcc.cfg
+</pre></div>
+</div>
+<p>Useful <code class="docutils literal notranslate"><span class="pre">tmux</span></code> commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Detach from the session without stopping STREAMLINE:</span>
+Ctrl-b,<span class="w"> </span><span class="k">then</span><span class="w"> </span>d
+
+<span class="c1"># List sessions:</span>
+tmux<span class="w"> </span>ls
+
+<span class="c1"># Reattach later:</span>
+tmux<span class="w"> </span>attach<span class="w"> </span>-t<span class="w"> </span>streamline
+
+<span class="c1"># Kill the session after the run is done:</span>
+tmux<span class="w"> </span>kill-session<span class="w"> </span>-t<span class="w"> </span>streamline
+</pre></div>
+</div>
+<p>The same pattern works for the UPenn LSF template:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tmux<span class="w"> </span>new<span class="w"> </span>-s<span class="w"> </span>streamline
+conda<span class="w"> </span>activate<span class="w"> </span>streamline
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/upenn_lsf_hcc.cfg<span class="w"> </span>--dry_run
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/upenn_lsf_hcc.cfg
+</pre></div>
+</div>
+</section>
+<section id="scheduler-settings-in-configs">
+<h2>Scheduler Settings In Configs<a class="headerlink" href="#scheduler-settings-in-configs" title="Link to this heading"></a></h2>
+<p>The core cluster settings live in the <code class="docutils literal notranslate"><span class="pre">[run]</span></code> section:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">run_cluster</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">BashSLURM</span>
+<span class="na">wait_for_cluster_completion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span>
+<span class="na">cluster_phase_timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">86400</span>
+<span class="na">cluster_phase_poll_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">30</span>
+<span class="na">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">defq</span>
+<span class="na">reserved_memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">4</span>
+</pre></div>
+</div>
+<p>For UPenn/LSF, the same fields look like:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">run_cluster</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">BashLSF</span>
+<span class="na">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">i2c2_normal</span>
+<span class="na">reserved_memory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">4</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">queue</span></code> maps to the scheduler queue or partition. <code class="docutils literal notranslate"><span class="pre">reserved_memory</span></code> is the memory
+request in GB used when STREAMLINE writes scheduler scripts. The exact queue
+names and memory limits are site-specific, so treat the included values as
+starting points.</p>
+<p><code class="docutils literal notranslate"><span class="pre">wait_for_cluster_completion</span> <span class="pre">=</span> <span class="pre">True</span></code> tells the config runner to wait for
+STREAMLINE completion markers in <code class="docutils literal notranslate"><span class="pre">jobsCompleted/</span></code> before it starts the next
+phase. This is important because later phases depend on files written by earlier
+scheduler jobs.</p>
+</section>
+<section id="monitoring-jobs">
+<h2>Monitoring Jobs<a class="headerlink" href="#monitoring-jobs" title="Link to this heading"></a></h2>
+<p>STREAMLINE writes scheduler scripts to the experiment <code class="docutils literal notranslate"><span class="pre">jobs/</span></code> folder and
+stdout/stderr files to <code class="docutils literal notranslate"><span class="pre">logs/</span></code>.</p>
+<p>Common SLURM commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>squeue<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USER</span>
+sacct<span class="w"> </span>-j<span class="w"> </span>&lt;job_id&gt;
+scancel<span class="w"> </span>&lt;job_id&gt;
+</pre></div>
+</div>
+<p>Common LSF commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bjobs
+bjobs<span class="w"> </span>-l<span class="w"> </span>&lt;job_id&gt;
+bkill<span class="w"> </span>&lt;job_id&gt;
+</pre></div>
+</div>
+<p>If a phase appears stuck, check the scheduler first, then inspect
+<code class="docutils literal notranslate"><span class="pre">&lt;output_path&gt;/&lt;experiment_name&gt;/logs/</span></code> and the <code class="docutils literal notranslate"><span class="pre">jobsCompleted/</span></code> markers.</p>
+</section>
+<section id="recovery-and-reruns">
+<h2>Recovery And Reruns<a class="headerlink" href="#recovery-and-reruns" title="Link to this heading"></a></h2>
+<p>Use a dry run before every large launch:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/cedars_slurm_hcc.cfg<span class="w"> </span>--dry_run
+</pre></div>
+</div>
+<p>If one phase fails, restart from that phase instead of repeating the full run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/cedars_slurm_hcc.cfg<span class="w"> </span>--start_at<span class="w"> </span>p6
+python<span class="w"> </span>run.py<span class="w"> </span>-c<span class="w"> </span>run_configs/hpc/cedars_slurm_hcc.cfg<span class="w"> </span>--only<span class="w"> </span>p8,p11
+</pre></div>
+</div>
+<p>Phase 6 reruns and overwrites requested model jobs by default. For recovery,
+set <code class="docutils literal notranslate"><span class="pre">skip_completed_models</span> <span class="pre">=</span> <span class="pre">True</span></code> in <code class="docutils literal notranslate"><span class="pre">[p6]</span></code> or pass
+<code class="docutils literal notranslate"><span class="pre">--skip_completed_models</span> <span class="pre">1</span></code> to the P6 CLI. That runs missing or failed model/CV
+jobs while leaving completed model jobs in place.</p>
+<p>If the config runner times out while scheduler jobs are still queued or running,
+increase <code class="docutils literal notranslate"><span class="pre">cluster_phase_timeout</span></code> and rerun from the interrupted phase after
+checking the logs.</p>
+</section>
+<section id="practical-hpc-checklist">
+<h2>Practical HPC Checklist<a class="headerlink" href="#practical-hpc-checklist" title="Link to this heading"></a></h2>
+<p>Before a paper-scale cluster run:</p>
+<ul class="simple">
+<li><p>Confirm the config with <code class="docutils literal notranslate"><span class="pre">--dry_run</span></code>.</p></li>
+<li><p>Use absolute paths for project data and outputs when running outside the repo.</p></li>
+<li><p>Keep <code class="docutils literal notranslate"><span class="pre">output_path</span></code> on shared storage visible to login and compute nodes.</p></li>
+<li><p>Start from small <code class="docutils literal notranslate"><span class="pre">models</span></code>, <code class="docutils literal notranslate"><span class="pre">n_trials</span></code>, <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, and <code class="docutils literal notranslate"><span class="pre">n_splits</span></code> values.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">tmux</span></code> or <code class="docutils literal notranslate"><span class="pre">screen</span></code> for any run that may outlive an SSH session.</p></li>
+<li><p>Confirm the Conda environment is available on compute nodes.</p></li>
+<li><p>Check <code class="docutils literal notranslate"><span class="pre">logs/</span></code> and <code class="docutils literal notranslate"><span class="pre">jobsCompleted/</span></code> before restarting a failed phase.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">skip_completed_models</span> <span class="pre">=</span> <span class="pre">True</span></code> only for Phase 6 recovery runs where you do
+not want to overwrite completed model artifacts.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running.html" class="btn btn-neutral float-left" title="Running STREAMLINE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parameters.html" class="btn btn-neutral float-right" title="Run Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ryan Urbanowicz, Harsh Bandhey.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
