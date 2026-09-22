@@ -1229,9 +1229,22 @@ class ReportPhaseJob:
 
     def _detect_task_type(self, ds_dir: Path, metadata: Dict[str, Any]) -> str:
         # Rule priority:
-        # 1) ClassCounts.csv if clearly binary.
-        # 2) ClassCounts with high-cardinality numeric labels can indicate regression.
+        # 1) Explicit run metadata/CLI outcome type.
+        # 2) ClassCounts.csv when no explicit task type was saved.
         # 3) Otherwise infer from *_Train.csv target values.
+        outcome_type = str(
+            self.outcome_type
+            or metadata.get("Outcome Type")
+            or metadata.get("outcome_type")
+            or ""
+        ).strip().lower()
+        if outcome_type in {"continuous", "regression", "numeric", "real", "float"}:
+            return "Regression"
+        if outcome_type in {"binary", "binary classification"}:
+            return "Binary Classification"
+        if outcome_type in {"multiclass", "multiclass classification", "multi-class"}:
+            return "Multiclass Classification"
+
         cc = self._read_csv_table(ds_dir / "exploratory" / "ClassCounts.csv")
         if cc and cc.rows:
             label_col = cc.columns[0]
@@ -2692,11 +2705,29 @@ class ReportPhaseJob:
         ordered_algs = list(m_map.keys())
         ordered_ens = list(em_map.keys())
 
+        all_rows = list(m_map.values()) + list(em_map.values())
+
+        def metric_value(row: Dict[str, str], metric: str) -> str:
+            if metric in row:
+                return row.get(metric, "")
+
+            json_key = METRIC_JSON_KEYS.get(metric)
+            if json_key and json_key in row:
+                return row.get(json_key, "")
+
+            normalized_metric = metric.strip().lower().replace(" ", "_").replace("-", "_")
+            normalized_json_key = str(json_key or "").strip().lower()
+            for col, val in row.items():
+                normalized_col = col.strip().lower().replace(" ", "_").replace("-", "_")
+                if normalized_col in {normalized_metric, normalized_json_key}:
+                    return val
+            return ""
+
         available_metrics: List[str] = []
         for metric in metrics:
             present = False
-            for row in list(m_map.values()) + list(em_map.values()):
-                if metric in row:
+            for row in all_rows:
+                if metric_value(row, metric) != "":
                     present = True
                     break
             if present:
@@ -2709,8 +2740,8 @@ class ReportPhaseJob:
             row = [alg]
             raw_means[alg] = {}
             for metric in available_metrics:
-                mval = _safe_float(m_map.get(alg, {}).get(metric, ""))
-                sval = _safe_float(s_map.get(alg, {}).get(metric, ""))
+                mval = _safe_float(metric_value(m_map.get(alg, {}), metric))
+                sval = _safe_float(metric_value(s_map.get(alg, {}), metric))
                 if mval is None:
                     row.append("")
                     continue
@@ -2726,8 +2757,8 @@ class ReportPhaseJob:
             row = [label]
             raw_means[label] = {}
             for metric in available_metrics:
-                mval = _safe_float(em_map.get(ens, {}).get(metric, ""))
-                sval = _safe_float(es_map.get(ens, {}).get(metric, ""))
+                mval = _safe_float(metric_value(em_map.get(ens, {}), metric))
+                sval = _safe_float(metric_value(es_map.get(ens, {}), metric))
                 if mval is None:
                     row.append("")
                     continue
@@ -2766,7 +2797,7 @@ class ReportPhaseJob:
             row = [alg]
             median_raw[alg] = {}
             for metric in available_metrics:
-                val = _safe_float(md_map.get(alg, {}).get(metric, ""))
+                val = _safe_float(metric_value(md_map.get(alg, {}), metric))
                 if val is None:
                     row.append("")
                 else:
@@ -2778,7 +2809,7 @@ class ReportPhaseJob:
             row = [label]
             median_raw[label] = {}
             for metric in available_metrics:
-                val = _safe_float(ed_map.get(ens, {}).get(metric, ""))
+                val = _safe_float(metric_value(ed_map.get(ens, {}), metric))
                 if val is None:
                     row.append("")
                 else:

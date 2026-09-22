@@ -620,8 +620,14 @@ class DataProcess:
                 df_value_counts = pd.DataFrame(class_counts).reset_index()
                 df_value_counts.columns = ['Top Occurring Values', 'Counts']
                 class_counts.to_csv(os.path.join(out_dir, 'ClassCounts.csv'), header=['Count'], index_label='Label')
-                logging.info("Skewness: %s", str(skew(self.data[self.outcome_label])))
-                logging.info("Kurtosis: %s", str(kurtosis(self.data[self.outcome_label])))
+                outcome_values = pd.to_numeric(self.data[self.outcome_label], errors='coerce')
+                outcome_values = outcome_values.replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
+                if outcome_values.size:
+                    logging.info("Skewness: %s", str(skew(outcome_values)))
+                    logging.info("Kurtosis: %s", str(kurtosis(outcome_values)))
+                else:
+                    logging.info("Skewness: not available (no numeric outcome values)")
+                    logging.info("Kurtosis: not available (no numeric outcome values)")
 
             if not replicate:
                 logging.info("Categorical: %s", self.categorical_features)
