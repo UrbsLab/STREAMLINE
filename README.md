@@ -136,6 +136,7 @@ Example configs are included for the three UCI demos and are organized by run en
 - `run_configs/local/uci_multiclass_student.cfg`
 - `run_configs/local/uci_regression_auto_mpg.cfg`
 - `run_configs/hpc/cedars_slurm_hcc.cfg`
+- `run_configs/hpc/upenn_lsf_hcc.cfg`
 
 The original top-level demo configs are still kept for backward compatibility.
 

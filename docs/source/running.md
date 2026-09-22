@@ -20,7 +20,7 @@ settings, phase toggles, and phase-specific parameters in one editable file.
 | Debugging one phase | Phase CLI command |
 | Faster local execution without Dask | `run_cluster = Parallel` |
 | Local Dask execution | `run_cluster = Local` |
-| HPC execution | `BashSLURM`, `BashLSF`, or a site-specific Dask cluster setting |
+| HPC execution | `run_configs/hpc/<config>.cfg` with `BashSLURM`, `BashLSF`, or a site-specific Dask cluster setting |
 
 ## Google Colab
 
@@ -117,7 +117,8 @@ timeout = 900
 ```
 
 Use `run_cluster = Local` for a local Dask cluster, or `run_cluster = Parallel`
-for local joblib parallelism without Dask.
+for local joblib parallelism without Dask. Use scheduler configs for cluster
+runs rather than changing a local demo config in place.
 
 Use `model_params_json` when a model needs specific Phase 6 wrapper settings,
 such as HEROS `pop_size` or ExSTraCS `N`. See
@@ -130,6 +131,11 @@ has finished writing `CVDatasets`. The wait can be adjusted with
 `wait_for_cluster_completion`, `cluster_phase_timeout`, and
 `cluster_phase_poll_interval` in the `[run]` section.
 
+For long HPC runs, launch the config runner inside `tmux` or `screen` so a lost
+SSH connection does not stop the orchestration process. See
+[HPC and Cluster Runs](hpc.md) for Cedars SLURM and UPenn LSF templates,
+scheduler monitoring commands, and recovery patterns.
+
 `Parallel` and Dask-backed runs show progress when `tqdm`/Dask progress support is
 available. Set `STREAMLINE_PROGRESS=0` to disable these progress displays.
 
@@ -141,6 +147,7 @@ The original top-level demo config paths are kept for backward compatibility.
 * `run_configs/local/uci_multiclass_student.cfg`
 * `run_configs/local/uci_regression_auto_mpg.cfg`
 * `run_configs/hpc/cedars_slurm_hcc.cfg`
+* `run_configs/hpc/upenn_lsf_hcc.cfg`
 
 ## Rerunning Phases
 

@@ -7,16 +7,16 @@ Overview
 --------------------------------------
 
 STREAMLINE is an end-to-end automated machine learning pipeline for
-supervised tabular data. The v1.0.0 main release supports binary classification,
+supervised tabular data. The v1.0.1 release supports binary classification,
 multiclass classification, and regression, with integrated
 data processing, imputation, scaling, feature learning, feature importance,
 feature selection, model training, classification ensembles, summary
 statistics, dataset comparison, replication, and PDF reporting.
 
-The schematic below summarizes the STREAMLINE v1.0.0 workflow.
+The schematic below summarizes the STREAMLINE v1.0.1 workflow.
 
 .. image:: pictures/STREAMLINE_v3_paper_new_lightcolor.png
-   :alt: STREAMLINE v1.0.0 automated machine learning pipeline overview
+   :alt: STREAMLINE v1.0.1 automated machine learning pipeline overview
    :width: 100%
 
 The repository is organized around eleven explicit phases:
@@ -93,6 +93,7 @@ How This Documentation Is Organized
 * Use :doc:`install` to prepare a local environment.
 * Use :doc:`data` to format custom datasets and understand the included UCI demos.
 * Use :doc:`running` for notebooks, config-driven runs, and phase-by-phase CLI commands.
+* Use :doc:`hpc` for SLURM/LSF configs, tmux basics, scheduler monitoring, and cluster recovery.
 * Use :doc:`parameters` when editing ``.cfg`` files or command-line calls.
 * Use :doc:`output` to navigate experiment folders and reports.
 * Use :doc:`pipeline` for a phase-by-phase explanation of what STREAMLINE does.
@@ -101,7 +102,7 @@ How This Documentation Is Organized
 Version History
 --------------------------------------
 
-This site documents the STREAMLINE v1.0.0 main release. See
+This site documents the STREAMLINE v1.0.1 release. See
 :doc:`changelog` for dated release entries and notable changes.
 
 Current Scope
@@ -143,6 +144,7 @@ questions, contact Harsh Bandhey at ``harsh.bandhey@cshs.org``.
    install
    tabpfn_token
    running
+   hpc
    parameters
    model_params_json
    output

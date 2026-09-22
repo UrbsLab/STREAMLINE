@@ -92,6 +92,16 @@ depending on phase support. For long runs, use a persistent terminal session
 such as `tmux` or `screen` so orchestration is not interrupted if your SSH
 connection drops.
 
+Use the scheduler templates in `run_configs/hpc/` as starting points:
+
+```bash
+python run.py -c run_configs/hpc/cedars_slurm_hcc.cfg --dry_run
+python run.py -c run_configs/hpc/upenn_lsf_hcc.cfg --dry_run
+```
+
+See [HPC and Cluster Runs](hpc.md) for tmux basics, SLURM/LSF monitoring
+commands, scheduler config fields, and recovery notes.
+
 ## Known Installation Issues
 
 Some modeling and reporting packages include compiled dependencies. On macOS,

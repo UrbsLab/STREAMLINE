@@ -100,10 +100,13 @@ The `run_configs/` directory is organized by execution environment:
 | Folder | Use case | Included examples |
 | --- | --- | --- |
 | `run_configs/local/` | Local serial, local joblib `Parallel`, and local Dask `Local` runs. | Binary HCC, multiclass student dropout, and regression Auto MPG demo configs. |
-| `run_configs/hpc/` | Scheduler-oriented templates that use `BashSLURM`, `BashLSF`, or site-specific cluster settings. | `cedars_slurm_hcc.cfg` as a Cedars/SLURM starting point. |
+| `run_configs/hpc/` | Scheduler-oriented templates that use `BashSLURM`, `BashLSF`, or site-specific cluster settings. | `cedars_slurm_hcc.cfg` for Cedars/SLURM and `upenn_lsf_hcc.cfg` for UPenn/LSF starting points. |
 
 The original top-level demo configs are still kept for backward compatibility,
 but new examples should point users to the environment-specific subfolders.
+
+For cluster-specific workflow details, including `tmux`, SLURM/LSF monitoring,
+and recovery after interrupted runs, see [HPC and Cluster Runs](hpc.md).
 
 ## Full Parameter Reference By Phase
 
