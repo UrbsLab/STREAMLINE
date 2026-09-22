@@ -231,13 +231,16 @@ def weight_fi(
     med_metric_list: List[float],
     top_fi_med_norm_list: List[List[float]],
     weight_mode: str = "balanced_accuracy",
+    skill_score_baseline: float = 0.5,
 ) -> Tuple[List[List[float]], List[float]]:
     """
     Weight normalized FI scores by algorithm performance.
 
     Supported modes:
-    - balanced_accuracy: any metric <= 0.5 is treated as 0; remaining values
-      are linearly scaled from [0.5, 1] -> [0, 1].
+    - balanced_accuracy: any metric <= skill_score_baseline is treated as 0;
+      remaining values are linearly scaled from [skill_score_baseline, 1] -> [0, 1].
+      For binary classification this baseline is 0.5; for multiclass it should
+      be 1 / number_of_classes.
     - explained_variance: any metric <= 0 is treated as 0; positive values are
       used directly and clipped to [0, 1].
     """
@@ -254,16 +257,13 @@ def weight_fi(
             else:
                 weights.append(v)
     else:
-        # Legacy/default behavior for balanced_accuracy-style weighting.
-        for i, v in enumerate(metrics):
-            if v <= 0.5:
-                metrics[i] = 0.0
-
+        # Balanced-accuracy-style weighting above the no-skill baseline.
+        baseline = min(max(float(skill_score_baseline), 0.0), 0.999999)
         for v in metrics:
-            if v == 0:
+            if v <= baseline:
                 weights.append(0.0)
             else:
-                weights.append((v - 0.5) / 0.5)
+                weights.append(min(max((v - baseline) / (1.0 - baseline), 0.0), 1.0))
 
     # Weight normalized FI
     weighted_lists: List[List[float]] = []

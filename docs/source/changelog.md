@@ -5,6 +5,36 @@ Older public release notes are based on the
 [GitHub Releases](https://github.com/UrbsLab/STREAMLINE/releases) entries, with
 minor wording cleanup for readability.
 
+## v1.0.1 - Bug Fix Release
+
+STREAMLINE v1.0.1 is a focused bug-fix release for regression reporting,
+regression EDA robustness, and multiclass weighted feature-importance
+visualization.
+
+### Fixed
+
+* Fixed Phase 1 regression EDA so skewness and kurtosis calculations do not
+  crash on mixed-type, missing, infinite, or nonnumeric continuous outcome
+  values.
+* Fixed Phase 11 report task detection so explicit saved or CLI `outcome_type`
+  values are respected before falling back to dataset inference.
+* Fixed regression reports for low-cardinality continuous outcomes that could
+  otherwise be misidentified as multiclass based on `ClassCounts.csv`.
+* Fixed regression report performance tables so both display-style metric names
+  and snake_case metric keys are recognized.
+* Fixed multiclass weighted composite feature-importance plots so the
+  balanced-accuracy no-skill baseline is `1 / number_of_classes` rather than
+  always `0.5`.
+
+### Added
+
+* Added an HPC and cluster-running documentation page with Conda setup notes,
+  `tmux` workflow basics, SLURM/LSF monitoring commands, scheduler config
+  explanations, and recovery/rerun guidance.
+* Added a UPenn/LSF HCC demo config template alongside the existing
+  Cedars/SLURM template and updated README, installation, running, and
+  parameter documentation to point users to both HPC examples.
+
 ## v1.0.0 - Main Release
 
 STREAMLINE v1.0.0 is a major reorganization and expansion of STREAMLINE into a

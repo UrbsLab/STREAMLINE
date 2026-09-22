@@ -706,10 +706,12 @@ class StatisticsPhaseJob:
         if self.outcome_type == "Continuous" and self.metric_weight == "Explained Variance":
             fi_weight_mode = "explained_variance"
 
+        skill_score_baseline = self.feature_importance_skill_baseline()
         weighted_lists, weights = weight_fi(
             med_metric_list=med_metric_list,
             top_fi_med_norm_list=top_fi_med_norm_list,
             weight_mode=fi_weight_mode,
+            skill_score_baseline=skill_score_baseline,
         )
 
         # Generate Normalized and Weighted Composite FI plot
@@ -753,6 +755,61 @@ class StatisticsPhaseJob:
         # )
         #                        all_feature_list_to_viz, 'Norm_Frac_Weight',
         #                        'Normalized, Fractionated, and Weighted Feature Importance')
+
+    def feature_importance_skill_baseline(self) -> float:
+        """
+        Return the no-skill baseline used for balanced-accuracy FI weighting.
+
+        Binary balanced accuracy has a 0.5 no-skill baseline. For multiclass,
+        balanced accuracy should be compared against 1 / number_of_classes.
+        """
+        if self.outcome_type != "Multiclass":
+            return 0.5
+
+        labels = set()
+
+        def label_key(value):
+            if pd.isna(value):
+                return None
+            text = str(value).strip()
+            if text == "":
+                return None
+            try:
+                return str(float(text))
+            except (TypeError, ValueError):
+                return text
+
+        class_counts_path = Path(self.full_path) / "exploratory" / "ClassCounts.csv"
+        if class_counts_path.exists():
+            try:
+                class_counts = pd.read_csv(class_counts_path)
+                if not class_counts.empty:
+                    label_col = class_counts.columns[0]
+                    for value in class_counts[label_col].dropna().tolist():
+                        key = label_key(value)
+                        if key is not None:
+                            labels.add(key)
+            except Exception as exc:
+                logging.warning("Could not read ClassCounts.csv for FI weighting baseline: %r", exc)
+
+        cv_dir = Path(self.full_path) / "CVDatasets"
+        for path in sorted(cv_dir.glob(f"{self.data_name}_CV_*_*.csv")):
+            try:
+                df = pd.read_csv(path, usecols=[self.outcome_label])
+            except Exception:
+                continue
+            for value in df[self.outcome_label].dropna().tolist():
+                key = label_key(value)
+                if key is not None:
+                    labels.add(key)
+
+        if len(labels) >= 2:
+            return 1.0 / float(len(labels))
+
+        logging.warning(
+            "Could not infer multiclass class count for FI weighting baseline; falling back to 0.5"
+        )
+        return 0.5
 
     def preparation(self):
         """

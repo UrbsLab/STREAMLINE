@@ -5,7 +5,7 @@
 Before launching a full config, inspect the resolved phase calls:
 
 ```bash
-python run.py -c run_configs/uci_binary_hcc.cfg --dry_run
+python run.py -c run_configs/local/uci_binary_hcc.cfg --dry_run
 ```
 
 This catches most path, phase toggle, and parameter-name mistakes early.

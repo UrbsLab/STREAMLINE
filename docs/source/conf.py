@@ -9,7 +9,7 @@ sys.path.insert(0, repo_root)
 project = "STREAMLINE"
 copyright = "2026, Ryan Urbanowicz, Harsh Bandhey"
 author = "Ryan Urbanowicz, Harsh Bandhey"
-release = "1.0.0"
+release = "1.0.1"
 
 extensions = [
     "sphinx.ext.autodoc",

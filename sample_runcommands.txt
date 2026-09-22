@@ -27,35 +27,36 @@
 # These run the same P1-P11 runner classes used by the phase
 # commands below, with shared and phase-specific arguments loaded
 # from editable .cfg files. Use --dry_run first to inspect resolved calls.
+# Local examples live under run_configs/local/. HPC templates live under run_configs/hpc/.
 
 python run.py \
-  -c run_configs/uci_binary_hcc.cfg \
+  -c run_configs/local/uci_binary_hcc.cfg \
   --dry_run
 
 python run.py \
-  -c run_configs/uci_binary_hcc.cfg
+  -c run_configs/local/uci_binary_hcc.cfg
 
 python run.py \
-  -c run_configs/uci_multiclass_student.cfg
+  -c run_configs/local/uci_multiclass_student.cfg
 
 python run.py \
-  -c run_configs/uci_regression_auto_mpg.cfg
+  -c run_configs/local/uci_regression_auto_mpg.cfg
 
 # Useful partial-run controls:
 python run.py \
-  -c run_configs/uci_binary_hcc.cfg \
+  -c run_configs/local/uci_binary_hcc.cfg \
   --start_at p4
 
 python run.py \
-  -c run_configs/uci_binary_hcc.cfg \
+  -c run_configs/local/uci_binary_hcc.cfg \
   --stop_after p8
 
 python run.py \
-  -c run_configs/uci_binary_hcc.cfg \
+  -c run_configs/local/uci_binary_hcc.cfg \
   --only p6,p8,p11
 
 python run.py \
-  -c run_configs/uci_binary_hcc.cfg \
+  -c run_configs/local/uci_binary_hcc.cfg \
   --skip p3,p4
 
 
